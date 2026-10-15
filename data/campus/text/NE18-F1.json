@@ -1,0 +1,14 @@
+{
+  "sourceId": "NE18-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "— — Be) — NEI6 NEIS Ol INT EXT 2015.01 2046.22 i a1",
+      "labelCandidates": []
+    }
+  ]
+}

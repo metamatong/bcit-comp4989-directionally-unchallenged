@@ -1,0 +1,70 @@
+{
+  "sourceId": "SW5-F2",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "28! 2625 CAN 2575 CLASS CLASS: CORRIDOR 2620 2690 ON CORRIDOR ON S289 STAIR, pC SWOS SWOS 02 02 INT EXT 401.63 659.06 / n ORD FLOCK, KIL BCIT < > CAMPUS DEVELOPMENT",
+      "labelCandidates": [
+        {
+          "text": "2625",
+          "bbox": [
+            821.28,
+            130.96,
+            843.36,
+            137.2
+          ],
+          "sourceRef": "SW5-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2575",
+          "bbox": [
+            634.56,
+            141.03,
+            656.16,
+            147.27
+          ],
+          "sourceRef": "SW5-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2620",
+          "bbox": [
+            400.32,
+            291.66,
+            422.4,
+            297.42
+          ],
+          "sourceRef": "SW5-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2690",
+          "bbox": [
+            868.8,
+            291.66,
+            891.36,
+            297.42
+          ],
+          "sourceRef": "SW5-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "S289",
+          "bbox": [
+            956.64,
+            312.29,
+            979.2,
+            318.53
+          ],
+          "sourceRef": "SW5-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

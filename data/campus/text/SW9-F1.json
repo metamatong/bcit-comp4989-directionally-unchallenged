@@ -1,0 +1,14 @@
+{
+  "sourceId": "SW9-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "[ WA T I Allo AJ IB SP Ol INT 5,272.94 5,1 90.33 n FLOCK. 20 BCIT campus development",
+      "labelCandidates": []
+    }
+  ]
+}

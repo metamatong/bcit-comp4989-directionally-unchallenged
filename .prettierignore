@@ -1,0 +1,8 @@
+node_modules
+dist
+data/campus
+package-lock.json
+docs/screenshots
+test-results
+tmp
+output

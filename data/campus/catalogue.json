@@ -1,0 +1,1532 @@
+[
+  {
+    "id": "NE1-F1",
+    "kind": "floor-plan",
+    "building": "NE1",
+    "floor": "1",
+    "title": "NE1 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne0101.pdf",
+    "localUrl": "/data/campus/raw/bne0101.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE1-F1",
+    "text": "SIAR ‘Att b iy Mit lg ites rit LORRIDO ne Mech PS FIFE M 26 oi a 6 MACH Mt oni is] STOR 199 08 2 fs) LOUS 5 oF FICF-O\"N J a Me] 2 Fic 1 2 6 i Labs 15 6 OFFIC K ol = OFFICE TG Mi on Oly Orr or COR! LOR or Bes Fi OFF CF ha 42 12 a Ar 2] Lap. STOR Grn NE01, FIRST FLOOR BRITISH COLUMBIA SCALE: 7300 INSTITUTE OF TECHNOLOGY campus planning LAST UPDATED: FEBRUARY 4, 2011",
+    "labelCount": 3,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE1-F2",
+    "kind": "floor-plan",
+    "building": "NE1",
+    "floor": "2",
+    "title": "NE1 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne0102.pdf",
+    "localUrl": "/data/campus/raw/bne0102.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE1-F2",
+    "text": "Ori 2 BILE a¢ M SHAFT, Were vale 5 OFF OF DR: 23, 29g a0 Me. 2¢ 208 oer Is NE al ve fils vi Al 2 293 rh | fer Tuy i oF CON Ser NOK, ab Pe a org be an ut ze VEST aS AE qh BAA -U a 2 207 cla 258, baad 13 — 14 CLAS c me a Pais CLAS 2 ve iT ay 26 FG fae a 17 MECH Les. IN 207 orn te al oF ‘OK, EN, 2407 ‘OK ae 72 72 CORKIDOK, con 4 A ol cr OFF Orr oF orig Eg Inu im A Me ins aT Ur i or 3 a 20\" eer 42 a oer Mao SHAG Wo AAI OFFICE © 248 243 2 ia Mec. 225 Se ‘Up 208 Af BUT 2 Wee. ar 33 70 v 1g EA OFF on & pa 223 eee 20 CAF RIA OR, SAT Pe, M AN 20 ba 22 22 se KC AFT M224 SUA] wi T T U 2 525i RY NE01, SECOND FLOOR BCIT ‘SCALE: 7300 CAMPUS PLANNING LAST UPDATED: MAY 16, 2023",
+    "labelCount": 13,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE1-F3",
+    "kind": "floor-plan",
+    "building": "NE1",
+    "floor": "3",
+    "title": "NE1 · Floor 3",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne0103.pdf",
+    "localUrl": "/data/campus/raw/bne0103.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE1-F3",
+    "text": "2001 ag Vols 312 A 5 3.5 SHAFT] 4 3 fe br clas AF 2 B 1 2 i 2260 I IBLLE YES 316 orn 1a m3 2 PS OFF ler 3. 3 80 ES fs) 22K fa OFFICE 50 3 23: 23 20 2 aC Crier BB, OF a oF 2 ¢ is SEN ‘Oh FN 3304, 32, 22 08 BEIC 6 3. iss a on 33. 42) 327 AD-DRAF-C ING OF 306 ie Be Ob a OVC oN SAT sl 2 2 3 4 2 338 33h ADS a ee 34 a La an 2340 B Bt ELLE VEST JL ¥ 3 315 BABA he & 3364 & a OFFICE OFF “ks 2: G M34 IS 2.05] 1 co x 5 341 3 ¢ 45 NC 847 Bal 23 Lats COM 6 ABs al a M3 Aly DRAF 349 Rt a 2 20% cA DOK, a 13.35 LR 2 4 x OFFICE. % Bu LOUNGE Bs] FICE 92 Me } SI nwa Wh Kyi ti M 352 ¢ M3 4201 SI OH i T T T T T T T T T T T T T T T T T T T T T T T wa T BC NE01, THIRD FLOOR SCALE: 7300 CAMPUS PLANNING LAST UPDATED: APRIL 24, 2023",
+    "labelCount": 17,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE1-F4",
+    "kind": "floor-plan",
+    "building": "NE1",
+    "floor": "4",
+    "title": "NE1 · Floor 4",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne0104.pdf",
+    "localUrl": "/data/campus/raw/bne0104.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE1-F4",
+    "text": "fs | =a oo FICE oO oO SHAFT 1 LAS: OO FT| t= os Jars TAR BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY campus planning LAST UPDATED: OCTOBER 15, 2010",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE2-F1",
+    "kind": "floor-plan",
+    "building": "NE2",
+    "floor": "1",
+    "title": "NE2 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne0201.pdf",
+    "localUrl": "/data/campus/raw/bne0201.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE2-F1",
+    "text": "tod Le err | ETT Ik",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE2-F2",
+    "kind": "floor-plan",
+    "building": "NE2",
+    "floor": "2",
+    "title": "NE2 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne0202.pdf",
+    "localUrl": "/data/campus/raw/bne0202.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE2-F2",
+    "text": "lea lea lea lea lea al 8 202 ie U k BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY NE02, SECOND FLOOR ‘SCALE: 1:200 campus planning LAST UPDATED: NOVEMBER 10, 2004",
+    "labelCount": 2,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE3-F1",
+    "kind": "floor-plan",
+    "building": "NE3",
+    "floor": "1",
+    "title": "NE3 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne0301.pdf",
+    "localUrl": "/data/campus/raw/bne0301.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE3-F1",
+    "text": "— CM) a7 NEO3, FIRST FLOOR © BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY campus planning LAST UPDATED: 3, 2008",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE3-F2",
+    "kind": "floor-plan",
+    "building": "NE3",
+    "floor": "2",
+    "title": "NE3 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne0302.pdf",
+    "localUrl": "/data/campus/raw/bne0302.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE3-F2",
+    "text": "| BEDROOM A 4 < “A cl ASSINDT NEO3 NEO3 02 O02 INT EXT 90.64 97.37",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE4-F1",
+    "kind": "floor-plan",
+    "building": "NE4",
+    "floor": "1",
+    "title": "NE4 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne0401.pdf",
+    "localUrl": "/data/campus/raw/bne0401.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE4-F1",
+    "text": "Th 08 FeO BOK FONG | ° lo! TELE 10 rh Eh NEO4, FIRST FLOOR SCALE: 1:200 CAMPUS PLANNING O LAST UPDATED: APRIL 21, 2023",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE4-F2",
+    "kind": "floor-plan",
+    "building": "NE4",
+    "floor": "2",
+    "title": "NE4 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne0402.pdf",
+    "localUrl": "/data/campus/raw/bne0402.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE4-F2",
+    "text": "vol ez Tal Os cr 2 BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY NE0O4, SECOND FLOOR ‘SCALE: 1:200 campus planning LAST UPDATED: OCTOBER 25, 2004",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE6-F1",
+    "kind": "floor-plan",
+    "building": "NE6",
+    "floor": "1",
+    "title": "NE6 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne0601.pdf",
+    "localUrl": "/data/campus/raw/bne0601.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE6-F1",
+    "text": "a a U i an a ol | Ea Th a a a a Ue BCIT NEO6, FIRST FLOOR CAMPUS PLANNING O SCALE: 1:200 LAST UPDATED: APRIL 21, 2023",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE6-F2",
+    "kind": "floor-plan",
+    "building": "NE6",
+    "floor": "2",
+    "title": "NE6 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne0602.pdf",
+    "localUrl": "/data/campus/raw/bne0602.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE6-F2",
+    "text": "Ta] 4 re wer NI hor ‘Ga a a le 12 ch TN al BCIT NEO6, SECOND FLOOR SCALE: 1:200 CAMPUS PLANNING O LAST UPDATED: APRIIL 21, 2023",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE7-F1",
+    "kind": "floor-plan",
+    "building": "NE7",
+    "floor": "1",
+    "title": "NE7 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne0701.pdf",
+    "localUrl": "/data/campus/raw/bne0701.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE7-F1",
+    "text": "4 145, SHO 143, Sh FAC en Nec CAMPUS PLANNING",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE8-F1",
+    "kind": "floor-plan",
+    "building": "NE8",
+    "floor": "1",
+    "title": "NE8 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne0801.pdf",
+    "localUrl": "/data/campus/raw/bne0801.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE8-F1",
+    "text": "24 SU LOR, Le STOX VEST BULE Lye A CORK LOR, ——, 510 lig BRI FABRI FA ie) SARE fee) Of, i 1G cr a A OX LL LOINGE M CAMPUS PLANNING",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE8-F2",
+    "kind": "floor-plan",
+    "building": "NE8",
+    "floor": "2",
+    "title": "NE8 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne0802.pdf",
+    "localUrl": "/data/campus/raw/bne0802.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE8-F2",
+    "text": "oF = 218 OF VE OK 205 207 x = NEO& 02 02 EXT INT 504.38 406.44 —",
+    "labelCount": 3,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE9-F1",
+    "kind": "floor-plan",
+    "building": "NE9",
+    "floor": "1",
+    "title": "NE9 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne0901.pdf",
+    "localUrl": "/data/campus/raw/bne0901.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE9-F1",
+    "text": "Jel a L 4+ [= NEOS, FIRST FLOOR BCIT APRIL 12, 2017",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE9-F2",
+    "kind": "floor-plan",
+    "building": "NE9",
+    "floor": "2",
+    "title": "NE9 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne0902.pdf",
+    "localUrl": "/data/campus/raw/bne0902.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE9-F2",
+    "text": "| omer Tr rr ie 7 Wo NEOS, SECOND FLOOR BCIT APRIL 6, 2017 ACI HIE AND ORAL",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE10-F1",
+    "kind": "floor-plan",
+    "building": "NE10",
+    "floor": "1",
+    "title": "NE10 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne1001.pdf",
+    "localUrl": "/data/campus/raw/bne1001.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE10-F1",
+    "text": "| Pasi © al BCIT CAMPUS PLANNING",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE12-F1",
+    "kind": "floor-plan",
+    "building": "NE12",
+    "floor": "1",
+    "title": "NE12 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne1201.pdf",
+    "localUrl": "/data/campus/raw/bne1201.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE12-F1",
+    "text": "pd TAI | BCIT CAMPUS PLANNING",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE12-F2",
+    "kind": "floor-plan",
+    "building": "NE12",
+    "floor": "2",
+    "title": "NE12 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne1202.pdf",
+    "localUrl": "/data/campus/raw/bne1202.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE12-F2",
+    "text": "I ly lj | [= | IY lq a | BCIT O= CAMPUS PLANNING",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE16-F1",
+    "kind": "floor-plan",
+    "building": "NE16",
+    "floor": "1",
+    "title": "NE16 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne1601.pdf",
+    "localUrl": "/data/campus/raw/bne1601.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE16-F1",
+    "text": "EF CLASS eo \\ A OFFICE, a oe A — — __ ‘Grn 8 | | | | | | NEIG NEIG Ol INT EXT FH 2,494.27 2,946.52 LOCK. 24.",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE18-F1",
+    "kind": "floor-plan",
+    "building": "NE18",
+    "floor": "1",
+    "title": "NE18 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne1801.pdf",
+    "localUrl": "/data/campus/raw/bne1801.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE18-F1",
+    "text": "— — Be) — NEI6 NEIS Ol INT EXT 2015.01 2046.22 i a1",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE20-F1",
+    "kind": "floor-plan",
+    "building": "NE20",
+    "floor": "1",
+    "title": "NE20 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne2001.pdf",
+    "localUrl": "/data/campus/raw/bne2001.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE20-F1",
+    "text": "i) hous OF RTE ory a: hae. 1 hue HG 1",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE20-F2",
+    "kind": "floor-plan",
+    "building": "NE20",
+    "floor": "2",
+    "title": "NE20 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne2002.pdf",
+    "localUrl": "/data/campus/raw/bne2002.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE20-F2",
+    "text": "2214, STORAGE OFFICE FLEG ral STOR 216 DA 2154 oF || 232 207 ¢ 20 231 orF NE2O NE2O 02 02 | INT EXT 317.56 368.52",
+    "labelCount": 5,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE21-F1",
+    "kind": "floor-plan",
+    "building": "NE21",
+    "floor": "1",
+    "title": "NE21 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne2101.pdf",
+    "localUrl": "/data/campus/raw/bne2101.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE21-F1",
+    "text": "MECH Fy 104 I Cy x | Gl TAPE vest iB IR a OFFICE OFN D 108 log or a OFFICE 100 hic OFFICE aul OMICr NE2 | NE2 | Ol INT EXT 560.46 613.40 a a HI",
+    "labelCount": 3,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE22-F1",
+    "kind": "floor-plan",
+    "building": "NE22",
+    "floor": "1",
+    "title": "NE22 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne2201.pdf",
+    "localUrl": "/data/campus/raw/bne2201.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE22-F1",
+    "text": "@ aa 2a u ow RO oa an on oD ow “oO ag as am at oF BA (LAT sa",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE23-F1",
+    "kind": "floor-plan",
+    "building": "NE23",
+    "floor": "1",
+    "title": "NE23 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne2301.pdf",
+    "localUrl": "/data/campus/raw/bne2301.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE23-F1",
+    "text": "Ce Log LAB -G a | CORRIL WASH 7\n2\t1\t33\t0\t0\t0\t1495\t679\t20\t20\t-1\t\n3\t1\t33\t1\t0\t0\t1495\t679\t20\t20\t-1\t\n4\t1\t33\t1\t1\t0\t1495\t679\t20\t20\t-1\t\n5\t1\t33\t1\t1\t1\t1495\t679\t20\t20\t89.370659\tMi\n2\t1\t34\t0\t0\t0\t1500\t700\t15\t8\t-1\t\n3\t1\t34\t1\t0\t0\t1500\t700\t15\t8\t-1\t\n4\t1\t34\t1\t1\t0\t1500\t700\t15\t8\t-1\t\n5\t1\t34\t1\t1\t1\t1500\t700\t15\t8\t38.325806\tSi\n2\t1\t35\t0\t0\t0\t1528\t697\t6\t2\t-1\t\n3\t1\t35\t1\t0\t0\t1528\t697\t6\t2\t-1\t\n4\t1\t35\t1\t1\t0\t1528\t697\t6\t2\t-1\t\n5\t1\t35\t1\t1\t1\t1528\t697\t6\t2\t49.921490\ttt\n2\t1\t36\t0\t0\t0\t1647\t692\t50\t7\t-1\t\n3\t1\t36\t1\t0\t0\t1647\t692\t50\t7\t-1\t\n4\t1\t36\t1\t1\t0\t1647\t692\t50\t7\t-1\t\n5\t1\t36\t1\t1\t1\t1647\t692\t20\t7\t0.000000\tSu\n5\t1\t36\t1\t1\t2\t1672\t692\t25\t7\t0.000000\tACE\n2\t1\t37\t0\t0\t0\t1385\t721\t85\t12\t-1\t\n3\t1\t37\t1\t0\t0\t1385\t721\t85\t12\t-1\t\n4\t1\t37\t1\t1\t0\t1385\t721\t85\t12\t-1\t\n5\t1\t37\t1\t1\t1\t1385\t721\t85\t12\t90.454048\tCORRIDOR,\n2\t1\t38\t0\t0\t0\t1410\t704\t40\t12\t-1\t\n3\t1\t38\t1\t0\t0\t1410\t704\t40\t12\t-1\t\n4\t1\t38\t1\t1\t0\t1410\t704\t40\t12\t-1\t\n5\t1\t38\t1\t1\t1\t1410\t704\t40\t12\t0.000000\tiOOA\n2\t1\t39\t0\t0\t0\t1150\t763\t27\t12\t-1\t\n3\t1\t39\t1\t0\t0\t1150\t763\t27\t12\t-1\t\n4\t1\t39\t1\t1\t0\t1150\t763\t27\t12\t-1\t\n5\t1\t39\t1\t1\t1\t1150\t763\t27\t12\t84.185654\tLAB.\n2\t1\t40\t0\t0\t0\t1649\t848\t24\t11\t-1\t\n3\t1\t40\t1\t0\t0\t1649\t848\t24\t11\t-1\t\n4\t1\t40\t1\t1\t0\t1649\t848\t24\t11\t-1\t\n5\t1\t40\t1\t1\t1\t1649\t848\t24\t11\t19.392109\tWt\n2\t1\t41\t0\t0\t0\t1328\t848\t40\t23\t-1\t\n3\t1\t41\t1\t0\t0\t1328\t848\t40\t23\t-1\t\n4\t1\t41\t1\t1\t0\t1328\t848\t40\t23\t-1\t\n5\t1\t41\t1\t1\t1\t1328\t848\t40\t23\t39.208790\tProt\n2\t1\t42\t0\t0\t0\t1639\t865\t43\t12\t-1\t\n3\t1\t42\t1\t0\t0\t1639\t865\t43\t12\t-1\t\n4\t1\t42\t1\t1\t0\t1639\t865\t43\t12\t-1\t\n5\t1\t42\t1\t1\t1\t1639\t865\t43\t12\t5.216026\tMECl\n2\t1\t43\t0\t0\t0\t1485\t890\t28\t12\t-1\t\n3\t1\t43\t1\t0\t0\t1485\t890\t28\t12\t-1\t\n4\t1\t43\t1\t1\t0\t1485\t890\t28\t12\t-1\t\n5\t1\t43\t1\t1\t1\t1485\t890\t28\t12\t67.331421\t102\n2\t1\t44\t0\t0\t0\t1471\t907\t47\t12\t-1\t\n3\t1\t44\t1\t0\t0\t1471\t907\t47\t12\t-1\t\n4\t1\t44\t1\t1\t0\t1471\t907\t47\t12\t-1\t\n5\t1\t44\t1\t1\t1\t1471\t907\t47\t12\t70.864227\tCOMM\n2\t1\t45\t0\t0\t0\t1298\t894\t37\t48\t-1\t\n3\t1\t45\t1\t0\t0\t1298\t894\t37\t48\t-1\t\n4\t1\t45\t1\t1\t0\t1298\t894\t37\t48\t-1\t\n5\t1\t45\t1\t1\t1\t1298\t894\t37\t48\t86.687294\tG\n2\t1\t46\t0\t0\t0\t1711\t906\t42\t44\t-1\t\n3\t1\t46\t1\t0\t0\t1711\t906\t42\t44\t-1\t\n4\t1\t46\t1\t1\t0\t1711\t906\t42\t44\t-1\t\n5\t1\t46\t1\t1\t1\t1711\t906\t42\t44\t56.502399\ta\n2\t1\t47\t0\t0\t0\t1416\t1024\t28\t12\t-1\t\n3\t1\t47\t1\t0\t0\t1416\t1024\t28\t12\t-1\t\n4\t1\t47\t1\t1\t0\t1416\t1024\t28\t12\t-1\t\n5\t1\t47\t1\t1\t1\t1416\t1024\t28\t12\t49.608913\t10\n2\t1\t48\t0\t0\t0\t1793\t939\t46\t91\t-1\t\n3\t1\t48\t1\t0\t0\t1793\t939\t46\t91\t-1\t\n4\t1\t48\t1\t1\t0\t1793\t939\t46\t91\t-1\t\n5\t1\t48\t1\t1\t1\t1793\t939\t46\t91\t70.740608\t3\n2\t1\t49\t0\t0\t0\t1236\t1072\t40\t12\t-1\t\n3\t1\t49\t1\t0\t0\t1236\t1072\t40\t12\t-1\t\n4\t1\t49\t1\t1\t0\t1236\t1072\t40\t12\t-1\t\n5\t1\t49\t1\t1\t1\t1236\t1072\t40\t12\t58.875351\tIOLA\n2\t1\t50\t0\t0\t0\t1605\t1074\t20\t10\t-1\t\n3\t1\t50\t1\t0\t0\t1605\t1074\t20\t10\t-1\t\n4\t1\t50\t1\t1\t0\t1605\t1074\t20\t10\t-1\t\n5\t1\t50\t1\t1\t1\t1605\t1074\t20\t10\t31.941204\tFa\n2\t1\t51\t0\t0\t0\t1219\t1089\t74\t13\t-1\t\n3\t1\t51\t1\t0\t0\t1219\t1089\t74\t13\t-1\t\n4\t1\t51\t1\t1\t0\t1219\t1089\t74\t13\t-1\t\n5\t1\t51\t1\t1\t1\t1219\t1089\t74\t13\t43.375862\tSTOR-GEN\n2\t1\t52\t0\t0\t0\t1050\t1119\t13\t19\t-1\t\n3\t1\t52\t1\t0\t0\t1050\t1119\t13\t19\t-1\t\n4\t1\t52\t1\t1\t0\t1050\t1119\t13\t19\t-1\t\n5\t1\t52\t1\t1\t1\t1050\t1119\t13\t19\t37.621571\tia\n2\t1\t53\t0\t0\t0\t1135\t1044\t56\t94\t-1\t\n3\t1\t53\t1\t0\t0\t1135\t1044\t56\t94\t-1\t\n4\t1\t53\t1\t1\t0\t1135\t1044\t56\t94\t-1\t\n5\t1\t53\t1\t1\t1\t1135\t1044\t56\t94\t33.783718\ta\n2\t1\t54\t0\t0\t0\t1249\t1128\t4\t7\t-1\t\n3\t1\t54\t1\t0\t0\t1249\t1128\t4\t7\t-1\t\n4\t1\t54\t1\t1\t0\t1249\t1128\t4\t7\t-1\t\n5\t1\t54\t1\t1\t1\t1249\t1128\t4\t7\t23.597517\tx\n2\t1\t55\t0\t0\t0\t1613\t1090\t78\t48\t-1\t\n3\t1\t55\t1\t0\t0\t1613\t1090\t78\t48\t-1\t\n4\t1\t55\t1\t1\t0\t1613\t1090\t78\t48\t-1\t\n5\t1\t55\t1\t1\t1\t1613\t1090\t78\t48\t34.817120\twae\n2\t1\t56\t0\t0\t0\t1793\t1119\t13\t19\t-1\t\n3\t1\t56\t1\t0\t0\t1793\t1119\t13\t19\t-1\t\n4\t1\t56\t1\t1\t0\t1793\t1119\t13\t19\t-1\t\n5\t1\t56\t1\t1\t1\t1793\t1119\t13\t19\t70.429993\t4\n2\t1\t57\t0\t0\t0\t1245\t1263\t10\t11\t-1\t\n3\t1\t57\t1\t0\t0\t1245\t1263\t10\t11\t-1\t\n4\t1\t57\t1\t1\t0\t1245\t1263\t10\t11\t-1\t\n5\t1\t57\t1\t1\t1\t1245\t1263\t10\t11\t23.377066\t1\n2\t1\t58\t0\t0\t0\t772\t1277\t80\t24\t-1\t\n3\t1\t58\t1\t0\t0\t772\t1277\t80\t24\t-1\t\n4\t1\t58\t1\t1\t0\t772\t1277\t80\t24\t-1\t\n5\t1\t58\t1\t1\t1\t772\t1277\t80\t24\t89.986893\tNE23\n2\t1\t59\t0\t0\t0\t912\t1277\t80\t24\t-1\t\n3\t1\t59\t1\t0\t0\t912\t1277\t80\t24\t-1\t\n4\t1\t59\t1\t1\t0\t912\t1277\t80\t24\t-1\t\n5\t1\t59\t1\t1\t1\t912\t1277\t80\t24\t89.840347\tNE23\n2\t1\t60\t0\t0\t0\t1253\t1284\t15\t8\t-1\t\n3\t1\t60\t1\t0\t0\t1253\t1284\t15\t8\t-1\t\n4\t1\t60\t1\t1\t0\t1253\t1284\t15\t8\t-1\t\n5\t1\t60\t1\t1\t1\t1253\t1284\t15\t8\t54.143456\t3\n2\t1\t61\t0\t0\t0\t790\t1312\t34\t24\t-1\t\n3\t1\t61\t1\t0\t0\t790\t1312\t34\t24\t-1\t\n4\t1\t61\t1\t1\t0\t790\t1312\t34\t24\t-1\t\n5\t1\t61\t1\t1\t1\t790\t1312\t34\t24\t43.385925\t0!\n2\t1\t62\t0\t0\t0\t931\t1312\t34\t24\t-1\t\n3\t1\t62\t1\t0\t0\t931\t1312\t34\t24\t-1\t\n4\t1\t62\t1\t1\t0\t931\t1312\t34\t24\t-1\t\n5\t1\t62\t1\t1\t1\t931\t1312\t34\t24\t56.975864\tO!\n2\t1\t63\t0\t0\t0\t791\t1347\t45\t24\t-1\t\n3\t1\t63\t1\t0\t0\t791\t1347\t45\t24\t-1\t\n4\t1\t63\t1\t1\t0\t791\t1347\t45\t24\t-1\t\n5\t1\t63\t1\t1\t1\t791\t1347\t45\t24\t92.546684\tINT\n2\t1\t64\t0\t0\t0\t928\t1347\t51\t23\t-1\t\n3\t1\t64\t1\t0\t0\t928\t1347\t51\t23\t-1\t\n4\t1\t64\t1\t1\t0\t928\t1347\t51\t23\t-1\t\n5\t1\t64\t1\t1\t1\t928\t1347\t51\t23\t93.700371\tEXT\n2\t1\t65\t0\t0\t0\t751\t1382\t263\t24\t-1\t\n3\t1\t65\t1\t0\t0\t751\t1382\t263\t24\t-1\t\n4\t1\t65\t1\t1\t0\t751\t1382\t263\t24\t-1\t\n5\t1\t65\t1\t1\t1\t751\t1382\t123\t24\t86.527283\t629.66\n5\t1\t65\t1\t1\t2\t891\t1382\t123\t24\t94.104828\t651.66\n2\t1\t66\t0\t0\t0\t1084\t1407\t7\t11\t-1\t\n3\t1\t66\t1\t0\t0\t1084\t1407\t7\t11\t-1\t\n4\t1\t66\t1\t1\t0\t1084\t1407\t7\t11\t-1\t\n5\t1\t66\t1\t1\t1\t1080\t1399\t5\t28\t0.000000\ts\n2\t1\t67\t0\t0\t0\t1120\t1407\t58\t11\t-1\t\n3\t1\t67\t1\t0\t0\t1120\t1407\t58\t11\t-1\t\n4\t1\t67\t1\t1\t0\t1120\t1407\t58\t11\t-1\t\n5\t1\t67\t1\t1\t1\t1120\t1407\t58\t11\t0.000000\t——e\n2\t1\t68\t0\t0\t0\t1207\t1406\t70\t13\t-1\t\n3\t1\t68\t1\t0\t0\t1207\t1406\t70\t13\t-1\t\n4\t1\t68\t1\t1\t0\t1207\t1406\t70\t13\t-1\t\n5\t1\t68\t1\t1\t1\t1207\t1406\t70\t13\t21.501450\t2s\n2\t1\t69\t0\t0\t0\t1306\t1407\t58\t11\t-1\t\n3\t1\t69\t1\t0\t0\t1306\t1407\t58\t11\t-1\t\n4\t1\t69\t1\t1\t0\t1306\t1407\t58\t11\t-1\t\n5\t1\t69\t1\t1\t1\t1306\t1407\t58\t11\t0.000000\t——\n2\t1\t70\t0\t0\t0\t1393\t1407\t7\t11\t-1\t\n3\t1\t70\t1\t0\t0\t1393\t1407\t7\t11\t-1\t\n4\t1\t70\t1\t1\t0\t1393\t1407\t7\t11\t-1\t\n5\t1\t70\t1\t1\t1\t1393\t1407\t7\t11\t17.747574\t*\n2\t1\t71\t0\t0\t0\t1455\t1407\t8\t10\t-1\t\n3\t1\t71\t1\t0\t0\t1455\t1407\t8\t10\t-1\t\n4\t1\t71\t1\t1\t0\t1455\t1407\t8\t10\t-1\t\n5\t1\t71\t1\t1\t1\t1455\t1407\t8\t10\t21.204863\t*\n2\t1\t72\t0\t0\t0\t1492\t1407\t58\t11\t-1\t\n3\t1\t72\t1\t0\t0\t1492\t1407\t58\t11\t-1\t\n4\t1\t72\t1\t1\t0\t1492\t1407\t58\t11\t-1\t\n5\t1\t72\t1\t1\t1\t1492\t1407\t58\t11\t0.000000\t——-\n2\t1\t73\t0\t0\t0\t1579\t1406\t69\t13\t-1\t\n3\t1\t73\t1\t0\t0\t1579\t1406\t69\t13\t-1\t\n4\t1\t73\t1\t1\t0\t1579\t1406\t69\t13\t-1\t\n5\t1\t73\t1\t1\t1\t1579\t1407\t7\t11\t27.148090\t2\n5\t1\t73\t1\t1\t2\t1604\t1406\t44\t13\t0.807104\ta\n2\t1\t74\t0\t0\t0\t1678\t1407\t57\t11\t-1\t\n3\t1\t74\t1\t0\t0\t1678\t1407\t57\t11\t-1\t\n4\t1\t74\t1\t1\t0\t1678\t1407\t57\t11\t-1\t\n5\t1\t74\t1\t1\t1\t1678\t1407\t57\t11\t0.000000\t——.\n2\t1\t75\t0\t0\t0\t1765\t1407\t7\t10\t-1\t\n3\t1\t75\t1\t0\t0\t1765\t1407\t7\t10\t-1\t\n4\t1\t75\t1\t1\t0\t1765\t1407\t7\t10\t-1\t\n5\t1\t75\t1\t1\t1\t1765\t1407\t7\t10\t3.746252\tza\n2\t1\t76\t0\t0\t0\t1789\t1406\t17\t13\t-1\t\n3\t1\t76\t1\t0\t0\t1789\t1406\t17\t13\t-1\t\n4\t1\t76\t1\t1\t0\t1789\t1406\t17\t13\t-1\t\n5\t1\t76\t1\t1\t1\t1789\t1406\t17\t13\t32.327423\ti\n2\t1\t77\t0\t0\t0\t340\t1482\t50\t9\t-1\t\n3\t1\t77\t1\t0\t0\t340\t1482\t50\t9\t-1\t\n4\t1\t77\t1\t1\t0\t340\t1482\t50\t9\t-1\t\n5\t1\t77\t1\t1\t1\t340\t1482\t50\t9\t0.000000\tTHLOOK,\n2\t1\t78\t0\t0\t0\t294\t1512\t74\t9\t-1\t\n3\t1\t78\t1\t0\t0\t294\t1512\t74\t9\t-1\t\n4\t1\t78\t1\t1\t0\t294\t1512\t74\t9\t-1\t\n5\t1\t78\t1\t1\t1\t294\t1512\t45\t9\t29.960232\t116.\n5\t1\t78\t1\t1\t2\t360\t1512\t8\t9\t70.896431\t2008\n",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE24-F1",
+    "kind": "floor-plan",
+    "building": "NE24",
+    "floor": "1",
+    "title": "NE24 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne2401.pdf",
+    "localUrl": "/data/campus/raw/bne2401.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE24-F1",
+    "text": "= 103 CLASS CLASS 103A | MECE CORRIEOR fan | | 104 CLASS NE24 NE24 INT EXT = = 629.50",
+    "labelCount": 3,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE25-F1",
+    "kind": "floor-plan",
+    "building": "NE25",
+    "floor": "1",
+    "title": "NE25 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne2501.pdf",
+    "localUrl": "/data/campus/raw/bne2501.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE25-F1",
+    "text": "le by hie OK, ay 0 Io — — = Loon Ww CF s LAB BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY ‘SCALE: 1:200 NE25, FIRST FLOOR campus planning LAST UPDATED: NOVEMBER 07, 2007",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE25-F2",
+    "kind": "floor-plan",
+    "building": "NE25",
+    "floor": "2",
+    "title": "NE25 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne2502.pdf",
+    "localUrl": "/data/campus/raw/bne2502.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE25-F2",
+    "text": "ial = Ok LAB TT rts baz: = we AW Pet cor J | BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY campus planning LAST UPDATED: OCTOBER 15, 2010",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE25-F3",
+    "kind": "floor-plan",
+    "building": "NE25",
+    "floor": "3",
+    "title": "NE25 · Floor 3",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne2503.pdf",
+    "localUrl": "/data/campus/raw/bne2503.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE25-F3",
+    "text": "ici 2081 ont 1K aa a ul “ING 2001 RCE TAI Le Ea 204 20 on Lae 2020 BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY NE25, THIRD FLOOR ‘SCALE: 1:200 campus planning LAST UPDATED: JANUARY 20, 2010",
+    "labelCount": 5,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NE28-F1",
+    "kind": "floor-plan",
+    "building": "NE28",
+    "floor": "1",
+    "title": "NE28 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/ne/bne2801.pdf",
+    "localUrl": "/data/campus/raw/bne2801.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NE28-F1",
+    "text": "——— 104 103 CLASS CLASS = Ct STOR-GEN STOR-GEN CORRIDOR 106 ir Ww, OG SHAET 105 M109 a ] 103 CORRIDOR MECH | OM 110 CORRIDOR STOR-GEN RESOURCE it OFFICE 10) OFFICE-OPN NE2& NE2& Ol INT EXT 624.46 651.51 te ©",
+    "labelCount": 7,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NW1-F1",
+    "kind": "floor-plan",
+    "building": "NW1",
+    "floor": "1",
+    "title": "NW1 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/nw/bnw0101.pdf",
+    "localUrl": "/data/campus/raw/bnw0101.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NW1-F1",
+    "text": "eR ot ot 2 113, By 1202 OL oO I orricr 7 oe FICE Leg, bo 1105 na THC 2 kre 3h Tee THe, ‘OH lou? lg 1497 NTOS De & Lae oF aw M Te ie 148 ore: ct in laze oor 7 14 orrice orrier O-N ML om oO =» BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY NW01, FIRST FLOOR Sea campus planning LAST UPDATED: OCTOBER 15, 2010",
+    "labelCount": 5,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NW3-F1",
+    "kind": "floor-plan",
+    "building": "NW3",
+    "floor": "1",
+    "title": "NW3 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/nw/bnw0301.pdf",
+    "localUrl": "/data/campus/raw/bnw0301.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NW3-F1",
+    "text": "all +4, ll NWO3, FIRST FLOOR BRITISH COLUMBIA © INSTITUTE OF TECHNOLOGY campus planning fT 2: 26. 2010",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NW3-F2",
+    "kind": "floor-plan",
+    "building": "NW3",
+    "floor": "2",
+    "title": "NW3 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/nw/bnw0302.pdf",
+    "localUrl": "/data/campus/raw/bnw0302.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NW3-F2",
+    "text": "M OO Ee (i NWO3 N 02 02 INT EXT 955.94 964.16",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NW4-F1",
+    "kind": "floor-plan",
+    "building": "NW4",
+    "floor": "1",
+    "title": "NW4 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/nw/bnw0401.pdf",
+    "localUrl": "/data/campus/raw/bnw0401.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NW4-F1",
+    "text": "Oo Lay, | d| 1065, 1051 1053 WASTE! 1067 RECYCLING 1043 CONTROL LAB LAB-LSCI-$ LAB - LSCI-G. ROOM SHIPPING &| RECEIVING a tees MG ey = 1028 1031 1029 ELECTRICAL a LAB -LSCI-$ ROOM ean 1062 STOR - INST Pa STORAGE 1026 | L- 1066, STORAGE | OFFICE-OPN 1027 Fe LAB 1068 STORAGE 1021 LAB-LSCI-S 1003 1017 COMM. 1072 ROOM CONFERENCE LAB a 076, CONFERENCE = = 1014 1010 1008 1016 isa PROJECT ROOM PROJECT QUIET & ROOM Rot 1078 CONFERENCE a koe 1080 FOOD SERVICES KIOSK 1 ae $1002 sre SOCIAL STAIR 2 lo LOBBY NW04, FIRST FLOOR BCIT TALE: NT! CAMPUS PLANNING LAST UPDATED: JANUARY 16, 2023",
+    "labelCount": 22,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NW4-F2",
+    "kind": "floor-plan",
+    "building": "NW4",
+    "floor": "2",
+    "title": "NW4 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/nw/bnw0402.pdf",
+    "localUrl": "/data/campus/raw/bnw0402.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NW4-F2",
+    "text": "im 2030 XRAY ‘oa, ROOM 2049 2051 83 2057 169 X-RAY LABA LABB LAB PRACTICE ROOM LAB 2062 TEACHING LAB 2033 X-RAY ROOM al = 2031 2030 VESTIBULE XRAY | 2066 X-RAY 2050 ACTIVE ROOM ROOM 4 STOR- LEARNING INSTR | 2024 2069 XRAY STUDENT 2070 2025 X-RAY ROOM set AMENITIES | ROOM A I 2021 2020 I VR 2003 CLASSROOM | COMM I |__| ROOM 2079 I STUDY",
+    "labelCount": 19,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NW4-F3",
+    "kind": "floor-plan",
+    "building": "NW4",
+    "floor": "3",
+    "title": "NW4 · Floor 3",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/nw/bnw0403.pdf",
+    "localUrl": "/data/campus/raw/bnw0403.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NW4-F3",
+    "text": "U 3033 3041 3043 3062 SIM LAB SIM LAB STOR-INSTR 3000H STUDENT AMENITY STUDY ‘ LOUNGE NOOK 3031 3000F AV ROOM CORRIDOR EI = re 3029 ACTIVE 3028 3050 stan LEARNING SIM LAB STORINSTR 3027 ACTIVE LEARNING Fane J 3026 3000E we fan 30008 3023 ACTIVE 3020 3003 LEARNING COMM ‘SIM LAB ROOM 3021 sits ACTIVE of ow o I CORRIDOR: T a 3119 B 3082 BRIEFING ROOM 3015 IM LAB LAB PREP. ty 315 ic) ACTIVE se LEARNING oe 3086 SIM LAB 313 ic) LT 30004 ACTIVE CORRIDOR: CORRIDOR: LEARNING 3092 SIM LAB 3110 3108 3104 3100 SKILLS SKILLS SKILLS SKILLS LAB LAB LAB LAB xs me = + + + + NW04, THIRD FLOOR BCIT ‘SCALE: NTS CAMPUS PLANNING LAST UPDATED: MARCH 6, 2023",
+    "labelCount": 29,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NW4-F4",
+    "kind": "floor-plan",
+    "building": "NW4",
+    "floor": "4",
+    "title": "NW4 · Floor 4",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/nw/bnw0404.pdf",
+    "localUrl": "/data/campus/raw/bnw0404.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NW4-F4",
+    "text": "7 7 FT | FER! 4060 TRANSFUSION 4041 LAB STUDY LOUNGE 4000F CORRIDOR: 4062 = LAB PREP. Q 4030 . 4035 ELEC. ROOM PROJECT BENCH 4028 LAB PREP 4066 WORKSHOP HEMATOLOGY CORRIDOR__ LAB 4070",
+    "labelCount": 9,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NW5-F1",
+    "kind": "floor-plan",
+    "building": "NW5",
+    "floor": "1",
+    "title": "NW5 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/nw/bnw0501.pdf",
+    "localUrl": "/data/campus/raw/bnw0501.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NW5-F1",
+    "text": "——— EE 100 |OOA 108D LL S10} 107 — 1O NWO5 NWO5 O| O| EXT INT 215.24 223.56 — = = =— Be",
+    "labelCount": 3,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NW5-F2",
+    "kind": "floor-plan",
+    "building": "NW5",
+    "floor": "2",
+    "title": "NW5 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/nw/bnw0502.pdf",
+    "localUrl": "/data/campus/raw/bnw0502.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NW5-F2",
+    "text": "208 206 210 OFFICE OFFICE OFFICE 20 | 200A OFFICE ELEC 2)! VESTIBULE 202 204 OFFICE OFFICE-OPN 205 OFFICE OFFICE 203 NWO5 NWO5 O7 OFFICE O2 O2 INT EXT 246.14 253.29 —",
+    "labelCount": 8,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NW6-F1",
+    "kind": "floor-plan",
+    "building": "NW6",
+    "floor": "1",
+    "title": "NW6 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/nw/bnw0601.pdf",
+    "localUrl": "/data/campus/raw/bnw0601.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NW6-F1",
+    "text": "",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NW6-F2",
+    "kind": "floor-plan",
+    "building": "NW6",
+    "floor": "2",
+    "title": "NW6 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/nw/bnw0602.pdf",
+    "localUrl": "/data/campus/raw/bnw0602.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NW6-F2",
+    "text": "| | 7 | | NI | | | Cl [ko of Cl na zi 21 of | Cl | | | | if ES | ae NWOG NWOG 02 02 INT EXT 909.63 954.34",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "NW7-F1",
+    "kind": "floor-plan",
+    "building": "NW7",
+    "floor": "1",
+    "title": "NW7 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/nw/bnw0701.pdf",
+    "localUrl": "/data/campus/raw/bnw0701.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "NW7-F1",
+    "text": "OFFICE T a M140 12 oa 110 OFFICE |40B ORRIDO! PREF] 145 ELEC | 304 | 30 LOADING LI 150 SFT-PLUM STORAGE > | 504 WRO = 17 MECH INI > 120 NWO7 NWO CLASS Ol O| INT EXT 429.43 Ct",
+    "labelCount": 7,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE1-F1",
+    "kind": "floor-plan",
+    "building": "SE1",
+    "floor": "1",
+    "title": "SE1 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse0101.pdf",
+    "localUrl": "/data/campus/raw/bse0101.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE1-F1",
+    "text": "= Pp ate | ali = bes Lae at Me 1B a) i LAI sae \n2\t1\t44\t0\t0\t0\t878\t730\t30\t17\t-1\t\n3\t1\t44\t1\t0\t0\t878\t730\t30\t17\t-1\t\n4\t1\t44\t1\t1\t0\t878\t730\t30\t17\t-1\t\n5\t1\t44\t1\t1\t1\t878\t730\t30\t17\t19.289513\twet\n2\t1\t45\t0\t0\t0\t1115\t724\t22\t17\t-1\t\n3\t1\t45\t1\t0\t0\t1115\t724\t22\t17\t-1\t\n4\t1\t45\t1\t1\t0\t1115\t724\t22\t17\t-1\t\n5\t1\t45\t1\t1\t1\t1115\t724\t22\t17\t56.420853\tfies\n2\t1\t46\t0\t0\t0\t1215\t728\t7\t8\t-1\t\n3\t1\t46\t1\t0\t0\t1215\t728\t7\t8\t-1\t\n4\t1\t46\t1\t1\t0\t1215\t728\t7\t8\t-1\t\n5\t1\t46\t1\t1\t1\t1215\t728\t7\t8\t24.495220\tFr\n2\t1\t47\t0\t0\t0\t1545\t738\t8\t7\t-1\t\n3\t1\t47\t1\t0\t0\t1545\t738\t8\t7\t-1\t\n4\t1\t47\t1\t1\t0\t1545\t738\t8\t7\t-1\t\n5\t1\t47\t1\t1\t1\t1545\t738\t8\t7\t62.608879\tiF\n2\t1\t48\t0\t0\t0\t1636\t727\t30\t18\t-1\t\n3\t1\t48\t1\t0\t0\t1636\t727\t30\t18\t-1\t\n4\t1\t48\t1\t1\t0\t1636\t727\t30\t18\t-1\t\n5\t1\t48\t1\t1\t1\t1636\t727\t30\t18\t20.848145\tnt\n2\t1\t49\t0\t0\t0\t1750\t738\t42\t7\t-1\t\n3\t1\t49\t1\t0\t0\t1750\t738\t42\t7\t-1\t\n4\t1\t49\t1\t1\t0\t1750\t738\t42\t7\t-1\t\n5\t1\t49\t1\t1\t1\t1750\t726\t13\t28\t45.644627\tben\n5\t1\t49\t1\t1\t2\t1774\t738\t18\t7\t40.062515\tFe\n2\t1\t50\t0\t0\t0\t1767\t727\t8\t6\t-1\t\n3\t1\t50\t1\t0\t0\t1767\t727\t8\t6\t-1\t\n4\t1\t50\t1\t1\t0\t1767\t727\t8\t6\t-1\t\n5\t1\t50\t1\t1\t1\t1767\t727\t8\t6\t0.000000\tn\n2\t1\t51\t0\t0\t0\t1299\t751\t38\t17\t-1\t\n3\t1\t51\t1\t0\t0\t1299\t751\t38\t17\t-1\t\n4\t1\t51\t1\t1\t0\t1299\t751\t38\t17\t-1\t\n5\t1\t51\t1\t1\t1\t1299\t751\t38\t17\t29.690681\twnat\n2\t1\t52\t0\t0\t0\t1965\t751\t42\t18\t-1\t\n3\t1\t52\t1\t0\t0\t1965\t751\t42\t18\t-1\t\n4\t1\t52\t1\t1\t0\t1965\t751\t42\t18\t-1\t\n5\t1\t52\t1\t1\t1\t1965\t762\t13\t7\t24.326324\tlei\n5\t1\t52\t1\t1\t2\t1988\t751\t19\t18\t5.083685\t1\n2\t1\t53\t0\t0\t0\t851\t768\t18\t7\t-1\t\n3\t1\t53\t1\t0\t0\t851\t768\t18\t7\t-1\t\n4\t1\t53\t1\t1\t0\t851\t768\t18\t7\t-1\t\n5\t1\t53\t1\t1\t1\t851\t768\t18\t7\t28.539330\tst)\n2\t1\t54\t0\t0\t0\t1060\t809\t13\t6\t-1\t\n3\t1\t54\t1\t0\t0\t1060\t809\t13\t6\t-1\t\n4\t1\t54\t1\t1\t0\t1060\t809\t13\t6\t-1\t\n5\t1\t54\t1\t1\t1\t1060\t809\t13\t6\t28.336258\ten\n2\t1\t55\t0\t0\t0\t843\t829\t24\t17\t-1\t\n3\t1\t55\t1\t0\t0\t843\t829\t24\t17\t-1\t\n4\t1\t55\t1\t1\t0\t843\t829\t24\t17\t-1\t\n5\t1\t55\t1\t1\t1\t843\t829\t24\t17\t16.409683\tfea\n2\t1\t56\t0\t0\t0\t1107\t839\t18\t6\t-1\t\n3\t1\t56\t1\t0\t0\t1107\t839\t18\t6\t-1\t\n4\t1\t56\t1\t1\t0\t1107\t839\t18\t6\t-1\t\n5\t1\t56\t1\t1\t1\t1107\t839\t18\t6\t35.570847\tlea\n2\t1\t57\t0\t0\t0\t1099\t850\t20\t7\t-1\t\n3\t1\t57\t1\t0\t0\t1099\t850\t20\t7\t-1\t\n4\t1\t57\t1\t1\t0\t1099\t850\t20\t7\t-1\t\n5\t1\t57\t1\t1\t1\t1099\t850\t20\t7\t23.396301\tety\n2\t1\t58\t0\t0\t0\t1154\t878\t29\t7\t-1\t\n3\t1\t58\t1\t0\t0\t1154\t878\t29\t7\t-1\t\n4\t1\t58\t1\t1\t0\t1154\t878\t29\t7\t-1\t\n5\t1\t58\t1\t1\t1\t1154\t878\t29\t7\t51.992287\twu\n2\t1\t59\t0\t0\t0\t1020\t888\t13\t6\t-1\t\n3\t1\t59\t1\t0\t0\t1020\t888\t13\t6\t-1\t\n4\t1\t59\t1\t1\t0\t1020\t888\t13\t6\t-1\t\n5\t1\t59\t1\t1\t1\t1020\t888\t13\t6\t5.443058\taT\n2\t1\t60\t0\t0\t0\t1040\t899\t8\t6\t-1\t\n3\t1\t60\t1\t0\t0\t1040\t899\t8\t6\t-1\t\n4\t1\t60\t1\t1\t0\t1040\t899\t8\t6\t-1\t\n5\t1\t60\t1\t1\t1\t1040\t899\t8\t6\t5.519648\t4 hou EO | FIRST FLOOR BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY LACT UP AN 24, 2012 campus planning",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE1-F2",
+    "kind": "floor-plan",
+    "building": "SE1",
+    "floor": "2",
+    "title": "SE1 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse0102.pdf",
+    "localUrl": "/data/campus/raw/bse0102.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE1-F2",
+    "text": "=a",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE2-F1",
+    "kind": "floor-plan",
+    "building": "SE2",
+    "floor": "1",
+    "title": "SE2 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse0201.pdf",
+    "localUrl": "/data/campus/raw/bse0201.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE2-F1",
+    "text": "ry LE Ca wi Il ye Il Il | eal Via I ian a a a a | Il qi ef a a a — Al 2 BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY SE02, FIRST FLOOR campus planning S SCALE: LAST UPDATED: JANUARY 18, 2005",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE2-F2",
+    "kind": "floor-plan",
+    "building": "SE2",
+    "floor": "2",
+    "title": "SE2 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse0202.pdf",
+    "localUrl": "/data/campus/raw/bse0202.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE2-F2",
+    "text": "oa — al QL EE ~ LAS] BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY SCALE: SE02, SECOND FLOOR campus planning LAST UPDATED: JULY 6, 2009",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE2-F3",
+    "kind": "floor-plan",
+    "building": "SE2",
+    "floor": "3",
+    "title": "SE2 · Floor 3",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse0203.pdf",
+    "localUrl": "/data/campus/raw/bse0203.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE2-F3",
+    "text": "—_| J | —= ut BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY SE02, THIRD FLOOR SCALE: campus planning S LAST UPDATED: OCTOBER 28, 2004",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE4-F1",
+    "kind": "floor-plan",
+    "building": "SE4",
+    "floor": "1",
+    "title": "SE4 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse0401.pdf",
+    "localUrl": "/data/campus/raw/bse0401.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE4-F1",
+    "text": "115A\n106 STOR-GEN\nCLASS\n115\n105B 115B CLASS\nOFFICE 114 STOR-GEN\nCORRIDOR\n105C 107 115C 122\nCORRIDOR COMM LAB-PREP SUPP-INST\n105A 109\nOFFICE RESOURCE\n104\nOFFICE\n121\nSUPP-INST\n108\nMECH\n103\nWASH-RM-FH\nM102\nSHAFT\n111\n102 110 STOR-GEN 112\nWASH-RM-MH JANITOR OFFICE\n100\nCORRIDOR\n120B\n117 116 STOR-GEN\nOFFICE OFFICE\n120\n120A STOR-GEN\nMECH\n118\nSUPP-INST\n119\nSTOR-GEN\nSE04 - 1ST FLOOR\nUPDATED: JULY 22, 2026\nCAMPUS PLANNING",
+    "labelCount": 30,
+    "textMethods": [
+      "embedded-pdf-text"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE6-F1",
+    "kind": "floor-plan",
+    "building": "SE6",
+    "floor": "1",
+    "title": "SE6 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse0601.pdf",
+    "localUrl": "/data/campus/raw/bse0601.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE6-F1",
+    "text": "| 7 BCIT CAMPUS PLANNING",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE6-F2",
+    "kind": "floor-plan",
+    "building": "SE6",
+    "floor": "2",
+    "title": "SE6 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse0602.pdf",
+    "localUrl": "/data/campus/raw/bse0602.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE6-F2",
+    "text": "ce fe] pu = z= | i jan (a O= BCIT CAMPUS PLANNING",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE6-F3",
+    "kind": "floor-plan",
+    "building": "SE6",
+    "floor": "3",
+    "title": "SE6 · Floor 3",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse0603.pdf",
+    "localUrl": "/data/campus/raw/bse0603.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE6-F3",
+    "text": "OFFICE OFFICE 307 OFFICE an 310 OFFICE ate 39 316 aa OFFICE OFFICE 325 OFFICE. 325 324 OFFICE 328 OFFICE 328 331 OFFICE, 332 OFFICE orice 337 OFFICE, OFFICE OFFICE OFFICE OFFICE 347 OFFICE OFFICE DU MEET oo OFFICE 365, cu 363 OFFICE OFFICE 372 us: CORRIDOR. 379 360 OFFICE, 377 375 375 3a OFFICE, LI 362 OFFICE 370 364 OFFICE, OFFICE = SEO6 SEO6 3700, 3700 3708, 366 OFFICE, OFFICE 03 03 INT EXT 1497.11 1545.09 — =. === == == = 204 = Fl",
+    "labelCount": 25,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE8-F1",
+    "kind": "floor-plan",
+    "building": "SE8",
+    "floor": "1",
+    "title": "SE8 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse0801.pdf",
+    "localUrl": "/data/campus/raw/bse0801.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE8-F1",
+    "text": "T in i | i 2428 Le 6 L 1c log £6 OF orm = K 25 al A Ge a a AK A fe 19] a | ner 6 _.- _.- - — te N TAA BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY SEO8, FIRST FLOOR campus planning LAST FEBRUARY 9, 2011",
+    "labelCount": 2,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE8-F2",
+    "kind": "floor-plan",
+    "building": "SE8",
+    "floor": "2",
+    "title": "SE8 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse0802.pdf",
+    "localUrl": "/data/campus/raw/bse0802.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE8-F2",
+    "text": "— Ti ore —— 2 sree 10 Ae Citar ia tal sa a 1h Ke 5204 BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY SCALE: 4:200 SE08, SECOND FLOOR campus planning LAST UPDATED: NOVEMBER 30, 2010",
+    "labelCount": 2,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE9-F1",
+    "kind": "floor-plan",
+    "building": "SE9",
+    "floor": "1",
+    "title": "SE9 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse0901.pdf",
+    "localUrl": "/data/campus/raw/bse0901.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE9-F1",
+    "text": "I na 103 JAN OR 106 MECH L| 100 OFFICE aa WASH- | OOZ I CORRIDOR FF =; 103 COMM OFFICE 102C VESTIBULE 102B STOR-GA 102A COMM 1 A. 102 OFFICE-OPN VESTIBULE ite",
+    "labelCount": 8,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE10-F1",
+    "kind": "floor-plan",
+    "building": "SE10",
+    "floor": "1",
+    "title": "SE10 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1001.pdf",
+    "localUrl": "/data/campus/raw/bse1001.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE10-F1",
+    "text": "oF 1s 4 rer 23 eo rr he. | fre 100 ub | lee oe tae tlt SEIO Ol Ol INT EXT 1,557.96",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE10-F2",
+    "kind": "floor-plan",
+    "building": "SE10",
+    "floor": "2",
+    "title": "SE10 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1002.pdf",
+    "localUrl": "/data/campus/raw/bse1002.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE10-F2",
+    "text": "—",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE12-F1",
+    "kind": "floor-plan",
+    "building": "SE12",
+    "floor": "1",
+    "title": "SE12 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1201.pdf",
+    "localUrl": "/data/campus/raw/bse1201.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE12-F1",
+    "text": "| | | oy T - = lv]",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE12-F2",
+    "kind": "floor-plan",
+    "building": "SE12",
+    "floor": "2",
+    "title": "SE12 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1202.pdf",
+    "localUrl": "/data/campus/raw/bse1202.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE12-F2",
+    "text": "ay a = | ) ] ror] = a = @ a — ==> i BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY $E12, SECOND FLOOR ‘SCALE: 1:300 LAST UPDATED: OCTOBER 22, 2008 campus planning ©)",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE12-F3",
+    "kind": "floor-plan",
+    "building": "SE12",
+    "floor": "3",
+    "title": "SE12 · Floor 3",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1203.pdf",
+    "localUrl": "/data/campus/raw/bse1203.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE12-F3",
+    "text": "SE 14\nSW3\ns\nS313\nSTAIR\nS M H 3 A 1 F 1 T S 3 H 1 A 3 F Z T S M H 3 A 2 F 5 T\n328C\n313C CORRIDOR\nCORRIDOR\n315A 305A 305 309A VESTIBULE COMM COMM OFFICE\n301 321 CLASS 315 LAB-COMP-G\nWASH-RM-MH 311 313 323 325 327 LAB-COMP-G CLASS LAB-COMP-G LAB-COMP-G LAB-COMP-G\nS327\nC 3 LA 0 S 7 S C 3 LA 0 S 9 S S M H 3 A 1 F 5 T STAIR\nCO 3 R 0 R 3 ID C OR LAB- 3 C 0 O 3 MP-G ST 3 O 1 R 7 -G A EN JA 3 N 1 IT 7 OR CO 3 R 1 R 7 ID C OR LAB- 3 C 1 O 9 MP-G\nS300\nSTAIR 328T\nCORRIDOR\nM314\nSHAFT\n306 308 310 312 320 322 324\nLAB-COMP-G LAB-COMP-G LAB-COMP-G CLASS LAB-COMP-G LAB-COMP-G LAB-COMP-G\n314\n302 WASH-RM-FH 318\nCLASS LAB-COMP-G\n314A\nVESTIBULE\nS M H 3 A 1 F 0 T S M H 3 A 2 F 2 T 3 E 4 L 1 EC A\nS328\nSTAIR\nF823 RODIRROC\n343 329 330 344 STAFF STOR-GEN OFFICE OFFICE\n346 KITCHEN-C\n345 OFFICE\nM346 SHAFT\n347\nOFFICE\nM342 351\nSHAFT WASH-RM-F\n342 RESOURCE\nO 3 FF 4 I 8 CE S M H 3 A 5 F 1 T\n353\n349 COMM\nOFFICE\nO 3 FF 5 I 0 CE COR 3 R 5 I 2 DOR\nSE12 SE12\n03 03\nINT EXT\n2,823.36 2,881.26\nD823 RODIRROC\n328B\nOFFICE-OPN\n332\nOFFICE-OPN\n334\nMEETING\n328A\nOFFICE-OPN\n336 MEETING\n312A 328E\nCORRIDOR CORRIDOR\nSE12 - 3RD FLOOR\nSCALE: NTS\nUPDATED: SEPT 21, 2026\nCampus Planning\nand Facilities",
+    "labelCount": 54,
+    "textMethods": [
+      "embedded-pdf-text"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE12-F4",
+    "kind": "floor-plan",
+    "building": "SE12",
+    "floor": "4",
+    "title": "SE12 · Floor 4",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1204.pdf",
+    "localUrl": "/data/campus/raw/bse1204.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE12-F4",
+    "text": "ND544434241404938373635343\nS413\nSTAIR\nM403 3242526272829203132333 M417\nSHAFT SHAFT\n413Z\nSHAFT 407C 418A\nCORRIDOR CORRIDOR\n413C ND 434\nCL\n4\nA\n0\nS\n1\nS CL\n4\nA\n03\nSS CL\n4\nA\n05\nSS\nWASH 4\n4\n- 0\n1\nR 9\n1\nM-MH SU\nL\nP\nA\nP\nB\n-I\n-\nN\n4 S\nS\n1 IM 3\nT\nULA LAB 4 -P 15 REP LAB 4 -S 1 I 7 M A ULA LAB 4 -S 1 I 7 M B ULA S S T 4 A\n3 21098765432\n1\n2 22211111111\nI 8 R\nO 4 FF 1 I 9 CE\nOFFI\n4\nC\n1\nE\n8\n-OPN\nO\nO\nF\n4 F\nF\nF 3\nIC\nI 5 C\nE\nE\nK 43 IT 2 CHEN-C\nWASH-RM-MH 418C 418D 418E\nCOR 40 R 2 ID C OR\nS M H 4 A 1 F 1 T COR\n41\nR\n0\nID\nC\nOR\n10\n4\n98765\n321\n11\nME\n4\nE\n2\nT\n2\nING COR 41 R\nS\n8\nH\nI\nM\nD F\nA 4\nO\nF 1\nR\nT 8 OF 4 F 2 I 5 C\nM\nE\nEETIN\nO\nG\nF 4 F 2\nM\nI 6 C\nEE\nE\nTING\nPR\nM\nO\nE\n4\nE\nJ 2\nT\nE\nI\n7\nN\nC\nG\nTS\nOF 4 F 3 I 6 CE S M H 4 A 3 F 2 T\nN 21098765432 22211111111 D S S T 4 A 0 I 0 R\n10\n4 98765 321\n11\nCL 4 A 02 SS PRO 40 J 4 E B CTS KITC 40 H 4 E C N-R LO 4 U 0 N 4 GE PRO 40 J 4 E D CTS CL 4 A 06 SS S M H 4 A 0 F 8 T JAN 41 IT 0 OR LAB- 4 S 1 IM 2 ULA LAB 4 -P 14 REP LAB 4 -S 1 I 6 M A ULA SUP 4 P 16 -I B NST COR 41 R 8 ID T OR OF 4 F 2 I 0 CE ME 4 E 2 T\nO\n3 IN\nF\nG\nF\n4\nIC\n1\nE\n8B\n-OPN\nOFFI 4 C 2 E 8 -OPN COR 41 R 8 ID H OR OF O 4 F 4 F 3 I F 3 7 S C I 8 C H M E E A 4 F 3 T 1 W C A O 4 S 4 3 M H 0 3 M - 1 RM-F\nPRO 40 J 4 E A CTS PRO 40 J 4 E E CTS WASH 40 -R 8 M-FH CO 4 N 1 T 2 R C OL SUP 41 P 6 -I C NST 421 424 RES 4 O 2 U 9 RCE\nOFFICE OFFICE 439\n408A OFFICE\nVESTIBULE\n408C 429A\nCORRIDOR CORRIDOR\n418G\nM404 M416 ELEC\nSHAFT SHAFT S428\nSTAIR3242526272829203132333\nSE12 SE12\n2 In ,8 te 0 4 r 4 8 n .9 a 6 l 2 E , x 9 t 0 0 e 4 9 rn .9 a 5 l N 5 D 44434241404938373635343\nSE12 - 4TH FLOOR\nSCALE: NTS\nUPDATED: SEPT 21, 2026\nCampus Planning\nand Facilities",
+    "labelCount": 24,
+    "textMethods": [
+      "embedded-pdf-text"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE14-F1",
+    "kind": "floor-plan",
+    "building": "SE14",
+    "floor": "1",
+    "title": "SE14 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1401.pdf",
+    "localUrl": "/data/campus/raw/bse1401.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE14-F1",
+    "text": "W L | =. BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY SCALE: 1:30 SE14, FIRST FLOOR campus development © LAST UPDATED: AUGUST 15, 2014",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE14-F2",
+    "kind": "floor-plan",
+    "building": "SE14",
+    "floor": "2",
+    "title": "SE14 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1402.pdf",
+    "localUrl": "/data/campus/raw/bse1402.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE14-F2",
+    "text": "Es Ve J |] a SCALE: SE14, SECOND FLOOR CAMPUS PLANNING LAST UPDATED: NOVEMBER 43, 2022",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE14-F3",
+    "kind": "floor-plan",
+    "building": "SE14",
+    "floor": "3",
+    "title": "SE14 · Floor 3",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1403.pdf",
+    "localUrl": "/data/campus/raw/bse1403.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE14-F3",
+    "text": "ec = q a a SE14, THIRD FLOOR CAMPUS PLANNING LAST UPDATED: NOVEMBER 14, 2022",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE16-F1",
+    "kind": "floor-plan",
+    "building": "SE16",
+    "floor": "1",
+    "title": "SE16 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1601.pdf",
+    "localUrl": "/data/campus/raw/bse1601.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE16-F1",
+    "text": "115H\nOFFICE 115J OFFICE\n115G\nOFFICE\n115F 115K\nOFFICE RECEPTION\n115E\nOFFICE\n115D\nOFFICE\n115L\nRESOURCE\n115C\nOFFICE\nO1F1F5ICBE CO1R1R5IDZOR\n115A\nCONFERENCE\n114\nMEETING\n109\nOFFICE-OPN\n101C\nCORRIDOR\n135A\nELEC\n101\nLOBBY\n101A FOOD-SERV\n147\nCORRIDOR\nVEST 1 IB 5 U 2 L A E SHO 1 W 5 E 4 R-M\n152\nLOCKER-F 157\nGYM\n190\nLOUNGE\n148 GYM\n190A\nCORRIDOR\n189\nWASH-RM-FH 171\nGYM\nM189 SHAFT 190B\nMECH\n188\nWASH-RM-MH\n187 S187\nMECH STAIR\n1 ST 4 A 8 I D R ST 1 O 4 R 8 -G A EN ST 1 O 4 R 8 -G B EN 1 ST 4 A 8 I C R\n711\nRODIRROC\n127E\nOFFICE\n127B\nOFFICE\n112 OFFICE\n111\nOFFICE\n110\nOFFICE\n102\n103 STOR-GEN\nELEC 102A\nCOMM\nP721\nRODIRROC\nST 1 O 2 R 7 -G N EN O 1 F 2 F 7 IC M E\n127Q\nSUPP-INST\n127L\nSUPP-INST\nO 1 F 2 F 7 IC J E O 1 F 2 F 7 IC K E\n127H\nSUPP-INST\n126\nSTOR-GEN 127G\nWASH-RM-M\n127D 127F\nSTOR-GEN WASH-RM-F\n127C\nSUPP-INST\n127A\nOFFICE\n127\nRECEPTION\n128A\nOFFICE\n128B OFFICE S134\nSTAIR\n128C 134E\nOFFICE STOR-GEN\n135 GYM\n136\nJANITOR\n141\nWASH-RM-M\nM136 139 M139 143 SHAFT WASH-RM-F SHAFT ELEC\n138\nVESTIBULE\n137 140 142\nSTOR-GEN VESTIBULE JANITOR\n101B\nCORRIDOR\nA741 RODIRROC\nCampus Planning\nand Facilities\nUPDATED: JULY 17, 2025\n128 LOBBY\n128D\nOFFICE 128G\nCORRIDOR\n128F 128E 134C\nOFFICE OFFICE STOR-GEN\n129 MEETING\n134A OFFICE-OPN\n134\nOFFICE-OPN\n192 191\nOFFICE OFFICE\n155\nJANITOR 153 WASH-RM-FH\n156\nSTOR-GEN\nG 1 Y 8 M 1 S M H 1 A 5 F 3 T S M H 1 A 5 F 4 T S M H 1 A 5 F 5 T\n147B\n182 CORRIDOR 161\nGYM VESTIBULE\n166 165\nELEC STOR-GEN LOC 1 K 6 E 2 R-M LO 1 B 5 B 8 Y\n164 160\nG 1 Y 8 M 3 LOCKE 1 R 6 - 7 F 169 SHOWER-M LOCKER-M 168 SHOWER-F WASH 1 - 6 R 3 M-MH STO 1 R 5 - 9 GEN\nLOCKER-F 170\nSHOWER-F\n184 171A\nGYM STAIR\n171B 185 STOR-GEN GYM\n186\nGYM 148F\nSTOR-GEN\nSE16 - FIRST FLOOR\nSCALE: NTS",
+    "labelCount": 98,
+    "textMethods": [
+      "embedded-pdf-text"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE30-F1",
+    "kind": "floor-plan",
+    "building": "SE30",
+    "floor": "1",
+    "title": "SE30 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse3001.pdf",
+    "localUrl": "/data/campus/raw/bse3001.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE30-F1",
+    "text": "SESO SESO Ol Ol INT EXT A STORAGE 1084.24 1115.30 L",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE40-F1",
+    "kind": "floor-plan",
+    "building": "SE40",
+    "floor": "1",
+    "title": "SE40 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse4001.pdf",
+    "localUrl": "/data/campus/raw/bse4001.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE40-F1",
+    "text": "Q OO |] QO al CAMPUS PLANNING SE40, FIRST FLOOR",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE40-F2",
+    "kind": "floor-plan",
+    "building": "SE40",
+    "floor": "2",
+    "title": "SE40 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse4002.pdf",
+    "localUrl": "/data/campus/raw/bse4002.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE40-F2",
+    "text": "ul l au ML ff LLLLLLL LL \\ — | | 3 p ia Se = INSTITUTE OF TECHNOLOGY RITISH COLUMBIA campus planning",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE41-F1",
+    "kind": "floor-plan",
+    "building": "SE41",
+    "floor": "1",
+    "title": "SE41 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse4101.pdf",
+    "localUrl": "/data/campus/raw/bse4101.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE41-F1",
+    "text": "GENERAL NOTES\n1) ALL DIMENSIONS ARE IN MM, ANGLES IN DEGREE\nAND LEVELS IN MM UNLESS NOTED OTHERWISE\n(U.N.O.)\n2) DRAWINGS SHALL NOT BE SCALED, FOLLOW\nWRITTEN DIMENSIONS.\nCORRIDOR\n150B\nSTOR-GEN 35.1 m²\n150A No. Description Date\n9 10 11 12 13 14 15 16 17 18\nUP\nELEV\n152 1\n8 7 6 5 4 3 2U1P\n2 15\n3 14\n4 13\nSTAIR 5 12\nS150 LOBBY 6 11\n150 7 10\n23.8 m²\n8 9\nSTAIR\nS110\nFIRST FLOOR PLAN\n1 TENANT SPACE\n1 : 100 @A1\nBCIT-SE41\nFirst Floor Plan\nProject Number 67819\n15-11-2023\nScan Date\nDate 16-03-2024\nDrawn By VJY\nChecked By MK\nA201\nScale 1 : 100",
+    "labelCount": 9,
+    "textMethods": [
+      "embedded-pdf-text"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE41-F2",
+    "kind": "floor-plan",
+    "building": "SE41",
+    "floor": "2",
+    "title": "SE41 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse4102.pdf",
+    "localUrl": "/data/campus/raw/bse4102.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE41-F2",
+    "text": "GFN SHAFT SHAFT] 200A M220) D | 230 Q [e| oJ OFFIC STOR-GEN 249 iw 255 OFFIC 2 260 M2 RY {Ml } SHA Oo SHAFT] OFFIC ore WAS ca 2 ral co STAIR M264 et 1 = OH BCIT Fe CAMPUS PLANNING",
+    "labelCount": 6,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE42-F1",
+    "kind": "floor-plan",
+    "building": "SE42",
+    "floor": "1",
+    "title": "SE42 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse4201.pdf",
+    "localUrl": "/data/campus/raw/bse4201.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE42-F1",
+    "text": "fel EE aN ey Gy = Ss",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE42-F2",
+    "kind": "floor-plan",
+    "building": "SE42",
+    "floor": "2",
+    "title": "SE42 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse4202.pdf",
+    "localUrl": "/data/campus/raw/bse4202.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE42-F2",
+    "text": "Es fej a Yy WY Yj q YG Y G Ly & G Liz Sy LY SS © i 5 Orne — — BCIT CAMPUS DEVELOPMENT",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SE50-F1",
+    "kind": "floor-plan",
+    "building": "SE50",
+    "floor": "1",
+    "title": "SE50 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse5001.pdf",
+    "localUrl": "/data/campus/raw/bse5001.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SE50-F1",
+    "text": "134 13 OF FICE 13: 135 132 1312 133 1308 OF FI OFFICE STOR-SHO} a 144 196 SHOP-HECH 146 143 SHOP-MECH SHOP-MECH 1368 Wal 130 1368 MECH 1300 142 ‘SHOP-MECH & 130H 130F 40 CORRIDOR, CORRIDOR la | J 1306 MECH 2a syor-Gi i ASH 12 113 124 WAS! oF FICE OFFICE KITCHEN al q ms 101k MEETING 101N no OFFICE MEETING 123 1208 1108 noc [a STOR-GE} 1e7 a =) OM! 101M OFFICE CORRIDOR 1288, ELEC OFFICE 120 RECEPTION 101, at 1017 OFFICE OFFICE 105 CH 12 RESEARCH OF ° CORRIDOR 128C OFFICE KITCHEN-R OFFICE 101k 1286, OFFICE 128D 1002 OFFICE CORRIDOR I SESO SESO = 01 01 101F 1010 1018 1018 101 OF FICE OF FICE, OFFICE OF FICE OFFICE OFFICE OFFICE RECEPTION EXT INT 2,347.73 2,278.63 x x x x — = —— == = = SE5O, FIRST FLOOR JANUARY 25, 2008",
+    "labelCount": 37,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SW1-F1",
+    "kind": "floor-plan",
+    "building": "SW1",
+    "floor": "1",
+    "title": "SW1 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0101.pdf",
+    "localUrl": "/data/campus/raw/bsw0101.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SW1-F1",
+    "text": "PU\nUP\nND PU\nPU ND\nR7 ND\nR7 ND\nND\nFOOD-C 1 L 2 D 7 S 5 T VEST 1 IB 4 U 9 L 3 E O 1 F 4 F 9 IC 6 E SU 1 P 4 P 8 -IN 2 ST\n1265 1295\nSU 1 P 2 P 4 -IN 9 ST FOOD-CLD 1 S 26 T 1 FOO 12 D 8 -P 5 REP FOOD-PREP S S T 1 A 2 I 9 R C 1 L 4 A 9 S 2 S ST 1 O 4 R 9 -G 8 EN\nCORRIDOR 1494\nS128 STOR-GEN\nSTOR 1 - 2 G 4 E 5 N O 1 F 2 F 5 IC 5 E STAIR ST 1 O 2 R 8 -G 9 EN SU 1 P 4 P 7 -IN 8 ST\n1490\n1239 LAB-PRODUC\nLAB-LSCI-G STO O R 1 1 - F 2 2 G F 2 3 E IC 9 5 N E LAB 1 - 2 LS 2 C 5 I-G PR 1 O 2 J 5 EC 0 TS SUP S P 1 U - 1 I 2 P N 2 P 6 S 6 - 2 T IN 0 ST SU 1 P 4 P 5 -IN 7 ST M146 S S T 1 A 4 I 8 R M145 S S T T 1 1 O O 4 4 R R 7 7 - - G G 6 4 E E N N\nSHAFT SHAFT 1472\nSTOR-GEN\n1213\nVESTIBULE 12 AV 19 ST 1 O 4 R 7 -G 0 EN\nM126 LAB 1 - 2 LS 4 C 0 I-S LAB 1 - 4 P 5 S 5 CI-S CO 1 R 4 R 0 ID 0 OR LAB 1 - 4 EL 5 E 0 C-C CORR 1 ID 4 O 52 R 1068 ST 1 O 4 R 6 -G 8 EN\nSHAFT LAB-LSCI-G\n1466\nSTOR-GEN\nS M H 1 A 2 F 7 T LE 1 C 2 T 0 U 5 RE CO 1 R 2 R 0 ID 0 OR S S T 1 A 4 I 5 R S S T 1 A 4 I 6 R S S T 1 A 0 I 7 R 1464\nSTOR-GEN\nLAB 1 - 2 LS 3 C 0 I-S O 1 F 4 F 2 IC 0 E ST 1 O 0 R 6 -G 9 EN\nST 1 O 2 R 1 -G 5 EN LAB 1 - 4 P 3 S 5 CI-S ST 1 O 0 R 5 -G 4 EN O 1 F 4 FI 1 C 0 E ST 1 O 0 R 6 -G 6 EN SU 1 P 0 P 7 -IN 0 ST ST 1 O 4 R 6 -G 2 EN\nJAN 1 I 2 TO 02 R ST 1 O 2 R 2 -G 0 EN ST 1 O 2 R 2 -G 4 EN O 1 F 4 F 1 IC 5 E 1050\n1017 LAB-COMP-G\nELEC O 1 F 0 F 1 IC 4 E M O 1 1 F 0 0 F 1 I 9 C 6 E O 1 F 0 F 2 IC 4 E O 1 F 0 F 2 IC 6 E O 1 F 0 F 2 IC 8 E WA 1 S 2 H 0 -R 3 M-F VEST 1 IB 2 U 0 L 1 E VEST 1 IB 2 U 0 L 8 E C S M 1 H 1 O A 0 2 F 1 T M 36 M S M H 1 A S 0 1 F H 2 0 T A 4 F 0 T 1 W 0 A 4 S 4 H-RM-F 1 W 4 A 0 S 5 H-RM-M LAB 1 -C 0 O 6 M 0 P-G SU 1 P 0 P 6 -IN 4 ST C 1 L 0 A 8 S 0 S LAB 1 -P 0 R 9 O 0 DUC S S 1 TA 9 I 0 R O 1 F 0 F 1 IC 3 E SHAFT WAS 1 H 2 - 1 R 0 M-M 1042 VEST 1 IB 4 U 0 L 3 E\nS S T 1 A 0 I 0 R O 1 F 0 FI 1 C 2 E M 1 E 0 ET 1 I 1 NG 1 ST 0 S O 0 TO R 8 - R 1 G - 0 E G N 0 E 9 N O 1 F 0 F 1 IC 0 E VE 1 S 0 TI 2 B 0 ULE S M H 1 A 2 F 0 T VESTIBULE S M H 1 A 0 F 3 T CO 1 R 2 R 9 ID 0 OR VEST 1 IB 0 U 9 L 8 E\nO 1 F 0 F 0 IC 7 E L 1 O 0 B 0 B 0 Y S M H 1 A 2 F 2 T 1023 S M H 1 A 2 F 3 T VEST 1 IB 0 U 3 L 7 E S S 1 TA 4 I 0 R 1 E 5 L 0 E 5 C ST 1 O 0 R 7 -G 3 EN\n1002 STOR-GEN 1507 CO 1 R 0 R 1 ID 5 OR OFFICE-OPN LE 1 C 0 T 2 U 1 RE LE 1 C 0 T 2 U 5 RE PR 1 O 0 J 3 EC 5 TS C 1 L 0 A 4 S 5 S CO 1 R 0 R 4 ID 7 OR JANITOR SU 1 P 0 P- 6 IN 5 ST 1006 1001 1023A 1075\nOFFICE O 1 F 0 F 0 IC 5 EO 1 F 0 F 0 IC 4 EO 1 F 0 F 0 IC 3 E OFFICE S M H 1 A 2 F 4 T AV S M H 1 A 2 F 5 T M151 S M H 1 A 5 F 9 T SUPP-INST O 1 F 0 F 8 IC 5 E\nSHAFT\n1511 1513\nMEETING MEETING\n1580 OFFICE-OPN\n1581 OFFICE\nS160 STAIR\n0051\nRODIRROC\n1501\nLOBBY\n1376 1377 OFFICE OFFICE RODIR8R7O3C1\n1375 1522\nOFFICE-OPN STUDY\n1523 OFFICE\n1524\nOFFICE\n1525 OFFICE\n8251\nRODIRROC\n1101 ST 1 O 3 R 0 - 4 GEN 1305 ST 1 O 3 R 0 -G 6 EN ST 1 O 3 R 0 - 7 GEN 1 S 3 T 0 O 8 R-GENST 1 O 3 R 0 - 9 GEN\nLOBBY STOR-GEN\n1102\nMECH 1E1LE0C3\nO 1 F 1 F 3 IC 7 E 1S1T3O6R-GENO 1 F 1 F 3 IC 5 E 1104 1105 1106 PROJECTSPROJECTSPROJECTS 1521\nO 1 F 1 F 3 IC 8 E O 1 F 1 F 3 IC 4 E LOUNGE\n1139 1133 1120\nOFFICE OFFICE MEETING 1318 1358\nOFFICE OFFICE\n1140 1132 OFFICE OFFICE O 1 F 1 F 3 IC 0 E 1317 1356 1 S 5 TA 2 F 7 F\n1141 RESOURCE RESOURCE\nOFFICE\n1316 1354\n1160 OFFICE 1350 OFFICE\n1142 1152 LOUNGE 1310 OFFICE-OPN OFFICE OFFICE OFFICE-OPN 1315 1352\nOFFICE OFFICE\nO 1 F 1 F 4 IC 3 E 1E1L5E O C0 1 F 1 F 1 5 S I 1T C 7O 1 7R E -GEN O 1 F 1 1 F 7 1 IC 5 7 E 8 O 1 F 3 F 1 IC 4 E CORRIDOR\nO 1 F 1 F 7 IC 4 E O 1 F 1 F 7 IC 3 E O 1 F 1 F 7 IC 2 E 1 E 3 LE 1 C 1 O 1 F 3 F 1 IC 2 E O 1 F 3 F 1 IC 3 E C 1 O 34 M 0 M\n1320 LOBBY\nM 1 E 3 E 4 TI 7 NG 1E5LE8C7\n1321 1344 1584\nOFFICE-OPN STOR-GEN CO 1 R 3 R 4 ID 1 OR 1591 JA1N5I8TO5R WASH-RM-MH O 1 F 3 F 2 IC 2 E 1 S 3 T 1 2 O 3 8 R 2 - 3 FIL 1 E 330 O 1 F 3 F 3 IC 4 E O 1 F 3 F 6 IC 2 E OFFICE-OPN WAS 1 H 5 - 8 R 3 M-FH 1 S 5 TA 8 F 6 F\nOFFICE OFFICE\nOFF 1 I 3 C 2 E- 4 OPN CO 1 R 3 R 3 ID 1 OR RE 1 S 3 O 3 U 3 RCE OFF 1 I 3 C 4 E- 2 OPN OFF 1 I 3 C 6 E- 6 OPN O 1 F 3 F 6 IC 3 E\n1592\nO 1 F 3 F 2 IC 5 E O 1 F 3 F 2 IC 6 E O 1 F 3 F 2 IC 7 E O 1 F 3 F 2 IC 9 E 1332 1365 1364 OFFICE-OPN 1598\nOFFICE OFFICE OFFICE OFFICE\n1311\nRODIRROC\n1022 OFFICE-OPN\n1020A PROJECTS\nPR 1 O 02 JE 0 C B TS S S T 1 A 2 I 0 R 1 O 0 F 1 F 8 ICE\n1019 OFFICE\n1303\nATRIUM\n1303A 1303B OFFICE OFFICE-OPN 1303CS1TO30R-3GDEN\nOFFICE\n1302 ATRIUM\n1374\nRESOURCE\n1360 1550E 1550F OFFICE-OPN OFFICE MEETING\n1550D OFFICE 1170 RECEPTION SST1A3IR1 1 O 5 F 5 FI 0 C C E\n1145 OFFICE 1W1A4S6H-R S M T - 1O U 1R4-7GEN 1 O 5 F 5 FI 0 C B E RE 1 S 5 O 5 U 0 R A CE\n1180 1345\nSST1A1IR9 CORRID\n1W1\nO\nA8S5H\nR\n-RM-U 1JH 1A8NI4TOR L\n1\nO\n3\nB\n0\nB\n0\nY\nCORRIDOR\n1187 1189 WASH-RM-FH WAS 1 H 1 - 8 RM 6 -M O H FFICE S1H3A0F1T 1188 OFFICE 1593\nRESOURCE\nSST1A3I0R\nSW01 - FIRST FLOOR Campus Planning\nand Facilities\nSCALE: NTS\nUPDATED: SEPT 17, 2026",
+    "labelCount": 99,
+    "textMethods": [
+      "embedded-pdf-text"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SW1-F2",
+    "kind": "floor-plan",
+    "building": "SW1",
+    "floor": "2",
+    "title": "SW1 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0102.pdf",
+    "localUrl": "/data/campus/raw/bsw0102.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SW1-F2",
+    "text": "1121314151617181910212ND 01987654321\n210987654321 222111111111 0987654321 1\nPU12345678901 1202918171615141312111\nND\nwoleB oT nepO\nN76543210 42 9876531 11111111 D\nwoleB\noT nepO\n2212029181716151413121\n123456789011121314151\n61718191021222ND\nPU1234567890111\nwoleB oT nepO\nND\nND ND\n9011121314151617181910212ND\nN 42 76531 D\n8765432109 111111111\nND\n1202918171615141312111 12345678901\nN210987654321 222111111111 D 0987654321 1\n01987654321PU 1121314151617181910212\n2448\nOFFICE\n2250 STOR-GEN\nS242\nSTAIR 2280 STOR-GEN\nS249 STAIR 2240\nMECH\nSU 2 P 4 P 4 -IN 0 ST ST 2 O 4 R 9 -G 0 EN\nS245\nSTAIR\n2442 M246 M245\nMECH SHAFT SHAFT\n2438\nSTOR-GEN\n2430\nSTOR-GEN\nS243\nSTAIR\nR220 VOID\nR240\nVOID\n2042 2044\nOFFICE OFFICE\nM204 M205 M206 SHAFT SHAFT SHAFT\n2019 2055 RETAIL LAB-PSCI-S\nM251 SHAFT\n2121 OFFICE\n2123\nOFFICE\n2125 OFFICE\n2574\nSTOR-GEN\n2573 RESOURCE\n2572 OFFICE\n2570 2593 LOBBY CORRIDOR\nS219 STAIR\n6442 RODIRROC\n442S RIATS\n2450\nOFFICE\nST 2 O 4 R 6 -G 4 EN SU 2 P 4 P 6 -IN 0 ST ST 2 O 4 R 8 -G 0 EN\n2462 CORRIDOR\n2444 STOR-GEN\n2000 CORRIDOR\nS S 2 TA 2 I 0 R STOR 2 - 0 G 1 E 3 N\n2023 STAFF 112M TFAHS\nC 2 L 0 A 0 S 4 S PR 2 O 0 J 1 EC 0 TS C 2 L 0 A 1 S 6 S C 2 L 0 A 2 S 0 S C 2 L 0 A 2 S 4 S C 2 L 0 A 3 S 0 S\nS200 STAIR\n2035 SUPP-INST\n2005 2009 2025 CLASS CLASS LAB-PSCI-S\nS M H 2 A 1 F 2 T O 2 F 0 F 3 IC 7 E\n0022 RODIRROC 0042 RODIRROC\n2220 WASH-RM-M\nM222\nSHAFT\nS M H 2 A 4 F 2 TWA 2 S 4 H 2 -R 0 M-F\n2208 2408\nVESTIBULE VESTIBULE\n2210 2410\nWASH-RM-M WASH-RM-F\n2202\nJANITOR M220 SHAFT\nC 2 O 0 M 34 M S 2 H 0 A 3 F 6 T O 2 F 0 F 4 IC 0 E\n2039 S250 2505 STOR-GEN STAIR ELEC\nO 2 F 0 F 4 IC 1 E C 2 L 0 A 4 S 5 S 052M TFAHS\n2052 2058 OFFICE SUPP-INST 2050 2060 2062 2068 2070 PROJECTS LAB-PSCI-S OFFICESTOR-GEN LAB-PSCI-S S290\nSTAIR 2056 STOR-GEN 2054\nSTOR-GEN\n2059 OFFICE\n2057 STOR-GEN 2061\nOFFICE\n2510 OFFICE\n2520\nOFFICE\n2530 OFFICE\n2540 LAB-COMP-G 2557 2559 OFFICE OFFICE\n2560 2571 LAB-COMP-G OFFICE-OPN\n2590 CLASS\nCO 2 R 3 R 0 ID 1 OR S S T 2 A 6 I 0 R SW01 SW01 02 02 INT EXT\n5,205.82 5,512.54\n5112 ECRUOSER\nO 2 F 1 F 3 IC 4 E RES 2 O 11 U 9 RCE\nRES 2 O 13 U 3 RCE R 2 E 3 T 0 A 4 IL O 2 F 3 F 8 IC 1 E O 2 F 3 F 8 IC 2 E\n2S3PE7C2-INST2S3PE7C3-INST 2S3PE7C4-INST2S3PE7C5-INS 2S\nT\n3PE7C6-INST2S3PE7C8-INST 2RE3S8O0URCE\nO\n2\nF\n3\nF\n8\nIC\n3\nE\nSP2EC3-7IN1ST 2575\n2384 MEETING\nOFFICE SP2EC3-7IN0ST 2366 2S3TO7R7-GEN O 2 F 3 F 7 IC 9 E 2385\nSPEC-INST OFFICE 2164 2387\nOFFICE 2369 OFFICE\nSPEC-INST 2386 OFFICE 2165\nOFFICE 2368 LOUNGE 2388 O 2 F 1 F 6 IC 6 E O 2 F 3 F 9 IC 2 E OFFICE\n2167 RES 2 O 1 U 5 R 1 CE M 2 E 1 ET 5 IN 2 G 2390 O 2 F 3 F 8 IC 9 E OFFICE RESOURCE C2O3M96M\nO 2 F 3 F 2 IC 7 E O 2 F 3 F 2 IC 6 E RES2 SM O3 H2 2U A3 4R F4 C T E O 2 F 3 F 2 IC 3 E O 2 F 3 F 2 IC 2 E O 2 F 3 F 2 IC 1 E O 2 F 3 F 2 IC 0 E O 2 F 3 F 1 IC 9 E L 2 O 3 B 1 B 0 Y INT 2 E 3 R 1 V 2 IEW2E5LE8C7 VE2S5TI8B2ULE 2584 2336 2334 2332 2330 REC 2 E 3 P 1 T 1 ION JA2N5I8TO5R WASH-RM-MH\nOFFICE OFFICE OFFICE OFFICE M 2 E 3 ET 1 IN 6 G 2315 M 2 E 3 ET 1 IN 3 G WAS 2 H 5 - 8 R 3 M-FH S 2 T 5 A 8 F 6 F\nO 2 F 3 F 3 IC 7 E O 2 F 3 F 3 IC 5 E O 2 F 3 F 3 IC 3 E O 2 F 3 F 3 IC 1 E 2 RE 3 S 4 O 9 URCE STOR-FILE\nO 2 F 3 F 4 IC 0 E O 2 F 3 F 4 IC 1 E O 2 F 3 F 4 IC 2 E O 2 F 3 F 4 IC 3 E O 2 F 3 F 4 IC 4 E O 2 F 3 F 4 IC 5 E O 2 F 3 F 4 IC 6 E M 2 E 3 ET 4 I 7 NG O 2 F 3 F 4 IC 8 E O 2 F 3 F 5 IC 0 E O 2 F 3 F 5 IC 1 E O 2 F 3 F 5 IC 2 E O 2 F 3 F 5 IC 3 E O 2 F 3 F 5 IC 4 E O 2 F 3 F 5 IC 5 E O 2 F 3 F 5 IC 6 E O 2 F 3 F 5 IC 7 E\nRODIR4R5O1C2\n2110\nPROJECTS SST2A3IR2 S 2 T 3 U 0 D 8 Y SST2A3IR3\n2111\nPROJECTS SST2A3I4R SST2A3IR5\n2112 PROJECTS 2V5ES3T2IBULE\n2113 PROJECTS\n2100 2306 2303 2500 CORRIDOR STUDY STUDY CORRIDOR\n2135 OFFICE 2171 STAFF 2305 2136 STOR-GEN OFFICE\n2137\nOFFICE\nO 2 F 1 F 3 IC 8 E OFF 2 IC 1 E 7 - 0 OPN S 2 T 3 U 0 D 2 Y\nCO2R3R9ID1OR\nSST2A3IR1\n2W3A6S7H-RM-MH2W3A6S5H-RM-FH ST2O3R6-G2EN\n2360 ST 2 O 1 R 4 -F 3 ILE 2EL3E6C1 LOUNGE\n2180 2300 CORRIDOR LOBBY M 2 E 1 ET 8 I 8 NG OFF 2 IC 1 E 8 - 7 OPN2186 OFF 2 IC 1 E 8 - 3 OPN S2H3A2F5T CO 2 R 3 R 1 ID 8 OR\nOFFICE-OPN SST2A3I0R\n2314\nCORRIDOR\n2312 NPO-ECIFFO 1312 RODIRROC\n7032 YDUTS\n2513\nPROJECTS\n2515\nPROJECTS\n2517 PROJECTS\n2519 PROJECTS\n8152 YDUTS\nSW01 - SECOND FLOOR Campus Planning\nand Facilities\nSCALE: NTS\nUPDATED: SEPT 17, 2026",
+    "labelCount": 127,
+    "textMethods": [
+      "embedded-pdf-text"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SW1-F3",
+    "kind": "floor-plan",
+    "building": "SW1",
+    "floor": "3",
+    "title": "SW1 · Floor 3",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0103.pdf",
+    "localUrl": "/data/campus/raw/bsw0103.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SW1-F3",
+    "text": "3002\nSUPP-INST\nS300 3000\nSTAIR CORRIDOR\nS320\n3105 STAIR COMM\n3005 3021\nCLASS LAB-LSCI-G 3115\nSTOR-GEN\n0053\nRODIRROC\n3520\nOFFICE\n3530\nOFFICE\n3540\nOFFICE\n3150\nCLASS 3555 LAB-ELEC-S\n3559\nSTOR-GEN\n3170\nCLASS\n3575\nLAB-ELEC-S\n3190\nCLASS 3585 CLASS\n3591 CORRIDOR\nS319 STAIR S360 STAIR\n1213 RODIRROC\n3125\nOFFICE\n3135\nOFFICE\n3145\nOFFICE\n0313 ECIFFO\nM311\nSHAFT\n3120\nOFFICE\n3124\nOFFICE\n3126\nOFFICE\n3140\nOFFICE\n013M TFAHS\n3028\n3004 STOR-GEN OFFICE 3026 SUPP-INST 3010 3030\nLAB-PSCI-G LAB-PSCI-G\n3024\nSTOR-GEN\n3051\nSTOR-FILE\n3102 ELEC 3049 VESTIBULE\n3045 3055\nLAB-ELEC-C LAB-ELEC-C 3047\nSTOR-GEN\n8303 TSNI-PPUS 0023 RODIRROC 0043 RODIRROC\n3220\nWASH-RM-M\nM322\nSHAFT\n3420\nWASH-RM-F\nSMH3A4F2T\nVES 3 T 2 IB 0 U 8 LEWA3S2H1-R0M-MWAS3H4-1R0M-FVES 3 T 4 IB 0 U 8 LE\n3202 JANITOR M304 SHAFT\n3040 3042 COMM SHAFT\nS350 3061 3065 STAIR OFFICE MEETING\n3059\nCORRIDOR 3075\nLAB-ELEC-C\n3063 3067 3069 3071\nOFFICE OFFICE OFFICE OFFICE M351\nSHAFT\n053M TFAHS\n3074 3078 3052 OFFICE OFFICE SUPP-INST 3050 3060 3070 3072 CO3R0R8ID2OR 3080\nLAB-ELEC-G LAB-ELEC-G LAB-ELEC-G LAB-ELEC-G LAB-ELEC-G\n3062 3076 SUPP-INST STOR-GEN\n3084\nSTOR-GEN\nS390\nSTAIR\n3505 ELEC\n0013\nRODIRROC\n3311\n3180 3300 STOR-FILE CORRIDOR LOBBY 3390 3395 OFFICE STAFF 3587 ELEC\n3310 CO 3 R 5 R 8 ID 4 OR 3582\n3304 RECEPTION 3312 3393 3332 3333 3583 WASH-RM-MH\nELEC OFFICE OFFICE MEETING STAFF JANITOR\n3581 O 3 F 3 F 1 IC 4 E 3313 3320 3321 3323 3327 3335 WASH-RM-FH 3586\n3306 RESOURCEOFFICE OFFICE OFFICE-OPN OFFICE-OPN 3331 OFFICE-OPN STAFF\nOFFICE RESOURCE\n3341 3348\nOFFICE-OPN OFFICE\n3307 3308 3309 3322 3326 3328 3330 3338\nMEETING OFFICE OFFICE OFFICE OFFICE OFFICE OFFICE OFFICE 3340 3342 3344 3346\nOFFICE OFFICE OFFICE OFFICE\n5033 RODIRROC\n3525\nOFFICE-OPN\n3155\nCLASS 3381 33803379 3377 OFFICE-OPN OFFICEOFFICE OFFICE-OPN\n3550\nLAB-ELEC-S\n3376\nOFFICE\n3378 3375\nOFFICE-OPN OFFICE\n3175\nCLASS 3374\n3382 OFFICE CORRIDOR\nO 3 F 3 F 8 IC 3 EOF 3 F 3 IC 8 E 2 -O B OPFN 3 F 3 IC 8 E 2 -O A PN ST 3 O 3 R 6 -F 6 ILE 3367 O 3 F 3 F 7 IC 3 E LAB 3 - 5 EL 7 E 0 C-S\nOFFICE-OPN\n3302 3361 3363 3365 3372 3590\nMEETING OFFICE OFFICE OFFICE OFFICE OFFICE-OPN\n3195\nCLASS CO 3 R 3 R 6 ID 0 OR 3370 O 3 F 5 F 9 IC 2 EO 3 F 5 F 9 IC 4 EO 3 F 5 F 9 IC 6 E\nOFFICE\n3362 3364 3369\nRECEPTIOONFFICE RESOURCE 3396\nCOMM\n3303 3398\nLOBBY 3310A CORRIDOR OFFICE 3392 3394 RESOURCE OFFICE-OPN 3391\nOFFICE-OPN\n3188 3183\nMEETING 3186 MEETING\nMEETING S330 STAIR\nSW01 - THIRD FLOOR\nCampus Planning\nSCALE: NTS and Facilities\nUPDATED: SEPT 17, 2026",
+    "labelCount": 154,
+    "textMethods": [
+      "embedded-pdf-text"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SW1-F4",
+    "kind": "floor-plan",
+    "building": "SW1",
+    "floor": "4",
+    "title": "SW1 · Floor 4",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0104.pdf",
+    "localUrl": "/data/campus/raw/bsw0104.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SW1-F4",
+    "text": "M424 SHAFT\n814M TFAHS\n4070 4066 SUPP-INST STOR-GEN\n4068 4059 4007 CORRIDOR STOR-GEN STOR-GEN 4056 4076 OFFICE LAB-LSCI-S 4072\n4064 LAB-LSCI-G\nSTOR-GEN 4052 S407 STOR-GEN STAIR\nM401\nSHAFT M402 M403 M404 M406 M407 M408 4000 M409 M410 M411 M412 M413 M414 M415 S490\nSHAFT SHAFT SHAFT SHAFT SHAFT SHAFT CORRIDOR SHAFT SHAFT SHAFT SHAFT SHAFT SHAFT SHAFT STAIR\nM400\nSHAFT\nS450 STAIR 4053 4055 4061 4063 4067 SUPP-INST LOBBY SUPP-INST SUPP-INST LAB-LSCI-G\n4065\n4057 LAB-LSCI-G\nSUPP-INST\nM451\nSHAFT\n0504 TSNI-PPUS\n4220\nWASH-RM-F\nM422\nSHAFT\n4216\nSTOR-GEN4420\nWASH-RM-M\nM421\n4208 SHAFT 4408\nVESTIBULE VESTIBULE\n4210 4410\nWASH-RM-F WASH-RM-M\n4054 4202 STAFF JANITOR\n0024 RODIRROC 0044 RODIRROC\n4006 4012 4016 SUPP-INST SUPP-INST 4014 KITCHEN-C\nSUPP-INST 4018 LAB 4 - 0 LS 0 C 2 I-S SUPP 4 -I 0 N 0 S 4 T OFFICE-OPN 4 O 0 FF 3 I 4 C B E S M H 4 A 2 F 0 T C 4 L 0 A 4 S 0 S C 4 L 0 A 6 S 0 S\n4010 4018X CORRIDOR CORRIDOR 4036 4038\n4028 4030 4032 4034 4034A COMM SHAFT MEETING OFFICE OFFICE RESOURCE OFFICE\nS400\nSTAIR\n4021\nS420 MEETING STAIR\n4009 4009A LAB 4 - 0 LS 0 C 5 I-G LAB-SIMULA CLASS OFF 4 IC 0 E 1 - 5 OPN OFF 4 IC 0 E 1 - 7 OPN C 4 L 0 A 3 S 5 S C 4 L 0 A 4 S 5 S\nM423 SHAFT\nM405\nSHAFT\n3204 GNITEEM 5204 GNITEEM\n4008\nWASHUP 4022 4024 STOR-GENFOOD-CLDST\n4027A\nKITCHEN-R 4027\nSTAFF\n4031 4029 OFFICE RESOURCE\nUPDATED: SEPT 17, 2026\nSW01 - FOURTH FLOOR\nSCALE: NTS\nCampus Planning\nand Facilities",
+    "labelCount": 83,
+    "textMethods": [
+      "embedded-pdf-text"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SW2-F1",
+    "kind": "floor-plan",
+    "building": "SW2",
+    "floor": "1",
+    "title": "SW2 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0201.pdf",
+    "localUrl": "/data/campus/raw/bsw0201.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SW2-F1",
+    "text": "oF 127 2! FFICE 28 corner 126 ICE OFFICE 14, OFFICE or 12, I ra a So — __ Lad Sie foal OFFIC MEETING Ie DN Xi Y OFFICE SWO2 Ol INT EXT 775.86 626.47 — \\ lo CAMPUS PLANNING",
+    "labelCount": 2,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SW2-F2",
+    "kind": "floor-plan",
+    "building": "SW2",
+    "floor": "2",
+    "title": "SW2 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0202.pdf",
+    "localUrl": "/data/campus/raw/bsw0202.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SW2-F2",
+    "text": "VAN VY Q > > WS aN A \\ > LS » S <S 2. JS YY Q A \\ \\ 4 \\ 250.98 — CAMPUS PLANNING",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SW2-F3",
+    "kind": "floor-plan",
+    "building": "SW2",
+    "floor": "3",
+    "title": "SW2 · Floor 3",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0203.pdf",
+    "localUrl": "/data/campus/raw/bsw0203.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SW2-F3",
+    "text": "MW“ VLAN AS OS \\ 5 > as WV, S 2 YW == S SS \\ x > \\ O WAV S 03 Swo2 60.10 399 34 Van — — CAMPUS PLANNING",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SW3-F1",
+    "kind": "floor-plan",
+    "building": "SW3",
+    "floor": "1",
+    "title": "SW3 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0301.pdf",
+    "localUrl": "/data/campus/raw/bsw0301.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SW3-F1",
+    "text": "| i f AES as aw 3 ol INT 2,05 58.2 xT 7.36 BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY Sw03, FIRST FLOOR SCALE: 4:500 campus planning LAST UPDATED: NOVEMBER 16, 2010",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SW3-F2",
+    "kind": "floor-plan",
+    "building": "SW3",
+    "floor": "2",
+    "title": "SW3 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0302.pdf",
+    "localUrl": "/data/campus/raw/bsw0302.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SW3-F2",
+    "text": "PU\ns\nND\ns\n2082\nOFFICE\n2084\n2083 OFFICE\nMEETING\n2085\nOFFICE\nLAB2-C6O6M5P-G\n2908 COMM\n2600 CORRIDOR s\n2618 WASH-RM-M\nM270 SHAFT\n2988\nSTOR-GEN\nS299\nSTAIR\n0062 RODIRROC\n2063 2080\nOFFICE OFFICE\n2081\n2065 OFFICE\nOFFICE\n2069\nOFFICE\n2075\nOFFICE 2086\nOFFICE\n2079 2087\nOFFICE OFFICE\n2090\nOFFICE\n2725 2715\nSTOR-GEN CLASS M280 SHAFT 2655 RESOURCE\nCO 2 R 7 R 0 ID 0 OR M274 2656 S M H 2 A 6 F 0 T SHAFT COMM\nS271 STAIR M268 M264 M263 SHAFT SHAFT SHAFT\nM265 SHAFT\nM271 SHAFT\n2900 CORRIDOR\nM298 SHAFT\n0002\nRODIRROC\n2088\nOFFICE\n2091 2089\nOFFICE RESOURCE\nVE 2 S 6 TI 0 B 4 ULE S M H 2 A 6 F 9 T VE 2 S 6 TI 1 B 4 ULE\n2606 2616 WASH-RM-UHWASH-RM-UH\n2620 2630 PROJECTS PROJECTS\n2610 JANITOR\n2608 WASH-RM-FH 2624 2626 STOR-GEN CORRIDOR\nM272\nSHAFT\n7192\nRODIRROC\n2095\nSHAFT\n2785 2775 2765 2745 2092\nLAB-ELEC-SLAB-COMP-S CLASS CLASS JANITOR\n2093 COMM\n2905 OFFICE\n5972 ECIFFO\n2639\nOFFICE\n2605 2625 2635 2675 2695 CLASS LAB-COMP-G LAB-COMP-G LAB-COMP-G LAB-COMP-G\nS280 STAIR S M H 2 A 7 F 8 T S M H 2 A 7 F 7 T 2 E 7 L 6 E 0 C S M H 2 A 7 F 6 T\nM279 M275 SHAFT SHAFT S M H 2 A 6 F 7 T S M H 2 A 6 F 6 T 2 E 6 L 5 EC 0 S M H 2 A 6 F 2 T S 2 H 6 A 9 F 6 T\n2702 S270 S260 2770 2750 2710 COMM STAIR M261 STAIR\nLAB-COMP-S LAB-LSCI-G 2730 LAB-COMP-G 2704 O 2 F 6 F 4 IC 0 E SHAFT STOR-GEN LOUNGE\n2660 2680 2684 LAB-LSCI-G LAB-LSCI-G SUPP-INST\n2644 S M H 2 A 7 F 3 T OFFICE SU 2 P 6 P 8 -IN 8 S S T TOR 2 - 6 G 9 E 0 N\n2925 2915 2910\nOFFICE OFFICE PROJECTS\n2930\nOFFICE\n2955 LAB-ELEC-C\n2980\nPROJECTS\nSW03, SECOND FLOOR\nSCALE: NTS\nLAST UPDATED: December 5, 2024",
+    "labelCount": 87,
+    "textMethods": [
+      "embedded-pdf-text"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SW3-F3",
+    "kind": "floor-plan",
+    "building": "SW3",
+    "floor": "3",
+    "title": "SW3 · Floor 3",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0303.pdf",
+    "localUrl": "/data/campus/raw/bsw0303.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SW3-F3",
+    "text": "| A] = = = = = = BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY SCALE: $w03, THIRD FLOOR campus planning LAST UPDATED: APRIL 16, 2008",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SW3-F4",
+    "kind": "floor-plan",
+    "building": "SW3",
+    "floor": "4",
+    "title": "SW3 · Floor 4",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0304.pdf",
+    "localUrl": "/data/campus/raw/bsw0304.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SW3-F4",
+    "text": "A BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY Sw03, FOURTH FLOOR SCALE: LAST UPDATED: FEBRUARY 9, 2009 campus planning",
+    "labelCount": 1,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SW5-F1",
+    "kind": "floor-plan",
+    "building": "SW5",
+    "floor": "1",
+    "title": "SW5 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0501.pdf",
+    "localUrl": "/data/campus/raw/bsw0501.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SW5-F1",
+    "text": "| | | | TAI oo 7 Ex [7 8 (3.97 657.26 — —",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SW5-F2",
+    "kind": "floor-plan",
+    "building": "SW5",
+    "floor": "2",
+    "title": "SW5 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0502.pdf",
+    "localUrl": "/data/campus/raw/bsw0502.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SW5-F2",
+    "text": "28! 2625 CAN 2575 CLASS CLASS: CORRIDOR 2620 2690 ON CORRIDOR ON S289 STAIR, pC SWOS SWOS 02 02 INT EXT 401.63 659.06 / n ORD FLOCK, KIL BCIT < > CAMPUS DEVELOPMENT",
+    "labelCount": 5,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SW9-F1",
+    "kind": "floor-plan",
+    "building": "SW9",
+    "floor": "1",
+    "title": "SW9 · Floor 1",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0901.pdf",
+    "localUrl": "/data/campus/raw/bsw0901.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SW9-F1",
+    "text": "[ WA T I Allo AJ IB SP Ol INT 5,272.94 5,1 90.33 n FLOCK. 20 BCIT campus development",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "SW9-F2",
+    "kind": "floor-plan",
+    "building": "SW9",
+    "floor": "2",
+    "title": "SW9 · Floor 2",
+    "url": "https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0902.pdf",
+    "localUrl": "/data/campus/raw/bsw0902.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "SW9-F2",
+    "text": "",
+    "labelCount": 0,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  },
+  {
+    "id": "burnaby-wayfinding",
+    "kind": "campus-map",
+    "building": null,
+    "floor": null,
+    "title": "Burnaby campus wayfinding map",
+    "url": "https://www.bcit.ca/files/maps/pdf/bcit_wayfinding.pdf",
+    "localUrl": "/data/campus/raw/bcit_wayfinding.pdf",
+    "attribution": "© British Columbia Institute of Technology",
+    "sourceRef": "burnaby-wayfinding",
+    "text": "British Columbia Institute of Technology BCIT 3700 Willingdon Avenue, Burnaby, BC V5G3H2 Burnaby Campus Wayfinding 604.434.5734 | bcit.ca LT | Bookstore Canada Way Childcare P24 P21 Library & ehPod aa LOTA Goard Way Security Desk Beedie Plaza Campus SES Public Hourly Parking is| Square Bus Stop LOTB SES) Buildings PS Construction Areas 2026 Future Building Footprints P12 P7 Parking Lots South Commons: Pedestrian Routes Roads Work Yards Services Building LOTD Accessibility Services swi Fairey Street, Audio Visual Services SE12 a Centre for Workplace Education Financial Aid & Awards swi Recreation LOTS Commons IT Services SE12 SW12 Indigenous Initiatives & Partnerships swi LOT International Student Centre swi H Learning & Teaching Centre SE12 Lost & Found swi P29) Program Advising swi LOT Student Life Office swi le Street LOTL ICBC P26 LOTT j P28 ial Reference oS Dau Proje iia “yg. 250 500 cr IT Campus Planning an 026-08 Th mation don BCIT ning es Information Syste fa pr rived from a sources with varyin uracy. BCIT makes no gua ith respect to th u of in th nt, or mater and disclaims all responsibilities fo racy 0 information contained herein, Map data i 001 BCIT an limited to Use only, BCI impus Facilities",
+    "labelCount": 5,
+    "textMethods": [
+      "local-tesseract-ocr; unreviewed"
+    ],
+    "routingSupported": false
+  }
+]

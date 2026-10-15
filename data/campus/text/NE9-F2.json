@@ -1,0 +1,26 @@
+{
+  "sourceId": "NE9-F2",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "| omer Tr rr ie 7 Wo NEOS, SECOND FLOOR BCIT APRIL 6, 2017 ACI HIE AND ORAL",
+      "labelCandidates": [
+        {
+          "text": "2017",
+          "bbox": [
+            147.84,
+            725.32,
+            168.96,
+            733.0
+          ],
+          "sourceRef": "NE9-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

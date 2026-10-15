@@ -1,0 +1,371 @@
+{
+  "campus": "Burnaby",
+  "buildings": [
+    "NE1",
+    "NE10",
+    "NE12",
+    "NE16",
+    "NE18",
+    "NE2",
+    "NE20",
+    "NE21",
+    "NE22",
+    "NE23",
+    "NE24",
+    "NE25",
+    "NE28",
+    "NE3",
+    "NE4",
+    "NE6",
+    "NE7",
+    "NE8",
+    "NE9",
+    "NW1",
+    "NW3",
+    "NW4",
+    "NW5",
+    "NW6",
+    "NW7",
+    "SE1",
+    "SE10",
+    "SE12",
+    "SE14",
+    "SE16",
+    "SE2",
+    "SE30",
+    "SE4",
+    "SE40",
+    "SE41",
+    "SE42",
+    "SE50",
+    "SE6",
+    "SE8",
+    "SE9",
+    "SW1",
+    "SW2",
+    "SW3",
+    "SW5",
+    "SW9"
+  ],
+  "floorPlans": 89,
+  "extractedLabelCandidates": 1045,
+  "routingVerified": false,
+  "supportedRealRoutingNodes": 0,
+  "unsupported": "All campus routes, entrances, transitions, distances, floor alignment, accessibility, live conditions, and camera localization require review. CARI and other campuses excluded.",
+  "floors": [
+    {
+      "building": "NE1",
+      "floors": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ]
+    },
+    {
+      "building": "NE10",
+      "floors": [
+        "1"
+      ]
+    },
+    {
+      "building": "NE12",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "NE16",
+      "floors": [
+        "1"
+      ]
+    },
+    {
+      "building": "NE18",
+      "floors": [
+        "1"
+      ]
+    },
+    {
+      "building": "NE2",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "NE20",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "NE21",
+      "floors": [
+        "1"
+      ]
+    },
+    {
+      "building": "NE22",
+      "floors": [
+        "1"
+      ]
+    },
+    {
+      "building": "NE23",
+      "floors": [
+        "1"
+      ]
+    },
+    {
+      "building": "NE24",
+      "floors": [
+        "1"
+      ]
+    },
+    {
+      "building": "NE25",
+      "floors": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "building": "NE28",
+      "floors": [
+        "1"
+      ]
+    },
+    {
+      "building": "NE3",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "NE4",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "NE6",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "NE7",
+      "floors": [
+        "1"
+      ]
+    },
+    {
+      "building": "NE8",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "NE9",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "NW1",
+      "floors": [
+        "1"
+      ]
+    },
+    {
+      "building": "NW3",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "NW4",
+      "floors": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ]
+    },
+    {
+      "building": "NW5",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "NW6",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "NW7",
+      "floors": [
+        "1"
+      ]
+    },
+    {
+      "building": "SE1",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "SE10",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "SE12",
+      "floors": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ]
+    },
+    {
+      "building": "SE14",
+      "floors": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "building": "SE16",
+      "floors": [
+        "1"
+      ]
+    },
+    {
+      "building": "SE2",
+      "floors": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "building": "SE30",
+      "floors": [
+        "1"
+      ]
+    },
+    {
+      "building": "SE4",
+      "floors": [
+        "1"
+      ]
+    },
+    {
+      "building": "SE40",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "SE41",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "SE42",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "SE50",
+      "floors": [
+        "1"
+      ]
+    },
+    {
+      "building": "SE6",
+      "floors": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "building": "SE8",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "SE9",
+      "floors": [
+        "1"
+      ]
+    },
+    {
+      "building": "SW1",
+      "floors": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ]
+    },
+    {
+      "building": "SW2",
+      "floors": [
+        "1",
+        "2",
+        "3"
+      ]
+    },
+    {
+      "building": "SW3",
+      "floors": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ]
+    },
+    {
+      "building": "SW5",
+      "floors": [
+        "1",
+        "2"
+      ]
+    },
+    {
+      "building": "SW9",
+      "floors": [
+        "1",
+        "2"
+      ]
+    }
+  ]
+}

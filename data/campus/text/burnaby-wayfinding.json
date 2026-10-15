@@ -1,0 +1,70 @@
+{
+  "sourceId": "burnaby-wayfinding",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 1224.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "British Columbia Institute of Technology BCIT 3700 Willingdon Avenue, Burnaby, BC V5G3H2 Burnaby Campus Wayfinding 604.434.5734 | bcit.ca LT | Bookstore Canada Way Childcare P24 P21 Library & ehPod aa LOTA Goard Way Security Desk Beedie Plaza Campus SES Public Hourly Parking is| Square Bus Stop LOTB SES) Buildings PS Construction Areas 2026 Future Building Footprints P12 P7 Parking Lots South Commons: Pedestrian Routes Roads Work Yards Services Building LOTD Accessibility Services swi Fairey Street, Audio Visual Services SE12 a Centre for Workplace Education Financial Aid & Awards swi Recreation LOTS Commons IT Services SE12 SW12 Indigenous Initiatives & Partnerships swi LOT International Student Centre swi H Learning & Teaching Centre SE12 Lost & Found swi P29) Program Advising swi LOT Student Life Office swi le Street LOTL ICBC P26 LOTT j P28 ial Reference oS Dau Proje iia “yg. 250 500 cr IT Campus Planning an 026-08 Th mation don BCIT ning es Information Syste fa pr rived from a sources with varyin uracy. BCIT makes no gua ith respect to th u of in th nt, or mater and disclaims all responsibilities fo racy 0 information contained herein, Map data i 001 BCIT an limited to Use only, BCI impus Facilities",
+      "labelCandidates": [
+        {
+          "text": "3700",
+          "bbox": [
+            539.19,
+            45.12,
+            565.1,
+            53.28
+          ],
+          "sourceRef": "burnaby-wayfinding#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2026",
+          "bbox": [
+            136.24,
+            471.36,
+            161.18,
+            480.0
+          ],
+          "sourceRef": "burnaby-wayfinding#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "250",
+          "bbox": [
+            144.39,
+            1149.6,
+            153.99,
+            1153.92
+          ],
+          "sourceRef": "burnaby-wayfinding#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "500",
+          "bbox": [
+            265.76,
+            1149.6,
+            275.35,
+            1153.92
+          ],
+          "sourceRef": "burnaby-wayfinding#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "001",
+          "bbox": [
+            525.76,
+            1192.32,
+            532.96,
+            1195.68
+          ],
+          "sourceRef": "burnaby-wayfinding#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "sourceId": "NE4-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "Th 08 FeO BOK FONG | ° lo! TELE 10 rh Eh NEO4, FIRST FLOOR SCALE: 1:200 CAMPUS PLANNING O LAST UPDATED: APRIL 21, 2023",
+      "labelCandidates": [
+        {
+          "text": "2023",
+          "bbox": [
+            1125.6,
+            757.94,
+            1140.96,
+            762.26
+          ],
+          "sourceRef": "NE4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

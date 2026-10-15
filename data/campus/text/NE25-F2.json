@@ -1,0 +1,26 @@
+{
+  "sourceId": "NE25-F2",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "ial = Ok LAB TT rts baz: = we AW Pet cor J | BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY campus planning LAST UPDATED: OCTOBER 15, 2010",
+      "labelCandidates": [
+        {
+          "text": "2010",
+          "bbox": [
+            1139.04,
+            758.42,
+            1153.92,
+            762.74
+          ],
+          "sourceRef": "NE25-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

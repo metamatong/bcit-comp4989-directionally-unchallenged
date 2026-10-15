@@ -1,0 +1,26 @@
+{
+  "sourceId": "NE1-F4",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 1224.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "fs | =a oo FICE oO oO SHAFT 1 LAS: OO FT| t= os Jars TAR BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY campus planning LAST UPDATED: OCTOBER 15, 2010",
+      "labelCandidates": [
+        {
+          "text": "2010",
+          "bbox": [
+            707.09,
+            1189.92,
+            721.96,
+            1194.24
+          ],
+          "sourceRef": "NE1-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

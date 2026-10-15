@@ -1,0 +1,48 @@
+{
+  "sourceId": "NE8-F2",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "oF = 218 OF VE OK 205 207 x = NEO& 02 02 EXT INT 504.38 406.44 —",
+      "labelCandidates": [
+        {
+          "text": "218",
+          "bbox": [
+            732.96,
+            113.69,
+            745.44,
+            118.49
+          ],
+          "sourceRef": "NE8-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "205",
+          "bbox": [
+            501.12,
+            384.25,
+            513.12,
+            388.56
+          ],
+          "sourceRef": "NE8-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "207",
+          "bbox": [
+            606.72,
+            383.77,
+            619.2,
+            388.08
+          ],
+          "sourceRef": "NE8-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

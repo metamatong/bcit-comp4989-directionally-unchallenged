@@ -1,0 +1,92 @@
+{
+  "sourceId": "NE28-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 1224.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "——— 104 103 CLASS CLASS = Ct STOR-GEN STOR-GEN CORRIDOR 106 ir Ww, OG SHAET 105 M109 a ] 103 CORRIDOR MECH | OM 110 CORRIDOR STOR-GEN RESOURCE it OFFICE 10) OFFICE-OPN NE2& NE2& Ol INT EXT 624.46 651.51 te ©",
+      "labelCandidates": [
+        {
+          "text": "104",
+          "bbox": [
+            358.82,
+            268.8,
+            376.09,
+            276.0
+          ],
+          "sourceRef": "NE28-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "103",
+          "bbox": [
+            585.25,
+            268.8,
+            602.51,
+            276.0
+          ],
+          "sourceRef": "NE28-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "106",
+          "bbox": [
+            472.03,
+            410.88,
+            489.3,
+            418.56
+          ],
+          "sourceRef": "NE28-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "105",
+          "bbox": [
+            329.56,
+            582.24,
+            346.35,
+            589.44
+          ],
+          "sourceRef": "NE28-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "M109",
+          "bbox": [
+            507.05,
+            573.12,
+            535.84,
+            580.32
+          ],
+          "sourceRef": "NE28-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "103",
+          "bbox": [
+            472.03,
+            605.28,
+            489.3,
+            612.48
+          ],
+          "sourceRef": "NE28-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "110",
+          "bbox": [
+            564.62,
+            726.72,
+            582.85,
+            733.92
+          ],
+          "sourceRef": "NE28-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

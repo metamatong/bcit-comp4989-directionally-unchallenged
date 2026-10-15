@@ -1,0 +1,70 @@
+{
+  "sourceId": "NW1-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "eR ot ot 2 113, By 1202 OL oO I orricr 7 oe FICE Leg, bo 1105 na THC 2 kre 3h Tee THe, ‘OH lou? lg 1497 NTOS De & Lae oF aw M Te ie 148 ore: ct in laze oor 7 14 orrice orrier O-N ML om oO =» BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY NW01, FIRST FLOOR Sea campus planning LAST UPDATED: OCTOBER 15, 2010",
+      "labelCandidates": [
+        {
+          "text": "1202",
+          "bbox": [
+            945.6,
+            215.87,
+            960.0,
+            223.54
+          ],
+          "sourceRef": "NW1-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1105",
+          "bbox": [
+            283.2,
+            307.49,
+            298.08,
+            311.81
+          ],
+          "sourceRef": "NW1-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1497",
+          "bbox": [
+            888.48,
+            363.62,
+            900.48,
+            367.94
+          ],
+          "sourceRef": "NW1-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "148",
+          "bbox": [
+            871.2,
+            442.77,
+            881.76,
+            447.09
+          ],
+          "sourceRef": "NW1-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2010",
+          "bbox": [
+            1139.04,
+            758.42,
+            1153.92,
+            762.74
+          ],
+          "sourceRef": "NW1-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

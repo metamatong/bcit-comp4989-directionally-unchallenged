@@ -1,0 +1,26 @@
+{
+  "sourceId": "NE25-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "le by hie OK, ay 0 Io — — = Loon Ww CF s LAB BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY ‘SCALE: 1:200 NE25, FIRST FLOOR campus planning LAST UPDATED: NOVEMBER 07, 2007",
+      "labelCandidates": [
+        {
+          "text": "2007",
+          "bbox": [
+            1144.32,
+            758.42,
+            1159.68,
+            762.74
+          ],
+          "sourceRef": "NE25-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

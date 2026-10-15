@@ -1,0 +1,224 @@
+{
+  "sourceId": "NW4-F2",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 1224.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "im 2030 XRAY ‘oa, ROOM 2049 2051 83 2057 169 X-RAY LABA LABB LAB PRACTICE ROOM LAB 2062 TEACHING LAB 2033 X-RAY ROOM al = 2031 2030 VESTIBULE XRAY | 2066 X-RAY 2050 ACTIVE ROOM ROOM 4 STOR- LEARNING INSTR | 2024 2069 XRAY STUDENT 2070 2025 X-RAY ROOM set AMENITIES | ROOM A I 2021 2020 I VR 2003 CLASSROOM | COMM I |__| ROOM 2079 I STUDY",
+      "labelCandidates": [
+        {
+          "text": "2030",
+          "bbox": [
+            191.4,
+            316.8,
+            204.84,
+            322.56
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2049",
+          "bbox": [
+            291.18,
+            336.0,
+            304.62,
+            341.28
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2051",
+          "bbox": [
+            362.66,
+            334.56,
+            375.61,
+            339.84
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2057",
+          "bbox": [
+            524.8,
+            334.56,
+            538.23,
+            339.84
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "169",
+          "bbox": [
+            597.72,
+            334.56,
+            603.95,
+            339.84
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2062",
+          "bbox": [
+            660.08,
+            358.56,
+            673.51,
+            363.84
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2033",
+          "bbox": [
+            189.01,
+            389.76,
+            202.44,
+            395.52
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2031",
+          "bbox": [
+            186.13,
+            451.68,
+            199.08,
+            457.44
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2030",
+          "bbox": [
+            298.38,
+            450.24,
+            312.29,
+            456.0
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2066",
+          "bbox": [
+            611.15,
+            459.36,
+            624.58,
+            465.12
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2050",
+          "bbox": [
+            372.73,
+            468.96,
+            386.65,
+            474.24
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2024",
+          "bbox": [
+            278.71,
+            507.36,
+            292.14,
+            512.64
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2069",
+          "bbox": [
+            575.17,
+            511.2,
+            588.6,
+            516.48
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2070",
+          "bbox": [
+            662.96,
+            518.88,
+            676.39,
+            524.64
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2025",
+          "bbox": [
+            186.13,
+            522.72,
+            199.56,
+            528.48
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2021",
+          "bbox": [
+            185.17,
+            595.68,
+            197.64,
+            601.44
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2020",
+          "bbox": [
+            285.43,
+            594.72,
+            298.86,
+            600.48
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2003",
+          "bbox": [
+            447.57,
+            611.52,
+            461.0,
+            617.28
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2079",
+          "bbox": [
+            586.2,
+            633.12,
+            599.64,
+            638.4
+          ],
+          "sourceRef": "NW4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

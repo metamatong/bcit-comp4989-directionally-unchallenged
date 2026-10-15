@@ -1,0 +1,26 @@
+{
+  "sourceId": "SE2-F3",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "—_| J | —= ut BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY SE02, THIRD FLOOR SCALE: campus planning S LAST UPDATED: OCTOBER 28, 2004",
+      "labelCandidates": [
+        {
+          "text": "2004",
+          "bbox": [
+            1139.04,
+            758.42,
+            1154.4,
+            762.74
+          ],
+          "sourceRef": "SE2-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "sourceId": "NW7-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 1224.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "OFFICE T a M140 12 oa 110 OFFICE |40B ORRIDO! PREF] 145 ELEC | 304 | 30 LOADING LI 150 SFT-PLUM STORAGE > | 504 WRO = 17 MECH INI > 120 NWO7 NWO CLASS Ol O| INT EXT 429.43 Ct",
+      "labelCandidates": [
+        {
+          "text": "M140",
+          "bbox": [
+            496.98,
+            349.92,
+            525.28,
+            357.6
+          ],
+          "sourceRef": "NW7-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "110",
+          "bbox": [
+            410.63,
+            408.96,
+            428.38,
+            416.16
+          ],
+          "sourceRef": "NW7-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "145",
+          "bbox": [
+            493.62,
+            576.48,
+            510.41,
+            583.68
+          ],
+          "sourceRef": "NW7-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "304",
+          "bbox": [
+            456.2,
+            616.8,
+            473.95,
+            624.0
+          ],
+          "sourceRef": "NW7-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "150",
+          "bbox": [
+            397.2,
+            786.24,
+            414.47,
+            793.92
+          ],
+          "sourceRef": "NW7-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "504",
+          "bbox": [
+            456.2,
+            843.84,
+            474.91,
+            851.04
+          ],
+          "sourceRef": "NW7-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "120",
+          "bbox": [
+            470.59,
+            989.76,
+            488.34,
+            996.96
+          ],
+          "sourceRef": "NW7-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

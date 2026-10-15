@@ -1,0 +1,14 @@
+{
+  "sourceId": "NW3-F2",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "M OO Ee (i NWO3 N 02 02 INT EXT 955.94 964.16",
+      "labelCandidates": []
+    }
+  ]
+}

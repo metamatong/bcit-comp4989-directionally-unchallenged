@@ -1,0 +1,26 @@
+{
+  "sourceId": "SW3-F4",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "A BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY Sw03, FOURTH FLOOR SCALE: LAST UPDATED: FEBRUARY 9, 2009 campus planning",
+      "labelCandidates": [
+        {
+          "text": "2009",
+          "bbox": [
+            1139.04,
+            758.42,
+            1153.92,
+            762.74
+          ],
+          "sourceRef": "SW3-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

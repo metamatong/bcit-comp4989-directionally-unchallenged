@@ -1,0 +1,26 @@
+{
+  "sourceId": "NW3-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 1224.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "all +4, ll NWO3, FIRST FLOOR BRITISH COLUMBIA © INSTITUTE OF TECHNOLOGY campus planning fT 2: 26. 2010",
+      "labelCandidates": [
+        {
+          "text": "2010",
+          "bbox": [
+            697.5,
+            1189.92,
+            713.33,
+            1194.24
+          ],
+          "sourceRef": "NW3-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

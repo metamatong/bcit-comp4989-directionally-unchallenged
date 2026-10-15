@@ -1,0 +1,103 @@
+{
+  "sourceId": "SE9-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "I na 103 JAN OR 106 MECH L| 100 OFFICE aa WASH- | OOZ I CORRIDOR FF =; 103 COMM OFFICE 102C VESTIBULE 102B STOR-GA 102A COMM 1 A. 102 OFFICE-OPN VESTIBULE ite",
+      "labelCandidates": [
+        {
+          "text": "103",
+          "bbox": [
+            650.4,
+            92.1,
+            670.56,
+            101.22
+          ],
+          "sourceRef": "SE9-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "106",
+          "bbox": [
+            516.96,
+            133.84,
+            537.6,
+            142.47
+          ],
+          "sourceRef": "SE9-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "100",
+          "bbox": [
+            840.0,
+            155.91,
+            861.12,
+            165.02
+          ],
+          "sourceRef": "SE9-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "103",
+          "bbox": [
+            567.84,
+            316.13,
+            588.48,
+            325.24
+          ],
+          "sourceRef": "SE9-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "102C",
+          "bbox": [
+            717.6,
+            376.09,
+            746.88,
+            385.21
+          ],
+          "sourceRef": "SE9-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "102B",
+          "bbox": [
+            652.32,
+            404.87,
+            681.6,
+            413.51
+          ],
+          "sourceRef": "SE9-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "102A",
+          "bbox": [
+            570.72,
+            424.06,
+            600.0,
+            433.18
+          ],
+          "sourceRef": "SE9-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "102",
+          "bbox": [
+            721.92,
+            542.55,
+            742.08,
+            551.19
+          ],
+          "sourceRef": "SE9-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

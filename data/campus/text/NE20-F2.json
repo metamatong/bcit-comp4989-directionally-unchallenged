@@ -1,0 +1,70 @@
+{
+  "sourceId": "NE20-F2",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "2214, STORAGE OFFICE FLEG ral STOR 216 DA 2154 oF || 232 207 ¢ 20 231 orF NE2O NE2O 02 02 | INT EXT 317.56 368.52",
+      "labelCandidates": [
+        {
+          "text": "216",
+          "bbox": [
+            253.92,
+            299.34,
+            268.32,
+            304.62
+          ],
+          "sourceRef": "NE20-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2154",
+          "bbox": [
+            262.56,
+            363.14,
+            283.2,
+            368.9
+          ],
+          "sourceRef": "NE20-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "232",
+          "bbox": [
+            809.28,
+            492.66,
+            824.16,
+            498.42
+          ],
+          "sourceRef": "NE20-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "207",
+          "bbox": [
+            323.52,
+            579.49,
+            338.88,
+            585.25
+          ],
+          "sourceRef": "NE20-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "231",
+          "bbox": [
+            809.28,
+            598.68,
+            822.72,
+            604.43
+          ],
+          "sourceRef": "NE20-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

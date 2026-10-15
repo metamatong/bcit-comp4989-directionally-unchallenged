@@ -1,0 +1,26 @@
+{
+  "sourceId": "SE14-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "W L | =. BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY SCALE: 1:30 SE14, FIRST FLOOR campus development © LAST UPDATED: AUGUST 15, 2014",
+      "labelCandidates": [
+        {
+          "text": "2014",
+          "bbox": [
+            1143.84,
+            749.31,
+            1159.2,
+            753.62
+          ],
+          "sourceRef": "SE14-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "sourceId": "SW2-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "oF 127 2! FFICE 28 corner 126 ICE OFFICE 14, OFFICE or 12, I ra a So — __ Lad Sie foal OFFIC MEETING Ie DN Xi Y OFFICE SWO2 Ol INT EXT 775.86 626.47 — \\ lo CAMPUS PLANNING",
+      "labelCandidates": [
+        {
+          "text": "127",
+          "bbox": [
+            507.84,
+            147.75,
+            518.88,
+            152.55
+          ],
+          "sourceRef": "SW2-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "126",
+          "bbox": [
+            537.6,
+            244.65,
+            549.12,
+            248.97
+          ],
+          "sourceRef": "SW2-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

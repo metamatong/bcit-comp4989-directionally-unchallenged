@@ -1,0 +1,14 @@
+{
+  "sourceId": "SE6-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 1224.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "| 7 BCIT CAMPUS PLANNING",
+      "labelCandidates": []
+    }
+  ]
+}

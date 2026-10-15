@@ -1,0 +1,14 @@
+{
+  "sourceId": "SE42-F2",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "Es fej a Yy WY Yj q YG Y G Ly & G Liz Sy LY SS © i 5 Orne — — BCIT CAMPUS DEVELOPMENT",
+      "labelCandidates": []
+    }
+  ]
+}

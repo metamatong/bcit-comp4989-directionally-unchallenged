@@ -1,0 +1,279 @@
+{
+  "sourceId": "SE12-F4",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "embedded-pdf-text",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "ND544434241404938373635343\nS413\nSTAIR\nM403 3242526272829203132333 M417\nSHAFT SHAFT\n413Z\nSHAFT 407C 418A\nCORRIDOR CORRIDOR\n413C ND 434\nCL\n4\nA\n0\nS\n1\nS CL\n4\nA\n03\nSS CL\n4\nA\n05\nSS\nWASH 4\n4\n- 0\n1\nR 9\n1\nM-MH SU\nL\nP\nA\nP\nB\n-I\n-\nN\n4 S\nS\n1 IM 3\nT\nULA LAB 4 -P 15 REP LAB 4 -S 1 I 7 M A ULA LAB 4 -S 1 I 7 M B ULA S S T 4 A\n3 21098765432\n1\n2 22211111111\nI 8 R\nO 4 FF 1 I 9 CE\nOFFI\n4\nC\n1\nE\n8\n-OPN\nO\nO\nF\n4 F\nF\nF 3\nIC\nI 5 C\nE\nE\nK 43 IT 2 CHEN-C\nWASH-RM-MH 418C 418D 418E\nCOR 40 R 2 ID C OR\nS M H 4 A 1 F 1 T COR\n41\nR\n0\nID\nC\nOR\n10\n4\n98765\n321\n11\nME\n4\nE\n2\nT\n2\nING COR 41 R\nS\n8\nH\nI\nM\nD F\nA 4\nO\nF 1\nR\nT 8 OF 4 F 2 I 5 C\nM\nE\nEETIN\nO\nG\nF 4 F 2\nM\nI 6 C\nEE\nE\nTING\nPR\nM\nO\nE\n4\nE\nJ 2\nT\nE\nI\n7\nN\nC\nG\nTS\nOF 4 F 3 I 6 CE S M H 4 A 3 F 2 T\nN 21098765432 22211111111 D S S T 4 A 0 I 0 R\n10\n4 98765 321\n11\nCL 4 A 02 SS PRO 40 J 4 E B CTS KITC 40 H 4 E C N-R LO 4 U 0 N 4 GE PRO 40 J 4 E D CTS CL 4 A 06 SS S M H 4 A 0 F 8 T JAN 41 IT 0 OR LAB- 4 S 1 IM 2 ULA LAB 4 -P 14 REP LAB 4 -S 1 I 6 M A ULA SUP 4 P 16 -I B NST COR 41 R 8 ID T OR OF 4 F 2 I 0 CE ME 4 E 2 T\nO\n3 IN\nF\nG\nF\n4\nIC\n1\nE\n8B\n-OPN\nOFFI 4 C 2 E 8 -OPN COR 41 R 8 ID H OR OF O 4 F 4 F 3 I F 3 7 S C I 8 C H M E E A 4 F 3 T 1 W C A O 4 S 4 3 M H 0 3 M - 1 RM-F\nPRO 40 J 4 E A CTS PRO 40 J 4 E E CTS WASH 40 -R 8 M-FH CO 4 N 1 T 2 R C OL SUP 41 P 6 -I C NST 421 424 RES 4 O 2 U 9 RCE\nOFFICE OFFICE 439\n408A OFFICE\nVESTIBULE\n408C 429A\nCORRIDOR CORRIDOR\n418G\nM404 M416 ELEC\nSHAFT SHAFT S428\nSTAIR3242526272829203132333\nSE12 SE12\n2 In ,8 te 0 4 r 4 8 n .9 a 6 l 2 E , x 9 t 0 0 e 4 9 rn .9 a 5 l N 5 D 44434241404938373635343\nSE12 - 4TH FLOOR\nSCALE: NTS\nUPDATED: SEPT 21, 2026\nCampus Planning\nand Facilities",
+      "labelCandidates": [
+        {
+          "text": "S413",
+          "bbox": [
+            464.64,
+            231.06,
+            476.88,
+            236.3
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "M403",
+          "bbox": [
+            314.7,
+            244.08,
+            327.81,
+            249.32
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "M417",
+          "bbox": [
+            795.24,
+            241.8,
+            808.35,
+            247.04
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "413Z",
+          "bbox": [
+            488.94,
+            254.46,
+            500.89,
+            259.7
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "407C",
+          "bbox": [
+            543.0,
+            261.06,
+            555.53,
+            266.3
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "418A",
+          "bbox": [
+            1036.86,
+            262.02,
+            1049.1,
+            267.26
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "413C",
+          "bbox": [
+            615.36,
+            283.86,
+            627.89,
+            289.1
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "434",
+          "bbox": [
+            1124.16,
+            286.32,
+            1132.91,
+            291.56
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "418C",
+          "bbox": [
+            1038.48,
+            332.17,
+            1047.88,
+            336.11
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "418D",
+          "bbox": [
+            1062.0,
+            331.81,
+            1071.4,
+            335.75
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "418E",
+          "bbox": [
+            1085.16,
+            331.93,
+            1094.34,
+            335.87
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "321",
+          "bbox": [
+            904.25,
+            358.09,
+            905.46,
+            365.21
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "321",
+          "bbox": [
+            81.77,
+            403.81,
+            82.98,
+            410.75
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "421",
+          "bbox": [
+            908.58,
+            441.96,
+            917.33,
+            447.2
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "424",
+          "bbox": [
+            941.82,
+            442.5,
+            950.57,
+            447.74
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "439",
+          "bbox": [
+            1127.22,
+            446.7,
+            1135.97,
+            451.94
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "408A",
+          "bbox": [
+            494.94,
+            453.67,
+            504.12,
+            457.61
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "408C",
+          "bbox": [
+            542.76,
+            464.16,
+            555.29,
+            469.4
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "429A",
+          "bbox": [
+            1033.62,
+            465.96,
+            1045.86,
+            471.2
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "418G",
+          "bbox": [
+            981.42,
+            481.15,
+            991.04,
+            485.09
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "M404",
+          "bbox": [
+            314.34,
+            487.2,
+            327.45,
+            492.44
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "M416",
+          "bbox": [
+            794.64,
+            485.7,
+            807.75,
+            490.94
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "S428",
+          "bbox": [
+            943.56,
+            495.78,
+            955.8,
+            501.02
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2026",
+          "bbox": [
+            189.63,
+            718.26,
+            213.4,
+            727.17
+          ],
+          "sourceRef": "SE12-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

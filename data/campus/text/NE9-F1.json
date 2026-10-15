@@ -1,0 +1,26 @@
+{
+  "sourceId": "NE9-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "Jel a L 4+ [= NEOS, FIRST FLOOR BCIT APRIL 12, 2017",
+      "labelCandidates": [
+        {
+          "text": "2017",
+          "bbox": [
+            153.6,
+            725.32,
+            174.24,
+            733.0
+          ],
+          "sourceRef": "NE9-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

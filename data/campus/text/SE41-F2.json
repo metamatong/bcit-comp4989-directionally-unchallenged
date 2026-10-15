@@ -1,0 +1,81 @@
+{
+  "sourceId": "SE41-F2",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 1224.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "GFN SHAFT SHAFT] 200A M220) D | 230 Q [e| oJ OFFIC STOR-GEN 249 iw 255 OFFIC 2 260 M2 RY {Ml } SHA Oo SHAFT] OFFIC ore WAS ca 2 ral co STAIR M264 et 1 = OH BCIT Fe CAMPUS PLANNING",
+      "labelCandidates": [
+        {
+          "text": "200A",
+          "bbox": [
+            462.92,
+            297.12,
+            484.51,
+            302.88
+          ],
+          "sourceRef": "SE41-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "230",
+          "bbox": [
+            542.07,
+            345.12,
+            555.5,
+            354.72
+          ],
+          "sourceRef": "SE41-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "249",
+          "bbox": [
+            380.89,
+            577.44,
+            394.32,
+            582.72
+          ],
+          "sourceRef": "SE41-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "255",
+          "bbox": [
+            542.55,
+            666.72,
+            554.54,
+            670.08
+          ],
+          "sourceRef": "SE41-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "260",
+          "bbox": [
+            376.09,
+            716.64,
+            391.92,
+            722.4
+          ],
+          "sourceRef": "SE41-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "M264",
+          "bbox": [
+            418.79,
+            875.04,
+            442.77,
+            884.64
+          ],
+          "sourceRef": "SE41-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

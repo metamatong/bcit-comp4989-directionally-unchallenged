@@ -1,0 +1,70 @@
+{
+  "sourceId": "NE25-F3",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "ici 2081 ont 1K aa a ul “ING 2001 RCE TAI Le Ea 204 20 on Lae 2020 BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY NE25, THIRD FLOOR ‘SCALE: 1:200 campus planning LAST UPDATED: JANUARY 20, 2010",
+      "labelCandidates": [
+        {
+          "text": "2081",
+          "bbox": [
+            668.16,
+            255.21,
+            683.52,
+            259.52
+          ],
+          "sourceRef": "NE25-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2001",
+          "bbox": [
+            469.92,
+            366.5,
+            481.92,
+            370.82
+          ],
+          "sourceRef": "NE25-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "204",
+          "bbox": [
+            483.36,
+            468.68,
+            493.44,
+            472.99
+          ],
+          "sourceRef": "NE25-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2020",
+          "bbox": [
+            552.96,
+            532.96,
+            567.84,
+            537.27
+          ],
+          "sourceRef": "NE25-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2010",
+          "bbox": [
+            1139.04,
+            758.42,
+            1153.92,
+            762.74
+          ],
+          "sourceRef": "NE25-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

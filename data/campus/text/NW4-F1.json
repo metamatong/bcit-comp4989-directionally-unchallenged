@@ -1,0 +1,257 @@
+{
+  "sourceId": "NW4-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 1224.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "Oo Lay, | d| 1065, 1051 1053 WASTE! 1067 RECYCLING 1043 CONTROL LAB LAB-LSCI-$ LAB - LSCI-G. ROOM SHIPPING &| RECEIVING a tees MG ey = 1028 1031 1029 ELECTRICAL a LAB -LSCI-$ ROOM ean 1062 STOR - INST Pa STORAGE 1026 | L- 1066, STORAGE | OFFICE-OPN 1027 Fe LAB 1068 STORAGE 1021 LAB-LSCI-S 1003 1017 COMM. 1072 ROOM CONFERENCE LAB a 076, CONFERENCE = = 1014 1010 1008 1016 isa PROJECT ROOM PROJECT QUIET & ROOM Rot 1078 CONFERENCE a koe 1080 FOOD SERVICES KIOSK 1 ae $1002 sre SOCIAL STAIR 2 lo LOBBY NW04, FIRST FLOOR BCIT TALE: NT! CAMPUS PLANNING LAST UPDATED: JANUARY 16, 2023",
+      "labelCandidates": [
+        {
+          "text": "1051",
+          "bbox": [
+            241.29,
+            364.32,
+            253.77,
+            370.08
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1053",
+          "bbox": [
+            306.05,
+            364.32,
+            318.53,
+            370.08
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1067",
+          "bbox": [
+            403.44,
+            368.64,
+            416.39,
+            374.4
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1043",
+          "bbox": [
+            150.15,
+            376.8,
+            163.58,
+            382.56
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1028",
+          "bbox": [
+            369.86,
+            454.08,
+            383.29,
+            459.84
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1031",
+          "bbox": [
+            189.01,
+            459.36,
+            201.48,
+            465.12
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1029",
+          "bbox": [
+            269.12,
+            463.2,
+            282.55,
+            468.96
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1062",
+          "bbox": [
+            646.17,
+            472.32,
+            659.6,
+            478.08
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1026",
+          "bbox": [
+            370.82,
+            496.8,
+            384.25,
+            502.08
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1027",
+          "bbox": [
+            152.07,
+            533.28,
+            165.5,
+            538.56
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1068",
+          "bbox": [
+            612.59,
+            549.12,
+            625.54,
+            554.88
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1021",
+          "bbox": [
+            274.87,
+            592.8,
+            287.35,
+            598.56
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1003",
+          "bbox": [
+            451.89,
+            609.6,
+            465.32,
+            615.36
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1017",
+          "bbox": [
+            159.26,
+            625.92,
+            172.22,
+            631.2
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1072",
+          "bbox": [
+            608.75,
+            620.16,
+            622.18,
+            625.92
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1014",
+          "bbox": [
+            231.7,
+            734.4,
+            244.65,
+            740.16
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1010",
+          "bbox": [
+            269.6,
+            734.4,
+            282.55,
+            740.16
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1008",
+          "bbox": [
+            308.45,
+            732.96,
+            321.88,
+            738.72
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1016",
+          "bbox": [
+            180.85,
+            738.72,
+            194.28,
+            744.48
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1078",
+          "bbox": [
+            607.79,
+            752.16,
+            621.22,
+            757.92
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "1080",
+          "bbox": [
+            602.99,
+            809.28,
+            616.43,
+            815.04
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2023",
+          "bbox": [
+            707.57,
+            1190.4,
+            722.92,
+            1194.72
+          ],
+          "sourceRef": "NW4-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

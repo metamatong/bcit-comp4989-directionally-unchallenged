@@ -1,0 +1,26 @@
+{
+  "sourceId": "NE6-F2",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "Ta] 4 re wer NI hor ‘Ga a a le 12 ch TN al BCIT NEO6, SECOND FLOOR SCALE: 1:200 CAMPUS PLANNING O LAST UPDATED: APRIIL 21, 2023",
+      "labelCandidates": [
+        {
+          "text": "2023",
+          "bbox": [
+            1129.92,
+            757.94,
+            1144.8,
+            762.26
+          ],
+          "sourceRef": "NE6-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

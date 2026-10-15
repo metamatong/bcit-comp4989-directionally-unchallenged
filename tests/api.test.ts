@@ -1,0 +1,199 @@
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import type { Server } from 'node:http';
+import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { createApp } from '../server/app';
+import { ProviderError } from '../server/provider';
+import type { Session } from '../src/types';
+let server: Server, base: string;
+const unavailableProvider = {
+  calls: 0,
+  generate: async () => {
+    throw new Error('No provider call is allowed without configuration');
+  },
+};
+const image = {
+  mimeType: 'image/png',
+  data: readFileSync('data/campus/visual/png/SE12-F1-p1/overview.png').toString('base64'),
+};
+const post = (url: string, body: unknown) =>
+  fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+beforeAll(async () => {
+  server = createApp({
+    provider: unavailableProvider,
+    liveAvailable: false,
+    model: 'gemini-3.8-flash',
+  }).listen(0, '127.0.0.1');
+  await new Promise<void>((resolve) => server.once('listening', resolve));
+  base = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
+});
+afterAll(() => new Promise<void>((resolve) => server.close(() => resolve())));
+const start = async (): Promise<Session> => (await post(`${base}/api/sessions`, {})).json();
+const action = (
+  session: Session,
+  value: unknown,
+  requestId = randomUUID(),
+  revision = session.revision,
+) => post(`${base}/api/sessions/${session.id}/actions`, { action: value, requestId, revision });
+
+describe('real-campus-only HTTP contract', () => {
+  it('creates a Gemini session with no synthetic state even when credentials are unavailable', async () => {
+    const session = await start();
+    expect(session.mode).toBe('live');
+    expect(session.notice).toContain('needs Gemini setup');
+    expect(session.agentStatus).toBe('Gemini · setup required');
+    expect(session.campusAnalysis).toBeNull();
+    for (const field of [
+      'route',
+      'currentNodeId',
+      'locationCandidates',
+      'events',
+      'replayStage',
+      'destinationId',
+    ])
+      expect(session).not.toHaveProperty(field);
+    expect(session.providerCalls).toBe(0);
+  });
+  it.each([
+    { type: 'mode', mode: 'demo', consent: false },
+    { type: 'mode', mode: 'live', consent: true },
+    { type: 'replay' },
+    { type: 'simulate', scenario: 'block-relevant' },
+    { type: 'locate', text: 'Cedar welcome desk', sampleId: 'welcome' },
+    { type: 'locate', text: 'hallway', manual: true },
+    { type: 'confirm-location', nodeId: 'cedar-entry' },
+    { type: 'destination', text: 'Robotics lab' },
+    { type: 'choose-destination', nodeId: 'maple-lab' },
+    { type: 'checkpoint' },
+    { type: 'preferences', avoidStairs: true, arrivalTime: '' },
+  ])('rejects removed action $type without changing state', async (removedAction) => {
+    const session = await start();
+    expect((await action(session, removedAction)).status).toBe(400);
+    const unchanged = await (await fetch(`${base}/api/sessions/${session.id}`)).json();
+    expect(unchanged).toEqual(session);
+  });
+  it('rejects session mode injection and never exposes a default-mode switch or fictional graph', async () => {
+    expect((await post(`${base}/api/sessions`, { mode: 'demo' })).status).toBe(400);
+    const response = await fetch(`${base}/api/bootstrap`);
+    const body = await response.json();
+    expect(body.liveAvailable).toBe(false);
+    expect(body.coverage.floorPlans).toBe(89);
+    expect(body.visualPlans).toHaveLength(89);
+    expect(body).not.toHaveProperty('graph');
+    expect(body).not.toHaveProperty('defaultMode');
+    expect(body).not.toHaveProperty('apiKey');
+    expect(response.headers.get('cache-control')).toBe('no-store');
+    const pdf = await fetch(`${base}/data/campus/raw/bse1201.pdf`);
+    expect(pdf.status).toBe(200);
+    expect(pdf.headers.get('content-type')).toContain('pdf');
+  });
+  it('returns a setup error instead of falling back when photo analysis is unconfigured', async () => {
+    const session = await start();
+    const response = await post(`${base}/api/sessions/${session.id}/photo`, {
+      requestId: randomUUID(),
+      revision: 0,
+      consent: true,
+      image,
+    });
+    expect(response.status).toBe(503);
+    const body = await response.json();
+    expect(body.providerError).toEqual({ code: 'configuration', retryable: false });
+    expect(body.error).toContain('Gemini is not configured');
+    expect(body.error).not.toMatch(/demo/i);
+    expect(body.session).toEqual(session);
+  });
+  it('keeps reset idempotent and rejects stale state and unproposed confirmations', async () => {
+    const initial = await start();
+    const requestId = randomUUID();
+    const next: Session = await (await action(initial, { type: 'reset' }, requestId)).json();
+    const retry = await (await action(initial, { type: 'reset' }, requestId)).json();
+    expect(retry).toEqual(next);
+    expect(next.mode).toBe('live');
+    expect((await action(initial, { type: 'reset' })).status).toBe(409);
+    expect(
+      (await action(next, { type: 'confirm-campus-region', candidateId: randomUUID() })).status,
+    ).toBe(400);
+  });
+  it('preserves source search without using a model or resolving fictional locations', async () => {
+    const records = await (await fetch(`${base}/api/search?q=SE12`)).json();
+    expect(records.length).toBeGreaterThan(0);
+    expect(records[0].url).toMatch(/^https:\/\/www.bcit.ca\//);
+    expect(records.every((record: { routingSupported: boolean }) => !record.routingSupported)).toBe(
+      true,
+    );
+    expect(await (await fetch(`${base}/api/search?q=Cedar%20welcome%20desk`)).json()).toEqual([]);
+  });
+  it('rejects cross-origin writes, malformed bodies, and unknown sessions', async () => {
+    const response = await fetch(`${base}/api/sessions`, {
+      method: 'POST',
+      headers: { Origin: 'https://example.com', 'Content-Type': 'application/json' },
+      body: '{}',
+    });
+    expect(response.status).toBe(403);
+    expect((await fetch(`${base}/api/sessions/not-a-session`)).status).toBe(404);
+    expect(
+      (
+        await fetch(`${base}/api/sessions`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: '{',
+        })
+      ).status,
+    ).toBe(400);
+  });
+});
+
+it.each([
+  { status: 503, code: 'unavailable' as const, retryAfterSeconds: 60 },
+  { status: 429, code: 'quota' as const, retryAfterSeconds: undefined },
+])('reports Gemini failure $status without producing a substitute location', async (failure) => {
+  const provider = {
+    calls: 0,
+    async generate(
+      _contents: unknown,
+      _tools: unknown,
+      _signal?: AbortSignal,
+      onAttempt?: () => void,
+    ) {
+      this.calls++;
+      onAttempt?.();
+      throw new ProviderError(
+        'Gemini is unavailable. Try again later.',
+        failure.status,
+        failure.code,
+        true,
+        failure.retryAfterSeconds,
+      );
+    },
+  };
+  const isolated = createApp({ provider, liveAvailable: true, model: 'gemini-3.8-flash' }).listen(
+    0,
+    '127.0.0.1',
+  );
+  await new Promise<void>((resolve) => isolated.once('listening', resolve));
+  const origin = `http://127.0.0.1:${(isolated.address() as { port: number }).port}`;
+  try {
+    const session = await (await post(`${origin}/api/sessions`, {})).json();
+    const response = await post(`${origin}/api/sessions/${session.id}/photo`, {
+      requestId: randomUUID(),
+      revision: 0,
+      consent: true,
+      image,
+    });
+    const body = await response.json();
+    expect(response.status).toBe(failure.status);
+    expect(response.headers.get('retry-after')).toBe(failure.retryAfterSeconds ? '60' : null);
+    expect(body.providerError).toMatchObject({ code: failure.code, retryable: true });
+    expect(body.session.mode).toBe('live');
+    expect(body.session.campusAnalysis).toBeNull();
+    expect(body.session.providerCalls).toBe(1);
+    expect(body.session.activity.at(-1).tool).toBe('photo_comparison_stopped');
+    expect(body.error).not.toMatch(/demo/i);
+  } finally {
+    await new Promise<void>((resolve) => isolated.close(() => resolve()));
+  }
+});

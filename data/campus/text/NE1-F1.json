@@ -1,0 +1,48 @@
+{
+  "sourceId": "NE1-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 1224.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "SIAR ‘Att b iy Mit lg ites rit LORRIDO ne Mech PS FIFE M 26 oi a 6 MACH Mt oni is] STOR 199 08 2 fs) LOUS 5 oF FICF-O\"N J a Me] 2 Fic 1 2 6 i Labs 15 6 OFFIC K ol = OFFICE TG Mi on Oly Orr or COR! LOR or Bes Fi OFF CF ha 42 12 a Ar 2] Lap. STOR Grn NE01, FIRST FLOOR BRITISH COLUMBIA SCALE: 7300 INSTITUTE OF TECHNOLOGY campus planning LAST UPDATED: FEBRUARY 4, 2011",
+      "labelCandidates": [
+        {
+          "text": "199",
+          "bbox": [
+            156.86,
+            433.44,
+            168.38,
+            435.84
+          ],
+          "sourceRef": "NE1-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "7300",
+          "bbox": [
+            352.59,
+            1164.48,
+            365.54,
+            1168.8
+          ],
+          "sourceRef": "NE1-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2011",
+          "bbox": [
+            707.09,
+            1189.92,
+            721.48,
+            1194.24
+          ],
+          "sourceRef": "NE1-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

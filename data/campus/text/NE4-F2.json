@@ -1,0 +1,26 @@
+{
+  "sourceId": "NE4-F2",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "vol ez Tal Os cr 2 BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY NE0O4, SECOND FLOOR ‘SCALE: 1:200 campus planning LAST UPDATED: OCTOBER 25, 2004",
+      "labelCandidates": [
+        {
+          "text": "2004",
+          "bbox": [
+            1139.04,
+            758.42,
+            1154.4,
+            762.74
+          ],
+          "sourceRef": "NE4-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "sourceId": "NE6-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "a a U i an a ol | Ea Th a a a a Ue BCIT NEO6, FIRST FLOOR CAMPUS PLANNING O SCALE: 1:200 LAST UPDATED: APRIL 21, 2023",
+      "labelCandidates": [
+        {
+          "text": "2023",
+          "bbox": [
+            1127.52,
+            757.94,
+            1142.88,
+            762.26
+          ],
+          "sourceRef": "NE6-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

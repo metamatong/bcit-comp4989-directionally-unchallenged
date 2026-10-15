@@ -1,0 +1,213 @@
+import { test, expect, type Page } from '@playwright/test';
+import { resolve } from 'node:path';
+import { mkdir } from 'node:fs/promises';
+import { randomUUID } from 'node:crypto';
+import type { CampusPhotoAnalysis, Session } from '../../src/types';
+
+function analysis(requestId: string, hasCandidate = true): CampusPhotoAnalysis {
+  return {
+    requestId,
+    outcome: hasCandidate ? 'candidates' : 'insufficient_evidence',
+    observations: ['The test image contains visible scene structure.'],
+    summary: hasCandidate
+      ? 'Mocked transport example: review this unverified region in an actual BCIT plan.'
+      : 'The image does not distinguish a specific campus region.',
+    clarification: 'A second view showing a corridor intersection would help.',
+    atlasPlanCount: 89,
+    detailedPlanIds: hasCandidate ? ['SE12-F1-p1'] : [],
+    buildingHint: null,
+    method: 'gemini-photo-floorplan',
+    generatedAt: new Date().toISOString(),
+    candidates: hasCandidate
+      ? [
+          {
+            id: randomUUID(),
+            planId: 'SE12-F1-p1',
+            sourceRef: 'SE12-F1#page=1',
+            building: 'SE12',
+            floor: '1',
+            page: 1,
+            bounds: [0.4, 0.25, 0.7, 0.55],
+            confidence: 'low',
+            matches: [
+              {
+                photoFeature: 'An elongated scene',
+                planFeature: 'A passage region in the supplied drawing',
+              },
+            ],
+            limitations: [
+              'This screenshot uses mocked provider results to verify the interface, not localization accuracy.',
+            ],
+            verification: 'unverified-ai-hypothesis',
+          },
+        ]
+      : [],
+  };
+}
+async function setup(page: Page, hasCandidate = true) {
+  let current!: Session;
+  const uploads: {
+    consent: boolean;
+    image: { data: string; mimeType: string };
+    description: string;
+  }[] = [];
+  const requests: string[] = [];
+  page.on('request', (request) => requests.push(request.url()));
+  await page.route('**/api/bootstrap', async (route) => {
+    const data = await (await route.fetch()).json();
+    await route.fulfill({ json: { ...data, liveAvailable: true } });
+  });
+  await page.route('**/api/sessions', async (route) => {
+    current = {
+      ...(await (await route.fetch()).json()),
+      mode: 'live',
+      agentStatus: 'Live AI · ready',
+    };
+    await route.fulfill({ json: current });
+  });
+  await page.route('**/api/sessions/*/photo', async (route) => {
+    const body = route.request().postDataJSON();
+    uploads.push(body);
+    current = {
+      ...current,
+      revision: current.revision + 1,
+      campusAnalysis: analysis(body.requestId, hasCandidate),
+      providerCalls: 2,
+      agentStatus: 'Live AI · photo and floor-plan comparison completed',
+    };
+    await route.fulfill({ json: current });
+  });
+  await page.route('**/api/sessions/*/actions', async (route) => {
+    const body = route.request().postDataJSON();
+    if (body.action.type === 'confirm-campus-region') {
+      current = {
+        ...current,
+        revision: current.revision + 1,
+        campusLocation: current.campusAnalysis!.candidates.find(
+          (candidate) => candidate.id === body.action.candidateId,
+        )!,
+        notice:
+          'You selected a possible region in SE12, floor 1. Real walking routes are not yet supported.',
+      };
+    } else if (body.action.type === 'reset') {
+      current = {
+        ...current,
+        revision: current.revision + 1,
+        campusLocation: null,
+        campusAnalysis: null,
+        activity: [],
+        providerCalls: 0,
+      };
+    } else throw new Error('Unexpected action in photo test');
+    await route.fulfill({ json: current });
+  });
+  await page.goto('/');
+  await expect(page.getByTestId('provider-status')).toBeVisible();
+  return { uploads, requests };
+}
+async function choosePhoto(page: Page) {
+  await page.getByRole('button', { name: 'Find my location', exact: true }).click();
+  await page
+    .getByLabel('Upload campus photo', { exact: true })
+    .setInputFiles(resolve('data/campus/visual/png/SE12-F1-p1/overview.png'));
+  await expect(page.getByText(/Photo ready\. Choose Analyze/)).toBeVisible();
+}
+
+test('photo → explicit consent → real plan region → confirmation, without OCR (mocked provider)', async ({
+  page,
+}, info) => {
+  const { uploads, requests } = await setup(page);
+  await choosePhoto(page);
+  const analyze = page.getByRole('button', {
+    name: 'Analyze photo against BCIT plans',
+    exact: true,
+  });
+  await expect(analyze).toBeDisabled();
+  expect(uploads).toHaveLength(0);
+  await page.getByRole('checkbox', { name: /Send this photo and optional description/ }).check();
+  await analyze.click();
+  await expect(
+    page.getByRole('dialog').getByRole('heading', { name: 'SE12 · Floor 1' }),
+  ).toBeVisible();
+  expect(uploads).toHaveLength(1);
+  expect(uploads[0].consent).toBe(true);
+  expect(uploads[0].image.mimeType).toBe('image/jpeg');
+  expect(uploads[0].image.data.length).toBeGreaterThan(1000);
+  expect(uploads[0].description).toBe('');
+  expect(requests.some((url) => url.includes('/ocr/'))).toBe(false);
+  await expect(
+    page.getByRole('dialog').getByRole('link', { name: 'Geometry JSON' }),
+  ).toHaveAttribute('href', /SE12-F1-p1\.json$/);
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: 'Confirm this possible region', exact: true })
+    .click();
+  await expect(page.getByRole('button', { name: 'Region selected', exact: true })).toBeDisabled();
+  await expect(page.getByRole('status')).toContainText('Real walking routes are not yet supported');
+  await expect(page.getByRole('img', { name: /Synthetic navigation map/ })).toHaveCount(0);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
+    true,
+  );
+  await mkdir('docs/screenshots', { recursive: true });
+  await page.screenshot({
+    path: `docs/screenshots/${info.project.name}-photo-comparison-mocked.png`,
+    fullPage: true,
+  });
+});
+
+test('ambiguous photo asks for another view and never supplies a demo match', async ({ page }) => {
+  await setup(page, false);
+  await choosePhoto(page);
+  await page.getByRole('checkbox', { name: /Send this photo and optional description/ }).check();
+  await page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }).click();
+  await expect(
+    page.getByRole('dialog').getByText('More visual evidence is needed', { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole('dialog').getByRole('button', { name: 'Confirm this possible region' }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByRole('dialog').getByText('A second view showing a corridor intersection would help.'),
+  ).toBeVisible();
+});
+
+test('closing the photo dialog discards a late comparison response', async ({ page }) => {
+  await setup(page);
+  await choosePhoto(page);
+  let release!: () => void;
+  const wait = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  let requested = false;
+  await page.route('**/api/sessions/*/photo', async (route) => {
+    requested = true;
+    await wait;
+    await route.abort().catch(() => {});
+  });
+  await page.getByRole('checkbox', { name: /Send this photo and optional description/ }).check();
+  await page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }).click();
+  await expect.poll(() => requested).toBe(true);
+  await page.getByRole('button', { name: 'Close dialog', exact: true }).click();
+  release();
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Possible locations to review' })).toHaveCount(0);
+  await expect(page.getByTestId('provider-status')).toBeVisible();
+});
+
+test('clearing an analysis removes the result without changing provider or loading sample data', async ({
+  page,
+}) => {
+  const { uploads } = await setup(page);
+  await choosePhoto(page);
+  await page.getByRole('checkbox', { name: /Send this photo and optional description/ }).check();
+  await page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }).click();
+  await page
+    .getByRole('dialog')
+    .getByRole('button', { name: 'Confirm this possible region', exact: true })
+    .click();
+  await page.getByRole('button', { name: 'Clear analysis', exact: true }).click();
+  await expect(page.getByRole('heading', { name: 'Let the photo tell the story.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Possible locations to review' })).toHaveCount(0);
+  await expect(page.getByTestId('provider-status')).toHaveText('Gemini ready');
+  expect(uploads).toHaveLength(1);
+});

@@ -1,0 +1,103 @@
+{
+  "sourceId": "NW5-F2",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "208 206 210 OFFICE OFFICE OFFICE 20 | 200A OFFICE ELEC 2)! VESTIBULE 202 204 OFFICE OFFICE-OPN 205 OFFICE OFFICE 203 NWO5 NWO5 O7 OFFICE O2 O2 INT EXT 246.14 253.29 —",
+      "labelCandidates": [
+        {
+          "text": "208",
+          "bbox": [
+            576.96,
+            146.79,
+            608.64,
+            158.78
+          ],
+          "sourceRef": "NW5-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "206",
+          "bbox": [
+            720.0,
+            146.79,
+            751.2,
+            158.78
+          ],
+          "sourceRef": "NW5-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "210",
+          "bbox": [
+            418.56,
+            156.86,
+            450.24,
+            168.38
+          ],
+          "sourceRef": "NW5-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "200A",
+          "bbox": [
+            847.68,
+            288.31,
+            890.4,
+            300.3
+          ],
+          "sourceRef": "NW5-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "202",
+          "bbox": [
+            851.04,
+            392.88,
+            881.76,
+            404.87
+          ],
+          "sourceRef": "NW5-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "204",
+          "bbox": [
+            623.52,
+            421.66,
+            654.72,
+            433.18
+          ],
+          "sourceRef": "NW5-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "205",
+          "bbox": [
+            877.44,
+            496.5,
+            908.16,
+            508.49
+          ],
+          "sourceRef": "NW5-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "203",
+          "bbox": [
+            1013.76,
+            524.8,
+            1044.48,
+            536.79
+          ],
+          "sourceRef": "NW5-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

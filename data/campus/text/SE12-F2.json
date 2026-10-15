@@ -1,0 +1,26 @@
+{
+  "sourceId": "SE12-F2",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "ay a = | ) ] ror] = a = @ a — ==> i BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY $E12, SECOND FLOOR ‘SCALE: 1:300 LAST UPDATED: OCTOBER 22, 2008 campus planning ©)",
+      "labelCandidates": [
+        {
+          "text": "2008",
+          "bbox": [
+            1139.04,
+            758.42,
+            1153.92,
+            762.74
+          ],
+          "sourceRef": "SE12-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

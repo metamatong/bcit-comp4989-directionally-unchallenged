@@ -1,0 +1,14 @@
+{
+  "sourceId": "NE16-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 1224.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "EF CLASS eo \\ A OFFICE, a oe A — — __ ‘Grn 8 | | | | | | NEIG NEIG Ol INT EXT FH 2,494.27 2,946.52 LOCK. 24.",
+      "labelCandidates": []
+    }
+  ]
+}

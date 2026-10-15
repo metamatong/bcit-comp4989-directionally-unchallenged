@@ -1,0 +1,158 @@
+{
+  "sourceId": "NE1-F2",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 1224.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "Ori 2 BILE a¢ M SHAFT, Were vale 5 OFF OF DR: 23, 29g a0 Me. 2¢ 208 oer Is NE al ve fils vi Al 2 293 rh | fer Tuy i oF CON Ser NOK, ab Pe a org be an ut ze VEST aS AE qh BAA -U a 2 207 cla 258, baad 13 — 14 CLAS c me a Pais CLAS 2 ve iT ay 26 FG fae a 17 MECH Les. IN 207 orn te al oF ‘OK, EN, 2407 ‘OK ae 72 72 CORKIDOK, con 4 A ol cr OFF Orr oF orig Eg Inu im A Me ins aT Ur i or 3 a 20\" eer 42 a oer Mao SHAG Wo AAI OFFICE © 248 243 2 ia Mec. 225 Se ‘Up 208 Af BUT 2 Wee. ar 33 70 v 1g EA OFF on & pa 223 eee 20 CAF RIA OR, SAT Pe, M AN 20 ba 22 22 se KC AFT M224 SUA] wi T T U 2 525i RY NE01, SECOND FLOOR BCIT ‘SCALE: 7300 CAMPUS PLANNING LAST UPDATED: MAY 16, 2023",
+      "labelCandidates": [
+        {
+          "text": "208",
+          "bbox": [
+            317.09,
+            231.36,
+            330.04,
+            236.16
+          ],
+          "sourceRef": "NE1-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "293",
+          "bbox": [
+            272.0,
+            254.88,
+            284.47,
+            257.28
+          ],
+          "sourceRef": "NE1-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "207",
+          "bbox": [
+            555.02,
+            367.2,
+            567.98,
+            372.0
+          ],
+          "sourceRef": "NE1-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "207",
+          "bbox": [
+            126.16,
+            546.72,
+            138.64,
+            551.52
+          ],
+          "sourceRef": "NE1-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2407",
+          "bbox": [
+            390.48,
+            597.6,
+            407.27,
+            602.4
+          ],
+          "sourceRef": "NE1-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "248",
+          "bbox": [
+            606.83,
+            735.84,
+            619.78,
+            740.64
+          ],
+          "sourceRef": "NE1-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "243",
+          "bbox": [
+            628.9,
+            759.84,
+            646.65,
+            764.64
+          ],
+          "sourceRef": "NE1-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "225",
+          "bbox": [
+            601.56,
+            783.84,
+            614.03,
+            788.64
+          ],
+          "sourceRef": "NE1-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "208",
+          "bbox": [
+            130.48,
+            827.04,
+            142.95,
+            831.84
+          ],
+          "sourceRef": "NE1-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "223",
+          "bbox": [
+            552.63,
+            895.2,
+            565.1,
+            900.0
+          ],
+          "sourceRef": "NE1-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "M224",
+          "bbox": [
+            682.15,
+            981.12,
+            700.38,
+            985.92
+          ],
+          "sourceRef": "NE1-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "7300",
+          "bbox": [
+            353.07,
+            1164.48,
+            366.02,
+            1168.8
+          ],
+          "sourceRef": "NE1-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2023",
+          "bbox": [
+            690.3,
+            1189.92,
+            705.65,
+            1194.72
+          ],
+          "sourceRef": "NE1-F2#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

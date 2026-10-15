@@ -1,0 +1,26 @@
+{
+  "sourceId": "NE8-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "24 SU LOR, Le STOX VEST BULE Lye A CORK LOR, ——, 510 lig BRI FABRI FA ie) SARE fee) Of, i 1G cr a A OX LL LOINGE M CAMPUS PLANNING",
+      "labelCandidates": [
+        {
+          "text": "510",
+          "bbox": [
+            965.28,
+            331.48,
+            977.28,
+            336.28
+          ],
+          "sourceRef": "NE8-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

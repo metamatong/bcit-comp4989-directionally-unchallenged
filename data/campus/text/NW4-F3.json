@@ -1,0 +1,334 @@
+{
+  "sourceId": "NW4-F3",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 1224.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "U 3033 3041 3043 3062 SIM LAB SIM LAB STOR-INSTR 3000H STUDENT AMENITY STUDY ‘ LOUNGE NOOK 3031 3000F AV ROOM CORRIDOR EI = re 3029 ACTIVE 3028 3050 stan LEARNING SIM LAB STORINSTR 3027 ACTIVE LEARNING Fane J 3026 3000E we fan 30008 3023 ACTIVE 3020 3003 LEARNING COMM ‘SIM LAB ROOM 3021 sits ACTIVE of ow o I CORRIDOR: T a 3119 B 3082 BRIEFING ROOM 3015 IM LAB LAB PREP. ty 315 ic) ACTIVE se LEARNING oe 3086 SIM LAB 313 ic) LT 30004 ACTIVE CORRIDOR: CORRIDOR: LEARNING 3092 SIM LAB 3110 3108 3104 3100 SKILLS SKILLS SKILLS SKILLS LAB LAB LAB LAB xs me = + + + + NW04, THIRD FLOOR BCIT ‘SCALE: NTS CAMPUS PLANNING LAST UPDATED: MARCH 6, 2023",
+      "labelCandidates": [
+        {
+          "text": "3033",
+          "bbox": [
+            183.73,
+            300.0,
+            197.16,
+            305.76
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3041",
+          "bbox": [
+            322.84,
+            300.0,
+            335.8,
+            305.76
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3043",
+          "bbox": [
+            425.02,
+            301.44,
+            438.45,
+            307.2
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3062",
+          "bbox": [
+            578.53,
+            302.4,
+            591.96,
+            308.16
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3000H",
+          "bbox": [
+            514.73,
+            314.88,
+            532.96,
+            320.64
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3031",
+          "bbox": [
+            157.34,
+            369.12,
+            169.82,
+            374.88
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3000F",
+          "bbox": [
+            358.82,
+            366.24,
+            376.57,
+            372.0
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3029",
+          "bbox": [
+            155.91,
+            408.48,
+            169.82,
+            414.24
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3028",
+          "bbox": [
+            281.11,
+            425.28,
+            294.54,
+            431.04
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3050",
+          "bbox": [
+            388.56,
+            425.28,
+            402.48,
+            431.04
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3027",
+          "bbox": [
+            161.18,
+            448.8,
+            174.61,
+            454.56
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3026",
+          "bbox": [
+            159.74,
+            497.28,
+            173.65,
+            503.04
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3000E",
+          "bbox": [
+            203.4,
+            503.52,
+            221.15,
+            509.28
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3023",
+          "bbox": [
+            159.74,
+            549.12,
+            173.18,
+            554.88
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3020",
+          "bbox": [
+            278.71,
+            565.44,
+            292.14,
+            571.2
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3003",
+          "bbox": [
+            462.44,
+            560.16,
+            475.87,
+            565.92
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3021",
+          "bbox": [
+            157.82,
+            594.24,
+            170.78,
+            600.0
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3119",
+          "bbox": [
+            94.5,
+            685.44,
+            107.93,
+            691.2
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3082",
+          "bbox": [
+            630.34,
+            692.64,
+            643.77,
+            698.4
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3015",
+          "bbox": [
+            257.6,
+            707.52,
+            271.04,
+            713.28
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "315",
+          "bbox": [
+            94.5,
+            732.48,
+            108.41,
+            738.24
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3086",
+          "bbox": [
+            625.06,
+            760.32,
+            638.97,
+            766.08
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "313",
+          "bbox": [
+            94.5,
+            778.08,
+            108.41,
+            783.84
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3092",
+          "bbox": [
+            629.38,
+            822.24,
+            643.29,
+            828.0
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3110",
+          "bbox": [
+            107.93,
+            859.68,
+            121.85,
+            865.44
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3108",
+          "bbox": [
+            220.67,
+            859.68,
+            234.1,
+            865.44
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3104",
+          "bbox": [
+            328.12,
+            859.68,
+            342.03,
+            865.44
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3100",
+          "bbox": [
+            430.3,
+            859.68,
+            444.21,
+            865.44
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2023",
+          "bbox": [
+            696.06,
+            1189.92,
+            711.41,
+            1194.72
+          ],
+          "sourceRef": "NW4-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

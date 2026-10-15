@@ -1,0 +1,26 @@
+{
+  "sourceId": "SE14-F3",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "ec = q a a SE14, THIRD FLOOR CAMPUS PLANNING LAST UPDATED: NOVEMBER 14, 2022",
+      "labelCandidates": [
+        {
+          "text": "2022",
+          "bbox": [
+            1145.76,
+            757.94,
+            1161.12,
+            762.26
+          ],
+          "sourceRef": "SE14-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "sourceId": "NW5-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "——— EE 100 |OOA 108D LL S10} 107 — 1O NWO5 NWO5 O| O| EXT INT 215.24 223.56 — = = =— Be",
+      "labelCandidates": [
+        {
+          "text": "100",
+          "bbox": [
+            695.04,
+            287.35,
+            719.04,
+            297.42
+          ],
+          "sourceRef": "NW5-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "108D",
+          "bbox": [
+            893.28,
+            341.55,
+            921.12,
+            349.71
+          ],
+          "sourceRef": "NW5-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "107",
+          "bbox": [
+            636.96,
+            455.72,
+            660.48,
+            466.28
+          ],
+          "sourceRef": "NW5-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

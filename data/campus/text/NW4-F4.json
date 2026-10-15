@@ -1,0 +1,114 @@
+{
+  "sourceId": "NW4-F4",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 1224.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "7 7 FT | FER! 4060 TRANSFUSION 4041 LAB STUDY LOUNGE 4000F CORRIDOR: 4062 = LAB PREP. Q 4030 . 4035 ELEC. ROOM PROJECT BENCH 4028 LAB PREP 4066 WORKSHOP HEMATOLOGY CORRIDOR__ LAB 4070",
+      "labelCandidates": [
+        {
+          "text": "4060",
+          "bbox": [
+            619.3,
+            316.8,
+            633.22,
+            322.56
+          ],
+          "sourceRef": "NW4-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "4041",
+          "bbox": [
+            381.37,
+            342.72,
+            394.32,
+            348.0
+          ],
+          "sourceRef": "NW4-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "4000F",
+          "bbox": [
+            461.0,
+            378.72,
+            478.75,
+            384.48
+          ],
+          "sourceRef": "NW4-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "4062",
+          "bbox": [
+            615.47,
+            404.16,
+            629.38,
+            409.92
+          ],
+          "sourceRef": "NW4-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "4030",
+          "bbox": [
+            389.04,
+            429.12,
+            402.96,
+            434.88
+          ],
+          "sourceRef": "NW4-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "4035",
+          "bbox": [
+            233.14,
+            438.72,
+            247.05,
+            444.48
+          ],
+          "sourceRef": "NW4-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "4028",
+          "bbox": [
+            396.24,
+            471.84,
+            410.15,
+            477.6
+          ],
+          "sourceRef": "NW4-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "4066",
+          "bbox": [
+            623.62,
+            493.44,
+            637.53,
+            499.2
+          ],
+          "sourceRef": "NW4-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "4070",
+          "bbox": [
+            603.95,
+            567.36,
+            617.87,
+            573.12
+          ],
+          "sourceRef": "NW4-F4#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

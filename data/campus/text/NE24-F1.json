@@ -1,0 +1,48 @@
+{
+  "sourceId": "NE24-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "= 103 CLASS CLASS 103A | MECE CORRIEOR fan | | 104 CLASS NE24 NE24 INT EXT = = 629.50",
+      "labelCandidates": [
+        {
+          "text": "103",
+          "bbox": [
+            756.96,
+            119.93,
+            770.4,
+            125.68
+          ],
+          "sourceRef": "NE24-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "103A",
+          "bbox": [
+            749.76,
+            206.75,
+            768.48,
+            212.51
+          ],
+          "sourceRef": "NE24-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "104",
+          "bbox": [
+            756.96,
+            605.87,
+            770.4,
+            611.63
+          ],
+          "sourceRef": "NE24-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

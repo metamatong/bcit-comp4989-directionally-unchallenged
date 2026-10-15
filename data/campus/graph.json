@@ -1,0 +1,7 @@
+{
+  "id": "burnaby-unverified",
+  "campus": "Burnaby",
+  "status": "No campus routing topology has been verified. Do not infer edges from text coordinates.",
+  "nodes": [],
+  "edges": []
+}

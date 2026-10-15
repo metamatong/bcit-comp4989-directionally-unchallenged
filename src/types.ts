@@ -1,0 +1,98 @@
+export type Activity = {
+  id: string;
+  at: string;
+  tool: string;
+  summary: string;
+  sourceRefs: string[];
+  durationMs?: number;
+};
+export type PlanImage = {
+  file: string;
+  url: string;
+  width: number;
+  height: number;
+  sha256: string;
+};
+export type PlanBounds = [number, number, number, number];
+export type VisualPlan = {
+  id: string;
+  sourceId: string;
+  building: string;
+  floor: string;
+  page: number;
+  width: number;
+  height: number;
+  sourceUrl: string;
+  sourceSha256: string;
+  sourceRef: string;
+  attribution: string;
+  full: PlanImage;
+  overview: PlanImage;
+  tiles: (PlanImage & { id: string; bounds: PlanBounds })[];
+  geometry: { file: string; url: string; sha256: string };
+  primitiveCount: number;
+  longSegmentCount: number;
+  labelCount: number;
+};
+export type CampusLocationCandidate = {
+  id: string;
+  planId: string;
+  sourceRef: string;
+  building: string;
+  floor: string;
+  page: number;
+  bounds: PlanBounds;
+  confidence: 'low' | 'medium' | 'high';
+  matches: { photoFeature: string; planFeature: string }[];
+  limitations: string[];
+  verification: 'unverified-ai-hypothesis';
+};
+export type CampusPhotoAnalysis = {
+  requestId: string;
+  outcome: 'candidates' | 'insufficient_evidence';
+  observations: string[];
+  summary: string;
+  clarification: string;
+  candidates: CampusLocationCandidate[];
+  atlasPlanCount: number;
+  detailedPlanIds: string[];
+  buildingHint: string | null;
+  method: 'gemini-photo-floorplan';
+  generatedAt: string;
+};
+export type Session = {
+  id: string;
+  revision: number;
+  mode: 'live';
+  activity: Activity[];
+  notice: string;
+  agentStatus: string;
+  providerCalls: number;
+  lastTouched: number;
+  appliedActions: string[];
+  campusAnalysis: CampusPhotoAnalysis | null;
+  campusLocation: CampusLocationCandidate | null;
+};
+export type CatalogueRecord = {
+  id: string;
+  kind: string;
+  building: string | null;
+  floor: string | null;
+  title: string;
+  url: string;
+  localUrl: string;
+  attribution: string;
+  sourceRef: string;
+  text: string;
+  labelCount: number;
+  routingSupported: boolean;
+};
+export type Bootstrap = {
+  catalogue: Omit<CatalogueRecord, 'text'>[];
+  liveAvailable: boolean;
+  model: string;
+  setupNotice?: string | null;
+  coverage: { floorPlans: number; buildings: string[]; extractedLabelCandidates: number };
+  visualPlans: VisualPlan[];
+  photoLocalizationAvailable: boolean;
+};

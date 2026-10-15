@@ -1,0 +1,290 @@
+{
+  "sourceId": "SE6-F3",
+  "pages": [
+    {
+      "page": 1,
+      "width": 792.0,
+      "height": 1224.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "OFFICE OFFICE 307 OFFICE an 310 OFFICE ate 39 316 aa OFFICE OFFICE 325 OFFICE. 325 324 OFFICE 328 OFFICE 328 331 OFFICE, 332 OFFICE orice 337 OFFICE, OFFICE OFFICE OFFICE OFFICE 347 OFFICE OFFICE DU MEET oo OFFICE 365, cu 363 OFFICE OFFICE 372 us: CORRIDOR. 379 360 OFFICE, 377 375 375 3a OFFICE, LI 362 OFFICE 370 364 OFFICE, OFFICE = SEO6 SEO6 3700, 3700 3708, 366 OFFICE, OFFICE 03 03 INT EXT 1497.11 1545.09 — =. === == == = 204 = Fl",
+      "labelCandidates": [
+        {
+          "text": "307",
+          "bbox": [
+            366.5,
+            149.28,
+            375.61,
+            153.6
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "310",
+          "bbox": [
+            517.61,
+            200.16,
+            525.76,
+            204.0
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "316",
+          "bbox": [
+            466.76,
+            301.44,
+            474.91,
+            305.28
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "325",
+          "bbox": [
+            315.65,
+            351.84,
+            324.76,
+            356.16
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "325",
+          "bbox": [
+            366.5,
+            368.64,
+            375.61,
+            372.96
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "324",
+          "bbox": [
+            465.8,
+            368.64,
+            475.39,
+            372.96
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "328",
+          "bbox": [
+            366.5,
+            402.24,
+            375.61,
+            406.56
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "328",
+          "bbox": [
+            517.13,
+            402.24,
+            526.24,
+            406.56
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "331",
+          "bbox": [
+            366.98,
+            435.84,
+            374.65,
+            439.68
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "332",
+          "bbox": [
+            517.13,
+            453.12,
+            526.24,
+            456.96
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "337",
+          "bbox": [
+            315.65,
+            503.52,
+            324.28,
+            507.84
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "347",
+          "bbox": [
+            315.65,
+            655.2,
+            324.28,
+            659.52
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "363",
+          "bbox": [
+            360.74,
+            727.68,
+            369.86,
+            731.52
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "372",
+          "bbox": [
+            362.66,
+            765.12,
+            371.77,
+            769.44
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "379",
+          "bbox": [
+            315.65,
+            806.4,
+            324.28,
+            810.72
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "360",
+          "bbox": [
+            517.13,
+            807.36,
+            526.24,
+            811.2
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "377",
+          "bbox": [
+            365.06,
+            823.68,
+            374.17,
+            827.52
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "375",
+          "bbox": [
+            399.12,
+            823.68,
+            408.23,
+            827.52
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "375",
+          "bbox": [
+            433.18,
+            823.68,
+            442.29,
+            827.52
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "362",
+          "bbox": [
+            517.13,
+            856.8,
+            526.24,
+            861.12
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "370",
+          "bbox": [
+            416.39,
+            883.68,
+            425.98,
+            891.36
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "364",
+          "bbox": [
+            517.13,
+            907.68,
+            526.24,
+            911.52
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "3700",
+          "bbox": [
+            445.65,
+            956.64,
+            458.12,
+            960.48
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "366",
+          "bbox": [
+            517.13,
+            958.08,
+            526.24,
+            962.4
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "204",
+          "bbox": [
+            177.97,
+            1088.16,
+            194.76,
+            1092.48
+          ],
+          "sourceRef": "SE6-F3#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

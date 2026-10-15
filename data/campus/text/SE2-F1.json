@@ -1,0 +1,26 @@
+{
+  "sourceId": "SE2-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "ry LE Ca wi Il ye Il Il | eal Via I ian a a a a | Il qi ef a a a — Al 2 BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY SE02, FIRST FLOOR campus planning S SCALE: LAST UPDATED: JANUARY 18, 2005",
+      "labelCandidates": [
+        {
+          "text": "2005",
+          "bbox": [
+            1139.04,
+            758.42,
+            1153.92,
+            762.74
+          ],
+          "sourceRef": "SE2-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

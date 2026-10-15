@@ -1,0 +1,37 @@
+{
+  "sourceId": "SE8-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "T in i | i 2428 Le 6 L 1c log £6 OF orm = K 25 al A Ge a a AK A fe 19] a | ner 6 _.- _.- - — te N TAA BRITISH COLUMBIA INSTITUTE OF TECHNOLOGY SEO8, FIRST FLOOR campus planning LAST FEBRUARY 9, 2011",
+      "labelCandidates": [
+        {
+          "text": "2428",
+          "bbox": [
+            538.56,
+            134.32,
+            557.76,
+            139.12
+          ],
+          "sourceRef": "SE8-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "2011",
+          "bbox": [
+            1139.04,
+            758.42,
+            1153.44,
+            762.74
+          ],
+          "sourceRef": "SE8-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

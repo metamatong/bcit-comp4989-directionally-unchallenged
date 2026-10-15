@@ -1,0 +1,48 @@
+{
+  "sourceId": "NE21-F1",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "MECH Fy 104 I Cy x | Gl TAPE vest iB IR a OFFICE OFN D 108 log or a OFFICE 100 hic OFFICE aul OMICr NE2 | NE2 | Ol INT EXT 560.46 613.40 a a HI",
+      "labelCandidates": [
+        {
+          "text": "104",
+          "bbox": [
+            668.16,
+            109.85,
+            680.64,
+            114.17
+          ],
+          "sourceRef": "NE21-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "108",
+          "bbox": [
+            741.6,
+            390.48,
+            755.52,
+            399.6
+          ],
+          "sourceRef": "NE21-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        },
+        {
+          "text": "100",
+          "bbox": [
+            696.96,
+            431.74,
+            710.88,
+            437.49
+          ],
+          "sourceRef": "NE21-F1#page=1",
+          "reviewStatus": "unreviewed-extraction"
+        }
+      ]
+    }
+  ]
+}

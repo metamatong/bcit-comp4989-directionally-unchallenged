@@ -1,0 +1,14 @@
+{
+  "sourceId": "SW2-F2",
+  "pages": [
+    {
+      "page": 1,
+      "width": 1224.0,
+      "height": 792.0,
+      "textMethod": "local-tesseract-ocr; unreviewed",
+      "coordinateSystem": "PDF points; top-left origin; not geographic; no inferred scale",
+      "text": "VAN VY Q > > WS aN A \\ > LS » S <S 2. JS YY Q A \\ \\ 4 \\ 250.98 — CAMPUS PLANNING",
+      "labelCandidates": []
+    }
+  ]
+}
