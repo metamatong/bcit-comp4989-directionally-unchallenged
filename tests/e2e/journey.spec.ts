@@ -1,50 +1,31 @@
 import { test, expect } from '@playwright/test';
 import { resolve } from 'node:path';
-import { mkdir } from 'node:fs/promises';
 import type { Session } from '../../src/types';
 
 const fixture = resolve('data/campus/visual/png/SE12-F1-p1/overview.png');
 
-test('opens only official plans, removes demo controls, and keeps the source library available without Gemini', async ({
+test('starts with photo controls, with no library, plan images or promotional heading', async ({
   page,
-}, info) => {
+}) => {
   const errors: string[] = [];
+  const planImages: string[] = [];
   page.on('pageerror', (error) => errors.push(error.message));
+  page.on('request', (request) => {
+    if (request.url().includes('/data/campus/visual/')) planImages.push(request.url());
+  });
   await page.goto('/');
   await expect(page.getByTestId('provider-status')).toHaveText('Setup required');
-  await expect(page.getByRole('heading', { name: 'Find a location' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Find my location', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Location result', exact: true })).toBeVisible();
   await expect(
-    page.getByRole('button', { name: /demo|landmark|closure|route|checkpoint/i }),
+    page.getByRole('button', {
+      name: /library|browse.*plans|explore.*plans|demo|landmark|closure|route|checkpoint/i,
+    }),
   ).toHaveCount(0);
   expect(await page.locator('body').innerText()).not.toMatch(
-    /Cedar|Maple|Demo mode|Use demo photo/,
+    /YOUR CAMPUS COMPANION|Your next step, made simple|Let the photo tell the story|Cedar|Maple/,
   );
-  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
-    true,
-  );
-  await mkdir('docs/screenshots', { recursive: true });
-  await page.screenshot({
-    path: `docs/screenshots/${info.project.name}-setup.png`,
-    fullPage: true,
-  });
-  await page.getByRole('button', { name: 'Campus library', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Burnaby floor-plan collection' })).toBeVisible();
-  await page.getByRole('textbox', { name: 'Search official campus plans' }).fill('SE12');
-  await page.getByRole('button', { name: 'Search source text' }).click();
-  await expect(page.getByRole('heading', { name: 'Source text results' })).toBeVisible();
-  const source = page.locator('.source-card').first();
-  await expect(source.getByRole('link', { name: 'View downloaded PDF' })).toHaveAttribute(
-    'href',
-    /^\/data\/campus\/raw\//,
-  );
-  await expect(source.getByRole('link', { name: 'View PNG' })).toHaveAttribute(
-    'href',
-    /^\/data\/campus\/visual\//,
-  );
-  await expect(source.getByRole('link', { name: 'Geometry JSON' })).toHaveAttribute(
-    'href',
-    /\.json$/,
-  );
+  expect(planImages).toEqual([]);
   expect(errors).toEqual([]);
 });
 

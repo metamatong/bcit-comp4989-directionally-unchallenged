@@ -46,7 +46,7 @@ const port = Number(process.env.PORT ?? 3000),
 try {
   await listenServer(httpServer, port, host);
   console.log(
-    `CampusLens is ready at http://${host}:${port} · ${liveAvailable ? 'Gemini configured' : 'Gemini setup required; official plan library available'}`,
+    `CampusLens is ready at http://${host}:${port} · ${liveAvailable ? 'Gemini configured' : 'Gemini setup required'}`,
   );
   if (setupNotice) console.log(`Gemini configuration: ${setupNotice}`);
 } catch (error) {

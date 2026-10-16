@@ -2,7 +2,7 @@
 
 A mobile-friendly BCIT Burnaby photo-to-floor-plan app. Gemini compares an uploaded photograph with real BCIT floor-plan PNGs and extracted geometry, then proposes source-linked regions for review.
 
-The library contains **89 official floor plans covering 45 Burnaby buildings**, plus the campus map. All floor plans have PNGs and structured geometry JSON. Results are **unverified AI location hypotheses**. Real walking routes remain unsupported.
+The internal reference dataset contains **89 official floor plans covering 45 Burnaby buildings**, plus the campus map. All floor plans have PNGs and structured geometry JSON. Results are **unverified AI location hypotheses**. Real walking routes remain unsupported.
 
 This does not train a model on BCIT. Gemini is pretrained and compares a photo with plan drawings; the plans are not labeled camera-view examples, so reliable exact positioning is not guaranteed.
 
@@ -27,9 +27,11 @@ npm run dev
 
 Open [CampusLens locally](http://127.0.0.1:3000). Configure `GEMINI_API_KEY`, a primary `GEMINI_MODEL`, and an ordered `GEMINI_FALLBACK_MODELS` list in the private `.env`. The defaults use Gemini 2.5 Flash-Lite with Gemini 2.5 Flash as fallback; Google lists both on its free tier. Set `AI_FREE_TIER_CONFIRMED=true` only after verifying model access and eligibility for your API project. Keys stay server-side. Existing private settings are preserved.
 
-The Node server does not restart automatically when files change. Restart it manually after backend or environment changes: Ctrl+C, then `npm run dev`. Frontend edits can still refresh through Vite HMR on the same port. Do not launch another instance on port 3000. Without valid provider configuration, photo analysis is disabled and the app displays setup guidance; browsing official plans still works.
+The Node server does not restart automatically when files change. Restart it manually after backend or environment changes: Ctrl+C, then `npm run dev`. Frontend edits can still refresh through Vite HMR on the same port. Do not launch another instance on port 3000. Without valid provider configuration, photo analysis is disabled and the app displays setup guidance.
 
 ## Use
+
+There is no Campus library, general plan browser, or introductory marketing banner. Start with photo input; the result shows the matching plan region and links to that plan. Full source data and geometry remain available to Gemini on the server.
 
 1. Select **Find my location**, then upload or capture a campus photo.
 2. Agree to send this photo to Google and select Analyze.
@@ -77,11 +79,11 @@ mvp/
 ├── src/
 │   ├── App.tsx, main.tsx, styles.css
 │   ├── api.ts, photo.ts, types.ts
-│   └── components/  CampusLibrary, CampusLocationResults
+│   └── components/  CampusLocationResults
 ├── server/
 │   ├── index.ts, app.ts, runtime.ts
 │   ├── provider.ts, photo-localization.ts, session.ts
-│   └── data.ts, retrieval.ts, visual-data.ts
+│   └── data.ts, visual-data.ts
 ├── data/campus/
 │   ├── floor-plans-source.html, manifest.json, coverage.json, catalogue.json
 │   ├── graph.json, landmarks.json  Empty placeholders for reviewed real records

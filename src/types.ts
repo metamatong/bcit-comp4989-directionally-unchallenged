@@ -89,7 +89,6 @@ export type CatalogueRecord = {
   routingSupported: boolean;
 };
 export type Bootstrap = {
-  catalogue: Omit<CatalogueRecord, 'text'>[];
   liveAvailable: boolean;
   model: string;
   setupNotice?: string | null;

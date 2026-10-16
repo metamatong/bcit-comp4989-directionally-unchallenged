@@ -2,13 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import {
   AlertTriangle,
   ArrowUpRight,
-  BookOpen,
   Camera,
   Compass,
   Info,
   LoaderCircle,
   LocateFixed,
-  Map,
   RotateCcw,
   Search,
   ShieldCheck,
@@ -24,17 +22,14 @@ import {
   clearLegacyModePreference,
 } from './api';
 import { preparePhoto, type PreparedPhoto } from './photo';
-import { CampusLibrary } from './components/CampusLibrary';
-import { CampusLocationResults, CampusPhotoWelcome } from './components/CampusLocationResults';
+import { CampusLocationResults, PhotoEmptyState } from './components/CampusLocationResults';
 import type { Bootstrap, Session } from './types';
 
-type View = 'plans' | 'library';
 type Modal = 'location' | 'about' | null;
 
 export default function App() {
   const [data, setData] = useState<Bootstrap>();
   const [session, setSession] = useState<Session>();
-  const [view, setView] = useState<View>('plans');
   const [modal, setModal] = useState<Modal>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -189,7 +184,6 @@ export default function App() {
   async function confirmCampus(candidateId: string) {
     if (await send({ type: 'confirm-campus-region', candidateId })) {
       closeModal();
-      setView('plans');
     }
   }
 
@@ -198,7 +192,7 @@ export default function App() {
       <main className="loading-page">
         <Compass size={42} />
         <h1>CampusLens</h1>
-        <p>{error || 'Getting your campus companion ready…'}</p>
+        <p>{error || 'Loading…'}</p>
         {error && (
           <button className="primary" onClick={() => location.reload()}>
             Try again
@@ -206,7 +200,9 @@ export default function App() {
         )}
       </main>
     );
-  const plans = data.visualPlans;
+  const plans = data.visualPlans.filter((plan) =>
+    session.campusAnalysis?.candidates.some((candidate) => candidate.planId === plan.id),
+  );
   const photoReady = data.liveAvailable && data.photoLocalizationAvailable;
   return (
     <div className="app-shell">
@@ -216,7 +212,6 @@ export default function App() {
           href="#"
           onClick={(event) => {
             event.preventDefault();
-            setView('plans');
           }}
         >
           <span className="brand-mark">
@@ -225,12 +220,6 @@ export default function App() {
           campus<span className="brand-light">lens</span>
           <span className="brand-dot">.</span>
         </a>
-        <nav aria-label="Main navigation">
-          <button className={view === 'library' ? 'active' : ''} onClick={() => setView('library')}>
-            <BookOpen size={17} />
-            Campus library
-          </button>
-        </nav>
         <div className="header-end">
           <span
             className={`provider-status ${data.liveAvailable ? 'live' : ''}`}
@@ -249,11 +238,7 @@ export default function App() {
         </div>
       </header>
       <main>
-        <div className="page-intro">
-          <div>
-            <h1>{view === 'library' ? 'Campus plans' : 'Find your location'}</h1>
-          </div>
-        </div>
+        <h1 className="visually-hidden">CampusLens photo location</h1>
         {!data.liveAvailable && (
           <div className="setup-notice" role="note">
             <ShieldCheck size={21} />
@@ -261,8 +246,7 @@ export default function App() {
               <strong>Gemini setup required</strong>
               <p>
                 {data.setupNotice ??
-                  'Photo analysis needs a Gemini key configured on the server. Add your key and restart the app.'}{' '}
-                You can browse all official plans now.
+                  'Photo analysis needs a Gemini key configured on the server. Add your key and restart the app.'}
               </p>
             </div>
           </div>
@@ -277,42 +261,38 @@ export default function App() {
             </button>
           </div>
         )}
-        {view === 'library' ? (
-          <CampusLibrary data={data} onError={setError} />
-        ) : (
-          <section className="workspace">
-            {session.campusAnalysis ? (
-              <>
-                <div className="result-actions">
-                  <button className="secondary" onClick={() => setModal('location')}>
-                    <Camera size={17} />
-                    New photo
-                  </button>
-                  <button
-                    className="text-button"
-                    disabled={busy}
-                    onClick={() => {
-                      closeModal();
-                      void send({ type: 'reset' });
-                    }}
-                  >
-                    <RotateCcw size={15} />
-                    Clear
-                  </button>
-                </div>
-                <CampusLocationResults
-                  analysis={session.campusAnalysis}
-                  plans={plans}
-                  selectedId={session.campusLocation?.id}
-                  onConfirm={(id) => void confirmCampus(id)}
-                  busy={busy}
-                />
-              </>
-            ) : (
-              <CampusPhotoWelcome planCount={plans.length} onUpload={() => setModal('location')} />
-            )}
-          </section>
-        )}
+        <section className="workspace">
+          {session.campusAnalysis ? (
+            <>
+              <div className="result-actions">
+                <button className="secondary" onClick={() => setModal('location')}>
+                  <Camera size={17} />
+                  New photo
+                </button>
+                <button
+                  className="text-button"
+                  disabled={busy}
+                  onClick={() => {
+                    closeModal();
+                    void send({ type: 'reset' });
+                  }}
+                >
+                  <RotateCcw size={15} />
+                  Clear
+                </button>
+              </div>
+              <CampusLocationResults
+                analysis={session.campusAnalysis}
+                plans={plans}
+                selectedId={session.campusLocation?.id}
+                onConfirm={(id) => void confirmCampus(id)}
+                busy={busy}
+              />
+            </>
+          ) : (
+            <PhotoEmptyState onUpload={() => setModal('location')} />
+          )}
+        </section>
       </main>
       <footer>
         <span>
@@ -354,7 +334,7 @@ export default function App() {
                 <p className="setup-notice">
                   {!data.liveAvailable
                     ? (data.setupNotice ??
-                      'Photo analysis is unavailable until Gemini is configured on the server. The official plan library remains available.')
+                      'Photo analysis is unavailable until Gemini is configured on the server.')
                     : 'Floor-plan images are not ready on this server. Restart after preparing the source plans.'}
                 </p>
               )}
@@ -450,8 +430,8 @@ export default function App() {
                 />
               )}
               <p className="helper">
-                <ShieldCheck size={13} /> Resized on your device. CampusLens does not save photos.
-                or location history.
+                <ShieldCheck size={13} /> Resized on your device. CampusLens does not save photos or
+                location history.
               </p>
             </>
           )}
@@ -460,12 +440,11 @@ export default function App() {
               <span className="modal-icon">
                 <Compass size={25} />
               </span>
-              <p className="eyebrow">REAL CAMPUS SOURCES</p>
-              <h2>A prototype with clear boundaries.</h2>
+              <h2>About CampusLens</h2>
               <p>
                 CampusLens compares photographs with {data.coverage.floorPlans} official BCIT
-                Burnaby floor plans across {data.coverage.buildings.length} buildings. The library
-                also includes the campus map.
+                Burnaby floor plans across {data.coverage.buildings.length} buildings. Relevant
+                plans appear with the location result.
               </p>
               <div className="about-section">
                 <h3>What you can do</h3>
@@ -490,15 +469,6 @@ export default function App() {
                   analysis removes the current result. Google’s free-tier data handling applies.
                 </p>
               </div>
-              <a
-                className="text-button"
-                href="https://www.bcit.ca/facilities/campus-maps/floor-plans/"
-                target="_blank"
-                rel="noreferrer"
-              >
-                Official BCIT floor-plan source
-                <ArrowUpRight size={15} />
-              </a>
             </>
           )}
         </div>

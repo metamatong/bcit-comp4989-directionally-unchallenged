@@ -129,6 +129,11 @@ test('photo → explicit consent → real plan region → confirmation, without 
   await expect(
     page.getByRole('dialog').getByRole('heading', { name: 'SE12 · Floor 1' }),
   ).toHaveCount(1);
+  await expect(page.getByRole('dialog').locator('.plan-region img')).toHaveCount(1);
+  await expect(page.getByRole('dialog').locator('.plan-region img')).toHaveAttribute(
+    'src',
+    /SE12-F1-p1\/overview\.png$/,
+  );
   expect(uploads).toHaveLength(1);
   expect(uploads[0].consent).toBe(true);
   expect(uploads[0].image.mimeType).toBe('image/jpeg');
@@ -137,16 +142,14 @@ test('photo → explicit consent → real plan region → confirmation, without 
   expect(requests.some((url) => url.includes('/ocr/'))).toBe(false);
   await expect(page.getByRole('dialog').getByText('Source files', { exact: true })).toBeVisible();
   await page.getByRole('dialog').getByText('Source files', { exact: true }).click();
-  await expect(page.getByRole('dialog').getByRole('link', { name: 'Geometry' })).toHaveAttribute(
-    'href',
-    /SE12-F1-p1\.json$/,
-  );
+  await expect(
+    page.getByRole('dialog').getByRole('link', { name: 'View full plan' }),
+  ).toHaveAttribute('href', /SE12-F1-p1\/full\.png$/);
   await page
     .getByRole('dialog')
     .getByRole('button', { name: 'Confirm this possible region', exact: true })
     .first()
     .click();
-  await expect(page.getByRole('button', { name: 'Region selected', exact: true })).toBeDisabled();
   await expect(page.getByRole('button', { name: 'Region selected', exact: true })).toBeDisabled();
   await expect(page.getByRole('img', { name: /Synthetic navigation map/ })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
@@ -164,9 +167,7 @@ test('ambiguous photo asks for another view and never supplies a demo match', as
   await choosePhoto(page);
   await page.getByRole('checkbox', { name: /Send this photo to Google Gemini/ }).check();
   await page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }).click();
-  await expect(
-    page.getByRole('dialog').getByText('More visual evidence is needed', { exact: true }),
-  ).toBeVisible();
+  await expect(page.getByRole('dialog').getByText('No clear match', { exact: true })).toBeVisible();
   await expect(
     page.getByRole('dialog').getByRole('button', { name: 'Confirm this possible region' }),
   ).toHaveCount(0);
@@ -210,7 +211,7 @@ test('clearing an analysis removes the result without changing provider or loadi
     .getByRole('button', { name: 'Confirm this possible region', exact: true })
     .click();
   await page.getByRole('button', { name: 'Clear', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Find a location' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Location result' })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Best match' })).toHaveCount(0);
   await expect(page.getByTestId('provider-status')).toHaveText('Gemini ready');
   expect(uploads).toHaveLength(1);

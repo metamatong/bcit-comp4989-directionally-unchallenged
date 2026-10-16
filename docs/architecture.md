@@ -12,15 +12,15 @@ CampusLens is a local React/TypeScript client and Express server for photo compa
 6. Completion status and tool arguments are checked, including source scope and normalized region coordinates. A failed/cancelled turn rolls back partial hypotheses.
 7. Gemini returns only the best supported region or abstains. The client displays that source-linked estimate; only the user can confirm it.
 
-`server/photo-localization.ts` owns the two-stage workflow. `provider.ts` owns the REST adapter, completion parsing, bounded retries, ordered Gemini model failover and request budgets. `visual-data.ts` verifies and supplies public plan assets. `session.ts` stores only transient structured results/activity. The source library/search require no model.
+`server/photo-localization.ts` owns the two-stage workflow. `provider.ts` owns the REST adapter, completion parsing, bounded retries, ordered Gemini model failover and request budgets. `visual-data.ts` verifies and supplies public plan assets. `session.ts` stores only transient structured results/activity. The complete source dataset stays on the server. The client shows plan images only for candidates in a location result; there is no library/search screen.
 
 ## API and state
 
-- `GET /api/bootstrap`: source catalogue, coverage, visual plan metadata and provider readiness. No fictional graph or default-mode setting.
+- `GET /api/bootstrap`: coverage, visual plan metadata used to display results and provider readiness. The general source catalogue is not exposed. No fictional graph or default-mode setting.
 - `POST /api/sessions`: empty object creates a live-analysis session. Provider readiness controls the setup notice, not a fallback mode.
 - `POST /api/sessions/:id/photo`: consented photo comparison.
 - `POST /api/sessions/:id/actions`: only `confirm-campus-region` and `reset`.
-- `GET /api/sessions/:id`, `GET /api/search`, `GET /api/health`: state, official source search and readiness.
+- `GET /api/sessions/:id`, `GET /api/health`: state and readiness. The removed `/api/search` endpoint returns HTTP 404.
 
 A session contains its capability ID, revision, `mode: live` marker, campus analysis/confirmed hypothesis, provider attempt count, short activity summaries, applied request IDs and expiry. It has no synthetic node, route, destination, disruption or replay fields. Removed action types are rejected. Browser mode preferences are cleared.
 

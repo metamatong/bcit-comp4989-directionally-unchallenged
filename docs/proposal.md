@@ -15,11 +15,11 @@ The Live flow is photo → visual plan shortlist → detailed image/geometry com
 
 A mobile-first React/TypeScript client connects to an Express server. The client resizes photos and obtains per-image consent. One LLM orchestrator selects official plan pages for detailed inspection and returns typed region hypotheses. The server validates tool arguments, source IDs, completion status and region bounds. A two-stage workflow, 60-second deadline, bounded retries, shared request budgets and transactional rollback limit inference. Only user confirmation selects a proposed region; walking routes are unavailable.
 
-The server-side adapter uses a configured Gemini model and can fall through to an ordered list of Gemini models on quota, service, timeout or invalid-model failures. New installs default to Gemini 2.5 Flash-Lite with Gemini 2.5 Flash as fallback; Google's current pricing page lists both with free-tier input/output. Existing private model settings are preserved. The actual account's free-tier eligibility and quota must still be checked. Earlier photo checks encountered overload, timeouts, response limits and quota errors; successful visual localization remains unverified. Missing configuration gives setup guidance while official source browsing remains available.
+The server-side adapter uses a configured Gemini model and can fall through to an ordered list of Gemini models on quota, service, timeout or invalid-model failures. New installs default to Gemini 2.5 Flash-Lite with Gemini 2.5 Flash as fallback; Google's current pricing page lists both with free-tier input/output. Existing private model settings are preserved. The actual account's free-tier eligibility and quota must still be checked. Earlier photo checks encountered overload, timeouts, response limits and quota errors; successful visual localization remains unverified. Missing configuration gives setup guidance. Source plans stay behind the scenes and appear only with relevant location results.
 
 ### 3. Core components and current scope
 
-The mobile-first MVP includes photo upload/native capture, per-photo consent, visual comparison, one region overlay with source links, searchable records and transient session state. Clearing analysis removes the current result. No live camera stream or automatic location tracking is used. No provider error can produce a substitute sample location.
+The mobile-first MVP includes photo upload/native capture, per-photo consent, visual comparison, one region overlay with relevant source links, internal source records and transient session state. Clearing analysis removes the current result. No live camera stream or automatic location tracking is used. No provider error can produce a substitute sample location.
 
 The source pipeline downloaded 89 Burnaby floor plans across 45 buildings and one campus map from official BCIT pages [1,2]. It records URLs, retrieval times, hashes, attribution, and page references. All 89 plans now have full PNGs, overviews, four detail crops, and geometry JSON. Eight overview sheets support visual shortlisting. The 566,620 extracted drawing primitives remain unclassified; they are not verified walls, doors, rooms or walking edges. Original PDFs remain unmodified.
 
@@ -33,7 +33,7 @@ Real-campus routes remain unsupported pending source review and field checks. Th
 
 **Incomplete responses and uncertainty.** An HTTP-success response may still end before producing an answer. The adapter checks completion status and rejects partial tool calls, unknown IDs and invalid coordinates. Low thinking and bounded output allowances leave room for structured results. Ambiguous scenes lead to clarification; a confirmed hypothesis remains unverified.
 
-**Provider and device limits.** Visual shortlisting and a public source-image cache reduce repeated work. Free-tier quotas depend on the API project and must be checked in AI Studio [5]. Timeouts and quota errors show retry guidance; the official library remains accessible. Real phone capture, HTTPS setup, Safari, battery impact and on-campus use remain untested [6].
+**Provider and device limits.** Visual shortlisting and a public source-image cache reduce repeated work. Free-tier quotas depend on the API project and must be checked in AI Studio [5]. Timeouts and quota errors show retry guidance; no substitute result is fabricated. Real phone capture, HTTPS setup, Safari, battery impact and on-campus use remain untested [6].
 
 ### Evaluation and delivery plan
 

@@ -9,7 +9,7 @@ export function newSession(providerAvailable = true): Session {
     activity: [],
     notice: providerAvailable
       ? 'Choose a photo to compare with official BCIT floor plans. Nothing is sent until you consent and select Analyze.'
-      : 'Photo analysis needs Gemini setup. You can browse the official BCIT plans while the provider is unavailable.',
+      : 'Photo analysis needs Gemini setup. Configure the server and restart to enable analysis.',
     agentStatus: providerAvailable ? 'Gemini · ready' : 'Gemini · setup required',
     providerCalls: 0,
     lastTouched: Date.now(),

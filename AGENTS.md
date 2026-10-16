@@ -3,8 +3,9 @@
 Read README.md and docs/project-brief.txt before changing behavior. The original brief is preserved as supplied; the latest user direction removes its synthetic fallback. The separately referenced assignment PDF was not provided.
 
 - Keep scope limited to official BCIT Burnaby source records.
+- Do not restore a Campus library screen or promotional hero copy. Keep the interface focused on photo input and location results.
 - Do not reintroduce Demo mode, fictional landmarks, sample-location controls, synthetic routing, or provider-failure fallbacks that fabricate results.
-- Gemini is the only photo-analysis path. Missing configuration and provider errors must be explicit; source browsing remains available.
+- Gemini is the only photo-analysis path. Missing configuration and provider errors must be explicit. Keep source plans behind the scenes; show only relevant plans with location results.
 - Keep API keys server-side and require verified free-tier eligibility. Push code only when authorized; do not deploy the app or submit coursework without an explicit request.
 - Send the actual consented photo with real source plans and geometry. Do not substitute OCR/sign matching.
 - Keep per-photo consent, original source hashes, normalized page coordinates and image-free session/log storage. Photos are transient.

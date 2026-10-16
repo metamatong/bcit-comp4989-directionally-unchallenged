@@ -1,4 +1,4 @@
-import { ArrowUpRight, Camera, Check, FileJson, FileText, MapPin } from 'lucide-react';
+import { ArrowUpRight, Camera, Check, FileText, MapPin } from 'lucide-react';
 import type { CampusLocationCandidate, CampusPhotoAnalysis, VisualPlan } from '../types';
 
 export function PlanRegion({
@@ -83,16 +83,12 @@ export function CampusLocationResults({
               <summary>Source files</summary>
               <div className="plan-source-links">
                 <a href={plan.full.url} target="_blank" rel="noreferrer">
-                  Full plan PNG
+                  View full plan
                   <ArrowUpRight size={14} />
-                </a>
-                <a href={plan.geometry.url} target="_blank" rel="noreferrer">
-                  <FileJson size={14} />
-                  Geometry
                 </a>
                 <a href={plan.sourceUrl} target="_blank" rel="noreferrer">
                   <FileText size={14} />
-                  Original PDF
+                  Source PDF
                 </a>
               </div>
               <p className="helper">
@@ -118,27 +114,16 @@ export function CampusLocationResults({
   );
 }
 
-export function CampusPhotoWelcome({
-  planCount,
-  onUpload,
-}: {
-  planCount: number;
-  onUpload: () => void;
-}) {
+export function PhotoEmptyState({ onUpload }: { onUpload: () => void }) {
   return (
-    <div className="campus-photo-welcome">
-      <span className="modal-icon">
-        <Camera size={29} />
-      </span>
-      <h2>Find a location</h2>
-      <p>Compare a photo with {planCount} official BCIT floor plans.</p>
+    <div className="photo-empty-state">
+      <Camera size={29} />
+      <h2>Location result</h2>
+      <p>Upload a photo to get a location estimate.</p>
       <button className="primary" onClick={onUpload}>
         <Camera size={18} />
         Find my location
       </button>
-      <p className="helper">
-        Your photo is sent only after consent. Unclear matches are not guessed.
-      </p>
     </div>
   );
 }

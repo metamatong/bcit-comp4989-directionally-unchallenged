@@ -130,45 +130,10 @@ a:hover {
 .brand-dot {
   color: #8ca36b;
 }
-.header nav {
-  display: flex;
-  height: 100%;
-  gap: 29px;
-}
-.header nav button {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  padding: 0 3px;
-  position: relative;
-  color: #7b847d;
-  font-size: 13px;
-  font-weight: 550;
-}
-.header nav button.active {
-  color: var(--green);
-}
-.header nav button.active:after {
-  content: '';
-  position: absolute;
-  height: 3px;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: #4c7b60;
-  border-radius: 3px 3px 0 0;
-}
 .header-end {
   display: flex;
   align-items: center;
   gap: 22px;
-}
-.campus-label {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12px;
-  color: #718074;
 }
 .provider-status {
   display: flex;
@@ -206,23 +171,6 @@ a:hover {
   max-width: 1040px;
   margin: auto;
   padding: 30px 5% 0;
-}
-.page-intro {
-  margin-bottom: 16px;
-}
-.eyebrow {
-  font-size: 9px;
-  letter-spacing: 1.7px;
-  font-weight: 650;
-  color: #7c8b71;
-  line-height: 1.5;
-}
-.page-intro h1 {
-  font-size: 29px;
-  font-weight: 550;
-  letter-spacing: -0.8px;
-  margin: 0;
-  line-height: 1.2;
 }
 .workspace {
   max-width: 760px;
@@ -403,11 +351,6 @@ a:hover {
   line-height: 1.2;
   margin: 8px 0 14px;
 }
-.dialog-content > p:not(.eyebrow):not(.helper) {
-  font-size: 12px;
-  color: #819473;
-  line-height: 1.8;
-}
 .photo-actions {
   display: flex;
   flex-wrap: wrap;
@@ -481,138 +424,6 @@ a:hover {
   color: #ac5a43;
   margin: 12px 0;
 }
-.library-summary {
-  display: flex;
-  gap: 35px;
-  align-items: center;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 24px;
-  background: #fffefa;
-}
-.library-summary > div {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: #79975f;
-}
-.library-summary strong {
-  font-size: 26px;
-  color: #385735;
-  font-weight: 500;
-}
-.library-summary span {
-  font-size: 11px;
-  color: #8c9e7b;
-}
-.library-note {
-  margin-left: auto;
-  max-width: 310px;
-}
-.library-note p {
-  font-size: 10px;
-  line-height: 1.7;
-  color: #8c9e7b;
-}
-.library-search {
-  margin: 25px 0 30px;
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  border: 1px solid #dbe5ce;
-  border-radius: 9px;
-  background: #fffefa;
-  padding: 6px 6px 6px 17px;
-  color: #91a87a;
-}
-.library-search input {
-  flex: 1;
-  width: 100%;
-  border: 0;
-  background: transparent;
-  font-size: 12px;
-  min-width: 0;
-  color: #547443;
-}
-.library-search input:focus {
-  outline: none;
-}
-.library-search:focus-within {
-  outline: 2px solid #8eb17a;
-}
-.library-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 14px;
-}
-.source-card {
-  border: 1px solid #dfe7d3;
-  border-radius: 11px;
-  padding: 20px;
-  background: #fffefa;
-  display: flex;
-  gap: 13px;
-  flex-wrap: wrap;
-  align-items: center;
-  min-width: 0;
-}
-.source-icon {
-  width: 47px;
-  height: 54px;
-  display: grid;
-  place-items: center;
-  border-radius: 7px;
-  background: #eff4e7;
-  color: #8aaa71;
-}
-.source-card .eyebrow {
-  font-size: 7px;
-  letter-spacing: 1px;
-}
-.source-card h3 {
-  font-size: 17px;
-  margin: 6px 0 7px;
-  font-weight: 550;
-  letter-spacing: -0.4px;
-}
-.source-card p:not(.eyebrow) {
-  font-size: 9px;
-  color: #95a782;
-}
-.source-card > div {
-  min-width: 0;
-}
-.source-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  width: 100%;
-  border-top: 1px solid #e8eedf;
-  padding-top: 14px;
-  margin-top: 3px;
-  font-size: 10px;
-}
-.source-card-footer a {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-  color: #67894f;
-}
-.source-excerpt {
-  overflow-wrap: anywhere;
-  font-size: 10px !important;
-  line-height: 1.8;
-  max-height: 120px;
-  overflow: auto;
-  width: 100%;
-}
-.source-attribution {
-  font-size: 10px;
-  color: #93a37f;
-  line-height: 1.85;
-  margin: 25px 0 10px;
-}
 .empty-state {
   text-align: center;
   padding: 50px;
@@ -663,23 +474,8 @@ a:hover {
   .header-end {
     gap: 10px;
   }
-  .campus-label {
-    display: none;
-  }
   .header {
     gap: 17px;
-  }
-  .header nav {
-    gap: 20px;
-  }
-  .library-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .library-note {
-    max-width: 220px;
-  }
-  .library-summary {
-    gap: 20px;
   }
 }
 @media (max-width: 800px) {
@@ -703,34 +499,12 @@ a:hover {
   .header-end .icon-button {
     display: none;
   }
-  .header nav {
-    order: 0;
-    width: auto;
-    height: 100%;
-    gap: 12px;
-    flex: 1;
-    justify-content: center;
-  }
-  .header nav button {
-    font-size: 10px;
-    gap: 4px;
-    white-space: nowrap;
-  }
   .provider-status {
     font-size: 9px;
     padding: 6px 8px;
   }
   .app-shell > main {
     padding: 22px 4% 0;
-  }
-  .page-intro {
-    margin-bottom: 12px;
-  }
-  .page-intro h1 {
-    font-size: 25px;
-  }
-  .eyebrow {
-    font-size: 8px;
   }
   .workspace {
     width: 100%;
@@ -772,60 +546,8 @@ a:hover {
   .dialog::backdrop {
     backdrop-filter: blur(2px);
   }
-  .library-summary {
-    flex-wrap: wrap;
-    gap: 16px;
-    padding: 18px;
-  }
-  .library-summary > div {
-    gap: 7px;
-  }
-  .library-summary strong {
-    font-size: 23px;
-  }
-  .library-summary span {
-    font-size: 10px;
-  }
-  .library-note {
-    width: 100%;
-    max-width: none;
-    margin-left: 0;
-    padding-top: 12px;
-    border-top: 1px solid var(--border);
-  }
-  .library-search {
-    padding: 8px;
-    gap: 8px;
-    margin: 20px 0;
-  }
-  .library-search .primary {
-    font-size: 9px;
-    padding: 10px;
-    max-width: 110px;
-  }
-  .library-search > svg {
-    width: 16px;
-  }
-  .library-search input {
-    font-size: 10px;
-  }
-  .library-grid {
-    grid-template-columns: 1fr;
-  }
-  .source-card {
-    padding: 18px;
-  }
   .section-heading h2 {
     font-size: 16px;
-  }
-  .source-card h3 {
-    font-size: 18px;
-  }
-  .source-card p:not(.eyebrow) {
-    font-size: 10px;
-  }
-  .source-card-footer {
-    font-size: 11px;
   }
   .error-banner {
     align-items: flex-start;
@@ -846,9 +568,6 @@ a:hover {
   .dialog .text-button {
     min-height: 44px;
   }
-  .source-attribution {
-    font-size: 10px;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -860,32 +579,17 @@ a:hover {
 }
 /* Secondary text remains legible on the pale surfaces. */
 .helper,
-.source-attribution,
 .photo-status,
-.source-card p:not(.eyebrow),
-.source-card-footer a,
-.source-card .eyebrow,
-.source-card p,
-.library-note p,
-.library-summary span,
-.dialog-content > p:not(.eyebrow):not(.helper),
 .about-section p,
 .app-shell > footer small,
 .app-shell > footer button,
 .section-heading > span {
   color: #617357;
 }
-.eyebrow {
-  color: #617552;
-}
 .app-shell > footer {
   color: #697b5d;
 }
 @media (max-width: 800px) {
-  .header nav button {
-    min-height: 44px;
-  }
-
   .icon-button {
     min-width: 44px;
     min-height: 44px;
@@ -893,12 +597,9 @@ a:hover {
   .dialog textarea {
     font-size: 16px;
   }
-  .library-search input {
-    font-size: 16px;
-  }
 }
 /* Real BCIT photo-to-plan comparison. These surfaces never imply a verified route. */
-.campus-photo-welcome {
+.photo-empty-state {
   border: 1px solid var(--border);
   border-radius: 16px;
   background: linear-gradient(145deg, #fffefa, #eef4e8);
@@ -910,19 +611,13 @@ a:hover {
   flex-direction: column;
   gap: 17px;
 }
-.campus-photo-welcome .modal-icon {
+.photo-empty-state .modal-icon {
   margin: 0;
 }
-.campus-photo-welcome h2 {
+.photo-empty-state h2 {
   font-size: 31px;
   letter-spacing: -0.8px;
   max-width: 420px;
-}
-.campus-photo-welcome > p:not(.eyebrow) {
-  font-size: 14px;
-  line-height: 1.8;
-  max-width: 540px;
-  color: #5f7354;
 }
 .campus-results {
   background: #fffefa;
@@ -1067,18 +762,15 @@ a:hover {
   font-size: 10px;
 }
 @media (max-width: 800px) {
-  .campus-photo-welcome {
+  .photo-empty-state {
     padding: 24px 18px;
     min-height: 0;
     gap: 14px;
   }
-  .campus-photo-welcome h2 {
+  .photo-empty-state h2 {
     font-size: 23px;
   }
-  .campus-photo-welcome > p:not(.eyebrow) {
-    font-size: 12px;
-  }
-  .campus-photo-welcome .primary {
+  .photo-empty-state .primary {
     width: 100%;
     min-height: 50px;
   }
