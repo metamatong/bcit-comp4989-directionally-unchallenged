@@ -4,10 +4,10 @@ The app uses the actual photo and detailed views in two separate API stages. Gem
 
 ## User flow
 
-1. Upload or capture a photo. The browser prepares a full view and four overlapping detail crops from the **original decoded image**, before discarding original metadata.
+1. Select **Find my location** to open the upload popup, then upload or capture a photo. The browser prepares a full view and four overlapping detail crops from the **original decoded image**, before discarding original metadata.
 2. Consent once to sending this photo and its detail views, then select Analyze.
-3. The client calls the label-reading endpoint and shows progress while Gemini reads visible identifiers.
-4. The client sends the same image bundle with the returned evidence ID to the location endpoint. Relevant source plans appear only with the resulting hypothesis.
+3. The popup remains open and shows progress while the client calls the label-reading endpoint and Gemini reads visible identifiers.
+4. The client sends the same image bundle with the returned evidence ID to the location endpoint. When analysis completes, the popup closes and relevant source plans appear with the resulting hypothesis on the main page.
 5. Confirm a region only if it agrees with the surroundings. The model can abstain and ask for another photo.
 
 The local server must be restarted after backend edits. Frontend HMR does not reload Node. Existing converted source files work without regeneration.
@@ -45,7 +45,7 @@ The client creates a context JPEG with a maximum 1,600-pixel long edge and four 
 
 Each view is capped at 450,000 encoded JPEG bytes, reducing quality and then size if necessary. This keeps five views within the server's existing 2.5 MB aggregate decoded-media limit and 4 MB JSON request limit. Original uploads remain limited to 8 MB and 50 million pixels. All output views are re-encoded to strip original metadata.
 
-Photo crop coordinates and floor-plan coordinates are separate. Photo crop bounds describe the original uploaded scene. Final location bounds are `[left, top, right, bottom]` in normalized coordinates of the **whole original floor-plan page**, never relative to a photo or plan crop. Source-label text boxes are not camera-position coordinates.
+Photo crop coordinates and floor-plan coordinates are separate. Photo crop bounds describe the original uploaded scene. Final location bounds are `[left, top, right, bottom]` in normalized coordinates of the **whole original floor-plan page**, never relative to a photo or plan crop. Source-label text boxes are not camera-position coordinates. Proposed highlight boxes are limited to at most 8% of the page and half-page in either dimension; Gemini is instructed to place a tight box only over the local photo-matching drawing and abstain if that region is not defensible. This prevents broad boxes from being presented, but does not establish that the remaining AI-proposed bounds are physically accurate.
 
 ## BCIT source preparation
 

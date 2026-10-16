@@ -50,6 +50,7 @@ describe('real-campus-only HTTP contract', () => {
       'events',
       'replayStage',
       'destinationId',
+      'campusLocation',
     ])
       expect(session).not.toHaveProperty(field);
     expect(session.providerCalls).toBe(0);
@@ -62,6 +63,7 @@ describe('real-campus-only HTTP contract', () => {
     { type: 'locate', text: 'Cedar welcome desk', sampleId: 'welcome' },
     { type: 'locate', text: 'hallway', manual: true },
     { type: 'confirm-location', nodeId: 'cedar-entry' },
+    { type: 'confirm-campus-region', candidateId: randomUUID() },
     { type: 'destination', text: 'Robotics lab' },
     { type: 'choose-destination', nodeId: 'maple-lab' },
     { type: 'checkpoint' },
@@ -79,14 +81,67 @@ describe('real-campus-only HTTP contract', () => {
     expect(body.liveAvailable).toBe(false);
     expect(body.coverage.floorPlans).toBe(89);
     expect(body.visualPlans).toHaveLength(89);
+    expect(body.directions.available).toBe(true);
+    expect(body.directions.nodes).toHaveLength(13);
+    expect(body.directions.segmentCount).toBe(14);
+    expect(body.directions.mapImage.sourceRef).toBe('burnaby-wayfinding#page=1');
     expect(body).not.toHaveProperty('graph');
     expect(body).not.toHaveProperty('catalogue');
     expect(body).not.toHaveProperty('defaultMode');
     expect(body).not.toHaveProperty('apiKey');
     expect(response.headers.get('cache-control')).toBe('no-store');
+    const map = await fetch(`${base}${body.directions.mapImage.url}`);
+    expect(map.status).toBe(200);
+    expect(map.headers.get('content-type')).toContain('image/png');
+    expect((await map.arrayBuffer()).byteLength).toBeGreaterThan(1000);
     const pdf = await fetch(`${base}/data/campus/raw/bse1201.pdf`);
     expect(pdf.status).toBe(200);
     expect(pdf.headers.get('content-type')).toContain('pdf');
+  });
+  it('calculates only routes between entries in the source-mapped pilot graph', async () => {
+    const response = await post(`${base}/api/directions`, {
+      fromNodeId: 'nw4-vicinity',
+      destination: 'SE16',
+    });
+    expect(response.status).toBe(200);
+    const { route } = await response.json();
+    expect(route.start.id).toBe('nw4-vicinity');
+    expect(route.destination.id).toBe('se16-vicinity');
+    expect(route.segments.length).toBeGreaterThan(1);
+    expect(
+      route.segments.every(
+        (segment: { sourceRef: string; points: number[][] }) =>
+          segment.sourceRef === 'burnaby-wayfinding#page=1' &&
+          segment.points.length >= 2 &&
+          segment.points.every(
+            (point) =>
+              point.length === 2 && point.every((coordinate) => coordinate >= 0 && coordinate <= 1),
+          ),
+      ),
+    ).toBe(true);
+    expect(route).not.toHaveProperty('steps');
+    expect(
+      await post(`${base}/api/directions`, {
+        fromNodeId: 'unmapped',
+        destination: 'SE16',
+      }),
+    ).toHaveProperty('status', 400);
+  });
+  it('resolves typed room labels exactly and never claims an indoor route', async () => {
+    const response = await post(`${base}/api/directions`, {
+      fromNodeId: 'nw4-vicinity',
+      destination: 'SE12 Floor 3 302',
+    });
+    expect(response.status).toBe(200);
+    const result = await response.json();
+    expect(result.destination).toMatchObject({
+      kind: 'room-label',
+      building: 'SE12',
+      floor: '3',
+      label: 'SE12 · Floor 3 · Room 302',
+    });
+    expect(result.route.destination.id).toBe('se12-vicinity');
+    expect(result.message).toContain('Indoor route to this room is not mapped');
   });
   it('returns a setup error instead of falling back when photo analysis is unconfigured', async () => {
     const session = await start();
@@ -100,7 +155,7 @@ describe('real-campus-only HTTP contract', () => {
     expect(body.error).not.toMatch(/demo/i);
     expect(body.session).toEqual(session);
   });
-  it('keeps reset idempotent and rejects stale state and unproposed confirmations', async () => {
+  it('keeps reset idempotent and rejects stale state and removed actions', async () => {
     const initial = await start();
     const requestId = randomUUID();
     const next: Session = await (await action(initial, { type: 'reset' }, requestId)).json();

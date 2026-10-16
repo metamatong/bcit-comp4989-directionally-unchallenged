@@ -16,7 +16,6 @@ export function newSession(providerAvailable = true): Session {
     appliedActions: [],
     photoEvidence: null,
     campusAnalysis: null,
-    campusLocation: null,
   };
 }
 

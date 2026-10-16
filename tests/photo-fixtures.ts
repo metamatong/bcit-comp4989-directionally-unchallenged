@@ -74,12 +74,12 @@ export function comparison(
         args: {
           outcome: 'candidates',
           observations: ['An exterior corridor and a room sign.'],
-          summary: 'A possible region requires confirmation.',
+          summary: 'The photo may match this source-plan region.',
           clarification: '',
           candidates: [
             {
               planId,
-              bounds: [0.2, 0.3, 0.5, 0.6],
+              bounds: [0.2, 0.3, 0.4, 0.55],
               confidence: 'low',
               matches: [
                 {

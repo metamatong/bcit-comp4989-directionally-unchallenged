@@ -51,7 +51,10 @@
   "extractedLabelCandidates": 1045,
   "routingVerified": false,
   "supportedRealRoutingNodes": 0,
-  "unsupported": "All campus routes, entrances, transitions, distances, floor alignment, accessibility, live conditions, and camera localization require review. CARI and other campuses excluded.",
+  "sourceTracedRouteNodes": 13,
+  "sourceTracedRouteEdges": 14,
+  "routeCoverage": "Central outdoor pedestrian routes to mapped building vicinities and named campus landmarks only; not field-verified.",
+  "unsupported": "Indoor routes, verified building entrances, distances, travel times, floor alignment, accessibility, live conditions, and precise camera-to-map localization are unavailable. CARI and other campuses excluded.",
   "floors": [
     {
       "building": "NE1",

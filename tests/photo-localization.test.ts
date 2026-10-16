@@ -1,10 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
-import {
-  analyzeCampusPhoto,
-  confirmCampusRegion,
-  comparisonSchema,
-} from '../server/photo-localization';
+import { analyzeCampusPhoto, comparisonSchema } from '../server/photo-localization';
 import { readPhotoEvidence, requirePhotoEvidence } from '../server/photo-evidence';
 import {
   photoEvidenceRequestSchema,
@@ -43,7 +39,6 @@ describe('separate photo evidence and source-grounded localization stages (mocke
     const { provider, captures } = fixture([labelReading(), comparison()]);
     const record = await readPhotoEvidence(session, input, provider);
     expect(session.campusAnalysis).toBeNull();
-    expect(session.campusLocation).toBeNull();
     expect(captures[0].options?.forceTool).toBe('read_photo_labels');
     expect(captures[0].contents[0].parts.filter((part) => part.inlineData)).toHaveLength(5);
     expect(JSON.stringify(captures[0].contents)).not.toContain('SE12-F3');
@@ -75,7 +70,6 @@ describe('separate photo evidence and source-grounded localization stages (mocke
     expect(result.candidates[0].floor).toBe('3');
     expect(result.candidates[0].labelMatches).toEqual([{ observedLabel: '302', planLabel: '302' }]);
     expect(session.photoEvidence).toBeNull();
-    expect(session.campusLocation).toBeNull();
     expect(JSON.stringify(session)).not.toContain(input.image.data);
     expect(session.activity.map((entry) => entry.tool)).toEqual([
       'read_photo_labels',
@@ -85,16 +79,15 @@ describe('separate photo evidence and source-grounded localization stages (mocke
     ]);
     for (const capture of captures) expect(capture.options?.thinkingLevel).toBe('low');
   });
-  it('can confirm only the proposed source-linked region', async () => {
+  it('keeps the photo result as an unverified estimate without adding confirmation state', async () => {
     const session = newSession(),
       input = photoInput();
     const { provider } = fixture([labelReading(), comparison()]);
     const record = await readPhotoEvidence(session, input, provider);
     await analyzeCampusPhoto(session, comparisonInput(input, record.evidence.id), provider, record);
-    confirmCampusRegion(session, session.campusAnalysis!.candidates[0].id);
-    expect(session.campusLocation?.planId).toBe('SE12-F3-p1');
+    expect(session.campusAnalysis?.candidates[0].verification).toBe('unverified-ai-hypothesis');
+    expect(session).not.toHaveProperty('campusLocation');
     expect(session).not.toHaveProperty('route');
-    expect(() => confirmCampusRegion(session, randomUUID())).toThrow('current photo comparison');
   });
   it('rejects SW1 as a source when the clear room 302 reading retrieved only SE12', async () => {
     const session = newSession(),
@@ -215,11 +208,17 @@ describe('separate photo evidence and source-grounded localization stages (mocke
     await expect(
       analyzeCampusPhoto(session, comparisonInput(input, record.evidence.id), provider, record),
     ).rejects.toThrow('region coordinates');
-    expect(session.campusLocation).toBeNull();
   });
   it('rejects more than one final candidate', () => {
     const args = comparison()[0].functionCall!.args as { candidates: unknown[] };
     args.candidates.push(args.candidates[0]);
+    expect(comparisonSchema.safeParse(args).success).toBe(false);
+  });
+  it('rejects a broad candidate highlight instead of presenting it as a location region', () => {
+    const args = comparison()[0].functionCall!.args as {
+      candidates: { bounds: number[] }[];
+    };
+    args.candidates[0].bounds = [0.1, 0.1, 0.6, 0.3];
     expect(comparisonSchema.safeParse(args).success).toBe(false);
   });
   it('cancels either stage without committing stale evidence or a result', async () => {

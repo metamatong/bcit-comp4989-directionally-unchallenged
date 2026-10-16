@@ -4,13 +4,13 @@ Verified October 16, 2026 on macOS arm64, Node 22.15.1. The current application 
 
 ## Current checks
 
-| Check | Result | Scope |
-|---|---|---|
-| `npm run test:unit` | **120 passed** | Crop preparation, exact-label, two-stage API, evidence binding and provider/default/failure-chain regressions |
-| Earlier `npm test` | **101 passed** | 79 unit/API cases and 22 browser cases after demo removal, before screen checks were stopped |
-| `npm run build` | Passed | TypeScript check and Vite production build |
-| `npm run data:validate` | Passed | 90 original PDF hashes, 89 geometry records and 631 derived asset hashes |
-| Documentation links | Checked | Local references match the current hierarchy |
+| Check                   | Result         | Scope                                                                                                         |
+| ----------------------- | -------------- | ------------------------------------------------------------------------------------------------------------- |
+| `npm run test:unit`     | **120 passed** | Crop preparation, exact-label, two-stage API, evidence binding and provider/default/failure-chain regressions |
+| Earlier `npm test`      | **101 passed** | 79 unit/API cases and 22 browser cases after demo removal, before screen checks were stopped                  |
+| `npm run build`         | Passed         | TypeScript check and Vite production build                                                                    |
+| `npm run data:validate` | Passed         | 90 original PDF hashes, 89 geometry records and 631 derived asset hashes                                      |
+| Documentation links     | Checked        | Local references match the current hierarchy                                                                  |
 
 The automated browser run had already completed when the user requested no further screen checks. No further browser test suite has run. On October 16, the user explicitly requested inspection of a displayed 404; only the existing page's error text was read, with no interactions or photo submission. Future validation should honor the no-screen-test preference. Automated tests use no real Gemini credentials or provider quota; separate live diagnostics are recorded below.
 
@@ -24,7 +24,7 @@ Browser tests used installed Chrome with desktop and phone-sized Chromium viewpo
 
 ## Source and live-model evidence
 
-All 89 floor plans have full PNGs, overviews and four overlapping detail crops. Eight overview sheets cover the corpus; 89 geometry files hold 566,620 unclassified drawing primitives. Original PDFs and derived assets retain source hashes and attribution. The campus graph/landmark placeholders remain empty.
+All 89 floor plans have full PNGs, overviews and four overlapping detail crops. Eight overview sheets cover the corpus; 89 geometry files hold 566,620 unclassified drawing primitives. Original PDFs and derived assets retain source hashes and attribution. At the time of the earlier verification, the campus graph/landmark placeholders were empty; the source-traced outdoor pilot added below supersedes that status.
 
 Earlier live diagnostics accepted the key/model but encountered HTTP 503, timeout, and a token cap. One reproduced HTTP 200 response had `MAX_TOKENS`, no answer parts and 1,726 thinking tokens against the old 1,800-token cap. The adapter now classifies incomplete results and uses low thinking with 4,096/8,192-token photo allowances. A post-fix check timed out and a subsequent check returned HTTP 429, so attempts stopped. See [provider notes](provider.md).
 
@@ -35,11 +35,10 @@ A successful current live photo-to-region match and physical-campus accuracy rem
 - Evaluate representative real campus photographs against reviewed ground truth; measure shortlist recall, abstention, incorrect-region rate and latency.
 - Verify account tier, model access and actual provider quotas.
 - Test physical-phone camera capture, secure HTTPS setup, Safari, accessibility, battery and network behavior when requested.
-- Review/field-validate actual campus connections, scale, floor alignment and accessibility before adding routes or ETAs.
+- Field-validate the source-traced outdoor pilot and review scale, floor alignment and accessibility before expanding routes or adding ETAs.
 - Reconcile the original assignment PDF, which was not supplied, and replace proposal group/member placeholders before submission.
 
 The prior synthetic-routing benchmark no longer describes the current product and was removed. No coursework, site or deployment was submitted/published.
-
 
 ## Gemini 3.6 setup follow-up
 
@@ -49,18 +48,31 @@ Startup/API/client configuration messages now distinguish a missing key, missing
 
 The proposal was updated to match the real-plan-only scope and regenerated as two pages. Automated text-boundary checks found no out-of-margin text. Visual inspection was skipped under the user's no-screen-check direction. Group/member placeholders remain; it was not submitted.
 
-
 ## Photo-focused interface
 
 The Campus library component, general catalogue/search endpoint, browse links, promotional intro/banner and empty-state slogans have been removed. Floor-plan assets and Gemini's two-stage image/geometry comparison remain intact. Only plans associated with returned location candidates are passed to the result display; full-plan and source-PDF links belong to those candidates. Geometry JSON remains an internal model input.
 
 All 83 unit/API tests, the production build and source-asset validation passed. API regression checks cover the missing catalogue/search endpoint and continued availability of plan assets for results. Browser test expectations were updated but were not executed, and no manual screen or screenshot checks were performed, per the user's request. The local server is restarted to load the backend changes. No live Gemini generation is required by this change.
 
+## Source-traced directions pilot — October 16, 2026
+
+Added an outdoor route pilot with 13 central-campus map locations and 14 undirected segments traced from the pedestrian paths on the official Burnaby wayfinding map (`burnaby-wayfinding#page=1`). The route API uses deterministic breadth-first search and returns normalized map polylines rather than sentence instructions. It minimizes mapped segments, not distance. An exact building-code match from a photo estimate automatically supplies its approximate map-side vicinity as the route start.
+
+Building endpoints are approximate map-side vicinities, not verified entrances. The network is not field-verified. Indoor links, stairs/elevators, measured distance, ETAs, accessibility and current closures remain unsupported. Routes ask users to compare against posted signs and the official source map.
+
+The route graph validator checks source references, unique node/edge IDs, connectivity, coverage-summary counts, normalized geometry, map-to-graph endpoints, map image provenance/hash and explicit unknown accessibility status. Mocked unit/API tests validate path calculation, unsupported endpoints, reversed route geometry, and exact photo-building-to-vicinity matching. A browser regression covers photo estimate → automatic mapped vicinity → typed destination → visual route overlay. Per the existing no-screen-test preference, no browser test suite or manual UI screen check was run for this change.
+
+## Visual-only route presentation
+
+The main-page route result now renders the computed path over a bounded crop of the original BCIT campus map, with distinct start and destination markers. The crop is generated reproducibly from the official PDF and hash-checked; each graph node and edge has normalized coordinates against that exact crop. This remains approximate, source-traced and unverified geometry, not an operational navigation guarantee. Written turn instructions were removed. AR is not implemented and would require reliable map registration and camera pose/heading.
+
+Validation for this update is limited to unit/API tests, the TypeScript/production build and data/hash validation. The Playwright suite and manual/browser/screenshot checks were intentionally skipped.
+
+The location-confirmation control was removed: the app presents the photo result as an unverified estimate and uses a matching building vicinity as the approximate route start. Destination entry is free text with browser speech recognition when supported. Exact source-plan label matching resolves a room destination; where outdoor topology exists, its visual route ends at the mapped building vicinity and the UI states that indoor routing is unavailable. API coverage checks the published map image URL; the updated browser regression checks for loaded map pixels and route geometry but remains unrun per the no-screen-check preference.
 
 ## Integration with the latest main branch
 
 The library removal was rebased onto the newer UI/provider changes already on main. The final integration preserves native photo capture, a single best-match result and configured Gemini model fallback behavior while removing library browsing and promotional copy. All 90 unit/API tests, the production build and validation of 90 original PDF hashes and 631 derived assets passed. Browser/screen checks were not run at the user's request; their expectations were updated. No live inference calls were made. The proposal was regenerated from the combined source, with automated page/margin checks only.
-
 
 ## Exact labels and original-image crops — October 16, 2026
 

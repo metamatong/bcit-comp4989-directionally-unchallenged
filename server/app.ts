@@ -6,12 +6,12 @@ import { newSession } from './session';
 import { ProviderError, type Provider } from './provider';
 import type { Session } from '../src/types';
 import { visualPlans } from './visual-data';
-import { analyzeCampusPhoto, confirmCampusRegion } from './photo-localization';
+import { analyzeCampusPhoto } from './photo-localization';
 import { readPhotoEvidence, PhotoEvidenceError, type PhotoEvidenceRecord } from './photo-evidence';
 import { photoEvidenceRequestSchema, photoRequestSchema, releasePhotoBytes } from './photo-media';
+import { directionCatalogue, resolveCampusDestination, routeCampus } from './directions';
 
 export const actionSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('confirm-campus-region'), candidateId: z.string().uuid() }).strict(),
   z.object({ type: z.literal('reset') }).strict(),
 ]);
 
@@ -77,8 +77,52 @@ export function createApp(options: {
       setupNotice: options.liveAvailable ? null : (options.setupNotice ?? null),
       visualPlans,
       photoLocalizationAvailable: visualPlans.length > 0,
+      directions: directionCatalogue,
     }),
   );
+  app.post('/api/directions', (req, res) => {
+    const parsed = z
+      .object({ fromNodeId: z.string().min(1), destination: z.string().trim().min(1).max(120) })
+      .strict()
+      .safeParse(req.body);
+    if (!parsed.success) {
+      res.status(400).json({ error: 'Enter a destination.' });
+      return;
+    }
+    try {
+      const destination = resolveCampusDestination(parsed.data.destination);
+      if (destination.kind === 'unmapped-room-label') {
+        res.json({
+          route: null,
+          destination: destination.resolution,
+          message: `Found this label on ${destination.resolution.building}, floor ${destination.resolution.floor}, but no outdoor route is mapped there.`,
+        });
+        return;
+      }
+      if (destination.kind === 'room-label' && destination.nodeId === parsed.data.fromNodeId) {
+        res.json({
+          route: null,
+          destination: destination.resolution,
+          message: `Found this label on ${destination.resolution.building}, floor ${destination.resolution.floor}. An indoor route to the room is not mapped.`,
+        });
+        return;
+      }
+      const route = routeCampus(parsed.data.fromNodeId, destination.nodeId);
+      res.json({
+        route,
+        destination: destination.resolution,
+        ...(destination.kind === 'room-label'
+          ? {
+              message: `Outdoor route to the ${destination.resolution.building} vicinity only. Indoor route to this room is not mapped.`,
+            }
+          : {}),
+      });
+    } catch (error) {
+      res.status(400).json({
+        error: error instanceof Error ? error.message : 'Could not resolve this destination.',
+      });
+    }
+  });
   app.post('/api/sessions', (req, res) => {
     if (
       !z
@@ -249,9 +293,7 @@ export function createApp(options: {
     }
     busy.add(session.id);
     try {
-      if (action.type === 'confirm-campus-region') {
-        confirmCampusRegion(session, action.candidateId);
-      } else if (action.type === 'reset') {
+      if (action.type === 'reset') {
         photoEvidence.delete(session.id);
         Object.assign(session, newSession(options.liveAvailable), {
           id: session.id,
