@@ -144,7 +144,7 @@ def process_source(source):
                 'architecturalElements': [], 'routingEdges': [],
                 'modelSummary': {'totalPrimitives': len(primitives), 'totalLongSegments': len(segments),
                     'sampledSegmentCount': len(model_segments), 'sampling': 'up to 8 longest per 4x4 grid cell; not complete topology',
-                    'segments': model_segments, 'labels': labels[:80], 'omittedLabelCount': max(0,len(labels)-80)}}
+                    'segments': model_segments, 'labels': labels, 'omittedLabelCount': 0}}
             geometry_path = OUTPUT / 'geometry' / f'{plan_id}.json'
             write_json(geometry_path, geometry, compact=True)
             results.append({'id': plan_id, 'sourceId': source['id'], 'building': source['building'],

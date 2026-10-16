@@ -55,7 +55,7 @@ test('prepares an image locally but disables analysis and sending when the key i
 }) => {
   const sent: string[] = [];
   page.on('request', (request) => {
-    if (request.url().endsWith('/photo')) sent.push(request.url());
+    if (/\/photo(?:\/evidence)?$/.test(request.url())) sent.push(request.url());
   });
   await page.goto('/');
   await page.getByRole('button', { name: 'Find my location', exact: true }).click();
@@ -68,7 +68,7 @@ test('prepares an image locally but disables analysis and sending when the key i
     page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }),
   ).toBeDisabled();
   await expect(
-    page.getByRole('checkbox', { name: /Send this photo to Google Gemini/ }),
+    page.getByRole('checkbox', { name: /Send this photo and its detail views/ }),
   ).toBeDisabled();
   expect(sent).toEqual([]);
 });
@@ -110,7 +110,7 @@ for (const failure of [
       current = await (await route.fetch()).json();
       await route.fulfill({ json: current });
     });
-    await page.route('**/api/sessions/*/photo', (route) =>
+    await page.route('**/api/sessions/*/photo/evidence', (route) =>
       route.fulfill({
         status: failure.status,
         json: {
@@ -128,7 +128,7 @@ for (const failure of [
     await page.goto('/');
     await page.getByRole('button', { name: 'Find my location', exact: true }).click();
     await page.getByLabel('Upload campus photo', { exact: true }).setInputFiles(fixture);
-    await page.getByRole('checkbox', { name: /Send this photo to Google Gemini/ }).check();
+    await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
     await page
       .getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true })
       .click();

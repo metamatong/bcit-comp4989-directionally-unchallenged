@@ -105,3 +105,10 @@ Future walking edges need independently reviewed endpoints, passages, transition
 ## Visual and geometry conversion
 
 All 89 floor-plan PDFs now also have full PNGs, bounded overviews, four overlapping crops, and structured geometry JSON under `data/campus/visual/`. Eight labeled overview sheets support coarse visual comparison. The corpus contains 566,620 extracted line/rectangle/curve primitives, explicitly unclassified. Source and derived hashes are checked by `npm run data:validate`. No room polygon, door, window, scale, accessibility property or walking edge is invented from those paths. The actual photo is compared with source images and sampled geometry, producing unverified region hypotheses rather than verified campus landmarks. See [photo-localization.md](photo-localization.md) for schema, conversion commands, scope and privacy.
+
+
+## Complete label retrieval
+
+Runtime lookup indexes every label in the geometry files' full `labels` arrays (5,463 extracted labels in the included corpus). This includes annotations and unreviewed OCR/PDF text; it is not a verified room count. Exact whole-identifier equality preserves leading zeroes, suffixes and all digits. The SE12 third-floor `302` label is included even though the older `modelSummary.labels` preview omitted it after 80 entries.
+
+`planGeometrySummary` also replaces that legacy preview with all source labels when preparing model input. The regeneration script writes complete summaries going forward. Existing PDFs, PNGs and geometry files remain byte-for-byte unchanged for this fix; their full label arrays already contain the needed data. `npm run data:validate` checks index completeness alongside source hashes.

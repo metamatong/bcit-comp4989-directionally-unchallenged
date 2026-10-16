@@ -6,7 +6,7 @@ The supplied original [brief](project-brief.txt) remains unchanged. The user's l
 |---|---|
 | Burnaby-only official sources | 89 floor plans / 45 buildings plus campus map; manifest, hashes and source links |
 | PDF conversion | Full PNGs, overviews, overlapping crops, atlas and geometry JSON for every floor plan |
-| Actual-photo interpretation | `server/photo-localization.ts` sends the actual consented photo in both Gemini stages |
+| Actual-photo interpretation | Both API stages send the context image and four crops from the original photo; plan comparison remains visual and source-grounded |
 | LLM agent and tools | One orchestrator shortlists supplied plans, eliminates conflicts, and returns only its best supported hypothesis or abstains |
 | Free-tier provider and server-side key | `server/provider.ts`, `.env.example`, [provider record](provider.md) |
 | User confirmation and uncertainty | One unverified location estimate, observable evidence, source links and explicit confirmation |

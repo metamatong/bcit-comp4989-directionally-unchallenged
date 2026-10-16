@@ -98,8 +98,37 @@ export function planImagePart(asset: PlanImage): ModelPart {
   return part;
 }
 
-export function planGeometrySummary(plan: VisualPlan) {
-  const data = JSON.parse(verifiedBytes(plan.geometry).toString('utf8'));
+const sourceLabelSchema = z.object({
+  text: z.string(),
+  bbox: z.tuple([
+    z.number().finite(),
+    z.number().finite(),
+    z.number().finite(),
+    z.number().finite(),
+  ]),
+  method: z.string(),
+  verified: z.boolean(),
+});
+export type SourceLabel = z.infer<typeof sourceLabelSchema>;
+const geometryEvidenceSchema = z.object({
+  id: z.string(),
+  sourceSha256: z.string(),
+  coordinateSystem: z.record(z.unknown()),
+  extraction: z.record(z.unknown()),
+  regions: z.array(z.unknown()),
+  labels: z.array(sourceLabelSchema),
+  modelSummary: z.object({
+    totalPrimitives: z.number(),
+    totalLongSegments: z.number(),
+    sampledSegmentCount: z.number(),
+    sampling: z.string(),
+    segments: z.array(z.unknown()),
+  }),
+});
+function loadGeometrySummary(plan: VisualPlan) {
+  const data = geometryEvidenceSchema.parse(
+    JSON.parse(verifiedBytes(plan.geometry).toString('utf8')),
+  );
   if (data.id !== plan.id || data.sourceSha256 !== plan.sourceSha256)
     throw new Error('Geometry provenance does not match its plan');
   return {
@@ -109,5 +138,18 @@ export function planGeometrySummary(plan: VisualPlan) {
     extraction: data.extraction,
     regions: data.regions,
     ...data.modelSummary,
+    // Legacy files contain an 80-label preview. Always use the complete source list.
+    labels: data.labels,
+    totalLabelCount: data.labels.length,
+    omittedLabelCount: 0,
   };
+}
+const geometryCache = new Map<string, ReturnType<typeof loadGeometrySummary>>();
+export function planGeometrySummary(plan: VisualPlan) {
+  let summary = geometryCache.get(plan.geometry.sha256);
+  if (!summary) {
+    summary = loadGeometrySummary(plan);
+    geometryCache.set(plan.geometry.sha256, summary);
+  }
+  return summary;
 }

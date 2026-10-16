@@ -1,7 +1,8 @@
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { readJson, root } from '../server/data';
-import { visualPlans, planAtlases } from '../server/visual-data';
+import { visualPlans, planAtlases, planGeometrySummary } from '../server/visual-data';
+import { roomLabelIndex } from '../server/room-labels';
 const manifest = readJson<{ sources: { file: string; sha256: string; campus: string }[] }>(
   'data/campus/manifest.json',
 );
@@ -61,3 +62,11 @@ if (visualPlans.length !== 89)
 console.log(
   `Validated ${visualPlans.length} source-linked geometry records and ${assetCount} generated asset hashes.`,
 );
+
+const labelCount = visualPlans.reduce(
+  (total, plan) => total + planGeometrySummary(plan).labels.length,
+  0,
+);
+if (roomLabelIndex().labelCount !== labelCount)
+  throw new Error('The room label index omits source labels.');
+console.log(`Indexed all ${labelCount} extracted source labels for exact identifier lookup.`);

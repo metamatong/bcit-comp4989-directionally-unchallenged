@@ -3,7 +3,7 @@
 ## An evidence-first campus wayfinding agent
 
 **COMP 4989 | Group [NUMBER] | Members [NAMES / STUDENT IDS]**
-**Proposal draft | October 15, 2026 | Non-binding scope**
+**Proposal draft | October 16, 2026 | Non-binding scope**
 
 ### 1. Novel AI agent use case
 
@@ -13,15 +13,16 @@ The Live flow is photo → visual plan shortlist → detailed image/geometry com
 
 ### 2. Architecture
 
-A mobile-first React/TypeScript client connects to an Express server. The client resizes photos and obtains per-image consent. One LLM orchestrator selects official plan pages for detailed inspection and returns typed region hypotheses. The server validates tool arguments, source IDs, completion status and region bounds. A two-stage workflow, 60-second deadline, bounded retries, shared request budgets and transactional rollback limit inference. Only user confirmation selects a proposed region; walking routes are unavailable.
+A React/TypeScript client sends a consented context image and four original-image crops to a dedicated photo-label API. Gemini reads visible room identifiers without plan hints. A second API request uses a short-lived evidence ID bound to the same image bundle. The server searches all extracted labels exactly, fetches relevant plans and asks Gemini to verify one region or abstain. A bounded visual shortlist remains available when labels are unreadable or ambiguous. Typed validation, deadlines, request budgets and rollback constrain the agent. Only the user confirms a location.
+
 
 The server-side adapter uses a configured Gemini model and can fall through to an ordered list of Gemini models on quota, service, timeout or invalid-model failures. New installs default to Gemini 2.5 Flash-Lite with Gemini 2.5 Flash as fallback; Google's current pricing page lists both with free-tier input/output. Existing private model settings are preserved. The actual account's free-tier eligibility and quota must still be checked. Earlier photo checks encountered overload, timeouts, response limits and quota errors; successful visual localization remains unverified. Missing configuration gives setup guidance. Source plans stay behind the scenes and appear only with relevant location results.
 
 ### 3. Core components and current scope
 
-The mobile-first MVP includes photo upload/native capture, per-photo consent, visual comparison, one region overlay with relevant source links, internal source records and transient session state. Clearing analysis removes the current result. No live camera stream or automatic location tracking is used. No provider error can produce a substitute sample location.
+The MVP includes photo upload/native capture, original-image detail crops, per-photo consent, separate reading/comparison requests, exact whole-label lookup, a source-linked region overlay and transient session state. Clearing analysis removes the current result. No live camera stream or automatic location tracking is used. No provider error can produce a substitute sample location.
 
-The source pipeline downloaded 89 Burnaby floor plans across 45 buildings and one campus map from official BCIT pages [1,2]. It records URLs, retrieval times, hashes, attribution, and page references. All 89 plans now have full PNGs, overviews, four detail crops, and geometry JSON. Eight overview sheets support visual shortlisting. The 566,620 extracted drawing primitives remain unclassified; they are not verified walls, doors, rooms or walking edges. Original PDFs remain unmodified.
+The source pipeline downloaded 89 Burnaby floor plans across 45 buildings and one campus map from official BCIT pages [1,2]. It records URLs, retrieval times, hashes, attribution, and page references. All 89 plans now have full PNGs, overviews, four detail crops, and geometry JSON. Eight overview sheets support visual shortlisting. The 566,620 extracted drawing primitives remain unclassified; they are not verified walls, doors, rooms or walking edges. All 5,463 extracted labels are searchable; the older 80-label preview is ignored. Whole identifiers such as 302 and 3021 are distinct. Original PDFs remain unmodified.
 
 Real-campus routes remain unsupported pending source review and field checks. The user explicitly removed the earlier synthetic fallback, including mode controls, fictional landmarks, routing, simulated closures and browser OCR. No custom training is required: source preprocessing, visual retrieval and pretrained LLM interpretation are separate operations. Raw drawing paths are not automatically promoted to navigable links.
 
@@ -37,7 +38,7 @@ Real-campus routes remain unsupported pending source review and field checks. Th
 
 ### Evaluation and delivery plan
 
-Completed work includes the local app, official source import and conversion, multimodal adapter, unit/API regression tests and desktop/mobile browser automation with mocked responses. Tests cover actual inline image transport, consent, source scope, coordinate validation, rollback, idempotency, stale responses, legacy-action rejection and provider failures. The latest code checks pass; further screen checks were skipped at the user's request. Mocked results do not establish campus accuracy.
+Completed work includes the local app, official source import and conversion, multimodal adapter, unit/API regression tests and desktop/mobile browser automation with mocked responses. Tests cover actual inline image transport, consent, source scope, coordinate validation, rollback, idempotency, stale responses, legacy-action rejection and provider failures. All 114 code/API tests, build and source validation pass; screen checks were skipped at the user's request. Mocked results do not establish campus accuracy.
 
 Next milestones are original-assignment reconciliation, a successful live photo walkthrough, representative campus-photo evaluation, physical phone checks and verified topology before adding navigation. Evaluation should measure shortlist recall, region errors, abstention and latency using reviewed ground truth. The team will assign data, interface, agent/testing and review owners using the member placeholders. A project walkthrough and requirements checklist accompany the app.
 

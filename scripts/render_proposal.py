@@ -42,7 +42,7 @@ def page_chrome(canvas, doc):
     canvas.setFont('Helvetica-Bold', 7.5)
     canvas.setFillColor(MUTED)
     canvas.drawString(49, height-36, 'CAMPUSLENS  /  COMP 4989')
-    canvas.drawRightString(width-49, height-36, 'PROPOSAL DRAFT  -  15 OCT 2026')
+    canvas.drawRightString(width-49, height-36, 'PROPOSAL DRAFT  -  16 OCT 2026')
     canvas.setStrokeColor(colors.HexColor('#dce3d5'))
     canvas.line(49, 37, width-49, 37)
     canvas.setFont('Helvetica', 7.2)

@@ -34,6 +34,26 @@ export type VisualPlan = {
   longSegmentCount: number;
   labelCount: number;
 };
+export type PhotoDetailCrop = {
+  id: 'nw' | 'ne' | 'sw' | 'se';
+  bounds: PlanBounds;
+  image: { mimeType: 'image/jpeg' | 'image/png' | 'image/webp'; data: string };
+};
+export type PhotoLabelReading = {
+  text: string;
+  clarity: 'clear' | 'uncertain';
+  viewId: 'full' | PhotoDetailCrop['id'];
+};
+export type PhotoEvidence = {
+  id: string;
+  requestId: string;
+  labels: PhotoLabelReading[];
+  observations: string[];
+  readAt: string;
+  expiresAt: string;
+  usedFallbackModel: boolean;
+};
+export type LabelMatch = { observedLabel: string; planLabel: string };
 export type CampusLocationCandidate = {
   id: string;
   planId: string;
@@ -45,6 +65,7 @@ export type CampusLocationCandidate = {
   confidence: 'low' | 'medium' | 'high';
   matches: { photoFeature: string; planFeature: string }[];
   limitations: string[];
+  labelMatches: LabelMatch[];
   verification: 'unverified-ai-hypothesis';
 };
 export type CampusPhotoAnalysis = {
@@ -58,6 +79,8 @@ export type CampusPhotoAnalysis = {
   detailedPlanIds: string[];
   buildingHint: string | null;
   method: 'gemini-photo-floorplan';
+  evidenceId: string;
+  labelRetrieval: { indexedLabels: number; exactMatchPlanIds: string[]; clearLabels: string[] };
   usedFallbackModel: boolean;
   generatedAt: string;
 };
@@ -71,6 +94,7 @@ export type Session = {
   providerCalls: number;
   lastTouched: number;
   appliedActions: string[];
+  photoEvidence: PhotoEvidence | null;
   campusAnalysis: CampusPhotoAnalysis | null;
   campusLocation: CampusLocationCandidate | null;
 };

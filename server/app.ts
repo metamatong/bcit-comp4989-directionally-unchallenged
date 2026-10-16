@@ -6,7 +6,9 @@ import { newSession } from './session';
 import { ProviderError, type Provider } from './provider';
 import type { Session } from '../src/types';
 import { visualPlans } from './visual-data';
-import { analyzeCampusPhoto, confirmCampusRegion, photoRequestSchema } from './photo-localization';
+import { analyzeCampusPhoto, confirmCampusRegion } from './photo-localization';
+import { readPhotoEvidence, PhotoEvidenceError, type PhotoEvidenceRecord } from './photo-evidence';
+import { photoEvidenceRequestSchema, photoRequestSchema, releasePhotoBytes } from './photo-media';
 
 export const actionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('confirm-campus-region'), candidateId: z.string().uuid() }).strict(),
@@ -22,11 +24,21 @@ export function createApp(options: {
   const app = express();
   const sessions = new Map<string, Session>(),
     busy = new Set<string>();
+  const photoEvidence = new Map<string, PhotoEvidenceRecord>();
   const requestCounts = new Map<string, { count: number; start: number }>();
   const cleanup = setInterval(() => {
     const now = Date.now();
     for (const [id, session] of sessions)
-      if (!busy.has(id) && now - session.lastTouched > 1800000) sessions.delete(id);
+      if (!busy.has(id) && now - session.lastTouched > 1800000) {
+        sessions.delete(id);
+        photoEvidence.delete(id);
+      }
+    for (const [id, record] of photoEvidence)
+      if (!busy.has(id) && Date.parse(record.evidence.expiresAt) <= now) {
+        photoEvidence.delete(id);
+        const session = sessions.get(id);
+        if (session?.photoEvidence?.id === record.evidence.id) session.photoEvidence = null;
+      }
     for (const [ip, counter] of requestCounts)
       if (now - counter.start > 60000) requestCounts.delete(ip);
   }, 60000);
@@ -96,17 +108,26 @@ export function createApp(options: {
     }
     res.json(session);
   });
-  app.post('/api/sessions/:id/photo', async (req, res) => {
+  async function handlePhotoStage(
+    req: express.Request<{ id: string }>,
+    res: express.Response,
+    stage: 'evidence' | 'location',
+  ) {
     const session = sessions.get(req.params.id);
     if (!session || Date.now() - session.lastTouched > 1800000) {
       res.status(404).json({ error: 'Session expired. Reload to start again.' });
       return;
     }
-    const parsed = photoRequestSchema.safeParse(req.body);
+    const parsed = (
+      stage === 'evidence' ? photoEvidenceRequestSchema : photoRequestSchema
+    ).safeParse(req.body);
     if (!parsed.success) {
-      res
-        .status(400)
-        .json({ error: 'Choose a valid photo and explicitly agree to send it to Gemini.' });
+      res.status(400).json({
+        error:
+          stage === 'evidence'
+            ? 'Choose a valid photo with its detail crops and explicitly agree to send it to Gemini.'
+            : 'Read the photo labels first, then submit the same photo and detail crops with its evidence ID.',
+      });
       return;
     }
     if (!options.liveAvailable) {
@@ -120,7 +141,8 @@ export function createApp(options: {
       return;
     }
     const input = parsed.data;
-    if (session.appliedActions.includes(input.requestId)) {
+    const actionKey = `photo:${stage}:${input.requestId}`;
+    if (session.appliedActions.includes(actionKey)) {
       res.json(session);
       return;
     }
@@ -137,8 +159,22 @@ export function createApp(options: {
       if (!res.writableEnded) controller.abort();
     });
     try {
-      await analyzeCampusPhoto(session, input, options.provider, controller.signal);
-      session.appliedActions.push(input.requestId);
+      if (stage === 'evidence') {
+        const record = await readPhotoEvidence(session, input, options.provider, controller.signal);
+        photoEvidence.set(session.id, record);
+      } else if ('evidenceId' in input && typeof input.evidenceId === 'string') {
+        await analyzeCampusPhoto(
+          session,
+          { ...input, evidenceId: input.evidenceId },
+          options.provider,
+          photoEvidence.get(session.id),
+          controller.signal,
+        );
+        photoEvidence.delete(session.id);
+      } else {
+        throw new PhotoEvidenceError('Read this photo’s labels before comparing plans.');
+      }
+      session.appliedActions.push(actionKey);
       session.appliedActions = session.appliedActions.slice(-80);
       session.revision++;
       session.lastTouched = Date.now();
@@ -149,27 +185,37 @@ export function createApp(options: {
       if (!res.destroyed) {
         if (error instanceof ProviderError && error.retryAfterSeconds)
           res.set('Retry-After', String(error.retryAfterSeconds));
-        res.status(error instanceof ProviderError ? error.httpStatus : 400).json({
-          error: error instanceof Error ? error.message : 'The photo could not be compared.',
-          ...(error instanceof ProviderError
-            ? {
-                providerError: {
-                  code: error.code,
-                  retryable: error.retryable,
-                  retryAfterSeconds: error.retryAfterSeconds,
-                },
-              }
-            : {}),
-          session,
-        });
+        res
+          .status(
+            error instanceof ProviderError || error instanceof PhotoEvidenceError
+              ? error.httpStatus
+              : 400,
+          )
+          .json({
+            error: error instanceof Error ? error.message : 'The photo could not be compared.',
+            ...(error instanceof ProviderError
+              ? {
+                  providerError: {
+                    code: error.code,
+                    retryable: error.retryable,
+                    retryAfterSeconds: error.retryAfterSeconds,
+                  },
+                }
+              : {}),
+            session,
+          });
       }
     } finally {
       // No media is copied into session state, disk, or logs; release request references.
-      input.image.data = '';
-      if (req.body?.image) req.body.image.data = '';
+      releasePhotoBytes(input);
+      releasePhotoBytes(req.body);
       busy.delete(session.id);
     }
-  });
+  }
+  app.post('/api/sessions/:id/photo/evidence', (req, res) =>
+    handlePhotoStage(req, res, 'evidence'),
+  );
+  app.post('/api/sessions/:id/photo', (req, res) => handlePhotoStage(req, res, 'location'));
   app.post('/api/sessions/:id/actions', async (req, res) => {
     const session = sessions.get(req.params.id);
     if (!session || Date.now() - session.lastTouched > 1800000) {
@@ -206,6 +252,7 @@ export function createApp(options: {
       if (action.type === 'confirm-campus-region') {
         confirmCampusRegion(session, action.candidateId);
       } else if (action.type === 'reset') {
+        photoEvidence.delete(session.id);
         Object.assign(session, newSession(options.liveAvailable), {
           id: session.id,
           revision: session.revision,

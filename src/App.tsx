@@ -39,6 +39,7 @@ export default function App() {
   const [photoConsent, setPhotoConsent] = useState(false);
   const [showPhotoResults, setShowPhotoResults] = useState(false);
   const photoAbort = useRef<AbortController | null>(null);
+  const evidenceForPhoto = useRef<{ photo: PreparedPhoto; id: string } | null>(null);
   const sessionRef = useRef<Session | undefined>(undefined);
   const busyRef = useRef(false);
   const evidenceGate = useRef(new RequestGate());
@@ -77,6 +78,7 @@ export default function App() {
     evidenceGate.current.cancel();
     photoAbort.current?.abort();
     setPreparedPhoto(null);
+    evidenceForPhoto.current = null;
     setPhotoConsent(false);
     setReadStatus('');
     setReading(false);
@@ -119,6 +121,7 @@ export default function App() {
     const generation = evidenceGate.current.next();
     photoAbort.current?.abort();
     setPreparedPhoto(null);
+    evidenceForPhoto.current = null;
     setPhotoConsent(false);
     setShowPhotoResults(false);
     setReading(true);
@@ -149,22 +152,58 @@ export default function App() {
     setBusy(true);
     setError('');
     setShowPhotoResults(false);
-    setReadStatus(
-      'Comparing your photo with official floor-plan overviews, then inspecting plausible plans and their geometry. This can take up to a minute.',
-    );
+    setReadStatus('Reading room labels from your photo and detail views…');
     try {
+      const media = {
+        consent: true,
+        image: { mimeType: preparedPhoto.mimeType, data: preparedPhoto.data },
+        detailCrops: preparedPhoto.detailCrops,
+      };
+      let latest = current;
+      const cached = evidenceForPhoto.current;
+      if (!(
+        cached?.photo === preparedPhoto &&
+        latest.photoEvidence?.id === cached.id &&
+        Date.parse(latest.photoEvidence.expiresAt) > Date.now()
+      )) {
+        latest = await request<Session>(
+          `/api/sessions/${current.id}/photo/evidence`,
+          {
+            ...media,
+            requestId: crypto.randomUUID(),
+            revision: current.revision,
+          },
+          { timeoutMs: 55000, signal: controller.signal },
+        );
+        if (!evidenceGate.current.isCurrent(generation)) return;
+        updateSession(latest);
+        if (!latest.photoEvidence)
+          throw new Error('Photo reading did not return evidence. Try again.');
+        evidenceForPhoto.current = { photo: preparedPhoto, id: latest.photoEvidence.id };
+      }
+      const evidence = latest.photoEvidence;
+      if (!evidence) throw new Error('Read this photo again before comparing plans.');
+      const labels = evidence.labels
+        .filter((label) => label.clarity === 'clear')
+        .map((label) => label.text);
+      setReadStatus(
+        labels.length
+          ? `Read room label${labels.length === 1 ? '' : 's'} ${[...new Set(labels)].join(', ')}. Comparing the photo with matching floor plans…`
+          : 'No clear room label found. Comparing the scene with the floor plans…',
+      );
       const result = await request<Session>(
         `/api/sessions/${current.id}/photo`,
         {
+          ...media,
           requestId: crypto.randomUUID(),
-          revision: current.revision,
-          consent: true,
-          image: { mimeType: preparedPhoto.mimeType, data: preparedPhoto.data },
+          revision: latest.revision,
+          evidenceId: evidence.id,
         },
         { timeoutMs: 70000, signal: controller.signal },
       );
       if (!evidenceGate.current.isCurrent(generation)) return;
       updateSession(result);
+      evidenceForPhoto.current = null;
       setShowPhotoResults(true);
       setReadStatus('Comparison complete.');
     } catch (failure) {
@@ -404,8 +443,8 @@ export default function App() {
                     disabled={busy || !preparedPhoto || !photoReady}
                     onChange={(event) => setPhotoConsent(event.target.checked)}
                   />
-                  Send this photo to Google Gemini for comparison. Free-tier inputs may be used to
-                  improve Google products.
+                  Send this photo and its detail views to Google Gemini to read labels and compare
+                  floor plans. Free-tier inputs may be used to improve Google products.
                 </label>
                 <button
                   className="primary full-width"

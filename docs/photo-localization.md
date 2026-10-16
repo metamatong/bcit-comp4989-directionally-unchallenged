@@ -1,93 +1,77 @@
-# Photo-to-floor-plan localization
+# Photo labels, exact retrieval and floor-plan localization
 
-This implements the requested **actual photo + real BCIT plans** workflow. Gemini is the only analysis path. A readable sign, manually selected landmark, or OCR success is not required for Live photo comparison.
+The app uses the actual photo and detailed views in two separate API stages. Gemini reads visible evidence first, a deterministic tool retrieves exact labels from all available source records, and a later Gemini call compares the photo against the retrieved plans. There is no training step or general Campus library screen.
 
-## Run and use
+## User flow
 
-The converted assets are already included in `data/campus/visual/`. The Node server does not restart automatically after backend changes; restart it manually (`Ctrl+C`, then `npm run dev`). Do not start a second server on port 3000.
+1. Upload or capture a photo. The browser prepares a full view and four overlapping detail crops from the **original decoded image**, before discarding original metadata.
+2. Consent once to sending this photo and its detail views, then select Analyze.
+3. The client calls the label-reading endpoint and shows progress while Gemini reads visible identifiers.
+4. The client sends the same image bundle with the returned evidence ID to the location endpoint. Relevant source plans appear only with the resulting hypothesis.
+5. Confirm a region only if it agrees with the surroundings. The model can abstain and ask for another photo.
 
-1. Use Gemini with the configured and verified free-tier key and model list.
-2. Choose Find my location → Upload photo or Take a photo.
-3. The browser prepares a resized JPEG preview. It does **not** run OCR in this Live flow.
-4. Explicitly agree to send this photo and click **Analyze**.
-5. Review the single best building/floor estimate and its source. Gemini can instead report insufficient evidence and request another view.
-6. Confirm the estimate only if it agrees with your surroundings. It remains unverified and does not enable a campus route.
+The local server must be restarted after backend edits. Frontend HMR does not reload Node. Existing converted source files work without regeneration.
 
-There is no mode selector, sample-photo control, manual fictional landmark picker or synthetic route. Missing Gemini configuration shows setup guidance. Temporary Gemini-model failures try the configured Gemini fallbacks; if all fail, the error is shown without a fabricated result.
+## API stages and agent tools
 
-## Converted data
+| Stage | Endpoint | Behavior |
+|---|---|---|
+| Read photo labels | `POST /api/sessions/:id/photo/evidence` | Gemini receives only the full photo and four photo crops, with no candidate plan IDs or drawings to bias its reading. The forced `read_photo_labels` tool returns complete room identifiers, clear/uncertain flags, source view IDs and brief observable scene features. No location is selected. |
+| Retrieve and localize | `POST /api/sessions/:id/photo` | Requires the first stage's server-issued `evidenceId`, the next session revision and the identical image/context bundle. The server executes `retrieve_room_labels`, fetches matching plan details, and asks Gemini to verify a single supported region or abstain. |
 
-The pipeline converted all **89 downloaded official Burnaby floor-plan PDFs**, covering 45 buildings:
+Both endpoints require per-photo consent, a new request UUID, current revision, the full image and four detail crops. Idempotency is scoped to each API stage; both stages use the same per-session lock. The second endpoint rejects absent, cross-session, expired or changed-photo evidence before model work. Clients cannot supply their own trusted label readings.
 
-- 89 full-page PNGs rendered at 180 dpi.
-- 89 overviews bounded to a 1,600-pixel long edge.
-- 356 detail PNGs: four quadrants per page, each bounded to 1,200 pixels, with overlap covering 10% of the original page width/height.
-- 89 structured geometry JSON files with **566,620 extracted drawing primitives** in total.
-- Eight labeled overview sheets covering all plans exactly once (12 plans per sheet except the final sheet).
-- An index recording source IDs, source PDF hashes, generated asset hashes, page dimensions, crop bounds, building/floor metadata, and attribution. PNG metadata also embeds the BCIT copyright notice, source index and reference-only notice.
+The first response places short-lived structured evidence in `session.photoEvidence`. Its ID is valid for five minutes. A private in-memory SHA-256 fingerprint binds it to that session's full image, crops, crop bounds and optional context. The fingerprint and media bytes are never returned in session state. Only the structured readings and fingerprint are held between requests; no image bytes are retained. The cleanup sweep runs once a minute. Reset, newer successful label reading, or a successful location result invalidates the previous receipt.
 
-The separate campus wayfinding PDF remains in the internal source dataset; this conversion targets the 89 floor plans. Generated visual assets occupy approximately 355 MB in this build.
+If comparison fails, its partial source/region hypotheses roll back while the already accepted first-stage evidence remains valid until expiry. The browser can retry comparison without spending another label-reading call for the same prepared image. Replacing or closing the photo clears its local reuse reference.
 
-Regenerate locally, with the Python dependencies from `requirements-data.txt`:
+This is a bounded observe → retrieve → verify workflow. The model chooses the observed label queries; source lookup is deterministic; the next model stage must use those tool results and the actual imagery. Observable activity records each stage without hidden reasoning.
+
+## Exact label lookup
+
+`server/room-labels.ts` indexes **all 5,463 currently extracted source labels** from the complete `geometry.labels` arrays across the 89 plans. This is a count of source labels, including annotations, not 5,463 verified rooms. Extraction is incomplete in some PDFs.
+
+Lookup normalizes Unicode compatibility forms, letter case and whitespace. It preserves digits, leading zeroes, letters, prefixes, suffixes and punctuation. It never performs substring, prefix, numeric or fuzzy matching. Thus `302`, `3021`, `0302`, `302A`, `A302`, `3O2` and `302-1` are distinct identifiers.
+
+The SE12 third-floor `302` label is at index 155 in its full 285-label list. The old first-80-label preview omitted it. Runtime retrieval and model geometry now use the complete `labels` array; legacy `modelSummary.labels` previews are ignored. The regeneration script also writes complete label summaries for future regenerated artifacts. No source PDF or existing PNG/geometry hash needs to change to activate the runtime fix.
+
+Clear exact matches narrow the candidate plans. One to three matching plans go directly to detailed comparison, avoiding the coarse atlas shortlist. Ambiguous matches spanning more plans use an additional visual shortlist over the matching set. Uncertain readings, absent readable labels, or labels with no exact source match retain the visual-shortlist path across eligible plans; signs are not mandatory.
+
+An exact label match alone never produces a location. Gemini must recheck the photo/crops against the supplied drawing and return an explicit `labelMatches` entry. The server verifies whole-label equality, the observed identifier and its presence in the chosen source plan. A proposed `302` → `3021` match is rejected. A label-guided result without a supporting clear exact label is also rejected; abstention remains valid. Missing extracted labels do not prove that a room is absent from the actual campus.
+
+## Photo views and coordinate systems
+
+The client creates a context JPEG with a maximum 1,600-pixel long edge and four detail JPEGs, each also bounded to 1,600 pixels. Detail crops are cut directly from the original bitmap and are not enlargements of the already-resized preview. Each pair of adjacent quadrants overlaps by 10% of the original image dimension. Small images are not upscaled.
+
+Each view is capped at 450,000 encoded JPEG bytes, reducing quality and then size if necessary. This keeps five views within the server's existing 2.5 MB aggregate decoded-media limit and 4 MB JSON request limit. Original uploads remain limited to 8 MB and 50 million pixels. All output views are re-encoded to strip original metadata.
+
+Photo crop coordinates and floor-plan coordinates are separate. Photo crop bounds describe the original uploaded scene. Final location bounds are `[left, top, right, bottom]` in normalized coordinates of the **whole original floor-plan page**, never relative to a photo or plan crop. Source-label text boxes are not camera-position coordinates.
+
+## BCIT source preparation
+
+The corpus contains 89 official Burnaby floor-plan PDFs covering 45 buildings, plus a separate campus map. Each floor plan has a full PNG at 180 dpi, an overview, four overlapping detail PNGs and geometry JSON. Eight overview sheets support visual shortlisting. Source and derived hashes and BCIT attribution are retained. The geometry contains 566,620 raw unclassified drawing primitives; no semantic walls, doors, accessibility or walking connections are invented.
+
+For detailed comparison Gemini receives the full photo and four photo crops again, along with each selected plan's overview, four plan crops, and source-linked geometry containing **every extracted label**. Long drawing segments remain a disclosed sample of up to 128 per plan. All 90 original PDFs and 631 derived asset hashes remain unchanged by this retrieval fix.
 
 ```bash
-python scripts/prepare_visual_maps.py --workers 3
-npm run data:validate
+python scripts/prepare_visual_maps.py --workers 3  # Optional source regeneration
+npm run data:validate                            # Source, asset and complete-label-index checks
 ```
 
-The script performs no network or model calls. Original PDFs are verified against their manifest hashes and remain unchanged. PNGs and JSON are derived reference artifacts, not revised official BCIT drawings. © British Columbia Institute of Technology. Source usage conditions remain in `data/campus/manifest.json` and [data.md](data.md).
+Original PDFs remain unmodified. © British Columbia Institute of Technology. See [data.md](data.md) and the manifest for source restrictions.
 
-## Geometry representation
+## Budgets, failures and privacy
 
-Each JSON file records:
+A clear exact-label case normally uses two Gemini calls across the two app API requests: photo reading, then detailed comparison. Visual-only or ambiguous-label cases can use a third model call for shortlisting. An empty visual shortlist can abstain without detail comparison. Existing retries, configured Gemini fallbacks and shared minute/day limits still apply to every attempt.
 
-| Field | Meaning |
-|---|---|
-| `coordinateSystem` | Original page width/height in PDF points, top-left origin; normalized-coordinate divisors; no geographic coordinates or assumed metric scale |
-| `primitives` | Extracted line, rectangle and curve objects, points/paths, bounding boxes, stroke/fill properties, stable primitive IDs and page provenance |
-| `longSegments` | Longer extracted path segments with normalized endpoints; they may include annotations and are not asserted to be walls |
-| `labels` | Embedded text boxes, or existing OCR label candidates when embedded text is absent; explicitly unverified |
-| `regions` | The four detail-crop bounds in normalized original-page coordinates |
-| `modelSummary` | Counts, up to 128 spatially distributed long segments, and up to 80 labels; omissions and sampling are disclosed |
-| `architecturalElements` / `routingEdges` | Empty: no verified walls, doors, windows, room polygons or walkable edges are invented |
+Label reading has a 45-second deadline and a 55-second client timeout. Localization has a 60-second deadline and a 70-second client timeout. Individual model requests allow at most 30 seconds. Reading/shortlisting allow 4,096 combined thinking/output tokens; detailed comparison allows 8,192. Gemini 3 uses low thinking; the adapter maps the photo setting to a 1,024-token thinking budget for Gemini 2.5. Thought summaries remain disabled. Inline provider bodies remain capped at 18 MB.
 
-The exported geometry is structured **drawing evidence**, not a fully interpreted architectural model. It includes letters/symbols and other nonstructural paths. Gemini sees this limitation and compares the images as well as the geometric evidence. A human review or a dedicated segmentation/localization system is still required before treating semantic geometry or routes as verified.
+Uploads/crops stay in client memory until closure/replacement. Both API stages release their media references after processing. The public source cache contains only official plan assets. Google free-tier data handling remains disclosed; the app cannot promise immediate provider deletion. No photo reference dataset or persistent user-image collection has been added.
 
-## The two-step multimodal workflow
+## Verification and next work
 
-`server/photo-localization.ts` is one bounded orchestrator using the existing server-side Gemini adapter.
+Code/API tests cover the SE12 `302` regression, exact identifier boundaries, complete label inclusion, original-image crop coordinates, per-view/aggregate size budgets, isolated first-stage model input, two API calls, idempotency, evidence binding/expiry/reset, comparison-only retry, cancellation, rollback and retained visual matching without signs. Model responses are mocked. Browser/screen tests are not run per the user's request.
 
-1. **Visual shortlisting.** Send the actual uploaded image and eight overview sheets to Gemini. A typed `select_floor_plans` function returns up to three eligible real plan IDs plus observable photo features. When a building hint narrows coverage to eight or fewer plans, send their individual overviews instead. This is visual comparison, not an OCR keyword gate.
-2. **Detailed comparison.** Send the actual photo again with the selected plans' overviews, all four detail crops per plan, and source-linked JSON geometry summaries. Gemini eliminates plans that conflict with visible features and returns only its single best supported region, or abstains if it cannot defend a match.
-3. **Validation.** Reject unknown IDs, plans outside the selected scope, malformed function calls, unsupported fields, invalid/inverted coordinates, and inconsistent outcomes. A failed or cancelled comparison discards partial hypotheses.
-4. **Confirmation.** Store only structured results and observable action summaries. Confirming a candidate updates `campusLocation`; it does not create route edges.
+This fixes information loss and prefix confusion in retrieval. It does not establish that Gemini always reads an image correctly or identifies a physical location. Next, evaluate the supplied SE12 photograph and separate SE12/SW1 photographs with known ground truth, then build a small mapped reference-photo collection if appearance-based ambiguity remains. Reference photos and evaluation photos must be separate.
 
-Candidate boxes are `[left, top, right, bottom]` in normalized coordinates of the **entire original page**, even when the model uses a crop. The UI displays the box over that same original-page overview. Confidence labels are qualitative model judgments, not calibrated probabilities or measured positioning accuracy.
-
-Overview shortlisting is not exhaustive detailed examination of every plan. It may omit the correct plan, particularly when corridors repeat or drawings are old. The UI reports both the number of overview plans considered and the plans inspected in detail. Unknown heading, scale, floor alignment, missing window/door semantics, and appearance absent from a plan remain important limits. No image-only uniqueness guarantee is made.
-
-## Transport, privacy and budgets
-
-`POST /api/sessions/:id/photo` requires an active Live session, explicit per-photo consent, a request UUID, the current session revision, and inline JPEG/PNG/WebP bytes. The upload endpoint accepts a 4 MB JSON body, validates base64 and image signatures, and limits decoded image bytes to 2.5 MB. The browser accepts originals up to 8 MB / 50 million pixels, resizes the long edge to 1,600 pixels, and removes original metadata through local re-encoding.
-
-Only clicking Analyze sends the photo. Neither a configured key nor the default Live mode silently uploads it. Images go transiently to the local server and Google; no photo is stored on disk, in session objects, in activity logs, or in the source-image cache. Google free-tier data handling is disclosed and is governed by Google's terms; the application cannot promise immediate deletion by the provider.
-
-The source-image cache contains only public BCIT assets and is bounded to 24 entries. The provider request body is capped at 18 MB, below the documented 20 MB inline limit. No Files API uploads are used. Normal analysis makes one visual-shortlist request and, if there is a shortlist, one detail request. Existing retry and shared minute/day budgets still apply. Budget failures now report how many seconds remain until the relevant application window can admit a request.
-
-Photo comparisons have a 60-second overall deadline; each model request is bounded to at most 30 seconds. The client allows 70 seconds for transport/cleanup. Closing the panel or replacing a capture cancels client work; server cancellation checks prevent stale results from committing. Provider failures are reported directly; no substitute location is generated.
-
-Both photo stages use low thinking with thought summaries disabled. The selection stage has a 4,096-token combined thinking/output cap; detailed comparison has an 8,192-token cap. This leaves space for the final structured result while bounding generation. A token-truncated or otherwise incomplete response cannot commit a partial hypothesis.
-
-References: [Gemini Generate Content image input](https://ai.google.dev/gemini-api/docs/generate-content/image-understanding), [Gemini function calling](https://ai.google.dev/gemini-api/docs/function-calling), [BCIT floor-plan source](https://www.bcit.ca/facilities/campus-maps/floor-plans/).
-
-## Response limits and recovery
-
-An HTTP 200 from Gemini can still contain an unfinished generation. In the reproduced failure, `MAX_TOKENS` arrived without any answer parts: thinking consumed the earlier 1,800-token allowance. The app previously called this an “unsupported response.” It now reports `response_limit` accurately and uses the larger photo budgets above. See [provider diagnostics](provider.md#incomplete-response-diagnosis-and-handling).
-
-After updating the code, restart the existing server, refresh the app, and retry the photo when provider quota is available. The public photo flow uses the image without a building hint; the internal API can optionally narrow its scope. A response-limit failure keeps Live AI selected and discards partial results. HTTP 429 means Google's quota has been reached; rapid repeated clicks do not fix it. The latest post-fix checks reached a timeout and then HTTP 429, so a completed live comparison remains unverified.
-
-## Verification and remaining limits
-
-Unit and HTTP tests verify actual image bytes in both model stages, real-source scope, geometry inclusion, consent, no OCR requirement, abstention, ID/coordinate rejection, transaction rollback, idempotency, cancellation, and separation from synthetic routes. Desktop/mobile browser tests exercise upload → consent → candidate plan → confirmation, and ambiguity/cancellation. Their model responses are mocked and labeled as such in saved screenshots.
-
-One initial real-provider check used the user's supplied hallway screenshot, without a building hint. The request contained the supplied image plus eight official plan overview sheets (nine images, approximately 6.57 MB of JSON). Google returned HTTP 503 on the first attempt; the second attempt reached the 60-second overall deadline. The image transport path is confirmed, but that run did not produce a localization result. No physical-campus accuracy claim follows from this check. See [verification.md](verification.md) for the latest record.
+References: [Gemini image inputs](https://ai.google.dev/gemini-api/docs/generate-content/image-understanding), [Gemini thinking settings](https://ai.google.dev/gemini-api/docs/generate-content/thinking), [BCIT floor plans](https://www.bcit.ca/facilities/campus-maps/floor-plans/).
