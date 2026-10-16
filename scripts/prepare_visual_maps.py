@@ -33,46 +33,15 @@ def write_json(path, content, compact=False):
                                separators=(',', ':') if compact else None) + '\n')
 
 
-def image_record(path, image, source_url=None, notice='Derived reference image; not a verified campus navigation map.'):
+def image_record(path, image):
     path.parent.mkdir(parents=True, exist_ok=True)
     metadata = PngInfo()
     metadata.add_text('Copyright', ATTRIBUTION)
-    metadata.add_text('Source', source_url or 'https://www.bcit.ca/facilities/campus-maps/floor-plans/')
-    metadata.add_text('Notice', notice)
+    metadata.add_text('Source', 'https://www.bcit.ca/facilities/campus-maps/floor-plans/')
+    metadata.add_text('Notice', 'Derived reference image; not a verified campus navigation map.')
     image.convert('RGB').save(path, format='PNG', optimize=True, pnginfo=metadata)
     return {'file': str(path.relative_to(ROOT)), 'url': '/' + str(path.relative_to(ROOT)),
             'width': image.width, 'height': image.height, 'sha256': digest(path)}
-
-
-def process_wayfinding_map(manifest):
-    source = next((item for item in manifest['sources'] if item['id'] == 'burnaby-wayfinding'), None)
-    if not source or digest(ROOT / source['file']) != source['sha256']:
-        raise ValueError('The official Burnaby wayfinding map is missing or has changed.')
-    with pdfplumber.open(ROOT / source['file']) as document:
-        page = document.pages[0]
-        raster = page.to_image(resolution=100).original.convert('RGB')
-        crop_bounds = (520, 370, 1040, 900)
-        if crop_bounds[2] > raster.width or crop_bounds[3] > raster.height:
-            raise ValueError('The expected central-campus area is outside the rendered wayfinding map.')
-        cropped = raster.crop(crop_bounds)
-    image = image_record(
-        OUTPUT / 'campus-wayfinding-central.png',
-        cropped,
-        source['url'],
-        'Crop of the original BCIT Burnaby campus wayfinding map for route visualization; route overlay is a derived, unverified annotation.',
-    )
-    graph_path = CAMPUS / 'graph.json'
-    graph = json.loads(graph_path.read_text())
-    graph['mapImage'] = {
-        **image,
-        'sourceId': source['id'],
-        'sourceRef': f"{source['id']}#page=1",
-        'sourceSha256': source['sha256'],
-        'renderDpi': 100,
-        'cropRenderedPixels': list(crop_bounds),
-    }
-    write_json(graph_path, graph)
-    print(f"Created central-campus map crop {image['width']}x{image['height']} from {source['id']}#page=1.")
 
 
 def resized(image, max_edge):
@@ -197,13 +166,8 @@ def font(size):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--workers', type=int, default=3)
-    parser.add_argument('--wayfinding-only', action='store_true')
     args = parser.parse_args()
     manifest = json.loads((CAMPUS / 'manifest.json').read_text())
-    if args.wayfinding_only:
-        process_wayfinding_map(manifest)
-        return
-    process_wayfinding_map(manifest)
     sources = [s for s in manifest['sources'] if s['kind'] == 'floor-plan' and s['campus'] == 'Burnaby']
     if not sources: raise ValueError('No official Burnaby floor plans in the manifest')
     plans = []

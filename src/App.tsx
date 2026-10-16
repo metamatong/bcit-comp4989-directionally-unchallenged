@@ -23,7 +23,6 @@ import {
 } from './api';
 import { preparePhoto, type PreparedPhoto } from './photo';
 import { CampusLocationResults, PhotoEmptyState } from './components/CampusLocationResults';
-import { CampusDirections } from './components/CampusDirections';
 import type { Bootstrap, Session } from './types';
 
 type Modal = 'location' | 'about' | null;
@@ -38,6 +37,7 @@ export default function App() {
   const [readStatus, setReadStatus] = useState('');
   const [preparedPhoto, setPreparedPhoto] = useState<PreparedPhoto | null>(null);
   const [photoConsent, setPhotoConsent] = useState(false);
+  const [showPhotoResults, setShowPhotoResults] = useState(false);
   const photoAbort = useRef<AbortController | null>(null);
   const evidenceForPhoto = useRef<{ photo: PreparedPhoto; id: string } | null>(null);
   const sessionRef = useRef<Session | undefined>(undefined);
@@ -82,6 +82,7 @@ export default function App() {
     setPhotoConsent(false);
     setReadStatus('');
     setReading(false);
+    setShowPhotoResults(false);
     setModal(null);
   }
   async function send(action: unknown): Promise<Session | undefined> {
@@ -122,6 +123,7 @@ export default function App() {
     setPreparedPhoto(null);
     evidenceForPhoto.current = null;
     setPhotoConsent(false);
+    setShowPhotoResults(false);
     setReading(true);
     setModal('location');
     setError('');
@@ -149,6 +151,7 @@ export default function App() {
     busyRef.current = true;
     setBusy(true);
     setError('');
+    setShowPhotoResults(false);
     setReadStatus('Reading room labels from your photo and detail views…');
     try {
       const media = {
@@ -200,11 +203,9 @@ export default function App() {
       );
       if (!evidenceGate.current.isCurrent(generation)) return;
       updateSession(result);
-      setPreparedPhoto(null);
       evidenceForPhoto.current = null;
-      setPhotoConsent(false);
-      setReadStatus('');
-      setModal(null);
+      setShowPhotoResults(true);
+      setReadStatus('Comparison complete.');
     } catch (failure) {
       if (evidenceGate.current.isCurrent(generation)) {
         if (failure instanceof ApiError && failure.session) updateSession(failure.session);
@@ -219,6 +220,12 @@ export default function App() {
       if (photoAbort.current === controller) photoAbort.current = null;
     }
   }
+  async function confirmCampus(candidateId: string) {
+    if (await send({ type: 'confirm-campus-region', candidateId })) {
+      closeModal();
+    }
+  }
+
   if (!data || !session)
     return (
       <main className="loading-page">
@@ -313,15 +320,17 @@ export default function App() {
                   Clear
                 </button>
               </div>
-              <CampusLocationResults analysis={session.campusAnalysis} plans={plans} />
+              <CampusLocationResults
+                analysis={session.campusAnalysis}
+                plans={plans}
+                selectedId={session.campusLocation?.id}
+                onConfirm={(id) => void confirmCampus(id)}
+                busy={busy}
+              />
             </>
           ) : (
             <PhotoEmptyState onUpload={() => setModal('location')} />
           )}
-          <CampusDirections
-            directions={data.directions}
-            locationEstimate={session.campusAnalysis?.candidates[0] ?? null}
-          />
         </section>
       </main>
       <footer>
@@ -413,7 +422,7 @@ export default function App() {
                 <img
                   className="evidence-photo"
                   src={preparedPhoto.preview}
-                  alt="Uploaded location photo, awaiting analysis"
+                  alt="Uploaded location photo, awaiting analysis or confirmation"
                 />
               )}
               {readStatus && (
@@ -450,6 +459,15 @@ export default function App() {
                   {error}
                 </p>
               )}
+              {showPhotoResults && session.campusAnalysis && (
+                <CampusLocationResults
+                  analysis={session.campusAnalysis}
+                  plans={plans}
+                  selectedId={session.campusLocation?.id}
+                  onConfirm={(id) => void confirmCampus(id)}
+                  busy={busy}
+                />
+              )}
               <p className="helper">
                 <ShieldCheck size={13} /> Resized on your device. CampusLens does not save photos or
                 location history.
@@ -470,15 +488,16 @@ export default function App() {
               <div className="about-section">
                 <h3>What you can do</h3>
                 <p>
-                  Upload a photo for an AI location estimate, then type or speak a room or
-                  destination.
+                  Upload or capture a photo, consent to Gemini analysis, and confirm the best
+                  source-linked estimate only if it matches your surroundings.
                 </p>
               </div>
               <div className="about-section">
                 <h3>What still needs validation</h3>
                 <p>
-                  The photo location is an estimate. Outdoor routes cover only the mapped pilot;
-                  indoor room routes, distances, and accessibility are not available.
+                  Location accuracy, corridor connections, floor alignment, travel times and
+                  accessibility remain unverified. Floor plans are not camera-view training data.
+                  Walking directions are not available.
                 </p>
               </div>
               <div className="about-section">

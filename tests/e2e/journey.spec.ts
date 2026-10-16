@@ -61,7 +61,9 @@ test('prepares an image locally but disables analysis and sending when the key i
   await page.getByRole('button', { name: 'Find my location', exact: true }).click();
   await page.getByLabel('Upload campus photo', { exact: true }).setInputFiles(fixture);
   await expect(page.getByText(/Photo ready\. Choose Analyze/)).toBeVisible();
-  await expect(page.getByRole('dialog').locator('.setup-notice')).toBeVisible();
+  await expect(
+    page.getByRole('dialog').getByText(/unavailable until Gemini is configured/),
+  ).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }),
   ).toBeDisabled();
@@ -132,7 +134,7 @@ for (const failure of [
       .click();
     await expect(page.getByRole('dialog').getByRole('alert')).toHaveText(failure.message);
     await expect(page.getByRole('button', { name: /Demo|landmark|checkpoint/i })).toHaveCount(0);
-    await expect(page.getByRole('heading', { name: 'Estimated location' })).toHaveCount(0);
+    await expect(page.getByRole('heading', { name: 'Best match' })).toHaveCount(0);
     await expect(page.getByTestId('provider-status')).toHaveText('Gemini ready');
   });
 }

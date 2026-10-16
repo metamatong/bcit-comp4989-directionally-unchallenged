@@ -27,21 +27,11 @@ it('preserves the hash and provenance of every downloaded official PDF', () => {
     expect(source.attribution).toContain('British Columbia Institute of Technology');
   }
 });
-it('keeps campus routing source-linked and separates unreviewed landmark candidates', () => {
-  const graph = readJson<{
-    sourceRef: string;
-    nodes: { id: string }[];
-    edges: { from: string; to: string; sourceRef: string; accessibility: string }[];
-    limitations: string[];
-  }>('data/campus/graph.json');
-  expect(graph.sourceRef).toBe('burnaby-wayfinding#page=1');
-  expect(graph.nodes.length).toBeGreaterThan(1);
-  expect(graph.edges.length).toBeGreaterThan(1);
-  expect(graph.edges.every((edge) => graph.nodes.some((node) => node.id === edge.from))).toBe(true);
-  expect(graph.edges.every((edge) => graph.nodes.some((node) => node.id === edge.to))).toBe(true);
-  expect(graph.edges.every((edge) => edge.sourceRef === graph.sourceRef)).toBe(true);
-  expect(graph.edges.every((edge) => edge.accessibility === 'unknown')).toBe(true);
-  expect(graph.limitations.join(' ')).toContain('not been field-verified');
+it('keeps synthetic topology out of campus records', () => {
+  expect(readJson<{ nodes: unknown[]; edges: unknown[] }>('data/campus/graph.json')).toMatchObject({
+    nodes: [],
+    edges: [],
+  });
   expect(readJson<{ landmarks: unknown[] }>('data/campus/landmarks.json')).toMatchObject({
     landmarks: [],
   });

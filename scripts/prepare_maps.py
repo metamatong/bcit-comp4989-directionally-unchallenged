@@ -130,15 +130,10 @@ def main():
                         'textMethods': sorted({p['textMethod'] for p in pages}), 'routingSupported': False})
     save_json(DATA / 'catalogue.json', records)
     buildings = sorted({r['building'] for r in records if r['building']})
-    graph_path = DATA / 'graph.json'
-    graph = json.loads(graph_path.read_text()) if graph_path.exists() else {'nodes': [], 'edges': [], 'status': 'No source-traced routes'}
     save_json(DATA / 'coverage.json', {'campus': 'Burnaby', 'buildings': buildings,
         'floorPlans': len(records) - 1, 'extractedLabelCandidates': sum(r['labelCount'] for r in records),
         'routingVerified': False, 'supportedRealRoutingNodes': 0,
-        'sourceTracedRouteNodes': len(graph.get('nodes', [])),
-        'sourceTracedRouteEdges': len(graph.get('edges', [])),
-        'routeCoverage': graph.get('status', 'No source-traced routes'),
-        'unsupported': 'Indoor routes, verified building entrances, distances, travel times, floor alignment, accessibility, live conditions, and precise camera-to-map localization are unavailable. CARI and other campuses excluded.',
+        'unsupported': 'All campus routes, entrances, transitions, distances, floor alignment, accessibility, live conditions, and camera localization require review. CARI and other campuses excluded.',
         'floors': [{'building': b, 'floors': [r['floor'] for r in records if r['building'] == b]} for b in buildings]})
     print(f'Prepared {len(records) - 1} Burnaby floor plans, {len(buildings)} buildings, and one official campus map.')
 

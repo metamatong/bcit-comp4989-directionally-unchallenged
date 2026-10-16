@@ -2,7 +2,7 @@
 
 A mobile-friendly BCIT Burnaby photo-to-floor-plan app. Gemini first reads visible room labels from the photo and detail crops. The server retrieves exact matches from all extracted floor-plan labels, then Gemini compares the photo with real plan images and geometry to propose a source-linked region.
 
-The internal reference dataset contains **89 official floor plans covering 45 Burnaby buildings**, plus the campus map. All floor plans have PNGs and structured geometry JSON. Results are **unverified AI location hypotheses**. CampusLens also draws an approximate outdoor route over a crop of the official map using a source-traced pilot network of 13 central-campus locations and 14 pedestrian segments; it does not provide sentence-based turn instructions or indoor navigation.
+The internal reference dataset contains **89 official floor plans covering 45 Burnaby buildings**, plus the campus map. All floor plans have PNGs and structured geometry JSON. Results are **unverified AI location hypotheses**. Real walking routes remain unsupported.
 
 This does not train a model on BCIT. Gemini is pretrained and compares a photo with plan drawings; the plans are not labeled camera-view examples, so reliable exact positioning is not guaranteed.
 
@@ -33,13 +33,12 @@ The Node server does not restart automatically when files change. Restart it man
 
 There is no Campus library, general plan browser, or introductory marketing banner. Start with photo input; the result shows the matching plan region and links to that plan. Full source data and geometry remain available to Gemini on the server.
 
-1. Select **Find my location** to open the photo-upload popup, then upload or capture a campus photo.
-2. Agree to send this photo and its detail views to Google, then select Analyze. Progress stays in the popup while label reading and location comparison run as two separate API requests; when analysis finishes, the popup closes and results appear on the main page.
+1. Select **Find my location**, then upload or capture a campus photo.
+2. Agree to send this photo and its detail views to Google, then select Analyze. Label reading and location comparison run as two separate API requests.
 3. Review the single best source-linked estimate, or take another photo if the evidence is unclear.
-4. CampusLens shows an unverified location estimate and uses its mapped building vicinity as an approximate route start. No user confirmation of the location is requested. **Clear** removes the result.
-5. Type or speak a destination. Exact source-plan labels can resolve a room; the visual route, when available, ends at the building vicinity because indoor room paths are not mapped.
+4. Confirm the estimate only if it matches your surroundings. **Clear** removes the result.
 
-The full view and four detail crops are prepared locally from the original image. Oversized model-proposed highlight regions are rejected; remaining small regions are still unverified AI hypotheses, not verified positions. An exact building-ID match can provide an approximate mapped route origin; it does not locate the user precisely within or outside that building. Destination labels are resolved by exact whole-label matching against source plans. For room destinations the outdoor route stops at the building vicinity; no indoor route is claimed. Route selection and path calculation are deterministic and do not call Gemini. The map overlay is an approximate, unverified annotation; route selection minimizes mapped segments, not distance. The route planner does not claim distances, ETAs, accessibility, current closure status, or indoor transitions. Voice input uses the browser's speech-recognition support when available. Photos are sent only after per-photo consent and submission. No photo is saved in application storage. Mobile capture uses the device's photo picker/camera; the app has no live camera preview or movement tracking. Google's free-tier data handling applies to photo analysis.
+The full view and four detail crops are prepared locally from the original image. Photos are sent only after per-photo consent and submission. No photo is saved in application storage. Mobile capture uses the device's photo picker/camera; the app has no live camera preview or movement tracking. Google's free-tier data handling applies.
 
 ## Checks
 
@@ -47,7 +46,7 @@ The full view and four detail crops are prepared locally from the original image
 npm run test:unit         # Unit, API and provider regression tests
 npm test                  # Unit/API plus desktop/mobile browser automation
 npm run build             # Type check and production frontend build
-npm run data:validate     # Source PDF and derived asset hashes
+npm run data:validate     # 90 PDF hashes and 631 derived asset hashes
 npm start                 # Serve the production build locally
 npm run format
 ```
@@ -68,7 +67,7 @@ Photo reading/shortlisting and detailed comparison use 4,096/8,192-token allowan
 - [Project walkthrough](docs/walkthrough.md)
 - [Proposal source](docs/proposal.md) and [two-page proposal](output/pdf/proposal_groupnumber.pdf)
 
-The latest user direction removes the synthetic fallback described in the original brief. The current source-traced pilot provides limited central-campus outdoor directions; indoor routes, verified entrances, closures, distances, and ETAs await additional authoritative evidence and field review. The separately referenced assignment PDF was not supplied. Verify assignment requirements and dates against it before submission. The supplied brief lists October 21, 2026, 23:59 (timezone unspecified) for the proposal and October 22 for the presentation. Group/member placeholders remain. No coursework has been submitted and the app has not been deployed.
+The latest user direction removes the synthetic fallback described in the original brief. Destination routing, closures and ETAs await verified campus topology. The separately referenced assignment PDF was not supplied. Verify assignment requirements and dates against it before submission. The supplied brief lists October 21, 2026, 23:59 (timezone unspecified) for the proposal and October 22 for the presentation. Group/member placeholders remain. No coursework has been submitted and the app has not been deployed.
 
 ## Project hierarchy
 
@@ -81,20 +80,19 @@ mvp/
 ├── requirements-data.txt, index.html
 ├── src/
 │   ├── App.tsx, main.tsx, styles.css
-│   ├── api.ts, directions.ts, photo.ts, photo-views.ts, types.ts
-│   └── components/  CampusLocationResults, CampusDirections
+│   ├── api.ts, photo.ts, photo-views.ts, types.ts
+│   └── components/  CampusLocationResults
 ├── server/
 │   ├── index.ts, app.ts, runtime.ts
-│   ├── provider.ts, photo-localization.ts, directions.ts, session.ts
+│   ├── provider.ts, photo-localization.ts, session.ts
 │   ├── photo-evidence.ts, photo-media.ts, room-labels.ts
 │   └── data.ts, visual-data.ts
 ├── data/campus/
 │   ├── floor-plans-source.html, manifest.json, coverage.json, catalogue.json
-│   ├── graph.json                   Source-traced central-campus outdoor pilot
-│   ├── landmarks.json               Unreviewed landmark candidates
+│   ├── graph.json, landmarks.json  Empty placeholders for reviewed real records
 │   ├── raw/                       90 unmodified official PDFs
 │   ├── text/                      Extracted text, boxes and provenance
-│   └── visual/                    campus-wayfinding-central.png, index.json, png/, geometry/, atlas/
+│   └── visual/                    index.json, png/, geometry/, atlas/
 ├── scripts/
 │   ├── prepare_maps.py, prepare_visual_maps.py
 │   ├── validate-data.ts
@@ -102,7 +100,7 @@ mvp/
 ├── tests/
 │   ├── api.test.ts, client-state.test.ts, data.test.ts, runtime.test.ts
 │   ├── provider.test.ts, provider-response.test.ts
-│   ├── photo-localization.test.ts, photo-api.test.ts, directions.test.ts
+│   ├── photo-localization.test.ts, photo-api.test.ts
 │   ├── photo.test.ts, room-labels.test.ts, photo-fixtures.ts
 │   └── e2e/journey.spec.ts, photo.spec.ts
 ├── docs/

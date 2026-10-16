@@ -21,7 +21,6 @@ python -m pip install -r requirements-data.txt
 python scripts/prepare_maps.py                 # Reuse existing PDFs; extract text/OCR
 python scripts/prepare_maps.py --refresh       # Refresh official index and source copies
 python scripts/prepare_maps.py --extract-only  # Re-extract only, verify stored hashes first
-python scripts/prepare_visual_maps.py --wayfinding-only  # Regenerate route map crop/provenance
 npm run data:validate
 ```
 
@@ -33,80 +32,80 @@ The delivered run used OCR on 80 documents, produced **1,045 numeric/alphanumeri
 
 ## Data layers
 
-| Layer                   | Files                                              | Meaning                                                                                                           |
-| ----------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| Source images/documents | `data/campus/raw/*.pdf`                            | 90 unmodified official files                                                                                      |
-| Acquisition/provenance  | `manifest.json`, `floor-plans-source.html`         | URLs, dates, hashes, rights and source evidence                                                                   |
-| Searchable evidence     | `text/*.json`, `catalogue.json`                    | Text method, page sizes, label candidates, boxes and `sourceRef`                                                  |
-| Campus records          | `coverage.json`, `landmarks.json`                  | Building/floor catalogue; landmarks and indoor entrance/transition records remain unreviewed                      |
-| Campus topology         | `data/campus/graph.json`                           | 13 source-traced outdoor locations and 14 pedestrian segments with normalized route polylines; not field-verified |
-| Route visualization     | `data/campus/visual/campus-wayfinding-central.png` | Hash-verified crop of the official map; graph coordinates use normalized crop pixels                              |
+| Layer | Files | Meaning |
+|---|---|---|
+| Source images/documents | `data/campus/raw/*.pdf` | 90 unmodified official files |
+| Acquisition/provenance | `manifest.json`, `floor-plans-source.html` | URLs, dates, hashes, rights and source evidence |
+| Searchable evidence | `text/*.json`, `catalogue.json` | Text method, page sizes, label candidates, boxes and `sourceRef` |
+| Campus records | `coverage.json`, `landmarks.json` | Building/floor catalogue; no promoted verified room/entrance/transition records yet |
+| Campus topology | `data/campus/graph.json` | Empty until connections are reviewed and validated |
 
 Floor-plan coordinates use PDF points with a top-left origin. There are no geographic coordinates, measured distances, inferred scale, or cross-floor alignment. Raw drawing primitives remain unclassified.
 
-A source review inspected the campus wayfinding map and traced a central-campus outdoor pilot between Beedie Plaza, Campus Square, South Commons, and nearby building-map vicinities (NW4, SW1, SE2, SE4, SE6, SE8, SE12, SW9, SE14, and SE16). The app overlays its approximate graph polylines on a crop rendered from the same official map page. Its coordinates are normalized to that image, and the crop's source PDF hash, pixel bounds, render resolution and PNG hash are validated. The network is not field-verified; line direction is treated as bidirectional because the map shows no one-way restrictions. The map does not establish building entrances, interior paths, exact route lengths, accessibility, or current conditions. An exact building-code match from a photo estimate can seed the route from that building's approximate map-side vicinity. This is not a precise camera-to-map localization. Typed room destinations are matched against exact extracted source labels, but only outdoor paths to supported building vicinities are available. The route is visual only; AR and sentence-based turn instructions are not implemented.
+A limited visual source review inspected SE12 floor 1, SW1 floor 1 and the campus wayfinding map. No complete set of campus entrances, corridor connections or accessibility properties is verified. Walking routes are unavailable. Fictional routing data and controls have been removed at the user's request.
 
 ## Downloaded building/floor coverage
 
 The following is **document coverage**, not routing support. `coverage.json` is the machine-readable source.
 
 | Building | Downloaded floors |
-| -------- | ----------------- |
-| NE1      | 1, 2, 3, 4        |
-| NE10     | 1                 |
-| NE12     | 1, 2              |
-| NE16     | 1                 |
-| NE18     | 1                 |
-| NE2      | 1, 2              |
-| NE20     | 1, 2              |
-| NE21     | 1                 |
-| NE22     | 1                 |
-| NE23     | 1                 |
-| NE24     | 1                 |
-| NE25     | 1, 2, 3           |
-| NE28     | 1                 |
-| NE3      | 1, 2              |
-| NE4      | 1, 2              |
-| NE6      | 1, 2              |
-| NE7      | 1                 |
-| NE8      | 1, 2              |
-| NE9      | 1, 2              |
-| NW1      | 1                 |
-| NW3      | 1, 2              |
-| NW4      | 1, 2, 3, 4        |
-| NW5      | 1, 2              |
-| NW6      | 1, 2              |
-| NW7      | 1                 |
-| SE1      | 1, 2              |
-| SE10     | 1, 2              |
-| SE12     | 1, 2, 3, 4        |
-| SE14     | 1, 2, 3           |
-| SE16     | 1                 |
-| SE2      | 1, 2, 3           |
-| SE30     | 1                 |
-| SE4      | 1                 |
-| SE40     | 1, 2              |
-| SE41     | 1, 2              |
-| SE42     | 1, 2              |
-| SE50     | 1                 |
-| SE6      | 1, 2, 3           |
-| SE8      | 1, 2              |
-| SE9      | 1                 |
-| SW1      | 1, 2, 3, 4        |
-| SW2      | 1, 2, 3           |
-| SW3      | 1, 2, 3, 4        |
-| SW5      | 1, 2              |
-| SW9      | 1, 2              |
+|---|---|
+| NE1 | 1, 2, 3, 4 |
+| NE10 | 1 |
+| NE12 | 1, 2 |
+| NE16 | 1 |
+| NE18 | 1 |
+| NE2 | 1, 2 |
+| NE20 | 1, 2 |
+| NE21 | 1 |
+| NE22 | 1 |
+| NE23 | 1 |
+| NE24 | 1 |
+| NE25 | 1, 2, 3 |
+| NE28 | 1 |
+| NE3 | 1, 2 |
+| NE4 | 1, 2 |
+| NE6 | 1, 2 |
+| NE7 | 1 |
+| NE8 | 1, 2 |
+| NE9 | 1, 2 |
+| NW1 | 1 |
+| NW3 | 1, 2 |
+| NW4 | 1, 2, 3, 4 |
+| NW5 | 1, 2 |
+| NW6 | 1, 2 |
+| NW7 | 1 |
+| SE1 | 1, 2 |
+| SE10 | 1, 2 |
+| SE12 | 1, 2, 3, 4 |
+| SE14 | 1, 2, 3 |
+| SE16 | 1 |
+| SE2 | 1, 2, 3 |
+| SE30 | 1 |
+| SE4 | 1 |
+| SE40 | 1, 2 |
+| SE41 | 1, 2 |
+| SE42 | 1, 2 |
+| SE50 | 1 |
+| SE6 | 1, 2, 3 |
+| SE8 | 1, 2 |
+| SE9 | 1 |
+| SW1 | 1, 2, 3, 4 |
+| SW2 | 1, 2, 3 |
+| SW3 | 1, 2, 3, 4 |
+| SW5 | 1, 2 |
+| SW9 | 1, 2 |
 
 ## Correct and extend records
 
 Inspect extracted labels and geometry against the original PDFs before promoting them to reviewed records. Keep source ID, page/region, review date, reviewer and the exact observation. Original PDFs must remain unchanged. Regenerate derived visual assets with `python scripts/prepare_visual_maps.py --workers 3`, then run `npm run data:validate` and the relevant tests.
 
-Future walking edges need reviewed endpoints, passages, transitions, restrictions, scale/cost assumptions and accessibility evidence. Keep unknown values unknown. Extend the source-traced graph only when each connection is visible in an authoritative source; field-check before claiming operational reliability. A source refresh requires reviewing changed hashes and dependent records. Do not infer doors or indoor adjacency from nearby OCR text alone.
+Future walking edges need independently reviewed endpoints, passages, transitions, restrictions, scale/cost assumptions and accessibility evidence. Keep unknown values unknown. Campus graph/landmark files remain empty; filling them does not automatically enable directions. A source refresh requires reviewing changed hashes and dependent records. Do not infer doors or adjacency from nearby OCR text alone.
 
 ## Visual and geometry conversion
 
 All 89 floor-plan PDFs now also have full PNGs, bounded overviews, four overlapping crops, and structured geometry JSON under `data/campus/visual/`. Eight labeled overview sheets support coarse visual comparison. The corpus contains 566,620 extracted line/rectangle/curve primitives, explicitly unclassified. Source and derived hashes are checked by `npm run data:validate`. No room polygon, door, window, scale, accessibility property or walking edge is invented from those paths. The actual photo is compared with source images and sampled geometry, producing unverified region hypotheses rather than verified campus landmarks. See [photo-localization.md](photo-localization.md) for schema, conversion commands, scope and privacy.
+
 
 ## Complete label retrieval
 

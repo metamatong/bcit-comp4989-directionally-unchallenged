@@ -23,7 +23,7 @@ First-stage evidence IDs expire after five minutes and are bound to a session an
 - `response_limit`: no partial result is applied. The next configured model may be tried; otherwise, retake the photo and retry.
 - Insufficient evidence: provide another view. This is an analysis result, not a transport failure.
 
-Fallback is limited to configured Gemini models; there is no alternate provider or sample-location substitution. Refresh state after an interrupted connection before retrying. Per-photo consent, typed validation, source constraints and visible uncertainty remain required.
+Fallback is limited to configured Gemini models; there is no alternate provider or sample-location substitution. Refresh state after an interrupted connection before retrying. Per-photo consent, typed validation, source constraints and user confirmation remain required.
 
 ## Validation
 

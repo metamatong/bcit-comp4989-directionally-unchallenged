@@ -30,6 +30,7 @@ describe('removed preferences and transient evidence', () => {
     for (const configured of [true, false]) {
       const session = newSession(configured);
       expect(session.mode).toBe('live');
+      expect(session.campusLocation).toBeNull();
       expect(session.activity).toEqual([]);
       expect(session).not.toHaveProperty('route');
       expect(session).not.toHaveProperty('replayStage');

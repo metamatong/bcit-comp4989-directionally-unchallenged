@@ -84,50 +84,6 @@ export type CampusPhotoAnalysis = {
   usedFallbackModel: boolean;
   generatedAt: string;
 };
-export type RouteNode = {
-  id: string;
-  label: string;
-  kind: 'building-vicinity' | 'mapped-landmark';
-  building?: string;
-  mapPoint: RoutePoint;
-};
-export type RoutePoint = [number, number];
-export type RouteMapImage = {
-  file: string;
-  url: string;
-  width: number;
-  height: number;
-  sha256: string;
-  sourceId: string;
-  sourceRef: string;
-  sourceSha256: string;
-  renderDpi: number;
-  cropRenderedPixels: [number, number, number, number];
-};
-export type CampusRoute = {
-  graphId: string;
-  start: RouteNode;
-  destination: RouteNode;
-  segments: {
-    edgeId: string;
-    points: RoutePoint[];
-    sourceRef: string;
-  }[];
-  sourceRef: string;
-  limitations: string[];
-};
-export type CampusDestinationResolution = {
-  kind: 'mapped-location' | 'room-label';
-  label: string;
-  building?: string;
-  floor?: string;
-  sourceRef?: string;
-};
-export type CampusDirectionsResult = {
-  route: CampusRoute | null;
-  destination: CampusDestinationResolution;
-  message?: string;
-};
 export type Session = {
   id: string;
   revision: number;
@@ -140,6 +96,7 @@ export type Session = {
   appliedActions: string[];
   photoEvidence: PhotoEvidence | null;
   campusAnalysis: CampusPhotoAnalysis | null;
+  campusLocation: CampusLocationCandidate | null;
 };
 export type CatalogueRecord = {
   id: string;
@@ -162,13 +119,4 @@ export type Bootstrap = {
   coverage: { floorPlans: number; buildings: string[]; extractedLabelCandidates: number };
   visualPlans: VisualPlan[];
   photoLocalizationAvailable: boolean;
-  directions: {
-    available: boolean;
-    nodes: RouteNode[];
-    segmentCount: number;
-    mapImage: RouteMapImage;
-    sourceRef: string;
-    status: string;
-    limitations: string[];
-  };
 };

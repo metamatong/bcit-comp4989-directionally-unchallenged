@@ -49,6 +49,7 @@ it('performs two separate API calls before any location result, with idempotency
   expect(provider.calls - before).toBe(1);
   expect(observed.photoEvidence?.labels[0].text).toBe('302');
   expect(observed.campusAnalysis).toBeNull();
+  expect(observed.campusLocation).toBeNull();
   expect(observed).not.toHaveProperty('fingerprint');
   const repeatedRead: Session = await (
     await post(`/api/sessions/${initial.id}/photo/evidence`, input)
@@ -64,6 +65,7 @@ it('performs two separate API calls before any location result, with idempotency
   const result: Session = await response.json();
   expect(result.providerCalls).toBe(2);
   expect(result.campusAnalysis?.candidates[0].planId).toBe('SE12-F3-p1');
+  expect(result.campusLocation).toBeNull();
   expect(result.photoEvidence).toBeNull();
   expect(result.campusAnalysis?.labelRetrieval.exactMatchPlanIds).toEqual(['SE12-F3-p1']);
   expect(JSON.stringify(result)).not.toContain(input.image.data);
@@ -71,12 +73,24 @@ it('performs two separate API calls before any location result, with idempotency
   expect(repeated.status).toBe(200);
   expect(provider.calls - before).toBe(2);
 
+  const confirmed: Session = await (
+    await post(`/api/sessions/${initial.id}/actions`, {
+      requestId: randomUUID(),
+      revision: result.revision,
+      action: {
+        type: 'confirm-campus-region',
+        candidateId: result.campusAnalysis!.candidates[0].id,
+      },
+    })
+  ).json();
+  expect(confirmed.campusLocation?.floor).toBe('3');
+  expect(confirmed).not.toHaveProperty('route');
   const stored = await (await fetch(`${base}/api/sessions/${initial.id}`)).json();
   expect(JSON.stringify(stored)).not.toContain(input.detailCrops[0].image.data);
   const reset: Session = await (
     await post(`/api/sessions/${initial.id}/actions`, {
       requestId: randomUUID(),
-      revision: result.revision,
+      revision: confirmed.revision,
       action: { type: 'reset' },
     })
   ).json();
