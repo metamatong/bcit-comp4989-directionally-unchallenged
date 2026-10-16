@@ -2,11 +2,29 @@ import { describe, expect, it, vi } from 'vitest';
 import {
   GeminiProvider,
   ProviderError,
+  defaultGeminiModel,
   isLiveAiConfigured,
+  liveAiFallbackModels,
   liveAiSetupIssue,
 } from '../server/provider';
 
 describe('live configuration', () => {
+  it('defaults to current models without implicitly trying restricted Gemini 2.5 models', () => {
+    expect(defaultGeminiModel).toBe('gemini-3.5-flash-lite');
+    expect(liveAiFallbackModels({})).toEqual(['gemini-3.8-flash']);
+    expect(liveAiFallbackModels({ GEMINI_MODEL: 'gemini-3.8-flash' })).toEqual([
+      'gemini-3.5-flash-lite',
+    ]);
+  });
+  it('preserves explicit fallback choices, including opting out or eligible legacy models', () => {
+    expect(liveAiFallbackModels({ GEMINI_FALLBACK_MODELS: '' })).toEqual([]);
+    expect(
+      liveAiFallbackModels({
+        GEMINI_MODEL: 'gemini-3.8-flash',
+        GEMINI_FALLBACK_MODELS: 'gemini-2.5-flash,gemini-2.5-flash,gemini-3.8-flash',
+      }),
+    ).toEqual(['gemini-2.5-flash']);
+  });
   it.each([
     { environment: {}, expected: 'GEMINI_API_KEY is missing' },
     {
@@ -173,6 +191,74 @@ describe('provider transport and free-tier request controls', () => {
     expect(pause.mock.calls[0][0]).toBeLessThan(1250);
     expect(pause.mock.calls[1][0]).toBeGreaterThanOrEqual(2000);
     expect(pause.mock.calls[1][0]).toBeLessThan(2250);
+  });
+  it.each([
+    { primaryStatus: 503, expectedCode: 'unavailable', expectedCalls: 4 },
+    { primaryStatus: 429, expectedCode: 'quota', expectedCalls: 2 },
+  ])(
+    'preserves the original $primaryStatus when the backup returns 404',
+    async ({ primaryStatus, expectedCode, expectedCalls }) => {
+      const fake = vi.fn<typeof fetch>().mockImplementation(
+        async (url) =>
+          new Response(JSON.stringify({ error: { message: 'fake-test-key private content' } }), {
+            status: String(url).includes('/gemini-3.8-flash:') ? primaryStatus : 404,
+          }),
+      );
+      const provider = new GeminiProvider({
+        ...options,
+        model: 'gemini-3.8-flash',
+        fallbackModels: ['gemini-3.5-flash-lite'],
+        fetchImpl: fake,
+      });
+      const failure = await provider.generate([], []).catch((error: unknown) => error);
+      expect(failure).toMatchObject({
+        code: expectedCode,
+        httpStatus: primaryStatus,
+        retryable: true,
+      });
+      const message = (failure as Error).message;
+      expect(message).toContain(primaryStatus === 503 ? 'HTTP 503' : 'quota exhausted');
+      expect(message).toContain('HTTP 404');
+      expect(message).not.toContain('fake-test-key');
+      expect(message).not.toContain('private content');
+      expect(fake).toHaveBeenCalledTimes(expectedCalls);
+    },
+  );
+  it('explains unavailable model access when every model returns 404', async () => {
+    const fake = vi.fn<typeof fetch>().mockImplementation(
+      async () =>
+        new Response(JSON.stringify({ error: { message: 'fake-test-key private content' } }), {
+          status: 404,
+        }),
+    );
+    const provider = new GeminiProvider({
+      ...options,
+      fallbackModels: ['gemini-3.8-flash'],
+      fetchImpl: fake,
+    });
+    const failure = await provider.generate([], []).catch((error: unknown) => error);
+    expect(failure).toMatchObject({ code: 'configuration', httpStatus: 502, retryable: false });
+    expect((failure as Error).message).toContain('unavailable for this API project (HTTP 404)');
+    expect((failure as Error).message).not.toContain('fake-test-key');
+    expect(fake).toHaveBeenCalledTimes(2);
+  });
+  it('keeps a backup authentication error authoritative after a transient primary failure', async () => {
+    const fake = vi.fn<typeof fetch>().mockImplementation(
+      async (url) =>
+        new Response('{}', {
+          status: String(url).includes('/gemini-3.8-flash:') ? 503 : 403,
+        }),
+    );
+    const provider = new GeminiProvider({
+      ...options,
+      model: 'gemini-3.8-flash',
+      fallbackModels: ['gemini-3.5-flash-lite', 'gemini-3.6-flash'],
+      fetchImpl: fake,
+    });
+    const failure = await provider.generate([], []).catch((error: unknown) => error);
+    expect(failure).toMatchObject({ code: 'configuration', retryable: false });
+    expect((failure as Error).message).toContain('HTTP 403');
+    expect(fake).toHaveBeenCalledTimes(4);
   });
   it('recovers from a transient 503 without changing model', async () => {
     const fake = vi

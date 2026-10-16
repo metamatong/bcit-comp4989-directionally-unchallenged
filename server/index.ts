@@ -2,14 +2,19 @@ import { existsSync } from 'node:fs';
 import { createServer as createHttpServer } from 'node:http';
 import express from 'express';
 import react from '@vitejs/plugin-react';
-import { GeminiProvider, liveAiFallbackModels, liveAiSetupIssue } from './provider';
+import {
+  GeminiProvider,
+  defaultGeminiModel,
+  liveAiFallbackModels,
+  liveAiSetupIssue,
+} from './provider';
 import { createApp } from './app';
 import { root } from './data';
 import { listenServer } from './runtime';
 if (existsSync(`${root}/.env`)) process.loadEnvFile(`${root}/.env`);
 const bounded = (value: string | undefined, fallback: number, max: number) =>
   Math.max(1, Math.min(max, Number(value) || fallback));
-const model = process.env.GEMINI_MODEL ?? 'gemini-2.5-flash-lite';
+const model = process.env.GEMINI_MODEL ?? defaultGeminiModel;
 const fallbackModels = liveAiFallbackModels(process.env);
 const setupNotice = liveAiSetupIssue(process.env);
 const liveAvailable = setupNotice === null;

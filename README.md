@@ -25,7 +25,7 @@ npm ci
 npm run dev
 ```
 
-Open [CampusLens locally](http://127.0.0.1:3000). Configure `GEMINI_API_KEY`, a primary `GEMINI_MODEL`, and an ordered `GEMINI_FALLBACK_MODELS` list in the private `.env`. The defaults use Gemini 2.5 Flash-Lite with Gemini 2.5 Flash as fallback; Google lists both on its free tier. Set `AI_FREE_TIER_CONFIRMED=true` only after verifying model access and eligibility for your API project. Keys stay server-side. Existing private settings are preserved.
+Open [CampusLens locally](http://127.0.0.1:3000). Configure `GEMINI_API_KEY`, a primary `GEMINI_MODEL`, and an ordered `GEMINI_FALLBACK_MODELS` list in the private `.env`. New installations default to Gemini 3.5 Flash-Lite with Gemini 3.8 Flash as fallback; Google lists both on its free tier. Existing primary selections are preserved; a 3.8 primary defaults to a 3.5 Flash-Lite backup. Gemini 2.5 is no longer an automatic fallback because Google restricts generation access for new users. Set `AI_FREE_TIER_CONFIRMED=true` only after verifying model access and eligibility for your API project. Keys stay server-side. Explicit fallback settings are preserved, including an empty list to disable fallback.
 
 The Node server does not restart automatically when files change. Restart it manually after backend or environment changes: Ctrl+C, then `npm run dev`. Frontend edits can still refresh through Vite HMR on the same port. Do not launch another instance on port 3000. Without valid provider configuration, photo analysis is disabled and the app displays setup guidance.
 
