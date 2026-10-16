@@ -1,82 +1,28 @@
-import { readFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
 import { describe, expect, it } from 'vitest';
 import {
   analyzeCampusPhoto,
   confirmCampusRegion,
-  photoRequestSchema,
-  validatePhotoBytes,
-  type PhotoRequest,
+  comparisonSchema,
 } from '../server/photo-localization';
+import { readPhotoEvidence, requirePhotoEvidence } from '../server/photo-evidence';
 import {
-  getVisualPlan,
-  planAtlases,
-  planGeometrySummary,
-  visualPlans,
-} from '../server/visual-data';
+  photoEvidenceRequestSchema,
+  photoRequestSchema,
+  validatePhotoBundle,
+} from '../server/photo-media';
 import { newSession } from '../server/session';
+import { getVisualPlan, planAtlases, planGeometrySummary } from '../server/visual-data';
 import type { GenerationOptions, ModelContent, ModelPart, Provider } from '../server/provider';
+import {
+  photoInput,
+  comparisonInput,
+  fixtureImage,
+  labelReading,
+  shortlist,
+  comparison,
+} from './photo-fixtures';
 
-const image = {
-  mimeType: 'image/png' as const,
-  data: readFileSync('data/campus/visual/png/SE12-F1-p1/overview.png').toString('base64'),
-};
-const planId = 'SE12-F1-p1';
-function input(overrides: Partial<PhotoRequest> = {}): PhotoRequest {
-  return {
-    requestId: randomUUID(),
-    revision: 0,
-    consent: true,
-    description: '',
-    image: { ...image },
-    ...overrides,
-  };
-}
-function shortlist(ids = [planId]): ModelPart[] {
-  return [
-    {
-      functionCall: {
-        name: 'select_floor_plans',
-        args: {
-          planIds: ids,
-          observations: ['A long corridor and glazing are visible.'],
-          explanation: 'Several floor layouts may fit; inspect these drawings.',
-          clarification: 'Another view could distinguish similar corridors.',
-        },
-      },
-    },
-  ];
-}
-function comparison(overrides: Record<string, unknown> = {}): ModelPart[] {
-  return [
-    {
-      functionCall: {
-        name: 'propose_campus_locations',
-        args: {
-          outcome: 'candidates',
-          observations: ['Visible corridor geometry.'],
-          summary: 'A possible region requires confirmation.',
-          clarification: 'Check the visible corridor arrangement.',
-          candidates: [
-            {
-              planId,
-              bounds: [0.2, 0.3, 0.5, 0.6],
-              confidence: 'low',
-              matches: [
-                {
-                  photoFeature: 'A straight corridor',
-                  planFeature: 'An elongated passage visible in the drawing',
-                },
-              ],
-              limitations: ['This is a synthetic test hypothesis, not a field observation.'],
-            },
-          ],
-          ...overrides,
-        },
-      },
-    },
-  ];
-}
 function fixture(turns: ModelPart[][]) {
   const captures: { contents: ModelContent[]; options?: GenerationOptions }[] = [];
   const provider: Provider = {
@@ -84,210 +30,316 @@ function fixture(turns: ModelPart[][]) {
     async generate(contents, _tools, _signal, onAttempt, options) {
       captures.push({ contents, options });
       onAttempt?.();
-      this.calls++;
-      return turns[this.calls - 1] ?? [];
+      return turns[this.calls++] ?? [];
     },
   };
   return { provider, captures };
 }
 
-describe('real-source multimodal localization contracts (mocked model)', () => {
-  it('sends the actual photo with every real floor-plan overview, then selected PNGs and geometry; no OCR is required', async () => {
+describe('separate photo evidence and source-grounded localization stages (mocked Gemini)', () => {
+  it('reads the photo without plan hints, then retrieves all exact labels and compares SE12 floor 3 directly', async () => {
     const session = newSession();
-    const { provider, captures } = fixture([shortlist(), comparison()]);
-    const result = await analyzeCampusPhoto(session, input(), provider);
+    const input = photoInput();
+    const { provider, captures } = fixture([labelReading(), comparison()]);
+    const record = await readPhotoEvidence(session, input, provider);
+    expect(session.campusAnalysis).toBeNull();
+    expect(session.campusLocation).toBeNull();
+    expect(captures[0].options?.forceTool).toBe('read_photo_labels');
+    expect(captures[0].contents[0].parts.filter((part) => part.inlineData)).toHaveLength(5);
+    expect(JSON.stringify(captures[0].contents)).not.toContain('SE12-F3');
+    expect(JSON.stringify(captures[0].contents)).not.toContain('EXTRACTED GEOMETRY');
+
+    const result = await analyzeCampusPhoto(
+      session,
+      comparisonInput(input, record.evidence.id),
+      provider,
+      record,
+    );
     expect(provider.calls).toBe(2);
-    expect(captures[0].contents[0].parts.filter((part) => part.inlineData).length).toBe(
-      planAtlases.length + 1,
-    );
-    for (const capture of captures) {
-      expect(capture.contents[0].parts.some((part) => part.inlineData?.data === image.data)).toBe(
-        true,
-      );
-      expect(capture.options?.systemInstruction).toContain('ACTUAL uploaded photograph');
-      expect(capture.options?.systemInstruction).toContain(
-        'Use only supplied official BCIT plan records',
-      );
-      expect(capture.options?.thinkingLevel).toBe('low');
-    }
-    expect(captures[0].options?.maxOutputTokens).toBe(4096);
-    expect(captures[1].options?.maxOutputTokens).toBe(8192);
-    expect(captures[1].options?.systemInstruction).toContain(
-      'select only the single strongest remaining location',
-    );
+    expect(session.providerCalls).toBe(2);
+    expect(captures[1].options?.forceTool).toBe('propose_campus_locations');
+    expect(captures[1].contents[0].parts.filter((part) => part.inlineData)).toHaveLength(10);
+    expect(
+      captures[1].contents[0].parts.filter((part) => part.inlineData?.data === fixtureImage.data),
+    ).toHaveLength(5);
     const detailText = captures[1].contents[0].parts
       .flatMap((part) => (part.text ? [part.text] : []))
       .join('\n');
     expect(detailText).toContain('EXTRACTED GEOMETRY');
-    expect(detailText).toContain('SE12-F1#page=1');
-    expect(detailText).not.toContain('Cedar welcome desk');
-    expect(result.atlasPlanCount).toBe(89);
-    expect(result.candidates).toHaveLength(1);
-    expect(result.usedFallbackModel).toBe(false);
-    expect(result.candidates[0].building).toBe('SE12');
-    expect(result.candidates[0].verification).toBe('unverified-ai-hypothesis');
-    expect(session).not.toHaveProperty('currentNodeId');
+    expect(detailText).toContain('SE12-F3#page=1');
+    expect(detailText).toContain('"text":"302"');
+    expect(detailText).not.toContain('SW1-F3-p1');
+    expect(result.labelRetrieval.exactMatchPlanIds).toEqual(['SE12-F3-p1']);
+    expect(result.labelRetrieval.indexedLabels).toBe(5463);
+    expect(result.atlasPlanCount).toBe(0);
+    expect(result.candidates[0].floor).toBe('3');
+    expect(result.candidates[0].labelMatches).toEqual([{ observedLabel: '302', planLabel: '302' }]);
+    expect(session.photoEvidence).toBeNull();
     expect(session.campusLocation).toBeNull();
-    expect(JSON.stringify(session).includes(image.data)).toBe(false);
+    expect(JSON.stringify(session)).not.toContain(input.image.data);
+    expect(session.activity.map((entry) => entry.tool)).toEqual([
+      'read_photo_labels',
+      'retrieve_room_labels',
+      'inspect_floor_plans',
+      'photo_comparison_complete',
+    ]);
+    for (const capture of captures) expect(capture.options?.thinkingLevel).toBe('low');
   });
-  it('confirms a real-source region without assigning a fictional node or route', async () => {
-    const session = newSession();
-    const { provider } = fixture([shortlist(), comparison()]);
-    await analyzeCampusPhoto(session, input(), provider);
+  it('can confirm only the proposed source-linked region', async () => {
+    const session = newSession(),
+      input = photoInput();
+    const { provider } = fixture([labelReading(), comparison()]);
+    const record = await readPhotoEvidence(session, input, provider);
+    await analyzeCampusPhoto(session, comparisonInput(input, record.evidence.id), provider, record);
     confirmCampusRegion(session, session.campusAnalysis!.candidates[0].id);
-    expect(session.campusLocation?.planId).toBe(planId);
-    expect(session).not.toHaveProperty('currentNodeId');
+    expect(session.campusLocation?.planId).toBe('SE12-F3-p1');
     expect(session).not.toHaveProperty('route');
     expect(() => confirmCampusRegion(session, randomUUID())).toThrow('current photo comparison');
   });
-  it('marks a result when a configured backup Gemini model was used', async () => {
-    const provider: Provider = {
-      calls: 0,
-      async generate(_contents, _tools, _signal, onAttempt, options) {
-        this.calls++;
-        onAttempt?.();
-        options?.onModelFallback?.();
-        return this.calls === 1 ? shortlist() : comparison();
-      },
-    };
-    const result = await analyzeCampusPhoto(newSession(), input(), provider);
-    expect(result.candidates).toHaveLength(1);
-    expect(result.usedFallbackModel).toBe(true);
-  });
-  it('abstains after visual inspection instead of substituting a demo location', async () => {
-    const session = newSession();
-    const { provider } = fixture([shortlist([])]);
-    const result = await analyzeCampusPhoto(session, input(), provider);
-    expect(result.outcome).toBe('insufficient_evidence');
-    expect(result.candidates).toEqual([]);
-    expect(provider.calls).toBe(1);
-  });
-  it('allows detailed comparison to conclude that a shortlist is insufficient', async () => {
-    const { provider } = fixture([
-      shortlist(),
-      comparison({ outcome: 'insufficient_evidence', candidates: [] }),
-    ]);
-    const result = await analyzeCampusPhoto(newSession(), input(), provider);
-    expect(result.candidates).toEqual([]);
-    expect(result.detailedPlanIds).toEqual([planId]);
-  });
-  it('rejects multiple suggestions instead of returning a list of possible locations', async () => {
-    const multipleCandidates = comparison();
-    const args = multipleCandidates[0].functionCall!.args as {
-      outcome: string;
-      candidates: unknown[];
-    };
-    args.candidates.push({
-      planId,
-      bounds: [0.55, 0.35, 0.8, 0.65],
-      confidence: 'low',
-      matches: [{ photoFeature: 'Corridor', planFeature: 'A different passage' }],
-      limitations: ['No field validation.'],
-    });
-    const { provider } = fixture([shortlist(), multipleCandidates]);
-    const session = newSession();
-    await expect(analyzeCampusPhoto(session, input(), provider)).rejects.toThrow(
-      'more than one location suggestion',
-    );
+  it('rejects SW1 as a source when the clear room 302 reading retrieved only SE12', async () => {
+    const session = newSession(),
+      input = photoInput();
+    const { provider } = fixture([labelReading(), comparison({}, 'SW1-F3-p1')]);
+    const record = await readPhotoEvidence(session, input, provider);
+    await expect(
+      analyzeCampusPhoto(session, comparisonInput(input, record.evidence.id), provider, record),
+    ).rejects.toThrow('invalid source IDs');
     expect(session.campusAnalysis).toBeNull();
+    expect(session.activity.map((entry) => entry.tool)).toEqual([
+      'read_photo_labels',
+      'photo_comparison_stopped',
+    ]);
   });
-  it('uses a supplied building hint to narrow visual comparison, not a text-match requirement', async () => {
-    const { provider, captures } = fixture([shortlist(), comparison()]);
-    const result = await analyzeCampusPhoto(
-      newSession(),
-      input({ buildingHint: 'SE12' }),
-      provider,
-    );
-    expect(result.atlasPlanCount).toBe(4);
-    expect(captures[0].contents[0].parts.filter((part) => part.inlineData).length).toBe(5);
-  });
-  it.each(['demo-layout-v1', 'cedar-entry', '../../.env', 'NW999-F1-p1'])(
-    'rejects invented or foreign plan ID %s',
-    async (id) => {
-      const session = newSession();
-      const { provider } = fixture([shortlist([id])]);
-      await expect(analyzeCampusPhoto(session, input(), provider)).rejects.toThrow(
-        'invalid or unsupplied',
-      );
+  it.each(['3021', '0302', '302A'])(
+    'rejects a model claim that 302 matches %s',
+    async (wrongLabel) => {
+      const response = comparison();
+      (
+        response[0].functionCall!.args as { candidates: { labelMatches: unknown[] }[] }
+      ).candidates[0].labelMatches = [{ observedLabel: '302', planLabel: wrongLabel }];
+      const session = newSession(),
+        input = photoInput();
+      const { provider } = fixture([labelReading(), response]);
+      const record = await readPhotoEvidence(session, input, provider);
+      await expect(
+        analyzeCampusPhoto(session, comparisonInput(input, record.evidence.id), provider, record),
+      ).rejects.toThrow('non-exact');
       expect(session.campusAnalysis).toBeNull();
     },
   );
-  it('rejects a candidate for a real plan that was not selected for detailed inspection', async () => {
-    const candidate = {
-      planId: 'SW1-F1-p1',
-      bounds: [0.2, 0.3, 0.5, 0.6],
-      confidence: 'low',
-      matches: [{ photoFeature: 'Corridor', planFeature: 'Passage' }],
-      limitations: ['Unverified'],
-    };
-    const { provider } = fixture([shortlist(), comparison({ candidates: [candidate] })]);
-    const session = newSession();
-    await expect(analyzeCampusPhoto(session, input(), provider)).rejects.toThrow(
-      'invalid source IDs',
+  it('requires a verified exact label in label-guided results, while allowing visual abstention', async () => {
+    const response = comparison();
+    (
+      response[0].functionCall!.args as { candidates: { labelMatches: unknown[] }[] }
+    ).candidates[0].labelMatches = [];
+    const session = newSession(),
+      input = photoInput();
+    const { provider } = fixture([
+      labelReading(),
+      response,
+      comparison({ outcome: 'insufficient_evidence', candidates: [] }),
+    ]);
+    const record = await readPhotoEvidence(session, input, provider);
+    const request = comparisonInput(input, record.evidence.id);
+    await expect(analyzeCampusPhoto(session, request, provider, record)).rejects.toThrow(
+      'did not verify',
     );
-    expect(session.campusAnalysis).toBeNull();
+    const result = await analyzeCampusPhoto(session, request, provider, record);
+    expect(result.outcome).toBe('insufficient_evidence');
+    expect(result.candidates).toEqual([]);
   });
-  it('rejects out-of-range and inverted image coordinates', async () => {
-    for (const bounds of [
-      [-0.1, 0, 0.4, 0.4],
-      [0.8, 0.1, 0.2, 0.4],
-      [0, 0, 1, 1.2],
-    ]) {
-      const invalid = comparison();
-      const args = invalid[0].functionCall!.args as { candidates: { bounds: number[] }[] };
-      args.candidates[0].bounds = bounds;
-      const { provider } = fixture([shortlist(), invalid]);
-      await expect(analyzeCampusPhoto(newSession(), input(), provider)).rejects.toThrow(
-        'region coordinates',
+  it('still performs photo/crop visual shortlisting when there is no readable label', async () => {
+    const response = comparison();
+    (
+      response[0].functionCall!.args as { candidates: { labelMatches: unknown[] }[] }
+    ).candidates[0].labelMatches = [];
+    const { provider, captures } = fixture([labelReading(null), shortlist(), response]);
+    const session = newSession(),
+      input = photoInput();
+    const record = await readPhotoEvidence(session, input, provider);
+    const result = await analyzeCampusPhoto(
+      session,
+      comparisonInput(input, record.evidence.id),
+      provider,
+      record,
+    );
+    expect(provider.calls).toBe(3);
+    expect(captures[1].options?.forceTool).toBe('select_floor_plans');
+    expect(captures[1].contents[0].parts.filter((part) => part.inlineData)).toHaveLength(
+      planAtlases.length + 5,
+    );
+    expect(result.atlasPlanCount).toBe(89);
+    expect(result.labelRetrieval.clearLabels).toEqual([]);
+  });
+  it('does not turn uncertain or unknown labels into a forced building match', async () => {
+    for (const [reading, clarity] of [
+      ['302', 'uncertain'],
+      ['99999', 'clear'],
+    ] as const) {
+      const session = newSession(),
+        input = photoInput();
+      const { provider, captures } = fixture([labelReading(reading, clarity), shortlist([])]);
+      const record = await readPhotoEvidence(session, input, provider);
+      const result = await analyzeCampusPhoto(
+        session,
+        comparisonInput(input, record.evidence.id),
+        provider,
+        record,
       );
+      expect(captures[1].options?.forceTool).toBe('select_floor_plans');
+      expect(result.candidates).toEqual([]);
+      expect(result.atlasPlanCount).toBe(89);
     }
   });
-  it('discards a stale response when the request is cancelled', async () => {
-    const controller = new AbortController();
-    const session = newSession();
+  it.each(['demo-layout-v1', '../../.env', 'NW999-F1-p1'])(
+    'rejects an unsupplied visual-shortlist ID: %s',
+    async (id) => {
+      const session = newSession(),
+        input = photoInput();
+      const { provider } = fixture([labelReading(null), shortlist([id])]);
+      const record = await readPhotoEvidence(session, input, provider);
+      await expect(
+        analyzeCampusPhoto(session, comparisonInput(input, record.evidence.id), provider, record),
+      ).rejects.toThrow('invalid or unsupplied');
+    },
+  );
+  it('rejects invented labels or mismatched source coordinates instead of setting a position', async () => {
+    const session = newSession(),
+      input = photoInput();
+    const response = comparison();
+    (
+      response[0].functionCall!.args as { candidates: { bounds: number[] }[] }
+    ).candidates[0].bounds = [0.8, 0.1, 0.2, 0.5];
+    const { provider } = fixture([labelReading(), response]);
+    const record = await readPhotoEvidence(session, input, provider);
+    await expect(
+      analyzeCampusPhoto(session, comparisonInput(input, record.evidence.id), provider, record),
+    ).rejects.toThrow('region coordinates');
+    expect(session.campusLocation).toBeNull();
+  });
+  it('rejects more than one final candidate', () => {
+    const args = comparison()[0].functionCall!.args as { candidates: unknown[] };
+    args.candidates.push(args.candidates[0]);
+    expect(comparisonSchema.safeParse(args).success).toBe(false);
+  });
+  it('cancels either stage without committing stale evidence or a result', async () => {
+    const first = new AbortController(),
+      session = newSession(),
+      input = photoInput();
     const provider: Provider = {
       calls: 0,
       async generate(_contents, _tools, _signal, onAttempt) {
         onAttempt?.();
         this.calls++;
-        controller.abort();
-        return shortlist();
+        first.abort();
+        return labelReading();
       },
     };
-    await expect(analyzeCampusPhoto(session, input(), provider, controller.signal)).rejects.toThrow(
-      'cancelled or timed out',
+    await expect(readPhotoEvidence(session, input, provider, first.signal)).rejects.toThrow(
+      'cancelled',
     );
-    expect(session.campusAnalysis).toBeNull();
-    expect(session.providerCalls).toBe(1);
-  });
-  it('stops before a provider call for invalid media, missing consent, and unknown building', async () => {
-    const { provider } = fixture([]);
-    expect(photoRequestSchema.safeParse(input({ consent: false as true })).success).toBe(false);
-    expect(() => validatePhotoBytes({ mimeType: 'image/jpeg', data: image.data })).toThrow(
-      'format',
-    );
+    expect(session.photoEvidence).toBeNull();
+    const fixtureProvider = fixture([labelReading()]).provider;
+    const record = await readPhotoEvidence(session, input, fixtureProvider);
+    const second = new AbortController();
+    second.abort();
     await expect(
-      analyzeCampusPhoto(newSession(), input({ buildingHint: 'OTHER' }), provider),
-    ).rejects.toThrow('building');
-    expect(provider.calls).toBe(0);
+      analyzeCampusPhoto(
+        session,
+        comparisonInput(input, record.evidence.id),
+        fixtureProvider,
+        record,
+        second.signal,
+      ),
+    ).rejects.toThrow('cancelled');
+    expect(session.campusAnalysis).toBeNull();
   });
-  it('does not execute a tool name embedded in a photo/model response', async () => {
-    const { provider } = fixture([
-      [{ functionCall: { name: 'report_disruption', args: { scenario: 'unreachable' } } }],
-    ]);
-    const session = newSession();
-    await expect(analyzeCampusPhoto(session, input(), provider)).rejects.toThrow(
-      'valid floor-plan comparison',
+  it('binds first-stage evidence to its session, complete image bundle and expiry', async () => {
+    const session = newSession(),
+      input = photoInput();
+    const { provider } = fixture([labelReading()]);
+    const record = await readPhotoEvidence(session, input, provider);
+    const request = comparisonInput(input, record.evidence.id);
+    expect(requirePhotoEvidence(session, request, record)).toMatchObject({
+      id: record.evidence.id,
+    });
+    expect(() => requirePhotoEvidence(newSession(), request, record)).toThrow('labels first');
+    expect(() =>
+      requirePhotoEvidence(session, { ...request, evidenceId: randomUUID() }, record),
+    ).toThrow('labels first');
+    expect(() =>
+      requirePhotoEvidence(session, { ...request, buildingHint: 'SW1' }, record),
+    ).toThrow('changed');
+    expect(() =>
+      requirePhotoEvidence(session, request, {
+        ...record,
+        evidence: { ...record.evidence, expiresAt: new Date(0).toISOString() },
+      }),
+    ).toThrow('expired');
+  });
+  it('validates consent, crop coverage, image format and aggregate media size before spending calls', () => {
+    const input = photoInput();
+    expect(photoEvidenceRequestSchema.safeParse({ ...input, consent: false }).success).toBe(false);
+    expect(photoRequestSchema.safeParse(input).success).toBe(false);
+    expect(
+      photoEvidenceRequestSchema.safeParse({ ...input, detailCrops: input.detailCrops.slice(1) })
+        .success,
+    ).toBe(false);
+    expect(
+      photoEvidenceRequestSchema.safeParse({
+        ...input,
+        detailCrops: [input.detailCrops[0], ...input.detailCrops.slice(0, 3)],
+      }).success,
+    ).toBe(false);
+    const wrongBounds = structuredClone(input);
+    wrongBounds.detailCrops[0].bounds[2] = 0.8;
+    expect(photoEvidenceRequestSchema.safeParse(wrongBounds).success).toBe(false);
+    const wrongFormat = structuredClone(input);
+    wrongFormat.detailCrops[0].image.mimeType = 'image/jpeg';
+    expect(() => validatePhotoBundle(wrongFormat)).toThrow('format');
+    const huge = structuredClone(input);
+    const data = Buffer.concat([
+      Buffer.from('89504e470d0a1a0a', 'hex'),
+      Buffer.alloc(600_000),
+    ]).toString('base64');
+    huge.image.data = data;
+    huge.detailCrops.forEach((crop) => {
+      crop.image.data = data;
+    });
+    expect(() => validatePhotoBundle(huge)).toThrow('2.5 MB');
+  });
+  it('preserves fallback disclosure across both API stages', async () => {
+    const session = newSession(),
+      input = photoInput();
+    const { provider } = fixture([labelReading(), comparison()]);
+    const original = provider.generate.bind(provider);
+    provider.generate = async (contents, tools, signal, onAttempt, options) => {
+      if (provider.calls === 0) options?.onModelFallback?.();
+      return original(contents, tools, signal, onAttempt, options);
+    };
+    const record = await readPhotoEvidence(session, input, provider);
+    expect(record.evidence.usedFallbackModel).toBe(true);
+    const result = await analyzeCampusPhoto(
+      session,
+      comparisonInput(input, record.evidence.id),
+      provider,
+      record,
     );
-    expect(session).not.toHaveProperty('events');
+    expect(result.usedFallbackModel).toBe(true);
   });
-  it('loads geometry tied to the original source and exposes its unreviewed status', () => {
-    const plan = getVisualPlan(planId);
-    const geometry = planGeometrySummary(plan);
-    expect(visualPlans).toHaveLength(89);
+  it('rejects an unexpected first-stage tool without allowing it to select a plan', async () => {
+    const session = newSession();
+    const { provider } = fixture([shortlist()]);
+    await expect(readPhotoEvidence(session, photoInput(), provider)).rejects.toThrow(
+      'invalid photo label evidence',
+    );
+    expect(session.photoEvidence).toBeNull();
+    expect(session.campusAnalysis).toBeNull();
+  });
+  it('retains the original source geometry and unreviewed status', () => {
+    const geometry = planGeometrySummary(getVisualPlan('SE12-F3-p1'));
     expect(geometry.extraction.semanticClassification).toBe('unclassified');
     expect(geometry.coordinateSystem.geographic).toBe(false);
-    expect(geometry.coordinateSystem.metersPerPoint).toBeNull();
     expect(geometry.totalPrimitives).toBeGreaterThan(100);
     expect(geometry.sampledSegmentCount).toBeLessThanOrEqual(128);
   });

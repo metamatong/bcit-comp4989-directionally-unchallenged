@@ -1,6 +1,6 @@
 # CampusLens
 
-A mobile-friendly BCIT Burnaby photo-to-floor-plan app. Gemini compares an uploaded photograph with real BCIT floor-plan PNGs and extracted geometry, then proposes source-linked regions for review.
+A mobile-friendly BCIT Burnaby photo-to-floor-plan app. Gemini first reads visible room labels from the photo and detail crops. The server retrieves exact matches from all extracted floor-plan labels, then Gemini compares the photo with real plan images and geometry to propose a source-linked region.
 
 The internal reference dataset contains **89 official floor plans covering 45 Burnaby buildings**, plus the campus map. All floor plans have PNGs and structured geometry JSON. Results are **unverified AI location hypotheses**. Real walking routes remain unsupported.
 
@@ -34,11 +34,11 @@ The Node server does not restart automatically when files change. Restart it man
 There is no Campus library, general plan browser, or introductory marketing banner. Start with photo input; the result shows the matching plan region and links to that plan. Full source data and geometry remain available to Gemini on the server.
 
 1. Select **Find my location**, then upload or capture a campus photo.
-2. Agree to send this photo to Google and select Analyze.
+2. Agree to send this photo and its detail views to Google, then select Analyze. Label reading and location comparison run as two separate API requests.
 3. Review the single best source-linked estimate, or take another photo if the evidence is unclear.
 4. Confirm the estimate only if it matches your surroundings. **Clear** removes the result.
 
-Photos are prepared locally and sent only after per-photo consent and submission. No photo is saved in application storage. Mobile capture uses the device's photo picker/camera; the app has no live camera preview or movement tracking. Google's free-tier data handling applies.
+The full view and four detail crops are prepared locally from the original image. Photos are sent only after per-photo consent and submission. No photo is saved in application storage. Mobile capture uses the device's photo picker/camera; the app has no live camera preview or movement tracking. Google's free-tier data handling applies.
 
 ## Checks
 
@@ -53,7 +53,9 @@ npm run format
 
 Tests mock Gemini and spend no provider quota. Browser automation, when requested, uses an isolated server on port 3100 with credentials disabled and installed Google Chrome. It is not a physical-phone or Safari test. The browser OCR packages, worker assets and installation hook have been removed; optional local PDF preprocessing can still use Tesseract.
 
-Photo comparison uses low thinking and 4,096/8,192-token selection/detail allowances. When a Gemini model hits quota, is unavailable, or returns an unusable response, the server tries the configured Gemini fallback models. Incomplete responses cannot become location results. See [provider notes](docs/provider.md).
+Exact retrieval uses all 5,463 extracted source labels, including SE12 floor 3 room `302` beyond the former 80-label cutoff. `302` never matches `3021` or `0302`. The two API stages use a short-lived evidence ID bound to the same photo/crops; no image bytes are stored between stages. Clear exact matches go directly to detailed plan comparison; unreadable or ambiguous labels can still use visual shortlisting.
+
+Photo reading/shortlisting and detailed comparison use 4,096/8,192-token allowances with bounded thinking. When a Gemini model hits quota, is unavailable, or returns an unusable response, the server tries the configured Gemini fallback models. Incomplete responses cannot become location results. See [provider notes](docs/provider.md).
 
 ## Documentation
 
@@ -78,11 +80,12 @@ mvp/
 ├── requirements-data.txt, index.html
 ├── src/
 │   ├── App.tsx, main.tsx, styles.css
-│   ├── api.ts, photo.ts, types.ts
+│   ├── api.ts, photo.ts, photo-views.ts, types.ts
 │   └── components/  CampusLocationResults
 ├── server/
 │   ├── index.ts, app.ts, runtime.ts
 │   ├── provider.ts, photo-localization.ts, session.ts
+│   ├── photo-evidence.ts, photo-media.ts, room-labels.ts
 │   └── data.ts, visual-data.ts
 ├── data/campus/
 │   ├── floor-plans-source.html, manifest.json, coverage.json, catalogue.json
@@ -98,6 +101,7 @@ mvp/
 │   ├── api.test.ts, client-state.test.ts, data.test.ts, runtime.test.ts
 │   ├── provider.test.ts, provider-response.test.ts
 │   ├── photo-localization.test.ts, photo-api.test.ts
+│   ├── photo.test.ts, room-labels.test.ts, photo-fixtures.ts
 │   └── e2e/journey.spec.ts, photo.spec.ts
 ├── docs/
 │   ├── project-brief.txt, requirements.md, architecture.md, data.md

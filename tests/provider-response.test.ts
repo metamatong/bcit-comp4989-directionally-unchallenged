@@ -15,6 +15,35 @@ function transport(body: unknown) {
 }
 
 describe('Gemini completion status and visible response validation', () => {
+  it.each(['gemini-2.5-flash-lite', 'gemini-2.5-flash'])(
+    'uses a bounded thinkingBudget for %s rather than an unsupported thinkingLevel',
+    async (model) => {
+      const fetcher = vi.fn<typeof fetch>().mockResolvedValue(
+        Response.json({
+          candidates: [{ finishReason: 'STOP', content: { parts: [{ text: 'Ready' }] } }],
+        }),
+      );
+      const provider = new GeminiProvider({
+        apiKey: 'fake-key',
+        model,
+        requestsPerMinute: 6,
+        requestsPerDay: 60,
+        timeoutMs: 1000,
+        fetchImpl: fetcher,
+      });
+      await provider.generate([], [], undefined, undefined, {
+        maxOutputTokens: 4096,
+        thinkingLevel: 'low',
+      });
+      const body = JSON.parse(String(fetcher.mock.calls[0][1]?.body));
+      expect(body.generationConfig.thinkingConfig).toEqual({
+        includeThoughts: false,
+        thinkingBudget: 1024,
+      });
+      expect(body.generationConfig.maxOutputTokens).toBe(4096);
+    },
+  );
+
   it('reports the observed HTTP-200 token exhaustion with no parts as an incomplete response', async () => {
     const { provider, fetcher } = transport({
       candidates: [{ content: { role: 'model' }, finishReason: 'MAX_TOKENS' }],

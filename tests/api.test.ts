@@ -1,7 +1,7 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Server } from 'node:http';
 import { randomUUID } from 'node:crypto';
-import { readFileSync } from 'node:fs';
+import { photoInput } from './photo-fixtures';
 import { createApp } from '../server/app';
 import { ProviderError } from '../server/provider';
 import type { Session } from '../src/types';
@@ -11,10 +11,6 @@ const unavailableProvider = {
   generate: async () => {
     throw new Error('No provider call is allowed without configuration');
   },
-};
-const image = {
-  mimeType: 'image/png',
-  data: readFileSync('data/campus/visual/png/SE12-F1-p1/overview.png').toString('base64'),
 };
 const post = (url: string, body: unknown) =>
   fetch(url, {
@@ -94,11 +90,8 @@ describe('real-campus-only HTTP contract', () => {
   });
   it('returns a setup error instead of falling back when photo analysis is unconfigured', async () => {
     const session = await start();
-    const response = await post(`${base}/api/sessions/${session.id}/photo`, {
-      requestId: randomUUID(),
-      revision: 0,
-      consent: true,
-      image,
+    const response = await post(`${base}/api/sessions/${session.id}/photo/evidence`, {
+      ...photoInput(),
     });
     expect(response.status).toBe(503);
     const body = await response.json();
@@ -178,11 +171,8 @@ it.each([
   const origin = `http://127.0.0.1:${(isolated.address() as { port: number }).port}`;
   try {
     const session = await (await post(`${origin}/api/sessions`, {})).json();
-    const response = await post(`${origin}/api/sessions/${session.id}/photo`, {
-      requestId: randomUUID(),
-      revision: 0,
-      consent: true,
-      image,
+    const response = await post(`${origin}/api/sessions/${session.id}/photo/evidence`, {
+      ...photoInput(),
     });
     const body = await response.json();
     expect(response.status).toBe(failure.status);
@@ -191,7 +181,7 @@ it.each([
     expect(body.session.mode).toBe('live');
     expect(body.session.campusAnalysis).toBeNull();
     expect(body.session.providerCalls).toBe(1);
-    expect(body.session.activity.at(-1).tool).toBe('photo_comparison_stopped');
+    expect(body.session.activity.at(-1).tool).toBe('photo_labels_stopped');
     expect(body.error).not.toMatch(/demo/i);
   } finally {
     await new Promise<void>((resolve) => isolated.close(() => resolve()));

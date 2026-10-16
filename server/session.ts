@@ -14,6 +14,7 @@ export function newSession(providerAvailable = true): Session {
     providerCalls: 0,
     lastTouched: Date.now(),
     appliedActions: [],
+    photoEvidence: null,
     campusAnalysis: null,
     campusLocation: null,
   };

@@ -4,7 +4,7 @@ import { mkdir } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import type { CampusPhotoAnalysis, Session } from '../../src/types';
 
-function analysis(requestId: string, hasCandidate = true): CampusPhotoAnalysis {
+function analysis(requestId: string, evidenceId: string, hasCandidate = true): CampusPhotoAnalysis {
   return {
     requestId,
     outcome: hasCandidate ? 'candidates' : 'insufficient_evidence',
@@ -17,6 +17,8 @@ function analysis(requestId: string, hasCandidate = true): CampusPhotoAnalysis {
     detailedPlanIds: hasCandidate ? ['SE12-F1-p1'] : [],
     buildingHint: null,
     method: 'gemini-photo-floorplan',
+    evidenceId,
+    labelRetrieval: { indexedLabels: 5463, exactMatchPlanIds: [], clearLabels: [] },
     usedFallbackModel: false,
     generatedAt: new Date().toISOString(),
     candidates: hasCandidate
@@ -39,6 +41,7 @@ function analysis(requestId: string, hasCandidate = true): CampusPhotoAnalysis {
             limitations: [
               'This screenshot uses mocked provider results to verify the interface, not localization accuracy.',
             ],
+            labelMatches: [],
             verification: 'unverified-ai-hypothesis',
           },
         ]
@@ -50,7 +53,9 @@ async function setup(page: Page, hasCandidate = true) {
   const uploads: {
     consent: boolean;
     image: { data: string; mimeType: string };
+    detailCrops: { id: string; image: { data: string; mimeType: string } }[];
   }[] = [];
+  const evidenceUploads: unknown[] = [];
   const requests: string[] = [];
   page.on('request', (request) => requests.push(request.url()));
   await page.route('**/api/bootstrap', async (route) => {
@@ -65,14 +70,34 @@ async function setup(page: Page, hasCandidate = true) {
     };
     await route.fulfill({ json: current });
   });
+  await page.route('**/api/sessions/*/photo/evidence', async (route) => {
+    const body = route.request().postDataJSON();
+    evidenceUploads.push(body);
+    current = {
+      ...current,
+      revision: current.revision + 1,
+      providerCalls: 1,
+      photoEvidence: {
+        id: randomUUID(),
+        requestId: body.requestId,
+        labels: [],
+        observations: ['Visible scene structure.'],
+        readAt: new Date().toISOString(),
+        expiresAt: new Date(Date.now() + 300000).toISOString(),
+        usedFallbackModel: false,
+      },
+    };
+    await route.fulfill({ json: current });
+  });
   await page.route('**/api/sessions/*/photo', async (route) => {
     const body = route.request().postDataJSON();
     uploads.push(body);
     current = {
       ...current,
       revision: current.revision + 1,
-      campusAnalysis: analysis(body.requestId, hasCandidate),
-      providerCalls: 2,
+      campusAnalysis: analysis(body.requestId, current.photoEvidence!.id, hasCandidate),
+      photoEvidence: null,
+      providerCalls: 3,
       agentStatus: 'Live AI · photo and floor-plan comparison completed',
     };
     await route.fulfill({ json: current });
@@ -95,6 +120,7 @@ async function setup(page: Page, hasCandidate = true) {
         revision: current.revision + 1,
         campusLocation: null,
         campusAnalysis: null,
+        photoEvidence: null,
         activity: [],
         providerCalls: 0,
       };
@@ -103,7 +129,7 @@ async function setup(page: Page, hasCandidate = true) {
   });
   await page.goto('/');
   await expect(page.getByTestId('provider-status')).toBeVisible();
-  return { uploads, requests };
+  return { uploads, evidenceUploads, requests };
 }
 async function choosePhoto(page: Page) {
   await page.getByRole('button', { name: 'Find my location', exact: true }).click();
@@ -116,7 +142,7 @@ async function choosePhoto(page: Page) {
 test('photo → explicit consent → real plan region → confirmation, without OCR (mocked provider)', async ({
   page,
 }, info) => {
-  const { uploads, requests } = await setup(page);
+  const { uploads, evidenceUploads, requests } = await setup(page);
   await choosePhoto(page);
   const analyze = page.getByRole('button', {
     name: 'Analyze photo against BCIT plans',
@@ -124,7 +150,7 @@ test('photo → explicit consent → real plan region → confirmation, without 
   });
   await expect(analyze).toBeDisabled();
   expect(uploads).toHaveLength(0);
-  await page.getByRole('checkbox', { name: /Send this photo to Google Gemini/ }).check();
+  await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
   await analyze.click();
   await expect(
     page.getByRole('dialog').getByRole('heading', { name: 'SE12 · Floor 1' }),
@@ -135,6 +161,8 @@ test('photo → explicit consent → real plan region → confirmation, without 
     /SE12-F1-p1\/overview\.png$/,
   );
   expect(uploads).toHaveLength(1);
+  expect(evidenceUploads).toHaveLength(1);
+  expect(uploads[0].detailCrops).toHaveLength(4);
   expect(uploads[0].consent).toBe(true);
   expect(uploads[0].image.mimeType).toBe('image/jpeg');
   expect(uploads[0].image.data.length).toBeGreaterThan(1000);
@@ -165,7 +193,7 @@ test('photo → explicit consent → real plan region → confirmation, without 
 test('ambiguous photo asks for another view and never supplies a demo match', async ({ page }) => {
   await setup(page, false);
   await choosePhoto(page);
-  await page.getByRole('checkbox', { name: /Send this photo to Google Gemini/ }).check();
+  await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
   await page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }).click();
   await expect(page.getByRole('dialog').getByText('No clear match', { exact: true })).toBeVisible();
   await expect(
@@ -189,7 +217,7 @@ test('closing the photo dialog discards a late comparison response', async ({ pa
     await wait;
     await route.abort().catch(() => {});
   });
-  await page.getByRole('checkbox', { name: /Send this photo to Google Gemini/ }).check();
+  await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
   await page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }).click();
   await expect.poll(() => requested).toBe(true);
   await page.getByRole('button', { name: 'Close dialog', exact: true }).click();
@@ -204,7 +232,7 @@ test('clearing an analysis removes the result without changing provider or loadi
 }) => {
   const { uploads } = await setup(page);
   await choosePhoto(page);
-  await page.getByRole('checkbox', { name: /Send this photo to Google Gemini/ }).check();
+  await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
   await page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }).click();
   await page
     .getByRole('dialog')

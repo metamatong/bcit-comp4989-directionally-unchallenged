@@ -6,7 +6,7 @@ Verified October 15, 2026 on macOS arm64, Node 22.15.1. The current application 
 
 | Check | Result | Scope |
 |---|---|---|
-| `npm run test:unit` | **83 passed** | Latest code/API/provider tests, including Gemini 3.6 configuration and precise setup notices |
+| `npm run test:unit` | **114 passed** | Latest crop preparation, exact-label, two-stage API, evidence binding and provider regression tests |
 | Earlier `npm test` | **101 passed** | 79 unit/API cases and 22 browser cases after demo removal, before screen checks were stopped |
 | `npm run build` | Passed | TypeScript check and Vite production build |
 | `npm run data:validate` | Passed | 90 original PDF hashes, 89 geometry records and 631 derived asset hashes |
@@ -60,3 +60,14 @@ All 83 unit/API tests, the production build and source-asset validation passed. 
 ## Integration with the latest main branch
 
 The library removal was rebased onto the newer UI/provider changes already on main. The final integration preserves native photo capture, a single best-match result and configured Gemini model fallback behavior while removing library browsing and promotional copy. All 90 unit/API tests, the production build and validation of 90 original PDF hashes and 631 derived assets passed. Browser/screen checks were not run at the user's request; their expectations were updated. No live inference calls were made. The proposal was regenerated from the combined source, with automated page/margin checks only.
+
+
+## Exact labels and original-image crops — October 16, 2026
+
+Implemented two app API requests: photo-label evidence first, exact source retrieval and visual localization second. All 5,463 extracted labels are indexed and all labels from selected plans are included in model context. The SE12 floor-3 room `302` regression verifies that the formerly omitted label is available and does not match `3021`, `0302`, `302A` or other partial identifiers. Candidate label assertions must match the observed complete identifier and the selected source record.
+
+The browser prepares a context JPEG and four overlapping crops directly from the original decoded bitmap, within the unchanged aggregate 2.5 MB media budget. Node-based unit tests mock canvas primitives to verify original source rectangles, no upscaling, adaptive output bounds and resource release; they are not screen tests. Both model stages receive all five views. First-stage input contains no source-plan hints.
+
+All 114 unit/API tests, TypeScript/production build, 90 source PDF hashes, 631 derived asset hashes and full label-index coverage passed. Tests cover stage-scoped idempotency, two distinct API requests before a result, same-photo/crop/session binding, five-minute evidence expiry, reset invalidation, comparison-only retry, cancellation, complete source labels, preserved no-sign visual matching and Gemini 2.5 thinking-budget compatibility. Provider responses are mocked; no live generation call or user-photo upload was performed. Browser expectations were updated and type-checked but not executed.
+
+This is implementation-contract evidence, not a measured improvement in physical localization accuracy. Next verify the supplied SE12 photo and independent labeled SE12/SW1 photos, recording extraction, shortlist and final-region outcomes separately. Do not reuse evaluation photos as retrieval references. The updated two-page proposal receives automated page/margin checks only, respecting the no-screen-check request.

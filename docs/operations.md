@@ -10,11 +10,11 @@ Without provider configuration, users see setup guidance. Photo submission is di
 
 ## Media and state
 
-The browser accepts JPEG/PNG/WebP up to 8 MB and 50 million pixels, resizes to a 1,600-pixel long edge, and re-encodes JPEG without original metadata. The server limits photo bodies to 4 MB and decoded image bytes to 2.5 MB. The photo goes transiently to Google after consent; the application saves no media to disk, caches or session logs. Google free-tier handling is disclosed under its terms.
+The browser accepts JPEG/PNG/WebP up to 8 MB and 50 million pixels, creates a full view and four overlapping original-image crops, each with at most a 1,600-pixel long edge and 450 KB JPEG bytes, without original metadata. The server limits photo bodies to 4 MB and aggregate decoded bytes across all five views to 2.5 MB. Two API stages send the same consented image bundle transiently to Google, first for reading labels and then for source-grounded location comparison; the application saves no media to disk, caches or session logs. Google free-tier handling is disclosed under its terms.
 
 Mobile photo capture uses the browser/device photo picker. CampusLens does not open a live camera stream or track movement. Physical-device capture behavior remains unverified.
 
-Session results expire after 30 minutes. Reload creates a new session. Clear analysis removes the current result. No accounts, saved positions, browser location history or automatic tracking exist. Obsolete mode preferences are removed from browser storage. API responses use `no-store` and reject cross-origin requests.
+First-stage evidence IDs expire after five minutes and are bound to a session and image/crop fingerprint. No media is stored between API stages. A failed comparison may retry with the accepted evidence until expiry. Session results expire after 30 minutes. Reload creates a new session. Clear analysis removes the current result. No accounts, saved positions, browser location history or automatic tracking exist. Obsolete mode preferences are removed from browser storage. API responses use `no-store` and reject cross-origin requests.
 
 ## Failures and recovery
 

@@ -318,6 +318,20 @@ export class GeminiProvider implements Provider {
       !declarations.some((item) => (item as { name?: string }).name === options.forceTool)
     )
       throw new Error('Forced tool is not declared');
+    const maxOutputTokens = Math.min(8192, Math.max(1, options.maxOutputTokens ?? 1800));
+    const thinkingConfig: {
+      includeThoughts: boolean;
+      thinkingLevel?: string;
+      thinkingBudget?: number;
+    } = { includeThoughts: false };
+    if (options.thinkingLevel) {
+      if (model.startsWith('gemini-2.5-')) {
+        // Gemini 2.5 accepts a token budget, not the Gemini 3 thinkingLevel field.
+        const requestedBudget = { low: 1024, medium: 2048, high: 4096 }[options.thinkingLevel];
+        const availableBudget = Math.max(0, Math.min(requestedBudget, maxOutputTokens - 512));
+        thinkingConfig.thinkingBudget = availableBudget < 512 ? 0 : availableBudget;
+      } else thinkingConfig.thinkingLevel = options.thinkingLevel;
+    }
     const requestBody = JSON.stringify({
       systemInstruction: { parts: [{ text: options.systemInstruction ?? SYSTEM }] },
       contents,
@@ -330,11 +344,8 @@ export class GeminiProvider implements Provider {
           }
         : {}),
       generationConfig: {
-        maxOutputTokens: Math.min(8192, Math.max(1, options.maxOutputTokens ?? 1800)),
-        thinkingConfig: {
-          includeThoughts: false,
-          ...(options.thinkingLevel ? { thinkingLevel: options.thinkingLevel } : {}),
-        },
+        maxOutputTokens,
+        thinkingConfig,
       },
     });
     if (Buffer.byteLength(requestBody) > 18 * 1024 * 1024)
