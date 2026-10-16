@@ -1,34 +1,32 @@
 # Gemini provider configuration and verification
 
-Documentation checked October 15, 2026. Gemini is the only analysis provider. There is no Demo mode or alternate response fallback. The private configured key and selected 3.6 Flash model are preserved. Exact account quotas/billing-tier status require operator verification; a key alone cannot establish free-tier eligibility.
+Documentation checked October 15, 2026. Gemini is the only photo-analysis provider. The configured primary model is preserved; ordered Gemini model fallbacks are now supported. Exact account quotas and free-tier eligibility require operator verification; a key alone cannot establish them.
 
 ## Selected adapter
 
-Google Gemini Developer API, with reviewed models **`gemini-3.5-flash-lite`** (default), **`gemini-3.6-flash`** and **`gemini-3.8-flash`**. The current local configuration selects 3.6 Flash. The official model page lists a stable model with text/image/video/audio/PDF inputs, text output, and function-calling support. Its published token limits are 1,048,576 input and 65,536 output. Photo analysis sends the actual image, official plan PNGs and geometry summaries. Selection/detail use 4,096/8,192 total output-and-thinking token allowances. [Model documentation](https://ai.google.dev/gemini-api/docs/models/gemini-3.5-flash-lite).
+Google Gemini Developer API. The new-install default is **`gemini-2.5-flash-lite`**, with **`gemini-2.5-flash`** as its default fallback. Google's current [model catalogue](https://ai.google.dev/gemini-api/docs/models) describes both as multimodal models; the [pricing page](https://ai.google.dev/gemini-api/docs/pricing) currently lists free-tier input and output for them. The existing private `.env` model is preserved and remains the primary model unless changed by the operator. Photo analysis sends the actual image, official plan PNGs and geometry summaries. Selection/detail use 4,096/8,192 total output-and-thinking token allowances.
 
-The pricing page lists free-tier input/output for the reviewed models. The application uses no provider context caching or Google Search/Maps grounding. Free-tier content may be used to improve Google's products. CampusLens uses its own local source/visual retrieval and requests no paid grounding. [Official pricing](https://ai.google.dev/gemini-api/docs/pricing).
+Free-tier content may be used to improve Google's products. CampusLens uses local source/visual retrieval and does not use provider context caching or Google Search/Maps grounding. Verify the selected primary and fallback models are available to the specific API project before confirming eligibility.
 
 Quotas are account/project dependent and must be inspected in AI Studio. The public documentation does not guarantee a universal RPM/TPM/RPD allowance; do not copy outdated numbers from a blog. [Rate-limit documentation](https://ai.google.dev/gemini-api/docs/rate-limits).
 
-Current model documentation restricts older 2.5 models to established users and recommends newer models for new projects. This is why the adapter does not assume 2.5 Flash is available. [Model catalogue](https://ai.google.dev/gemini-api/docs/models).
-
-Gemini 3.8 Flash also lists multimodal inputs, text output, and function calling, with the same published token limits. Its documentation does not support the `minimal` thinking setting; the adapter does not send that setting. [3.8 Flash documentation](https://ai.google.dev/gemini-api/docs/models/gemini-3.8-flash).
+The code retains the previously configured Gemini 3.x IDs in its supported list for existing private configurations. The new-install default and fallback are the documented 2.5 Flash family. Google's exact model availability and quotas can change and must be checked for the operator's account.
 
 ## Activation
 
 1. Verify the API project's free tier, model access and quotas in AI Studio.
-2. If no private `.env` exists, copy `.env.example`. Set `GEMINI_API_KEY`, a reviewed model and `AI_FREE_TIER_CONFIRMED=true` after that account check.
+2. If no private `.env` exists, copy `.env.example`. Set `GEMINI_API_KEY`, a primary model, an ordered `GEMINI_FALLBACK_MODELS` list, and `AI_FREE_TIER_CONFIRMED=true` only after the account check.
 3. Set application request ceilings to fit the project's actual limits. Defaults are six attempts/minute and 60/day; these are application ceilings, not provider entitlements. Counters reset on process restart.
 4. Restart the existing server and refresh. Gemini readiness is displayed directly. `AI_DEFAULT_MODE` is unused and old browser mode preferences are cleared.
 5. Upload a photo, consent to sending that image, and select Analyze. No request occurs merely because a key is configured.
 
-Missing configuration leaves the official source library available and disables/rejects photo submissions. Adding JSON or changing browser storage cannot restore fictional locations. No billing activation, paid fallback or automatic model switch is implemented.
+Missing configuration leaves the official source library available and disables/rejects photo submissions. Adding JSON or changing browser storage cannot restore fictional locations. Model failover is limited to the configured Gemini list; there is no paid or alternate-provider fallback.
 
 ## Transport, budgets and privacy
 
-The adapter sends keys in the server-side `x-goog-api-key` header and uses `generateContent` with forced typed functions. See [function calling](https://ai.google.dev/gemini-api/docs/function-calling). The orchestrator normally makes one shortlist request and, if appropriate, one detail request.
+The adapter sends keys in the server-side `x-goog-api-key` header and uses `generateContent` with forced typed functions. See [function calling](https://ai.google.dev/gemini-api/docs/function-calling). The orchestrator normally makes one shortlist request and, if appropriate, one detail request. Only the single best location is returned; if the plans do not support a defensible result, it abstains.
 
-Each photo request allows at most 30 seconds; the entire comparison has a 60-second deadline and client transport allows 70 seconds. Inline bodies are capped at 18 MB. HTTP 500/502/503/504 have at most two retries with roughly one/two seconds of exponential backoff and up to 250 ms jitter. Retry-After is honored; waits above eight seconds are returned to the user instead. HTTP 429 is not retried automatically. Every attempt consumes the shared budget. All work is cancellable and incomplete state rolls back.
+Each photo request allows at most 30 seconds; the entire comparison has a 60-second deadline and client transport allows 70 seconds. Inline bodies are capped at 18 MB. HTTP 500/502/503/504 have at most two retries with roughly one/two seconds of exponential backoff and up to 250 ms jitter. Retry-After is honored; waits above eight seconds are returned to the user instead. If a model remains unavailable, exhausts its quota, times out or returns an unusable response, the next configured Gemini model is tried. Authentication errors, user cancellation and local request-budget exhaustion do not trigger model fallback. Every attempt consumes the shared budget. All work is cancellable and incomplete state rolls back.
 
 Photos are resized locally and sent transiently to the local server and Google after per-photo consent. Original metadata is removed; no media enters app storage, session logs or the source-image cache. No hidden reasoning is requested or saved. Provider terms still govern Google's handling. Images, drawings and retrieved text are evidence, never instructions.
 

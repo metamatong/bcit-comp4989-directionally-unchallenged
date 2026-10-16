@@ -9,17 +9,17 @@
 
 CampusLens helps students establish a possible location from a photograph on BCIT's Burnaby campus. One agent compares the actual image with official floor plans and structured drawing geometry, retrieves plausible pages, and proposes source-linked regions for user review. It can abstain when repeated corridors or missing features make the scene ambiguous. The use case combines visual evidence, transparent uncertainty, source provenance, and bounded agent actions.
 
-The Live flow is photo → visual plan shortlist → detailed image/geometry comparison → candidate region → confirmation. Readable signs are optional. There is no demo mode, fictional map or sample-location fallback. The app does not claim precise camera pose, continuous indoor position, or spatial AR.
+The Live flow is photo → visual plan shortlist → detailed image/geometry comparison → single best-supported region or abstention → confirmation. Readable signs are optional. There is no demo mode, fictional map or sample-location fallback. The app does not claim precise camera pose, continuous indoor position, or spatial AR.
 
 ### 2. Architecture
 
 A mobile-first React/TypeScript client connects to an Express server. The client resizes photos and obtains per-image consent. One LLM orchestrator selects official plan pages for detailed inspection and returns typed region hypotheses. The server validates tool arguments, source IDs, completion status and region bounds. A two-stage workflow, 60-second deadline, bounded retries, shared request budgets and transactional rollback limit inference. Only user confirmation selects a proposed region; walking routes are unavailable.
 
-The server-side adapter supports Gemini 3.6 Flash, 3.8 Flash and 3.5 Flash-Lite with a free-tier attestation [3,4]. The configured 3.6 model was confirmed accessible through Google's metadata API. Earlier photo checks encountered overload, timeouts, response limits and quota errors. Response-limit handling has been corrected; successful visual localization and actual account quotas remain unverified. Missing configuration gives setup guidance while official source browsing remains available.
+The server-side adapter uses a configured Gemini model and can fall through to an ordered list of Gemini models on quota, service, timeout or invalid-model failures. New installs default to Gemini 2.5 Flash-Lite with Gemini 2.5 Flash as fallback; Google's current pricing page lists both with free-tier input/output. Existing private model settings are preserved. The actual account's free-tier eligibility and quota must still be checked. Earlier photo checks encountered overload, timeouts, response limits and quota errors; successful visual localization remains unverified. Missing configuration gives setup guidance while official source browsing remains available.
 
 ### 3. Core components and current scope
 
-The local MVP includes photo upload/capture, per-photo consent, visual comparison, region overlays with source links, searchable records, session state and observable activity. Clearing analysis removes the current result. Camera preview captures only on request and stops when hidden or closed. No provider error can produce a substitute sample location.
+The mobile-first MVP includes photo upload/native capture, per-photo consent, visual comparison, one region overlay with source links, searchable records and transient session state. Clearing analysis removes the current result. No live camera stream or automatic location tracking is used. No provider error can produce a substitute sample location.
 
 The source pipeline downloaded 89 Burnaby floor plans across 45 buildings and one campus map from official BCIT pages [1,2]. It records URLs, retrieval times, hashes, attribution, and page references. All 89 plans now have full PNGs, overviews, four detail crops, and geometry JSON. Eight overview sheets support visual shortlisting. The 566,620 extracted drawing primitives remain unclassified; they are not verified walls, doors, rooms or walking edges. Original PDFs remain unmodified.
 

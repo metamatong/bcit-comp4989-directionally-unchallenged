@@ -42,6 +42,34 @@ describe('live configuration', () => {
       ).toBe(true);
     },
   );
+  it('accepts documented Gemini Flash free-tier fallback models', () => {
+    for (const model of ['gemini-2.5-flash-lite', 'gemini-2.5-flash']) {
+      expect(
+        isLiveAiConfigured({
+          GEMINI_API_KEY: 'test-key',
+          GEMINI_MODEL: 'gemini-3.6-flash',
+          GEMINI_FALLBACK_MODELS: model,
+          AI_FREE_TIER_CONFIRMED: 'true',
+        }),
+      ).toBe(true);
+    }
+  });
+  it('rejects unsupported or excessive Gemini fallbacks', () => {
+    const configured = {
+      GEMINI_API_KEY: 'test-key',
+      GEMINI_MODEL: 'gemini-2.5-flash-lite',
+      AI_FREE_TIER_CONFIRMED: 'true',
+    };
+    expect(liveAiSetupIssue({ ...configured, GEMINI_FALLBACK_MODELS: 'unknown-model' })).toContain(
+      'unsupported model',
+    );
+    expect(
+      liveAiSetupIssue({
+        ...configured,
+        GEMINI_FALLBACK_MODELS: 'gemini-2.5-flash,gemini-3.6-flash,gemini-3.8-flash',
+      }),
+    ).toContain('at most 2');
+  });
   it('keeps live AI disabled for absent credentials, unconfirmed tiers, or unreviewed models', () => {
     const configured = {
       GEMINI_API_KEY: 'test-key',
@@ -92,6 +120,41 @@ describe('provider transport and free-tier request controls', () => {
     const provider = new GeminiProvider({ ...options, fetchImpl: fake });
     await expect(provider.generate([], [])).rejects.toThrow('quota');
     expect(fake).toHaveBeenCalledTimes(1);
+  });
+  it('tries the next configured Gemini model after quota exhaustion', async () => {
+    const fake = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response('{}', { status: 429 }))
+      .mockResolvedValueOnce(
+        Response.json({
+          candidates: [{ content: { parts: [{ text: 'Fallback succeeded' }] } }],
+        }),
+      );
+    const onModelFallback = vi.fn();
+    const provider = new GeminiProvider({
+      ...options,
+      model: 'gemini-3.6-flash',
+      fallbackModels: ['gemini-2.5-flash-lite'],
+      fetchImpl: fake,
+    });
+    expect(await provider.generate([], [], undefined, undefined, { onModelFallback })).toEqual([
+      { text: 'Fallback succeeded' },
+    ]);
+    expect(String(fake.mock.calls[0][0])).toContain('/gemini-3.6-flash:');
+    expect(String(fake.mock.calls[1][0])).toContain('/gemini-2.5-flash-lite:');
+    expect(onModelFallback).toHaveBeenCalledTimes(1);
+  });
+  it('reports when every configured Gemini model is exhausted', async () => {
+    const fake = vi.fn<typeof fetch>().mockResolvedValue(new Response('{}', { status: 429 }));
+    const provider = new GeminiProvider({
+      ...options,
+      fallbackModels: ['gemini-2.5-flash'],
+      fetchImpl: fake,
+    });
+    await expect(provider.generate([], [])).rejects.toThrow(
+      'All configured Gemini models failed. Gemini quota exhausted.',
+    );
+    expect(fake).toHaveBeenCalledTimes(2);
   });
   it('bounds service-unavailable retries', async () => {
     const fake = vi
@@ -187,7 +250,11 @@ describe('provider transport and free-tier request controls', () => {
         status: 403,
       }),
     );
-    const provider = new GeminiProvider({ ...options, fetchImpl: fake });
+    const provider = new GeminiProvider({
+      ...options,
+      fallbackModels: ['gemini-2.5-flash'],
+      fetchImpl: fake,
+    });
     let failure: unknown;
     try {
       await provider.generate([], []);
@@ -198,6 +265,23 @@ describe('provider transport and free-tier request controls', () => {
     expect(failure).toMatchObject({ code: 'configuration', retryable: false });
     expect((failure as Error).message).not.toContain('fake-test-key');
     expect(fake).toHaveBeenCalledTimes(1);
+  });
+  it('falls back when the primary model ID is unavailable, but preserves the key error for 403', async () => {
+    const fake = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response('{}', { status: 404 }))
+      .mockResolvedValueOnce(
+        Response.json({
+          candidates: [{ content: { parts: [{ text: 'Fallback model available' }] } }],
+        }),
+      );
+    const provider = new GeminiProvider({
+      ...options,
+      fallbackModels: ['gemini-2.5-flash'],
+      fetchImpl: fake,
+    });
+    expect(await provider.generate([], [])).toEqual([{ text: 'Fallback model available' }]);
+    expect(fake).toHaveBeenCalledTimes(2);
   });
   it('enforces a shared provider budget', async () => {
     const fake = vi

@@ -12,7 +12,7 @@ test('opens only official plans, removes demo controls, and keeps the source lib
   page.on('pageerror', (error) => errors.push(error.message));
   await page.goto('/');
   await expect(page.getByTestId('provider-status')).toHaveText('Setup required');
-  await expect(page.getByRole('heading', { name: 'Let the photo tell the story.' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Find a location' })).toBeVisible();
   await expect(
     page.getByRole('button', { name: /demo|landmark|closure|route|checkpoint/i }),
   ).toHaveCount(0);
@@ -87,30 +87,16 @@ test('prepares an image locally but disables analysis and sending when the key i
     page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }),
   ).toBeDisabled();
   await expect(
-    page.getByRole('checkbox', { name: /Send this photo and optional description/ }),
+    page.getByRole('checkbox', { name: /Send this photo to Google Gemini/ }),
   ).toBeDisabled();
   expect(sent).toEqual([]);
 });
 
-test('camera denial leaves photo upload available without checkpoint or fake-location controls', async ({
-  page,
-}) => {
-  await page.addInitScript(() => {
-    Object.defineProperty(navigator, 'mediaDevices', {
-      configurable: true,
-      value: {
-        getUserMedia: async () => {
-          throw new DOMException('Denied', 'NotAllowedError');
-        },
-      },
-    });
-  });
+test('mobile photo capture uses the native picker and keeps upload available', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Camera preview', exact: true }).click();
-  await expect(page.getByText(/Camera access is unavailable or was denied/)).toBeVisible();
+  await page.getByRole('button', { name: 'Find my location', exact: true }).click();
+  await expect(page.getByLabel('Capture phone photo')).toHaveAttribute('capture', 'environment');
   await expect(page.getByRole('button', { name: /checkpoint|landmark/i })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Upload a photo instead' }).click();
-  await expect(page.getByRole('dialog')).toBeVisible();
   await expect(page.getByRole('button', { name: 'Upload photo', exact: true })).toBeEnabled();
 });
 
@@ -161,15 +147,13 @@ for (const failure of [
     await page.goto('/');
     await page.getByRole('button', { name: 'Find my location', exact: true }).click();
     await page.getByLabel('Upload campus photo', { exact: true }).setInputFiles(fixture);
-    await page.getByRole('checkbox', { name: /Send this photo and optional description/ }).check();
+    await page.getByRole('checkbox', { name: /Send this photo to Google Gemini/ }).check();
     await page
       .getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true })
       .click();
     await expect(page.getByRole('dialog').getByRole('alert')).toHaveText(failure.message);
     await expect(page.getByRole('button', { name: /Demo|landmark|checkpoint/i })).toHaveCount(0);
-    await expect(page.getByRole('heading', { name: 'Possible locations to review' })).toHaveCount(
-      0,
-    );
+    await expect(page.getByRole('heading', { name: 'Best match' })).toHaveCount(0);
     await expect(page.getByTestId('provider-status')).toHaveText('Gemini ready');
   });
 }

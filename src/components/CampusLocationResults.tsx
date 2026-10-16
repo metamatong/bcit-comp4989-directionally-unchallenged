@@ -50,25 +50,9 @@ export function CampusLocationResults({
 }) {
   return (
     <section className="campus-results" aria-label="Photo comparison results">
-      <p className="eyebrow">PHOTO + OFFICIAL BCIT FLOOR PLANS</p>
-      <h3>
-        {analysis.candidates.length
-          ? 'Possible locations to review'
-          : 'More visual evidence is needed'}
-      </h3>
+      <h3>{analysis.candidates.length ? 'Best match' : 'No clear match'}</h3>
       <p>{analysis.summary}</p>
-      <p className="helper">
-        {analysis.atlasPlanCount} plan previews considered · {analysis.detailedPlanIds.length} plans
-        inspected in detail. The shortlist is not an exhaustive detailed comparison.
-      </p>
-      <details>
-        <summary>What Gemini observed in the photo</summary>
-        <ul>
-          {analysis.observations.map((observation, i) => (
-            <li key={i}>{observation}</li>
-          ))}
-        </ul>
-      </details>
+      {analysis.usedFallbackModel && <p className="helper">Backup Gemini model used.</p>}
       {analysis.candidates.map((candidate) => {
         const plan = plans.find((plan) => plan.id === candidate.planId);
         if (!plan) return null;
@@ -79,36 +63,42 @@ export function CampusLocationResults({
                 <MapPin size={18} />
                 {candidate.building} · Floor {candidate.floor}
               </h3>
-              <span className="pill">{candidate.confidence} confidence*</span>
+              <span className="pill">Unverified estimate</span>
             </div>
             <PlanRegion plan={plan} candidate={candidate} />
-            <ul className="visual-matches">
-              {candidate.matches.map((match, i) => (
-                <li key={i}>
-                  <strong>Photo:</strong> {match.photoFeature}
-                  <br />
-                  <strong>Plan:</strong> {match.planFeature}
-                </li>
-              ))}
-            </ul>
-            <p className="helper">{candidate.limitations.join(' ')}</p>
-            <div className="plan-source-links">
-              <a href={plan.full.url} target="_blank" rel="noreferrer">
-                Full PNG
-                <ArrowUpRight size={14} />
-              </a>
-              <a href={plan.geometry.url} target="_blank" rel="noreferrer">
-                <FileJson size={14} />
-                Geometry JSON
-              </a>
-              <a href={plan.sourceUrl} target="_blank" rel="noreferrer">
-                <FileText size={14} />
-                Original PDF
-              </a>
-            </div>
-            <p className="helper">
-              {plan.attribution} · {plan.sourceRef}
-            </p>
+            <details>
+              <summary>Why this match?</summary>
+              <ul className="visual-matches">
+                {candidate.matches.map((match, i) => (
+                  <li key={i}>
+                    <strong>Photo:</strong> {match.photoFeature}
+                    <br />
+                    <strong>Plan:</strong> {match.planFeature}
+                  </li>
+                ))}
+              </ul>
+              <p className="helper">{candidate.limitations.join(' ')}</p>
+            </details>
+            <details>
+              <summary>Source files</summary>
+              <div className="plan-source-links">
+                <a href={plan.full.url} target="_blank" rel="noreferrer">
+                  Full plan PNG
+                  <ArrowUpRight size={14} />
+                </a>
+                <a href={plan.geometry.url} target="_blank" rel="noreferrer">
+                  <FileJson size={14} />
+                  Geometry
+                </a>
+                <a href={plan.sourceUrl} target="_blank" rel="noreferrer">
+                  <FileText size={14} />
+                  Original PDF
+                </a>
+              </div>
+              <p className="helper">
+                {plan.attribution} · {plan.sourceRef}
+              </p>
+            </details>
             <button
               className="primary full-width"
               disabled={busy || selectedId === candidate.id}
@@ -120,15 +110,9 @@ export function CampusLocationResults({
           </article>
         );
       })}
-      {analysis.clarification && (
-        <div className="clarification-note">
-          <Camera size={19} />
-          <p>{analysis.clarification}</p>
-        </div>
-      )}
+      {analysis.clarification && <p className="clarification-note">{analysis.clarification}</p>}
       <p className="helper">
-        *Model confidence is qualitative and uncalibrated. These are unverified location hypotheses,
-        not measured camera positions. Real campus walking routes are not yet supported.
+        AI estimate only. Confirm it against your surroundings; walking routes are not available.
       </p>
     </section>
   );
@@ -146,24 +130,14 @@ export function CampusPhotoWelcome({
       <span className="modal-icon">
         <Camera size={29} />
       </span>
-      <p className="eyebrow">FIND YOUR PLACE ON CAMPUS</p>
-      <h2>Let the photo tell the story.</h2>
-      <p>
-        Gemini compares your actual photo with official BCIT Burnaby floor plans and their extracted
-        geometry. Readable signs are optional.
-      </p>
-      <div className="visual-flow">
-        <span>1 · Your photo</span>
-        <span>2 · {planCount} real plans</span>
-        <span>3 · Possible regions</span>
-      </div>
+      <h2>Find a location</h2>
+      <p>Compare a photo with {planCount} official BCIT floor plans.</p>
       <button className="primary" onClick={onUpload}>
         <Camera size={18} />
-        Upload a campus photo
+        Find my location
       </button>
       <p className="helper">
-        You choose when to send the photo to Google. If the scene is ambiguous, the app will ask for
-        another view.
+        Your photo is sent only after consent. Unclear matches are not guessed.
       </p>
     </div>
   );

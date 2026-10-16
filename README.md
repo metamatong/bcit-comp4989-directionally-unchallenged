@@ -4,7 +4,7 @@ A mobile-friendly BCIT Burnaby photo-to-floor-plan app. Gemini compares an uploa
 
 The library contains **89 official floor plans covering 45 Burnaby buildings**, plus the campus map. All floor plans have PNGs and structured geometry JSON. Results are **unverified AI location hypotheses**. Real walking routes remain unsupported.
 
-Demo mode has been removed: no fictional places, sample-photo button, manual demo landmarks, simulated closures, or synthetic routing. Gemini is the only analysis path. Provider failures show a setup or retry message; the official plan library remains available.
+This does not train a model on BCIT. Gemini is pretrained and compares a photo with plan drawings; the plans are not labeled camera-view examples, so reliable exact positioning is not guaranteed.
 
 ## Run locally
 
@@ -25,21 +25,18 @@ npm ci
 npm run dev
 ```
 
-Open [CampusLens locally](http://127.0.0.1:3000). Configure `GEMINI_API_KEY` and an eligible `GEMINI_MODEL` in the private `.env`. Set `AI_FREE_TIER_CONFIRMED=true` only after verifying that API project's free tier. Supported models are `gemini-3.5-flash-lite`, `gemini-3.6-flash` and `gemini-3.8-flash`. Keys stay server-side. The existing private key/model are preserved.
+Open [CampusLens locally](http://127.0.0.1:3000). Configure `GEMINI_API_KEY`, a primary `GEMINI_MODEL`, and an ordered `GEMINI_FALLBACK_MODELS` list in the private `.env`. The defaults use Gemini 2.5 Flash-Lite with Gemini 2.5 Flash as fallback; Google lists both on its free tier. Set `AI_FREE_TIER_CONFIRMED=true` only after verifying model access and eligibility for your API project. Keys stay server-side. Existing private settings are preserved.
 
-Restart the existing server after backend or environment changes: Ctrl+C, then `npm run dev`. Do not launch another instance on port 3000. Development reloads use that same port. Without valid provider configuration, photo analysis is disabled and the app displays setup guidance; browsing official plans still works.
-
-`AI_DEFAULT_MODE` is no longer used. Old browser mode preferences are cleared automatically, and removed mode/fixture/simulation API actions are rejected.
+The Node server does not restart automatically when files change. Restart it manually after backend or environment changes: Ctrl+C, then `npm run dev`. Frontend edits can still refresh through Vite HMR on the same port. Do not launch another instance on port 3000. Without valid provider configuration, photo analysis is disabled and the app displays setup guidance; browsing official plans still works.
 
 ## Use
 
 1. Select **Find my location**, then upload or capture a campus photo.
-2. Optionally provide context or a building hint. A readable sign is not required.
-3. Agree to send this photo to Google and select **Analyze photo against BCIT plans**.
-4. Review possible regions, image/geometry evidence, uncertainty and original sources. Gemini can ask for another view instead of proposing a match.
-5. Confirm a possible region that agrees with your surroundings. **Clear analysis** removes the current result.
+2. Agree to send this photo to Google and select Analyze.
+3. Review the single best source-linked estimate, or take another photo if the evidence is unclear.
+4. Confirm the estimate only if it matches your surroundings. **Clear** removes the result.
 
-Photos are prepared locally and sent only after per-photo consent and submission. No photo is saved in application storage. Google's free-tier data handling applies. Camera preview captures only when requested; it does not track movement or provide walking directions.
+Photos are prepared locally and sent only after per-photo consent and submission. No photo is saved in application storage. Mobile capture uses the device's photo picker/camera; the app has no live camera preview or movement tracking. Google's free-tier data handling applies.
 
 ## Checks
 
@@ -54,7 +51,7 @@ npm run format
 
 Tests mock Gemini and spend no provider quota. Browser automation, when requested, uses an isolated server on port 3100 with credentials disabled and installed Google Chrome. It is not a physical-phone or Safari test. The browser OCR packages, worker assets and installation hook have been removed; optional local PDF preprocessing can still use Tesseract.
 
-Photo comparison uses low thinking and 4,096/8,192-token selection/detail allowances. Incomplete responses cannot become location results. HTTP 429 requires waiting for Google's quota; HTTP 503 indicates provider unavailability. No alternate model or sample result is substituted. See [provider notes](docs/provider.md).
+Photo comparison uses low thinking and 4,096/8,192-token selection/detail allowances. When a Gemini model hits quota, is unavailable, or returns an unusable response, the server tries the configured Gemini fallback models. Incomplete responses cannot become location results. See [provider notes](docs/provider.md).
 
 ## Documentation
 
@@ -80,7 +77,7 @@ mvp/
 ├── src/
 │   ├── App.tsx, main.tsx, styles.css
 │   ├── api.ts, photo.ts, types.ts
-│   └── components/  CameraCapture, CampusLibrary, CampusLocationResults
+│   └── components/  CampusLibrary, CampusLocationResults
 ├── server/
 │   ├── index.ts, app.ts, runtime.ts
 │   ├── provider.ts, photo-localization.ts, session.ts

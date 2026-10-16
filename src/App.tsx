@@ -1,19 +1,14 @@
 import { useEffect, useRef, useState } from 'react';
 import {
-  Activity,
   AlertTriangle,
   ArrowUpRight,
   BookOpen,
   Camera,
-  Check,
-  ChevronDown,
-  ChevronRight,
   Compass,
   Info,
   LoaderCircle,
   LocateFixed,
   Map,
-  MapPin,
   RotateCcw,
   Search,
   ShieldCheck,
@@ -29,12 +24,11 @@ import {
   clearLegacyModePreference,
 } from './api';
 import { preparePhoto, type PreparedPhoto } from './photo';
-import { CameraCapture } from './components/CameraCapture';
 import { CampusLibrary } from './components/CampusLibrary';
 import { CampusLocationResults, CampusPhotoWelcome } from './components/CampusLocationResults';
 import type { Bootstrap, Session } from './types';
 
-type View = 'plans' | 'library' | 'camera';
+type View = 'plans' | 'library';
 type Modal = 'location' | 'about' | null;
 
 export default function App() {
@@ -44,13 +38,10 @@ export default function App() {
   const [modal, setModal] = useState<Modal>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const [description, setDescription] = useState('');
   const [reading, setReading] = useState(false);
   const [readStatus, setReadStatus] = useState('');
-  const [activityOpen, setActivityOpen] = useState(false);
   const [preparedPhoto, setPreparedPhoto] = useState<PreparedPhoto | null>(null);
   const [photoConsent, setPhotoConsent] = useState(false);
-  const [buildingHint, setBuildingHint] = useState('');
   const [showPhotoResults, setShowPhotoResults] = useState(false);
   const photoAbort = useRef<AbortController | null>(null);
   const sessionRef = useRef<Session | undefined>(undefined);
@@ -92,7 +83,6 @@ export default function App() {
     photoAbort.current?.abort();
     setPreparedPhoto(null);
     setPhotoConsent(false);
-    setDescription('');
     setReadStatus('');
     setReading(false);
     setShowPhotoResults(false);
@@ -144,7 +134,6 @@ export default function App() {
       const prepared = await preparePhoto(file);
       if (!evidenceGate.current.isCurrent(generation)) return;
       setPreparedPhoto(prepared);
-      setDescription('');
       setReadStatus(
         'Photo ready. Choose Analyze to compare the image with real BCIT floor plans. No readable sign is required.',
       );
@@ -175,8 +164,6 @@ export default function App() {
           requestId: crypto.randomUUID(),
           revision: current.revision,
           consent: true,
-          description,
-          buildingHint: buildingHint || null,
           image: { mimeType: preparedPhoto.mimeType, data: preparedPhoto.data },
         },
         { timeoutMs: 70000, signal: controller.signal },
@@ -184,9 +171,7 @@ export default function App() {
       if (!evidenceGate.current.isCurrent(generation)) return;
       updateSession(result);
       setShowPhotoResults(true);
-      setReadStatus(
-        'Photo-to-floor-plan comparison completed. Review the evidence and any possible regions below.',
-      );
+      setReadStatus('Comparison complete.');
     } catch (failure) {
       if (evidenceGate.current.isCurrent(generation)) {
         if (failure instanceof ApiError && failure.session) updateSession(failure.session);
@@ -241,20 +226,12 @@ export default function App() {
           <span className="brand-dot">.</span>
         </a>
         <nav aria-label="Main navigation">
-          <button className={view !== 'library' ? 'active' : ''} onClick={() => setView('plans')}>
-            <Map size={17} />
-            Find your way
-          </button>
           <button className={view === 'library' ? 'active' : ''} onClick={() => setView('library')}>
             <BookOpen size={17} />
             Campus library
           </button>
         </nav>
         <div className="header-end">
-          <span className="campus-label">
-            <MapPin size={14} />
-            BCIT Burnaby
-          </span>
           <span
             className={`provider-status ${data.liveAvailable ? 'live' : ''}`}
             data-testid="provider-status"
@@ -274,33 +251,8 @@ export default function App() {
       <main>
         <div className="page-intro">
           <div>
-            <p className="eyebrow">YOUR CAMPUS COMPANION</p>
-            <h1>
-              {view === 'library'
-                ? 'A clearer picture of campus.'
-                : view === 'camera'
-                  ? 'A new perspective on campus.'
-                  : 'Your next step, made simple.'}
-            </h1>
-            <p>
-              {view === 'library'
-                ? 'Official Burnaby floor plans, with sources you can inspect.'
-                : 'Start with a photo. Find possible locations on real BCIT floor plans.'}
-            </p>
+            <h1>{view === 'library' ? 'Campus plans' : 'Find your location'}</h1>
           </div>
-          <span className="project-label">
-            <span className="tiny-grid">✦</span> CAMPUSLENS / MVP 01
-          </span>
-        </div>
-        <div className="source-banner">
-          <Info size={16} />
-          <span>
-            <strong>Official BCIT plans · AI location estimates.</strong> Review possible regions
-            before confirming. Real walking routes are not yet verified.{' '}
-            <button onClick={() => setView('library')}>
-              Explore official plans <ArrowUpRight size={13} />
-            </button>
-          </span>
         </div>
         {!data.liveAvailable && (
           <div className="setup-notice" role="note">
@@ -325,95 +277,29 @@ export default function App() {
             </button>
           </div>
         )}
-        {view === 'camera' ? (
-          <CameraCapture
-            onBack={() => setView('plans')}
-            onUpload={() => {
-              setView('plans');
-              setModal('location');
-            }}
-            onCapture={(file) => {
-              setView('plans');
-              void readPhoto(file);
-            }}
-            busy={busy || reading}
-          />
-        ) : view === 'library' ? (
+        {view === 'library' ? (
           <CampusLibrary data={data} onError={setError} />
         ) : (
-          <div className="workspace">
-            <aside className="journey-panel">
-              <div className="panel-heading">
-                <span>
-                  <LocateFixed size={19} />
-                  Find your place
-                </span>
-                <span className="pill pale">BCIT PLANS</span>
-              </div>
-              <div className="journey-step">
-                <div className={`step-number ${session.campusLocation ? 'complete' : ''}`}>
-                  {session.campusLocation ? <Check size={14} /> : 1}
-                </div>
-                <div className="step-body">
-                  <label className="field-label">Your location</label>
-                  {session.campusLocation ? (
-                    <button className="location-selected" onClick={() => setModal('location')}>
-                      <span>
-                        <strong>
-                          {session.campusLocation.building} · Floor {session.campusLocation.floor}
-                        </strong>
-                        <small>Selected region · AI estimate, unverified</small>
-                      </span>
-                      <LocateFixed size={20} />
-                    </button>
-                  ) : (
-                    <button className="find-location" onClick={() => setModal('location')}>
-                      <LocateFixed size={19} />
-                      <span>Find my location</span>
-                      <ChevronRight size={16} />
-                    </button>
-                  )}
-                  <p className="helper">
-                    Upload a campus photo. Gemini examines the image alongside official plans and
-                    geometry.
-                  </p>
-                </div>
-              </div>
-              <div className="campus-route-note">
-                <h3>Start with a photo.</h3>
-                <p>
-                  Possible regions appear on the source plans for you to review. A photo estimate
-                  cannot establish a safe walking route.
-                </p>
-                <button className="secondary full-width" onClick={() => setView('library')}>
-                  Browse official plans
-                  <ArrowUpRight size={15} />
-                </button>
-                <button className="secondary full-width" onClick={() => setView('camera')}>
-                  <Camera size={17} />
-                  Camera preview
-                </button>
-                {session.campusAnalysis && (
+          <section className="workspace">
+            {session.campusAnalysis ? (
+              <>
+                <div className="result-actions">
+                  <button className="secondary" onClick={() => setModal('location')}>
+                    <Camera size={17} />
+                    New photo
+                  </button>
                   <button
-                    className="text-button full-width"
+                    className="text-button"
                     disabled={busy}
                     onClick={() => {
                       closeModal();
                       void send({ type: 'reset' });
                     }}
                   >
-                    <RotateCcw size={16} />
-                    Clear analysis
+                    <RotateCcw size={15} />
+                    Clear
                   </button>
-                )}
-              </div>
-              <div className="privacy-note">
-                <ShieldCheck size={17} />
-                <span>Photos are sent only after your consent and selecting Analyze.</span>
-              </div>
-            </aside>
-            <section className="map-panel">
-              {session.campusAnalysis ? (
+                </div>
                 <CampusLocationResults
                   analysis={session.campusAnalysis}
                   plans={plans}
@@ -421,70 +307,12 @@ export default function App() {
                   onConfirm={(id) => void confirmCampus(id)}
                   busy={busy}
                 />
-              ) : (
-                <CampusPhotoWelcome
-                  planCount={plans.length}
-                  onUpload={() => setModal('location')}
-                />
-              )}
-              <div className="status-note" role="status">
-                <span className="status-dot" />
-                {session.notice}
-              </div>
-            </section>
-          </div>
+              </>
+            ) : (
+              <CampusPhotoWelcome planCount={plans.length} onUpload={() => setModal('location')} />
+            )}
+          </section>
         )}
-        <section className="tools-section">
-          <div className="tool-tabs">
-            <button aria-expanded={activityOpen} onClick={() => setActivityOpen(!activityOpen)}>
-              <Activity size={17} />
-              Analysis activity
-              <ChevronDown size={15} />
-            </button>
-          </div>
-          {activityOpen && (
-            <div className="activity-panel">
-              <div className="section-heading">
-                <div>
-                  <h3>Observable actions</h3>
-                  <p>
-                    {session.agentStatus} · {session.providerCalls} provider calls
-                  </p>
-                </div>
-                <span className="pill">No hidden reasoning</span>
-              </div>
-              {session.activity.length ? (
-                session.activity
-                  .slice()
-                  .reverse()
-                  .map((item) => (
-                    <div className="activity-item" key={item.id}>
-                      <span className="activity-icon">
-                        <Check size={13} />
-                      </span>
-                      <div>
-                        <strong>{item.tool.replaceAll('_', ' ')}</strong>
-                        <p>{item.summary}</p>
-                        {item.sourceRefs.length > 0 && (
-                          <small>Evidence: {item.sourceRefs.join(', ')}</small>
-                        )}
-                      </div>
-                      <time>
-                        {new Date(item.at).toLocaleTimeString([], {
-                          hour: '2-digit',
-                          minute: '2-digit',
-                        })}
-                      </time>
-                    </div>
-                  ))
-              ) : (
-                <p className="helper">
-                  Analyze a photo to see completed comparisons and source references here.
-                </p>
-              )}
-            </div>
-          )}
-        </section>
       </main>
       <footer>
         <span>
@@ -520,12 +348,8 @@ export default function App() {
               <span className="modal-icon">
                 <LocateFixed size={25} />
               </span>
-              <p className="eyebrow">FIRST, FIND YOUR BEARINGS</p>
-              <h2>What can you see?</h2>
-              <p>
-                Upload a campus photo. Gemini compares the actual scene with official BCIT floor
-                plans and geometry; readable signs are optional.
-              </p>
+              <h2>Analyze a photo</h2>
+              <p>Compare it with official BCIT Burnaby floor plans.</p>
               {!photoReady && (
                 <p className="setup-notice">
                   {!data.liveAvailable
@@ -593,34 +417,6 @@ export default function App() {
                   void analyzePhoto();
                 }}
               >
-                <label className="field-label" htmlFor="location-description">
-                  Optional context about your photo
-                </label>
-                <textarea
-                  id="location-description"
-                  rows={2}
-                  maxLength={1000}
-                  placeholder="Optional: anything else you know about the building or floor"
-                  value={description}
-                  disabled={busy}
-                  onChange={(event) => setDescription(event.target.value)}
-                />
-                <label className="field-label" htmlFor="building-hint">
-                  Building, if you know it (optional)
-                </label>
-                <select
-                  id="building-hint"
-                  value={buildingHint}
-                  disabled={busy}
-                  onChange={(event) => setBuildingHint(event.target.value)}
-                >
-                  <option value="">All prepared Burnaby floor plans</option>
-                  {data.coverage.buildings.map((building) => (
-                    <option key={building} value={building}>
-                      {building}
-                    </option>
-                  ))}
-                </select>
                 <label className="checkbox-label photo-consent">
                   <input
                     type="checkbox"
@@ -628,8 +424,8 @@ export default function App() {
                     disabled={busy || !preparedPhoto || !photoReady}
                     onChange={(event) => setPhotoConsent(event.target.checked)}
                   />
-                  Send this photo and optional description to Google Gemini for comparison with
-                  official BCIT plans. Free-tier inputs may be used to improve Google products.
+                  Send this photo to Google Gemini for comparison. Free-tier inputs may be used to
+                  improve Google products.
                 </label>
                 <button
                   className="primary full-width"
@@ -654,8 +450,7 @@ export default function App() {
                 />
               )}
               <p className="helper">
-                <ShieldCheck size={13} /> Photos are resized locally, then sent transiently to the
-                server and Google only after you choose Analyze. The app does not save them to disk
+                <ShieldCheck size={13} /> Resized on your device. CampusLens does not save photos.
                 or location history.
               </p>
             </>
@@ -675,8 +470,8 @@ export default function App() {
               <div className="about-section">
                 <h3>What you can do</h3>
                 <p>
-                  Upload or capture a photo, consent to Gemini analysis, inspect possible regions on
-                  the source plans, and confirm a hypothesis that matches your surroundings.
+                  Upload or capture a photo, consent to Gemini analysis, and confirm the best
+                  source-linked estimate only if it matches your surroundings.
                 </p>
               </div>
               <div className="about-section">
@@ -690,10 +485,9 @@ export default function App() {
               <div className="about-section">
                 <h3>Your data stays transient</h3>
                 <p>
-                  Only an explicitly submitted photo and optional description go to Google. No
-                  accounts or saved media. Session results expire after 30 minutes; reloading starts
-                  a new session. Clear analysis removes the current result. Google’s free-tier data
-                  handling applies.
+                  Only the explicitly submitted photo goes to Google. No accounts or saved media.
+                  Session results expire after 30 minutes; reloading starts a new session. Clear
+                  analysis removes the current result. Google’s free-tier data handling applies.
                 </p>
               </div>
               <a

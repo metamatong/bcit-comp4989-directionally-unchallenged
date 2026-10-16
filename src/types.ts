@@ -58,6 +58,7 @@ export type CampusPhotoAnalysis = {
   detailedPlanIds: string[];
   buildingHint: string | null;
   method: 'gemini-photo-floorplan';
+  usedFallbackModel: boolean;
   generatedAt: string;
 };
 export type Session = {

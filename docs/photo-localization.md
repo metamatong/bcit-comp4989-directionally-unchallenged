@@ -4,17 +4,16 @@ This implements the requested **actual photo + real BCIT plans** workflow. Gemin
 
 ## Run and use
 
-The converted assets are already included in `data/campus/visual/`. Restart the existing dev server after these backend changes (`Ctrl+C`, then `npm run dev`); do not start a second server on port 3000.
+The converted assets are already included in `data/campus/visual/`. The Node server does not restart automatically after backend changes; restart it manually (`Ctrl+C`, then `npm run dev`). Do not start a second server on port 3000.
 
-1. Use Live AI with the configured free-tier Gemini key.
+1. Use Gemini with the configured and verified free-tier key and model list.
 2. Choose Find my location → Upload photo or Take a photo.
 3. The browser prepares a resized JPEG preview. It does **not** run OCR in this Live flow.
-4. Optionally add context or select a building. Leaving the building blank considers the entire prepared Burnaby collection.
-5. Explicitly agree to send this photo and click **Analyze photo against BCIT plans**.
-6. Review the photo observations, possible building/floor regions, visual matches, limitations, source PNG and geometry links. Gemini can instead report insufficient evidence and request another view.
-7. Confirm a possible region only if it agrees with your surroundings. It remains an unverified estimate; it does not enable an invented campus route.
+4. Explicitly agree to send this photo and click **Analyze**.
+5. Review the single best building/floor estimate and its source. Gemini can instead report insufficient evidence and request another view.
+6. Confirm the estimate only if it agrees with your surroundings. It remains unverified and does not enable a campus route.
 
-There is no mode selector, sample-photo control, manual fictional landmark picker or synthetic route. Missing Gemini configuration shows setup guidance, and provider failures retain the real-plan library without fabricating a result.
+There is no mode selector, sample-photo control, manual fictional landmark picker or synthetic route. Missing Gemini configuration shows setup guidance. Temporary Gemini-model failures try the configured Gemini fallbacks; if all fail, the real-plan library remains available without a fabricated result.
 
 ## Converted data
 
@@ -59,7 +58,7 @@ The exported geometry is structured **drawing evidence**, not a fully interprete
 `server/photo-localization.ts` is one bounded orchestrator using the existing server-side Gemini adapter.
 
 1. **Visual shortlisting.** Send the actual uploaded image and eight overview sheets to Gemini. A typed `select_floor_plans` function returns up to three eligible real plan IDs plus observable photo features. When a building hint narrows coverage to eight or fewer plans, send their individual overviews instead. This is visual comparison, not an OCR keyword gate.
-2. **Detailed comparison.** Send the actual photo again with the selected plans' overviews, all four detail crops per plan, and source-linked JSON geometry summaries. A typed `propose_campus_locations` function returns up to three candidate regions or an abstention.
+2. **Detailed comparison.** Send the actual photo again with the selected plans' overviews, all four detail crops per plan, and source-linked JSON geometry summaries. Gemini eliminates plans that conflict with visible features and returns only its single best supported region, or abstains if it cannot defend a match.
 3. **Validation.** Reject unknown IDs, plans outside the selected scope, malformed function calls, unsupported fields, invalid/inverted coordinates, and inconsistent outcomes. A failed or cancelled comparison discards partial hypotheses.
 4. **Confirmation.** Store only structured results and observable action summaries. Confirming a candidate updates `campusLocation`; it does not create route edges.
 

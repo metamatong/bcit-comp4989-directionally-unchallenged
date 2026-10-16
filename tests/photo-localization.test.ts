@@ -112,6 +112,9 @@ describe('real-source multimodal localization contracts (mocked model)', () => {
     }
     expect(captures[0].options?.maxOutputTokens).toBe(4096);
     expect(captures[1].options?.maxOutputTokens).toBe(8192);
+    expect(captures[1].options?.systemInstruction).toContain(
+      'select only the single strongest remaining location',
+    );
     const detailText = captures[1].contents[0].parts
       .flatMap((part) => (part.text ? [part.text] : []))
       .join('\n');
@@ -119,6 +122,8 @@ describe('real-source multimodal localization contracts (mocked model)', () => {
     expect(detailText).toContain('SE12-F1#page=1');
     expect(detailText).not.toContain('Cedar welcome desk');
     expect(result.atlasPlanCount).toBe(89);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.usedFallbackModel).toBe(false);
     expect(result.candidates[0].building).toBe('SE12');
     expect(result.candidates[0].verification).toBe('unverified-ai-hypothesis');
     expect(session).not.toHaveProperty('currentNodeId');
@@ -134,6 +139,20 @@ describe('real-source multimodal localization contracts (mocked model)', () => {
     expect(session).not.toHaveProperty('currentNodeId');
     expect(session).not.toHaveProperty('route');
     expect(() => confirmCampusRegion(session, randomUUID())).toThrow('current photo comparison');
+  });
+  it('marks a result when a configured backup Gemini model was used', async () => {
+    const provider: Provider = {
+      calls: 0,
+      async generate(_contents, _tools, _signal, onAttempt, options) {
+        this.calls++;
+        onAttempt?.();
+        options?.onModelFallback?.();
+        return this.calls === 1 ? shortlist() : comparison();
+      },
+    };
+    const result = await analyzeCampusPhoto(newSession(), input(), provider);
+    expect(result.candidates).toHaveLength(1);
+    expect(result.usedFallbackModel).toBe(true);
   });
   it('abstains after visual inspection instead of substituting a demo location', async () => {
     const session = newSession();
@@ -151,6 +170,26 @@ describe('real-source multimodal localization contracts (mocked model)', () => {
     const result = await analyzeCampusPhoto(newSession(), input(), provider);
     expect(result.candidates).toEqual([]);
     expect(result.detailedPlanIds).toEqual([planId]);
+  });
+  it('rejects multiple suggestions instead of returning a list of possible locations', async () => {
+    const multipleCandidates = comparison();
+    const args = multipleCandidates[0].functionCall!.args as {
+      outcome: string;
+      candidates: unknown[];
+    };
+    args.candidates.push({
+      planId,
+      bounds: [0.55, 0.35, 0.8, 0.65],
+      confidence: 'low',
+      matches: [{ photoFeature: 'Corridor', planFeature: 'A different passage' }],
+      limitations: ['No field validation.'],
+    });
+    const { provider } = fixture([shortlist(), multipleCandidates]);
+    const session = newSession();
+    await expect(analyzeCampusPhoto(session, input(), provider)).rejects.toThrow(
+      'more than one location suggestion',
+    );
+    expect(session.campusAnalysis).toBeNull();
   });
   it('uses a supplied building hint to narrow visual comparison, not a text-match requirement', async () => {
     const { provider, captures } = fixture([shortlist(), comparison()]);

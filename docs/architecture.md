@@ -5,14 +5,14 @@ CampusLens is a local React/TypeScript client and Express server for photo compa
 ## Request flow
 
 1. The browser prepares a JPEG with a 1,600-pixel long edge and removes original metadata. Capture/upload alone makes no AI request.
-2. The user consents to this photo and submits it with optional context/building information, a request UUID and session revision.
+2. The user consents to this photo and submits it with a request UUID and session revision.
 3. The server validates the image, consent, provider readiness, revision and per-session lock.
 4. One bounded orchestrator sends the actual photo with official plan overviews. Gemini shortlists at most three supplied plan IDs.
 5. If there is a shortlist, the same photo is compared against selected overviews, source crops and sampled geometry using a second typed function.
 6. Completion status and tool arguments are checked, including source scope and normalized region coordinates. A failed/cancelled turn rolls back partial hypotheses.
-7. The client displays source-linked possible regions or an abstention. Only the user can confirm a returned region.
+7. Gemini returns only the best supported region or abstains. The client displays that source-linked estimate; only the user can confirm it.
 
-`server/photo-localization.ts` owns the two-stage workflow. `provider.ts` owns the REST adapter, completion parsing, bounded retries and request budgets. `visual-data.ts` verifies and supplies public plan assets. `session.ts` stores only transient structured results/activity. The source library/search require no model.
+`server/photo-localization.ts` owns the two-stage workflow. `provider.ts` owns the REST adapter, completion parsing, bounded retries, ordered Gemini model failover and request budgets. `visual-data.ts` verifies and supplies public plan assets. `session.ts` stores only transient structured results/activity. The source library/search require no model.
 
 ## API and state
 
