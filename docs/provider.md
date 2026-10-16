@@ -1,16 +1,16 @@
 # Gemini provider configuration and verification
 
-Documentation checked October 15, 2026. Gemini is the only photo-analysis provider. The configured primary model is preserved; ordered Gemini model fallbacks are now supported. Exact account quotas and free-tier eligibility require operator verification; a key alone cannot establish them.
+Documentation checked October 16, 2026. Gemini is the only photo-analysis provider. The configured primary model is preserved; ordered Gemini model fallbacks are supported. Exact account quotas and free-tier eligibility require operator verification; a key alone cannot establish them.
 
 ## Selected adapter
 
-Google Gemini Developer API. The new-install default is **`gemini-2.5-flash-lite`**, with **`gemini-2.5-flash`** as its default fallback. Google's current [model catalogue](https://ai.google.dev/gemini-api/docs/models) describes both as multimodal models; the [pricing page](https://ai.google.dev/gemini-api/docs/pricing) currently lists free-tier input and output for them. The existing private `.env` model is preserved and remains the primary model unless changed by the operator. Photo analysis sends the actual image, official plan PNGs and geometry summaries. Selection/detail use 4,096/8,192 total output-and-thinking token allowances.
+Google Gemini Developer API. The new-install default is **`gemini-3.5-flash-lite`**, with **`gemini-3.8-flash`** as its default fallback. Google's current [model catalogue](https://ai.google.dev/gemini-api/docs/models) describes both as multimodal models; the [pricing page](https://ai.google.dev/gemini-api/docs/pricing) currently lists free-tier input and output for them. The existing private `.env` model is preserved and remains the primary model unless changed by the operator. An existing 3.8 primary defaults to a 3.5 Flash-Lite backup. Explicit fallback lists, including an empty list, are preserved. Photo analysis sends the actual image, official plan PNGs and geometry summaries. Selection/detail use 4,096/8,192 total output-and-thinking token allowances.
 
 Free-tier content may be used to improve Google's products. CampusLens uses local source/visual retrieval and does not use provider context caching or Google Search/Maps grounding. Verify the selected primary and fallback models are available to the specific API project before confirming eligibility.
 
 Quotas are account/project dependent and must be inspected in AI Studio. The public documentation does not guarantee a universal RPM/TPM/RPD allowance; do not copy outdated numbers from a blog. [Rate-limit documentation](https://ai.google.dev/gemini-api/docs/rate-limits).
 
-The code retains the previously configured Gemini 3.x IDs in its supported list for existing private configurations. The new-install default and fallback are the documented 2.5 Flash family. Google's exact model availability and quotas can change and must be checked for the operator's account.
+The code retains Gemini 3.6 and explicitly selected Gemini 2.5 IDs for existing eligible configurations. Google now restricts 2.5 generation access for new users, so those models are never implicit defaults or backups. A successful model-list or metadata response does not prove generation access. Google's exact model availability and quotas can change and must be checked for the operator's account.
 
 ## Activation
 
@@ -30,9 +30,11 @@ Individual model requests allow at most 30 seconds. The label-reading API stage 
 
 Photos are resized locally and sent transiently to the local server and Google after per-photo consent. Original metadata is removed; no media enters app storage, session logs or the source-image cache. No hidden reasoning is requested or saved. Provider terms still govern Google's handling. Images, drawings and retrieved text are evidence, never instructions.
 
-Authentication/model-access errors, quota exhaustion, overload, blocked content and incomplete responses are distinguished without exposing raw provider messages. The adapter omits custom temperature/top-p/top-k parameters. [Google troubleshooting](https://ai.google.dev/gemini-api/docs/troubleshooting).
+Authentication/model-access errors, quota exhaustion, overload, blocked content and incomplete responses are distinguished without exposing raw provider messages. An HTTP 404 identifies unavailable model access and points to the primary/fallback settings. If all models fail, the final error preserves distinct sanitized reasons from every attempt; an inaccessible backup does not hide a retryable primary overload or quota error. Authentication, cancellation and local-budget failures still take precedence. The adapter omits custom temperature/top-p/top-k parameters. [Google troubleshooting](https://ai.google.dev/gemini-api/docs/troubleshooting).
 
 ## Live verification history
+
+On October 16, a text-only forced-tool diagnostic reproduced the reported failure chain: the configured Gemini 3.8 Flash returned HTTP 503 (high demand), while both implicit 2.5 backups returned HTTP 404 with Google indicating they were unavailable to new users. Metadata requests had returned HTTP 200 with `generateContent` support for every checked model, so metadata alone was insufficient. One text-only check of the replacement 3.5 Flash-Lite backup also returned 503. The obsolete defaults and error masking were corrected, but current provider capacity remains an external limitation. No user photo was sent by these diagnostics and no photo-localization accuracy is established.
 
 The key was accepted by Google's model-list endpoint, which listed the configured model. An earlier text/tool request succeeded; that text-location feature has now been removed with the fictional data. It did not establish photo-localization accuracy.
 

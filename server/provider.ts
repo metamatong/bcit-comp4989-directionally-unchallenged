@@ -46,7 +46,8 @@ function unavailableError(status: number, retryDelay?: number) {
   );
 }
 
-// Gemini 2.5 Flash models are listed on Google's current model and pricing pages.
+export const defaultGeminiModel = 'gemini-3.5-flash-lite';
+// Gemini 2.5 is opt-in for existing projects; Google restricts it for new users.
 const supportedFreeTierModels = new Set([
   'gemini-2.5-flash-lite',
   'gemini-2.5-flash',
@@ -54,7 +55,7 @@ const supportedFreeTierModels = new Set([
   'gemini-3.6-flash',
   'gemini-3.8-flash',
 ]);
-const defaultFallbackModels = ['gemini-2.5-flash-lite', 'gemini-2.5-flash'];
+const defaultFallbackModels = [defaultGeminiModel, 'gemini-3.8-flash'];
 const maximumFallbackModels = 2;
 
 export function liveAiFallbackModels(environment: NodeJS.ProcessEnv): string[] {
@@ -63,7 +64,7 @@ export function liveAiFallbackModels(environment: NodeJS.ProcessEnv): string[] {
     .split(',')
     .map((model) => model.trim())
     .filter(Boolean);
-  const primary = environment.GEMINI_MODEL ?? 'gemini-2.5-flash-lite';
+  const primary = environment.GEMINI_MODEL ?? defaultGeminiModel;
   return [...new Set(models)].filter((model) => model !== primary);
 }
 
@@ -72,7 +73,7 @@ export function liveAiSetupIssue(environment: NodeJS.ProcessEnv): string | null 
     return 'GEMINI_API_KEY is missing from the server environment. Add it to .env and restart.';
   if (environment.AI_FREE_TIER_CONFIRMED !== 'true')
     return 'AI_FREE_TIER_CONFIRMED must be true after verifying the API project uses an eligible free tier.';
-  if (!supportedFreeTierModels.has(environment.GEMINI_MODEL ?? 'gemini-2.5-flash-lite'))
+  if (!supportedFreeTierModels.has(environment.GEMINI_MODEL ?? defaultGeminiModel))
     return `GEMINI_MODEL is not supported. Supported models: ${[...supportedFreeTierModels].join(', ')}.`;
   const fallbackModels = liveAiFallbackModels(environment);
   if (fallbackModels.length > maximumFallbackModels)
@@ -266,6 +267,7 @@ export class GeminiProvider implements Provider {
     options: GenerationOptions = {},
   ): Promise<ModelPart[]> {
     const models = [...new Set([this.options.model, ...(this.options.fallbackModels ?? [])])];
+    const failures: ProviderError[] = [];
     for (let index = 0; index < models.length; index++) {
       try {
         return await this.generateWithModel(
@@ -277,6 +279,7 @@ export class GeminiProvider implements Provider {
           options,
         );
       } catch (error) {
+        if (error instanceof ProviderError) failures.push(error);
         const shouldFallback =
           index < models.length - 1 &&
           !signal?.aborted &&
@@ -286,14 +289,22 @@ export class GeminiProvider implements Provider {
           ) ||
             error.fallbackEligible);
         if (!shouldFallback) {
-          if (index > 0 && error instanceof ProviderError)
+          if (index > 0 && error instanceof ProviderError) {
+            // An inaccessible backup must not hide a retryable failure from a usable model.
+            // Authentication, cancellation and local budget failures still take precedence.
+            const actionableError =
+              error.code === 'configuration' && error.fallbackEligible
+                ? (failures.find((failure) => failure.retryable) ?? error)
+                : error;
+            const reasons = [...new Set(failures.map((failure) => failure.message))].join(' ');
             throw new ProviderError(
-              `All configured Gemini models failed. ${error.message}`,
-              error.httpStatus,
-              error.code,
-              error.retryable,
-              error.retryAfterSeconds,
+              `All configured Gemini models failed. ${reasons}`,
+              actionableError.httpStatus,
+              actionableError.code,
+              actionableError.retryable,
+              actionableError.retryAfterSeconds,
             );
+          }
           throw error;
         }
         options.onModelFallback?.();
@@ -423,6 +434,17 @@ export class GeminiProvider implements Provider {
           'quota',
           true,
         );
+      if (response.status === 404) {
+        await response.body?.cancel();
+        throw new ProviderError(
+          'A configured Gemini model is unavailable for this API project (HTTP 404). Check GEMINI_MODEL and GEMINI_FALLBACK_MODELS; model listings alone do not confirm generation access.',
+          502,
+          'configuration',
+          false,
+          undefined,
+          true,
+        );
+      }
       if (!response.ok)
         throw new ProviderError(
           `Gemini rejected the request (HTTP ${response.status}). Check the API key, model access, and server configuration. Live AI remains selected.`,
@@ -430,7 +452,7 @@ export class GeminiProvider implements Provider {
           'configuration',
           false,
           undefined,
-          response.status === 400 || response.status === 404,
+          response.status === 400,
         );
       return parseResponse(await response.json().catch(() => null));
     }

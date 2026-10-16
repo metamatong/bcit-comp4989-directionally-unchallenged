@@ -1,18 +1,18 @@
 # Verification record
 
-Verified October 15, 2026 on macOS arm64, Node 22.15.1. The current application uses only official Burnaby sources and Gemini photo analysis. Mocked provider results are not evidence of real-campus accuracy.
+Verified October 16, 2026 on macOS arm64, Node 22.15.1. The current application uses only official Burnaby sources and Gemini photo analysis. Mocked provider results are not evidence of real-campus accuracy.
 
 ## Current checks
 
 | Check | Result | Scope |
 |---|---|---|
-| `npm run test:unit` | **114 passed** | Latest crop preparation, exact-label, two-stage API, evidence binding and provider regression tests |
+| `npm run test:unit` | **120 passed** | Crop preparation, exact-label, two-stage API, evidence binding and provider/default/failure-chain regressions |
 | Earlier `npm test` | **101 passed** | 79 unit/API cases and 22 browser cases after demo removal, before screen checks were stopped |
 | `npm run build` | Passed | TypeScript check and Vite production build |
 | `npm run data:validate` | Passed | 90 original PDF hashes, 89 geometry records and 631 derived asset hashes |
 | Documentation links | Checked | Local references match the current hierarchy |
 
-The automated browser run had already completed when the user requested no further screen checks. No subsequent manual screen/screenshot inspection or browser run was performed. Future validation should honor that preference. Tests use no real Gemini credentials or provider quota.
+The automated browser run had already completed when the user requested no further screen checks. No further browser test suite has run. On October 16, the user explicitly requested inspection of a displayed 404; only the existing page's error text was read, with no interactions or photo submission. Future validation should honor the no-screen-test preference. Automated tests use no real Gemini credentials or provider quota; separate live diagnostics are recorded below.
 
 ## Removal and regression coverage
 
@@ -71,3 +71,9 @@ The browser prepares a context JPEG and four overlapping crops directly from the
 All 114 unit/API tests, TypeScript/production build, 90 source PDF hashes, 631 derived asset hashes and full label-index coverage passed. Tests cover stage-scoped idempotency, two distinct API requests before a result, same-photo/crop/session binding, five-minute evidence expiry, reset invalidation, comparison-only retry, cancellation, complete source labels, preserved no-sign visual matching and Gemini 2.5 thinking-budget compatibility. Provider responses are mocked; no live generation call or user-photo upload was performed. Browser expectations were updated and type-checked but not executed.
 
 This is implementation-contract evidence, not a measured improvement in physical localization accuracy. Next verify the supplied SE12 photo and independent labeled SE12/SW1 photos, recording extraction, shortlist and final-region outcomes separately. Do not reuse evaluation photos as retrieval references. The updated two-page proposal receives automated page/margin checks only, respecting the no-screen-check request.
+
+## Gemini backup 404 diagnosis — October 16, 2026
+
+Read-only model metadata checks returned HTTP 200 with generation listed. Separate text-only forced-tool checks returned 503 for the configured 3.8 Flash primary and 404 for both implicit 2.5 backups. Google's error identified 2.5 generation as unavailable to new users. One replacement-backup check of 3.5 Flash-Lite also returned 503. Four bounded generation diagnostics sent no user photo and produced no usable inference; live photo localization remains unverified.
+
+Defaults now use 3.5 Flash-Lite and 3.8 Flash, preserving explicit primary/fallback settings. Mixed failures retain sanitized original reasons, and an unavailable backup no longer turns a retryable primary failure into an unexplained configuration error. All 120 mocked unit/API tests, production build and source-data validation passed. The first sandboxed test attempt could not bind loopback ports; the complete rerun with local networking enabled passed. No screen tests were run. Provider capacity remains an external limitation.
