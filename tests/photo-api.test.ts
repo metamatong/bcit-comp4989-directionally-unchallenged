@@ -158,7 +158,7 @@ it('rejects mismatched image bytes, oversized bodies, and unproposed campus conf
   ).toBe(400);
   expect(provider.calls).toBe(before);
 });
-it('serves PNG and geometry evidence linked by the bootstrap catalogue', async () => {
+it('serves PNG and geometry evidence linked by plan metadata', async () => {
   const bootstrap = await (await fetch(`${base}/api/bootstrap`)).json();
   expect(bootstrap.photoLocalizationAvailable).toBe(true);
   expect(bootstrap.visualPlans).toHaveLength(89);

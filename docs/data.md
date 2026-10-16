@@ -4,11 +4,11 @@
 
 The only floor-plan collection used is [BCIT Facilities: Floor Plans](https://www.bcit.ca/facilities/campus-maps/floor-plans/). The importer discovers links from that page and accepts only the Burnaby NE, NW, SE and SW filename/directory patterns. It does not construct unobserved PDF URLs or ingest other campuses. The separate CARI section is excluded.
 
-The source library includes **89 floor-plan PDFs across 45 buildings** plus the [Burnaby Campus Wayfinding PDF](https://www.bcit.ca/files/maps/pdf/bcit_wayfinding.pdf), linked from [BCIT Campus Maps & Wayfinding](https://www.bcit.ca/facilities/campus-maps/). Downloaded on **October 15, 2026**. Each entry in `data/campus/manifest.json` records URL, source index, retrieval time, SHA-256, relative file path, attribution, and review status. The saved index HTML also has a hash.
+The internal source dataset includes **89 floor-plan PDFs across 45 buildings** plus the [Burnaby Campus Wayfinding PDF](https://www.bcit.ca/files/maps/pdf/bcit_wayfinding.pdf), linked from [BCIT Campus Maps & Wayfinding](https://www.bcit.ca/facilities/campus-maps/). Downloaded on **October 15, 2026**. Each entry in `data/campus/manifest.json` records URL, source index, retrieval time, SHA-256, relative file path, attribution, and review status. The saved index HTML also has a hash.
 
 © British Columbia Institute of Technology. BCIT's stated reuse conditions limit copies to informational, non-commercial use, require its copyright notice, prohibit modifications to the source content, and permit revocation. Other uses need permission. Original PDFs are preserved byte-for-byte; derived research annotations are separate and are not presented as revised official plans. Review permission before wider distribution or commercial use. [BCIT copyright terms](https://www.bcit.ca/copyright/).
 
-BCIT describes the plans as general information and does not warrant their accuracy or completeness. “Official source” therefore means provenance, not physical verification. The app links the unmodified originals and shows the attribution in its source library.
+BCIT describes the plans as general information and does not warrant their accuracy or completeness. “Official source” therefore means provenance, not physical verification. Location results link their relevant original plans and show attribution; there is no general source browser.
 
 ## Regenerate the dataset
 

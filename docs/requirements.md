@@ -13,7 +13,7 @@ The supplied original [brief](project-brief.txt) remains unchanged. The user's l
 | Mobile photo/camera input | Local resizing, photo picker and native camera capture |
 | Privacy and governance | Per-photo consent; transient media/session state; untrusted source evidence; no hidden reasoning logs |
 | Failure behavior | Setup, timeout, overload, quota, blocked and incomplete-response errors; no synthetic fallback |
-| Source search without inference | Official catalogue/text search and downloadable original/source-derived assets |
+| Source plans behind the scenes | Full official dataset remains available to Gemini; only relevant plan images and original-source links appear with location results |
 | Destination routing, closures, ETAs | Removed with synthetic routes; unavailable pending verified campus topology |
 | Verification/evaluation | Mocked unit/API/browser checks and source hashes; live successful localization and field accuracy remain unverified |
 | Documentation/proposal | README, architecture/data/provider/operations/verification notes, walkthrough and two-page proposal |

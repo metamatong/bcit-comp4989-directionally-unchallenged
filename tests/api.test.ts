@@ -84,6 +84,7 @@ describe('real-campus-only HTTP contract', () => {
     expect(body.coverage.floorPlans).toBe(89);
     expect(body.visualPlans).toHaveLength(89);
     expect(body).not.toHaveProperty('graph');
+    expect(body).not.toHaveProperty('catalogue');
     expect(body).not.toHaveProperty('defaultMode');
     expect(body).not.toHaveProperty('apiKey');
     expect(response.headers.get('cache-control')).toBe('no-store');
@@ -118,14 +119,13 @@ describe('real-campus-only HTTP contract', () => {
       (await action(next, { type: 'confirm-campus-region', candidateId: randomUUID() })).status,
     ).toBe(400);
   });
-  it('preserves source search without using a model or resolving fictional locations', async () => {
-    const records = await (await fetch(`${base}/api/search?q=SE12`)).json();
-    expect(records.length).toBeGreaterThan(0);
-    expect(records[0].url).toMatch(/^https:\/\/www.bcit.ca\//);
-    expect(records.every((record: { routingSupported: boolean }) => !record.routingSupported)).toBe(
-      true,
-    );
-    expect(await (await fetch(`${base}/api/search?q=Cedar%20welcome%20desk`)).json()).toEqual([]);
+  it('removes general library search while preserving plan assets for location results', async () => {
+    const response = await fetch(`${base}/api/search?q=SE12`);
+    expect(response.status).toBe(404);
+    expect(await response.json()).toEqual({ error: 'Unknown API endpoint.' });
+    const plan = await fetch(`${base}/data/campus/visual/png/SE12-F1-p1/overview.png`);
+    expect(plan.status).toBe(200);
+    expect(plan.headers.get('content-type')).toContain('image/png');
   });
   it('rejects cross-origin writes, malformed bodies, and unknown sessions', async () => {
     const response = await fetch(`${base}/api/sessions`, {

@@ -6,7 +6,7 @@ Use Node.js 22+, `npm ci`, and `npm run dev`. The app defaults to `127.0.0.1:300
 
 Set `GEMINI_API_KEY` in private `.env`, choose a primary `GEMINI_MODEL`, and set an ordered comma-separated `GEMINI_FALLBACK_MODELS` list. Defaults use Gemini 2.5 Flash-Lite and Gemini 2.5 Flash; Google currently lists both on the free tier. Verify eligibility and model access for the specific API project before setting `AI_FREE_TIER_CONFIRMED=true`. `.env.example` is a keyless template. Never put secrets in frontend variables. `AI_DEFAULT_MODE` is obsolete and ignored. No mode switch or synthetic location fallback exists.
 
-Without provider configuration, users see setup guidance and can browse official PDFs/PNGs/geometry. Photo submission is disabled in the client and rejected by the server. With configuration, each photo still requires consent and an explicit Analyze action.
+Without provider configuration, users see setup guidance. Photo submission is disabled in the client and rejected by the server. With configuration, each photo still requires consent and an explicit Analyze action.
 
 ## Media and state
 
@@ -19,7 +19,7 @@ Session results expire after 30 minutes. Reload creates a new session. Clear ana
 ## Failures and recovery
 
 - Configuration errors: fix the private server key/model/free-tier settings, restart and refresh.
-- Gemini quota, temporary service or response errors: try the configured Gemini fallbacks. If they also fail, the error is shown and the plan library remains available.
+- Gemini quota, temporary service or response errors: try the configured Gemini fallbacks. If they also fail, the error is shown and no substitute location is generated.
 - `response_limit`: no partial result is applied. The next configured model may be tried; otherwise, retake the photo and retry.
 - Insufficient evidence: provide another view. This is an analysis result, not a transport failure.
 

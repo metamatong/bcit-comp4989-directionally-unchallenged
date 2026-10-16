@@ -13,7 +13,7 @@ The converted assets are already included in `data/campus/visual/`. The Node ser
 5. Review the single best building/floor estimate and its source. Gemini can instead report insufficient evidence and request another view.
 6. Confirm the estimate only if it agrees with your surroundings. It remains unverified and does not enable a campus route.
 
-There is no mode selector, sample-photo control, manual fictional landmark picker or synthetic route. Missing Gemini configuration shows setup guidance. Temporary Gemini-model failures try the configured Gemini fallbacks; if all fail, the real-plan library remains available without a fabricated result.
+There is no mode selector, sample-photo control, manual fictional landmark picker or synthetic route. Missing Gemini configuration shows setup guidance. Temporary Gemini-model failures try the configured Gemini fallbacks; if all fail, the error is shown without a fabricated result.
 
 ## Converted data
 
@@ -26,7 +26,7 @@ The pipeline converted all **89 downloaded official Burnaby floor-plan PDFs**, c
 - Eight labeled overview sheets covering all plans exactly once (12 plans per sheet except the final sheet).
 - An index recording source IDs, source PDF hashes, generated asset hashes, page dimensions, crop bounds, building/floor metadata, and attribution. PNG metadata also embeds the BCIT copyright notice, source index and reference-only notice.
 
-The separate campus wayfinding PDF remains in the source library; this conversion targets the 89 floor plans. Generated visual assets occupy approximately 355 MB in this build.
+The separate campus wayfinding PDF remains in the internal source dataset; this conversion targets the 89 floor plans. Generated visual assets occupy approximately 355 MB in this build.
 
 Regenerate locally, with the Python dependencies from `requirements-data.txt`:
 
@@ -84,7 +84,7 @@ References: [Gemini Generate Content image input](https://ai.google.dev/gemini-a
 
 An HTTP 200 from Gemini can still contain an unfinished generation. In the reproduced failure, `MAX_TOKENS` arrived without any answer parts: thinking consumed the earlier 1,800-token allowance. The app previously called this an “unsupported response.” It now reports `response_limit` accurately and uses the larger photo budgets above. See [provider diagnostics](provider.md#incomplete-response-diagnosis-and-handling).
 
-After updating the code, restart the existing server, refresh the app, and retry the photo when provider quota is available. An optional building hint narrows the comparison if the user actually knows the building. A response-limit failure keeps Live AI selected and discards partial results. HTTP 429 means Google's quota has been reached; rapid repeated clicks do not fix it. The latest post-fix checks reached a timeout and then HTTP 429, so a completed live comparison remains unverified.
+After updating the code, restart the existing server, refresh the app, and retry the photo when provider quota is available. The public photo flow uses the image without a building hint; the internal API can optionally narrow its scope. A response-limit failure keeps Live AI selected and discards partial results. HTTP 429 means Google's quota has been reached; rapid repeated clicks do not fix it. The latest post-fix checks reached a timeout and then HTTP 429, so a completed live comparison remains unverified.
 
 ## Verification and remaining limits
 

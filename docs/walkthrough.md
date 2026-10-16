@@ -1,12 +1,10 @@
 # Project walkthrough
 
-1. Open the app and explain that all available floor plans come from official BCIT Burnaby sources.
-2. Browse the campus library and open an original PDF, its PNG and geometry JSON.
-3. If Gemini is configured and quota is available, upload or capture a real campus photo and explain the per-photo send confirmation.
-4. Gemini first shortlists plans, then compares selected details and geometry, eliminating plans that conflict with visible features.
-5. Review its single best unverified match, evidence and source links. Confirm only if it agrees with the actual surroundings. An insufficient-evidence result is acceptable and should lead to another view.
-6. Clear the analysis to remove the result. If a Gemini model fallback was needed, the result labels that.
+1. Open the app and choose Find my location to upload or capture a campus photo.
+2. Show the preview and obtain per-photo send confirmation.
+3. Submit the photo. Gemini uses the official BCIT Burnaby dataset behind the scenes, shortlists plans and inspects detailed imagery and geometry.
+4. Review the single best supported location region on its relevant floor plan, along with observable matches and uncertainty. The source links refer only to that plan's full image and original PDF.
+5. Confirm only if the estimate agrees with the actual surroundings. An insufficient-evidence result should lead to another view.
+6. Clear removes the current result. If a configured Gemini fallback model was needed, the result labels it.
 
-If provider configuration, quota or availability prevents a request, show that message and the source library. Do not present test fixtures or mocked responses as successful live localization.
-
-There are no fictional landmarks, synthetic routes, mode choices, closure simulations or sample-photo controls. Walking directions and campus accuracy remain unverified. No app or coursework has been published/submitted.
+There is no Campus library, plan-search screen, introductory promotional banner, fictional landmark or sample location. A provider error shows setup/retry guidance. Never present mocked results as a successful live localization. Walking directions and campus accuracy remain unverified. Nothing has been deployed or submitted as coursework.

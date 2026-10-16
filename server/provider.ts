@@ -311,9 +311,7 @@ export class GeminiProvider implements Provider {
     options: GenerationOptions = {},
   ): Promise<ModelPart[]> {
     if (!this.options.apiKey)
-      throw new Error(
-        'Gemini is not configured. Add the server API key and restart. The official plan library remains available.',
-      );
+      throw new Error('Gemini is not configured. Add the server API key and restart.');
     const fetcher = this.options.fetchImpl ?? fetch;
     if (
       options.forceTool &&
@@ -372,7 +370,7 @@ export class GeminiProvider implements Provider {
         );
       } catch {
         throw new ProviderError(
-          'The Gemini connection timed out or is unavailable. Try again later; the official plan library remains available.',
+          'The Gemini connection timed out or is unavailable. Try again later.',
           503,
           'connection',
           true,

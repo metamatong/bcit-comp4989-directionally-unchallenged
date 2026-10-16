@@ -1,9 +1,8 @@
 import express from 'express';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import { catalogue, coverage, root } from './data';
+import { coverage, root } from './data';
 import { newSession } from './session';
-import { searchCampus } from './retrieval';
 import { ProviderError, type Provider } from './provider';
 import type { Session } from '../src/types';
 import { visualPlans } from './visual-data';
@@ -60,7 +59,6 @@ export function createApp(options: {
   app.use(express.json({ limit: '12kb' }));
   app.get('/api/bootstrap', (_req, res) =>
     res.json({
-      catalogue: catalogue.map(({ text: _text, ...record }) => record),
       coverage,
       liveAvailable: options.liveAvailable,
       model: options.model,
@@ -68,9 +66,6 @@ export function createApp(options: {
       visualPlans,
       photoLocalizationAvailable: visualPlans.length > 0,
     }),
-  );
-  app.get('/api/search', (req, res) =>
-    res.json(searchCampus(String(req.query.q ?? '').slice(0, 100))),
   );
   app.post('/api/sessions', (req, res) => {
     if (
@@ -118,7 +113,7 @@ export function createApp(options: {
       res.status(503).json({
         error:
           options.setupNotice ??
-          'Gemini is not configured. Add the server API key and free-tier confirmation, then restart. The official plan library remains available.',
+          'Gemini is not configured. Add the server API key and free-tier confirmation, then restart.',
         providerError: { code: 'configuration', retryable: false },
         session,
       });
@@ -263,6 +258,7 @@ export function createApp(options: {
   app.get('/api/health', (_req, res) =>
     res.json({ ok: true, mode: 'local-prototype', requestId: randomUUID() }),
   );
+  app.use('/api', (_req, res) => res.status(404).json({ error: 'Unknown API endpoint.' }));
   app.use(
     (error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
       const tooLarge = (error as { type?: string })?.type === 'entity.too.large';

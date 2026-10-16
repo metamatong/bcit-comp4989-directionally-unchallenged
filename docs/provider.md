@@ -20,7 +20,7 @@ The code retains the previously configured Gemini 3.x IDs in its supported list 
 4. Restart the existing server and refresh. Gemini readiness is displayed directly. `AI_DEFAULT_MODE` is unused and old browser mode preferences are cleared.
 5. Upload a photo, consent to sending that image, and select Analyze. No request occurs merely because a key is configured.
 
-Missing configuration leaves the official source library available and disables/rejects photo submissions. Adding JSON or changing browser storage cannot restore fictional locations. Model failover is limited to the configured Gemini list; there is no paid or alternate-provider fallback.
+Missing configuration displays setup guidance and disables/rejects photo submissions. Source plans remain internal; only relevant plans are shown with location results. Adding JSON or changing browser storage cannot restore fictional locations. Model failover is limited to the configured Gemini list; there is no paid or alternate-provider fallback.
 
 ## Transport, budgets and privacy
 
