@@ -1,4 +1,4 @@
-import { ArrowUpRight, Camera, Check, FileText, MapPin } from 'lucide-react';
+import { ArrowUpRight, Check, FileText, MapPin } from 'lucide-react';
 import type { CampusLocationCandidate, CampusPhotoAnalysis, VisualPlan } from '../types';
 
 export function PlanRegion({
@@ -111,19 +111,5 @@ export function CampusLocationResults({
         AI estimate only. Confirm it against your surroundings; walking routes are not available.
       </p>
     </section>
-  );
-}
-
-export function PhotoEmptyState({ onUpload }: { onUpload: () => void }) {
-  return (
-    <div className="photo-empty-state">
-      <Camera size={29} />
-      <h2>Location result</h2>
-      <p>Upload a photo to get a location estimate.</p>
-      <button className="primary" onClick={onUpload}>
-        <Camera size={18} />
-        Find my location
-      </button>
-    </div>
   );
 }

@@ -14,6 +14,8 @@ The browser accepts JPEG/PNG/WebP up to 8 MB and 50 million pixels, creates a fu
 
 Mobile photo capture uses the browser/device photo picker. CampusLens does not open a live camera stream or track movement. Physical-device capture behavior remains unverified.
 
+Upload and capture controls are shown inline under Find my location. A selected photo reveals the consent and analysis controls. Remove photo, Cancel analysis, result confirmation or leaving the page releases the client photo; the coverage/privacy dialog does not clear it. Results appear once beneath the input, and a newly selected photo hides the prior result until its own comparison completes.
+
 First-stage evidence IDs expire after five minutes and are bound to a session and image/crop fingerprint. No media is stored between API stages. A failed comparison may retry with the accepted evidence until expiry. Session results expire after 30 minutes. Reload creates a new session. Clear analysis removes the current result. No accounts, saved positions, browser location history or automatic tracking exist. Obsolete mode preferences are removed from browser storage. API responses use `no-store` and reject cross-origin requests.
 
 ## Failures and recovery

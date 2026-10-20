@@ -132,7 +132,6 @@ async function setup(page: Page, hasCandidate = true) {
   return { uploads, evidenceUploads, requests };
 }
 async function choosePhoto(page: Page) {
-  await page.getByRole('button', { name: 'Find my location', exact: true }).click();
   await page
     .getByLabel('Upload campus photo', { exact: true })
     .setInputFiles(resolve('data/campus/visual/png/SE12-F1-p1/overview.png'));
@@ -153,13 +152,16 @@ test('photo → explicit consent → real plan region → confirmation, without 
   await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
   await analyze.click();
   await expect(
-    page.getByRole('dialog').getByRole('heading', { name: 'SE12 · Floor 1' }),
+    page
+      .getByRole('region', { name: 'Photo comparison results' })
+      .getByRole('heading', { name: 'SE12 · Floor 1' }),
   ).toHaveCount(1);
-  await expect(page.getByRole('dialog').locator('.plan-region img')).toHaveCount(1);
-  await expect(page.getByRole('dialog').locator('.plan-region img')).toHaveAttribute(
-    'src',
-    /SE12-F1-p1\/overview\.png$/,
-  );
+  await expect(
+    page.getByRole('region', { name: 'Photo comparison results' }).locator('.plan-region img'),
+  ).toHaveCount(1);
+  await expect(
+    page.getByRole('region', { name: 'Photo comparison results' }).locator('.plan-region img'),
+  ).toHaveAttribute('src', /SE12-F1-p1\/overview\.png$/);
   expect(uploads).toHaveLength(1);
   expect(evidenceUploads).toHaveLength(1);
   expect(uploads[0].detailCrops).toHaveLength(4);
@@ -168,13 +170,22 @@ test('photo → explicit consent → real plan region → confirmation, without 
   expect(uploads[0].image.data.length).toBeGreaterThan(1000);
   expect(uploads[0]).not.toHaveProperty('description');
   expect(requests.some((url) => url.includes('/ocr/'))).toBe(false);
-  await expect(page.getByRole('dialog').getByText('Source files', { exact: true })).toBeVisible();
-  await page.getByRole('dialog').getByText('Source files', { exact: true }).click();
   await expect(
-    page.getByRole('dialog').getByRole('link', { name: 'View full plan' }),
+    page
+      .getByRole('region', { name: 'Photo comparison results' })
+      .getByText('Source files', { exact: true }),
+  ).toBeVisible();
+  await page
+    .getByRole('region', { name: 'Photo comparison results' })
+    .getByText('Source files', { exact: true })
+    .click();
+  await expect(
+    page
+      .getByRole('region', { name: 'Photo comparison results' })
+      .getByRole('link', { name: 'View full plan' }),
   ).toHaveAttribute('href', /SE12-F1-p1\/full\.png$/);
   await page
-    .getByRole('dialog')
+    .getByRole('region', { name: 'Photo comparison results' })
     .getByRole('button', { name: 'Confirm this possible region', exact: true })
     .first()
     .click();
@@ -195,16 +206,24 @@ test('ambiguous photo asks for another view and never supplies a demo match', as
   await choosePhoto(page);
   await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
   await page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }).click();
-  await expect(page.getByRole('dialog').getByText('No clear match', { exact: true })).toBeVisible();
   await expect(
-    page.getByRole('dialog').getByRole('button', { name: 'Confirm this possible region' }),
+    page
+      .getByRole('region', { name: 'Photo comparison results' })
+      .getByText('No clear match', { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page
+      .getByRole('region', { name: 'Photo comparison results' })
+      .getByRole('button', { name: 'Confirm this possible region' }),
   ).toHaveCount(0);
   await expect(
-    page.getByRole('dialog').getByText('A second view showing a corridor intersection would help.'),
+    page
+      .getByRole('region', { name: 'Photo comparison results' })
+      .getByText('A second view showing a corridor intersection would help.'),
   ).toBeVisible();
 });
 
-test('closing the photo dialog discards a late comparison response', async ({ page }) => {
+test('cancelling inline analysis discards a late comparison response', async ({ page }) => {
   await setup(page);
   await choosePhoto(page);
   let release!: () => void;
@@ -220,9 +239,10 @@ test('closing the photo dialog discards a late comparison response', async ({ pa
   await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
   await page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }).click();
   await expect.poll(() => requested).toBe(true);
-  await page.getByRole('button', { name: 'Close dialog', exact: true }).click();
+  await page.getByRole('button', { name: 'Cancel analysis', exact: true }).click();
   release();
-  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await expect(page.getByRole('region', { name: 'Photo comparison results' })).toHaveCount(0);
+  await expect(page.getByRole('img', { name: /Uploaded location photo/ })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: 'Best match' })).toHaveCount(0);
   await expect(page.getByTestId('provider-status')).toBeVisible();
 });
@@ -235,12 +255,28 @@ test('clearing an analysis removes the result without changing provider or loadi
   await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
   await page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }).click();
   await page
-    .getByRole('dialog')
+    .getByRole('region', { name: 'Photo comparison results' })
     .getByRole('button', { name: 'Confirm this possible region', exact: true })
     .click();
   await page.getByRole('button', { name: 'Clear', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Location result' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Find my location', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Best match' })).toHaveCount(0);
   await expect(page.getByTestId('provider-status')).toHaveText('Gemini ready');
   expect(uploads).toHaveLength(1);
+});
+
+test('opening and closing privacy information preserves the inline photo and consent', async ({
+  page,
+}) => {
+  await setup(page);
+  await choosePhoto(page);
+  await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
+  await page.getByRole('button', { name: /Coverage & privacy/ }).click();
+  await expect(page.getByRole('dialog', { name: 'About CampusLens' })).toBeVisible();
+  await page.getByRole('dialog').press('Escape');
+  await expect(page.getByRole('dialog')).not.toBeVisible();
+  await expect(page.getByRole('img', { name: /Uploaded location photo/ })).toBeVisible();
+  await expect(
+    page.getByRole('checkbox', { name: /Send this photo and its detail views/ }),
+  ).toBeChecked();
 });
