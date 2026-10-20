@@ -4,6 +4,7 @@ Read README.md and docs/project-brief.txt before changing behavior. The original
 
 - Keep scope limited to official BCIT Burnaby source records.
 - Do not restore a Campus library screen or promotional hero copy. Keep the interface focused on photo input and location results.
+- Show Upload photo and Take a photo directly under the first screen's Find my location heading. Keep the photo workflow inline, with results below it; do not restore the location popup or extra launch button.
 - Do not reintroduce Demo mode, fictional landmarks, sample-location controls, synthetic routing, or provider-failure fallbacks that fabricate results.
 - Gemini is the only photo-analysis path. Missing configuration and provider errors must be explicit. Keep source plans behind the scenes; show only relevant plans with location results.
 - Keep API keys server-side and require verified free-tier eligibility. Push code only when authorized; do not deploy the app or submit coursework without an explicit request.

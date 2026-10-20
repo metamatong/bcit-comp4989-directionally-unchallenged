@@ -2,15 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import {
   AlertTriangle,
   ArrowUpRight,
-  Camera,
   Compass,
   Info,
-  LoaderCircle,
-  LocateFixed,
   RotateCcw,
-  Search,
   ShieldCheck,
-  Upload,
   X,
 } from 'lucide-react';
 import {
@@ -22,15 +17,14 @@ import {
   clearLegacyModePreference,
 } from './api';
 import { preparePhoto, type PreparedPhoto } from './photo';
-import { CampusLocationResults, PhotoEmptyState } from './components/CampusLocationResults';
+import { CampusLocationResults } from './components/CampusLocationResults';
+import { PhotoLocationInput } from './components/PhotoLocationInput';
 import type { Bootstrap, Session } from './types';
-
-type Modal = 'location' | 'about' | null;
 
 export default function App() {
   const [data, setData] = useState<Bootstrap>();
   const [session, setSession] = useState<Session>();
-  const [modal, setModal] = useState<Modal>(null);
+  const [aboutOpen, setAboutOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [reading, setReading] = useState(false);
@@ -43,8 +37,6 @@ export default function App() {
   const sessionRef = useRef<Session | undefined>(undefined);
   const busyRef = useRef(false);
   const evidenceGate = useRef(new RequestGate());
-  const upload = useRef<HTMLInputElement>(null);
-  const phonePhoto = useRef<HTMLInputElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
 
   function updateSession(next: Session) {
@@ -70,11 +62,11 @@ export default function App() {
     };
   }, []);
   useEffect(() => {
-    if (modal) dialog.current?.showModal();
+    if (aboutOpen) dialog.current?.showModal();
     else dialog.current?.close();
-  }, [modal]);
+  }, [aboutOpen]);
 
-  function closeModal() {
+  function discardPhoto() {
     evidenceGate.current.cancel();
     photoAbort.current?.abort();
     setPreparedPhoto(null);
@@ -82,8 +74,11 @@ export default function App() {
     setPhotoConsent(false);
     setReadStatus('');
     setReading(false);
+  }
+  function removePhoto() {
+    discardPhoto();
     setShowPhotoResults(false);
-    setModal(null);
+    setError('');
   }
   async function send(action: unknown): Promise<Session | undefined> {
     const current = sessionRef.current;
@@ -125,7 +120,6 @@ export default function App() {
     setPhotoConsent(false);
     setShowPhotoResults(false);
     setReading(true);
-    setModal('location');
     setError('');
     setReadStatus('Preparing your photo locally…');
     try {
@@ -222,7 +216,7 @@ export default function App() {
   }
   async function confirmCampus(candidateId: string) {
     if (await send({ type: 'confirm-campus-region', candidateId })) {
-      closeModal();
+      discardPhoto();
     }
   }
 
@@ -270,14 +264,13 @@ export default function App() {
           <button
             className="icon-button"
             aria-label="About CampusLens"
-            onClick={() => setModal('about')}
+            onClick={() => setAboutOpen(true)}
           >
             <Info size={19} />
           </button>
         </div>
       </header>
       <main>
-        <h1 className="visually-hidden">CampusLens photo location</h1>
         {!data.liveAvailable && (
           <div className="setup-notice" role="note">
             <ShieldCheck size={21} />
@@ -300,19 +293,33 @@ export default function App() {
             </button>
           </div>
         )}
-        <section className="workspace">
-          {session.campusAnalysis ? (
+        <div className="workspace">
+          {data.liveAvailable && !data.photoLocalizationAvailable && (
+            <p className="setup-notice" role="note">
+              Floor-plan images are not ready on this server. Restart after preparing the source
+              plans.
+            </p>
+          )}
+          <PhotoLocationInput
+            photo={preparedPhoto}
+            consent={photoConsent}
+            ready={photoReady}
+            reading={reading}
+            busy={busy}
+            status={readStatus}
+            onPhoto={(file) => void readPhoto(file)}
+            onConsent={setPhotoConsent}
+            onAnalyze={() => void analyzePhoto()}
+            onDiscard={removePhoto}
+          />
+          {showPhotoResults && session.campusAnalysis && (
             <>
               <div className="result-actions">
-                <button className="secondary" onClick={() => setModal('location')}>
-                  <Camera size={17} />
-                  New photo
-                </button>
                 <button
                   className="text-button"
                   disabled={busy}
                   onClick={() => {
-                    closeModal();
+                    removePhoto();
                     void send({ type: 'reset' });
                   }}
                 >
@@ -328,158 +335,45 @@ export default function App() {
                 busy={busy}
               />
             </>
-          ) : (
-            <PhotoEmptyState onUpload={() => setModal('location')} />
           )}
-        </section>
+        </div>
       </main>
       <footer>
         <span>
           campuslens<span className="brand-dot">.</span>
           <small>A COMP 4989 project · Independent student prototype</small>
         </span>
-        <button onClick={() => setModal('about')}>
+        <button onClick={() => setAboutOpen(true)}>
           Coverage & privacy
           <ArrowUpRight size={14} />
         </button>
       </footer>
       <dialog
         ref={dialog}
+        aria-labelledby="about-heading"
         className="dialog"
         onCancel={(event) => {
           event.preventDefault();
-          closeModal();
+          setAboutOpen(false);
         }}
         onClick={(event) => {
-          if (event.target === event.currentTarget) closeModal();
+          if (event.target === event.currentTarget) setAboutOpen(false);
         }}
       >
         <div className="dialog-content">
           <button
             className="dialog-close icon-button"
             aria-label="Close dialog"
-            onClick={closeModal}
+            onClick={() => setAboutOpen(false)}
           >
             <X size={21} />
           </button>
-          {modal === 'location' && (
-            <>
-              <span className="modal-icon">
-                <LocateFixed size={25} />
-              </span>
-              <h2>Analyze a photo</h2>
-              <p>Compare it with official BCIT Burnaby floor plans.</p>
-              {!photoReady && (
-                <p className="setup-notice">
-                  {!data.liveAvailable
-                    ? (data.setupNotice ??
-                      'Photo analysis is unavailable until Gemini is configured on the server.')
-                    : 'Floor-plan images are not ready on this server. Restart after preparing the source plans.'}
-                </p>
-              )}
-              <div className="photo-actions">
-                <button
-                  className="secondary"
-                  disabled={reading || busy}
-                  onClick={() => upload.current?.click()}
-                >
-                  <Upload size={18} />
-                  Upload photo
-                </button>
-                <button
-                  className="secondary"
-                  disabled={reading || busy}
-                  onClick={() => phonePhoto.current?.click()}
-                >
-                  <Camera size={18} />
-                  Take a photo
-                </button>
-              </div>
-              <input
-                ref={upload}
-                type="file"
-                accept="image/png,image/jpeg,image/webp"
-                className="visually-hidden"
-                aria-label="Upload campus photo"
-                onChange={(event) => {
-                  void readPhoto(event.target.files?.[0]);
-                  event.target.value = '';
-                }}
-              />
-              <input
-                ref={phonePhoto}
-                type="file"
-                accept="image/*"
-                capture="environment"
-                className="visually-hidden"
-                aria-label="Capture phone photo"
-                onChange={(event) => {
-                  void readPhoto(event.target.files?.[0]);
-                  event.target.value = '';
-                }}
-              />
-              {preparedPhoto && (
-                <img
-                  className="evidence-photo"
-                  src={preparedPhoto.preview}
-                  alt="Uploaded location photo, awaiting analysis or confirmation"
-                />
-              )}
-              {readStatus && (
-                <p className="photo-status">
-                  {reading && <LoaderCircle className="spin" size={15} />} {readStatus}
-                </p>
-              )}
-              <form
-                onSubmit={(event) => {
-                  event.preventDefault();
-                  void analyzePhoto();
-                }}
-              >
-                <label className="checkbox-label photo-consent">
-                  <input
-                    type="checkbox"
-                    checked={photoConsent}
-                    disabled={busy || !preparedPhoto || !photoReady}
-                    onChange={(event) => setPhotoConsent(event.target.checked)}
-                  />
-                  Send this photo and its detail views to Google Gemini to read labels and compare
-                  floor plans. Free-tier inputs may be used to improve Google products.
-                </label>
-                <button
-                  className="primary full-width"
-                  disabled={busy || reading || !preparedPhoto || !photoConsent || !photoReady}
-                >
-                  {busy ? <LoaderCircle className="spin" size={17} /> : <Search size={17} />}Analyze
-                  photo against BCIT plans
-                </button>
-              </form>
-              {error && (
-                <p role="alert" className="inline-error">
-                  {error}
-                </p>
-              )}
-              {showPhotoResults && session.campusAnalysis && (
-                <CampusLocationResults
-                  analysis={session.campusAnalysis}
-                  plans={plans}
-                  selectedId={session.campusLocation?.id}
-                  onConfirm={(id) => void confirmCampus(id)}
-                  busy={busy}
-                />
-              )}
-              <p className="helper">
-                <ShieldCheck size={13} /> Resized on your device. CampusLens does not save photos or
-                location history.
-              </p>
-            </>
-          )}
-          {modal === 'about' && (
+          {aboutOpen && (
             <>
               <span className="modal-icon">
                 <Compass size={25} />
               </span>
-              <h2>About CampusLens</h2>
+              <h2 id="about-heading">About CampusLens</h2>
               <p>
                 CampusLens compares photographs with {data.coverage.floorPlans} official BCIT
                 Burnaby floor plans across {data.coverage.buildings.length} buildings. Relevant

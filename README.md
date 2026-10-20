@@ -33,12 +33,12 @@ The Node server does not restart automatically when files change. Restart it man
 
 There is no Campus library, general plan browser, or introductory marketing banner. Start with photo input; the result shows the matching plan region and links to that plan. Full source data and geometry remain available to Gemini on the server.
 
-1. Select **Find my location**, then upload or capture a campus photo.
+1. Use **Upload photo** or **Take a photo** directly in the first screen's **Find my location** section.
 2. Agree to send this photo and its detail views to Google, then select Analyze. Label reading and location comparison run as two separate API requests.
 3. Review the single best source-linked estimate, or take another photo if the evidence is unclear.
-4. Confirm the estimate only if it matches your surroundings. **Clear** removes the result.
+4. Review results below the photo input and confirm the estimate only if it matches your surroundings. **Clear** removes the result. **Remove photo** discards the local preview; **Cancel analysis** stops an active comparison.
 
-The full view and four detail crops are prepared locally from the original image. Photos are sent only after per-photo consent and submission. No photo is saved in application storage. Mobile capture uses the device's photo picker/camera; the app has no live camera preview or movement tracking. Google's free-tier data handling applies.
+The photo workflow is inline, with no location popup or extra launch button. Consent and analysis controls appear after choosing a photo. The full view and four detail crops are prepared locally from the original image. Photos are sent only after per-photo consent and submission. No photo is saved in application storage. Removing a photo, confirming a result or leaving the page discards the browser's prepared photo. Mobile capture uses the device's photo picker/camera; the app has no live camera preview or movement tracking. Google's free-tier data handling applies.
 
 ## Checks
 
@@ -81,7 +81,7 @@ mvp/
 ├── src/
 │   ├── App.tsx, main.tsx, styles.css
 │   ├── api.ts, photo.ts, photo-views.ts, types.ts
-│   └── components/  CampusLocationResults
+│   └── components/  PhotoLocationInput, CampusLocationResults
 ├── server/
 │   ├── index.ts, app.ts, runtime.ts
 │   ├── provider.ts, photo-localization.ts, session.ts
@@ -101,7 +101,7 @@ mvp/
 │   ├── api.test.ts, client-state.test.ts, data.test.ts, runtime.test.ts
 │   ├── provider.test.ts, provider-response.test.ts
 │   ├── photo-localization.test.ts, photo-api.test.ts
-│   ├── photo.test.ts, room-labels.test.ts, photo-fixtures.ts
+│   ├── photo.test.ts, photo-location-input.test.ts, room-labels.test.ts, photo-fixtures.ts
 │   └── e2e/journey.spec.ts, photo.spec.ts
 ├── docs/
 │   ├── project-brief.txt, requirements.md, architecture.md, data.md

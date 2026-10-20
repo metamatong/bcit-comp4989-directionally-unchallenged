@@ -352,13 +352,14 @@ a:hover {
   margin: 8px 0 14px;
 }
 .photo-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin: 22px 0 17px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  margin: 24px 0 20px;
 }
 .photo-actions .secondary {
-  flex: 1;
+  min-height: 56px;
+  font-size: 14px;
 }
 .text-button {
   display: inline-flex;
@@ -368,10 +369,6 @@ a:hover {
   font-size: 11px;
   min-height: 38px;
   padding: 2px;
-}
-.photo-actions .text-button {
-  width: 100%;
-  justify-content: center;
 }
 .dialog textarea {
   width: 100%;
@@ -385,8 +382,9 @@ a:hover {
   color: #4f6740;
 }
 .evidence-photo {
+  display: block;
   width: 100%;
-  max-height: 220px;
+  max-height: 360px;
   object-fit: contain;
   border-radius: 9px;
   background: #eef0e7;
@@ -395,7 +393,8 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 4px;
-  font-size: 10px !important;
+  font-size: 13px;
+  line-height: 1.6;
   background: #f0f4e8;
   padding: 9px;
   border-radius: 6px;
@@ -599,25 +598,40 @@ a:hover {
   }
 }
 /* Real BCIT photo-to-plan comparison. These surfaces never imply a verified route. */
-.photo-empty-state {
+.photo-location-input {
   border: 1px solid var(--border);
   border-radius: 16px;
-  background: linear-gradient(145deg, #fffefa, #eef4e8);
-  padding: 42px;
-  min-height: 440px;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  flex-direction: column;
-  gap: 17px;
+  background: #fffefa;
+  padding: 32px;
+  margin-bottom: 24px;
 }
-.photo-empty-state .modal-icon {
-  margin: 0;
-}
-.photo-empty-state h2 {
-  font-size: 31px;
+.photo-location-input h1 {
+  font-size: 30px;
   letter-spacing: -0.8px;
-  max-width: 420px;
+  line-height: 1.25;
+}
+.photo-description {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.photo-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+.photo-controls .text-button {
+  min-height: 44px;
+  font-size: 12px;
+}
+.photo-location-input .primary {
+  min-height: 50px;
+  font-size: 13px;
+}
+.photo-location-input .helper {
+  font-size: 11px;
+  margin-top: 16px;
 }
 .campus-results {
   background: #fffefa;
@@ -739,40 +753,21 @@ a:hover {
   font-size: 13px;
   line-height: 1.7;
 }
-.dialog .campus-results {
-  padding: 17px;
-  margin-top: 21px;
-}
-.dialog .campus-results > h3 {
-  font-size: 20px;
-}
-.dialog .campus-candidate h3 {
-  font-size: 16px;
-}
 .photo-consent {
   padding: 12px;
   background: #f1f5e9;
   border: 1px solid #dce5ce;
   border-radius: 8px;
 }
-.dialog .photo-consent input {
+.photo-consent input {
   margin-top: 3px;
 }
-.dialog .campus-results .helper {
-  font-size: 10px;
-}
 @media (max-width: 800px) {
-  .photo-empty-state {
+  .photo-location-input {
     padding: 24px 18px;
-    min-height: 0;
-    gap: 14px;
   }
-  .photo-empty-state h2 {
-    font-size: 23px;
-  }
-  .photo-empty-state .primary {
-    width: 100%;
-    min-height: 50px;
+  .photo-location-input h1 {
+    font-size: 25px;
   }
   .campus-results {
     padding: 18px;
@@ -799,6 +794,11 @@ a:hover {
   }
   .photo-consent {
     font-size: 12px;
+  }
+}
+@media (max-width: 420px) {
+  .photo-actions {
+    grid-template-columns: 1fr;
   }
 }
 

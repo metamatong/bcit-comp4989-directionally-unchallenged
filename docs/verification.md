@@ -1,12 +1,12 @@
 # Verification record
 
-Verified October 16, 2026 on macOS arm64, Node 22.15.1. The current application uses only official Burnaby sources and Gemini photo analysis. Mocked provider results are not evidence of real-campus accuracy.
+Verified October 20, 2026 on macOS arm64, Node 22.15.1. The current application uses only official Burnaby sources and Gemini photo analysis. Mocked provider results are not evidence of real-campus accuracy.
 
 ## Current checks
 
 | Check | Result | Scope |
 |---|---|---|
-| `npm run test:unit` | **120 passed** | Crop preparation, exact-label, two-stage API, evidence binding and provider/default/failure-chain regressions |
+| `npm run test:unit` | **126 passed** | Inline photo input, crop preparation, exact-label, two-stage API, evidence binding and provider/default/failure-chain regressions |
 | Earlier `npm test` | **101 passed** | 79 unit/API cases and 22 browser cases after demo removal, before screen checks were stopped |
 | `npm run build` | Passed | TypeScript check and Vite production build |
 | `npm run data:validate` | Passed | 90 original PDF hashes, 89 geometry records and 631 derived asset hashes |
@@ -77,3 +77,9 @@ This is implementation-contract evidence, not a measured improvement in physical
 Read-only model metadata checks returned HTTP 200 with generation listed. Separate text-only forced-tool checks returned 503 for the configured 3.8 Flash primary and 404 for both implicit 2.5 backups. Google's error identified 2.5 generation as unavailable to new users. One replacement-backup check of 3.5 Flash-Lite also returned 503. Four bounded generation diagnostics sent no user photo and produced no usable inference; live photo localization remains unverified.
 
 Defaults now use 3.5 Flash-Lite and 3.8 Flash, preserving explicit primary/fallback settings. Mixed failures retain sanitized original reasons, and an unavailable backup no longer turns a retryable primary failure into an unexplained configuration error. All 120 mocked unit/API tests, production build and source-data validation passed. The first sandboxed test attempt could not bind loopback ports; the complete rerun with local networking enabled passed. No screen tests were run. Provider capacity remains an external limitation.
+
+## Inline photo input — October 20, 2026
+
+Find my location is now the first screen's heading, with Upload photo and Take a photo directly available. The location dialog and its launcher are removed. A selected photo reveals the consent and analysis controls; results appear once below the input. Remove photo and Cancel analysis release local media and invalidate late work. Confirmation releases the photo while retaining the selected result. The separate coverage/privacy dialog preserves the photo and consent.
+
+All 126 unit/API tests, production build and source-data validation passed. Six new Node-only component rendering tests cover initial controls, native capture, preview/consent gating, missing configuration and the availability of cancellation controls during preparation/analysis. Existing request-gate tests cover invalidation of stale work. Browser expectations were updated for the inline flow and privacy dialog but were not executed; no browser, screenshot or manual screen checks were performed. No live Gemini request or user-photo upload was used. Visual feedback from the user is pending before PR/merge work.

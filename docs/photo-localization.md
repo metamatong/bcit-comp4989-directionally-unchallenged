@@ -4,11 +4,11 @@ The app uses the actual photo and detailed views in two separate API stages. Gem
 
 ## User flow
 
-1. Upload or capture a photo. The browser prepares a full view and four overlapping detail crops from the **original decoded image**, before discarding original metadata.
+1. Use Upload photo or Take a photo directly under the first screen's Find my location heading. The browser prepares a full view and four overlapping detail crops from the **original decoded image**, before discarding original metadata.
 2. Consent once to sending this photo and its detail views, then select Analyze.
 3. The client calls the label-reading endpoint and shows progress while Gemini reads visible identifiers.
-4. The client sends the same image bundle with the returned evidence ID to the location endpoint. Relevant source plans appear only with the resulting hypothesis.
-5. Confirm a region only if it agrees with the surroundings. The model can abstain and ask for another photo.
+4. The client sends the same image bundle with the returned evidence ID to the location endpoint. Relevant source plans appear only with the resulting hypothesis, below the inline photo input.
+5. Confirm a region only if it agrees with the surroundings. Confirmation releases the local photo while keeping the selected result visible. The model can abstain and ask for another photo. Remove photo or Cancel analysis discards the current photo and prevents late results from appearing.
 
 The local server must be restarted after backend edits. Frontend HMR does not reload Node. Existing converted source files work without regeneration.
 

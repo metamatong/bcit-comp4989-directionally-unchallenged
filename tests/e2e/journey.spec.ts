@@ -15,8 +15,11 @@ test('starts with photo controls, with no library, plan images or promotional he
   });
   await page.goto('/');
   await expect(page.getByTestId('provider-status')).toHaveText('Setup required');
-  await expect(page.getByRole('button', { name: 'Find my location', exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Location result', exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Find my location', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Upload photo', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Take a photo', exact: true })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Find my location', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('dialog')).not.toBeVisible();
   await expect(
     page.getByRole('button', {
       name: /library|browse.*plans|explore.*plans|demo|landmark|closure|route|checkpoint/i,
@@ -58,12 +61,9 @@ test('prepares an image locally but disables analysis and sending when the key i
     if (/\/photo(?:\/evidence)?$/.test(request.url())) sent.push(request.url());
   });
   await page.goto('/');
-  await page.getByRole('button', { name: 'Find my location', exact: true }).click();
   await page.getByLabel('Upload campus photo', { exact: true }).setInputFiles(fixture);
   await expect(page.getByText(/Photo ready\. Choose Analyze/)).toBeVisible();
-  await expect(
-    page.getByRole('dialog').getByText(/unavailable until Gemini is configured/),
-  ).toBeVisible();
+  await expect(page.getByText(/Photo analysis needs a Gemini key/)).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }),
   ).toBeDisabled();
@@ -75,7 +75,6 @@ test('prepares an image locally but disables analysis and sending when the key i
 
 test('mobile photo capture uses the native picker and keeps upload available', async ({ page }) => {
   await page.goto('/');
-  await page.getByRole('button', { name: 'Find my location', exact: true }).click();
   await expect(page.getByLabel('Capture phone photo')).toHaveAttribute('capture', 'environment');
   await expect(page.getByRole('button', { name: /checkpoint|landmark/i })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Upload photo', exact: true })).toBeEnabled();
@@ -126,13 +125,12 @@ for (const failure of [
       }),
     );
     await page.goto('/');
-    await page.getByRole('button', { name: 'Find my location', exact: true }).click();
     await page.getByLabel('Upload campus photo', { exact: true }).setInputFiles(fixture);
     await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
     await page
       .getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true })
       .click();
-    await expect(page.getByRole('dialog').getByRole('alert')).toHaveText(failure.message);
+    await expect(page.getByRole('alert')).toContainText(failure.message);
     await expect(page.getByRole('button', { name: /Demo|landmark|checkpoint/i })).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Best match' })).toHaveCount(0);
     await expect(page.getByTestId('provider-status')).toHaveText('Gemini ready');
