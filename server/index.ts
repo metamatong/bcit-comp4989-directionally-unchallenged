@@ -51,15 +51,15 @@ const port = Number(process.env.PORT ?? 3000),
 try {
   await listenServer(httpServer, port, host);
   console.log(
-    `CampusLens is ready at http://${host}:${port} · ${liveAvailable ? 'Gemini configured' : 'Gemini setup required'}`,
+    `DirectionallyUnchallenged is ready at http://${host}:${port} · ${liveAvailable ? 'Gemini configured' : 'Gemini setup required'}`,
   );
   if (setupNotice) console.log(`Gemini configuration: ${setupNotice}`);
 } catch (error) {
   const code = (error as NodeJS.ErrnoException).code;
   console.error(
     code === 'EADDRINUSE'
-      ? `CampusLens could not start: port ${port} is already in use. Stop the other instance or set a different PORT.`
-      : `CampusLens could not start: ${code ?? 'listener error'}.`,
+      ? `DirectionallyUnchallenged could not start: port ${port} is already in use. Stop the other instance or set a different PORT.`
+      : `DirectionallyUnchallenged could not start: ${code ?? 'listener error'}.`,
   );
   await closeDevelopmentServer?.();
   process.exitCode = 1;

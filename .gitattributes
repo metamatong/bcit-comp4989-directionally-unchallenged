@@ -1,0 +1,6 @@
+# Geometry hashes cover exact bytes; Windows checkouts must retain LF endings.
+data/campus/visual/geometry/*.json text eol=lf
+
+# Preserve source documents and derived images byte-for-byte.
+*.pdf -text
+*.png -text

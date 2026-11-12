@@ -272,7 +272,7 @@ test('opening and closing privacy information preserves the inline photo and con
   await choosePhoto(page);
   await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
   await page.getByRole('button', { name: /Coverage & privacy/ }).click();
-  await expect(page.getByRole('dialog', { name: 'About CampusLens' })).toBeVisible();
+  await expect(page.getByRole('dialog', { name: 'About DirectionallyUnchallenged' })).toBeVisible();
   await page.getByRole('dialog').press('Escape');
   await expect(page.getByRole('dialog')).not.toBeVisible();
   await expect(page.getByRole('img', { name: /Uploaded location photo/ })).toBeVisible();

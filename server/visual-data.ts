@@ -113,8 +113,8 @@ export type SourceLabel = z.infer<typeof sourceLabelSchema>;
 const geometryEvidenceSchema = z.object({
   id: z.string(),
   sourceSha256: z.string(),
-  coordinateSystem: z.record(z.unknown()),
-  extraction: z.record(z.unknown()),
+  coordinateSystem: z.record(z.string(), z.unknown()),
+  extraction: z.record(z.string(), z.unknown()),
   regions: z.array(z.unknown()),
   labels: z.array(sourceLabelSchema),
   modelSummary: z.object({

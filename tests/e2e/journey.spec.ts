@@ -14,6 +14,9 @@ test('starts with photo controls, with no library, plan images or promotional he
     if (request.url().includes('/data/campus/visual/')) planImages.push(request.url());
   });
   await page.goto('/');
+  await expect(page).toHaveTitle('DirectionallyUnchallenged · Find your way');
+  await expect(page.locator('.brand')).toHaveText('DirectionallyUnchallenged.');
+  await expect(page.locator('footer')).toContainText('DirectionallyUnchallenged.');
   await expect(page.getByTestId('provider-status')).toHaveText('Setup required');
   await expect(page.getByRole('heading', { name: 'Find my location', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Upload photo', exact: true })).toBeVisible();
@@ -36,7 +39,7 @@ test('clears a saved Demo preference and uses Gemini readiness without a mode ac
   page,
 }) => {
   const modeRequests: unknown[] = [];
-  await page.addInitScript(() => localStorage.setItem('campuslens.ai-mode', 'demo'));
+  await page.addInitScript(() => localStorage.setItem('directionallyunchallenged.ai-mode', 'demo'));
   page.on('request', (request) => {
     if (request.url().endsWith('/actions')) modeRequests.push(request.postDataJSON());
   });
@@ -46,7 +49,9 @@ test('clears a saved Demo preference and uses Gemini readiness without a mode ac
   });
   await page.goto('/');
   await expect(page.getByTestId('provider-status')).toHaveText('Gemini ready');
-  expect(await page.evaluate(() => localStorage.getItem('campuslens.ai-mode'))).toBeNull();
+  expect(
+    await page.evaluate(() => localStorage.getItem('directionallyunchallenged.ai-mode')),
+  ).toBeNull();
   await page.reload();
   await expect(page.getByTestId('provider-status')).toHaveText('Gemini ready');
   expect(modeRequests).toEqual([]);

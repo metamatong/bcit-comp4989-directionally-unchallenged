@@ -1,12 +1,16 @@
 # Verification record
 
+## App rename — November 12, 2026
+
+The app, package metadata, server messages, documentation and two-page proposal now use DirectionallyUnchallenged. Header, footer and dialog browser expectations were updated; the Node-rendered photo privacy notice also asserts the new name. Formatting, all 130 mocked unit/API tests, the production build and source-data validation passed on Windows. `npm test` reached browser tests after passing unit/API tests, but all 24 browser cases stopped before launch because the configured Chrome installation was missing. No manual screen checks, live Gemini calls or physical-campus checks were performed. Historical screenshot artifacts were not regenerated. Proposal text, metadata and page count were checked without visual inspection.
+
 Verified October 20, 2026 on macOS arm64, Node 22.15.1. The current application uses only official Burnaby sources and Gemini photo analysis. Mocked provider results are not evidence of real-campus accuracy.
 
 ## Current checks
 
 | Check | Result | Scope |
 |---|---|---|
-| `npm run test:unit` | **126 passed** | Inline photo input, crop preparation, exact-label, two-stage API, evidence binding and provider/default/failure-chain regressions |
+| `npm run test:unit` | **130 passed** | Inline photo input, crop preparation, exact-label, two-stage API, evidence binding, provider failures and strict asset-integrity regressions |
 | Earlier `npm test` | **101 passed** | 79 unit/API cases and 22 browser cases after demo removal, before screen checks were stopped |
 | `npm run build` | Passed | TypeScript check and Vite production build |
 | `npm run data:validate` | Passed | 90 original PDF hashes, 89 geometry records and 631 derived asset hashes |
@@ -83,3 +87,11 @@ Defaults now use 3.5 Flash-Lite and 3.8 Flash, preserving explicit primary/fallb
 Find my location is now the first screen's heading, with Upload photo and Take a photo directly available. The location dialog and its launcher are removed. A selected photo reveals the consent and analysis controls; results appear once below the input. Remove photo and Cancel analysis release local media and invalidate late work. Confirmation releases the photo while retaining the selected result. The separate coverage/privacy dialog preserves the photo and consent.
 
 All 126 unit/API tests, production build and source-data validation passed. Six new Node-only component rendering tests cover initial controls, native capture, preview/consent gating, missing configuration and the availability of cancellation controls during preparation/analysis. Existing request-gate tests cover invalidation of stale work. Browser expectations were updated for the inline flow and privacy dialog but were not executed; no browser, screenshot or manual screen checks were performed. No live Gemini request or user-photo upload was used. Visual feedback from the user is pending before PR/merge work.
+
+## Windows geometry hash repair — November 12, 2026
+
+The reported comparison failure occurred after label reading because all 89 geometry JSON files had Windows CRLF endings. Converting only CRLF to LF reproduced every original indexed SHA-256 exactly. Those original bytes were restored without changing source PDFs, expected hashes, labels or geometry content. Checkout attributes now preserve LF geometry and binary PDF/PNG bytes; the visual generator writes UTF-8/LF bytes explicitly. Three record schemas now specify string keys as required by the installed Zod version.
+
+All **130 unit/API tests**, the production build and data validation passed on Windows: 90 original PDF hashes, 89 geometry records, 631 derived asset hashes and all 5,463 indexed labels. New regressions verify every derived asset's exact bytes and ensure runtime geometry loading rejects both CRLF conversion and content changes before accepting the restored room `302` source. The initial sandboxed HTTP tests could not connect to localhost; the full rerun with local networking enabled passed.
+
+`npm test` was not run because it includes browser checks; `npm run test:unit` ran the full non-browser suite. No browser, screenshot, manual screen, live Gemini or physical-campus checks were performed. These mocked-provider tests do not establish live localization accuracy. Restart the existing server to load backend changes before retrying the photo.

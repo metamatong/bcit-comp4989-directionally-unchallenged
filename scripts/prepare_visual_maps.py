@@ -29,8 +29,10 @@ def digest(path):
 
 def write_json(path, content, compact=False):
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(content, ensure_ascii=False, indent=None if compact else 2,
-                               separators=(',', ':') if compact else None) + '\n')
+    # Hash the same UTF-8/LF bytes on every OS, without Windows newline translation.
+    serialized = json.dumps(content, ensure_ascii=False, indent=None if compact else 2,
+                            separators=(',', ':') if compact else None) + '\n'
+    path.write_bytes(serialized.encode('utf-8'))
 
 
 def image_record(path, image):

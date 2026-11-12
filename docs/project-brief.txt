@@ -1,4 +1,4 @@
-Build CampusLens: a working, mobile-friendly BCIT Burnaby campus
+Build DirectionallyUnchallenged: a working, mobile-friendly BCIT Burnaby campus
 wayfinding application for COMP 4989.
 
 Implement the application, test its integrated behavior, and prepare

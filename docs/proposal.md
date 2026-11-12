@@ -1,4 +1,4 @@
-# CampusLens
+# DirectionallyUnchallenged
 
 ## An evidence-first campus wayfinding agent
 
@@ -7,7 +7,7 @@
 
 ### 1. Novel AI agent use case
 
-CampusLens helps students establish a possible location from a photograph on BCIT's Burnaby campus. One agent compares the actual image with official floor plans and structured drawing geometry, retrieves plausible pages, and proposes source-linked regions for user review. It can abstain when repeated corridors or missing features make the scene ambiguous. The use case combines visual evidence, transparent uncertainty, source provenance, and bounded agent actions.
+DirectionallyUnchallenged helps students establish a possible location from a photograph on BCIT's Burnaby campus. One agent compares the actual image with official floor plans and structured drawing geometry, retrieves plausible pages, and proposes source-linked regions for user review. It can abstain when repeated corridors or missing features make the scene ambiguous. The use case combines visual evidence, transparent uncertainty, source provenance, and bounded agent actions.
 
 The Live flow is photo → visual plan shortlist → detailed image/geometry comparison → single best-supported region or abstention → confirmation. Readable signs are optional. There is no demo mode, fictional map or sample-location fallback. The app does not claim precise camera pose, continuous indoor position, or spatial AR.
 

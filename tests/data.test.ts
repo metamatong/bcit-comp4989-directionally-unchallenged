@@ -2,6 +2,7 @@ import { expect, it } from 'vitest';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { readJson, root } from '../server/data';
+import { planAtlases, visualPlans } from '../server/visual-data';
 it('preserves the hash and provenance of every downloaded official PDF', () => {
   const manifest = readJson<{
     sources: {
@@ -35,4 +36,15 @@ it('keeps synthetic topology out of campus records', () => {
   expect(readJson<{ landmarks: unknown[] }>('data/campus/landmarks.json')).toMatchObject({
     landmarks: [],
   });
+});
+
+it('preserves the exact indexed bytes of every floor-plan asset on checkout', () => {
+  const assets = visualPlans
+    .flatMap((plan) => [plan.full, plan.overview, ...plan.tiles, plan.geometry])
+    .concat(planAtlases);
+  expect(assets).toHaveLength(631);
+  for (const asset of assets) {
+    const bytes = readFileSync(`${root}/${asset.file}`);
+    expect(createHash('sha256').update(bytes).digest('hex'), asset.file).toBe(asset.sha256);
+  }
 });

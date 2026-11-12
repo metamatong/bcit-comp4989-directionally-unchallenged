@@ -41,7 +41,7 @@ def page_chrome(canvas, doc):
     canvas.rect(0, height-11, width, 11, fill=1, stroke=0)
     canvas.setFont('Helvetica-Bold', 7.5)
     canvas.setFillColor(MUTED)
-    canvas.drawString(49, height-36, 'CAMPUSLENS  /  COMP 4989')
+    canvas.drawString(49, height-36, 'DirectionallyUnchallenged  /  COMP 4989')
     canvas.drawRightString(width-49, height-36, 'PROPOSAL DRAFT  -  16 OCT 2026')
     canvas.setStrokeColor(colors.HexColor('#dce3d5'))
     canvas.line(49, 37, width-49, 37)
@@ -73,7 +73,7 @@ for block in re.split(r'\n\s*\n', source.strip()):
         flow.append(Paragraph(markup(block), styles['body']))
 
 SimpleDocTemplate(str(OUTPUT), pagesize=letter, rightMargin=49, leftMargin=49,
-                  topMargin=57, bottomMargin=49, title='CampusLens - COMP 4989 Proposal Draft',
+                  topMargin=57, bottomMargin=49, title='DirectionallyUnchallenged - COMP 4989 Proposal Draft',
                   author='Group [NUMBER] - Members [NAMES]').build(flow, onFirstPage=page_chrome, onLaterPages=page_chrome)
 reader = PdfReader(OUTPUT)
 if len(reader.pages) != 2:

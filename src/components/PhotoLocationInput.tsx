@@ -126,8 +126,8 @@ export function PhotoLocationInput({
         </form>
       )}
       <p className="helper">
-        <ShieldCheck size={14} /> Resized on your device. CampusLens does not save photos or
-        location history.
+        <ShieldCheck size={14} /> Resized on your device. DirectionallyUnchallenged does not save
+        photos or location history.
       </p>
     </section>
   );

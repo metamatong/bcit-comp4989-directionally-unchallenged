@@ -45,6 +45,7 @@ describe('inline photo input (Node rendering, no browser)', () => {
     expect(button(markup, 'Upload photo')).not.toContain('disabled');
     expect(button(markup, 'Take a photo')).not.toContain('disabled');
     expect(markup).toContain('capture="environment"');
+    expect(markup).toContain('DirectionallyUnchallenged does not save photos');
     expect(markup).not.toContain('<dialog');
     expect(markup).not.toContain('Analyze a photo');
     expect(markup).not.toContain('aria-label="Photo analysis"');

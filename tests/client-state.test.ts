@@ -6,7 +6,7 @@ describe('removed preferences and transient evidence', () => {
   it('clears the obsolete browser mode without storing a replacement preference', () => {
     const storage = { removeItem: vi.fn() };
     clearLegacyModePreference(storage);
-    expect(storage.removeItem).toHaveBeenCalledExactlyOnceWith('campuslens.ai-mode');
+    expect(storage.removeItem).toHaveBeenCalledExactlyOnceWith('directionallyunchallenged.ai-mode');
   });
   it('works when browser storage is blocked', () => {
     expect(() =>

@@ -1,4 +1,4 @@
-# CampusLens
+# DirectionallyUnchallenged
 
 A mobile-friendly BCIT Burnaby photo-to-floor-plan app. Gemini first reads visible room labels from the photo and detail crops. The server retrieves exact matches from all extracted floor-plan labels, then Gemini compares the photo with real plan images and geometry to propose a source-linked region.
 
@@ -19,13 +19,15 @@ cd bcit-comp4989-directionally-unchallenged
 
 Official PDFs and converted floor-plan assets are included. The private `.env`, installed dependencies, builds and temporary test files are excluded from Git.
 
+Geometry JSON must retain LF line endings to match its recorded hashes. `.gitattributes` preserves these on Windows; `npm run data:validate` detects altered assets before photo analysis.
+
 ```bash
 npm ci
 # Copy .env.example to .env only if you do not already have your private .env.
 npm run dev
 ```
 
-Open [CampusLens locally](http://127.0.0.1:3000). Configure `GEMINI_API_KEY`, a primary `GEMINI_MODEL`, and an ordered `GEMINI_FALLBACK_MODELS` list in the private `.env`. New installations default to Gemini 3.5 Flash-Lite with Gemini 3.8 Flash as fallback; Google lists both on its free tier. Existing primary selections are preserved; a 3.8 primary defaults to a 3.5 Flash-Lite backup. Gemini 2.5 is no longer an automatic fallback because Google restricts generation access for new users. Set `AI_FREE_TIER_CONFIRMED=true` only after verifying model access and eligibility for your API project. Keys stay server-side. Explicit fallback settings are preserved, including an empty list to disable fallback.
+Open [DirectionallyUnchallenged locally](http://127.0.0.1:3000). Configure `GEMINI_API_KEY`, a primary `GEMINI_MODEL`, and an ordered `GEMINI_FALLBACK_MODELS` list in the private `.env`. New installations default to Gemini 3.5 Flash-Lite with Gemini 3.8 Flash as fallback; Google lists both on its free tier. Existing primary selections are preserved; a 3.8 primary defaults to a 3.5 Flash-Lite backup. Gemini 2.5 is no longer an automatic fallback because Google restricts generation access for new users. Set `AI_FREE_TIER_CONFIRMED=true` only after verifying model access and eligibility for your API project. Keys stay server-side. Explicit fallback settings are preserved, including an empty list to disable fallback.
 
 The Node server does not restart automatically when files change. Restart it manually after backend or environment changes: Ctrl+C, then `npm run dev`. Frontend edits can still refresh through Vite HMR on the same port. Do not launch another instance on port 3000. Without valid provider configuration, photo analysis is disabled and the app displays setup guidance.
 
@@ -76,7 +78,7 @@ mvp/
 ├── README.md, AGENTS.md
 ├── package.json, package-lock.json, tsconfig.json, vite.config.ts
 ├── vitest.config.ts, playwright.config.ts
-├── .env.example, .gitignore, .prettierrc.json, .prettierignore
+├── .env.example, .gitignore, .gitattributes, .prettierrc.json, .prettierignore
 ├── requirements-data.txt, index.html
 ├── src/
 │   ├── App.tsx, main.tsx, styles.css
@@ -98,7 +100,7 @@ mvp/
 │   ├── validate-data.ts
 │   └── render_proposal.py
 ├── tests/
-│   ├── api.test.ts, client-state.test.ts, data.test.ts, runtime.test.ts
+│   ├── api.test.ts, client-state.test.ts, data.test.ts, visual-data.test.ts, runtime.test.ts
 │   ├── provider.test.ts, provider-response.test.ts
 │   ├── photo-localization.test.ts, photo-api.test.ts
 │   ├── photo.test.ts, photo-location-input.test.ts, room-labels.test.ts, photo-fixtures.ts

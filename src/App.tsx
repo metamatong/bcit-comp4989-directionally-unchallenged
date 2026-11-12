@@ -224,7 +224,7 @@ export default function App() {
     return (
       <main className="loading-page">
         <Compass size={42} />
-        <h1>CampusLens</h1>
+        <h1>DirectionallyUnchallenged</h1>
         <p>{error || 'Loading…'}</p>
         {error && (
           <button className="primary" onClick={() => location.reload()}>
@@ -250,7 +250,11 @@ export default function App() {
           <span className="brand-mark">
             <Compass size={25} strokeWidth={1.7} />
           </span>
-          campus<span className="brand-light">lens</span>
+          <span className="brand-name">
+            Directionally
+            <wbr />
+            Unchallenged
+          </span>
           <span className="brand-dot">.</span>
         </a>
         <div className="header-end">
@@ -263,7 +267,7 @@ export default function App() {
           </span>
           <button
             className="icon-button"
-            aria-label="About CampusLens"
+            aria-label="About DirectionallyUnchallenged"
             onClick={() => setAboutOpen(true)}
           >
             <Info size={19} />
@@ -340,7 +344,7 @@ export default function App() {
       </main>
       <footer>
         <span>
-          campuslens<span className="brand-dot">.</span>
+          DirectionallyUnchallenged<span className="brand-dot">.</span>
           <small>A COMP 4989 project · Independent student prototype</small>
         </span>
         <button onClick={() => setAboutOpen(true)}>
@@ -373,11 +377,11 @@ export default function App() {
               <span className="modal-icon">
                 <Compass size={25} />
               </span>
-              <h2 id="about-heading">About CampusLens</h2>
+              <h2 id="about-heading">About DirectionallyUnchallenged</h2>
               <p>
-                CampusLens compares photographs with {data.coverage.floorPlans} official BCIT
-                Burnaby floor plans across {data.coverage.buildings.length} buildings. Relevant
-                plans appear with the location result.
+                DirectionallyUnchallenged compares photographs with {data.coverage.floorPlans}{' '}
+                official BCIT Burnaby floor plans across {data.coverage.buildings.length} buildings.
+                Relevant plans appear with the location result.
               </p>
               <div className="about-section">
                 <h3>What you can do</h3>

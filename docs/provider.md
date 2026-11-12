@@ -6,7 +6,7 @@ Documentation checked October 16, 2026. Gemini is the only photo-analysis provid
 
 Google Gemini Developer API. The new-install default is **`gemini-3.5-flash-lite`**, with **`gemini-3.8-flash`** as its default fallback. Google's current [model catalogue](https://ai.google.dev/gemini-api/docs/models) describes both as multimodal models; the [pricing page](https://ai.google.dev/gemini-api/docs/pricing) currently lists free-tier input and output for them. The existing private `.env` model is preserved and remains the primary model unless changed by the operator. An existing 3.8 primary defaults to a 3.5 Flash-Lite backup. Explicit fallback lists, including an empty list, are preserved. Photo analysis sends the actual image, official plan PNGs and geometry summaries. Selection/detail use 4,096/8,192 total output-and-thinking token allowances.
 
-Free-tier content may be used to improve Google's products. CampusLens uses local source/visual retrieval and does not use provider context caching or Google Search/Maps grounding. Verify the selected primary and fallback models are available to the specific API project before confirming eligibility.
+Free-tier content may be used to improve Google's products. DirectionallyUnchallenged uses local source/visual retrieval and does not use provider context caching or Google Search/Maps grounding. Verify the selected primary and fallback models are available to the specific API project before confirming eligibility.
 
 Quotas are account/project dependent and must be inspected in AI Studio. The public documentation does not guarantee a universal RPM/TPM/RPD allowance; do not copy outdated numbers from a blog. [Rate-limit documentation](https://ai.google.dev/gemini-api/docs/rate-limits).
 

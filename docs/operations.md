@@ -12,7 +12,7 @@ Without provider configuration, users see setup guidance. Photo submission is di
 
 The browser accepts JPEG/PNG/WebP up to 8 MB and 50 million pixels, creates a full view and four overlapping original-image crops, each with at most a 1,600-pixel long edge and 450 KB JPEG bytes, without original metadata. The server limits photo bodies to 4 MB and aggregate decoded bytes across all five views to 2.5 MB. Two API stages send the same consented image bundle transiently to Google, first for reading labels and then for source-grounded location comparison; the application saves no media to disk, caches or session logs. Google free-tier handling is disclosed under its terms.
 
-Mobile photo capture uses the browser/device photo picker. CampusLens does not open a live camera stream or track movement. Physical-device capture behavior remains unverified.
+Mobile photo capture uses the browser/device photo picker. DirectionallyUnchallenged does not open a live camera stream or track movement. Physical-device capture behavior remains unverified.
 
 Upload and capture controls are shown inline under Find my location. A selected photo reveals the consent and analysis controls. Remove photo, Cancel analysis, result confirmation or leaving the page releases the client photo; the coverage/privacy dialog does not clear it. Results appear once beneath the input, and a newly selected photo hides the prior result until its own comparison completes.
 

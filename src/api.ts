@@ -3,7 +3,7 @@ import type { Bootstrap, Session } from './types';
 /** Remove obsolete preferences; provider readiness now comes only from the server. */
 export function clearLegacyModePreference(storage?: Pick<Storage, 'removeItem'>) {
   try {
-    (storage ?? window.localStorage).removeItem('campuslens.ai-mode');
+    (storage ?? window.localStorage).removeItem('directionallyunchallenged.ai-mode');
   } catch {
     // Blocked browser storage must not prevent starting a session.
   }

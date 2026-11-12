@@ -1,4 +1,4 @@
-# CampusLens development expectations
+# DirectionallyUnchallenged development expectations
 
 ## Project workflow
 

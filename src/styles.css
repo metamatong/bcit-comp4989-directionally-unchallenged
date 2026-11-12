@@ -107,6 +107,7 @@ a:hover {
 }
 .brand {
   display: flex;
+  min-width: 0;
   align-items: center;
   font-size: 25px;
   font-weight: 750;
@@ -123,15 +124,18 @@ a:hover {
   height: 41px;
   border-radius: 13px;
   margin-right: 11px;
+  flex-shrink: 0;
 }
-.brand-light {
-  font-weight: 430;
+.brand-name {
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .brand-dot {
   color: #8ca36b;
 }
 .header-end {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   gap: 22px;
 }
@@ -345,6 +349,7 @@ a:hover {
   margin-bottom: 22px;
 }
 .dialog h2 {
+  overflow-wrap: anywhere;
   font-size: 26px;
   font-weight: 550;
   letter-spacing: -0.8px;
@@ -454,6 +459,9 @@ a:hover {
 }
 .loading-page h1 {
   font-weight: 500;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  text-align: center;
 }
 .loading-page p {
   font-size: 13px;

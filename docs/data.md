@@ -106,6 +106,8 @@ Future walking edges need independently reviewed endpoints, passages, transition
 
 All 89 floor-plan PDFs now also have full PNGs, bounded overviews, four overlapping crops, and structured geometry JSON under `data/campus/visual/`. Eight labeled overview sheets support coarse visual comparison. The corpus contains 566,620 extracted line/rectangle/curve primitives, explicitly unclassified. Source and derived hashes are checked by `npm run data:validate`. No room polygon, door, window, scale, accessibility property or walking edge is invented from those paths. The actual photo is compared with source images and sampled geometry, producing unverified region hypotheses rather than verified campus landmarks. See [photo-localization.md](photo-localization.md) for schema, conversion commands, scope and privacy.
 
+Geometry hashes cover exact UTF-8/LF bytes. Windows CRLF conversion changes those hashes and prevents comparison after photo-label reading. `.gitattributes` enforces LF for geometry checkouts and disables text conversion for PDFs/PNGs; the visual generator writes UTF-8/LF bytes explicitly. Restore altered files from the unchanged source assets or regenerate them, then run `npm run data:validate` and restart the server. Do not update expected hashes merely to accept changed checkout bytes or relax runtime verification.
+
 
 ## Complete label retrieval
 
