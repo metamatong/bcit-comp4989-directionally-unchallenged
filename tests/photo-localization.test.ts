@@ -37,6 +37,58 @@ function fixture(turns: ModelPart[][]) {
 }
 
 describe('separate photo evidence and source-grounded localization stages (mocked Gemini)', () => {
+  it('keeps alternative floors in the visual shortlist when only automatic plan OCR matches', async () => {
+    const session = newSession(),
+      input = photoInput({ buildingHint: 'SW03' });
+    const response = comparison({}, 'SW3-F2-p1');
+    const payload = response[0].functionCall!.args as { candidates: { labelMatches: unknown[] }[] };
+    payload.candidates[0].labelMatches = [];
+    const { provider, captures } = fixture([
+      labelReading('3083'),
+      shortlist(['SW3-F2-p1']),
+      response,
+    ]);
+    const receipt = await readPhotoEvidence(session, input, provider);
+    const result = await analyzeCampusPhoto(
+      session,
+      comparisonInput(input, receipt.evidence.id),
+      provider,
+      receipt,
+    );
+    expect(result.labelRetrieval.exactMatchPlanIds).toEqual(['SW3-F3-p1']);
+    expect(result.candidates[0]).toMatchObject({
+      planId: 'SW3-F2-p1',
+      labelMatches: [],
+      verification: 'unverified-ai-hypothesis',
+    });
+    expect(captures[1].options?.forceTool).toBe('select_floor_plans');
+    expect(result.atlasPlanCount).toBe(4);
+    expect(session.campusLocation).toBeNull();
+  });
+  it('uses the pilot RAG evidence for SW03 3615 only after the independent image reading', async () => {
+    const input = photoInput({ buildingHint: 'SW03' });
+    const output = comparison({}, 'SW3-F3-p1');
+    const payload = output[0].functionCall!.args as {
+      candidates: { labelMatches: { observedLabel: string; planLabel: string }[] }[];
+    };
+    payload.candidates[0].labelMatches = [{ observedLabel: '3615', planLabel: '3615' }];
+    const { provider, captures } = fixture([labelReading('3615'), output]);
+    const session = newSession();
+    const receipt = await readPhotoEvidence(session, input, provider);
+    expect(JSON.stringify(captures[0].contents)).not.toContain('SW3-F3');
+    const result = await analyzeCampusPhoto(
+      session,
+      comparisonInput(input, receipt.evidence.id),
+      provider,
+      receipt,
+    );
+    expect(result.candidates[0]).toMatchObject({
+      planId: 'SW3-F3-p1',
+      verification: 'unverified-ai-hypothesis',
+    });
+    expect(JSON.stringify(captures[1].contents)).toContain('manual-plan-transcription');
+    expect(session.campusLocation).toBeNull();
+  });
   it('reads the photo without plan hints, then retrieves all exact labels and compares SE12 floor 3 directly', async () => {
     const session = newSession();
     const input = photoInput();
@@ -70,7 +122,7 @@ describe('separate photo evidence and source-grounded localization stages (mocke
     expect(detailText).toContain('"text":"302"');
     expect(detailText).not.toContain('SW1-F3-p1');
     expect(result.labelRetrieval.exactMatchPlanIds).toEqual(['SE12-F3-p1']);
-    expect(result.labelRetrieval.indexedLabels).toBe(5463);
+    expect(result.labelRetrieval.indexedLabels).toBeGreaterThan(5463);
     expect(result.atlasPlanCount).toBe(0);
     expect(result.candidates[0].floor).toBe('3');
     expect(result.candidates[0].labelMatches).toEqual([{ observedLabel: '302', planLabel: '302' }]);

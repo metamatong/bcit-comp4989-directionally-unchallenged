@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "questions": [
+    {
+      "id": "sw1-sw3-f2-passage-inquiry",
+      "status": "unreviewed",
+      "from": {
+        "planId": "SW1-F2-p1",
+        "sourceSha256": "37ab5548156a14f390b7d51010172c3ba7975744fb47ee441eee3586f5ce639b",
+        "label": "S290 landing beside 2070 and 2059",
+        "point": {
+          "x": 0.8014706,
+          "y": 0.4128788
+        }
+      },
+      "to": {
+        "planId": "SW3-F2-p1",
+        "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+        "label": "2063/2080 end of the 2000 corridor",
+        "point": {
+          "x": 0.5122549,
+          "y": 0.0954545
+        }
+      },
+      "question": "Do these two marked locations connect on foot? Check the arrival floor, actual endpoints and permitted directions.",
+      "basis": "Passage outlines on the two official sheets and the building footprints on the campus map suggest a possible correspondence. Confirm both endpoints independently, including the neighboring building."
+    },
+    {
+      "id": "sw1-sw3-f3-passage-inquiry",
+      "status": "unreviewed",
+      "from": {
+        "planId": "SW1-F3-p1",
+        "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
+        "label": "S390 landing beside 3080",
+        "point": {
+          "x": 0.9323529,
+          "y": 0.2363636
+        }
+      },
+      "to": {
+        "planId": "SW3-F3-p1",
+        "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+        "label": "3081/3086 end of the 3000 corridor",
+        "point": {
+          "x": 0.4872549,
+          "y": 0.3515152
+        }
+      },
+      "question": "Do these two marked locations connect on foot? Check the arrival floor, actual endpoints and permitted directions.",
+      "basis": "Passage outlines on the two official sheets and the building footprints on the campus map suggest a possible correspondence. Confirm both endpoints independently, including the neighboring building."
+    },
+    {
+      "id": "sw1-sw3-f4-passage-inquiry",
+      "status": "unreviewed",
+      "from": {
+        "planId": "SW1-F4-p1",
+        "sourceSha256": "ed111bbfb9b7423af5a9369253f7820ed4e7eddbe6bf3a3421cda77bf3f53e30",
+        "label": "S490 landing beside 4076",
+        "point": {
+          "x": 0.9745098,
+          "y": 0.45
+        }
+      },
+      "to": {
+        "planId": "SW3-F4-p1",
+        "sourceSha256": "ec9b5c3ae80da356b78dc7ea89e3228e6cd6b5e882d9c20a6b7e10bbd5ec034a",
+        "label": "4075/4080 end of the 4000 corridor",
+        "point": {
+          "x": 0.4872549,
+          "y": 0.2977273
+        }
+      },
+      "question": "Do these two marked locations connect on foot? Check the arrival floor, actual endpoints and permitted directions.",
+      "basis": "Passage outlines on the two official sheets and the building footprints on the campus map suggest a possible correspondence. Confirm both endpoints independently, including the neighboring building."
+    }
+  ],
+  "supportingMap": {
+    "url": "https://www.bcit.ca/files/maps/pdf/bby_access_map.pdf",
+    "sha256": "fcf9521f2e2667184d6f81e8457417cc0a9a2b9bea523e572ecf7f6d0da626ec"
+  }
+}
