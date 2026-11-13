@@ -55,7 +55,9 @@ npm run format
 
 Tests mock Gemini and spend no provider quota. Browser automation, when requested, uses an isolated server on port 3100 with credentials disabled and installed Google Chrome. It is not a physical-phone or Safari test. The browser OCR packages, worker assets and installation hook have been removed; optional local PDF preprocessing can still use Tesseract.
 
-Exact retrieval uses all 5,463 extracted source labels, including SE12 floor 3 room `302` beyond the former 80-label cutoff. `302` never matches `3021` or `0302`. The two API stages use a short-lived evidence ID bound to the same photo/crops; no image bytes are stored between stages. Clear exact matches go directly to detailed plan comparison; unreadable or ambiguous labels can still use visual shortlisting.
+SE12, SW03 and SW01 have a server-side spatial index across floors 1–4. It includes 377 source-read labels, 16 drawn door locations, whole-page OCR evidence and a revisioned graph of 20 approved checkpoints and 12 passages. Try a label with `npm run spatial:query -- resolve_spatial_labels '{"purpose":"destination","labels":["SW03 2605"]}'`. Unknown labels return `unsupported`. [Tool contracts, coverage and examples](docs/spatial-retrieval.md)
+
+Photo retrieval preserves exact identifiers, including `302`, `3021` and `0302`. All 5,463 original labels remain available as source evidence. The second stage uses the pilot drawing index to retrieve matching observations and their page boxes. Optical-only hits go through visual shortlisting. Detailed photo-to-plan comparison and user confirmation follow.
 
 Photo reading/shortlisting and detailed comparison use 4,096/8,192-token allowances with bounded thinking. When a Gemini model hits quota, is unavailable, or returns an unusable response, the server tries the configured Gemini fallback models. Incomplete responses cannot become location results. See [provider notes](docs/provider.md).
 
@@ -88,27 +90,31 @@ mvp/
 │   ├── index.ts, app.ts, runtime.ts
 │   ├── provider.ts, photo-localization.ts, session.ts
 │   ├── photo-evidence.ts, photo-media.ts, room-labels.ts
+│   ├── pilot-evidence.ts, pilot-network.ts, pilot-inquiries.ts
+│   ├── spatial-retrieval.ts, pilot-tools.ts
 │   └── data.ts, visual-data.ts
 ├── data/campus/
 │   ├── floor-plans-source.html, manifest.json, coverage.json, catalogue.json
 │   ├── graph.json, landmarks.json  Empty placeholders for reviewed real records
 │   ├── raw/                       90 unmodified official PDFs
+│   ├── spatial/                   pilot-ocr, plan-annotations, reviewed-network, passage-inquiries JSON and checksums
 │   ├── text/                      Extracted text, boxes and provenance
 │   └── visual/                    index.json, png/, geometry/, atlas/
 ├── scripts/
-│   ├── prepare_maps.py, prepare_visual_maps.py
+│   ├── prepare_maps.py, prepare_visual_maps.py, prepare_pilot_labels.py
+│   ├── export-pilot-network.ts, query-spatial.ts
 │   ├── validate-data.ts
 │   └── render_proposal.py
 ├── tests/
 │   ├── api.test.ts, client-state.test.ts, data.test.ts, visual-data.test.ts, runtime.test.ts
-│   ├── provider.test.ts, provider-response.test.ts
+│   ├── provider.test.ts, provider-response.test.ts, spatial-retrieval.test.ts
 │   ├── photo-localization.test.ts, photo-api.test.ts
 │   ├── photo.test.ts, photo-location-input.test.ts, room-labels.test.ts, photo-fixtures.ts
 │   └── e2e/journey.spec.ts, photo.spec.ts
 ├── docs/
 │   ├── project-brief.txt, requirements.md, architecture.md, data.md
 │   ├── provider.md, operations.md, photo-localization.md, walkthrough.md
-│   ├── verification.md, proposal.md
+│   ├── verification.md, proposal.md, spatial-retrieval.md
 │   └── screenshots/  Automated test artifacts; mocked results are labeled
 ├── output/pdf/proposal_groupnumber.pdf
 └── dist/, node_modules/, test-results/, tmp/  Generated local output

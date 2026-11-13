@@ -32,6 +32,8 @@ The delivered run used OCR on 80 documents, produced **1,045 numeric/alphanumeri
 
 ## Data layers
 
+The pilot spatial evidence under `data/campus/spatial/` includes additional OCR, transcriptions, door symbols and reviewed passages. [Pilot data, regeneration and coverage](spatial-retrieval.md)
+
 | Layer | Files | Meaning |
 |---|---|---|
 | Source images/documents | `data/campus/raw/*.pdf` | 90 unmodified official files |

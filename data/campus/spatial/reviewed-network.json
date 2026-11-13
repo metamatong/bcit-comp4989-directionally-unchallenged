@@ -1,0 +1,570 @@
+{
+  "schemaVersion": 1,
+  "revision": 23,
+  "sourceDocumentSha256": "b25e2c5ccebd64fa65b3e3b14881bcfde8b525543ae165943b6a6b2bc2ce6ffd",
+  "nodes": [
+    {
+      "version": 1,
+      "reviewContentHash": "54ccaa71ed4b89b433273ab11a795197ef079556f45debe1516fdb8a55221445",
+      "reviewBasis": "user-confirmation",
+      "id": "e2c6b5b4-8af8-4eaa-a1e0-066c0cae5e3b",
+      "planId": "SW3-F3-p1",
+      "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+      "label": "SE12 방향 연결부",
+      "aliases": [
+        "SE12 방향 연결부"
+      ],
+      "kind": "door",
+      "point": {
+        "x": 0.4875,
+        "y": 0.352
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "38732a08f604b388d1d8916be55380d0c440078035530e92d32e5abd17dd8713",
+      "reviewBasis": "user-confirmation",
+      "id": "b376a70f-6b95-4e15-b381-9e42ada2ead3",
+      "planId": "SE12-F3-p1",
+      "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "label": "SW03 방향 연결부",
+      "aliases": [
+        "SW03 방향 연결부"
+      ],
+      "kind": "junction",
+      "point": {
+        "x": 0.4435,
+        "y": 0.631
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "12cae7231aca0546f42577e82d45d3f1b3178f055641481e92e689819b7c30f0",
+      "reviewBasis": "user-confirmation",
+      "id": "16841337-0780-41d9-8d19-8827973bbec2",
+      "planId": "SW3-F2-p1",
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "label": "SE12 방향 2층 외부 출입문 후보",
+      "aliases": [
+        "SE12 방향 2층 외부 출입문 후보"
+      ],
+      "kind": "outdoor-access",
+      "point": {
+        "x": 0.5125,
+        "y": 0.096
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "05e3dba67e69a10eeb00f95b116ae273dd5204780394e987b9b035ca079063b1",
+      "reviewBasis": "user-confirmation",
+      "id": "0e2e540d-5feb-473e-b60b-5ca6f6816225",
+      "planId": "SE12-F2-p1",
+      "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "label": "SW03 방향 2층 외부 출입문 후보",
+      "aliases": [
+        "SW03 방향 2층 외부 출입문 후보"
+      ],
+      "kind": "outdoor-access",
+      "point": {
+        "x": 0.5395,
+        "y": 0.5365
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "5bacbf980e62301bebe4f7f5b784600d05902809bf18c6254ceab5ca3d52b2db",
+      "reviewBasis": "user-confirmation",
+      "id": "e38b105c-1bc7-4d5e-9750-9f1105a05937",
+      "planId": "SE12-F2-p1",
+      "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "label": "S209 · 208Z 복도",
+      "aliases": [
+        "S209 · 208Z 복도",
+        "S209"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.752451,
+        "y": 0.418182
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "6eb7f73134931bd8daad9639c42f4cc31203944ea1b5ed77e894e24dff4d5731",
+      "reviewBasis": "user-confirmation",
+      "id": "7a8b0223-e542-45a2-970a-f6be66765db4",
+      "planId": "SE12-F3-p1",
+      "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "label": "S327 · 327호 옆",
+      "aliases": [
+        "S327 · 327호 옆",
+        "S327"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.735294,
+        "y": 0.369697
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "9d8f03e4a8cbdff6aa591073c378a54f9360aec9590ff9b6a7ceb4670fd25796",
+      "reviewBasis": "user-confirmation",
+      "id": "2635e047-18f0-4493-b1a9-73d9779466a8",
+      "planId": "SE12-F2-p1",
+      "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "label": "S200 · 식당 쪽 계단참",
+      "aliases": [
+        "S200 · 식당 쪽 계단참",
+        "S200"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.07451,
+        "y": 0.443939
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "8d50fb02d20975370b58e960bfcd57c58bc20c3c0eaf9470721d351d595def59",
+      "reviewBasis": "user-confirmation",
+      "id": "9e4d3f61-332e-4d27-8838-65a7596cb304",
+      "planId": "SE12-F3-p1",
+      "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "label": "S300 · 303C 복도 쪽",
+      "aliases": [
+        "S300 · 303C 복도 쪽",
+        "S300"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.085294,
+        "y": 0.491667
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "52e7bc4605972739ef95a5d5b9328d575460d7f03e7890ffec5e92b7b745deb1",
+      "reviewBasis": "user-confirmation",
+      "id": "2177d876-b5b3-4e60-a8e3-349874e4d023",
+      "planId": "SE12-F2-p1",
+      "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "label": "S202 · 201T 옆 계단참",
+      "aliases": [
+        "S202 · 201T 옆 계단참",
+        "S202"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.395588,
+        "y": 0.257576
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "10e62a067331cb386367d56fe95183aaa0cad44ff581e05d450b4b581df78a5d",
+      "reviewBasis": "user-confirmation",
+      "id": "92a95623-7e31-42e9-8228-2b6a77874045",
+      "planId": "SE12-F3-p1",
+      "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "label": "S313 · 313C 복도 쪽",
+      "aliases": [
+        "S313 · 313C 복도 쪽",
+        "S313"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.388725,
+        "y": 0.325
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "abddb37ae6c999e8a188b7337ee6fc54db2b71316638f122b1a76550d0fee679",
+      "reviewBasis": "user-confirmation",
+      "id": "799f8b99-fc7b-40d9-a262-e8ee6b36ac38",
+      "planId": "SE12-F2-p1",
+      "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "label": "S228 · 213H 옆 계단참",
+      "aliases": [
+        "S228 · 213H 옆 계단참",
+        "S228"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.791176,
+        "y": 0.57803
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "042adbabe9c04eefa4bb0b675c6867350d6cf02e1e077de9477e7b68d65b5e4f",
+      "reviewBasis": "user-confirmation",
+      "id": "f9d700f2-9e8b-4bcb-93a0-055cf1c585cb",
+      "planId": "SE12-F3-p1",
+      "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "label": "S328 · 336호 부근",
+      "aliases": [
+        "S328 · 336호 부근",
+        "S328"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.773529,
+        "y": 0.607576
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "f7077bde70e012321b8b38c59fb65c8e5b93b75f0577e2327214d240b121d9ea",
+      "reviewBasis": "user-confirmation",
+      "id": "5ab26f71-aabe-4414-af8f-d195a668bd65",
+      "planId": "SW3-F2-p1",
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "label": "S260 · 2696 옆",
+      "aliases": [
+        "S260 · 2696 옆",
+        "S260"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.848039,
+        "y": 0.462121
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "9da16d1bef131d3e5c118202ee08c2dbcc1d0c709c4436a25e4f8730c58d4968",
+      "reviewBasis": "user-confirmation",
+      "id": "e66f5029-dec9-4314-b471-d343261c4734",
+      "planId": "SW3-F3-p1",
+      "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+      "label": "S360 · 3696 옆",
+      "aliases": [
+        "S360 · 3696 옆",
+        "S360"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.754412,
+        "y": 0.643939
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "3584371e14bf1db21066a27fee48b3fc31d77a8312719eb810ea1734076ecd77",
+      "reviewBasis": "user-confirmation",
+      "id": "6c251db5-cfa6-425c-85f3-3b6248fdf5b4",
+      "planId": "SW3-F2-p1",
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "label": "2696 앞 · 2600 복도",
+      "aliases": [
+        "2696 앞 · 2600 복도"
+      ],
+      "kind": "elevator-stop",
+      "point": {
+        "x": 0.828922,
+        "y": 0.459848
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "c35839838eb0e21dae0bfb597f0e13c2020c2d582d1bd56373308460189dc0f0",
+      "reviewBasis": "user-confirmation",
+      "id": "3fc46aaf-d0ce-49dd-82d3-a62e3fec96dc",
+      "planId": "SW3-F3-p1",
+      "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+      "label": "3696 앞 · 3600 복도",
+      "aliases": [
+        "3696 앞 · 3600 복도"
+      ],
+      "kind": "elevator-stop",
+      "point": {
+        "x": 0.740196,
+        "y": 0.640909
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "0d7ff12e49e0c07ca86e2f9952fc4efb244ef94021272c126d82e00b1b92922b",
+      "reviewBasis": "user-confirmation",
+      "id": "7b7e149a-fd90-4d48-a06b-9acfe2d30bfa",
+      "planId": "SW3-F2-p1",
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "label": "S270 · 2704 라운지 옆",
+      "aliases": [
+        "S270 · 2704 라운지 옆",
+        "S270"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.545098,
+        "y": 0.462121
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "fc6e810e553aa947cd4b947b0917a60597e808e2517b1fb3d5934216148c1f9f",
+      "reviewBasis": "user-confirmation",
+      "id": "3e2feaaa-0d8b-4ad2-a020-87f7c928fd26",
+      "planId": "SW3-F3-p1",
+      "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+      "label": "S370 · 3704 라운지 옆",
+      "aliases": [
+        "S370 · 3704 라운지 옆",
+        "S370"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.513725,
+        "y": 0.643182
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "dd8fde20c6c36bda6f4ae9c4b1b661c858eab6ae42f780d3e75ab3d938497b7c",
+      "reviewBasis": "user-confirmation",
+      "id": "b10034ed-27ee-419e-82dc-451ce7dd0f69",
+      "planId": "SW3-F2-p1",
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "label": "S280 · 2700 복도 끝",
+      "aliases": [
+        "S280 · 2700 복도 끝",
+        "S280"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.234314,
+        "y": 0.427273
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "29ba46242e90e31d9ab51073c8a4b12f9670dfbc59d6524a60a410c10368c57f",
+      "reviewBasis": "user-confirmation",
+      "id": "fe6834d4-97af-474f-b60b-0cb3c87c3158",
+      "planId": "SW3-F3-p1",
+      "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+      "label": "S380 · 3700 복도 끝",
+      "aliases": [
+        "S380 · 3700 복도 끝",
+        "S380"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.265686,
+        "y": 0.609848
+      }
+    }
+  ],
+  "edges": [
+    {
+      "version": 2,
+      "reviewContentHash": "df755b862f25d0a808b03a80950a87f38eeaf8da4dca4b96234ec24ab11d4c65",
+      "reviewBasis": "user-confirmation",
+      "id": "c42b5b98-67d0-426b-8977-4a1aa9bfbd64",
+      "fromNodeId": "e2c6b5b4-8af8-4eaa-a1e0-066c0cae5e3b",
+      "toNodeId": "b376a70f-6b95-4e15-b381-9e42ada2ead3",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "building-link",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw3-se12-floor3-passage"
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "9c11fec578c8e55ba56984da18c52d6ace5ca0b0f52f735b18d7818958736cd3",
+      "reviewBasis": "user-confirmation",
+      "id": "32d90db3-22be-4415-aa83-aee9d5d79107",
+      "fromNodeId": "16841337-0780-41d9-8d19-8827973bbec2",
+      "toNodeId": "0e2e540d-5feb-473e-b60b-5ca6f6816225",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "outdoor",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw3-se12-floor2-passage"
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "fb39d3161ad8c98e7a488c56e293ff1adf32e3561945b7de970383a96902a953",
+      "reviewBasis": "user-confirmation",
+      "id": "07daae90-f677-49b3-9cbb-10b8f64e74b8",
+      "fromNodeId": "e38b105c-1bc7-4d5e-9750-9f1105a05937",
+      "toNodeId": "7a8b0223-e542-45a2-970a-f6be66765db4",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "se12-f2-f3-s209-s327"
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "cc3d09cd37ede660b0645ac3064b08efbf563c0f132bc5c872af8502793ae38f",
+      "reviewBasis": "user-confirmation",
+      "id": "dfc268be-ddce-44af-8e40-d1881c43bb55",
+      "fromNodeId": "2635e047-18f0-4493-b1a9-73d9779466a8",
+      "toNodeId": "9e4d3f61-332e-4d27-8838-65a7596cb304",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "se12-f2-f3-s200-s300"
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "7358c97e60dfdf46c2e36a01d9f90435649cd1694aab016addfb63a2415fabca",
+      "reviewBasis": "user-confirmation",
+      "id": "0b8b2308-05b5-4200-8e27-27179e76ad28",
+      "fromNodeId": "2177d876-b5b3-4e60-a8e3-349874e4d023",
+      "toNodeId": "92a95623-7e31-42e9-8228-2b6a77874045",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "se12-f2-f3-s202-s313"
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "433e814009a2271c89fc4df179ee653975bb4c93c2e7df5c14fdf969da613177",
+      "reviewBasis": "user-confirmation",
+      "id": "97b7f625-034a-479e-9730-e435463cfad5",
+      "fromNodeId": "799f8b99-fc7b-40d9-a262-e8ee6b36ac38",
+      "toNodeId": "f9d700f2-9e8b-4bcb-93a0-055cf1c585cb",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "se12-f2-f3-s228-s328"
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "eb5289a1a34f1b622a52b7b4e14f9719cad9379b581b2f5a4dce3fd243608575",
+      "reviewBasis": "user-confirmation",
+      "id": "40cbac1b-659d-4530-986a-6be59d0082cd",
+      "fromNodeId": "5ab26f71-aabe-4414-af8f-d195a668bd65",
+      "toNodeId": "e66f5029-dec9-4314-b471-d343261c4734",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw3-f2-f3-s260-s360"
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "bb3139eed8aa8cd88866dde6d1801bdb50471356f521505d37fd91492cdb0f74",
+      "reviewBasis": "user-confirmation",
+      "id": "a1ed1c22-622d-445f-a9ff-9737076631c0",
+      "fromNodeId": "6c251db5-cfa6-425c-85f3-3b6248fdf5b4",
+      "toNodeId": "3fc46aaf-d0ce-49dd-82d3-a62e3fec96dc",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "elevator",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw3-f2-f3-east-lift"
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "827c960201b1df1103c549a3489fe4ab194d2b504758133a7eacd6e974028a45",
+      "reviewBasis": "user-confirmation",
+      "id": "4c67c09f-ab08-48ec-95fa-2124f8b78dc2",
+      "fromNodeId": "7b7e149a-fd90-4d48-a06b-9acfe2d30bfa",
+      "toNodeId": "3e2feaaa-0d8b-4ad2-a020-87f7c928fd26",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw3-f2-f3-s270-s370"
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "f9d909df8333a82b8762ee5ee3c7cba3cda8fb3cc95bd6fffbaa2c69b1a9c35f",
+      "reviewBasis": "user-confirmation",
+      "id": "fb62403a-38cb-4e28-b16a-fba3c0748116",
+      "fromNodeId": "b10034ed-27ee-419e-82dc-451ce7dd0f69",
+      "toNodeId": "fe6834d4-97af-474f-b60b-0cb3c87c3158",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw3-f2-f3-s280-s380"
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "f57a4f2fc86ee795740eb310ff78ab0777a78ed59f7c5dca16772257c050b13e",
+      "reviewBasis": "user-confirmation",
+      "id": "8b8caf69-adbc-4613-89f4-cffc9dea4983",
+      "fromNodeId": "16841337-0780-41d9-8d19-8827973bbec2",
+      "toNodeId": "6c251db5-cfa6-425c-85f3-3b6248fdf5b4",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "corridor",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw3-f2-door-to-lift-corridor"
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "f63b79401b0cce761a7188c5c2c98a4fb3556f4cad374786a1377a583a33e713",
+      "reviewBasis": "user-confirmation",
+      "id": "428c51ac-308c-4514-926a-2c9e6526067f",
+      "fromNodeId": "3fc46aaf-d0ce-49dd-82d3-a62e3fec96dc",
+      "toNodeId": "e2c6b5b4-8af8-4eaa-a1e0-066c0cae5e3b",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "corridor",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw3-f3-lift-to-building-link-corridor"
+    }
+  ],
+  "elevatorReports": [
+    {
+      "candidateId": "se12-f2-f3-lift-location",
+      "definitionHash": "23d0d1e6b31202044986813f8660ed72b225f10c7c9021308d161ac950ddeddc",
+      "answer": "false",
+      "from": {
+        "planId": "SE12-F2-p1",
+        "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545"
+      },
+      "to": {
+        "planId": "SE12-F3-p1",
+        "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1"
+      }
+    }
+  ]
+}

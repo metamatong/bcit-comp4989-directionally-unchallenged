@@ -2,7 +2,10 @@ import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { readJson, root } from '../server/data';
 import { visualPlans, planAtlases, planGeometrySummary } from '../server/visual-data';
-import { roomLabelIndex } from '../server/room-labels';
+import { retrieveRoomLabels, roomLabelIndex } from '../server/room-labels';
+import { pilotCoverage } from '../server/spatial-retrieval';
+import { pilotEvidence } from '../server/pilot-evidence';
+import { reviewedNetwork } from '../server/pilot-network';
 const manifest = readJson<{ sources: { file: string; sha256: string; campus: string }[] }>(
   'data/campus/manifest.json',
 );
@@ -67,6 +70,24 @@ const labelCount = visualPlans.reduce(
   (total, plan) => total + planGeometrySummary(plan).labels.length,
   0,
 );
+const pilot = pilotCoverage();
+const planRead = pilot.reduce((count, page) => count + page.planReadLabels, 0);
 if (roomLabelIndex().labelCount !== labelCount)
   throw new Error('The room label index omits source labels.');
-console.log(`Indexed all ${labelCount} extracted source labels for exact identifier lookup.`);
+const pilotCount = pilot.reduce((sum, p) => sum + p.geometryLabels, 0);
+const drawingCount = pilotEvidence().reduce(
+  (sum, p) =>
+    sum +
+    p.observations.filter((o) => o.context === 'drawing' && o.disposition === 'candidate').length,
+  0,
+);
+const photoCount = retrieveRoomLabels([], new Set()).indexedLabels;
+if (photoCount !== labelCount - pilotCount + drawingCount)
+  throw new Error('Incomplete photo drawing index.');
+console.log(
+  `Indexed all ${labelCount} original source labels. Photo retrieval covers ${photoCount} drawing observations, including ${planRead} transcriptions.`,
+);
+const network = reviewedNetwork();
+console.log(
+  `Pilot RAG: ${pilot.length} pages, ${pilot.reduce((sum, page) => sum + page.ocrWords, 0)} OCR observations; approved network revision ${network.revision}, ${network.nodes.length} points, ${network.edges.length} passages.`,
+);

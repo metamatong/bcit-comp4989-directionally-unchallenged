@@ -1,5 +1,11 @@
 # Verification record
 
+## Three-building spatial retrieval — November 13, 2026
+
+The release branch passed 146 non-browser unit, HTTP and provider tests on macOS arm64 with Node 22.15.1. The production build and data validation passed. The latter checked 90 original PDFs, 631 derived assets, 12 pilot source and geometry bindings, 16,659 optical observations, 377 plan transcriptions, and the approved revision 23 graph. The private editor export reproduced the published 20 checkpoints and 12 passages. A traversal test followed the same five reviewed edges in both directions.
+
+Source checks used all 12 official pages, including enlarged original PDF details. A regression set queries two additional printed identifiers per floor. Missing `SW03 2458`, an ambiguous `S300`, marginal dates and the erroneous SW01 OCR reading `302` all produce the documented outcomes. The photo tests mock Gemini. Browser checks were skipped under the existing screen-check preference. Physical localization accuracy and complete room-to-room walking coverage are unmeasured. [Coverage and interpretation](spatial-retrieval.md)
+
 ## App rename — November 12, 2026
 
 The app, package metadata, server messages, documentation and two-page proposal now use DirectionallyUnchallenged. Header, footer and dialog browser expectations were updated; the Node-rendered photo privacy notice also asserts the new name. Formatting, all 130 mocked unit/API tests, the production build and source-data validation passed on Windows. `npm test` reached browser tests after passing unit/API tests, but all 24 browser cases stopped before launch because the configured Chrome installation was missing. No manual screen checks, live Gemini calls or physical-campus checks were performed. Historical screenshot artifacts were not regenerated. Proposal text, metadata and page count were checked without visual inspection.
@@ -10,7 +16,7 @@ Verified October 20, 2026 on macOS arm64, Node 22.15.1. The current application 
 
 | Check | Result | Scope |
 |---|---|---|
-| `npm run test:unit` | **130 passed** | Inline photo input, crop preparation, exact-label, two-stage API, evidence binding, provider failures and strict asset-integrity regressions |
+| `npm run test:unit` | **146 passed** | Photo, API, provider and source-integrity regressions plus pilot lookup, drawing context and reviewed-network checks |
 | Earlier `npm test` | **101 passed** | 79 unit/API cases and 22 browser cases after demo removal, before screen checks were stopped |
 | `npm run build` | Passed | TypeScript check and Vite production build |
 | `npm run data:validate` | Passed | 90 original PDF hashes, 89 geometry records and 631 derived asset hashes |

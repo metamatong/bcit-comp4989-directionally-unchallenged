@@ -1,5 +1,7 @@
 # Photo labels, exact retrieval and floor-plan localization
 
+For the three pilot buildings, the label retrieval stage also reads digitized plan transcriptions and optical observations. The label-reading request sees only the consented photo and crops. Exact source matches carry their page-specific evidence into visual comparison. When automatic pilot OCR alone supplies a match, all eligible building plans remain available for the visual shortlist. [Pilot retrieval contract](spatial-retrieval.md)
+
 The app uses the actual photo and detailed views in two separate API stages. Gemini reads visible evidence first, a deterministic tool retrieves exact labels from all available source records, and a later Gemini call compares the photo against the retrieved plans. There is no training step or general Campus library screen.
 
 ## User flow
@@ -35,7 +37,7 @@ Lookup normalizes Unicode compatibility forms, letter case and whitespace. It pr
 
 The SE12 third-floor `302` label is at index 155 in its full 285-label list. The old first-80-label preview omitted it. Runtime retrieval and model geometry now use the complete `labels` array; legacy `modelSummary.labels` previews are ignored. The regeneration script also writes complete label summaries for future regenerated artifacts. No source PDF or existing PNG/geometry hash needs to change to activate the runtime fix.
 
-Clear exact matches narrow the candidate plans. One to three matching plans go directly to detailed comparison, avoiding the coarse atlas shortlist. Ambiguous matches spanning more plans use an additional visual shortlist over the matching set. Uncertain readings, absent readable labels, or labels with no exact source match retain the visual-shortlist path across eligible plans; signs are not mandatory.
+When a clear reading has at least one original-source or manually transcribed match, the server searches the matching plans. One to three matching plans proceed to detailed comparison. A larger set receives a visual shortlist. A match supplied solely by supplemental machine OCR keeps all eligible plans in the visual shortlist. The model can still abstain or locate a region through visual features.
 
 An exact label match alone never produces a location. Gemini must recheck the photo/crops against the supplied drawing and return an explicit `labelMatches` entry. The server verifies whole-label equality, the observed identifier and its presence in the chosen source plan. A proposed `302` → `3021` match is rejected. A label-guided result without a supporting clear exact label is also rejected; abstention remains valid. Missing extracted labels do not prove that a room is absent from the actual campus.
 

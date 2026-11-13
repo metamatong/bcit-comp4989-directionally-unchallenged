@@ -15,6 +15,7 @@ import type { CampusPhotoAnalysis, Session, VisualPlan } from '../src/types';
 import { photoImageParts, validatePhotoBundle, type PhotoRequest } from './photo-media';
 import { requirePhotoEvidence, type PhotoEvidenceRecord } from './photo-evidence';
 import { normalizeRoomLabel, retrieveRoomLabels } from './room-labels';
+import { canonicalBuilding } from './pilot-evidence';
 export {
   photoRequestSchema,
   photoEvidenceRequestSchema,
@@ -205,13 +206,15 @@ export async function analyzeCampusPhoto(
       'Floor-plan images are not prepared yet. Complete the visual source preparation and restart the server.',
     );
   const eligible = visualPlans.filter(
-    (plan) => !input.buildingHint || plan.building === input.buildingHint,
+    (plan) =>
+      !input.buildingHint ||
+      plan.building === (canonicalBuilding(input.buildingHint) ?? input.buildingHint),
   );
   if (!eligible.length)
     throw new Error('That building is not in the prepared Burnaby floor-plan collection.');
   const eligibleIds = new Set(eligible.map((plan) => plan.id));
   const retrieval = retrieveRoomLabels(evidence.labels, eligibleIds);
-  const candidatePlans = retrieval.clearMatchPlanIds.length
+  const candidatePlans = retrieval.hasCorroboratedLabel
     ? eligible.filter((plan) => retrieval.clearMatchPlanIds.includes(plan.id))
     : eligible;
   const candidateIds = new Set(candidatePlans.map((plan) => plan.id));
@@ -227,11 +230,18 @@ export async function analyzeCampusPhoto(
             .map((match) => match.observedLabel),
         ),
       ],
+      locations: retrieval.matches
+        .filter((match) => match.planId === planId)
+        .map((match) => ({
+          label: match.text,
+          bboxPdfPoints: match.bbox,
+          method: match.method,
+          evidenceId: match.evidenceId,
+        })),
     })),
     rule: 'Exact whole identifiers only. Missing or uncertain source labels do not prove a position. Independently verify the photo and plan before proposing a region.',
   };
-  const needsVisualShortlist =
-    retrieval.clearMatchPlanIds.length === 0 || candidatePlans.length > 3;
+  const needsVisualShortlist = !retrieval.hasCorroboratedLabel || candidatePlans.length > 3;
   const deadline = AbortSignal.timeout(60000);
   const signal = cancellation ? AbortSignal.any([cancellation, deadline]) : deadline;
   const staged = structuredClone(session);
@@ -413,7 +423,7 @@ export async function analyzeCampusPhoto(
             );
         }
         if (
-          retrieval.clearMatchPlanIds.length &&
+          retrieval.hasCorroboratedLabel &&
           !candidate.labelMatches.some((match) =>
             retrieval.clearLabels.includes(normalizeRoomLabel(match.observedLabel)),
           )

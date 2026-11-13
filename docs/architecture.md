@@ -14,6 +14,8 @@ DirectionallyUnchallenged is a local React/TypeScript client and Express server 
 
 `photo-evidence.ts` owns label extraction and receipt validation; `photo-media.ts` owns shared media schemas, bounds, sizes and fingerprinting. `room-labels.ts` indexes all full source labels. `photo-localization.ts` owns retrieval, visual selection and comparison. `provider.ts` handles transport, bounded retries, fallback and completion parsing. `visual-data.ts` verifies public source provenance and includes complete labels in model context. `src/photo.ts` and `photo-views.ts` prepare original-image crops. The full dataset stays behind the scenes.
 
+The server exposes `pilotToolDeclarations` and `runPilotTool` for exact label resolution, page-region context, reviewed outgoing connections and floor coverage. These tools read checked-in evidence without a provider key. The photo workflow uses the pilot evidence in its second stage. A room result supplies the printed region and any source-read doors. Visitor routing requires a confirmed start and a reviewed destination door in the connected graph. [Pilot retrieval contract](spatial-retrieval.md)
+
 ## API and state
 
 - `GET /api/bootstrap`: coverage, visual plan metadata used to display results and provider readiness. The general source catalogue is not exposed. No fictional graph or default-mode setting.
