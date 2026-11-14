@@ -38,9 +38,11 @@ The twelve pages contain 4,641 original geometry labels, 16,659 additional OCR o
 
 | Building | Floors | Identifier candidates by floor 1 / 2 / 3 / 4 | Source-read labels | Drawn door symbols | Approved checkpoints |
 |---|---|---|---:|---:|---:|
-| SE12 | 1–4 | 45 / 74 / 72 / 75 | 125 | 6 | 10 |
+| SE12 | 1–4 | 45 / 74 / 72 / 75 | 125 | 9 | 10 |
 | SW03 | 1–4 | 48 / 118 / 76 / 81 | 125 | 5 | 12 |
 | SW01 | 1–4 | 249 / 235 / 206 / 109 | 127 | 5 | 0 |
+
+The SE12 floor 3 annotations include one drawn doorway for room 302 and two for room 320. They are bound to the original sheet and supply page positions for comparing photo regions. Room 302 also has a source-traced corridor frontage between its doorway and the exterior boundary. Doorway details for photo comparison are generated from each eligible door throughout the pilot. The individual room annotations do not grant route access.
 
 The approved network is an export of editor revision 25. It contains 22 points and 14 bidirectional passages. Four corridors have original-page traces, including the east elevator approaches to rooms 2605 and 3615. Five passages form the continuous SE12 floor 2 → outdoor → SW03 floor 2 corridor → elevator → SW03 floor 3 corridor → SE12 floor 3 journey. The latest SE12 floor 2–3 elevator report is F and is stored as floor evidence. The earlier fourth-floor building passage does not qualify for this revision. No distance has been measured for the five-step journey.
 

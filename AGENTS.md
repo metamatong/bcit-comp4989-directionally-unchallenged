@@ -29,6 +29,7 @@
 - Write readable TypeScript and use descriptive names. Run npm run format after edits.
 - Update README hierarchy and affected docs when files, setup or behavior change.
 - Add meaningful regression tests. Run npm test, npm run build and npm run data:validate unless the user explicitly narrows validation; fix failures.
+- Permit a tentative doorway or corridor vicinity when independent photo-to-plan comparison ties the signed doorway and its architectural surroundings to a unique supplied source doorway. Keep drawing crop margins and printed label positions separate from camera regions and route origins.
 - Visitor routing must require a session-confirmed photo region and an explicitly selected approved point within it. Use the live reviewed graph, exact room-door bindings, source-page corridor traces and manual transfer steps. Keep outdoor geometry gaps explicit.
 - Preserve exact pilot label occurrences, drawing coordinates and source hashes. Record a source-plan door symbol as a hypothesis. Promote walking connections only through reviewed topology. Keep floor-service reports and open passage questions separate from approved edges.
 

@@ -25,6 +25,7 @@ First-stage evidence IDs expire after five minutes and are bound to a session an
 - Configuration errors: fix the private server key/model/free-tier settings, restart and refresh.
 - Gemini quota, temporary service or response errors: try the configured Gemini fallbacks. If they also fail, the error is shown and no substitute location is generated.
 - `response_limit`: no partial result is applied. The next configured model may be tried; otherwise, retake the photo and retry.
+- A slow model: the server temporarily prioritizes an available configured backup. The photo status reports the failed stage and cause. A retry keeps the selected photo and reuses unexpired readings when possible. An expired session is renewed once on submission.
 - Insufficient evidence: provide another view. This is an analysis result, not a transport failure.
 
 Fallback is limited to configured Gemini models; there is no alternate provider or sample-location substitution. Refresh state after an interrupted connection before retrying. Per-photo consent, typed validation, source constraints and user confirmation remain required.

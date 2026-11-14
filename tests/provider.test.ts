@@ -403,6 +403,86 @@ describe('provider transport and free-tier request controls', () => {
     });
     await expect(timeout.generate([], [])).rejects.toThrow('timed out');
   });
+  it('fails over within the photo request and reuses the working model for the next stage', async () => {
+    const models: string[] = [];
+    let primaryCount = 0;
+    const onModelFallback = vi.fn();
+    const onModelFailure = vi.fn();
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(10_000);
+    const provider = new GeminiProvider({
+      ...options,
+      model: 'primary',
+      fallbackModels: ['backup'],
+      timeoutMs: 20,
+      onModelFailure,
+      fetchImpl: async (url, init) => {
+        const model = String(url).includes('/primary:') ? 'primary' : 'backup';
+        models.push(model);
+        if (model === 'primary' && !primaryCount++) {
+          return new Promise((_resolve, reject) =>
+            init!.signal!.addEventListener('abort', () => reject(init!.signal!.reason)),
+          );
+        }
+        return Response.json({ candidates: [{ content: { parts: [{ text: 'OK' }] } }] });
+      },
+    });
+    try {
+      const invoke = (tool: string) =>
+        provider.generate(
+          [{ role: 'user', parts: [{ text: 'private-fixture' }] }],
+          [{ name: tool }],
+          undefined,
+          undefined,
+          { forceTool: tool, timeoutMs: 2000, onModelFallback },
+        );
+      await invoke('read_photo_labels');
+      await invoke('propose_campus_locations');
+      expect(models).toEqual(['primary', 'backup', 'backup']);
+      expect(onModelFallback).toHaveBeenCalledTimes(2);
+      expect(onModelFailure).toHaveBeenCalledWith({
+        model: 'primary',
+        operation: 'read_photo_labels',
+        code: 'timeout',
+        httpStatus: 504,
+        elapsedMs: expect.any(Number),
+      });
+      expect(JSON.stringify(onModelFailure.mock.calls)).not.toContain('private-fixture');
+      clock.mockReturnValue(75_000);
+      await invoke('read_photo_labels');
+      expect(models.at(-1)).toBe('primary');
+      expect(onModelFallback).toHaveBeenCalledTimes(2);
+    } finally {
+      clock.mockRestore();
+    }
+  });
+  it('reports a timeout while reading a started response as a deadline, not invalid model output', async () => {
+    const provider = new GeminiProvider({
+      ...options,
+      fetchImpl: async (_url, init) =>
+        new Response(
+          new ReadableStream({
+            start(controller) {
+              init!.signal!.addEventListener('abort', () => controller.error(init!.signal!.reason));
+            },
+          }),
+        ),
+    });
+    await expect(provider.generate([], [])).rejects.toMatchObject({
+      code: 'timeout',
+      httpStatus: 504,
+      retryable: true,
+    });
+  });
+  it('returns a provider quota retry interval when Google supplies it', async () => {
+    const provider = new GeminiProvider({
+      ...options,
+      fetchImpl: async () => new Response('{}', { status: 429, headers: { 'Retry-After': '40' } }),
+    });
+    await expect(provider.generate([], [])).rejects.toMatchObject({
+      code: 'quota',
+      retryAfterSeconds: 40,
+    });
+  });
   it('requires credentials', async () => {
     await expect(new GeminiProvider({ ...options, apiKey: '' }).generate([], [])).rejects.toThrow(
       'not configured',

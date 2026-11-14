@@ -1,5 +1,31 @@
 # Verification record
 
+## Doorway and corridor localization
+
+The preceding binary decision accepted a model camera rectangle or returned only printed-label references. It could not retain a supported doorway vicinity when the model abstained on the rectangle or when the rectangle failed validation. That implementation retained neither the individual validation reasons nor a doorway assessment, so the specific branch taken by the earlier live hallway request cannot be reconstructed.
+
+The new comparison offers each eligible source doorway with its own unmarked crop from the hash-checked drawing. All 19 annotated doors across SE12, SW03 and SW01 produced source views. The test suite covers the same workflow in all three buildings, competing entrances, an adjacent second label, missing or contradictory visual evidence, and the difference between a starting hypothesis and a reviewed routing origin. The 237 non-browser tests, TypeScript and production build, and data validation passed.
+
+One authorized live application workflow used the original hallway photograph and its four detail views. No building, floor, room or destination hint was supplied. Gemini read 302, then selected the mapped 302 doorway on SE12 floor 3 on the basis of the signed door opposite exterior glazing and the drawn exterior-facing corridor. The server returned a low-confidence, unconfirmed doorway-vicinity candidate. The original-page frontage bounds were [0.10691, 0.5821, 0.16431, 0.60288]. The label-reading HTTP stage took 22.1 seconds and the comparison took 12.8 seconds. Source-room and door positions are known, while the exact camera point and heading remain unmeasured. The 302 doorway has no current binding to a reviewed walking connection. This single live photograph does not establish general localization accuracy.
+
+## SE12 floor 3 photo overlay — November 13, 2026
+
+The hallway photo supplied by the tester shows a sign reading **302 Classroom** above the open door on the right, with exterior windows on the left. The tester reported the app showed `Read room label 302`. That status uses the clear first-stage photo reading before floor-plan retrieval. Both observations identify 302. The previous diagnosis of a 320-to-302 reading error was incorrect.
+
+On the original SE12 floor 3 sheet the printed 302 is centred at approximately (0.135, 0.542), with a drawn doorway at (0.1508, 0.5821). Coordinates are fractions of the full page from its top left. The reported orange box covered x = 0.08–0.30 and y = 0.30–0.48. It ended above both the printed room number and its doorway. Its footprint included labels 301, 303 and 307. The room entrance opens onto the corridor along the lower edge of this part of the plan. The photo supports the vicinity of this entrance. Its exact camera point and heading are unmeasured. The source index contains no exact `800C` occurrence on this floor.
+
+A controlled replay of the pre-fix code at `0170d12` used a test provider to inspect the request assembly. A clear reading of 302 retrieved the original PDF text, the overlapping optical reading and the manual transcription at the same room. The second stage received those positions, five plan images and the full 285-label geometry. Supplying the reported rectangle and explanation as the model response allowed the old server to display them. The application checked the label and floor but did not check the relationship between the returned rectangle and the source positions. The original provider response was not retained; the model's reason for choosing that rectangle is unknown.
+
+The tester authorized one new comparison of the original hallway photo through the local visitor UI and Google Gemini. The destination field was empty and no room or building hint was supplied. The first stage displayed `Read room label 302`. The final screen showed SE12 floor 3 and a blue printed-label reference at (0.135294, 0.542424). Its outcome was `Camera position unresolved`, with zero camera candidates and no orange overlay. The UI indicated a backup Gemini model was used. This live result does not establish a precise camera point or the model's reasoning during the original run.
+
+All 230 non-browser tests, the production build and source-data validation passed. Regression cases use the correct 302 reading, the reported rectangle and the drawn 302 doorway. The wrong rectangle is also checked on its own with the corridor claim removed, while a mocked architectural match at the correct doorway remains eligible for user confirmation. Room 320 and a generated 320 card remain separate controls for source references and sign-only abstention. The visitor's photo was not added to the test suite or routing data.
+
+## Photo response timing — November 13, 2026
+
+The in-app browser displayed a Gemini connection/timeout error before route lookup. The original error did not distinguish the stage or the cause. On the same local server, a separately generated number card passed the two live Gemini API stages. Before the change the evidence request took 31.6 seconds and the comparison took 32.4 seconds, with two provider attempts per stage. After restarting with the fix, the same card took 14.5 seconds and 11.1 seconds respectively, with one attempt per stage. These are individual observations under variable service load. A card bearing a room identifier has no known camera position on campus and cannot validate localization accuracy. The visitor's original photo was not resubmitted during diagnosis.
+
+All 220 non-browser tests, the production build and data validation passed. Mocked tests exercise slow and failed model requests, the next stage reusing a working fallback, cooldown expiry, and renewal of a lost local session. The live run exercised the successful primary-model path.
+
 ## Visitor walking routes — November 13, 2026
 
 The user confirmed both directions between each SW03 east elevator landing and the specified classroom door. Revision 25 contains 22 eligible points, 14 passages and four source-bound corridor traces. The floor 2 door is the 2605 entrance opposite vestibule 2604. The floor 3 door serves 3615 opposite vestibule 3604. Both answers have a user-confirmation basis and no field observation date.

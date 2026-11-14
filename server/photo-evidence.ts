@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type { PhotoEvidence, Session } from '../src/types';
 import { ProviderError, type Provider } from './provider';
 import { logActivity } from './session';
+import { PHOTO_STAGE_TIMEOUT_MS } from '../src/photo-views';
 import {
   photoFingerprint,
   photoImageParts,
@@ -98,7 +99,7 @@ export async function readPhotoEvidence(
   cancellation?: AbortSignal,
 ): Promise<PhotoEvidenceRecord> {
   validatePhotoBundle(input);
-  const deadline = AbortSignal.timeout(45_000);
+  const deadline = AbortSignal.timeout(PHOTO_STAGE_TIMEOUT_MS.evidence);
   const signal = cancellation ? AbortSignal.any([cancellation, deadline]) : deadline;
   let attempts = 0,
     usedFallbackModel = false;

@@ -15,8 +15,10 @@ import {
   ApiError,
   RequestGate,
   clearLegacyModePreference,
+  readPhotoInSession,
 } from './api';
 import { preparePhoto, type PreparedPhoto } from './photo';
+import { PHOTO_STAGE_TIMEOUT_MS, PHOTO_RESPONSE_GRACE_MS } from './photo-views';
 import { CampusLocationResults } from './components/CampusLocationResults';
 import { PhotoLocationInput } from './components/PhotoLocationInput';
 import { JourneyPanel } from './components/JourneyPanel';
@@ -32,6 +34,7 @@ export default function App() {
   const [error, setError] = useState('');
   const [reading, setReading] = useState(false);
   const [readStatus, setReadStatus] = useState('');
+  const [photoError, setPhotoError] = useState('');
   const [preparedPhoto, setPreparedPhoto] = useState<PreparedPhoto | null>(null);
   const [photoConsent, setPhotoConsent] = useState(false);
   const [showPhotoResults, setShowPhotoResults] = useState(false);
@@ -78,6 +81,7 @@ export default function App() {
     evidenceForPhoto.current = null;
     setPhotoConsent(false);
     setReadStatus('');
+    setPhotoError('');
     setReading(false);
   }
   function removePhoto() {
@@ -127,6 +131,7 @@ export default function App() {
     setShowPhotoResults(false);
     setActiveDestination('');
     setReading(true);
+    setPhotoError('');
     setError('');
     setReadStatus('Preparing your photo locally…');
     try {
@@ -151,8 +156,9 @@ export default function App() {
     setBusy(true);
     setError('');
     setShowPhotoResults(false);
+    setPhotoError('');
     setActiveDestination(destination.trim());
-    setReadStatus('Reading room labels from your photo and detail views…');
+    let stage: 'evidence' | 'comparison' = 'evidence';
     try {
       const media = {
         consent: true,
@@ -160,47 +166,69 @@ export default function App() {
         image: { mimeType: preparedPhoto.mimeType, data: preparedPhoto.data },
         detailCrops: preparedPhoto.detailCrops,
       };
-      let latest = current;
-      const cached = evidenceForPhoto.current;
-      if (!(
-        cached?.photo === preparedPhoto &&
-        latest.photoEvidence?.id === cached.id &&
-        Date.parse(latest.photoEvidence.expiresAt) > Date.now()
-      )) {
-        latest = await request<Session>(
-          `/api/sessions/${current.id}/photo/evidence`,
-          {
-            ...media,
-            requestId: crypto.randomUUID(),
-            revision: current.revision,
-          },
-          { timeoutMs: 55000, signal: controller.signal },
-        );
-        if (!evidenceGate.current.isCurrent(generation)) return;
-        updateSession(latest);
-        if (!latest.photoEvidence)
-          throw new Error('Photo reading did not return evidence. Try again.');
-        evidenceForPhoto.current = { photo: preparedPhoto, id: latest.photoEvidence.id };
-      }
-      const evidence = latest.photoEvidence;
-      if (!evidence) throw new Error('Read this photo again before comparing plans.');
-      const labels = evidence.labels
-        .filter((label) => label.clarity === 'clear')
-        .map((label) => label.text);
-      setReadStatus(
-        labels.length
-          ? `Read room label${labels.length === 1 ? '' : 's'} ${[...new Set(labels)].join(', ')}. Comparing the photo with matching floor plans…`
-          : 'No clear room label found. Comparing the scene with the floor plans…',
-      );
-      const result = await request<Session>(
-        `/api/sessions/${current.id}/photo`,
-        {
-          ...media,
-          requestId: crypto.randomUUID(),
-          revision: latest.revision,
-          evidenceId: evidence.id,
+      const result = await readPhotoInSession(
+        current,
+        async (active) => {
+          let latest = active;
+          stage = 'evidence';
+          setReadStatus('Reading room labels from your photo and detail views…');
+          const cached = evidenceForPhoto.current;
+          if (!(
+            cached?.photo === preparedPhoto &&
+            latest.photoEvidence?.id === cached.id &&
+            Date.parse(latest.photoEvidence.expiresAt) > Date.now()
+          )) {
+            latest = await request<Session>(
+              `/api/sessions/${active.id}/photo/evidence`,
+              {
+                ...media,
+                requestId: crypto.randomUUID(),
+                revision: active.revision,
+              },
+              {
+                timeoutMs: PHOTO_STAGE_TIMEOUT_MS.evidence + PHOTO_RESPONSE_GRACE_MS,
+                signal: controller.signal,
+              },
+            );
+            controller.signal.throwIfAborted();
+            updateSession(latest);
+            if (!latest.photoEvidence)
+              throw new Error('Photo reading did not return evidence. Try again.');
+            evidenceForPhoto.current = { photo: preparedPhoto, id: latest.photoEvidence.id };
+          }
+          const evidence = latest.photoEvidence;
+          if (!evidence) throw new Error('Read this photo again before comparing plans.');
+          stage = 'comparison';
+          const labels = evidence.labels
+            .filter((label) => label.clarity === 'clear')
+            .map((label) => label.text);
+          setReadStatus(
+            labels.length
+              ? `Read room label${labels.length === 1 ? '' : 's'} ${[...new Set(labels)].join(', ')}. Comparing the photo with matching floor plans…`
+              : 'No clear room label found. Comparing the scene with the floor plans…',
+          );
+          return request<Session>(
+            `/api/sessions/${active.id}/photo`,
+            {
+              ...media,
+              requestId: crypto.randomUUID(),
+              revision: latest.revision,
+              evidenceId: evidence.id,
+            },
+            {
+              timeoutMs: PHOTO_STAGE_TIMEOUT_MS.comparison + PHOTO_RESPONSE_GRACE_MS,
+              signal: controller.signal,
+            },
+          );
         },
-        { timeoutMs: 70000, signal: controller.signal },
+        async () => {
+          const fresh = await request<Session>('/api/sessions', {}, { signal: controller.signal });
+          controller.signal.throwIfAborted();
+          evidenceForPhoto.current = null;
+          updateSession(fresh);
+          return fresh;
+        },
+        controller.signal,
       );
       if (!evidenceGate.current.isCurrent(generation)) return;
       updateSession(result);
@@ -210,9 +238,10 @@ export default function App() {
     } catch (failure) {
       if (evidenceGate.current.isCurrent(generation)) {
         if (failure instanceof ApiError && failure.session) updateSession(failure.session);
-        setError((failure as Error).message);
-        setReadStatus(
-          'The photo comparison could not finish. Your photo is ready for another attempt; no location was automatically applied.',
+        setReadStatus('');
+        const step = stage === 'evidence' ? 'Reading the photo' : 'Comparing the floor plans';
+        setPhotoError(
+          `${step} stopped. ${failure instanceof Error ? failure.message : 'Please try again.'}`,
         );
       }
     } finally {
@@ -240,8 +269,10 @@ export default function App() {
         )}
       </main>
     );
-  const plans = data.visualPlans.filter((plan) =>
-    session.campusAnalysis?.candidates.some((candidate) => candidate.planId === plan.id),
+  const plans = data.visualPlans.filter(
+    (plan) =>
+      session.campusAnalysis?.candidates.some((candidate) => candidate.planId === plan.id) ||
+      session.campusAnalysis?.referenceLabels?.some((ref) => ref.planId === plan.id),
   );
   const photoReady = data.liveAvailable && data.photoLocalizationAvailable;
   const region = showPhotoResults ? session.campusLocation : null;
@@ -324,6 +355,7 @@ export default function App() {
             reading={reading}
             busy={busy}
             status={readStatus}
+            error={photoError}
             onPhoto={(file) => void readPhoto(file)}
             onConsent={setPhotoConsent}
             onAnalyze={() => void analyzePhoto()}
@@ -332,7 +364,11 @@ export default function App() {
           {region && (
             <>
               <div className="selected-start">
-                <strong>Photo region confirmed</strong>
+                <strong>
+                  {region.doorwayVicinity
+                    ? `Starting corridor confirmed · Room ${region.doorwayVicinity.room}`
+                    : 'Photo region confirmed'}
+                </strong>
                 <span>
                   {buildingLabel(region.building)} · Floor {region.floor}
                 </span>

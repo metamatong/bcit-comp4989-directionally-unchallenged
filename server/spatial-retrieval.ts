@@ -1,10 +1,11 @@
 /** Exact label retrieval, multi-label plan intersections, and coordinate-based follow-up evidence. */
 import { z } from 'zod';
-import type { PlanBounds, VisualPlan } from '../src/types';
+import type { VisualPlan } from '../src/types';
 import { boundsSchema } from './visual-data';
 import {
   canonicalBuilding,
-  centerIn,
+  groupLabelOccurrences,
+  overlappingBounds,
   labelKey,
   looksLikeIdentifier,
   pilotEvidence,
@@ -42,23 +43,11 @@ function scopedLabel(value: string) {
     ? { building: qualified[1], label: qualified[2].trim() }
     : { building: undefined, label: key };
 }
-function overlaps(a: PlanBounds, b: PlanBounds) {
-  return Math.min(a[2], b[2]) > Math.max(a[0], b[0]) && Math.min(a[3], b[3]) > Math.max(a[1], b[1]);
-}
 // Several OCR passes can see the same printed text. Never merge disjoint occurrences or other strings.
 function occurrences(items: LabelObservation[]) {
-  const groups: LabelObservation[][] = [];
   const priority = (item: LabelObservation) =>
     item.method === 'plan-transcription' ? 0 : item.method === 'geometry' ? 1 : 2;
-  for (const item of [...items].sort((a, b) => priority(a) - priority(b))) {
-    const group = groups.find(
-      (group) =>
-        overlaps(group[0].bounds, item.bounds) &&
-        (centerIn(group[0].bounds, item.bounds) || centerIn(item.bounds, group[0].bounds)),
-    );
-    if (group) group.push(item);
-    else groups.push([item]);
-  }
+  const groups = groupLabelOccurrences([...items].sort((a, b) => priority(a) - priority(b)));
   return groups.map((group) => ({
     occurrenceId: group[0].id,
     label: group[0].text,
@@ -184,7 +173,7 @@ export function getPilotContext(input: z.infer<typeof contextSchema>) {
     ...source(page.plan),
     bounds,
     networkRevision: reviewedNetwork().revision,
-    observations: page.observations.filter((item) => overlaps(item.bounds, bounds)),
+    observations: page.observations.filter((item) => overlappingBounds(item.bounds, bounds)),
     doorHypotheses: page.drawnDoors.filter(
       ({ point }) =>
         point.x >= bounds[0] &&

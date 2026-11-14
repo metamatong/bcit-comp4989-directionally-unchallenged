@@ -10,6 +10,9 @@ export const PHOTO_CROP_REGIONS: { id: 'nw' | 'ne' | 'sw' | 'se'; bounds: PlanBo
 export type PhotoCropId = (typeof PHOTO_CROP_REGIONS)[number]['id'];
 export const MAX_PHOTO_VIEW_BYTES = 450_000;
 export const MAX_PHOTO_BUNDLE_BYTES = 2_500_000;
+// The comparison can need two sequential Gemini calls. Leave time to deliver a stage error to the browser.
+export const PHOTO_STAGE_TIMEOUT_MS = { evidence: 45_000, comparison: 90_000 } as const;
+export const PHOTO_RESPONSE_GRACE_MS = 10_000;
 
 export function sourceCropPixels(width: number, height: number, bounds: PlanBounds) {
   const x = Math.round(bounds[0] * width),

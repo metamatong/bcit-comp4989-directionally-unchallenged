@@ -76,7 +76,7 @@ export function getVisualPlan(id: string) {
   return plan;
 }
 
-function verifiedBytes(asset: { file: string; sha256: string }) {
+export function verifiedVisualBytes(asset: { file: string; sha256: string }) {
   const path = resolve(root, asset.file);
   if (!path.startsWith(visualRoot + sep)) throw new Error('Invalid floor-plan asset path');
   const bytes = readFileSync(path);
@@ -89,7 +89,7 @@ const imageCache = new Map<string, ModelPart>();
 export function planImagePart(asset: PlanImage): ModelPart {
   const cached = imageCache.get(asset.sha256);
   if (cached) return cached;
-  const bytes = verifiedBytes(asset);
+  const bytes = verifiedVisualBytes(asset);
   if (bytes.length > 4 * 1024 * 1024 || bytes.subarray(0, 8).toString('hex') !== '89504e470d0a1a0a')
     throw new Error('Invalid or oversized floor-plan PNG');
   const part: ModelPart = { inlineData: { mimeType: 'image/png', data: bytes.toString('base64') } };
@@ -127,7 +127,7 @@ const geometryEvidenceSchema = z.object({
 });
 function loadGeometrySummary(plan: VisualPlan) {
   const data = geometryEvidenceSchema.parse(
-    JSON.parse(verifiedBytes(plan.geometry).toString('utf8')),
+    JSON.parse(verifiedVisualBytes(plan.geometry).toString('utf8')),
   );
   if (data.id !== plan.id || data.sourceSha256 !== plan.sourceSha256)
     throw new Error('Geometry provenance does not match its plan');

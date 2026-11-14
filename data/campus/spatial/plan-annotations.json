@@ -1145,6 +1145,22 @@
             "y": 0.5818182
           },
           "adjoiningLabel": "312A"
+        },
+        {
+          "room": "302",
+          "point": { "x": 0.1508, "y": 0.5821 },
+          "adjoiningLabel": null,
+          "corridorBounds": [0.10691, 0.5821, 0.16431, 0.60288]
+        },
+        {
+          "room": "320",
+          "point": { "x": 0.5557, "y": 0.5821 },
+          "adjoiningLabel": null
+        },
+        {
+          "room": "320",
+          "point": { "x": 0.5924, "y": 0.5821 },
+          "adjoiningLabel": null
         }
       ],
       "rejectedOcr": [

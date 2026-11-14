@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Camera, LoaderCircle, Search, ShieldCheck, Upload, X, MapPin } from 'lucide-react';
 import type { PreparedPhoto } from '../photo';
 
@@ -9,6 +9,7 @@ type PhotoLocationInputProps = {
   reading: boolean;
   busy: boolean;
   status: string;
+  error?: string;
   destination: string;
   onDestinationChange: (value: string) => void;
   onPhoto: (file?: File) => void;
@@ -17,6 +18,23 @@ type PhotoLocationInputProps = {
   onDiscard: () => void;
 };
 
+function ElapsedTime() {
+  const [seconds, setSeconds] = useState(0);
+  useEffect(() => {
+    const start = Date.now();
+    const timer = window.setInterval(
+      () => setSeconds(Math.floor((Date.now() - start) / 1000)),
+      1000,
+    );
+    return () => window.clearInterval(timer);
+  }, []);
+  return seconds >= 5 ? (
+    <span className="photo-elapsed" aria-hidden="true">
+      {seconds}s elapsed
+    </span>
+  ) : null;
+}
+
 export function PhotoLocationInput({
   photo,
   consent,
@@ -24,6 +42,7 @@ export function PhotoLocationInput({
   reading,
   busy,
   status,
+  error,
   destination,
   onDestinationChange,
   onPhoto,
@@ -113,11 +132,18 @@ export function PhotoLocationInput({
         </div>
         <small>BCIT Burnaby · SE12, SW03 and SW01</small>
       </div>
-      {status && (
-        <p className="photo-status" role="status">
-          {(reading || busy) && <LoaderCircle className="spin" size={15} />}
-          {status}
+      {error ? (
+        <p className="photo-failure" role="alert">
+          {error}
         </p>
+      ) : (
+        status && (
+          <p className="photo-status" role="status">
+            {(reading || busy) && <LoaderCircle className="spin" size={15} />}
+            {status}
+            {busy && <ElapsedTime key={status} />}
+          </p>
+        )
       )}
       {photo && (
         <form
@@ -140,7 +166,11 @@ export function PhotoLocationInput({
           </label>
           <button className="primary full-width" disabled={busy || reading || !consent || !ready}>
             {busy ? <LoaderCircle className="spin" size={17} /> : <Search size={17} />}
-            {destination.trim() ? 'Find my route' : 'Analyze photo against BCIT plans'}
+            {error
+              ? 'Retry with this photo'
+              : destination.trim()
+                ? 'Find my route'
+                : 'Analyze photo against BCIT plans'}
           </button>
         </form>
       )}

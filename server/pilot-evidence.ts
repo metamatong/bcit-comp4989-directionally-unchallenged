@@ -75,6 +75,8 @@ const annotationsSchema = z.object({
             room: z.string().min(1),
             point: z.object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1) }).strict(),
             adjoiningLabel: z.string().nullable(),
+            /** Optional extent of the corridor along this room frontage, traced on the source page. */
+            corridorBounds: boundsSchema.optional(),
           })
           .strict(),
       ),
@@ -112,6 +114,24 @@ export function centerIn(bounds: PlanBounds, region: PlanBounds) {
   const x = (bounds[0] + bounds[2]) / 2,
     y = (bounds[1] + bounds[3]) / 2;
   return x >= region[0] && x <= region[2] && y >= region[1] && y <= region[3];
+}
+export function overlappingBounds(a: PlanBounds, b: PlanBounds) {
+  return Math.min(a[2], b[2]) > Math.max(a[0], b[0]) && Math.min(a[3], b[3]) > Math.max(a[1], b[1]);
+}
+
+/** Multiple passes over the same print form one occurrence. Disjoint print stays distinct. */
+export function groupLabelOccurrences<T extends { bounds: PlanBounds }>(ordered: T[]): T[][] {
+  const groups: T[][] = [];
+  for (const item of ordered) {
+    const group = groups.find(
+      ([first]) =>
+        overlappingBounds(first.bounds, item.bounds) &&
+        (centerIn(first.bounds, item.bounds) || centerIn(item.bounds, first.bounds)),
+    );
+    if (group) group.push(item);
+    else groups.push([item]);
+  }
+  return groups;
 }
 function byPage<T extends { planId: string }>(items: T[], plans: VisualPlan[]) {
   const map = new Map(items.map((item) => [item.planId, item]));
@@ -234,6 +254,25 @@ function loadEvidence() {
         door.point.y > bottom
       )
         throw new Error(`Door is missing its source label or page region: ${plan.id} ${door.room}`);
+      if (door.corridorBounds) {
+        const [x0, y0, x1, y1] = door.corridorBounds;
+        if (
+          x0 < left ||
+          y0 < top ||
+          x1 > right ||
+          y1 > bottom ||
+          door.point.x < x0 ||
+          door.point.x > x1 ||
+          door.point.y < y0 ||
+          door.point.y > y1 ||
+          annotation.labels.some(
+            (label) =>
+              labelKey(label.text) === labelKey(door.room) &&
+              centerIn(label.bounds, door.corridorBounds!),
+          )
+        )
+          throw new Error(`Invalid corridor frontage on ${plan.id} at room ${door.room}`);
+      }
       return {
         ...door,
         id: `${plan.id}:drawn-door:${i + 1}`,

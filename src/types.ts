@@ -54,6 +54,25 @@ export type PhotoEvidence = {
   usedFallbackModel: boolean;
 };
 export type LabelMatch = { observedLabel: string; planLabel: string };
+export type VisualFeatureMatch = {
+  photoFeature: string;
+  planFeature: string;
+  kind?: 'architecture' | 'printed-label';
+};
+export type PlanLabelReference = {
+  id: string;
+  planId: string;
+  sourceSha256: string;
+  label: string;
+  bounds: PlanBounds;
+};
+export type CameraRegionIssue =
+  | 'label-mismatch'
+  | 'region-mismatch'
+  | 'appearance-unverified'
+  | 'region-too-broad'
+  | 'unsupported-identifier'
+  | 'no-camera-proposal';
 export type CampusLocationCandidate = {
   id: string;
   planId: string;
@@ -61,13 +80,24 @@ export type CampusLocationCandidate = {
   building: string;
   floor: string;
   page: number;
-  bounds: PlanBounds;
   confidence: 'low' | 'medium' | 'high';
-  matches: { photoFeature: string; planFeature: string }[];
+  matches: VisualFeatureMatch[];
   limitations: string[];
   labelMatches: LabelMatch[];
+  sourceLabels?: PlanLabelReference[];
   verification: 'unverified-ai-hypothesis';
-};
+} & (
+  | { bounds: PlanBounds; doorwayVicinity?: undefined }
+  | {
+      bounds: PlanBounds | null;
+      doorwayVicinity: {
+        doorId: string;
+        room: string;
+        point: { x: number; y: number };
+        sourceSha256: string;
+      };
+    }
+);
 export type CampusPhotoAnalysis = {
   requestId: string;
   outcome: 'candidates' | 'insufficient_evidence';
@@ -75,6 +105,13 @@ export type CampusPhotoAnalysis = {
   summary: string;
   clarification: string;
   candidates: CampusLocationCandidate[];
+  /** Printed labels can be shown as reference even when no camera region is defensible. */
+  referenceLabels?: PlanLabelReference[];
+  /** Session-only diagnostics; never includes photo bytes or generated coordinates rejected by grounding. */
+  localizationDecision?: {
+    cameraIssues: CameraRegionIssue[];
+    doorwayOutcome: 'not-offered' | 'no-assessment' | 'no-unique-match' | 'supported';
+  };
   atlasPlanCount: number;
   detailedPlanIds: string[];
   buildingHint: string | null;

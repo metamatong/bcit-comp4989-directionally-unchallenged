@@ -195,16 +195,27 @@ export function planVisitorJourney(
   const network = visitorPassages(doc, eligible, store.candidates, plans);
   const approved = new Set(eligible.nodeIds);
   const nodes = doc.nodes.filter((n) => approved.has(n.id));
-  const [left, top, right, bottom] = candidate.bounds;
+  const vicinity = candidate.doorwayVicinity;
+  const activeDoor = vicinity ? network.doors.get(vicinity.doorId) : undefined;
   const origins = nodes
-    .filter(
-      (n) =>
-        n.planId === candidate.planId &&
-        n.point.x >= left &&
-        n.point.x <= right &&
-        n.point.y >= top &&
-        n.point.y <= bottom,
-    )
+    .filter((n) => {
+      if (n.planId !== candidate.planId) return false;
+      if (vicinity)
+        return (
+          n.id === activeDoor &&
+          n.sourceSha256 === vicinity.sourceSha256 &&
+          n.point.x === vicinity.point.x &&
+          n.point.y === vicinity.point.y
+        );
+      const bounds = candidate.bounds;
+      return (
+        !!bounds &&
+        n.point.x >= bounds[0] &&
+        n.point.x <= bounds[2] &&
+        n.point.y >= bounds[1] &&
+        n.point.y <= bounds[3]
+      );
+    })
     .map(stop);
   const choices = resolveDestination(request.destination, nodes, network.doors);
   const context = {
@@ -249,8 +260,9 @@ export function planVisitorJourney(
     return {
       ...context,
       status: 'unmapped-origin',
-      message:
-        'There is no reviewed starting point inside your confirmed region. Try a photo at a marked doorway, stair landing or elevator.',
+      message: vicinity
+        ? `The corridor outside room ${vicinity.room} is identified. Its connection to the walking network still needs review.`
+        : 'There is no reviewed starting point inside your confirmed region. Try a photo at a marked doorway, stair landing or elevator.',
     };
   const origin = origins.find((n) => n.id === request.originId);
   if (!origin)
