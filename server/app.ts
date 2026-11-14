@@ -11,7 +11,12 @@ import { readPhotoEvidence, PhotoEvidenceError, type PhotoEvidenceRecord } from 
 import { photoEvidenceRequestSchema, photoRequestSchema, releasePhotoBytes } from './photo-media';
 import { createTopologyRouter, protectTopologyFiles, requireLocalTopology } from './topology-api';
 import { TopologyError, TopologyStore } from './topology';
-import { navigationSchema, planVisitorJourney } from './wayfinding';
+import {
+  navigationSchema,
+  planVisitorJourney,
+  startingPoints,
+  startingPointsSchema,
+} from './wayfinding';
 
 export const actionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('confirm-campus-region'), candidateId: z.string().uuid() }).strict(),
@@ -228,6 +233,40 @@ export function createApp(options: {
     handlePhotoStage(req, res, 'evidence'),
   );
   app.post('/api/sessions/:id/photo', (req, res) => handlePhotoStage(req, res, 'location'));
+  app.post('/api/sessions/:id/navigation/origins', (req, res) => {
+    const session = sessions.get(req.params.id);
+    if (!session || Date.now() - session.lastTouched > 1800000) {
+      res.status(404).json({ error: 'Session expired. Reload and confirm a new photo.' });
+      return;
+    }
+    const input = startingPointsSchema.safeParse(req.body);
+    if (!input.success) {
+      res.status(400).json({ error: 'Choose a starting area from the current photo.' });
+      return;
+    }
+    const candidate = session.campusAnalysis?.candidates.find(
+      (c) => c.id === input.data.candidateId,
+    );
+    if (!candidate || busy.has(session.id) || input.data.revision !== session.revision) {
+      res.status(409).json({
+        error: 'The photo session changed. Refresh before choosing a starting point.',
+        session,
+      });
+      return;
+    }
+    try {
+      const points = startingPoints(candidate, topologyStore);
+      session.lastTouched = Date.now();
+      res.json(points);
+    } catch (error) {
+      res.status(error instanceof TopologyError ? error.httpStatus : 503).json({
+        error:
+          error instanceof TopologyError
+            ? error.message
+            : 'The walking map is unavailable. Try again after its source data is restored.',
+      });
+    }
+  });
   app.post('/api/sessions/:id/navigation', (req, res) => {
     const session = sessions.get(req.params.id);
     if (!session || Date.now() - session.lastTouched > 1800000) {

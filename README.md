@@ -33,12 +33,12 @@ The Node server does not restart automatically when files change. Restart it man
 
 ## Use
 
-There is no Campus library, general plan browser, or introductory marketing banner. Start with photo input; the result shows the matching plan region and links to that plan. Full source data and geometry remain available to Gemini on the server.
+A destination and a starting photo open a walking itinerary. A photo-only submission shows the location evidence.
 
 1. Use **Upload photo** or **Take a photo** directly in the first screen's **Find my location** section.
 2. Enter a destination such as `SW03 3615`, agree to send this photo and its detail views to Gemini, and select **Find my route**. You can also run a photo-only comparison and enter the destination later.
-3. Blue marks identify printed room labels. A matching signed doorway and corridor layout can yield a **Possible starting corridor** even when the exact camera position is unknown. Confirm it with **I’m in this corridor**. An orange strip marks a traced corridor frontage where available. An orange diamond marks the reference doorway when its frontage has yet to be traced. Sign-only and ambiguous results show the printed labels. Choose the numbered point where you are standing. A photo without a defensible region or a region without a reviewed point requires a different view.
-4. Follow the arrows on the selected floor plan. Use **Next step** at an elevator, stair or building crossing. You can zoom out to the full floor or check another destination using the same photo region. **Clear** removes the current result.
+3. Choose **Start at …** for the marked door or checkpoint where you are standing. This confirms the photo area and the specific route start in one action. Choose the intended place if the destination label has several matches. Insufficient evidence or a missing reviewed connection produces a coverage message.
+4. **Walking directions** shows all floor plans in travel order. Follow the arrows on each floor and the instructions for crossing buildings or changing floors. **One floor at a time** opens manual floor navigation. **Edit photo or destination** and **Photo location evidence** are available below the itinerary. **Start over** clears the current result.
 
 A connected example runs from the SW03 2605 door opposite vestibule 2604 to the SW03 3615 door opposite vestibule 3604 via the east elevator. SE12 floor 2 joins this network at its exterior door and floor 3 at its indoor passage. SW01 has searchable labels and zero reviewed connections in this revision. `SW01 2004` shows its source location and `SW03 2458` returns no exact match.
 
@@ -55,7 +55,9 @@ Open [the local topology editor](http://127.0.0.1:3000/internal/topology) after 
 
 The catalogue contains three building-passage reviews, nine floor 2–3 reviews and two SW03 corridor reviews. The corridor questions use the previously reviewed door and lift stop on each floor. Open **후보 확인 · T / F** and check whether the entire corridor between A and B is passable, then record its permitted direction. [Floor-by-floor evidence](docs/topology-editor.md#stairs-and-elevators-between-floors-2-and-3)
 
-At revision 25 the user has confirmed seven stair pairs, the SW03 east elevator, two building crossings and four SW03 corridors in both directions. Two corridors reach the specified classroom doors. The SE12 elevator inquiry has a final F response. The fourth-floor building passage is in draft. [Pilot route and its endpoints](docs/topology-editor.md#first-continuous-route)
+The indoor journey from SE12 room 302 to SW03 office 2082 uses two additional corridor reviews. The revision 28 snapshot includes both bidirectional approvals for new installations. Open the [SE12 floor 3 segment](http://127.0.0.1:3000/internal/topology?candidate=se12-f3-302-to-sw03-link) and the [SW03 floor 2 segment](http://127.0.0.1:3000/internal/topology?candidate=sw3-f2-exterior-door-to-2082) to inspect the marked lines and the recorded directions. The third-floor building passage and the SW03 east elevator already have current approvals.
+
+At revision 28 the user has confirmed seven stair pairs, the SW03 east elevator, two building crossings and six indoor corridor segments in both directions. Four room doorways now have reviewed approaches. The SE12 elevator inquiry has a final F response. The fourth-floor building passage is in draft. [Pilot route and its endpoints](docs/topology-editor.md#first-continuous-route)
 
 The user also reported that part of SE12 floor 2 meets the ground. This is context, not a universal floor-to-elevation mapping, an entrance position, or evidence of step-free access. Second-floor travel is represented as an outdoor passage between source-linked exterior doors, with unknown distance and intermediate geometry. More candidates require source-grounded preparation; there is no automatic all-building reconstruction or runtime Gemini call for this workflow. F rejects only the presented candidate, not every possible path between the buildings. Changing a prior T to F, unknown or unknown direction withdraws that candidate connection from routing while preserving answer history.
 
@@ -76,7 +78,7 @@ npm run format
 
 Tests mock Gemini and spend no provider quota. Browser automation, when requested, uses an isolated server on port 3100 with credentials disabled and installed Google Chrome. It is not a physical-phone or Safari test. The browser OCR packages, worker assets and installation hook have been removed; optional local PDF preprocessing can still use Tesseract.
 
-SE12, SW03 and SW01 have a server-side spatial index across floors 1–4. It includes 377 source-read labels, 19 drawn door locations, whole-page OCR evidence and a revisioned graph of 22 approved checkpoints and 14 passages. Try a label with `npm run spatial:query -- resolve_spatial_labels '{"purpose":"destination","labels":["SW03 2605"]}'`. Unknown labels return `unsupported`. [Tool contracts, coverage and examples](docs/spatial-retrieval.md)
+SE12, SW03 and SW01 have a server-side spatial index across floors 1–4. It includes 378 source-read labels, 20 drawn door locations, whole-page OCR evidence and a revisioned graph of 24 approved checkpoints and 16 passages. Try a label with `npm run spatial:query -- resolve_spatial_labels '{"purpose":"destination","labels":["SW03 2605"]}'`. Unknown labels return `unsupported`. [Tool contracts, coverage and examples](docs/spatial-retrieval.md)
 
 Photo retrieval preserves exact identifiers, including `302`, `3021` and `0302`. All 5,463 original labels remain available as source evidence. The second stage uses the pilot drawing index to retrieve matching observations and their page boxes. Optical-only hits go through visual shortlisting. Detailed photo-to-plan comparison and user confirmation follow.
 
@@ -110,7 +112,7 @@ mvp/
 │   ├── App.tsx, main.tsx, styles.css, wayfinding.ts, wayfinding.css
 │   ├── TopologyEditor.tsx, topology.ts, topology.css
 │   ├── api.ts, photo.ts, photo-views.ts, types.ts
-│   └── components/  PhotoLocationInput, CampusLocationResults, JourneyPanel, RouteMap, TopologyPlan, TopologyForms, ConnectionReview
+│   └── components/  PhotoLocationInput, CampusLocationResults, JourneyPanel, RouteDirections, RouteMap, TopologyPlan, TopologyForms, ConnectionReview
 ├── server/
 │   ├── index.ts, app.ts, runtime.ts
 │   ├── provider.ts, photo-localization.ts, session.ts
@@ -137,7 +139,7 @@ mvp/
 ├── tests/
 │   ├── api.test.ts, client-state.test.ts, data.test.ts, visual-data.test.ts, runtime.test.ts
 │   ├── provider.test.ts, provider-response.test.ts, spatial-retrieval.test.ts
-│   ├── photo-localization.test.ts, photo-doorways.test.ts, photo-api.test.ts
+│   ├── photo-localization.test.ts, photo-doorways.test.ts, photo-api.test.ts, route-results.test.ts
 │   ├── photo.test.ts, photo-location-input.test.ts, room-labels.test.ts, photo-fixtures.ts
 │   ├── topology.test.ts, topology-api.test.ts, topology-editor.test.ts
 │   ├── topology-candidates.test.ts, wayfinding.test.ts, wayfinding-api.test.ts

@@ -151,28 +151,64 @@
   width: 100%;
   height: clamp(210px, 43vw, 420px);
 }
-.step-tabs {
+.itinerary-toggle {
   display: flex;
-  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.floor-itinerary {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.floor-directions {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid #cad6cf;
+}
+.floor-directions h3 {
+  font-size: 21px;
+  margin: 0 0 6px;
+}
+.floor-endpoints {
+  display: flex;
   gap: 6px;
-  margin: 14px 0;
+  align-items: center;
+  flex-wrap: wrap;
+  font-size: 14px;
 }
-.step-tabs button {
-  min-width: 38px;
-  min-height: 38px;
-  border-radius: 50%;
-  background: #f0f4f0;
-  border: 1px solid #c0cdc2;
+.floor-directions .walking-map {
+  height: auto;
+  min-height: 140px;
+  max-height: 52vh;
+}
+.map-bar > button:only-child {
+  margin-left: auto;
+}
+.floor-directions .floor-transfer,
+.floor-directions .route-arrival {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 12px 0 0;
   font-weight: 600;
-}
-.step-tabs button[aria-current] {
-  background: #194f40;
-  color: white;
-  border-color: #194f40;
+  color: #205540;
 }
 .route-paging {
   justify-content: space-between;
   margin: 16px 0 8px;
+}
+.journey-inputs,
+.journey-evidence {
+  margin: 12px 0;
+}
+.journey-inputs > summary,
+.journey-evidence > summary {
+  min-height: 44px;
+  align-content: center;
+  color: #25513f;
+  cursor: pointer;
+  font-weight: 600;
 }
 .place-choices {
   display: grid;

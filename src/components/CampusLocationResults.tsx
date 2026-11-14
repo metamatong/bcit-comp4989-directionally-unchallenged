@@ -75,12 +75,14 @@ export function CampusLocationResults({
   selectedId,
   onConfirm,
   busy,
+  evidenceOnly = false,
 }: {
   analysis: CampusPhotoAnalysis;
   plans: VisualPlan[];
   selectedId?: string;
   onConfirm: (id: string) => void;
   busy: boolean;
+  evidenceOnly?: boolean;
 }) {
   const references = analysis.referenceLabels ?? [];
   return (
@@ -166,23 +168,25 @@ export function CampusLocationResults({
                 {plan.attribution} · {plan.sourceRef}
               </p>
             </details>
-            <button
-              className="primary full-width"
-              disabled={busy || selectedId === candidate.id}
-              onClick={() => onConfirm(candidate.id)}
-            >
-              <Check size={17} />
-              {selectedId === candidate.id
-                ? 'Region selected'
-                : candidate.doorwayVicinity
-                  ? 'I’m in this corridor'
-                  : 'Confirm this possible region'}
-            </button>
+            {!evidenceOnly && (
+              <button
+                className="primary full-width"
+                disabled={busy || selectedId === candidate.id}
+                onClick={() => onConfirm(candidate.id)}
+              >
+                <Check size={17} />
+                {selectedId === candidate.id
+                  ? 'Region selected'
+                  : candidate.doorwayVicinity
+                    ? 'I’m in this corridor'
+                    : 'Confirm this possible region'}
+              </button>
+            )}
           </article>
         );
       })}
       {analysis.clarification && <p className="clarification-note">{analysis.clarification}</p>}
-      {!!analysis.candidates.length && (
+      {!evidenceOnly && !!analysis.candidates.length && (
         <p className="helper">
           Confirm the highlighted region only if it matches your surroundings.
         </p>

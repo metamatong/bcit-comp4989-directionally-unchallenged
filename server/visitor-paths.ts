@@ -22,6 +22,7 @@ const traceSchema = z
     to: normalizedPointSchema,
     bends: z.array(normalizedPointSchema).min(1),
     instruction: z.string().min(1),
+    departureDoorId: z.string().optional(),
     arrivalDoorId: z.string().optional(),
     initialReviewHash: hash.optional(),
   })
@@ -46,19 +47,45 @@ function matchesSource(trace: Trace, candidates: ConnectionCandidate[], plans: V
     samePoint(candidate.to.point, trace.to)
   );
 }
-function doorForTrace(trace: Trace) {
+function corridorTraces(candidates: ConnectionCandidate[]): Trace[] {
+  const proposals = candidates.flatMap((candidate) => {
+    const trace = candidate.drawingTrace;
+    if (!trace || !candidate.from.point || !candidate.to.point) return [];
+    return [
+      {
+        candidateId: candidate.id,
+        definitionHash: topologyContentHash(candidate),
+        planId: candidate.from.planId,
+        sourceSha256: candidate.from.sourceSha256,
+        from: candidate.from.point,
+        to: candidate.to.point,
+        bends: trace.bends,
+        instruction: trace.instruction,
+        departureDoorId: trace.fromDoorId,
+        arrivalDoorId: trace.toDoorId,
+      },
+    ];
+  });
+  return [...catalogue.traces, ...proposals];
+}
+function doorForTrace(trace: Trace, doorId: string, point: PagePoint) {
   return pilotEvidence()
     .find((p) => p.plan.id === trace.planId)
-    ?.drawnDoors.find((d) => d.id === trace.arrivalDoorId && samePoint(d.point, trace.to));
+    ?.drawnDoors.find((d) => d.id === doorId && samePoint(d.point, point));
 }
 export function validateCorridorTraces(candidates: ConnectionCandidate[], plans: VisualPlan[]) {
-  if (new Set(catalogue.traces.map((t) => t.candidateId)).size !== catalogue.traces.length)
+  const traces = corridorTraces(candidates);
+  if (new Set(traces.map((t) => t.candidateId)).size !== traces.length)
     throw new Error('Duplicate pilot corridor trace.');
-  for (const trace of catalogue.traces) {
-    if (!matchesSource(trace, candidates, plans) || (trace.arrivalDoorId && !doorForTrace(trace)))
+  for (const trace of traces) {
+    if (
+      !matchesSource(trace, candidates, plans) ||
+      (trace.arrivalDoorId && !doorForTrace(trace, trace.arrivalDoorId, trace.to)) ||
+      (trace.departureDoorId && !doorForTrace(trace, trace.departureDoorId, trace.from))
+    )
       throw new Error(`Corridor trace needs current source evidence: ${trace.candidateId}`);
   }
-  return catalogue.traces.length;
+  return traces.length;
 }
 
 export function visitorPassages(
@@ -76,7 +103,7 @@ export function visitorPassages(
   );
   const traces = new Map<string, { fromId: string; path: PagePoint[]; instruction: string }>();
   const doors = new Map<string, string>();
-  for (const trace of catalogue.traces) {
+  for (const trace of corridorTraces(candidates)) {
     const answer = latest.get(trace.candidateId);
     if (
       !answer?.bindings ||
@@ -112,7 +139,10 @@ export function visitorPassages(
       path: [trace.from, ...trace.bends, trace.to],
       instruction: trace.instruction,
     });
-    if (trace.arrivalDoorId && doorForTrace(trace)) doors.set(trace.arrivalDoorId, to.id);
+    if (trace.departureDoorId && doorForTrace(trace, trace.departureDoorId, trace.from))
+      doors.set(trace.departureDoorId, from.id);
+    if (trace.arrivalDoorId && doorForTrace(trace, trace.arrivalDoorId, trace.to))
+      doors.set(trace.arrivalDoorId, to.id);
   }
   return { allowed, traces, doors };
 }

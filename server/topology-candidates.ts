@@ -50,6 +50,13 @@ export function readConnectionCandidates() {
   const definitions = new Map(catalogue.candidates.map((candidate) => [candidate.id, candidate]));
   for (const candidate of catalogue.candidates) {
     const { from, to, kind } = candidate;
+    if (
+      candidate.drawingTrace &&
+      (kind !== 'corridor' || from.planId !== to.planId || !from.point || !to.point)
+    )
+      throw new Error(
+        `A proposed corridor line must join two marked points on one floor: ${candidate.id}`,
+      );
     if (candidate.endpointRefs) {
       if (kind !== 'corridor' || from.planId !== to.planId)
         throw new Error(`Expected one floor for corridor ${candidate.id}`);
@@ -174,6 +181,16 @@ export function connectionCandidateViews(
     };
     const from = endpoint('from'),
       to = endpoint('to');
+    const onOriginalTrace = (['from', 'to'] as const).every((side) => {
+      const current = side === 'from' ? from : to,
+        original = candidate[side];
+      return (
+        current.planId === original.planId &&
+        current.sourceSha256 === original.sourceSha256 &&
+        current.point?.x === original.point?.x &&
+        current.point?.y === original.point?.y
+      );
+    });
     const endpointTitle = (point: CandidateEndpoint) => {
       const plan = plans.find((item) => item.id === point.planId);
       return plan ? planLabel(plan) : point.planId;
@@ -192,6 +209,7 @@ export function connectionCandidateViews(
     );
     return {
       ...candidate,
+      ...(candidate.drawingTrace && !onOriginalTrace ? { drawingTrace: undefined } : {}),
       title:
         from.planId !== candidate.from.planId || to.planId !== candidate.to.planId
           ? `${endpointTitle(from)} ↔ ${endpointTitle(to)} 연결 후보 (층 수정됨)`

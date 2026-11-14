@@ -1,8 +1,11 @@
 import { randomUUID } from 'node:crypto';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import sharp from 'sharp';
-import { describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it } from 'vitest';
 import { analyzeCampusPhoto, confirmCampusRegion } from '../server/photo-localization';
 import { readPhotoEvidence } from '../server/photo-evidence';
 import { sourcePhotoReferences } from '../server/photo-grounding';
@@ -15,6 +18,7 @@ import { pilotEvidence } from '../server/pilot-evidence';
 import { retrieveRoomLabels } from '../server/room-labels';
 import { verifiedVisualBytes } from '../server/visual-data';
 import { TopologyStore } from '../server/topology';
+import { reviewedNetwork } from '../server/pilot-network';
 import { planVisitorJourney } from '../server/wayfinding';
 import type { ModelPart, Provider } from '../server/provider';
 import { newSession } from '../server/session';
@@ -24,6 +28,15 @@ import { comparison, comparisonInput, labelReading, photoInput } from './photo-f
 
 const plans = pilotEvidence().map((p) => p.plan);
 const planIds = new Set(plans.map((p) => p.id));
+// Coverage-gap cases use the shipped graph. A review in the running editor must not change their meaning.
+const fixtureDirectory = mkdtempSync(join(tmpdir(), 'doorway-coverage-'));
+const fixtureStore = new TopologyStore(
+  join(fixtureDirectory, 'topology.json'),
+  undefined,
+  undefined,
+  reviewedNetwork,
+);
+afterAll(() => rmSync(fixtureDirectory, { recursive: true, force: true }));
 function sources(labels: string[]) {
   const retrieval = retrieveRoomLabels(
     labels.map((text) => ({ text, clarity: 'clear', viewId: 'full' })),
@@ -49,7 +62,7 @@ function supported(doorId: string, room: string) {
 }
 describe('visually supported doorway vicinities', () => {
   it.each([
-    ['302', 'SE12-F3-p1', 'SW03 3615', 'unmapped-origin'],
+    ['302', 'SE12-F3-p1', 'SW03 2082', 'choose-origin'],
     ['3615', 'SW3-F3-p1', 'SW03 2605', 'choose-origin'],
     ['2004', 'SW1-F2-p1', 'SW03 3615', 'unmapped-origin'],
   ])(
@@ -113,7 +126,7 @@ describe('visually supported doorway vicinities', () => {
       expect(markup).toContain(door.corridorBounds ? 'corridor-vicinity' : 'doorway-reference');
       expect(session.campusLocation).toBeNull();
       confirmCampusRegion(session, match.id);
-      const store = new TopologyStore();
+      const store = fixtureStore;
       const query = { revision: session.revision, candidateId: match.id, destination };
       const choices = planVisitorJourney(session.campusLocation!, query, store);
       expect(choices.status).toBe(routeState);
@@ -168,7 +181,7 @@ describe('visually supported doorway vicinities', () => {
     }
     const other = sources(['320']).references;
     expect(matchDoorwayVicinity(options, [a], [...references, ...other])).toBeUndefined();
-    expect(sources(['2082']).options).toEqual([]);
+    expect(sources(['2087']).options).toEqual([]);
   });
   it('preserves a second nearby printed sign without treating the whole inspection crop as a position', () => {
     const { options, references } = sources(['2004', '2005']);

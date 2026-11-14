@@ -95,6 +95,15 @@ The editor page and its API require an actual loopback connection and a local Ho
 
 `src/topology.ts` defines the shared types/schemas. `server/topology.ts` owns storage, source binding, review and eligibility; `server/routing.ts` owns deterministic routing; `server/topology-api.ts` owns internal access and API handling. The visitor bootstrap and photo sessions do not expose the editable graph. The local visitor planner reads current approvals from the same store. Withdrawing a room approach also withdraws its corridor overlay from subsequent route requests.
 
+## SE12 room 302 to SW03 office 2082
+
+Two source-bound questions complete the ends of the indoor itinerary through the third-floor connecting passage and SW03 east elevator. Both have user-confirmed bidirectional answers in revision 28.
+
+- **SE12 floor 3**. A is the drawn threshold of classroom 302 on the window-side corridor. Follow the frontage of 306, 308, 310 and 312 to 312A, then turn into the narrow SW03 passage to B, its existing reviewed junction. [Review this segment](http://127.0.0.1:3000/internal/topology?candidate=se12-f3-302-to-sw03-link)
+- **SW03 floor 2**. A is the interior side of the existing exterior doorway between rooms 2063 and 2080. Follow corridor 2000 into the building to B, the corridor-side threshold of office 2082 between office 2081 and meeting room 2083. This question covers indoor travel only. [Review this segment](http://127.0.0.1:3000/internal/topology?candidate=sw3-f2-exterior-door-to-2082)
+
+The combined view displays both pins and the proposed bends on one source page. Expand the endpoint details to inspect or adjust an editable pin. The proposed bends and room-door references are included in the candidate definition hash. A current T and its permitted direction can activate the trace only while its endpoints and source still match. Changing an endpoint disables its original trace until the source line is revised and reviewed.
+
 ## Classroom approaches
 
 Two additional SW03 corridor questions share a previously approved east elevator landing. Each has a new room-door point. Floor 2 uses the 2605 door opposite vestibule 2604, and floor 3 uses the 3615 door opposite vestibule 3604. The user confirmed both directions in chat. Those answers are stored at revisions 24 and 25 with user-confirmation evidence, no field date, and the hash of the approved edge. The alternate door to 2605 has no approved approach.
