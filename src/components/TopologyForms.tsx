@@ -423,7 +423,7 @@ export function ReviewPanel({
                 <strong>{review.status}</strong> · {review.reviewer} · record v
                 {review.recordVersion}
                 <time dateTime={review.reviewedAt}>
-                  {new Date(review.reviewedAt).toLocaleString()}
+                  {new Date(review.reviewedAt).toLocaleString('en-CA')}
                 </time>
                 <p>{review.note}</p>
                 <p className="topology-help">

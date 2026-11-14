@@ -3,7 +3,7 @@
   "traces": [
     {
       "candidateId": "sw3-f2-door-to-lift-corridor",
-      "definitionHash": "1eb9e73a879d36b1c165b0186c8cbd4ddde66fa458f5cea0a00b97e2221fc413",
+      "definitionHash": "b106686c118bddf0ee8e2fc4499b14d83a0f4311edbffebae815b5d50f362f71",
       "planId": "SW3-F2-p1",
       "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
       "from": {
@@ -37,7 +37,7 @@
     },
     {
       "candidateId": "sw3-f3-lift-to-building-link-corridor",
-      "definitionHash": "27d5a88f0f98241fd4ad6224b35e6755a0df585fe5118c4f1b1c4ad762d338ac",
+      "definitionHash": "832dec64a9b54e803173f593b103532169701c5b693a5240fe96fa165d02481c",
       "planId": "SW3-F3-p1",
       "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
       "from": {
@@ -67,7 +67,7 @@
     },
     {
       "candidateId": "sw3-f2-east-lift-to-2605",
-      "definitionHash": "0ffdc44568dbc298b596407af6587014178e67b4e22fa6adb0d68a3a41f4f10f",
+      "definitionHash": "99f314e03b82875a7b09783dd638f3de97f05bbdc9e3beacb75322859e22cc50",
       "planId": "SW3-F2-p1",
       "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
       "from": {
@@ -93,7 +93,7 @@
     },
     {
       "candidateId": "sw3-f3-east-lift-to-3615",
-      "definitionHash": "3ae5ddbfd77839f22a3b2140b6df34d568fd0cdeeed1518b0e5f470de3ed7791",
+      "definitionHash": "962011097269cfef8aa13540e255e531ea4f079d3c3be271c546043c05c301bd",
       "planId": "SW3-F3-p1",
       "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
       "from": {

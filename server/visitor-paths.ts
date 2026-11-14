@@ -32,6 +32,12 @@ const catalogue = z
   .object({ schemaVersion: z.literal(1), traces: z.array(traceSchema) })
   .strict()
   .parse(checkedSpatialJson('corridor-traces'));
+// Original edge receipts for journals saved before the editor recorded these on each answer.
+export const initialCorridorReviewHashes = new Map(
+  catalogue.traces.flatMap((trace) =>
+    trace.initialReviewHash ? [[trace.candidateId, trace.initialReviewHash] as const] : [],
+  ),
+);
 const samePoint = (a: PagePoint | null, b: PagePoint) => a?.x === b.x && a.y === b.y;
 
 function matchesSource(trace: Trace, candidates: ConnectionCandidate[], plans: VisualPlan[]) {

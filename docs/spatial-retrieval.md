@@ -32,7 +32,7 @@ Import `pilotToolDeclarations` and `runPilotTool(name, args)` from `server/pilot
 
 For origin evidence, confirm the actual image/plan match, then have the user confirm the relevant checkpoint. A destination can resolve to a printed room label before its door has a routable binding. A single room can have more than one drawn door. Ambiguity requires clarification. Tool output, including extracted text, is untrusted evidence.
 
-## Coverage on November 13, 2026
+## Coverage on November 14, 2026
 
 The twelve pages contain 4,641 original geometry labels, 16,659 additional OCR observations and 378 source-read labels. OCR includes fragments, annotations, repeated readings and recognition errors. Grouping room-shaped identifiers by page gives 1,388 candidates after occurrence-specific source corrections. Counts include service spaces. The total number of actual rooms on campus remains unmeasured.
 
@@ -44,9 +44,9 @@ The twelve pages contain 4,641 original geometry labels, 16,659 additional OCR o
 
 The SE12 floor 3 annotations include one drawn doorway for room 302 and two for room 320. They are bound to the original sheet and supply page positions for comparing photo regions. Room 302 also has a source-traced corridor frontage between its doorway and the exterior boundary. Doorway details for photo comparison are generated from each eligible door throughout the pilot. The individual room annotations do not grant route access.
 
-SW03 floor 2 includes the office label 2082 and its drawing door on corridor 2000. Separate review questions bind this door and the 302 door on SE12 floor 3 to their respective existing checkpoints. Both connections have current bidirectional approvals in revision 28.
+SW03 floor 2 includes the office label 2082 and its drawing door on corridor 2000. Separate review questions bind this door and the 302 door on SE12 floor 3 to their respective existing checkpoints. Both connections have current bidirectional approvals in revision 29.
 
-The approved network is an export of editor revision 28. It contains 24 points and 16 bidirectional passages. Six corridors have original-page traces, including the approaches to SE12 room 302 and SW03 rooms 2082, 2605 and 3615. Five passages form the continuous SE12 floor 2 → outdoor → SW03 floor 2 corridor → elevator → SW03 floor 3 corridor → SE12 floor 3 journey. The latest SE12 floor 2–3 elevator report is F and is stored as floor evidence. The earlier fourth-floor building passage does not qualify for this revision. No distance has been measured for the five-step journey.
+The approved network is an export of editor revision 29. It contains 24 points and 16 bidirectional passages. Six corridors have original-page traces, including the approaches to SE12 room 302 and SW03 rooms 2082, 2605 and 3615. Five passages form the continuous SE12 floor 2 → outdoor → SW03 floor 2 corridor → elevator → SW03 floor 3 corridor → SE12 floor 3 journey. The latest SE12 floor 2–3 elevator report is F and is stored as floor evidence. The earlier fourth-floor building passage does not qualify for this revision. No distance has been measured for the five-step journey.
 
 The SW01–SW03 questions on floors 2, 3 and 4 pair visible openings on the official plans for future review. The SW01 markers are near S290, S390 and S490 respectively. The SW03 markers are at the end of the office wing. These questions carry a supporting campus-map URL and hash. They appear in region context with `status: unreviewed` and have no graph edges. Complete room-to-room routing requires more reviewed doors, indoor corridor connections and a confirmed SW01 crossing.
 

@@ -134,12 +134,21 @@ it('turns a photo and typed destination into the complete three-floor route afte
     expect(provider.calls).toBe(0);
     await click(button('Find my route'));
     await wait(() => expect(button('Start at 302')).toBeDefined());
+    expect(button('Start at 302').textContent).toContain('302 · window-side corridor door');
     expect(host.querySelector('.route-directions')).toBeNull();
     expect(host.querySelector('.journey-evidence[open]')).toBeNull();
     await click(button('Start at 302'));
     await wait(() => expect(host.querySelector('.route-directions')).not.toBeNull());
     const result = host.querySelector('.workspace > section')!;
     expect(result.getAttribute('aria-label')).toBe('Your walking route');
+    for (const label of [
+      'Passage to SW03',
+      'Passage to SE12',
+      'East elevator at 3696',
+      'East elevator at 2696',
+    ])
+      expect(result.textContent).toContain(label);
+    expect(result.textContent).not.toMatch(/\p{Script=Hangul}/u);
     expect([...result.querySelectorAll('.floor-directions h3')].map((h) => h.textContent)).toEqual([
       'SE12 · Floor 3',
       'SW03 · Floor 3',

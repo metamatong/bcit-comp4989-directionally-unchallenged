@@ -30,6 +30,7 @@ import { topologyRecordHash } from './topology-provenance';
 import { connectionCandidateViews, readConnectionCandidates } from './topology-candidates';
 import { importReviewedNetwork, initializeTopologyFile } from './topology-import';
 import { reviewedNetwork } from './pilot-network';
+import { needsEnglishMigration, migrateTopologyToEnglish } from './topology-english';
 
 export class TopologyError extends Error {
   constructor(
@@ -173,9 +174,10 @@ export class TopologyStore {
     resolve(root, 'data/campus/topology.json')
       ? reviewedNetwork
       : undefined,
+    private readonly legacyAnnotations?: ReadonlyMap<string, string>,
   ) {}
 
-  read(): TopologyDocument {
+  private load(): TopologyDocument {
     try {
       let contents: string;
       try {
@@ -203,6 +205,18 @@ export class TopologyStore {
       );
     }
   }
+  read(): TopologyDocument {
+    const document = this.load();
+    if (!needsEnglishMigration(document)) return document;
+    return this.withWriteLock(() => this.upgrade(this.load()));
+  }
+  private upgrade(document: TopologyDocument) {
+    if (needsEnglishMigration(document)) {
+      migrateTopologyToEnglish(document, this.legacyAnnotations);
+      this.save(document);
+    }
+    return document;
+  }
   snapshot(): TopologyBootstrap {
     return this.present(this.read());
   }
@@ -221,6 +235,22 @@ export class TopologyStore {
       throw new TopologyError(
         `Invalid edit: ${parsed.error.issues[0]?.message ?? 'check the fields'}`,
       );
+    return this.withWriteLock(() => {
+      const document = this.upgrade(this.load());
+      if (parsed.data.revision !== document.revision)
+        throw new TopologyError(
+          'Another edit changed the graph. Discard or copy your unsaved edit, reload the graph, and try again.',
+          409,
+        );
+      document.schemaVersion = 2;
+      this.apply(document, parsed.data.command);
+      document.revision++;
+      document.updatedAt = new Date().toISOString();
+      this.save(document);
+      return this.present(document);
+    });
+  }
+  private withWriteLock<T>(action: () => T): T {
     const lockPath = `${this.file}.lock`;
     let lock: number;
     try {
@@ -231,24 +261,8 @@ export class TopologyStore {
         503,
       );
     }
-    const temporaryPath = `${this.file}.${randomUUID()}.tmp`;
     try {
-      const document = this.read();
-      if (parsed.data.revision !== document.revision)
-        throw new TopologyError(
-          'Another edit changed the graph. Discard or copy your unsaved edit, reload the graph, and try again.',
-          409,
-        );
-      this.apply(document, parsed.data.command);
-      document.revision++;
-      document.updatedAt = new Date().toISOString();
-      validateTopologyDocument(document);
-      writeFileSync(temporaryPath, JSON.stringify(document, null, 2) + '\n', {
-        flag: 'wx',
-        mode: 0o600,
-      });
-      renameSync(temporaryPath, this.file);
-      return this.present(document);
+      return action();
     } catch (error) {
       if (error instanceof TopologyError) throw error;
       throw new TopologyError(
@@ -256,9 +270,21 @@ export class TopologyStore {
         503,
       );
     } finally {
-      if (existsSync(temporaryPath)) unlinkSync(temporaryPath);
       closeSync(lock);
       unlinkSync(lockPath);
+    }
+  }
+  private save(document: TopologyDocument) {
+    validateTopologyDocument(document);
+    const temporaryPath = `${this.file}.${randomUUID()}.tmp`;
+    try {
+      writeFileSync(temporaryPath, JSON.stringify(document, null, 2) + '\n', {
+        flag: 'wx',
+        mode: 0o600,
+      });
+      renameSync(temporaryPath, this.file);
+    } finally {
+      if (existsSync(temporaryPath)) unlinkSync(temporaryPath);
     }
   }
   private apply(document: TopologyDocument, command: TopologyCommand) {
@@ -389,10 +415,13 @@ export class TopologyStore {
     if (!candidate) throw new TopologyError('Unknown connection candidate.', 404);
     if (candidate.blockedReason) throw new TopologyError(candidate.blockedReason, 409);
     if (candidate.waitingForPoints)
-      throw new TopologyError('복도 양 끝의 출입문과 승강장 위치를 먼저 확인해주세요.', 409);
+      throw new TopologyError(
+        'First confirm the door and landing at the ends of the corridor.',
+        409,
+      );
     if (candidate.presentedHash !== command.presentedHash)
       throw new TopologyError(
-        '후보나 표시 위치가 변경되었습니다. 새로고침 후 다시 확인해주세요.',
+        'The candidate or its markers changed. Reload and review them again.',
         409,
       );
     if (
@@ -400,7 +429,7 @@ export class TopologyStore {
       (command.answer === 'true') !== (command.direction !== null)
     )
       throw new TopologyError(
-        'T에는 별도의 통행 방향 답변이 필요합니다. F와 모름에는 방향을 지정하지 마세요.',
+        'A T answer requires a travel direction. Leave direction empty for F or Unknown.',
       );
     const position = (side: 'from' | 'to'): CandidateEndpoint => {
       const input = command[side],
@@ -411,9 +440,7 @@ export class TopologyStore {
           input.point?.x !== original.point?.x ||
           input.point?.y !== original.point?.y)
       ) {
-        throw new TopologyError(
-          '공유 지점의 위치는 원래 출입문 또는 승강장 항목에서 수정해주세요.',
-        );
+        throw new TopologyError('Edit a shared point through its original door or landing review.');
       }
       const plan = this.plans.find((item) => item.id === input.planId);
       const originalPlan = this.plans.find((item) => item.id === original.planId);
@@ -422,14 +449,16 @@ export class TopologyStore {
         plan.building !== originalPlan?.building ||
         plan.sourceSha256 !== input.sourceSha256
       )
-        throw new TopologyError('수정한 지점은 같은 건물의 현재 공식 도면에 있어야 합니다.');
+        throw new TopologyError(
+          'A corrected point must use the current official plan for the same building.',
+        );
       return {
         ...original,
         ...input,
         description:
           input.planId === original.planId
             ? original.description
-            : '사용자가 도착 층과 표시 위치를 수정한 후보입니다. 이 도면의 실제 통행 지점인지 확인해주세요.',
+            : 'The reviewer changed the floor and marker. Confirm the passage on this plan.',
       };
     };
     const first = position('from'),
@@ -439,11 +468,11 @@ export class TopologyStore {
       this.plans.find((plan) => plan.id === first.planId)?.floor ===
         this.plans.find((plan) => plan.id === second.planId)?.floor
     ) {
-      throw new TopologyError('층간 이동 후보에는 서로 다른 층을 선택해주세요.');
+      throw new TopologyError('Select different floors for this transition.');
     }
     if (command.type === 'record-floor-observation') {
       if (!candidate.allowsFloorOnlyAnswer || (first.point && second.point)) {
-        throw new TopologyError('표시된 후보는 지점 단위로 확인해주세요.');
+        throw new TopologyError('Review the marked points to confirm this candidate.');
       }
       document.floorObservations.push({
         id: randomUUID(),
@@ -459,16 +488,16 @@ export class TopologyStore {
       });
       return;
     }
-    if (!first.point || !second.point) throw new TopologyError('두 지점을 표시해주세요.');
+    if (!first.point || !second.point) throw new TopologyError('Mark both endpoints.');
     const from = { ...first, point: first.point },
       to = { ...second, point: second.point };
     let bindings = candidate.latestAnswer?.bindings ?? null;
     const oldEdge = document.edges.find((edge) => edge.id === bindings?.edgeId);
-    const answerDescription = `사용자 연결 확인: ${command.answer}; 통행 방향: ${command.direction ?? 'not answered'}. ${from.planId}의 A와 ${to.planId}의 B. 현장 방문 여부는 별도로 확인하지 않았습니다.`;
+    const answerDescription = `User confirmation of ${command.answer} with travel direction ${command.direction ?? 'not answered'}. A is on ${from.planId} and B is on ${to.planId}. Field visit unconfirmed.`;
     const evidence = {
       basis: 'user-confirmation' as const,
       observedOn: null,
-      note: `${answerDescription}${command.note ? ` 메모: ${command.note}` : ''}`,
+      note: `${answerDescription}${command.note ? ` Reviewer note: ${command.note}` : ''}`,
     };
     const approve = (target: 'node' | 'edge', id: string) =>
       this.apply(document, {
@@ -477,7 +506,7 @@ export class TopologyStore {
         id,
         status: 'verified',
         reviewer: command.reviewer,
-        note: `표시된 지점과 연결에 대한 사용자 확인. ${answerDescription}`,
+        note: `The reviewer confirmed the marked points and passage. ${answerDescription}`,
       });
     if (command.answer === 'true' && command.direction !== 'unknown') {
       const oldFrom = document.nodes.find((node) => node.id === bindings?.fromNodeId);
@@ -506,7 +535,7 @@ export class TopologyStore {
       ) => {
         if (candidate.endpointRefs?.[side]) {
           const ref = candidate.sharedEndpoints?.[side];
-          if (!ref) throw new TopologyError('복도 양 끝에 승인된 지점이 필요합니다.', 409);
+          if (!ref) throw new TopologyError('Both corridor endpoints need approved points.', 409);
           return ref.id;
         }
         if (
@@ -521,7 +550,7 @@ export class TopologyStore {
           label: point.label,
           kind: point.kind,
           point: point.point,
-          notes: existing?.notes ?? `후보 ${candidate.id}의 사용자 확인 지점.`,
+          notes: existing?.notes ?? `User-confirmed point for candidate ${candidate.id}.`,
           evidence,
         });
         const saved = existing
@@ -540,7 +569,7 @@ export class TopologyStore {
         toNodeId: reverseOnly ? fromNodeId : toNodeId,
         kind: candidate.kind,
         direction: command.direction === 'both' ? 'both' : 'forward',
-        notes: oldEdge?.notes ?? `후보 ${candidate.id}. ${candidate.rationale}`,
+        notes: oldEdge?.notes ?? `Candidate ${candidate.id}. ${candidate.rationale}`,
         evidence,
         distanceMeters: distanceStillApplies ? (oldEdge?.distanceMeters ?? null) : null,
         distanceEvidence: distanceStillApplies ? (oldEdge?.distanceEvidence ?? '') : '',
@@ -562,7 +591,7 @@ export class TopologyStore {
         id: oldEdge.id,
         status: command.answer === 'false' ? 'rejected' : 'draft',
         reviewer: command.reviewer,
-        note: `후보 답변 변경으로 경로 사용 중지. ${answerDescription}`,
+        note: `Passage withdrawn after the answer changed. ${answerDescription}`,
       });
     }
     document.candidateAnswers.push({

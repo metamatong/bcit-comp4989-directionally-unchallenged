@@ -195,9 +195,9 @@ export default function TopologyEditor({
       setRoute(null);
       setNotice(
         command.type === 'record-floor-observation'
-          ? '층 단위 답변을 저장했습니다.'
+          ? 'Floor-service report saved.'
           : command.type === 'answer-candidate'
-            ? '답변이 저장되었습니다. 사용자 확인과 통행 방향에 따라 경로 반영 상태를 갱신했습니다.'
+            ? 'Answer saved. Routing eligibility now reflects the recorded direction.'
             : command.type === 'review'
               ? 'Review recorded. Routing eligibility has been recalculated.'
               : 'Saved to the local topology file.',
@@ -322,7 +322,7 @@ export default function TopologyEditor({
             </button>
           </div>
         </div>
-        <div className="candidate-view-tabs" aria-label="편집 방식">
+        <div className="candidate-view-tabs" aria-label="Editor view">
           <button
             type="button"
             className="topology-button"
@@ -332,7 +332,7 @@ export default function TopologyEditor({
               if (view !== 'questions' && canSwitch()) setView('questions');
             }}
           >
-            후보 확인 · T / F
+            Review candidates · T / F
           </button>
           <button
             type="button"
@@ -343,7 +343,7 @@ export default function TopologyEditor({
               if (view !== 'manual' && canSwitch()) setView('manual');
             }}
           >
-            직접 수정 · 경로 확인
+            Edit map and check routes
           </button>
         </div>
         {view === 'manual' && (

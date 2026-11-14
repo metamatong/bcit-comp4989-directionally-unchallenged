@@ -33,7 +33,7 @@ The Node server does not restart automatically when files change. Restart it man
 
 ## Use
 
-A destination and a starting photo open a walking itinerary. A photo-only submission shows the location evidence.
+The visitor and review interfaces use English. Enter a building and room identifier such as `SW03 2082`, or an English request such as `Take me to SW03 room 2082`. A destination and a starting photo open a walking itinerary. A photo-only submission shows the location evidence.
 
 1. Use **Upload photo** or **Take a photo** directly in the first screen's **Find my location** section.
 2. Enter a destination such as `SW03 3615` and select **Find my route** to send the selected photo and its detail views to Google Gemini. You can also run a photo-only comparison and enter the destination later.
@@ -48,22 +48,22 @@ The photo workflow is inline, with no location popup or extra launch button. A s
 
 Open [the local topology editor](http://127.0.0.1:3000/internal/topology) after starting or restarting the server. It works without a Gemini key and is separate from the photo screen. Access is limited to this computer through `localhost` or `127.0.0.1` (IPv6 loopback also works); it is not a phone/LAN editing service.
 
-1. The default **후보 확인 · T / F** view selects the first unanswered proposal. Enter a reviewer name or nickname, compare the two official floor plans and answer **T**, **F** or **모름**. For stairs and elevators the direction choices show the floor numbers.
-2. After T, explicitly choose **양방향 A ↔ B**, **A → B만**, **B → A만**, or **모름**. T plus a known direction records approval of the displayed endpoints and that passage in one atomic save. F and unknown are saved without adding routes; an unknown direction also stays outside routing.
-3. If a proposed marker or floor is wrong, use **A/B 위치·층 수정** before answering. Changing a floor clears the point; mark its actual position on the new plan. Saved answers include exact endpoint snapshots, original-source hashes, reviewer, time, direction and optional notes. They are labeled **user confirmation**, not a claim that a field visit occurred.
-4. Use **직접 수정 · 경로 확인** for the original manual point/connection editor or route checker. The confirmed proposal also offers **이 연결의 경로 확인** with its endpoints selected. **Fewest recorded connections** minimizes edge count; **Shortest recorded distance** uses only approved, measured edges and cannot compare unmeasured alternatives.
+1. The default **Review candidates · T / F** view selects the first unanswered proposal. Enter a reviewer name or nickname, compare the two official floor plans and answer **T**, **F** or **Unknown**. For stairs and elevators the direction choices show the floor numbers.
+2. After T, explicitly choose **Both directions A ↔ B**, **A → B only**, **B → A only**, or **Unknown**. T plus a known direction records approval of the displayed endpoints and that passage in one atomic save. F and unknown are saved without adding routes; an unknown direction also stays outside routing.
+3. If a proposed marker or floor is wrong, use **Edit A location or floor** or **Edit B location or floor** before answering. Changing a floor clears the point; mark its actual position on the new plan. Saved answers include exact endpoint snapshots, original-source hashes, reviewer, time, direction and optional notes. They are labeled **user confirmation**, not a claim that a field visit occurred.
+4. Use **Edit map and check routes** for the original manual point/connection editor or route checker. The confirmed proposal also offers **Check this route** with its endpoints selected. **Fewest recorded connections** minimizes edge count; **Shortest recorded distance** uses only approved, measured edges and cannot compare unmeasured alternatives.
 
-The catalogue contains three building-passage reviews, nine floor 2–3 reviews and two SW03 corridor reviews. The corridor questions use the previously reviewed door and lift stop on each floor. Open **후보 확인 · T / F** and check whether the entire corridor between A and B is passable, then record its permitted direction. [Floor-by-floor evidence](docs/topology-editor.md#stairs-and-elevators-between-floors-2-and-3)
+The catalogue contains three building-passage reviews, nine floor 2–3 reviews and two SW03 corridor reviews. The corridor questions use the previously reviewed door and lift stop on each floor. Open **Review candidates · T / F** and check whether the entire corridor between A and B is passable, then record its permitted direction. [Floor-by-floor evidence](docs/topology-editor.md#stairs-and-elevators-between-floors-2-and-3)
 
-The indoor journey from SE12 room 302 to SW03 office 2082 uses two additional corridor reviews. The revision 28 snapshot includes both bidirectional approvals for new installations. Open the [SE12 floor 3 segment](http://127.0.0.1:3000/internal/topology?candidate=se12-f3-302-to-sw03-link) and the [SW03 floor 2 segment](http://127.0.0.1:3000/internal/topology?candidate=sw3-f2-exterior-door-to-2082) to inspect the marked lines and the recorded directions. The third-floor building passage and the SW03 east elevator already have current approvals.
+The indoor journey from SE12 room 302 to SW03 office 2082 uses two additional corridor reviews. The revision 29 snapshot includes both bidirectional approvals for new installations. Open the [SE12 floor 3 segment](http://127.0.0.1:3000/internal/topology?candidate=se12-f3-302-to-sw03-link) and the [SW03 floor 2 segment](http://127.0.0.1:3000/internal/topology?candidate=sw3-f2-exterior-door-to-2082) to inspect the marked lines and the recorded directions. The third-floor building passage and the SW03 east elevator already have current approvals.
 
-At revision 28 the user has confirmed seven stair pairs, the SW03 east elevator, two building crossings and six indoor corridor segments in both directions. Four room doorways now have reviewed approaches. The SE12 elevator inquiry has a final F response. The fourth-floor building passage is in draft. [Pilot route and its endpoints](docs/topology-editor.md#first-continuous-route)
+At revision 29 the user has confirmed seven stair pairs, the SW03 east elevator, two building crossings and six indoor corridor segments in both directions. Four room doorways now have reviewed approaches. The SE12 elevator inquiry has a final F response. The fourth-floor building passage is in draft. [Pilot route and its endpoints](docs/topology-editor.md#first-continuous-route)
 
 The user also reported that part of SE12 floor 2 meets the ground. This is context, not a universal floor-to-elevation mapping, an entrance position, or evidence of step-free access. Second-floor travel is represented as an outdoor passage between source-linked exterior doors, with unknown distance and intermediate geometry. More candidates require source-grounded preparation; there is no automatic all-building reconstruction or runtime Gemini call for this workflow. F rejects only the presented candidate, not every possible path between the buildings. Changing a prior T to F, unknown or unknown direction withdraws that candidate connection from routing while preserving answer history.
 
 Plan reviews, user confirmations and dated field observations are recorded separately. The manual editor remains available for adding corridors and transitions outside the prepared questions. Editing a point clears its own and its incident connections' approvals; editing a connection clears that connection's approval. Withdrawing point approval also invalidates its connections. Re-review is explicit. The two-stage photo analysis never creates or approves topology and its user-confirmed region does not automatically become a route start.
 
-A fresh checkout initializes the editor from the approved public network. Further edits and the private review history persist across reloads and restarts in the Git-ignored `data/campus/topology.json`. Existing workstations retain their original records. **Export saved graph** downloads a backup; unsaved form edits are not included. Revision checks reject conflicting edits from another tab. See [the topology workflow, storage and recovery guide](docs/topology-editor.md).
+A fresh checkout initializes the editor from the approved public network. Further edits and the private review history persist across reloads and restarts in the Git-ignored `data/campus/topology.json`. On an existing workstation the editor upgrades saved application labels to English on first access and carries forward the original direction, markers and review history. **Export saved graph** downloads a backup; unsaved form edits are not included. Revision checks reject conflicting edits from another tab. See [the topology workflow, storage and recovery guide](docs/topology-editor.md).
 
 ## Checks
 
@@ -118,7 +118,7 @@ mvp/
 │   ├── provider.ts, photo-localization.ts, session.ts
 │   ├── photo-evidence.ts, photo-media.ts, photo-grounding.ts, photo-doorways.ts, room-labels.ts
 │   ├── topology.ts, topology-api.ts, routing.ts, visitor-paths.ts, wayfinding.ts
-│   ├── topology-candidates.ts, topology-provenance.ts, topology-import.ts
+│   ├── topology-candidates.ts, topology-provenance.ts, topology-import.ts, topology-english.ts
 │   ├── pilot-evidence.ts, pilot-network.ts, pilot-inquiries.ts
 │   ├── spatial-retrieval.ts, pilot-tools.ts
 │   └── data.ts, visual-data.ts
@@ -126,6 +126,7 @@ mvp/
 │   ├── floor-plans-source.html, manifest.json, coverage.json, catalogue.json
 │   ├── graph.json, landmarks.json  Legacy empty placeholders, not used by routing
 │   ├── topology.json              Local annotations and review history, created on first use and ignored by Git
+│   ├── topology-english-migration.json  Fingerprints of earlier application text and translated definitions
 │   ├── connection-candidates.json  Unverified source-grounded questions; never route edges
 │   ├── raw/                       90 unmodified official PDFs
 │   ├── spatial/                   pilot-ocr, plan-annotations, reviewed-network, passage-inquiries, corridor-traces JSON and checksums
@@ -142,7 +143,7 @@ mvp/
 │   ├── photo-localization.test.ts, photo-doorways.test.ts, photo-api.test.ts, route-results.test.ts
 │   ├── photo.test.ts, photo-location-input.test.ts, room-labels.test.ts, photo-fixtures.ts
 │   ├── topology.test.ts, topology-api.test.ts, topology-editor.test.ts
-│   ├── topology-candidates.test.ts, wayfinding.test.ts, wayfinding-api.test.ts
+│   ├── topology-candidates.test.ts, topology-english.test.ts, wayfinding.test.ts, wayfinding-api.test.ts
 │   └── e2e/journey.spec.ts, photo.spec.ts
 ├── docs/
 │   ├── project-brief.txt, requirements.md, architecture.md, data.md

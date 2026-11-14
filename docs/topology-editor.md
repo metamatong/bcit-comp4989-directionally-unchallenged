@@ -4,15 +4,15 @@ The local editor at `/internal/topology` lets a human confirm proposed connectio
 
 ## Answer-first workflow
 
-The default **후보 확인 · T / F** view selects the first unanswered question. Compare the A and B regions on their original plans and review whether the indicated passage connects the two points.
+The default **Review candidates · T / F** view selects the first unanswered question. Compare the A and B regions on their original plans and review whether the indicated passage connects the two points.
 
 Enter a reviewer name or nickname once for the current editor session. If both markers are right, answer T/F/unknown. T confirms the displayed endpoints and their proposed connection; a separate direction question offers both ways, A→B only, B→A only, or unknown, without a preselected choice. T plus a known direction atomically creates/updates and approves the two points and that allowed edge. Unknown direction records T but excludes the passage from routing. F rejects the presented candidate only; unknown defers it. Neither is evidence that no other route exists between the buildings.
 
-Use **A/B 위치·층 수정** to correct a marker or its floor before answering. Markers remain page-relative when viewing a cropped region. A floor change clears the previous point because page coordinates cannot be transferred across floors; click the actual point on the new page or use explicit numerical entry. Corrected proposals are saved with the answer even if the answer is F or unknown. Source PDFs and rasters are never modified.
+Use **Edit A location or floor** or **Edit B location or floor** to correct a marker or its floor before answering. Markers remain page-relative when viewing a cropped region. A floor change clears the previous point because page coordinates cannot be transferred across floors; click the actual point on the new page or use explicit numerical entry. Corrected proposals are saved with the answer even if the answer is F or unknown. Source PDFs and rasters are never modified.
 
 The answer stores the reviewer, server timestamp, exact endpoint snapshots, source hashes, proposal/presentation hashes, optional note and the separate direction answer. It is **user-confirmation** evidence with no automatically populated field-observation date. It does not assert a new campus visit, current opening hours, accessibility or measured distance. Existing measured costs survive re-confirmation only if their passage and endpoints remain unchanged and the previous edge is still eligible; unapproved or changed measurements are discarded rather than silently approved through a T answer.
 
-Answers are append-only within the graph document. Changing a prior T to F/unknown/unknown direction withdraws the generated connection from routing. Re-answering uses the same generated records when they still exist, avoiding duplicate graph nodes/edges. Manual point changes invalidate approvals and appear in the next question for explicit re-confirmation. Stale graph revisions, proposal presentations and source hashes are rejected. The existing point/connection editor remains available under **직접 수정 · 경로 확인**; approved candidates offer **이 연결의 경로 확인** with the direction-appropriate endpoints selected.
+Answers are append-only within the graph document. Changing a prior T to F/unknown/unknown direction withdraws the generated connection from routing. Re-answering uses the same generated records when they still exist, avoiding duplicate graph nodes/edges. Manual point changes invalidate approvals and appear in the next question for explicit re-confirmation. Stale graph revisions, proposal presentations and source hashes are rejected. The existing point/connection editor remains available under **Edit map and check routes**; approved candidates offer **Check this route** with the direction-appropriate endpoints selected.
 
 To extend the question set, inspect the original plans and add versioned definitions to `data/campus/connection-candidates.json`. Each definition references the source hash for each endpoint and explains how to identify it on the page. Restart the server after changing the catalogue and run data validation.
 
@@ -33,7 +33,7 @@ The short steps between the SW03 lounge and hall, SE12 S203 marked “down” on
 
 Two SW03 questions connect the doors and lift stops that have already been reviewed. On floor 2, check whether the entrance by 2063/2080 leads through corridors 2000 and 2600 to the boarding point by 2696. On floor 3, check whether the boarding point by 3696 leads through corridors 3600 and 3000 to the SE12 passage by 3081/3086. Compare both points on the same plan, confirm the whole passage and select the permitted direction.
 
-When both corridors support the proposed journey, open **직접 수정 · 경로 확인 → Route check** and choose the SE12 floor 2 exterior doorway and the SE12 floor 3 SW03 passage as endpoints. With travel permitted in the forward directions, the recorded path has five connections: the outdoor passage, the SW03 floor 2 corridor, the SW03 elevator, the SW03 floor 3 corridor and the building link. Use **Fewest recorded connections** while distances are unknown.
+When both corridors support the proposed journey, open **Edit map and check routes → Route check** and choose the SE12 floor 2 exterior doorway and the SE12 floor 3 SW03 passage as endpoints. With travel permitted in the forward directions, the recorded path has five connections: the outdoor passage, the SW03 floor 2 corridor, the SW03 elevator, the SW03 floor 3 corridor and the building link. Use **Fewest recorded connections** while distances are unknown.
 
 Each corridor definition references the candidate and side that own each endpoint. On approval, the server uses the exact reviewed node IDs and current versions. To correct a shared point, edit its owner, review the point and recheck affected connections. Withdrawing a corridor removes that passage from routing and preserves the preceding door and lift reviews.
 
@@ -45,7 +45,7 @@ The original fourth-floor T answers remain in history and the linked points and 
 
 ## Who enters the first data?
 
-For the prepared pairs, the assistant supplies source-grounded candidates and the user supplies the connection/direction answers. For passages outside that initial set, the person inspecting the plans can still enter them manually under **직접 수정 · 경로 확인**. Start with a short passage you can check, then extend it. Add a point at each doorway, corridor junction, stair landing, elevator stop or checkpoint needed by the route. Use exact room identifiers when applicable and descriptive names for otherwise unnamed portals. Do not use a room label's text box as a doorway without checking the drawing.
+For the prepared pairs, the assistant supplies source-grounded candidates and the user supplies the connection/direction answers. For passages outside that initial set, the person inspecting the plans can still enter them manually under **Edit map and check routes**. Start with a short passage you can check, then extend it. Add a point at each doorway, corridor junction, stair landing, elevator stop or checkpoint needed by the route. Use exact room identifiers when applicable and descriptive names for otherwise unnamed portals. Do not use a room label's text box as a doorway without checking the drawing.
 
 Save a point as draft with its evidence. A source-plan ID, original PDF hash and normalized coordinates are attached automatically. Add separate points on each actual arrival floor; floor numbers in different buildings do not imply equal elevation. Points use page-relative X/Y percentages with a top-left origin. Zoom changes only the display. Keyboard users can focus the plan in placement mode, press Enter to begin at the page centre and edit X/Y to the intended position.
 
@@ -75,6 +75,8 @@ Routes return ordered point/edge IDs, the graph revision and connection evidence
 
 ## Storage, backup and conflicts
 
+Saved version 1 journals with review records upgrade to version 2 on first access under the editor write lock. The upgrade translates recognized application text, retains review IDs, answers, directions, timestamps, source hashes, coordinates and recorded presentation fingerprints, and increments the document revision. The editor carries forward a content-bound approval only when its previous fingerprint matches. Withdrawn passages and stale receipts stay ineligible. Custom notes and reviewer names retain their original wording unless an explicit translation is supplied.
+
 `data/campus/topology.json` contains `schemaVersion`, a monotonic `revision`, `updatedAt`, `nodes`, `edges`, `candidateAnswers` and `floorObservations`. Earlier documents read missing collections as empty lists. The next explicit edit persists the document. Exports include marked-point answers as well as floor reports. The source definitions live in `connection-candidates.json`.
 
 On first use in a fresh checkout, the server initializes the local file from `spatial/reviewed-network.json`. Imported records cite their published approval hashes. The displayed import timestamp and attribution describe the local import. Only the eligible points and passages, their source-bound candidate references and the published elevator report are included. Full review history, draft records and free-text notes remain in the originating workstation's backup. A pre-existing file is used as-is. Restore a backup before starting the app when recovering lost local work.
@@ -97,7 +99,7 @@ The editor page and its API require an actual loopback connection and a local Ho
 
 ## SE12 room 302 to SW03 office 2082
 
-Two source-bound questions complete the ends of the indoor itinerary through the third-floor connecting passage and SW03 east elevator. Both have user-confirmed bidirectional answers in revision 28.
+Two source-bound questions complete the ends of the indoor itinerary through the third-floor connecting passage and SW03 east elevator. Both have user-confirmed bidirectional answers in revision 29.
 
 - **SE12 floor 3**. A is the drawn threshold of classroom 302 on the window-side corridor. Follow the frontage of 306, 308, 310 and 312 to 312A, then turn into the narrow SW03 passage to B, its existing reviewed junction. [Review this segment](http://127.0.0.1:3000/internal/topology?candidate=se12-f3-302-to-sw03-link)
 - **SW03 floor 2**. A is the interior side of the existing exterior doorway between rooms 2063 and 2080. Follow corridor 2000 into the building to B, the corridor-side threshold of office 2082 between office 2081 and meeting room 2083. This question covers indoor travel only. [Review this segment](http://127.0.0.1:3000/internal/topology?candidate=sw3-f2-exterior-door-to-2082)

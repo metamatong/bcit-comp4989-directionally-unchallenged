@@ -37,7 +37,7 @@ function stop(node: TopologyNode): MapStop {
   return {
     id: node.id,
     planId: node.planId,
-    label: node.label.replace(/ 후보$/, ''),
+    label: node.label,
     point: node.point,
   };
 }
@@ -48,11 +48,6 @@ function destinationText(value: string) {
     .normalize('NFKC')
     .trim()
     .replace(/^(?:take me to|directions to|navigate to|go to)\s+/i, '')
-    .replace(
-      /(?:호(?:실)?)?(?:으?로\s*(?:가고\s*싶(?:어|어요)|가\s*주세요|안내해\s*줘))\s*[.!?]?$/u,
-      '',
-    )
-    .replace(/(\d[A-Za-z]?)호(?:실)?$/u, '$1')
     .replace(/^((?:(?:NE|NW|SE|SW)\d+[\s-]+)?)room\s+/i, '$1')
     .trim();
 }
@@ -65,13 +60,11 @@ function resolveDestination(
 ): Destination[] {
   const cleaned = labelKey(destinationText(text));
   if (!cleaned) return [];
-  const scoped = /^(?:((?:NE|NW|SE|SW)\d+)[\s-]+)?(?:(?:floor\s+(\d+)\s+|(\d+)층\s*))?(.+)$/i.exec(
-    cleaned,
-  )!;
+  const scoped = /^(?:((?:NE|NW|SE|SW)\d+)[\s-]+)?(?:floor\s+(\d+)\s+)?(.+)$/i.exec(cleaned)!;
   const building = scoped[1] && canonicalBuilding(scoped[1]),
-    floor = scoped[2] || scoped[3];
+    floor = scoped[2];
   if (scoped[1] && !building) return [];
-  const token = scoped[4].replace(/^room\s+/i, '');
+  const token = scoped[3].replace(/^room\s+/i, '');
   if (!token.trim()) return [];
   const scopedNodes = nodes.filter(
     (n) =>
@@ -81,11 +74,8 @@ function resolveDestination(
   const kind = new Map<string, TopologyNode['kind']>([
     ['ELEVATOR', 'elevator-stop'],
     ['LIFT', 'elevator-stop'],
-    ['엘리베이터', 'elevator-stop'],
     ['STAIRS', 'stair-landing'],
-    ['계단', 'stair-landing'],
     ['EXTERIOR DOOR', 'outdoor-access'],
-    ['외부 출입문', 'outdoor-access'],
   ]).get(labelKey(token));
   if (kind)
     return scopedNodes.filter((n) => n.kind === kind).map((n) => ({ place: stop(n), nodes: [n] }));

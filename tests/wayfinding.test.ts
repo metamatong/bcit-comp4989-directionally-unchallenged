@@ -145,7 +145,7 @@ describe('visitor routes on the current three-building pilot', () => {
         const markup = renderToStaticMarkup(
           createElement(TopologyEditor, { initialData: { ...baseline, candidates: [q] } }),
         );
-        expect(markup).toContain('검수할 복도 구간');
+        expect(markup).toContain('Corridor segment under review');
         expect(markup).toContain('point-a');
         expect(markup).toContain('point-b');
       }
@@ -258,7 +258,7 @@ describe('visitor routes on the current three-building pilot', () => {
   });
   it('links the two confirmed classroom doors through the east elevator in either direction', () => {
     const forward = journey(bound(lower), 'SW03 Floor 3 room 3615'),
-      reverse = journey(bound(upper), 'SW03 2605호로 가고 싶어');
+      reverse = journey(bound(upper), 'Take me to SW03 room 2605');
     if (forward.status !== 'route' || reverse.status !== 'route')
       throw Error('Expected both reviewed routes');
     expect(forward.steps.map((s) => s.kind)).toEqual(['corridor', 'elevator', 'corridor']);
@@ -351,7 +351,7 @@ describe('visitor routes on the current three-building pilot', () => {
     const sw1 = options.destinations.find((d) => d.planId.startsWith('SW1-'))!;
     expect(journey(from, 'S300', { destinationId: sw1.id }).status).toBe('unmapped-destination');
     expect(journey(from, 'SW03 elevator').status).toBe('choose-destination');
-    expect(journey(from, 'SW03 3층 엘리베이터')).toMatchObject({
+    expect(journey(from, 'SW03 floor 3 elevator')).toMatchObject({
       status: 'route',
       destination: { id: bound(upper, 'from').id },
     });
