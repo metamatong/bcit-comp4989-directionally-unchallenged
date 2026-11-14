@@ -15,7 +15,7 @@ import type { CampusPhotoAnalysis, Session, VisualPlan } from '../src/types';
 import { photoImageParts, validatePhotoBundle, type PhotoRequest } from './photo-media';
 import { requirePhotoEvidence, type PhotoEvidenceRecord } from './photo-evidence';
 import { normalizeRoomLabel, retrieveRoomLabels } from './room-labels';
-import { canonicalBuilding } from './pilot-evidence';
+import { canonicalBuilding, isPilotPlan } from './pilot-evidence';
 export {
   photoRequestSchema,
   photoEvidenceRequestSchema,
@@ -207,8 +207,9 @@ export async function analyzeCampusPhoto(
     );
   const eligible = visualPlans.filter(
     (plan) =>
-      !input.buildingHint ||
-      plan.building === (canonicalBuilding(input.buildingHint) ?? input.buildingHint),
+      (!input.scope || isPilotPlan(plan)) &&
+      (!input.buildingHint ||
+        plan.building === (canonicalBuilding(input.buildingHint) ?? input.buildingHint)),
   );
   if (!eligible.length)
     throw new Error('That building is not in the prepared Burnaby floor-plan collection.');
@@ -264,7 +265,7 @@ export async function analyzeCampusPhoto(
     let shortlistClarification = '';
     if (needsVisualShortlist) {
       const overviewParts: ModelPart[] =
-        candidatePlans.length <= 8
+        input.scope === 'wayfinding-pilot' || candidatePlans.length <= 8
           ? candidatePlans.flatMap((plan) => [
               { text: `Official plan ${plan.id}: ${plan.building}, floor ${plan.floor}.` },
               planImagePart(plan.overview),
@@ -462,6 +463,7 @@ export async function analyzeCampusPhoto(
     ensureActive(signal);
     staged.photoEvidence = null;
     staged.campusAnalysis = analysis;
+    staged.campusLocation = null;
     staged.agentStatus = 'Live AI · photo and floor-plan comparison completed';
     staged.notice = analysis.candidates.length
       ? 'Possible campus regions found. Inspect the source plans and confirm a region; this is not a verified position or route.'
@@ -494,7 +496,7 @@ export function confirmCampusRegion(session: Session, candidateId: string) {
   if (!candidate) throw new Error('Choose a candidate from the current photo comparison.');
   getVisualPlan(candidate.planId);
   session.campusLocation = structuredClone(candidate);
-  session.notice = `You selected a possible region in ${candidate.building}, floor ${candidate.floor}. The estimate is unverified; real walking routes are not yet supported.`;
+  session.notice = `You selected a possible region in ${candidate.building}, floor ${candidate.floor}. Confirm a marked starting point to check for a reviewed route.`;
   logActivity(
     session,
     'confirm_campus_region',

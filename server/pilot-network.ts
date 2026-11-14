@@ -9,6 +9,7 @@ const review = {
   version,
   reviewContentHash: hash,
   reviewBasis: z.enum(['user-confirmation', 'plan', 'field', 'plan-and-field']),
+  fieldObservedOn: z.string().date().optional(),
 };
 const node = z
   .object({
@@ -40,6 +41,16 @@ const edge = z
     direction: z.enum(['forward', 'both']),
     distanceMeters: z.number().finite().positive().nullable(),
     sourceCandidateId: z.string().min(1).nullable(),
+    candidateBinding: z
+      .object({
+        definitionHash: hash,
+        presentedHash: hash,
+        fromNodeId: z.string().uuid(),
+        toNodeId: z.string().uuid(),
+        reviewedEdgeHash: hash.optional(),
+      })
+      .strict()
+      .optional(),
   })
   .strict();
 const schema = z
@@ -97,6 +108,14 @@ export function validateNetworkExport(value: unknown, plans: VisualPlan[]) {
       passage.endpointVersions.to !== to.version
     )
       throw new Error(`Stale spatial endpoints: ${passage.id}`);
+    const binding = passage.candidateBinding;
+    if (
+      binding &&
+      (!passage.sourceCandidateId ||
+        binding.fromNodeId === binding.toNodeId ||
+        ![binding.fromNodeId, binding.toNodeId].every((id) => id === from.id || id === to.id))
+    )
+      throw new Error(`Invalid candidate endpoint binding: ${passage.id}`);
     const a = planMap.get(from.planId)!,
       b = planMap.get(to.planId)!;
     const vertical = passage.kind === 'stairs' || passage.kind === 'elevator';

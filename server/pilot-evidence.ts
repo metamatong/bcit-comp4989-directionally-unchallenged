@@ -84,7 +84,9 @@ const annotationsSchema = z.object({
     }),
   ),
 });
-export function checkedSpatialJson(name: 'pilot-ocr' | 'reviewed-network'): unknown {
+export function checkedSpatialJson(
+  name: 'pilot-ocr' | 'reviewed-network' | 'corridor-traces',
+): unknown {
   const file = resolve(root, spatialDir, name);
   const bytes = readFileSync(file + '.json');
   const expected = readFileSync(file + '.sha256', 'utf8').trim();

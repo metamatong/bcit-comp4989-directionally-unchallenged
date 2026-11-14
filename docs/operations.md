@@ -6,7 +6,7 @@ Use Node.js 22+, `npm ci`, and `npm run dev`. The app defaults to `127.0.0.1:300
 
 Set `GEMINI_API_KEY` in private `.env`, choose a primary `GEMINI_MODEL`, and set an ordered comma-separated `GEMINI_FALLBACK_MODELS` list. Defaults use Gemini 3.5 Flash-Lite and Gemini 3.8 Flash; Google currently lists both on the free tier. An existing 3.8 primary defaults to a 3.5 Flash-Lite backup. Explicit settings are preserved. Gemini 2.5 requires existing-project access and is never an automatic backup. Verify eligibility and generation access for the specific API project before setting `AI_FREE_TIER_CONFIRMED=true`; model metadata can return HTTP 200 even when generation returns 404. `.env.example` is a keyless template. Never put secrets in frontend variables. `AI_DEFAULT_MODE` is obsolete and ignored. No mode switch or synthetic location fallback exists.
 
-Without provider configuration, users see setup guidance. Photo submission is disabled in the client and rejected by the server. With configuration, each photo still requires consent and an explicit Analyze action.
+Without provider configuration, users see setup guidance. Photo submission is disabled in the client and rejected by the server. With configuration, each photo still requires consent and explicit submission. Destination lookup and routing are local server operations and consume no provider quota.
 
 ## Media and state
 
@@ -15,6 +15,8 @@ The browser accepts JPEG/PNG/WebP up to 8 MB and 50 million pixels, creates a fu
 Mobile photo capture uses the browser/device photo picker. DirectionallyUnchallenged does not open a live camera stream or track movement. Physical-device capture behavior remains unverified.
 
 Upload and capture controls are shown inline under Find my location. A selected photo reveals the consent and analysis controls. Remove photo, Cancel analysis, result confirmation or leaving the page releases the client photo; the coverage/privacy dialog does not clear it. Results appear once beneath the input, and a newly selected photo hides the prior result until its own comparison completes.
+
+Routes exist only in the active browser view. Editing the destination or replacing the photo clears directions. Recheck current route reads current topology approvals and asks for the starting point again.
 
 First-stage evidence IDs expire after five minutes and are bound to a session and image/crop fingerprint. No media is stored between API stages. A failed comparison may retry with the accepted evidence until expiry. Session results expire after 30 minutes. Reload creates a new session. Clear analysis removes the current result. No accounts, saved positions, browser location history or automatic tracking exist. Obsolete mode preferences are removed from browser storage. API responses use `no-store` and reject cross-origin requests.
 
@@ -32,3 +34,11 @@ Fallback is limited to configured Gemini models; there is no alternate provider 
 `npm run test:unit` checks code/API contracts, `npm run build` checks TypeScript and builds production files, and `npm run data:validate` checks official assets. `npm test` additionally runs browser automation with Gemini disabled on isolated port 3100. The user currently requested no further screen checks. No live provider calls are needed for regression tests.
 
 The local service has not undergone a public-hosting review. No deployment or coursework submission has occurred. See [verification](verification.md) and [provider notes](provider.md).
+
+## Local topology editing
+
+`/internal/topology` is a separate local workstation tool for manually annotating SE12/SW03/SW01, independent of Gemini. The page and `/api/internal/topology` require loopback access and a local Host header, with cross-site requests rejected. Remote/LAN and phone access are not enabled by changing `HOST`; there is no remote staff authentication.
+
+Annotations, textual evidence and self-entered reviewer names persist in the Git-ignored `data/campus/topology.json`. A fresh checkout initializes this file from the public network on first use. They do not contain photos or session location histories. Export saved graph provides a revisioned JSON backup. Writes use an exclusive file lock, optimistic revision checks and atomic replacement. Invalid storage is not automatically reset. Stop the server before restoring backups or removing an abandoned lock. Detailed recovery, review and route-limit instructions are in [the editor guide](topology-editor.md).
+
+The default candidate review view uses `connection-candidates.json`. Marked-point T/F/unknown responses and direction decisions are stored in `topology.json.candidateAnswers`. Floor-only elevator reports, including partial positions when supplied, are stored in `topology.json.floorObservations`. Both retain the reviewer, timestamp and source references. Older documents read missing collections as empty. Restart the local server after editing the proposal catalogue. Reloading the editor retrieves the first unanswered question.

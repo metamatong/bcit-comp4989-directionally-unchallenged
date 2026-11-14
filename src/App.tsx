@@ -19,6 +19,9 @@ import {
 import { preparePhoto, type PreparedPhoto } from './photo';
 import { CampusLocationResults } from './components/CampusLocationResults';
 import { PhotoLocationInput } from './components/PhotoLocationInput';
+import { JourneyPanel } from './components/JourneyPanel';
+import { buildingLabel } from './topology';
+import './wayfinding.css';
 import type { Bootstrap, Session } from './types';
 
 export default function App() {
@@ -32,6 +35,8 @@ export default function App() {
   const [preparedPhoto, setPreparedPhoto] = useState<PreparedPhoto | null>(null);
   const [photoConsent, setPhotoConsent] = useState(false);
   const [showPhotoResults, setShowPhotoResults] = useState(false);
+  const [destination, setDestination] = useState('');
+  const [activeDestination, setActiveDestination] = useState('');
   const photoAbort = useRef<AbortController | null>(null);
   const evidenceForPhoto = useRef<{ photo: PreparedPhoto; id: string } | null>(null);
   const sessionRef = useRef<Session | undefined>(undefined);
@@ -78,6 +83,7 @@ export default function App() {
   function removePhoto() {
     discardPhoto();
     setShowPhotoResults(false);
+    setActiveDestination('');
     setError('');
   }
   async function send(action: unknown): Promise<Session | undefined> {
@@ -119,6 +125,7 @@ export default function App() {
     evidenceForPhoto.current = null;
     setPhotoConsent(false);
     setShowPhotoResults(false);
+    setActiveDestination('');
     setReading(true);
     setError('');
     setReadStatus('Preparing your photo locally…');
@@ -126,9 +133,7 @@ export default function App() {
       const prepared = await preparePhoto(file);
       if (!evidenceGate.current.isCurrent(generation)) return;
       setPreparedPhoto(prepared);
-      setReadStatus(
-        'Photo ready. Choose Analyze to compare the image with real BCIT floor plans. No readable sign is required.',
-      );
+      setReadStatus('Photo ready. Review your photo consent before continuing.');
     } catch (failure) {
       if (evidenceGate.current.isCurrent(generation)) setReadStatus((failure as Error).message);
     } finally {
@@ -146,10 +151,12 @@ export default function App() {
     setBusy(true);
     setError('');
     setShowPhotoResults(false);
+    setActiveDestination(destination.trim());
     setReadStatus('Reading room labels from your photo and detail views…');
     try {
       const media = {
         consent: true,
+        scope: 'wayfinding-pilot',
         image: { mimeType: preparedPhoto.mimeType, data: preparedPhoto.data },
         detailCrops: preparedPhoto.detailCrops,
       };
@@ -237,8 +244,9 @@ export default function App() {
     session.campusAnalysis?.candidates.some((candidate) => candidate.planId === plan.id),
   );
   const photoReady = data.liveAvailable && data.photoLocalizationAvailable;
+  const region = showPhotoResults ? session.campusLocation : null;
   return (
-    <div className="app-shell">
+    <div className="app-shell visitor-shell">
       <header className="header">
         <a
           className="brand"
@@ -305,6 +313,11 @@ export default function App() {
             </p>
           )}
           <PhotoLocationInput
+            destination={destination}
+            onDestinationChange={(value) => {
+              setDestination(value);
+              setActiveDestination('');
+            }}
             photo={preparedPhoto}
             consent={photoConsent}
             ready={photoReady}
@@ -316,6 +329,35 @@ export default function App() {
             onAnalyze={() => void analyzePhoto()}
             onDiscard={removePhoto}
           />
+          {region && (
+            <>
+              <div className="selected-start">
+                <strong>Photo region confirmed</strong>
+                <span>
+                  {buildingLabel(region.building)} · Floor {region.floor}
+                </span>
+              </div>
+              {!activeDestination && (
+                <button
+                  className="primary full-width"
+                  disabled={!destination.trim()}
+                  onClick={() => setActiveDestination(destination.trim())}
+                >
+                  Look up destination
+                </button>
+              )}
+              {activeDestination && (
+                <JourneyPanel
+                  key={JSON.stringify([region.id, activeDestination, session.revision])}
+                  sessionId={session.id}
+                  revision={session.revision}
+                  candidate={region}
+                  destination={activeDestination}
+                  plans={data.visualPlans}
+                />
+              )}
+            </>
+          )}
           {showPhotoResults && session.campusAnalysis && (
             <>
               <div className="result-actions">
@@ -379,23 +421,22 @@ export default function App() {
               </span>
               <h2 id="about-heading">About DirectionallyUnchallenged</h2>
               <p>
-                DirectionallyUnchallenged compares photographs with {data.coverage.floorPlans}{' '}
-                official BCIT Burnaby floor plans across {data.coverage.buildings.length} buildings.
-                Relevant plans appear with the location result.
+                Visitor wayfinding covers SE12, SW03 and SW01 at BCIT Burnaby. Photographs are
+                compared with the twelve official floor plans for these buildings.
               </p>
               <div className="about-section">
                 <h3>What you can do</h3>
                 <p>
-                  Upload or capture a photo, consent to Gemini analysis, and confirm the best
-                  source-linked estimate only if it matches your surroundings.
+                  Enter a room or stair label, submit a photo, and confirm the proposed area and the
+                  marked point where you are standing. Follow the arrows one floor at a time.
                 </p>
               </div>
               <div className="about-section">
                 <h3>What still needs validation</h3>
                 <p>
-                  Location accuracy, corridor connections, floor alignment, travel times and
-                  accessibility remain unverified. Floor plans are not camera-view training data.
-                  Walking directions are not available.
+                  Walking directions cover reviewed connections and mapped room doors. Outdoor
+                  crossings show the two doorways. Distances, travel times, accessibility and live
+                  conditions have not been verified.
                 </p>
               </div>
               <div className="about-section">

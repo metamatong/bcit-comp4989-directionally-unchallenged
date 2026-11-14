@@ -1,5 +1,13 @@
 # Verification record
 
+## Visitor walking routes — November 13, 2026
+
+The user confirmed both directions between each SW03 east elevator landing and the specified classroom door. Revision 25 contains 22 eligible points, 14 passages and four source-bound corridor traces. The floor 2 door is the 2605 entrance opposite vestibule 2604. The floor 3 door serves 3615 opposite vestibule 3604. Both answers have a user-confirmation basis and no field observation date.
+
+All 214 non-browser tests passed with Node 22.15.1. A fresh-checkout regression verifies the public network produces the same four drawable corridors and two room-door approaches, and that local withdrawals survive restarting the editor. A mocked Gemini HTTP journey submits a consented photo, checks the twelve eligible source plans, confirms a region and a starting point, and obtains room-to-room directions. Regression checks cover the reverse route, one-way review changes, a moved door, ambiguous labels, an unreviewed SW01 door, an unknown room and an outdoor crossing with no intermediate geometry. Server-rendered React checks exercise the map overlay. The TypeScript and production build passed. Data validation verified 90 source PDFs, 631 derived image and geometry assets, and the four corridor traces.
+
+The requested [mobile landing capture](../outputs/screenshots/landing-mobile-390x844.png) shows a 390 × 844 Chrome emulation with the configured local server. The local server passed its readiness check. Live Gemini generation, visitor screen checks, physical-device testing and independent campus traversal were outside this verification run. The floor plans and user reports do not measure real-photo localization accuracy or walking distance.
+
 ## Three-building spatial retrieval — November 13, 2026
 
 The release branch passed 146 non-browser unit, HTTP and provider tests on macOS arm64 with Node 22.15.1. The production build and data validation passed. The latter checked 90 original PDFs, 631 derived assets, 12 pilot source and geometry bindings, 16,659 optical observations, 377 plan transcriptions, and the approved revision 23 graph. The private editor export reproduced the published 20 checkpoints and 12 passages. A traversal test followed the same five reviewed edges in both directions.
@@ -12,19 +20,27 @@ The app, package metadata, server messages, documentation and two-page proposal 
 
 Verified October 20, 2026 on macOS arm64, Node 22.15.1. The current application uses only official Burnaby sources and Gemini photo analysis. Mocked provider results are not evidence of real-campus accuracy.
 
+Latest automated checks: November 13, 2026 on macOS arm64, Node 22.15.1. The current application uses only official Burnaby sources and Gemini photo analysis, plus a separate topology editor with candidate confirmation. Mocked provider results and artificial graph annotations are not evidence of real-campus accuracy.
+
 ## Current checks
 
 | Check | Result | Scope |
 |---|---|---|
-| `npm run test:unit` | **146 passed** | Photo, API, provider and source-integrity regressions plus pilot lookup, drawing context and reviewed-network checks |
+| `npm run test:unit` | **184 passed** | Photo/provider tests and 58 topology tests covering candidate answers, endpoint reuse, routing, HTTP access and Node-rendered review controls |
 | Earlier `npm test` | **101 passed** | 79 unit/API cases and 22 browser cases after demo removal, before screen checks were stopped |
 | `npm run build` | Passed | TypeScript check and Vite production build |
-| `npm run data:validate` | Passed | 90 original PDF hashes, 89 geometry records and 631 derived asset hashes |
+| `npm run data:validate` | Passed | 90 original PDFs, 89 geometry records, 631 derived asset hashes and all 5,463 extracted labels. Revision 21 has 22 points, 11 edges, 10 eligible edges, 14 questions, 12 marked-point answers and six floor observations. |
 | Documentation links | Checked | Local references match the current hierarchy |
 
 The automated browser run had already completed when the user requested no further screen checks. No further browser test suite has run. On October 16, the user explicitly requested inspection of a displayed 404; only the existing page's error text was read, with no interactions or photo submission. Future validation should honor the no-screen-test preference. Automated tests use no real Gemini credentials or provider quota; separate live diagnostics are recorded below.
 
 ## Removal and regression coverage
+
+For the first continuous route, revision 21 returned no route between the SE12 floor 2 exterior doorway and its floor 3 SW03 passage. The two proposed SW03 corridors had no answers. In temporary test data, approving both corridors in the forward directions produced the expected five-edge route using the existing points. The reverse route became available after its one-way constraint was changed to bidirectional. Withdrawing a corridor disconnected the test journey. These checks used mock confirmations. The saved campus graph was read only.
+
+The November 13 stair and elevator review used the four original floor plans and BCIT's campus accessibility map. Seven stair pairs and one SW03 elevator pair have page-specific markers. SE12 elevator service is a floor inquiry with unknown boarding positions. The running editor/API returned HTTP 200 and nine unanswered floor 2–3 questions. The saved graph retained its original SHA-256 throughout this change.
+
+All 180 non-browser tests and the production build passed. New fixture tests cover review of each vertical mode, same-floor rejection, reverse-only routing, full-page elevator inquiries and subsequent confirmation with two independently supplied positions. Physical passage and elevator operation await user review. Application screen checks were skipped per the project preference.
 
 Demo selection and browser preference restoration, sample photos, manual fictional landmarks, synthetic routing, destination/checkpoint/closure/replay actions, browser OCR assets/dependencies, and their evaluation tooling were removed. Old mode preferences are cleared, and legacy API actions/session mode overrides are rejected. The source dataset is retained internally. The library screen was subsequently removed as described below.
 
@@ -50,6 +66,36 @@ A successful current live photo-to-region match and physical-campus accuracy rem
 
 The prior synthetic-routing benchmark no longer describes the current product and was removed. No coursework, site or deployment was submitted/published.
 
+## Internal topology editor — November 12, 2026
+
+Added a separate local-only editor for the 12 official SE12/SW3/SW1 plans. It supports page-normalized manual points, explicit same-floor/inter-floor/inter-building/outdoor connections, direction, evidence, dated field observations, human review decisions/history, optional measured distance, JSON backup export and persistent revisioned storage. The initial topology file is empty. Existing photo input and two-stage Gemini localization behavior remain unchanged.
+
+All **151 unit/API tests** passed, including 25 new cases. These use temporary artificial annotations and mocked provider behavior, not real-campus topology. Checks cover storage across reloads, content/source/endpoint review binding, invalidation of approvals after edits or withdrawal, rejected/unreviewed shortcuts, one-way paths, measured versus unknown costs, deletion, concurrency/locks, invalid input, normalized coordinates and local-only access. Raw annotation files are blocked before the development/static fallback. The first sandboxed run could not bind localhost ports; the full suite passed with local networking enabled. A Host-header test was corrected to use raw HTTP because fetch replaces that header.
+
+`npm run build`, `npm run data:validate`, `npm run format` and `git diff --check` passed. Source validation still covers all 90 PDFs and 631 generated assets; topology validation reports revision 0, zero points, zero connections and zero eligible routing edges. No original source assets or pre-existing survey outputs were changed.
+
+Per the existing user instruction, **no browser, screenshot or manual screen checks were run**, so `npm test` (which includes Playwright) was not invoked; the complete non-browser suite was run instead. The editor's rendering and interactions still need user screen feedback. No live Gemini generation, user-photo upload, physical-device check or physical-campus traversal was performed. At that editor-only milestone, the route checker computed paths over manually approved topology. See the visitor pilot entry above for the subsequent integration.
+
+## Candidate confirmation — November 13, 2026
+
+The default internal view now presents A/B points on two original floor plans and accepts T/F/unknown, followed by an explicit permitted-direction answer after T. It supports point/floor correction, stored answer history, nickname/name attribution and a direct route-check handoff. T with a known direction atomically approves the marked endpoints and passage as user-confirmation evidence, without fabricating a field visit or measured distance. F, unknown and unknown direction cannot enable a route and withdraw previously generated candidate connections. Existing manual annotation remains available.
+
+Two initial SW03–SE12 third-/fourth-floor hypotheses were prepared by reading the official overview/detail PNGs. This was source-evidence inspection, not application screen testing or field validation. Each proposal has exact original-source hashes, page-normalized points and a rationale describing its uncertainty. The actual topology still has zero points, zero connections and zero answers; none of the candidate questions was answered on the user's behalf. All source images and geometry remain unchanged.
+
+All **171 non-browser tests** passed, including 20 new candidate/API regressions. Temporary mock answers verify forward/reverse/bidirectional routing, unknown-direction exclusion, F versus unknown histories, exact presentation/source binding, corrected floor/point persistence, revision conflicts, non-duplication, manual edit invalidation, unaffected adjacent passages, preservation of legacy documents, and exclusion of unreviewed measurements. Node rendering checks the paired-source questions and explicit direction controls; it does not validate browser interactions or layout.
+
+The production build, formatting, source/topology/candidate validation, documentation links and whitespace checks passed. The owned local server was restarted as a detached process. Read-only localhost requests returned HTTP 200 for the editor, its API and the transformed component module; the API reported two unanswered candidates and an empty graph. Direct candidate-catalogue access returned HTTP 404. No browser, screenshot, manual application screen, live Gemini generation or physical-campus checks were run. No deployment or push occurred.
+
+
+## Floor correction and second-floor outdoor proposal — November 13, 2026
+
+The user corrected the SE12–SW03 connected levels to 2 and 3 and explicitly said the second-floor journey exits one building and enters the other via outdoors. The reported ground-adjacent portion of SE12 floor 2 is recorded as context only; no entrance position, global elevation, floor renumbering, distance or accessibility inference follows from it.
+
+Through three revision-checked editor API operations, the previous fourth-floor points and edge were returned to draft with assistant-attributed notes recording the user's correction. Their original T answers and review history were preserved, and no fourth-floor coordinate was reassigned to floor 2. The third-floor bidirectional edge remains eligible. The saved graph is revision 6 with four points, two saved edges, one eligible edge and three original user answers.
+
+A third source-bound proposal was added using new inspections of the official SE12/SW03 second-floor PDFs, rendered locally at 300/600 dpi. It uses `outdoor-access` points and an `outdoor` passage kind. Its exact door positions remain unanswered and have not been added to the route graph. The question now explicitly asks about walking outdoors between the marked doors. Original source and derived runtime assets remain unchanged.
+
+All **173 non-browser tests**, the build, formatting, data/candidate validation, documentation links and whitespace checks passed. Two added regressions cover the outdoor floor-2 prompt and preservation of historical floor-4 coordinates/answers while retaining the floor-3 route. These tests use temporary fixtures, not physical-campus evidence. The local server was restarted and its page/API returned HTTP 200, showing the new outdoor candidate, retained third-floor confirmation and fourth-floor re-review state. No browser/screenshot/application screen checks or live provider calls were made; source-image inspection was limited to candidate preparation. No physical campus verification, push or deployment occurred.
 
 ## Gemini 3.6 setup follow-up
 

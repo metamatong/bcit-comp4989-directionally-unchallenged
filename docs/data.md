@@ -40,11 +40,13 @@ The pilot spatial evidence under `data/campus/spatial/` includes additional OCR,
 | Acquisition/provenance | `manifest.json`, `floor-plans-source.html` | URLs, dates, hashes, rights and source evidence |
 | Searchable evidence | `text/*.json`, `catalogue.json` | Text method, page sizes, label candidates, boxes and `sourceRef` |
 | Campus records | `coverage.json`, `landmarks.json` | Building/floor catalogue; no promoted verified room/entrance/transition records yet |
-| Campus topology | `data/campus/graph.json` | Empty until connections are reviewed and validated |
+| Legacy campus placeholders | `data/campus/graph.json`, `landmarks.json` | Empty; not consumed by the topology editor or its route checker |
+| Reviewed topology | `data/campus/topology.json` | Human-confirmed points/connections, original source hashes, evidence and version-bound review history |
+| Connection proposals | `data/campus/connection-candidates.json` | Source-bound SW03–SE12 questions for T/F/unknown review, separate from the routing graph |
 
 Floor-plan coordinates use PDF points with a top-left origin. There are no geographic coordinates, measured distances, inferred scale, or cross-floor alignment. Raw drawing primitives remain unclassified.
 
-A limited visual source review inspected SE12 floor 1, SW1 floor 1 and the campus wayfinding map. No complete set of campus entrances, corridor connections or accessibility properties is verified. Walking routes are unavailable. Fictional routing data and controls have been removed at the user's request.
+A limited visual source review inspected SE12 floor 1, SW1 floor 1 and the campus wayfinding map. No complete set of campus entrances, corridor connections or accessibility properties is verified. Visitor routing uses the subsequent reviewed pilot topology and four page-bound corridor traces. Fictional routing data and controls have been removed at the user's request.
 
 ## Downloaded building/floor coverage
 
@@ -103,6 +105,14 @@ The following is **document coverage**, not routing support. `coverage.json` is 
 Inspect extracted labels and geometry against the original PDFs before promoting them to reviewed records. Keep source ID, page/region, review date, reviewer and the exact observation. Original PDFs must remain unchanged. Regenerate derived visual assets with `python scripts/prepare_visual_maps.py --workers 3`, then run `npm run data:validate` and the relevant tests.
 
 Future walking edges need independently reviewed endpoints, passages, transitions, restrictions, scale/cost assumptions and accessibility evidence. Keep unknown values unknown. Campus graph/landmark files remain empty; filling them does not automatically enable directions. A source refresh requires reviewing changed hashes and dependent records. Do not infer doors or adjacency from nearby OCR text alone.
+
+The local [topology editor](topology-editor.md) now provides that manual annotation workflow for SE12, SW3 and SW1. It stores annotations separately from raw extraction. Each point has page-normalized coordinates and the original PDF hash; a connection references two saved points and their versions. Review history distinguishes plan review from dated field observations. Only currently eligible approved records enter internal route checks. No scale, floor alignment, same-floor connectivity or distance is inferred. There are no prefilled campus connections or independently field-validated routes in the initial document.
+
+The answer-first workflow also records user confirmations separately from plan/field reviews. The initial two SW03–SE12 third-/fourth-floor pairs were prepared from direct inspection of official plan overviews/detail tiles, not inferred from label equality. Candidate point coordinates and original hashes are explicit, while physical correspondence remains unknown until a user answers. T must include a separate permitted-direction answer before creating graph records; F and unknown stay out of routing. Candidate answers retain exact endpoint snapshots and presentation hashes under `topology.json.candidateAnswers`. Data validation checks the candidate source bindings as well as active graph approvals. Original labels and drawing primitives are unchanged.
+
+The reviewed graph at revision 21 contains 22 points and 11 edges. Ten edges are eligible. The third-floor building link and the second-floor outdoor passage are bidirectional. The earlier fourth-floor building edge is in draft.
+
+The floor 2–3 catalogue adds seven marked stair pairs and one marked SW03 lift pair. The SE12 lift inquiry has two official plan references and null boarding coordinates. The floor-service response goes into `floorObservations`. Publishing an elevator edge requires a separate answer binding both marked points to their original pages and hashes. Elevator questions link the supplemental BCIT campus map and pin its PDF hash in `supportingSource`. [Landing locations and Source Map](topology-editor.md#stairs-and-elevators-between-floors-2-and-3)
 
 ## Visual and geometry conversion
 

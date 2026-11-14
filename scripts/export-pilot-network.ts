@@ -5,7 +5,7 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { z } from 'zod';
 import { validateNetworkExport } from '../server/pilot-network';
-import { pilotEvidence } from '../server/pilot-evidence';
+import { checkedSpatialJson, pilotEvidence } from '../server/pilot-evidence';
 
 const hash = (bytes: Buffer | string) => createHash('sha256').update(bytes).digest('hex');
 const version = z.number().int().positive();
@@ -84,7 +84,22 @@ const inputSchema = z.object({
         answeredAt: z.string().datetime(),
         answer: z.enum(['true', 'false', 'unknown']),
         direction: z.enum(['both', 'a-to-b', 'b-to-a', 'unknown']).nullable(),
-        bindings: z.object({ edgeId: z.string() }).nullable(),
+        definitionHash: z
+          .string()
+          .regex(/^[a-f0-9]{64}$/)
+          .optional(),
+        presentedHash: z
+          .string()
+          .regex(/^[a-f0-9]{64}$/)
+          .optional(),
+        bindings: z
+          .object({
+            edgeId: z.string(),
+            fromNodeId: z.string().uuid().optional(),
+            toNodeId: z.string().uuid().optional(),
+            reviewedEdgeHash: z.string().optional(),
+          })
+          .nullable(),
       }),
     )
     .default([]),
@@ -116,6 +131,17 @@ function approved(
 }
 export function exportPilotNetwork(bytes: Buffer) {
   const document = inputSchema.parse(JSON.parse(bytes.toString('utf8')));
+  const traces = z
+    .object({
+      traces: z.array(
+        z.object({
+          candidateId: z.string(),
+          definitionHash: z.string(),
+          initialReviewHash: z.string().optional(),
+        }),
+      ),
+    })
+    .parse(checkedSpatialJson('corridor-traces')).traces;
   const plans = pilotEvidence().map((page) => page.plan);
   const nodes = document.nodes
     .filter(
@@ -136,6 +162,7 @@ export function exportPilotNetwork(bytes: Buffer) {
         sourceSha256: n.sourceSha256,
         reviewContentHash: n.review!.contentHash,
         reviewBasis: n.evidence.basis,
+        ...(n.evidence.observedOn ? { fieldObservedOn: n.evidence.observedOn } : {}),
       };
     });
   const byId = new Map(nodes.map((n) => [n.id, n]));
@@ -171,19 +198,48 @@ export function exportPilotNetwork(bytes: Buffer) {
         (e.distanceMeters === null || e.distanceEvidence.trim().length >= 10)
       );
     })
-    .map((e) => ({
-      id: e.id,
-      fromNodeId: e.fromNodeId,
-      toNodeId: e.toNodeId,
-      kind: e.kind,
-      direction: e.direction,
-      version: e.version,
-      endpointVersions: e.endpointVersions,
-      distanceMeters: e.distanceMeters,
-      reviewContentHash: e.review!.contentHash,
-      reviewBasis: e.evidence.basis,
-      sourceCandidateId: responses.get(e.id)?.candidateId ?? null,
-    }));
+    .map((e) => {
+      const answer = responses.get(e.id);
+      const pair = answer?.bindings;
+      const candidateBinding =
+        answer?.answer === 'true' &&
+        answer.definitionHash &&
+        answer.presentedHash &&
+        pair?.fromNodeId &&
+        pair.toNodeId &&
+        (!pair.reviewedEdgeHash || pair.reviewedEdgeHash === e.review!.contentHash)
+          ? {
+              definitionHash: answer.definitionHash,
+              presentedHash: answer.presentedHash,
+              fromNodeId: pair.fromNodeId,
+              toNodeId: pair.toNodeId,
+              ...(pair.reviewedEdgeHash === e.review!.contentHash ||
+              traces.some(
+                (trace) =>
+                  trace.candidateId === answer.candidateId &&
+                  trace.definitionHash === answer.definitionHash &&
+                  trace.initialReviewHash === e.review!.contentHash,
+              )
+                ? { reviewedEdgeHash: e.review!.contentHash }
+                : {}),
+            }
+          : undefined;
+      return {
+        id: e.id,
+        fromNodeId: e.fromNodeId,
+        toNodeId: e.toNodeId,
+        kind: e.kind,
+        direction: e.direction,
+        version: e.version,
+        endpointVersions: e.endpointVersions,
+        distanceMeters: e.distanceMeters,
+        reviewContentHash: e.review!.contentHash,
+        reviewBasis: e.evidence.basis,
+        ...(e.evidence.observedOn ? { fieldObservedOn: e.evidence.observedOn } : {}),
+        sourceCandidateId: answer?.candidateId ?? null,
+        ...(candidateBinding ? { candidateBinding } : {}),
+      };
+    });
   return validateNetworkExport(
     {
       schemaVersion: 1,

@@ -1,0 +1,117 @@
+{
+  "schemaVersion": 1,
+  "traces": [
+    {
+      "candidateId": "sw3-f2-door-to-lift-corridor",
+      "definitionHash": "1eb9e73a879d36b1c165b0186c8cbd4ddde66fa458f5cea0a00b97e2221fc413",
+      "planId": "SW3-F2-p1",
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "from": {
+        "x": 0.5125,
+        "y": 0.096
+      },
+      "to": {
+        "x": 0.828922,
+        "y": 0.459848
+      },
+      "bends": [
+        {
+          "x": 0.5125,
+          "y": 0.45
+        },
+        {
+          "x": 0.5346569,
+          "y": 0.45
+        },
+        {
+          "x": 0.8289216,
+          "y": 0.45
+        }
+      ],
+      "instruction": "Follow corridors 2000 and 2600 between the SE12 exterior door and the east elevator.",
+      "initialReviewHash": "f57a4f2fc86ee795740eb310ff78ab0777a78ed59f7c5dca16772257c050b13e"
+    },
+    {
+      "candidateId": "sw3-f3-lift-to-building-link-corridor",
+      "definitionHash": "27d5a88f0f98241fd4ad6224b35e6755a0df585fe5118c4f1b1c4ad762d338ac",
+      "planId": "SW3-F3-p1",
+      "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+      "from": {
+        "x": 0.740196,
+        "y": 0.640909
+      },
+      "to": {
+        "x": 0.4875,
+        "y": 0.352
+      },
+      "bends": [
+        {
+          "x": 0.7401961,
+          "y": 0.6325758
+        },
+        {
+          "x": 0.5409314,
+          "y": 0.6325758
+        },
+        {
+          "x": 0.4875,
+          "y": 0.6325758
+        }
+      ],
+      "instruction": "Follow corridors 3600 and 3000 between the east elevator and the SE12 passage.",
+      "initialReviewHash": "f63b79401b0cce761a7188c5c2c98a4fb3556f4cad374786a1377a583a33e713"
+    },
+    {
+      "candidateId": "sw3-f2-east-lift-to-2605",
+      "definitionHash": "0ffdc44568dbc298b596407af6587014178e67b4e22fa6adb0d68a3a41f4f10f",
+      "planId": "SW3-F2-p1",
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "from": {
+        "x": 0.828922,
+        "y": 0.459848
+      },
+      "to": {
+        "x": 0.5346569,
+        "y": 0.4356061
+      },
+      "bends": [
+        {
+          "x": 0.8289216,
+          "y": 0.45
+        },
+        {
+          "x": 0.5346569,
+          "y": 0.45
+        }
+      ],
+      "instruction": "Follow corridor 2600 between the east elevator and the door to room 2605 opposite vestibule 2604.",
+      "arrivalDoorId": "SW3-F2-p1:drawn-door:2"
+    },
+    {
+      "candidateId": "sw3-f3-east-lift-to-3615",
+      "definitionHash": "3ae5ddbfd77839f22a3b2140b6df34d568fd0cdeeed1518b0e5f470de3ed7791",
+      "planId": "SW3-F3-p1",
+      "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+      "from": {
+        "x": 0.740196,
+        "y": 0.640909
+      },
+      "to": {
+        "x": 0.5409314,
+        "y": 0.6214394
+      },
+      "bends": [
+        {
+          "x": 0.7401961,
+          "y": 0.6325758
+        },
+        {
+          "x": 0.5409314,
+          "y": 0.6325758
+        }
+      ],
+      "instruction": "Follow corridor 3600 between the east elevator and the door to room 3615 opposite vestibule 3604.",
+      "arrivalDoorId": "SW3-F3-p1:drawn-door:1"
+    }
+  ]
+}
