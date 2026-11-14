@@ -6,7 +6,7 @@ Use Node.js 22+, `npm ci`, and `npm run dev`. The app defaults to `127.0.0.1:300
 
 Set `GEMINI_API_KEY` in private `.env`, choose a primary `GEMINI_MODEL`, and set an ordered comma-separated `GEMINI_FALLBACK_MODELS` list. Defaults use Gemini 3.5 Flash-Lite and Gemini 3.8 Flash; Google currently lists both on the free tier. An existing 3.8 primary defaults to a 3.5 Flash-Lite backup. Explicit settings are preserved. Gemini 2.5 requires existing-project access and is never an automatic backup. Verify eligibility and generation access for the specific API project before setting `AI_FREE_TIER_CONFIRMED=true`; model metadata can return HTTP 200 even when generation returns 404. `.env.example` is a keyless template. Never put secrets in frontend variables. `AI_DEFAULT_MODE` is obsolete and ignored. No mode switch or synthetic location fallback exists.
 
-Without provider configuration, users see setup guidance. Photo submission is disabled in the client and rejected by the server. With configuration, each photo still requires consent and explicit submission. Destination lookup and routing are local server operations and consume no provider quota.
+Without provider configuration, users see setup guidance. Photo submission is disabled in the client and rejected by the server. With configuration, pressing the analysis button authorizes that submission. Destination lookup and routing are local server operations and consume no provider quota.
 
 ## Media and state
 
@@ -14,7 +14,7 @@ The browser accepts JPEG/PNG/WebP up to 8 MB and 50 million pixels, creates a fu
 
 Mobile photo capture uses the browser/device photo picker. DirectionallyUnchallenged does not open a live camera stream or track movement. Physical-device capture behavior remains unverified.
 
-Upload and capture controls are shown inline under Find my location. A selected photo reveals the consent and analysis controls. Remove photo, Cancel analysis, result confirmation or leaving the page releases the client photo; the coverage/privacy dialog does not clear it. When a destination is present, confirming a marked start opens the floor-by-floor route overview, with the photo evidence and trip inputs in collapsed sections below it. A newly selected photo clears the previous route.
+Upload and capture controls are shown inline under Find my location. A selected photo reveals the analysis button and its Gemini data-use notice. Remove photo, Cancel analysis, result confirmation or leaving the page releases the client photo; the coverage/privacy dialog does not clear it. When a destination is present, confirming a marked start opens the floor-by-floor route overview, with the photo evidence and trip inputs in collapsed sections below it. A newly selected photo clears the previous route.
 
 Routes exist only in the active browser view. Editing the destination or replacing the photo clears directions. Recheck current route reads current topology approvals and asks for the starting point again.
 

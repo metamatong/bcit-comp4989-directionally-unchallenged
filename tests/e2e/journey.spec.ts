@@ -67,14 +67,14 @@ test('prepares an image locally but disables analysis and sending when the key i
   });
   await page.goto('/');
   await page.getByLabel('Upload campus photo', { exact: true }).setInputFiles(fixture);
-  await expect(page.getByText(/Photo ready\. Choose Analyze/)).toBeVisible();
+  await expect(page.getByText('Photo ready.', { exact: true })).toBeVisible();
   await expect(page.getByText(/Photo analysis needs a Gemini key/)).toBeVisible();
   await expect(
     page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }),
   ).toBeDisabled();
   await expect(
-    page.getByRole('checkbox', { name: /Send this photo and its detail views/ }),
-  ).toBeDisabled();
+    page.getByRole('form', { name: 'Photo analysis' }).getByRole('checkbox'),
+  ).toHaveCount(0);
   expect(sent).toEqual([]);
 });
 
@@ -131,7 +131,6 @@ for (const failure of [
     );
     await page.goto('/');
     await page.getByLabel('Upload campus photo', { exact: true }).setInputFiles(fixture);
-    await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
     await page
       .getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true })
       .click();

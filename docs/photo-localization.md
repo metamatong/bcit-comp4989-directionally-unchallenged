@@ -7,7 +7,7 @@ The app uses the actual photo and detailed views in two separate API stages. Gem
 ## User flow
 
 1. Use Upload photo or Take a photo directly under the first screen's Find my location heading. The browser prepares a full view and four overlapping detail crops from the **original decoded image**, before discarding original metadata.
-2. Enter the destination and select **Find my route** after consenting to the photo analysis. Photo-only comparison is also available. The visitor client binds both photo requests to `wayfinding-pilot`, restricting visual comparison to the 12 SE12, SW03 and SW01 plans.
+2. Enter the destination and select **Find my route** to authorize and start analysis of the selected photo. Photo-only comparison is also available. The visitor client binds both photo requests to `wayfinding-pilot`, restricting visual comparison to the 12 SE12, SW03 and SW01 plans.
 3. The client calls the label-reading endpoint and shows progress while Gemini reads visible identifiers.
 4. The client sends the same image bundle with the returned evidence ID to the location endpoint. Relevant source plans appear only with the resulting hypothesis, below the inline photo input.
 5. Confirm a region only if it agrees with the surroundings. Confirmation releases the local photo while keeping the selected result visible. The model can abstain and ask for another photo. Remove photo or Cancel analysis discards the current photo and prevents late results from appearing.

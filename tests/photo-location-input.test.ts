@@ -16,7 +16,6 @@ const photo: PreparedPhoto = {
 function renderInput(overrides: Partial<ComponentProps<typeof PhotoLocationInput>> = {}) {
   const props: ComponentProps<typeof PhotoLocationInput> = {
     photo: null,
-    consent: false,
     ready: true,
     reading: false,
     busy: false,
@@ -24,7 +23,6 @@ function renderInput(overrides: Partial<ComponentProps<typeof PhotoLocationInput
     destination: '',
     onDestinationChange: vi.fn(),
     onPhoto: vi.fn(),
-    onConsent: vi.fn(),
     onAnalyze: vi.fn(),
     onDiscard: vi.fn(),
     ...overrides,
@@ -54,25 +52,23 @@ describe('inline photo input (Node rendering, no browser)', () => {
     expect(markup).not.toContain('aria-label="Photo analysis"');
     expect(props.onAnalyze).not.toHaveBeenCalled();
   });
-  it('shows a local preview while requiring separate photo consent before analysis', () => {
+  it('shows a local preview and explains what submitting the prepared photo sends', () => {
     const { markup, props } = renderInput({ photo });
     expect(markup).toContain(photo.preview);
-    expect(markup).toContain('Send this photo and its detail views to Google Gemini');
-    expect(markup).not.toContain('checked=""');
-    expect(button(markup, 'Analyze photo against BCIT plans')).toContain('disabled');
+    expect(markup).toContain('Submitting sends this photo and its detail views to Google Gemini.');
+    expect(markup).not.toContain('type="checkbox"');
+    expect(button(markup, 'Analyze photo against BCIT plans')).toContain(
+      'aria-describedby="photo-submission-note"',
+    );
+    expect(button(markup, 'Analyze photo against BCIT plans')).not.toContain('disabled');
     expect(button(markup, 'Remove photo')).not.toContain('disabled');
     expect(props.onAnalyze).not.toHaveBeenCalled();
-  });
-  it('enables analysis only after the photo is consented and the provider is ready', () => {
-    const { markup } = renderInput({ photo, consent: true });
-    expect(button(markup, 'Analyze photo against BCIT plans')).not.toContain('disabled');
   });
   it('shows the failed stage and cause beside the retained photo and offers an explicit retry', () => {
     const error =
       'Comparing the floor plans stopped. Gemini timed out before completing the response.';
     const { markup, props } = renderInput({
       photo,
-      consent: true,
       status: 'Comparing plans…',
       error,
     });
@@ -82,21 +78,19 @@ describe('inline photo input (Node rendering, no browser)', () => {
     expect(button(markup, 'Retry with this photo')).not.toContain('disabled');
     expect(props.onAnalyze).not.toHaveBeenCalled();
   });
-  it('starts a journey from a typed destination with the same per-photo consent gate', () => {
+  it('offers route finding as soon as the photo and destination are ready', () => {
     expect(
       button(renderInput({ photo, destination: 'SW03 3615' }).markup, 'Find my route'),
-    ).toContain('disabled');
-    expect(
-      button(
-        renderInput({ photo, consent: true, destination: 'SW03 3615' }).markup,
-        'Find my route',
-      ),
     ).not.toContain('disabled');
+  });
+  it('keeps submission disabled while preparing a replacement photo', () => {
+    const { markup, props } = renderInput({ photo, reading: true, destination: 'SW03 2082' });
+    expect(button(markup, 'Find my route')).toContain('disabled');
+    expect(props.onAnalyze).not.toHaveBeenCalled();
   });
   it('can edit a destination using the accepted photo result without offering a second submission', () => {
     const { markup } = renderInput({
       photo,
-      consent: true,
       destination: 'SW03 2082',
       canUsePhotoResult: true,
     });
@@ -105,15 +99,13 @@ describe('inline photo input (Node rendering, no browser)', () => {
     expect(button(markup, 'Upload photo')).not.toContain('disabled');
   });
   it('keeps local upload available while provider configuration is unavailable', () => {
-    const { markup } = renderInput({ photo, consent: true, ready: false });
+    const { markup } = renderInput({ photo, ready: false });
     expect(button(markup, 'Upload photo')).not.toContain('disabled');
     expect(button(markup, 'Analyze photo against BCIT plans')).toContain('disabled');
-    expect(markup).toMatch(/type="checkbox"[^>]*disabled=""/);
   });
   it('keeps cancellation available while analysis locks submission and replacement', () => {
     const { markup } = renderInput({
       photo,
-      consent: true,
       busy: true,
       status: 'Comparing plans…',
     });

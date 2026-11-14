@@ -130,7 +130,8 @@ it('turns a photo and typed destination into the complete three-floor route afte
       });
       fileInput.dispatchEvent(new Event('change', { bubbles: true }));
     });
-    await click(host.querySelector<HTMLInputElement>('input[type=checkbox]')!);
+    expect(host.querySelector('input[type=checkbox]')).toBeNull();
+    expect(provider.calls).toBe(0);
     await click(button('Find my route'));
     await wait(() => expect(button('Start at 302')).toBeDefined());
     expect(host.querySelector('.route-directions')).toBeNull();

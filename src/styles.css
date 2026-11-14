@@ -207,21 +207,6 @@ a:hover {
 .helper svg {
   vertical-align: middle;
 }
-.checkbox-label {
-  display: flex;
-  gap: 9px;
-  align-items: flex-start;
-  font-size: 11px;
-  line-height: 1.7;
-  margin: 15px 0;
-}
-.checkbox-label input {
-  accent-color: var(--green);
-  margin: 2px 0 0;
-  flex-shrink: 0;
-  width: 16px;
-  height: 16px;
-}
 .primary,
 .secondary {
   display: inline-flex;
@@ -564,9 +549,6 @@ a:hover {
   .error-banner > span {
     min-width: 75%;
   }
-  .checkbox-label {
-    font-size: 11px;
-  }
   .primary,
   .secondary {
     min-height: 46px;
@@ -761,15 +743,6 @@ a:hover {
   font-size: 13px;
   line-height: 1.7;
 }
-.photo-consent {
-  padding: 12px;
-  background: #f1f5e9;
-  border: 1px solid #dce5ce;
-  border-radius: 8px;
-}
-.photo-consent input {
-  margin-top: 3px;
-}
 @media (max-width: 800px) {
   .photo-location-input {
     padding: 24px 18px;
@@ -799,9 +772,6 @@ a:hover {
   .estimated-region > span {
     font-size: 9px;
     padding: 4px;
-  }
-  .photo-consent {
-    font-size: 12px;
   }
 }
 @media (max-width: 420px) {

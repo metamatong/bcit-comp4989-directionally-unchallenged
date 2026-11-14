@@ -36,13 +36,13 @@ The Node server does not restart automatically when files change. Restart it man
 A destination and a starting photo open a walking itinerary. A photo-only submission shows the location evidence.
 
 1. Use **Upload photo** or **Take a photo** directly in the first screen's **Find my location** section.
-2. Enter a destination such as `SW03 3615`, agree to send this photo and its detail views to Gemini, and select **Find my route**. You can also run a photo-only comparison and enter the destination later.
+2. Enter a destination such as `SW03 3615` and select **Find my route** to send the selected photo and its detail views to Google Gemini. You can also run a photo-only comparison and enter the destination later.
 3. Choose **Start at …** for the marked door or checkpoint where you are standing. This confirms the photo area and the specific route start in one action. Choose the intended place if the destination label has several matches. Insufficient evidence or a missing reviewed connection produces a coverage message.
 4. **Walking directions** shows all floor plans in travel order. Follow the arrows on each floor and the instructions for crossing buildings or changing floors. **One floor at a time** opens manual floor navigation. **Edit photo or destination** and **Photo location evidence** are available below the itinerary. **Start over** clears the current result.
 
 A connected example runs from the SW03 2605 door opposite vestibule 2604 to the SW03 3615 door opposite vestibule 3604 via the east elevator. SE12 floor 2 joins this network at its exterior door and floor 3 at its indoor passage. SW01 has searchable labels and zero reviewed connections in this revision. `SW01 2004` shows its source location and `SW03 2458` returns no exact match.
 
-The photo workflow is inline, with no location popup or extra launch button. Consent and analysis controls appear after choosing a photo. The full view and four detail crops are prepared locally from the original image. Photos are sent only after per-photo consent and submission. No photo is saved in application storage. Removing a photo, confirming a result or leaving the page discards the browser's prepared photo. Mobile capture uses the device's photo picker/camera; the app has no live camera preview or movement tracking. Google's free-tier data handling applies.
+The photo workflow is inline, with no location popup or extra launch button. A submission button and a short Gemini data-use notice appear after choosing a photo. The full view and four detail crops are prepared locally from the original image. Pressing the analysis button authorizes both photo requests for that submission. No photo is saved in application storage. Removing a photo, confirming a result or leaving the page discards the browser's prepared photo. Mobile capture uses the device's photo picker/camera; the app has no live camera preview or movement tracking. Google's free-tier data handling applies.
 
 ## Internal connection editor
 

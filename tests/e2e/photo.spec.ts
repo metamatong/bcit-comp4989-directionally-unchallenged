@@ -135,10 +135,10 @@ async function choosePhoto(page: Page) {
   await page
     .getByLabel('Upload campus photo', { exact: true })
     .setInputFiles(resolve('data/campus/visual/png/SE12-F1-p1/overview.png'));
-  await expect(page.getByText(/Photo ready\. Choose Analyze/)).toBeVisible();
+  await expect(page.getByText('Photo ready.', { exact: true })).toBeVisible();
 }
 
-test('photo → explicit consent → real plan region → confirmation, without OCR (mocked provider)', async ({
+test('submits a prepared photo in one action and confirms the plan result (mocked provider)', async ({
   page,
 }, info) => {
   const { uploads, evidenceUploads, requests } = await setup(page);
@@ -147,9 +147,12 @@ test('photo → explicit consent → real plan region → confirmation, without 
     name: 'Analyze photo against BCIT plans',
     exact: true,
   });
-  await expect(analyze).toBeDisabled();
+  await expect(analyze).toBeEnabled();
+  await expect(
+    page.getByRole('form', { name: 'Photo analysis' }).getByRole('checkbox'),
+  ).toHaveCount(0);
+  expect(evidenceUploads).toHaveLength(0);
   expect(uploads).toHaveLength(0);
-  await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
   await analyze.click();
   await expect(
     page
@@ -204,7 +207,6 @@ test('photo → explicit consent → real plan region → confirmation, without 
 test('ambiguous photo asks for another view and never supplies a demo match', async ({ page }) => {
   await setup(page, false);
   await choosePhoto(page);
-  await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
   await page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }).click();
   await expect(
     page
@@ -236,7 +238,6 @@ test('cancelling inline analysis discards a late comparison response', async ({ 
     await wait;
     await route.abort().catch(() => {});
   });
-  await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
   await page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }).click();
   await expect.poll(() => requested).toBe(true);
   await page.getByRole('button', { name: 'Cancel analysis', exact: true }).click();
@@ -252,7 +253,6 @@ test('clearing an analysis removes the result without changing provider or loadi
 }) => {
   const { uploads } = await setup(page);
   await choosePhoto(page);
-  await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
   await page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }).click();
   await page
     .getByRole('region', { name: 'Photo comparison results' })
@@ -265,18 +265,19 @@ test('clearing an analysis removes the result without changing provider or loadi
   expect(uploads).toHaveLength(1);
 });
 
-test('opening and closing privacy information preserves the inline photo and consent', async ({
+test('opening and closing privacy information keeps the photo ready without submitting it', async ({
   page,
 }) => {
-  await setup(page);
+  const { evidenceUploads, uploads } = await setup(page);
   await choosePhoto(page);
-  await page.getByRole('checkbox', { name: /Send this photo and its detail views/ }).check();
   await page.getByRole('button', { name: /Coverage & privacy/ }).click();
   await expect(page.getByRole('dialog', { name: 'About DirectionallyUnchallenged' })).toBeVisible();
   await page.getByRole('dialog').press('Escape');
   await expect(page.getByRole('dialog')).not.toBeVisible();
   await expect(page.getByRole('img', { name: /Uploaded location photo/ })).toBeVisible();
   await expect(
-    page.getByRole('checkbox', { name: /Send this photo and its detail views/ }),
-  ).toBeChecked();
+    page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }),
+  ).toBeEnabled();
+  expect(evidenceUploads).toHaveLength(0);
+  expect(uploads).toHaveLength(0);
 });
