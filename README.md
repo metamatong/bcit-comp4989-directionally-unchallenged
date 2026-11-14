@@ -37,7 +37,7 @@ There is no Campus library, general plan browser, or introductory marketing bann
 
 1. Use **Upload photo** or **Take a photo** directly in the first screen's **Find my location** section.
 2. Enter a destination such as `SW03 3615`, agree to send this photo and its detail views to Gemini, and select **Find my route**. You can also run a photo-only comparison and enter the destination later.
-3. Confirm the highlighted region if it matches your surroundings. Choose the numbered point where you are standing. A photo without a defensible region or a region without a reviewed point requires a different view.
+3. Blue marks identify printed room labels. A matching signed doorway and corridor layout can yield a **Possible starting corridor** even when the exact camera position is unknown. Confirm it with **I’m in this corridor**. An orange strip marks a traced corridor frontage where available. An orange diamond marks the reference doorway when its frontage has yet to be traced. Sign-only and ambiguous results show the printed labels. Choose the numbered point where you are standing. A photo without a defensible region or a region without a reviewed point requires a different view.
 4. Follow the arrows on the selected floor plan. Use **Next step** at an elevator, stair or building crossing. You can zoom out to the full floor or check another destination using the same photo region. **Clear** removes the current result.
 
 A connected example runs from the SW03 2605 door opposite vestibule 2604 to the SW03 3615 door opposite vestibule 3604 via the east elevator. SE12 floor 2 joins this network at its exterior door and floor 3 at its indoor passage. SW01 has searchable labels and zero reviewed connections in this revision. `SW01 2004` shows its source location and `SW03 2458` returns no exact match.
@@ -76,9 +76,11 @@ npm run format
 
 Tests mock Gemini and spend no provider quota. Browser automation, when requested, uses an isolated server on port 3100 with credentials disabled and installed Google Chrome. It is not a physical-phone or Safari test. The browser OCR packages, worker assets and installation hook have been removed; optional local PDF preprocessing can still use Tesseract.
 
-SE12, SW03 and SW01 have a server-side spatial index across floors 1–4. It includes 377 source-read labels, 16 drawn door locations, whole-page OCR evidence and a revisioned graph of 22 approved checkpoints and 14 passages. Try a label with `npm run spatial:query -- resolve_spatial_labels '{"purpose":"destination","labels":["SW03 2605"]}'`. Unknown labels return `unsupported`. [Tool contracts, coverage and examples](docs/spatial-retrieval.md)
+SE12, SW03 and SW01 have a server-side spatial index across floors 1–4. It includes 377 source-read labels, 19 drawn door locations, whole-page OCR evidence and a revisioned graph of 22 approved checkpoints and 14 passages. Try a label with `npm run spatial:query -- resolve_spatial_labels '{"purpose":"destination","labels":["SW03 2605"]}'`. Unknown labels return `unsupported`. [Tool contracts, coverage and examples](docs/spatial-retrieval.md)
 
 Photo retrieval preserves exact identifiers, including `302`, `3021` and `0302`. All 5,463 original labels remain available as source evidence. The second stage uses the pilot drawing index to retrieve matching observations and their page boxes. Optical-only hits go through visual shortlisting. Detailed photo-to-plan comparison and user confirmation follow.
+
+During photo analysis the input shows the current step and elapsed time. A failure appears next to the photo with its cause and an explicit retry button. A retry reuses any valid label reading and recovers an expired session with the same selected photo.
 
 Photo reading/shortlisting and detailed comparison use 4,096/8,192-token allowances with bounded thinking. When a Gemini model hits quota, is unavailable, or returns an unusable response, the server tries the configured Gemini fallback models. Incomplete responses cannot become location results. See [provider notes](docs/provider.md).
 
@@ -112,7 +114,7 @@ mvp/
 ├── server/
 │   ├── index.ts, app.ts, runtime.ts
 │   ├── provider.ts, photo-localization.ts, session.ts
-│   ├── photo-evidence.ts, photo-media.ts, room-labels.ts
+│   ├── photo-evidence.ts, photo-media.ts, photo-grounding.ts, photo-doorways.ts, room-labels.ts
 │   ├── topology.ts, topology-api.ts, routing.ts, visitor-paths.ts, wayfinding.ts
 │   ├── topology-candidates.ts, topology-provenance.ts, topology-import.ts
 │   ├── pilot-evidence.ts, pilot-network.ts, pilot-inquiries.ts
@@ -135,7 +137,7 @@ mvp/
 ├── tests/
 │   ├── api.test.ts, client-state.test.ts, data.test.ts, visual-data.test.ts, runtime.test.ts
 │   ├── provider.test.ts, provider-response.test.ts, spatial-retrieval.test.ts
-│   ├── photo-localization.test.ts, photo-api.test.ts
+│   ├── photo-localization.test.ts, photo-doorways.test.ts, photo-api.test.ts
 │   ├── photo.test.ts, photo-location-input.test.ts, room-labels.test.ts, photo-fixtures.ts
 │   ├── topology.test.ts, topology-api.test.ts, topology-editor.test.ts
 │   ├── topology-candidates.test.ts, wayfinding.test.ts, wayfinding-api.test.ts

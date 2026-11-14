@@ -6,6 +6,9 @@ import { isPilotPlan, drawingPhotoLabels, labelKey } from './pilot-evidence';
 export function normalizeRoomLabel(text: string): string {
   return labelKey(text);
 }
+export function isSourceReadLabel(method: string) {
+  return method === 'embedded-pdf-text' || method === 'manual-plan-transcription';
+}
 export type IndexedRoomLabel = SourceLabel & {
   planId: string;
   sourceRef: string;
@@ -51,11 +54,12 @@ let photoIndex: RoomLabelIndex | undefined;
 function photoLabelIndex() {
   photoIndex ??= new RoomLabelIndex(
     visualPlans.flatMap((plan) => {
-      const labels = isPilotPlan(plan)
+      const labels: (SourceLabel & { evidenceId?: string })[] = isPilotPlan(plan)
         ? drawingPhotoLabels(plan)
         : planGeometrySummary(plan).labels;
-      return labels.map((label) => ({
+      return labels.map((label, index) => ({
         ...label,
+        evidenceId: label.evidenceId ?? `${plan.id}:geometry:${index + 1}`,
         planId: plan.id,
         building: plan.building,
         floor: plan.floor,
@@ -83,7 +87,7 @@ export function retrieveRoomLabels(
   );
   const clearMatches = matches.filter((match) => clearLabels.includes(match.observedLabel));
   const clearMatchPlanIds = [...new Set(clearMatches.map((match) => match.planId))];
-  const hasCorroboratedLabel = clearMatches.some((match) => match.method !== 'pilot-ocr');
+  const hasCorroboratedLabel = clearMatches.some((match) => isSourceReadLabel(match.method));
   return {
     indexedLabels: index.labelCount,
     clearLabels,

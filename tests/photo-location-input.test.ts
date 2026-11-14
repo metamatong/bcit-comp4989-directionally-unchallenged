@@ -67,6 +67,21 @@ describe('inline photo input (Node rendering, no browser)', () => {
     const { markup } = renderInput({ photo, consent: true });
     expect(button(markup, 'Analyze photo against BCIT plans')).not.toContain('disabled');
   });
+  it('shows the failed stage and cause beside the retained photo and offers an explicit retry', () => {
+    const error =
+      'Comparing the floor plans stopped. Gemini timed out before completing the response.';
+    const { markup, props } = renderInput({
+      photo,
+      consent: true,
+      status: 'Comparing plans…',
+      error,
+    });
+    expect(markup).toContain('role="alert">' + error + '</p>');
+    expect(markup).toContain(photo.preview);
+    expect(markup).not.toContain('Comparing plans…');
+    expect(button(markup, 'Retry with this photo')).not.toContain('disabled');
+    expect(props.onAnalyze).not.toHaveBeenCalled();
+  });
   it('starts a journey from a typed destination with the same per-photo consent gate', () => {
     expect(
       button(renderInput({ photo, destination: 'SW03 3615' }).markup, 'Find my route'),

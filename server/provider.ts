@@ -26,6 +26,26 @@ export class ProviderError extends Error {
 
 const retryableStatuses = new Set([500, 502, 503, 504]);
 const maximumAttempts = 3;
+const recoveryWindowMs = 60_000;
+
+function transportFailure(signal: AbortSignal) {
+  if (signal.aborted && signal.reason?.name === 'TimeoutError') {
+    return new ProviderError(
+      'Gemini timed out before completing the response.',
+      504,
+      'timeout',
+      true,
+    );
+  }
+  if (signal.aborted)
+    return new ProviderError('The photo request was cancelled.', 499, 'connection', false);
+  return new ProviderError(
+    'The Gemini connection is unavailable. Check the server connection and try again.',
+    503,
+    'connection',
+    true,
+  );
+}
 
 function requestedRetryDelay(response: Response): number | undefined {
   const value = response.headers.get('retry-after');
@@ -214,6 +234,8 @@ export class GeminiProvider implements Provider {
   calls = 0;
   private minuteCalls: number[] = [];
   private dayCalls: number[] = [];
+  private recoveringUntil = new Map<string, number>();
+  private lastSuccessfulModel?: string;
   constructor(
     private options: {
       apiKey: string;
@@ -224,6 +246,13 @@ export class GeminiProvider implements Provider {
       timeoutMs: number;
       fetchImpl?: typeof fetch;
       waitForRetry?: (milliseconds: number, signal?: AbortSignal) => Promise<void>;
+      onModelFailure?: (event: {
+        model: string;
+        operation: string;
+        code: ProviderError['code'];
+        httpStatus: number;
+        elapsedMs: number;
+      }) => void;
     },
   ) {}
   private reserve() {
@@ -266,20 +295,53 @@ export class GeminiProvider implements Provider {
     onAttempt?: () => void,
     options: GenerationOptions = {},
   ): Promise<ModelPart[]> {
-    const models = [...new Set([this.options.model, ...(this.options.fallbackModels ?? [])])];
+    const configured = [...new Set([this.options.model, ...(this.options.fallbackModels ?? [])])];
+    const now = Date.now();
+    const available = configured.filter((model) => (this.recoveringUntil.get(model) ?? 0) <= now);
+    // Once a backup has recovered the workflow, keep using it while the primary is cooling down.
+    if (
+      !available.includes(this.options.model) &&
+      this.lastSuccessfulModel &&
+      available.includes(this.lastSuccessfulModel)
+    ) {
+      available.splice(available.indexOf(this.lastSuccessfulModel), 1);
+      available.unshift(this.lastSuccessfulModel);
+    }
+    // Keep the user's order among healthy models and still try a recovering model if all others fail.
+    const models = [...available, ...configured.filter((model) => !available.includes(model))];
     const failures: ProviderError[] = [];
     for (let index = 0; index < models.length; index++) {
+      const started = performance.now();
       try {
-        return await this.generateWithModel(
+        const result = await this.generateWithModel(
           models[index],
           contents,
           declarations,
           signal,
           onAttempt,
           options,
+          models.slice(index + 1).some((model) => available.includes(model)),
         );
+        this.recoveringUntil.delete(models[index]);
+        this.lastSuccessfulModel = models[index];
+        if (models[index] !== this.options.model) options.onModelFallback?.();
+        return result;
       } catch (error) {
-        if (error instanceof ProviderError) failures.push(error);
+        if (error instanceof ProviderError) {
+          failures.push(error);
+          this.options.onModelFailure?.({
+            model: models[index],
+            operation: options.forceTool ?? 'generate',
+            code: error.code,
+            httpStatus: error.httpStatus,
+            elapsedMs: Math.round(performance.now() - started),
+          });
+          if (!signal?.aborted && ['timeout', 'unavailable', 'quota'].includes(error.code))
+            this.recoveringUntil.set(
+              models[index],
+              Date.now() + Math.max(recoveryWindowMs, (error.retryAfterSeconds ?? 0) * 1000),
+            );
+        }
         const shouldFallback =
           index < models.length - 1 &&
           !signal?.aborted &&
@@ -307,7 +369,6 @@ export class GeminiProvider implements Provider {
           }
           throw error;
         }
-        options.onModelFallback?.();
       }
     }
     throw unavailableError(503);
@@ -320,6 +381,7 @@ export class GeminiProvider implements Provider {
     signal?: AbortSignal,
     onAttempt?: () => void,
     options: GenerationOptions = {},
+    hasAlternative = false,
   ): Promise<ModelPart[]> {
     if (!this.options.apiKey)
       throw new Error('Gemini is not configured. Add the server API key and restart.');
@@ -366,7 +428,11 @@ export class GeminiProvider implements Provider {
         'configuration',
         false,
       );
-    const timeoutMs = Math.min(30000, options.timeoutMs ?? this.options.timeoutMs);
+    const maximumWaitMs = Math.min(30000, options.timeoutMs ?? this.options.timeoutMs);
+    // Use the configured failover threshold while another model is available. Give the last model its full stage allowance.
+    const timeoutMs = hasAlternative
+      ? Math.min(maximumWaitMs, this.options.timeoutMs)
+      : maximumWaitMs;
     for (let attempt = 0; attempt < maximumAttempts; attempt++) {
       if (signal?.aborted)
         throw new ProviderError(
@@ -378,25 +444,20 @@ export class GeminiProvider implements Provider {
       this.reserve();
       onAttempt?.();
       let response: Response;
+      const attemptDeadline = AbortSignal.timeout(timeoutMs);
+      const requestSignal = signal ? AbortSignal.any([signal, attemptDeadline]) : attemptDeadline;
       try {
         response = await fetcher(
           `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'x-goog-api-key': this.options.apiKey },
-            signal: signal
-              ? AbortSignal.any([signal, AbortSignal.timeout(timeoutMs)])
-              : AbortSignal.timeout(timeoutMs),
+            signal: requestSignal,
             body: requestBody,
           },
         );
       } catch {
-        throw new ProviderError(
-          'The Gemini connection timed out or is unavailable. Try again later.',
-          503,
-          'connection',
-          true,
-        );
+        throw transportFailure(requestSignal);
       }
       if (retryableStatuses.has(response.status)) {
         const retryDelay = requestedRetryDelay(response);
@@ -427,13 +488,18 @@ export class GeminiProvider implements Provider {
         }
         continue;
       }
-      if (response.status === 429)
+      if (response.status === 429) {
+        const delay = requestedRetryDelay(response);
+        const seconds = delay === undefined ? undefined : Math.max(1, Math.ceil(delay / 1000));
+        await response.body?.cancel();
         throw new ProviderError(
-          'Gemini quota exhausted. Wait for the provider limit to reset before trying again.',
+          `Gemini quota exhausted. ${seconds ? `Try again in ${seconds} seconds.` : 'Wait for the provider limit to reset before trying again.'}`,
           429,
           'quota',
           true,
+          seconds,
         );
+      }
       if (response.status === 404) {
         await response.body?.cancel();
         throw new ProviderError(
@@ -445,7 +511,8 @@ export class GeminiProvider implements Provider {
           true,
         );
       }
-      if (!response.ok)
+      if (!response.ok) {
+        await response.body?.cancel();
         throw new ProviderError(
           `Gemini rejected the request (HTTP ${response.status}). Check the API key, model access, and server configuration. Live AI remains selected.`,
           502,
@@ -454,7 +521,16 @@ export class GeminiProvider implements Provider {
           undefined,
           response.status === 400,
         );
-      return parseResponse(await response.json().catch(() => null));
+      }
+      let json: unknown;
+      try {
+        json = await response.json();
+      } catch (error) {
+        if (requestSignal.aborted || !(error instanceof SyntaxError))
+          throw transportFailure(requestSignal);
+        throw unsupportedResponse();
+      }
+      return parseResponse(json);
     }
     throw unavailableError(503);
   }

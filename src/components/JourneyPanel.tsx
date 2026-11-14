@@ -229,7 +229,7 @@ export function JourneyPanel({
         <>
           <RouteMap
             plan={plans.find((p) => p.id === candidate.planId)!}
-            bounds={candidate.bounds}
+            bounds={candidate.bounds ?? undefined}
             markers={result.origins.map((s, i) => ({
               point: s.point,
               label: s.label,

@@ -1,4 +1,6 @@
 import { randomUUID } from 'node:crypto';
+import { createElement } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import {
   analyzeCampusPhoto,
@@ -13,6 +15,10 @@ import {
 } from '../server/photo-media';
 import { newSession } from '../server/session';
 import { getVisualPlan, planAtlases, planGeometrySummary } from '../server/visual-data';
+import { CampusLocationResults } from '../src/components/CampusLocationResults';
+import { groundPhotoRegion } from '../server/photo-grounding';
+import { retrieveRoomLabels } from '../server/room-labels';
+import type { PlanBounds } from '../src/types';
 import type { GenerationOptions, ModelContent, ModelPart, Provider } from '../server/provider';
 import {
   photoInput,
@@ -37,6 +43,207 @@ function fixture(turns: ModelPart[][]) {
 }
 
 describe('separate photo evidence and source-grounded localization stages (mocked Gemini)', () => {
+  const screenshotBox: PlanBounds = [0.08, 0.3, 0.3, 0.48];
+  const door302: PlanBounds = [0.145, 0.574, 0.158, 0.598];
+  const door320: PlanBounds = [0.549, 0.572, 0.562, 0.596];
+  const plan = getVisualPlan('SE12-F3-p1');
+  const match320 = { observedLabel: '320', planLabel: '320' };
+  const match302 = { observedLabel: '302', planLabel: '302' };
+  async function compareRoom(
+    reading: string,
+    bounds: PlanBounds,
+    summary: string,
+    claimed = [{ observedLabel: reading, planLabel: reading }],
+    printedOnly = false,
+  ) {
+    const input = photoInput({ scope: 'wayfinding-pilot' });
+    const response = comparison({ summary }, plan.id, bounds);
+    const args = response[0].functionCall!.args as {
+      candidates: {
+        labelMatches: typeof claimed;
+        matches: { kind: string; photoFeature: string; planFeature: string }[];
+      }[];
+    };
+    args.candidates[0].labelMatches = claimed;
+    if (printedOnly)
+      args.candidates[0].matches = [
+        {
+          kind: 'printed-label',
+          photoFeature: `The sign reads ${reading}`,
+          planFeature: `The print reads ${reading}`,
+        },
+      ];
+    const { provider } = fixture([labelReading(reading), response]),
+      session = newSession();
+    const record = await readPhotoEvidence(session, input, provider);
+    const result = await analyzeCampusPhoto(
+      session,
+      comparisonInput(input, record.evidence.id),
+      provider,
+      record,
+    );
+    const markup = renderToStaticMarkup(
+      createElement(CampusLocationResults, {
+        analysis: result,
+        plans: [plan],
+        onConfirm: () => {},
+        busy: false,
+      }),
+    );
+    return { result, session, markup };
+  }
+  it.each([
+    [
+      'box spanning unrelated rooms',
+      [0.05, 0.3, 0.72, 0.64],
+      'The adjoining doorway matches the photo.',
+      [match302],
+    ],
+    [
+      'box from the screenshot',
+      screenshotBox,
+      'The adjoining doorway matches the photo.',
+      [match302],
+    ],
+    [
+      'transposed room in prose',
+      door302,
+      'The photo matches the doorway outside room 320.',
+      [match302],
+    ],
+    [
+      'invented corridor in prose',
+      door302,
+      'The photo matches corridor 800C outside room 302.',
+      [match302],
+    ],
+    [
+      'a different room in structured evidence',
+      screenshotBox,
+      'A doorway and corridor.',
+      [match320],
+    ],
+  ] as const)(
+    'withholds the position and marks the printed 302 when the comparison returns a %s',
+    async (_name, box, summary, claims) => {
+      const { result, session, markup } = await compareRoom('302', [...box], summary, [...claims]);
+      expect(result).toMatchObject({
+        outcome: 'insufficient_evidence',
+        candidates: [],
+        referenceLabels: [
+          {
+            label: '302',
+            planId: plan.id,
+            sourceSha256: plan.sourceSha256,
+            bounds: [0.1307353, 0.5386364, 0.1398529, 0.5462121],
+          },
+        ],
+      });
+      expect(result.labelRetrieval).toMatchObject({
+        clearLabels: ['302'],
+        exactMatchPlanIds: [plan.id],
+      });
+      expect(markup).toContain('Printed plan label 302');
+      expect(markup).not.toMatch(
+        /outside room 320|800C|class="estimated-region"|Confirm this possible region/,
+      );
+      expect(() => confirmCampusRegion(session, randomUUID())).toThrow('current photo comparison');
+    },
+  );
+  it('retains the confirmed 302 reading and accepts a visual area at its source doorway', async () => {
+    const { result } = await compareRoom('302', door302, 'A doorway matches room 302.');
+    expect(result).toMatchObject({
+      outcome: 'candidates',
+      candidates: [{ planId: plan.id, bounds: door302, sourceLabels: [{ label: '302' }] }],
+    });
+  });
+  it('shows the printed room as a reference when only the sign matches', async () => {
+    const { result, markup } = await compareRoom(
+      '320',
+      door320,
+      'The photo contains 320.',
+      [match320],
+      true,
+    );
+    expect(result.outcome).toBe('insufficient_evidence');
+    expect(markup).toContain('Printed plan label 320');
+    expect(markup).not.toContain('Confirm this possible region');
+  });
+  it('keeps the source position of an unambiguous label when visual comparison abstains entirely', async () => {
+    const input = photoInput({ buildingHint: 'SE12' }),
+      session = newSession();
+    const { provider } = fixture([
+      labelReading('320'),
+      comparison({ outcome: 'insufficient_evidence', candidates: [], summary: 'Maybe room 302.' }),
+    ]);
+    const record = await readPhotoEvidence(session, input, provider);
+    const result = await analyzeCampusPhoto(
+      session,
+      comparisonInput(input, record.evidence.id),
+      provider,
+      record,
+    );
+    expect(result).toMatchObject({
+      outcome: 'insufficient_evidence',
+      candidates: [],
+      referenceLabels: [{ label: '320', planId: 'SE12-F3-p1' }],
+    });
+    expect(result.summary).not.toContain('302');
+  });
+  it('keeps the visually selected doorway box distinct from the room text printed away from the door', async () => {
+    const { result, markup } = await compareRoom('320', door320, 'A doorway matches room 320.');
+    expect(result).toMatchObject({
+      outcome: 'candidates',
+      candidates: [{ bounds: door320, sourceLabels: [{ label: '320' }] }],
+    });
+    expect(markup).toContain('class="estimated-region"');
+    expect(markup).toContain('Printed plan label 320');
+  });
+  it('requires every clear corroborated sign and preserves ambiguity between distinct printed occurrences', () => {
+    const candidate = {
+      planId: plan.id,
+      bounds: door320,
+      labelMatches: [match320],
+      matches: [
+        {
+          photoFeature: 'A door',
+          planFeature: 'Door at the corridor',
+          kind: 'architecture' as const,
+        },
+      ],
+      limitations: [],
+    };
+    const retrieval = retrieveRoomLabels(
+      ['320', '302'].map((text) => ({ text, clarity: 'clear', viewId: 'full' })),
+      new Set([plan.id]),
+    );
+    expect(groundPhotoRegion(plan, candidate, retrieval, 'Doorway').conflict).toBe(true);
+    const original = retrieval.matches.find(
+      (m) => m.text === '320' && m.method === 'manual-plan-transcription',
+    )!;
+    // Simulate a second independent printing of the same room number on this page.
+    const two = {
+      ...retrieval,
+      clearLabels: ['320'],
+      matches: [
+        original,
+        { ...original, evidenceId: 'other-print', bbox: [146, 410, 158, 416] as PlanBounds },
+      ],
+    };
+    const both = groundPhotoRegion(
+      plan,
+      { ...candidate, bounds: [0.1, 0.49, 0.62, 0.55] },
+      two,
+      'Doorway',
+    );
+    expect(both.conflict).toBe(true);
+    expect(both.references).toHaveLength(2);
+    expect(groundPhotoRegion(plan, candidate, two, 'Doorway').conflict).toBe(true);
+    expect(
+      groundPhotoRegion(plan, { ...candidate, bounds: [0.56, 0.5, 0.59, 0.55] }, two, 'Doorway')
+        .conflict,
+    ).toBe(false);
+  });
   it('keeps alternative floors in the visual shortlist when only automatic plan OCR matches', async () => {
     const session = newSession(),
       input = photoInput({ buildingHint: 'SW03' });
@@ -67,7 +274,7 @@ describe('separate photo evidence and source-grounded localization stages (mocke
   });
   it('uses the pilot RAG evidence for SW03 3615 only after the independent image reading', async () => {
     const input = photoInput({ buildingHint: 'SW03' });
-    const output = comparison({}, 'SW3-F3-p1');
+    const output = comparison({}, 'SW3-F3-p1', [0.5, 0.57, 0.55, 0.63]);
     const payload = output[0].functionCall!.args as {
       candidates: { labelMatches: { observedLabel: string; planLabel: string }[] }[];
     };
@@ -110,7 +317,7 @@ describe('separate photo evidence and source-grounded localization stages (mocke
     expect(provider.calls).toBe(2);
     expect(session.providerCalls).toBe(2);
     expect(captures[1].options?.forceTool).toBe('propose_campus_locations');
-    expect(captures[1].contents[0].parts.filter((part) => part.inlineData)).toHaveLength(10);
+    expect(captures[1].contents[0].parts.filter((part) => part.inlineData)).toHaveLength(11);
     expect(
       captures[1].contents[0].parts.filter((part) => part.inlineData?.data === fixtureImage.data),
     ).toHaveLength(5);
@@ -173,10 +380,18 @@ describe('separate photo evidence and source-grounded localization stages (mocke
         input = photoInput();
       const { provider } = fixture([labelReading(), response]);
       const record = await readPhotoEvidence(session, input, provider);
-      await expect(
-        analyzeCampusPhoto(session, comparisonInput(input, record.evidence.id), provider, record),
-      ).rejects.toThrow('non-exact');
-      expect(session.campusAnalysis).toBeNull();
+      const result = await analyzeCampusPhoto(
+        session,
+        comparisonInput(input, record.evidence.id),
+        provider,
+        record,
+      );
+      expect(result).toMatchObject({
+        outcome: 'insufficient_evidence',
+        candidates: [],
+        referenceLabels: [{ label: '302' }],
+      });
+      expect(session.campusLocation).toBeNull();
     },
   );
   it('requires a verified exact label in label-guided results, while allowing visual abstention', async () => {
@@ -186,16 +401,9 @@ describe('separate photo evidence and source-grounded localization stages (mocke
     ).candidates[0].labelMatches = [];
     const session = newSession(),
       input = photoInput();
-    const { provider } = fixture([
-      labelReading(),
-      response,
-      comparison({ outcome: 'insufficient_evidence', candidates: [] }),
-    ]);
+    const { provider } = fixture([labelReading(), response]);
     const record = await readPhotoEvidence(session, input, provider);
     const request = comparisonInput(input, record.evidence.id);
-    await expect(analyzeCampusPhoto(session, request, provider, record)).rejects.toThrow(
-      'did not verify',
-    );
     const result = await analyzeCampusPhoto(session, request, provider, record);
     expect(result.outcome).toBe('insufficient_evidence');
     expect(result.candidates).toEqual([]);

@@ -25,6 +25,7 @@ const provider = new GeminiProvider({
   requestsPerMinute: bounded(process.env.AI_REQUESTS_PER_MINUTE, 6, 20),
   requestsPerDay: bounded(process.env.AI_REQUESTS_PER_DAY, 60, 1000),
   timeoutMs: bounded(process.env.AI_TIMEOUT_MS, 15000, 20000),
+  onModelFailure: (event) => console.warn('Gemini request failed', JSON.stringify(event)),
 });
 const app = createApp({ provider, liveAvailable, model, setupNotice });
 const httpServer = createHttpServer(app);

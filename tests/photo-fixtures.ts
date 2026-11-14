@@ -66,6 +66,7 @@ export function shortlist(ids = ['SE12-F3-p1']): ModelPart[] {
 export function comparison(
   overrides: Record<string, unknown> = {},
   planId = 'SE12-F3-p1',
+  bounds: PlanBounds = [0.12, 0.53, 0.16, 0.6],
 ): ModelPart[] {
   return [
     {
@@ -79,12 +80,13 @@ export function comparison(
           candidates: [
             {
               planId,
-              bounds: [0.2, 0.3, 0.5, 0.6],
+              bounds,
               confidence: 'low',
               matches: [
                 {
-                  photoFeature: 'Corridor and sign',
-                  planFeature: 'Source drawing with an adjoining room label',
+                  kind: 'architecture',
+                  photoFeature: 'A glazed corridor turns at a doorway',
+                  planFeature: 'A matching corridor turn beside the doorway',
                 },
               ],
               limitations: ['Mocked model output, not field validation.'],

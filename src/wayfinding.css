@@ -214,3 +214,68 @@
     gap: 3px;
   }
 }
+
+.photo-failure {
+  margin: 14px 0;
+  padding: 12px 14px;
+  border-left: 3px solid #a04e2c;
+  background: #fff4ec;
+  color: #773b24;
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.photo-elapsed {
+  margin-left: 6px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.plan-print-marker {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  width: 8px;
+  height: 8px;
+  border: 2px solid white;
+  outline: 1px solid #12548b;
+  border-radius: 50%;
+  background: #12548b;
+  pointer-events: none;
+}
+.plan-print-marker > span {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  border: 1px solid white;
+  border-radius: 4px;
+  padding: 2px 5px;
+  color: white;
+  background: #12548b;
+  font-weight: 650;
+  font-size: 11px;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+.plan-label-legend {
+  color: #344e5b;
+  font-size: 12px;
+  line-height: 1.5;
+  margin: 4px 0 12px;
+}
+
+.estimated-region.corridor-vicinity {
+  border: 2px solid #a45116;
+  background: #eea13b66;
+  min-height: 0;
+  min-width: 0;
+}
+.doorway-reference {
+  position: absolute;
+  height: 11px;
+  width: 11px;
+  transform: translate(-50%, -50%) rotate(45deg);
+  background: #af571b;
+  border: 2px solid white;
+  outline: 1px solid #914716;
+}
