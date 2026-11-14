@@ -200,7 +200,7 @@ export function connectionCandidateViews(
         plans.find((plan) => plan.id === point.planId)?.sourceSha256 !== point.sourceSha256,
     );
     const blockedReason = staleSource
-      ? '후보의 원본 도면이 변경되었습니다. 최신 도면으로 후보를 다시 준비해야 합니다.'
+      ? 'The source plan has changed. Prepare this candidate again using the current plan.'
       : null;
     const state = reviewState(
       matchingDefinition ? latestAnswer : null,
@@ -212,7 +212,7 @@ export function connectionCandidateViews(
       ...(candidate.drawingTrace && !onOriginalTrace ? { drawingTrace: undefined } : {}),
       title:
         from.planId !== candidate.from.planId || to.planId !== candidate.to.planId
-          ? `${endpointTitle(from)} ↔ ${endpointTitle(to)} 연결 후보 (층 수정됨)`
+          ? `${endpointTitle(from)} ↔ ${endpointTitle(to)} passage (floor updated)`
           : candidate.title,
       from,
       to,

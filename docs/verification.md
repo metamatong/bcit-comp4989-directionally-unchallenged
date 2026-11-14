@@ -1,5 +1,9 @@
 # Verification record
 
+## English checkpoint labels and existing reviews
+
+Revision 29 uses English labels for all 24 approved checkpoints and 16 passages. A migrated journal produced the five-step route from SE12 room 302 to SW03 room 2605. The visitor form test also checks the start button, transfer points and floor directions for the 302-to-2082 route using mocked photo inference. Migration tests check one-way travel, withdrawn or stale approvals, original review fingerprints, all six corridor traces and four room-door bindings. The local journal retained its 19 marked-point answers and six floor-service observations through the upgrade. No physical walk or live Gemini inference was part of these checks.
+
 ## Visitor route overview
 
 The revision 28 distributable network includes the two user-approved approaches for SE12 302 and SW03 2082. A fresh editor initialized from that network produces the same continuous indoor journey. A Node DOM integration test exercises the normal visitor form, verifies that selecting the photo starts no provider call, submits the photo and destination with one button, and selects the marked starting door once. With the real session and navigation APIs and mocked image preparation and Gemini inference, the first result shows three source sheets in walking order, three walking lines, the building passage, the elevator transfer and arrival at 2082. The test switches between all floors and manual floor navigation, then edits the destination and checks that the old route disappears without a new model request.

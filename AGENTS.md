@@ -9,6 +9,7 @@
 
 ## Product scope and source integrity
 
+- Write application copy, map checkpoint labels, review questions, examples and documentation in English. Use exact identifiers from the official plans.
 - Keep scope limited to official BCIT Burnaby source records.
 - Do not restore a Campus library screen or promotional hero copy. Keep the interface focused on photo input and location results.
 - Do not reintroduce Demo mode, fictional landmarks, sample-location controls, synthetic routing, or provider-failure fallbacks that fabricate results.

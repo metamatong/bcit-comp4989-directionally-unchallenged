@@ -56,6 +56,7 @@ const reviewSchema = z
     reviewedAt: timestamp,
     recordVersion: z.number().int().positive(),
     contentHash: hash,
+    legacyContentHash: hash.optional(),
     evidence: evidenceSchema,
   })
   .strict();
@@ -214,7 +215,7 @@ const inquiryPositionSchema = candidateEndpointSchema
   .strict();
 export const topologyDocumentSchema = z
   .object({
-    schemaVersion: z.literal(1),
+    schemaVersion: z.union([z.literal(1), z.literal(2)]),
     revision: z.number().int().nonnegative(),
     updatedAt: timestamp.nullable(),
     nodes: z.array(topologyNodeSchema).max(2000),

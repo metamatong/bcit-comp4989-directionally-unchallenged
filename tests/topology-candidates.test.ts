@@ -88,14 +88,14 @@ describe('same-floor corridors joining previously reviewed points', () => {
   it('requires the original reviewed points and never seeds or invents their identities', () => {
     const view = store.snapshot().candidates.find((item) => item.id === lower)!;
     expect(view.waitingForPoints).toBe(true);
-    expect(() => edit(command('true', 'both', lower))).toThrow('먼저 확인');
+    expect(() => edit(command('true', 'both', lower))).toThrow('First confirm');
     expect(store.read().revision).toBe(0);
     expect(store.read().nodes).toEqual([]);
     confirmTransitions();
     const ready = store.snapshot();
     const mismatched = command('true', 'both', lower);
     mismatched.from.point = { x: 0.32, y: 0.18 };
-    expect(() => edit(mismatched)).toThrow('공유 지점');
+    expect(() => edit(mismatched)).toThrow('shared point');
     expect(store.read()).toEqual(ready.document);
     const leakedNodeId = {
       ...command('true', 'both', lower),
@@ -172,7 +172,7 @@ describe('same-floor corridors joining previously reviewed points', () => {
       true,
     );
     edit(command('true', 'both', 'sw3-f2-f3-east-lift'));
-    expect(() => edit(stale)).toThrow('변경');
+    expect(() => edit(stale)).toThrow('changed');
     const latest = store.snapshot().candidates.find((item) => item.id === lower)!;
     expect(latest.to.point).toEqual({ ...stop.point, x: stop.point.x + 0.001 });
     expect(latest.state).toBe('needs-review');
@@ -185,12 +185,12 @@ describe('same-floor corridors joining previously reviewed points', () => {
     const data = store.snapshot();
     data.candidates = data.candidates.filter((candidate) => candidate.id === lower);
     const markup = renderToStaticMarkup(createElement(TopologyEditor, { initialData: data }));
-    expect(markup).toContain('복도 양 끝이 표시된 도면');
-    expect(markup).toContain('2000 CORRIDOR');
-    expect(markup).toContain('2600 CORRIDOR');
+    expect(markup).toContain('Floor plan with both corridor endpoints');
+    expect(markup).toContain('corridor 2000');
+    expect(markup).toContain('corridor 2600');
     expect(markup).toContain('class="candidate-pin point-a"');
     expect(markup).toContain('class="candidate-pin point-b"');
-    expect(markup).not.toContain('A 위치·층 수정');
+    expect(markup).not.toContain('Edit A location or floor');
   });
 });
 describe('candidate proposals and explicit user answers', () => {
@@ -255,8 +255,8 @@ describe('candidate proposals and explicit user answers', () => {
     expect(next.document.edges).toEqual([]);
     expect(next.document.nodes).toEqual([]);
     expect(next.candidates[0].state).toBe('needs-direction');
-    expect(() => answer('true', null)).toThrow('방향');
-    expect(() => answer('false', 'both')).toThrow('방향');
+    expect(() => answer('true', null)).toThrow('direction');
+    expect(() => answer('false', 'both')).toThrow('direction');
   });
   it.each(['a-to-b', 'b-to-a'] as const)(
     'publishes only the explicitly allowed %s direction',
@@ -331,9 +331,9 @@ describe('candidate proposals and explicit user answers', () => {
   it('rejects stale presentations, changed original hashes, unsupported corrections and missing reviewer names', () => {
     const first = command('true', 'both');
     expect(() => edit({ ...first, reviewer: '' })).toThrow('Invalid edit');
-    expect(() => edit({ ...first, presentedHash: '0'.repeat(64) })).toThrow('변경');
+    expect(() => edit({ ...first, presentedHash: '0'.repeat(64) })).toThrow('changed');
     expect(() => edit({ ...first, from: { ...first.from, sourceSha256: '0'.repeat(64) } })).toThrow(
-      '현재 공식 도면',
+      'current official plan',
     );
     const other = topologyPlans.find((plan) => plan.id === 'SW1-F3-p1')!;
     expect(() =>
@@ -341,7 +341,7 @@ describe('candidate proposals and explicit user answers', () => {
         ...first,
         from: { ...first.from, planId: other.id, sourceSha256: other.sourceSha256 },
       }),
-    ).toThrow('같은 건물');
+    ).toThrow('same building');
     expect(() => edit({ ...first, from: { ...first.from, point: { x: -1, y: 0.5 } } })).toThrow(
       'Invalid edit',
     );
@@ -350,11 +350,11 @@ describe('candidate proposals and explicit user answers', () => {
       version: candidate.version + 1,
     }));
     const updated = new TopologyStore(file, topologyPlans, changedCatalog);
-    expect(() => updated.mutate({ revision: 0, command: first })).toThrow('변경');
+    expect(() => updated.mutate({ revision: 0, command: first })).toThrow('changed');
     const changedPlans = topologyPlans.map((plan) => ({ ...plan, sourceSha256: 'f'.repeat(64) }));
     const stale = new TopologyStore(file, changedPlans);
     expect(stale.snapshot().candidates[0].blockedReason).not.toBeNull();
-    expect(() => stale.mutate({ revision: 0, command: first })).toThrow('원본 도면');
+    expect(() => stale.mutate({ revision: 0, command: first })).toThrow('source plan');
     expect(store.read().nodes).toEqual([]);
   });
   it('preserves manual corrections, rejects a stale answer and requires re-confirmation after a point moves', () => {
@@ -373,7 +373,7 @@ describe('candidate proposals and explicit user answers', () => {
     });
     expect(store.snapshot().candidates[0].from.point).toEqual({ x: 0.65, y: 0.4 });
     expect(store.snapshot().candidates[0].state).toBe('needs-review');
-    expect(() => edit(oldAnswer)).toThrow('변경');
+    expect(() => edit(oldAnswer)).toThrow('changed');
     expect(route().outcome).toBe('no-route');
     answer('true', 'both');
     expect(route().outcome).toBe('route');
@@ -472,16 +472,16 @@ describe('candidate review interface (Node only)', () => {
         onRoute: vi.fn(),
       }),
     );
-    expect(markup).toContain('두 층에 모두 정차하는 엘리베이터가 있나요?');
+    expect(markup).toContain('Does an elevator in this building serve both floors?');
     expect(markup).not.toContain('class="candidate-pin');
-    expect(markup).toMatch(/<button(?![^>]*disabled)[^>]*>T · 두 층에 정차/);
-    expect(markup).toMatch(/<button(?![^>]*disabled)[^>]*>F · 해당 없음/);
-    expect(markup).toMatch(/<button(?![^>]*disabled)[^>]*>모름 · 보류/);
+    expect(markup).toMatch(/<button(?![^>]*disabled)[^>]*>T · Serves both floors/);
+    expect(markup).toMatch(/<button(?![^>]*disabled)[^>]*>F · No service between floors/);
+    expect(markup).toMatch(/<button(?![^>]*disabled)[^>]*>Unknown · Defer/);
   });
   it('names the mode being reviewed and identifies the permitted direction by floor', () => {
     for (const [id, question] of [
-      ['se12-f2-f3-s209-s327', '같은 계단으로 오갈 수 있나요?'],
-      ['sw3-f2-f3-east-lift', '같은 엘리베이터가 A와 B 두 층에 모두 정차하나요?'],
+      ['se12-f2-f3-s209-s327', 'Does the same stairway connect A and B?'],
+      ['sw3-f2-f3-east-lift', 'Does the same elevator serve both marked landings?'],
     ]) {
       const data = store.snapshot();
       data.candidates = data.candidates.filter((candidate) => candidate.id === id);
@@ -497,8 +497,8 @@ describe('candidate review interface (Node only)', () => {
         floorPair: { from: '2', to: '3' },
       }),
     );
-    expect(choices).toContain('A → B만 (2층 → 3층)');
-    expect(choices).toContain('B → A만 (3층 → 2층)');
+    expect(choices).toContain('A → B only (floor 2 → floor 3)');
+    expect(choices).toContain('B → A only (floor 3 → floor 2)');
   });
   it('asks about outdoor travel for the second-floor proposal without renumbering it as floor one', () => {
     const data = store.snapshot();
@@ -506,7 +506,7 @@ describe('candidate review interface (Node only)', () => {
     const markup = renderToStaticMarkup(createElement(TopologyEditor, { initialData: data }));
     expect(markup).toContain('SW03 · Floor 2');
     expect(markup).toContain('SE12 · Floor 2');
-    expect(markup).toContain('표시된 A·B 출입문 사이를 실외로 걸어갈 수 있나요?');
+    expect(markup).toContain('Can you walk outside between doors A and B?');
     expect(data.candidates[0].kind).toBe('outdoor');
     expect(data.candidates[0].from.kind).toBe('outdoor-access');
     expect(data.candidates[0].to.kind).toBe('outdoor-access');
@@ -516,15 +516,15 @@ describe('candidate review interface (Node only)', () => {
     const markup = renderToStaticMarkup(
       createElement(TopologyEditor, { initialData: store.snapshot() }),
     );
-    expect(markup).toContain('두 지점을 보고 T · F · 모름');
-    expect(markup).toContain('T · 연결됨');
-    expect(markup).toContain('F · 연결 안 됨');
-    expect(markup).toContain('모름 · 보류');
+    expect(markup).toContain('Review both points and choose T, F or Unknown');
+    expect(markup).toContain('T · Connected');
+    expect(markup).toContain('F · Disconnected');
+    expect(markup).toContain('Unknown · Defer');
     expect(markup).toContain('SW03 · Floor 3');
     expect(markup).toContain('SE12 · Floor 3');
-    expect(markup).toContain('A 위치·층 수정');
-    expect(markup).toContain('B 위치·층 수정');
-    expect(markup).toContain('직접 수정 · 경로 확인');
+    expect(markup).toContain('Edit A location or floor');
+    expect(markup).toContain('Edit B location or floor');
+    expect(markup).toContain('Edit map and check routes');
     expect(markup).not.toContain('Add point on plan');
     expect(markup).not.toContain('type="file"');
   });
@@ -540,11 +540,11 @@ describe('candidate review interface (Node only)', () => {
         onRoute: vi.fn(),
       }),
     );
-    expect(markup).toMatch(/<button[^>]*disabled=""[^>]*>T · 연결됨/);
+    expect(markup).toMatch(/<button[^>]*disabled=""[^>]*>T · Connected/);
     const directions = renderToStaticMarkup(
       createElement(DirectionQuestion, { disabled: false, onAnswer: vi.fn() }),
     );
-    for (const label of ['양방향 A ↔ B', 'A → B만', 'B → A만', '모름'])
+    for (const label of ['Both directions A ↔ B', 'A → B only', 'B → A only', 'Unknown'])
       expect(directions).toContain(label);
     expect(directions).not.toContain('checked=');
   });
@@ -624,7 +624,7 @@ describe('second-to-third-floor reviews', () => {
     expect(route(true).outcome).toBe('route');
     const invalid = command('true', 'both', id);
     invalid.to = { ...invalid.from };
-    expect(() => edit(invalid)).toThrow('서로 다른 층');
+    expect(() => edit(invalid)).toThrow('different floors');
     expect(store.read().revision).toBe(saved.document.revision);
     expect(edit(command('false', null, id)).eligibility.edgeIds).toEqual([]);
   });
@@ -658,7 +658,7 @@ describe('second-to-third-floor reviews', () => {
       );
     }
     expect(() => edit({ ...initial, type: 'record-floor-observation', answer: 'false' })).toThrow(
-      '변경',
+      'changed',
     );
     const corrected = fields();
     const confirmed = edit({
@@ -677,7 +677,7 @@ describe('second-to-third-floor reviews', () => {
         ?.allowsFloorOnlyAnswer,
     ).toBe(false);
     expect(() => edit({ ...fields(), type: 'record-floor-observation', answer: 'false' })).toThrow(
-      '지점 단위',
+      'marked points',
     );
   });
 });

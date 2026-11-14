@@ -6,6 +6,7 @@ import { pathToFileURL } from 'node:url';
 import { z } from 'zod';
 import { validateNetworkExport } from '../server/pilot-network';
 import { checkedSpatialJson, pilotEvidence } from '../server/pilot-evidence';
+import { englishDefinitionHash, translateTopologyText } from '../server/topology-english';
 
 const hash = (bytes: Buffer | string) => createHash('sha256').update(bytes).digest('hex');
 const version = z.number().int().positive();
@@ -29,7 +30,7 @@ const meta = {
   reviewHistory: z.array(z.unknown()),
 };
 const inputSchema = z.object({
-  schemaVersion: z.literal(1),
+  schemaVersion: z.union([z.literal(1), z.literal(2)]),
   revision: z.number().int().nonnegative(),
   floorObservations: z
     .array(
@@ -131,6 +132,12 @@ function approved(
 }
 export function exportPilotNetwork(bytes: Buffer) {
   const document = inputSchema.parse(JSON.parse(bytes.toString('utf8')));
+  if (document.schemaVersion === 1) {
+    for (const receipt of [...document.candidateAnswers, ...document.floorObservations]) {
+      if (receipt.definitionHash)
+        receipt.definitionHash = englishDefinitionHash(receipt.definitionHash);
+    }
+  }
   const traces = z
     .object({
       traces: z.array(
@@ -148,14 +155,15 @@ export function exportPilotNetwork(bytes: Buffer) {
       (n) => approved(n) && plans.find((p) => p.id === n.planId)?.sourceSha256 === n.sourceSha256,
     )
     .map((n) => {
-      const aliases = [n.label];
-      const stairId = /^([A-Za-z]?\d{3,4}[A-Za-z]?) · /.exec(n.label)?.[1];
+      const label = document.schemaVersion === 1 ? translateTopologyText(n.label) : n.label;
+      const aliases = [label];
+      const stairId = /^([A-Za-z]?\d{3,4}[A-Za-z]?) · /.exec(label)?.[1];
       if (stairId && n.kind === 'stair-landing') aliases.push(stairId);
       return {
         id: n.id,
         planId: n.planId,
         point: n.point,
-        label: n.label,
+        label,
         kind: n.kind,
         aliases,
         version: n.version,

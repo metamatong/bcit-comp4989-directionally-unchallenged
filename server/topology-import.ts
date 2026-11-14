@@ -145,7 +145,7 @@ export function importReviewedNetwork(
     });
   }
   return {
-    schemaVersion: 1,
+    schemaVersion: 2,
     revision: network.revision,
     updatedAt: importedAt,
     nodes,
