@@ -4,7 +4,6 @@ import type { PreparedPhoto } from '../photo';
 
 type PhotoLocationInputProps = {
   photo: PreparedPhoto | null;
-  consent: boolean;
   ready: boolean;
   reading: boolean;
   busy: boolean;
@@ -14,7 +13,6 @@ type PhotoLocationInputProps = {
   canUsePhotoResult?: boolean;
   onDestinationChange: (value: string) => void;
   onPhoto: (file?: File) => void;
-  onConsent: (consent: boolean) => void;
   onAnalyze: () => void;
   onDiscard: () => void;
 };
@@ -38,7 +36,6 @@ function ElapsedTime() {
 
 export function PhotoLocationInput({
   photo,
-  consent,
   ready,
   reading,
   busy,
@@ -48,7 +45,6 @@ export function PhotoLocationInput({
   canUsePhotoResult = false,
   onDestinationChange,
   onPhoto,
-  onConsent,
   onAnalyze,
   onDiscard,
 }: PhotoLocationInputProps) {
@@ -157,17 +153,16 @@ export function PhotoLocationInput({
             onAnalyze();
           }}
         >
-          <label className="checkbox-label photo-consent">
-            <input
-              type="checkbox"
-              checked={consent}
-              disabled={busy || reading || !ready}
-              onChange={(event) => onConsent(event.target.checked)}
-            />
-            Send this photo and its detail views to Google Gemini to read labels and compare floor
-            plans. Free-tier inputs may be used to improve Google products.
-          </label>
-          <button className="primary full-width" disabled={busy || reading || !consent || !ready}>
+          <p className="helper" id="photo-submission-note">
+            Submitting sends this photo and its detail views to Google Gemini. Google may use
+            free-tier inputs to improve its products.
+          </p>
+          <button
+            type="submit"
+            className="primary full-width"
+            aria-describedby="photo-submission-note"
+            disabled={busy || reading || !ready}
+          >
             {busy ? <LoaderCircle className="spin" size={17} /> : <Search size={17} />}
             {error
               ? 'Retry with this photo'

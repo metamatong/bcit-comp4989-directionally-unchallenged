@@ -18,7 +18,7 @@ The code retains Gemini 3.6 and explicitly selected Gemini 2.5 IDs for existing 
 2. If no private `.env` exists, copy `.env.example`. Set `GEMINI_API_KEY`, a primary model, an ordered `GEMINI_FALLBACK_MODELS` list, and `AI_FREE_TIER_CONFIRMED=true` only after the account check.
 3. Set application request ceilings to fit the project's actual limits. Defaults are six attempts/minute and 60/day; these are application ceilings, not provider entitlements. Counters reset on process restart.
 4. Restart the existing server and refresh. Gemini readiness is displayed directly. `AI_DEFAULT_MODE` is unused and old browser mode preferences are cleared.
-5. Upload a photo, consent to sending that image, and select Analyze. No request occurs merely because a key is configured.
+5. Choose a photo, then select **Analyze photo against BCIT plans** or **Find my route** to send it to Gemini. No request occurs merely because a key is configured.
 
 Missing configuration displays setup guidance and disables/rejects photo submissions. Source plans remain internal; only relevant plans are shown with location results. Adding JSON or changing browser storage cannot restore fictional locations. Model failover is limited to the configured Gemini list; there is no paid or alternate-provider fallback.
 

@@ -36,7 +36,6 @@ export default function App() {
   const [readStatus, setReadStatus] = useState('');
   const [photoError, setPhotoError] = useState('');
   const [preparedPhoto, setPreparedPhoto] = useState<PreparedPhoto | null>(null);
-  const [photoConsent, setPhotoConsent] = useState(false);
   const [showPhotoResults, setShowPhotoResults] = useState(false);
   const [destination, setDestination] = useState('');
   const [activeDestination, setActiveDestination] = useState('');
@@ -79,7 +78,6 @@ export default function App() {
     photoAbort.current?.abort();
     setPreparedPhoto(null);
     evidenceForPhoto.current = null;
-    setPhotoConsent(false);
     setReadStatus('');
     setPhotoError('');
     setReading(false);
@@ -127,7 +125,6 @@ export default function App() {
     photoAbort.current?.abort();
     setPreparedPhoto(null);
     evidenceForPhoto.current = null;
-    setPhotoConsent(false);
     setShowPhotoResults(false);
     setActiveDestination('');
     setReading(true);
@@ -138,7 +135,7 @@ export default function App() {
       const prepared = await preparePhoto(file);
       if (!evidenceGate.current.isCurrent(generation)) return;
       setPreparedPhoto(prepared);
-      setReadStatus('Photo ready. Review your photo consent before continuing.');
+      setReadStatus('Photo ready.');
     } catch (failure) {
       if (evidenceGate.current.isCurrent(generation)) setReadStatus((failure as Error).message);
     } finally {
@@ -147,7 +144,13 @@ export default function App() {
   }
   async function analyzePhoto() {
     const current = sessionRef.current;
-    if (!current || !preparedPhoto || !photoConsent || !data?.liveAvailable || busyRef.current)
+    if (
+      !current ||
+      !preparedPhoto ||
+      !data?.liveAvailable ||
+      !data.photoLocalizationAvailable ||
+      busyRef.current
+    )
       return;
     const generation = evidenceGate.current.next();
     const controller = new AbortController();
@@ -290,14 +293,12 @@ export default function App() {
         setActiveDestination('');
       }}
       photo={preparedPhoto}
-      consent={photoConsent}
       ready={photoReady}
       reading={reading}
       busy={busy}
       status={readStatus}
       error={photoError}
       onPhoto={(file) => void readPhoto(file)}
-      onConsent={setPhotoConsent}
       onAnalyze={() => void analyzePhoto()}
       onDiscard={removePhoto}
     />

@@ -8,7 +8,7 @@ export function newSession(providerAvailable = true): Session {
     mode: 'live',
     activity: [],
     notice: providerAvailable
-      ? 'Choose a photo to compare with official BCIT floor plans. Nothing is sent until you consent and select Analyze.'
+      ? 'Choose a campus photo. Submitting it sends the photo and its detail views to Google Gemini for analysis.'
       : 'Photo analysis needs Gemini setup. Configure the server and restart to enable analysis.',
     agentStatus: providerAvailable ? 'Gemini · ready' : 'Gemini · setup required',
     providerCalls: 0,
