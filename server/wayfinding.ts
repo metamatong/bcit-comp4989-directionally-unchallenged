@@ -7,6 +7,7 @@ import type {
   NavigationResult,
   MapStop,
   PlaceChoice,
+  StartingPoints,
   WalkingStep,
 } from '../src/wayfinding';
 import { canonicalBuilding, isPilotPlan, labelKey } from './pilot-evidence';
@@ -16,10 +17,14 @@ import { computeTopologyRoute } from './routing';
 import { TopologyError, TopologyStore, topologyEligibility } from './topology';
 import { visitorPassages } from './visitor-paths';
 
-export const navigationSchema = z
+export const startingPointsSchema = z
   .object({
     revision: z.number().int().nonnegative(),
     candidateId: z.string().uuid(),
+  })
+  .strict();
+export const navigationSchema = startingPointsSchema
+  .extend({
     destination: z.string().trim().min(1).max(150),
     originId: z.string().uuid().optional(),
     destinationId: z.string().min(1).max(180).optional(),
@@ -177,16 +182,16 @@ function removeBacktracking(steps: WalkingStep[]) {
   return result;
 }
 
-export function planVisitorJourney(
+function readVisitorMap(
   candidate: CampusLocationCandidate,
-  request: NavigationChoice,
   store: TopologyStore,
-): NavigationResult {
+  expectedRevision?: number,
+) {
   const plans = store.plans.filter(isPilotPlan);
-  if (candidate.id !== request.candidateId || !plans.some((p) => p.id === candidate.planId))
+  if (!plans.some((p) => p.id === candidate.planId))
     throw new TopologyError('Confirm a current photo region in SE12, SW03 or SW01 first.', 409);
   const doc = store.read();
-  if (request.networkRevision !== undefined && request.networkRevision !== doc.revision)
+  if (expectedRevision !== undefined && expectedRevision !== doc.revision)
     throw new TopologyError(
       'The walking map changed. Check the starting point and destination again.',
       409,
@@ -217,6 +222,31 @@ export function planVisitorJourney(
       );
     })
     .map(stop);
+  return { plans, doc, network, nodes, origins };
+}
+
+/** Only selectable points are exposed before the visitor confirms their starting location. */
+export function startingPoints(
+  candidate: CampusLocationCandidate,
+  store: TopologyStore,
+): StartingPoints {
+  const { doc, origins } = readVisitorMap(candidate, store);
+  return { networkRevision: doc.revision, origins };
+}
+
+export function planVisitorJourney(
+  candidate: CampusLocationCandidate,
+  request: NavigationChoice,
+  store: TopologyStore,
+): NavigationResult {
+  if (candidate.id !== request.candidateId)
+    throw new TopologyError('Confirm the current photo region before requesting directions.', 409);
+  const { plans, doc, network, nodes, origins } = readVisitorMap(
+    candidate,
+    store,
+    request.networkRevision,
+  );
+  const vicinity = candidate.doorwayVicinity;
   const choices = resolveDestination(request.destination, nodes, network.doors);
   const context = {
     networkRevision: doc.revision,

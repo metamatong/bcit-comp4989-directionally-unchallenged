@@ -11,6 +11,7 @@ type PhotoLocationInputProps = {
   status: string;
   error?: string;
   destination: string;
+  canUsePhotoResult?: boolean;
   onDestinationChange: (value: string) => void;
   onPhoto: (file?: File) => void;
   onConsent: (consent: boolean) => void;
@@ -44,6 +45,7 @@ export function PhotoLocationInput({
   status,
   error,
   destination,
+  canUsePhotoResult = false,
   onDestinationChange,
   onPhoto,
   onConsent,
@@ -125,6 +127,7 @@ export function PhotoLocationInput({
             type="text"
             maxLength={150}
             value={destination}
+            disabled={busy}
             autoComplete="off"
             placeholder="Building and room, e.g. SW03 2605"
             onChange={(event) => onDestinationChange(event.target.value)}
@@ -145,7 +148,7 @@ export function PhotoLocationInput({
           </p>
         )
       )}
-      {photo && (
+      {photo && !canUsePhotoResult && (
         <form
           aria-label="Photo analysis"
           aria-busy={busy}

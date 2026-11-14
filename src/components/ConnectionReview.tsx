@@ -106,16 +106,43 @@ function PlanPin({
   );
 }
 
-function CorridorPlan({ candidate, plans }: { candidate: CandidateView; plans: VisualPlan[] }) {
+function CorridorPlan({
+  candidate,
+  plans,
+  from,
+  to,
+}: {
+  candidate: CandidateView;
+  plans: VisualPlan[];
+  from: Position;
+  to: Position;
+}) {
   const [fullPage, setFullPage] = useState(false);
-  const plan = plans.find((item) => item.id === candidate.from.planId);
-  const a = candidate.from.point,
-    b = candidate.to.point;
+  const plan = plans.find((item) => item.id === from.planId && item.id === to.planId);
+  const a = from.point,
+    b = to.point;
   if (!plan || !a || !b) return <p role="alert">복도 양 끝의 도면을 읽을 수 없습니다.</p>;
-  const left = fullPage ? 0 : Math.max(0, Math.min(a.x, b.x) - 0.06);
-  const top = fullPage ? 0 : Math.max(0, Math.min(a.y, b.y) - 0.06);
-  const right = fullPage ? 1 : Math.min(1, Math.max(a.x, b.x) + 0.06);
-  const bottom = fullPage ? 1 : Math.min(1, Math.max(a.y, b.y) + 0.06);
+  const trace =
+    candidate.drawingTrace &&
+    (['from', 'to'] as const).every((side) => {
+      const mark = side === 'from' ? from : to,
+        original = candidate[side];
+      return (
+        mark.planId === original.planId &&
+        mark.sourceSha256 === original.sourceSha256 &&
+        mark.point?.x === original.point?.x &&
+        mark.point?.y === original.point?.y
+      );
+    })
+      ? candidate.drawingTrace
+      : undefined;
+  const points = [a, ...(trace?.bends ?? []), b];
+  const xs = points.map((p) => p.x),
+    ys = points.map((p) => p.y);
+  const left = fullPage ? 0 : Math.max(0, Math.min(...xs) - 0.045);
+  const top = fullPage ? 0 : Math.max(0, Math.min(...ys) - 0.06);
+  const right = fullPage ? 1 : Math.min(1, Math.max(...xs) + 0.045);
+  const bottom = fullPage ? 1 : Math.min(1, Math.max(...ys) + 0.045);
   const width = (right - left) * plan.width,
     height = (bottom - top) * plan.height;
   return (
@@ -148,10 +175,25 @@ function CorridorPlan({ candidate, plans }: { candidate: CandidateView; plans: V
         aria-label={`${candidate.from.label}에서 ${candidate.to.label}까지의 복도 검수`}
       >
         <image href={plan.full.url} x={0} y={0} width={plan.width} height={plan.height} />
+        {trace && (
+          <polyline
+            aria-label="검수할 복도 구간"
+            points={points.map((p) => `${p.x * plan.width},${p.y * plan.height}`).join(' ')}
+            fill="none"
+            stroke="#a04a10"
+            strokeWidth="3"
+            strokeDasharray="7 4"
+            strokeLinejoin="round"
+            vectorEffect="non-scaling-stroke"
+          />
+        )}
         <PlanPin marker="A" point={a} plan={plan} size={width * 0.015} />
         <PlanPin marker="B" point={b} plan={plan} size={width * 0.015} />
       </svg>
-      <p>{candidate.rationale}</p>
+      {(!candidate.drawingTrace || trace) && <p>{candidate.rationale}</p>}
+      {candidate.drawingTrace && !trace && (
+        <p>표시 위치가 바뀌었습니다. 변경된 지점의 경로선을 다시 검수해야 합니다.</p>
+      )}
       <div className="topology-plan-footer">
         <span>{plan.attribution}</span>
         <a href={plan.sourceUrl} target="_blank" rel="noreferrer">
@@ -396,8 +438,13 @@ export function ConnectionReview({
   onRoute: (answer: CandidateAnswer) => void;
 }) {
   const candidates = data.candidates ?? [];
-  const [selectedId, setSelectedId] = useState(
-    () =>
+  const [selectedId, setSelectedId] = useState(() => {
+    const requestedId =
+      typeof window === 'undefined'
+        ? null
+        : new URLSearchParams(window.location.search).get('candidate');
+    return (
+      candidates.find((item) => item.id === requestedId)?.id ??
       candidates.find(
         (candidate) =>
           candidate.state === 'unanswered' &&
@@ -405,8 +452,9 @@ export function ConnectionReview({
           !candidate.blockedReason,
       )?.id ??
       candidates[0]?.id ??
-      '',
-  );
+      ''
+    );
+  });
   const candidate = candidates.find((item) => item.id === selectedId) ?? candidates[0];
   const [from, setFrom] = useState<Position | null>(() =>
     candidate ? candidatePosition(candidate.from) : null,
@@ -567,47 +615,61 @@ export function ConnectionReview({
       {candidate.waitingForPoints && (
         <p role="status">먼저 이 복도 양 끝의 출입문과 승강장 지점을 확인해주세요.</p>
       )}
-      {candidate.endpointRefs?.from && candidate.endpointRefs.to ? (
-        <CorridorPlan key={candidate.presentedHash} candidate={candidate} plans={data.plans} />
-      ) : (
-        <div className="candidate-plan-pair">
-          <CandidatePlan
-            key={`${candidate.presentedHash}-A`}
-            marker="A"
-            original={candidate.from}
-            value={from}
-            plans={data.plans}
-            disabled={
-              !!candidate.endpointRefs?.from ||
-              busy ||
-              draftForHash !== candidate.presentedHash ||
-              !!candidate.blockedReason
-            }
-            onChange={(value) => {
-              setFrom(value);
-              setStage('connection');
-              markModified();
-            }}
-          />
-          <CandidatePlan
-            key={`${candidate.presentedHash}-B`}
-            marker="B"
-            original={candidate.to}
-            value={to}
-            plans={data.plans}
-            disabled={
-              !!candidate.endpointRefs?.to ||
-              busy ||
-              draftForHash !== candidate.presentedHash ||
-              !!candidate.blockedReason
-            }
-            onChange={(value) => {
-              setTo(value);
-              setStage('connection');
-              markModified();
-            }}
-          />
-        </div>
+      {(candidate.drawingTrace || (candidate.endpointRefs?.from && candidate.endpointRefs.to)) && (
+        <CorridorPlan
+          key={candidate.presentedHash}
+          candidate={candidate}
+          plans={data.plans}
+          from={from}
+          to={to}
+        />
+      )}
+      {!(candidate.endpointRefs?.from && candidate.endpointRefs.to) && (
+        <details
+          key={candidate.presentedHash}
+          className="candidate-position-details"
+          open={candidate.drawingTrace ? undefined : true}
+        >
+          <summary>각 지점 확대 및 위치·층 수정</summary>
+          <div className="candidate-plan-pair">
+            <CandidatePlan
+              key={`${candidate.presentedHash}-A`}
+              marker="A"
+              original={candidate.from}
+              value={from}
+              plans={data.plans}
+              disabled={
+                !!candidate.endpointRefs?.from ||
+                busy ||
+                draftForHash !== candidate.presentedHash ||
+                !!candidate.blockedReason
+              }
+              onChange={(value) => {
+                setFrom(value);
+                setStage('connection');
+                markModified();
+              }}
+            />
+            <CandidatePlan
+              key={`${candidate.presentedHash}-B`}
+              marker="B"
+              original={candidate.to}
+              value={to}
+              plans={data.plans}
+              disabled={
+                !!candidate.endpointRefs?.to ||
+                busy ||
+                draftForHash !== candidate.presentedHash ||
+                !!candidate.blockedReason
+              }
+              onChange={(value) => {
+                setTo(value);
+                setStage('connection');
+                markModified();
+              }}
+            />
+          </div>
+        </details>
       )}
       <div className="candidate-decision">
         {!reviewer.trim() && (
@@ -753,7 +815,7 @@ export function ConnectionReview({
           )}
         </div>
       </div>
-      {!(candidate.endpointRefs?.from && candidate.endpointRefs.to) && (
+      {!candidate.drawingTrace && !(candidate.endpointRefs?.from && candidate.endpointRefs.to) && (
         <details className="candidate-source-note">
           <summary>왜 이 두 지점을 후보로 제안했나요?</summary>
           <p>{candidate.rationale}</p>

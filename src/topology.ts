@@ -129,6 +129,16 @@ export const connectionCandidateSchema = z
     kind: z.enum(connectionKinds),
     from: candidateEndpointSchema,
     to: candidateEndpointSchema,
+    /** Source-page walking line proposed for this A/B review. Its geometry participates in the review hash. */
+    drawingTrace: z
+      .object({
+        bends: z.array(normalizedPointSchema).max(128),
+        instruction: z.string().trim().min(1).max(500),
+        fromDoorId: z.string().min(1).optional(),
+        toDoorId: z.string().min(1).optional(),
+      })
+      .strict()
+      .optional(),
     endpointRefs: z
       .object({ from: candidateEndpointRef.optional(), to: candidateEndpointRef.optional() })
       .strict()

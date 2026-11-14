@@ -6,7 +6,7 @@ import { createApp } from '../server/app';
 import type { Provider } from '../server/provider';
 import { TopologyStore } from '../server/topology';
 import type { Session } from '../src/types';
-import type { NavigationResult } from '../src/wayfinding';
+import type { NavigationResult, StartingPoints } from '../src/wayfinding';
 import { comparison, comparisonInput, labelReading, photoInput, shortlist } from './photo-fixtures';
 
 const store = new TopologyStore();
@@ -80,6 +80,19 @@ it('takes a consented pilot photo through two stages, region and point confirmat
   const query = { candidateId, destination: 'SW03 3615', revision: match.revision };
   const nav = (request: object) => post(prefix + '/navigation', request);
   expect((await nav(query)).status).toBe(409);
+  const preview = (body: object) => post(prefix + '/navigation/origins', body);
+  const identifying = { candidateId, revision: match.revision };
+  expect((await preview({ ...identifying, candidateId: randomUUID() })).status).toBe(409);
+  expect((await preview({ ...identifying, revision: 0 })).status).toBe(409);
+  expect((await preview({ ...identifying, bounds: [0, 0, 1, 1] })).status).toBe(400);
+  const options = await preview(identifying);
+  expect(options.status).toBe(200);
+  const points: StartingPoints = await options.json();
+  expect(points.origins.map((s) => s.id)).toEqual([room.id]);
+  expect(Object.keys(points).sort()).toEqual(['networkRevision', 'origins']);
+  expect(
+    (await nav({ ...query, originId: room.id, networkRevision: points.networkRevision })).status,
+  ).toBe(409);
   const confirmed: Session = await (
     await post(prefix + '/actions', {
       requestId: randomUUID(),
@@ -90,7 +103,11 @@ it('takes a consented pilot photo through two stages, region and point confirmat
   const request = { ...query, revision: confirmed.revision };
   const choices: NavigationResult = await (await nav(request)).json();
   expect(choices).toMatchObject({ status: 'choose-origin', origins: [{ id: room.id }] });
-  const complete = { ...request, networkRevision: choices.networkRevision, originId: room.id };
+  const complete = {
+    ...request,
+    networkRevision: points.networkRevision,
+    originId: points.origins[0].id,
+  };
   const route = await nav(complete);
   expect(route.status).toBe(200);
   expect(route.headers.get('cache-control')).toBe('no-store');

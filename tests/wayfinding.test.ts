@@ -6,13 +6,15 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { describe, expect, it } from 'vitest';
 import { TopologyStore } from '../server/topology';
+import { pilotEvidence } from '../server/pilot-evidence';
+import TopologyEditor from '../src/TopologyEditor';
 import { reviewedNetwork } from '../server/pilot-network';
 import { visitorPassages } from '../server/visitor-paths';
 import { navigationSchema, planVisitorJourney } from '../server/wayfinding';
-import { RouteDirections } from '../src/components/JourneyPanel';
+import { RouteDirections } from '../src/components/RouteDirections';
 import { RouteMap } from '../src/components/RouteMap';
 import type { CampusLocationCandidate } from '../src/types';
-import type { TopologyNode } from '../src/topology';
+import type { CandidateAnswer, TopologyNode } from '../src/topology';
 import type { NavigationChoice } from '../src/wayfinding';
 
 const store = new TopologyStore();
@@ -65,6 +67,145 @@ function journey(
 }
 
 describe('visitor routes on the current three-building pilot', () => {
+  it('reviews just the missing 302 and 2082 legs before using the existing indoor crossing and elevator', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'campuslens-302-2082-'));
+    const first = 'se12-f3-302-to-sw03-link',
+      last = 'sw3-f2-exterior-door-to-2082';
+    try {
+      const isolated = new TopologyStore(
+        join(dir, 'topology.json'),
+        store.plans,
+        store.candidates,
+        reviewedNetwork,
+      );
+      const room = pilotEvidence().find((p) => p.plan.id === 'SE12-F3-p1')!;
+      const door = room.drawnDoors.find((d) => d.room === '302')!;
+      const start: CampusLocationCandidate = {
+        ...candidate(bound('sw3-se12-floor3-passage')),
+        bounds: door.corridorBounds!,
+        doorwayVicinity: {
+          room: door.room,
+          doorId: door.id,
+          point: door.point,
+          sourceSha256: room.plan.sourceSha256,
+        },
+      };
+      const nav = (originId?: string) =>
+        planVisitorJourney(
+          start,
+          {
+            revision: 1,
+            candidateId: start.id,
+            destination: 'SW03 2082',
+            originId,
+            networkRevision: isolated.read().revision,
+          },
+          isolated,
+        );
+      function answer(
+        id: string,
+        answer: CandidateAnswer['answer'],
+        direction: CandidateAnswer['direction'],
+      ) {
+        const current = isolated.snapshot(),
+          q = current.candidates.find((q) => q.id === id)!;
+        const position = (side: 'from' | 'to') => {
+          const { planId, sourceSha256, point } = q[side];
+          return { planId, sourceSha256, point };
+        };
+        return isolated.mutate({
+          revision: current.document.revision,
+          command: {
+            type: 'answer-candidate',
+            candidateId: id,
+            presentedHash: q.presentedHash,
+            from: position('from'),
+            to: position('to'),
+            answer,
+            direction,
+            reviewer: 'local test',
+            note: 'Isolated regression fixture.',
+          },
+        });
+      }
+      // Start with the real published journey, then withdraw both approvals in this isolated editor.
+      const initialStart = nav();
+      expect(initialStart.status).toBe('choose-origin');
+      expect(nav(initialStart.origins[0].id).status).toBe('route');
+      answer(first, 'false', null);
+      const baseline = answer(last, 'false', null);
+      expect(nav().status).toBe('unmapped-origin-and-destination');
+      for (const id of [first, last]) {
+        const q = baseline.candidates.find((c) => c.id === id)!;
+        expect(q).toMatchObject({
+          state: 'rejected',
+          waitingForPoints: false,
+          blockedReason: null,
+        });
+        const markup = renderToStaticMarkup(
+          createElement(TopologyEditor, { initialData: { ...baseline, candidates: [q] } }),
+        );
+        expect(markup).toContain('검수할 복도 구간');
+        expect(markup).toContain('point-a');
+        expect(markup).toContain('point-b');
+      }
+      answer(first, 'true', 'a-to-b');
+      expect(nav().status).toBe('unmapped-destination');
+      answer(last, 'true', 'unknown');
+      expect(nav().status).toBe('unmapped-destination');
+      let saved = answer(last, 'true', 'a-to-b');
+      expect(saved.eligibility.nodeIds).toHaveLength(baseline.eligibility.nodeIds.length);
+      expect(saved.eligibility.edgeIds.length - baseline.eligibility.edgeIds.length).toBe(2);
+      const choice = nav();
+      expect(choice.status).toBe('choose-origin');
+      expect(choice.origins).toHaveLength(1);
+      const forward = nav(choice.origins[0].id);
+      if (forward.status !== 'route')
+        throw Error('Missing fixture route from the confirmed 302 doorway');
+      expect(forward.steps.map((s) => s.kind)).toEqual([
+        'corridor',
+        'building-link',
+        'corridor',
+        'elevator',
+        'corridor',
+      ]);
+      expect(forward.steps[0].from.point).toEqual(door.point);
+      expect(forward.steps[0].to.id).toBe(bound('sw3-se12-floor3-passage').id);
+      const overview = renderToStaticMarkup(
+        createElement(RouteDirections, {
+          route: forward,
+          plans: isolated.plans,
+          onRecheck: () => {},
+        }),
+      );
+      expect(overview.match(/href="[^"]*\/full\.png"/g)).toEqual([
+        'href="/data/campus/visual/png/SE12-F3-p1/full.png"',
+        'href="/data/campus/visual/png/SW3-F3-p1/full.png"',
+        'href="/data/campus/visual/png/SW3-F2-p1/full.png"',
+      ]);
+      expect(overview.match(/data-walking-line="true"/g)).toHaveLength(3);
+      for (const step of forward.steps) expect(overview).toContain(step.instruction);
+      expect(overview).toContain('Arrive at 2082');
+      const office = saved.document.nodes.find((n) => n.id === forward.destination.id)!;
+      expect(office.point).toEqual(
+        pilotEvidence()
+          .find((p) => p.plan.id === 'SW3-F2-p1')!
+          .drawnDoors.find((d) => d.room === '2082')!.point,
+      );
+      expect(forward.steps.at(-1)!.path).not.toContainEqual(
+        bound('sw3-se12-floor2-passage', 'from').point,
+      );
+      expect(journey(office, 'SE12 302', {}, isolated).status).toBe('no-route');
+      answer(first, 'true', 'both');
+      answer(last, 'true', 'both');
+      expect(journey(office, 'SE12 302', {}, isolated).status).toBe('route');
+      saved = answer(last, 'false', null);
+      expect(nav(choice.origins[0].id).status).toBe('unmapped-destination');
+      expect(saved.eligibility.edgeIds.length - baseline.eligibility.edgeIds.length).toBe(1);
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  });
   it('starts a fresh checkout from published reviews and keeps saved edits across restarts', () => {
     const dir = mkdtempSync(join(tmpdir(), 'campuslens-first-launch-'));
     const file = join(dir, 'topology.json');
@@ -84,8 +225,8 @@ describe('visitor routes on the current three-building pilot', () => {
         fresh.candidates,
         fresh.plans,
       );
-      expect(passages.traces.size).toBe(4);
-      expect(passages.doors.size).toBe(2);
+      expect(passages.traces.size).toBe(6);
+      expect(passages.doors.size).toBe(4);
       expect(journey(bound(lower), 'SW03 3615', {}, fresh).status).toBe('route');
       expect(JSON.stringify(snapshot)).not.toMatch(
         /"reviewer"|"reviewHistory"|"answeredAt"|"note"/,
@@ -137,9 +278,10 @@ describe('visitor routes on the current three-building pilot', () => {
     );
     expect(markup).toContain('data-walking-line="true"');
     expect(markup).toContain('SW3-F2-p1/full.png');
-    expect(markup).toContain('Step 2, Elevator');
-    expect(markup).toContain('Step 4, Arrival');
-    expect(markup).not.toContain('SW3-F3-p1/full.png');
+    expect(markup).toContain('Take the elevator to SW03 · Floor 3.');
+    expect(markup).toContain('Arrive at 3615');
+    expect(markup).toContain('SW3-F3-p1/full.png');
+    expect(markup).toContain('One floor at a time');
   });
   it.each([
     ['sw3-se12-floor2-passage', 'SW03 2605', lower, 'outdoor'],
@@ -159,7 +301,7 @@ describe('visitor routes on the current three-building pilot', () => {
           plan: sheet,
           label: 'Crossing',
           markers: [{ label: 'Door', symbol: 'A', point: r.origin.point }],
-          path: r.steps[0].path,
+          paths: [r.steps[0].path],
         }),
       );
       expect(markup).not.toContain('<polyline');

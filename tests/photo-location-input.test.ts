@@ -93,6 +93,17 @@ describe('inline photo input (Node rendering, no browser)', () => {
       ),
     ).not.toContain('disabled');
   });
+  it('can edit a destination using the accepted photo result without offering a second submission', () => {
+    const { markup } = renderInput({
+      photo,
+      consent: true,
+      destination: 'SW03 2082',
+      canUsePhotoResult: true,
+    });
+    expect(markup).toContain('SW03 2082');
+    expect(markup).not.toContain('aria-label="Photo analysis"');
+    expect(button(markup, 'Upload photo')).not.toContain('disabled');
+  });
   it('keeps local upload available while provider configuration is unavailable', () => {
     const { markup } = renderInput({ photo, consent: true, ready: false });
     expect(button(markup, 'Upload photo')).not.toContain('disabled');

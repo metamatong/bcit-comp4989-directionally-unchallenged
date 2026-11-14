@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 25,
-  "sourceDocumentSha256": "a15bb9c08069ab9adf7ebbc7a7643784c9aa62629e6d2af1f0eeebd51a7ed388",
+  "revision": 28,
+  "sourceDocumentSha256": "4565fedfb317fc3ae277e5d8bd76e090d8e9cde4928ec0e63039072d6440db0e",
   "nodes": [
     {
       "version": 1,
@@ -390,6 +390,40 @@
         "x": 0.5409314,
         "y": 0.6214394
       }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "422b8797c932a1bd6264076b1232ce0c42a58babc4e39a2f3c0ab2fba7bc02d9",
+      "reviewBasis": "user-confirmation",
+      "id": "d8f0139c-8e82-4fa4-b606-55471c96c598",
+      "planId": "SE12-F3-p1",
+      "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "label": "302 · 외벽 쪽 복도 문",
+      "aliases": [
+        "302 · 외벽 쪽 복도 문"
+      ],
+      "kind": "door",
+      "point": {
+        "x": 0.1508,
+        "y": 0.5821
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "d44746857694743767f6769146b319b5da14a08bf380351282841fb4de833e4c",
+      "reviewBasis": "user-confirmation",
+      "id": "f2750351-e8f6-477d-a8c6-adec1f8ae59a",
+      "planId": "SW3-F2-p1",
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "label": "2082 · 2000 복도 문",
+      "aliases": [
+        "2082 · 2000 복도 문"
+      ],
+      "kind": "door",
+      "point": {
+        "x": 0.5195588,
+        "y": 0.1501136
+      }
     }
   ],
   "edges": [
@@ -703,6 +737,52 @@
         "fromNodeId": "3fc46aaf-d0ce-49dd-82d3-a62e3fec96dc",
         "toNodeId": "18b7cf08-4ee4-4cfd-81dc-aeb9d3386ceb",
         "reviewedEdgeHash": "c824b23f9c4fb4fc4d8dc534eb26ba45588931a1c14253c35868046354022aca"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "f324dd521ffd84b3d8567e2729faa83f275b0aa508f59c3550c045ded6c23fb4",
+      "reviewBasis": "user-confirmation",
+      "id": "00949dd1-1228-4eb8-b4f6-9dc99dfc11d3",
+      "fromNodeId": "d8f0139c-8e82-4fa4-b606-55471c96c598",
+      "toNodeId": "b376a70f-6b95-4e15-b381-9e42ada2ead3",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "corridor",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "se12-f3-302-to-sw03-link",
+      "candidateBinding": {
+        "definitionHash": "e2f5ac85a2af37994c48afbe367e31a7fc2d5d3180c45d4b50e16ee43b53c4be",
+        "presentedHash": "381cdb51b12be351033f1c211974310c6a3c184e6e0176706a15840ebe343cb7",
+        "fromNodeId": "d8f0139c-8e82-4fa4-b606-55471c96c598",
+        "toNodeId": "b376a70f-6b95-4e15-b381-9e42ada2ead3",
+        "reviewedEdgeHash": "f324dd521ffd84b3d8567e2729faa83f275b0aa508f59c3550c045ded6c23fb4"
+      }
+    },
+    {
+      "version": 2,
+      "reviewContentHash": "fdd9d5316ea94599dcf6ba9e6643d6ac2987602e4d4fcbf42d48c20b067e3f0e",
+      "reviewBasis": "user-confirmation",
+      "id": "ed07bcda-bcdd-46ad-bb30-c40cc99a1151",
+      "fromNodeId": "16841337-0780-41d9-8d19-8827973bbec2",
+      "toNodeId": "f2750351-e8f6-477d-a8c6-adec1f8ae59a",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "corridor",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw3-f2-exterior-door-to-2082",
+      "candidateBinding": {
+        "definitionHash": "16faf44773f1a04b864262d36b942b32934c37ed1c870a68983d7516c2a6be65",
+        "presentedHash": "a926a6f4d9471cd53f5da4a03892334d2d8f6256c28c27d0578ff349157f1759",
+        "fromNodeId": "16841337-0780-41d9-8d19-8827973bbec2",
+        "toNodeId": "f2750351-e8f6-477d-a8c6-adec1f8ae59a",
+        "reviewedEdgeHash": "fdd9d5316ea94599dcf6ba9e6643d6ac2987602e4d4fcbf42d48c20b067e3f0e"
       }
     }
   ],

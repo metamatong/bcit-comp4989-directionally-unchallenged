@@ -253,7 +253,9 @@ export default function App() {
   async function confirmCampus(candidateId: string) {
     if (await send({ type: 'confirm-campus-region', candidateId })) {
       discardPhoto();
+      return true;
     }
+    return false;
   }
 
   if (!data || !session)
@@ -275,7 +277,52 @@ export default function App() {
       session.campusAnalysis?.referenceLabels?.some((ref) => ref.planId === plan.id),
   );
   const photoReady = data.liveAvailable && data.photoLocalizationAvailable;
-  const region = showPhotoResults ? session.campusLocation : null;
+  const analysis = showPhotoResults ? session.campusAnalysis : null;
+  const region = analysis ? session.campusLocation : null;
+  const routeCandidate = region ?? analysis?.candidates[0];
+  const directionsMode = Boolean(analysis && activeDestination);
+  const photoInput = (
+    <PhotoLocationInput
+      destination={destination}
+      canUsePhotoResult={!!analysis?.candidates.length}
+      onDestinationChange={(value) => {
+        setDestination(value);
+        setActiveDestination('');
+      }}
+      photo={preparedPhoto}
+      consent={photoConsent}
+      ready={photoReady}
+      reading={reading}
+      busy={busy}
+      status={readStatus}
+      error={photoError}
+      onPhoto={(file) => void readPhoto(file)}
+      onConsent={setPhotoConsent}
+      onAnalyze={() => void analyzePhoto()}
+      onDiscard={removePhoto}
+    />
+  );
+  const photoResults = analysis && (
+    <CampusLocationResults
+      analysis={analysis}
+      plans={plans}
+      selectedId={region?.id}
+      onConfirm={(id) => void confirmCampus(id)}
+      busy={busy}
+      evidenceOnly={directionsMode && !!routeCandidate}
+    />
+  );
+  const updateDestination = analysis &&
+    destination.trim() &&
+    destination.trim() !== activeDestination && (
+      <button
+        className="primary full-width"
+        disabled={busy}
+        onClick={() => setActiveDestination(destination.trim())}
+      >
+        Show directions to {destination.trim()}
+      </button>
+    );
   return (
     <div className="app-shell visitor-shell">
       <header className="header">
@@ -343,80 +390,72 @@ export default function App() {
               plans.
             </p>
           )}
-          <PhotoLocationInput
-            destination={destination}
-            onDestinationChange={(value) => {
-              setDestination(value);
-              setActiveDestination('');
-            }}
-            photo={preparedPhoto}
-            consent={photoConsent}
-            ready={photoReady}
-            reading={reading}
-            busy={busy}
-            status={readStatus}
-            error={photoError}
-            onPhoto={(file) => void readPhoto(file)}
-            onConsent={setPhotoConsent}
-            onAnalyze={() => void analyzePhoto()}
-            onDiscard={removePhoto}
-          />
-          {region && (
+          {directionsMode ? (
             <>
-              <div className="selected-start">
-                <strong>
-                  {region.doorwayVicinity
-                    ? `Starting corridor confirmed · Room ${region.doorwayVicinity.room}`
-                    : 'Photo region confirmed'}
-                </strong>
-                <span>
-                  {buildingLabel(region.building)} · Floor {region.floor}
-                </span>
-              </div>
-              {!activeDestination && (
-                <button
-                  className="primary full-width"
-                  disabled={!destination.trim()}
-                  onClick={() => setActiveDestination(destination.trim())}
-                >
-                  Look up destination
-                </button>
-              )}
-              {activeDestination && (
+              {routeCandidate ? (
                 <JourneyPanel
-                  key={JSON.stringify([region.id, activeDestination, session.revision])}
+                  key={JSON.stringify([session.id, routeCandidate.id, activeDestination])}
                   sessionId={session.id}
                   revision={session.revision}
-                  candidate={region}
+                  candidate={routeCandidate}
+                  confirmed={region?.id === routeCandidate.id}
                   destination={activeDestination}
                   plans={data.visualPlans}
+                  busy={busy}
+                  onConfirm={confirmCampus}
                 />
+              ) : (
+                <section className="journey-panel">
+                  <h2>Starting point needed for {activeDestination}</h2>
+                  {photoResults}
+                </section>
+              )}
+              {routeCandidate && (
+                <details className="journey-evidence">
+                  <summary>Photo location evidence</summary>
+                  {photoResults}
+                </details>
               )}
             </>
-          )}
-          {showPhotoResults && session.campusAnalysis && (
+          ) : (
             <>
-              <div className="result-actions">
-                <button
-                  className="text-button"
-                  disabled={busy}
-                  onClick={() => {
-                    removePhoto();
-                    void send({ type: 'reset' });
-                  }}
-                >
-                  <RotateCcw size={15} />
-                  Clear
-                </button>
-              </div>
-              <CampusLocationResults
-                analysis={session.campusAnalysis}
-                plans={plans}
-                selectedId={session.campusLocation?.id}
-                onConfirm={(id) => void confirmCampus(id)}
-                busy={busy}
-              />
+              {!analysis && photoInput}
+              {region && (
+                <div className="selected-start">
+                  <strong>
+                    {region.doorwayVicinity
+                      ? `Starting corridor confirmed · Room ${region.doorwayVicinity.room}`
+                      : 'Photo region confirmed'}
+                  </strong>
+                  <span>
+                    {buildingLabel(region.building)} · Floor {region.floor}
+                  </span>
+                </div>
+              )}
+              {photoResults}
             </>
+          )}
+          {analysis && (
+            <details key={analysis.requestId} className="journey-inputs" open={!directionsMode}>
+              <summary>Edit photo or destination</summary>
+              {photoInput}
+              {updateDestination}
+            </details>
+          )}
+          {analysis && (
+            <div className="result-actions">
+              <button
+                className="text-button"
+                disabled={busy}
+                onClick={() => {
+                  removePhoto();
+                  void send({ type: 'reset' });
+                }}
+              >
+                <RotateCcw size={15} />
+                {directionsMode ? 'Start over' : 'Clear'}
+              </button>
+            </div>
           )}
         </div>
       </main>
@@ -463,8 +502,9 @@ export default function App() {
               <div className="about-section">
                 <h3>What you can do</h3>
                 <p>
-                  Enter a room or stair label, submit a photo, and confirm the proposed area and the
-                  marked point where you are standing. Follow the arrows one floor at a time.
+                  Enter a destination, submit a photo, and select the marked point where you are
+                  standing. Follow the arrows and transfer instructions on the floor plans in
+                  walking order.
                 </p>
               </div>
               <div className="about-section">

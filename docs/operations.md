@@ -14,7 +14,7 @@ The browser accepts JPEG/PNG/WebP up to 8 MB and 50 million pixels, creates a fu
 
 Mobile photo capture uses the browser/device photo picker. DirectionallyUnchallenged does not open a live camera stream or track movement. Physical-device capture behavior remains unverified.
 
-Upload and capture controls are shown inline under Find my location. A selected photo reveals the consent and analysis controls. Remove photo, Cancel analysis, result confirmation or leaving the page releases the client photo; the coverage/privacy dialog does not clear it. Results appear once beneath the input, and a newly selected photo hides the prior result until its own comparison completes.
+Upload and capture controls are shown inline under Find my location. A selected photo reveals the consent and analysis controls. Remove photo, Cancel analysis, result confirmation or leaving the page releases the client photo; the coverage/privacy dialog does not clear it. When a destination is present, confirming a marked start opens the floor-by-floor route overview, with the photo evidence and trip inputs in collapsed sections below it. A newly selected photo clears the previous route.
 
 Routes exist only in the active browser view. Editing the destination or replacing the photo clears directions. Recheck current route reads current topology approvals and asks for the starting point again.
 

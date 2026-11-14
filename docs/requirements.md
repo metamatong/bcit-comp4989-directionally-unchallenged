@@ -23,4 +23,4 @@ The supplied original [brief](project-brief.txt) remains unchanged. The user's l
 
 Old mode preferences are cleared and mode/fixture/replay/simulation/destination/checkpoint actions are rejected. Tests explicitly verify that legacy requests cannot restore the removed functionality.
 
-Visitor routing requires a confirmed photo region, an explicitly selected checkpoint and a reachable reviewed destination. The editor stores current approvals in `topology.json`. Four traced corridors can be drawn on source pages. User reports supply connectivity evidence. Independent field validation, measured costs and accessibility evidence remain outstanding.
+Visitor routing requires a confirmed photo region, an explicitly selected checkpoint and a reachable reviewed destination. The editor stores current approvals in `topology.json`. Six traced corridors can be drawn on source pages. For a typed destination the default result shows every floor in walking order and labels each transfer. User reports supply connectivity evidence. Independent field validation, measured costs and accessibility evidence remain outstanding.

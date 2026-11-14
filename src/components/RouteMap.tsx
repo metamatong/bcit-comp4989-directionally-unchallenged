@@ -8,20 +8,22 @@ export type MapMarker = { point: PagePoint; label: string; symbol: string; end?:
 export function RouteMap({
   plan,
   markers = [],
-  path = [],
+  paths = [],
   bounds,
   label,
+  showPlanTitle = true,
 }: {
   plan: VisualPlan;
   markers?: MapMarker[];
-  path?: PagePoint[];
+  paths?: PagePoint[][];
   bounds?: PlanBounds;
   label: string;
+  showPlanTitle?: boolean;
 }) {
   const [whole, setWhole] = useState(false);
   const points = [
     ...markers.map((m) => m.point),
-    ...path,
+    ...paths.flat(),
     ...(bounds
       ? [
           { x: bounds[0], y: bounds[1] },
@@ -40,16 +42,21 @@ export function RouteMap({
   const h = whole || !points.length ? height : Math.min(height, Math.max(...ys) + margin) - y;
   const scale = Math.max(w / 640, h / 420);
   const line = 3.7 * scale;
-  const svgPoints = path.map((p) => `${p.x * width},${p.y * height}`).join(' ');
   return (
     <div className="journey-map">
       <div className="map-bar">
-        <strong>{planLabel(plan)}</strong>
+        {showPlanTitle && <strong>{planLabel(plan)}</strong>}
         <button type="button" aria-pressed={whole} onClick={() => setWhole(!whole)}>
           {whole ? 'Zoom to marks' : 'Show full floor'}
         </button>
       </div>
-      <svg viewBox={`${x} ${y} ${w} ${h}`} role="img" aria-label={label} className="walking-map">
+      <svg
+        viewBox={`${x} ${y} ${w} ${h}`}
+        style={{ aspectRatio: `${w} / ${h}` }}
+        role="img"
+        aria-label={label}
+        className="walking-map"
+      >
         <title>{label}</title>
         <image href={plan.full.url} x={0} y={0} width={width} height={height} />
         {bounds && (
@@ -64,45 +71,50 @@ export function RouteMap({
             strokeDasharray={`${3 * line} ${line}`}
           />
         )}
-        {path.length > 1 && (
-          <g>
-            <polyline
-              points={svgPoints}
-              fill="none"
-              stroke="white"
-              strokeWidth={line * 2.3}
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
-            <polyline
-              data-walking-line="true"
-              points={svgPoints}
-              fill="none"
-              stroke="#1460ab"
-              strokeWidth={line}
-              strokeLinejoin="round"
-              strokeLinecap="round"
-            />
-            {path.slice(1).map((p, i) => {
-              const a = path[i],
-                dx = (p.x - a.x) * width,
-                dy = (p.y - a.y) * height;
-              if (Math.hypot(dx, dy) < 14 * scale) return null;
-              return (
-                <path
-                  key={i}
-                  d="M -5 -4 L 2.5 0 L -5 4"
-                  transform={`translate(${((a.x + p.x) * width) / 2} ${((a.y + p.y) * height) / 2}) rotate(${(Math.atan2(dy, dx) * 180) / Math.PI}) scale(${scale * 1.4})`}
+        {paths
+          .filter((path) => path.length > 1)
+          .map((path, pathIndex) => {
+            const svgPoints = path.map((p) => `${p.x * width},${p.y * height}`).join(' ');
+            return (
+              <g key={pathIndex}>
+                <polyline
+                  points={svgPoints}
                   fill="none"
-                  stroke="#103f73"
-                  strokeWidth="2.6"
-                  strokeLinecap="round"
+                  stroke="white"
+                  strokeWidth={line * 2.3}
                   strokeLinejoin="round"
+                  strokeLinecap="round"
                 />
-              );
-            })}
-          </g>
-        )}
+                <polyline
+                  data-walking-line="true"
+                  points={svgPoints}
+                  fill="none"
+                  stroke="#1460ab"
+                  strokeWidth={line}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+                {path.slice(1).map((p, i) => {
+                  const a = path[i],
+                    dx = (p.x - a.x) * width,
+                    dy = (p.y - a.y) * height;
+                  if (Math.hypot(dx, dy) < 14 * scale) return null;
+                  return (
+                    <path
+                      key={i}
+                      d="M -5 -4 L 2.5 0 L -5 4"
+                      transform={`translate(${((a.x + p.x) * width) / 2} ${((a.y + p.y) * height) / 2}) rotate(${(Math.atan2(dy, dx) * 180) / Math.PI}) scale(${scale * 1.4})`}
+                      fill="none"
+                      stroke="#103f73"
+                      strokeWidth="2.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  );
+                })}
+              </g>
+            );
+          })}
         {markers.map((m, i) => (
           <g key={i} transform={`translate(${m.point.x * width} ${m.point.y * height})`}>
             <title>{m.label}</title>

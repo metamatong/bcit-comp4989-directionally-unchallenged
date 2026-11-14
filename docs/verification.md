@@ -1,5 +1,17 @@
 # Verification record
 
+## Visitor route overview
+
+The revision 28 distributable network includes the two user-approved approaches for SE12 302 and SW03 2082. A fresh editor initialized from that network produces the same continuous indoor journey. A Node DOM integration test exercises the normal visitor form, checks the consent control, submits the photo and destination, and selects the marked starting door once. With the real session and navigation APIs and mocked image preparation and Gemini inference, the first result shows three source sheets in walking order, three walking lines, the building passage, the elevator transfer and arrival at 2082. The test switches between all floors and manual floor navigation, then edits the destination and checks that the old route disappears without a new model request.
+
+All 240 non-browser tests, the production build and data validation passed. The local server loaded the new start-selection endpoint and the two current bidirectional approvals. No additional live photo submission, browser layout check or physical walk was part of this change.
+
+## Two proposed room approaches for SE12 302 to SW03 2082
+
+The two marked A/B questions match the official SE12 third-floor and SW03 second-floor drawings. Both were loaded as unanswered against topology revision 25. The approved graph still contained 22 eligible points and 14 eligible passages before review.
+
+An isolated copy of the published graph exercised the visitor route from the 302 doorway hypothesis to the exact 2082 office. It confirmed that a single approval or unknown direction leaves the route incomplete, two forward-only approvals provide the requested journey only in the forward direction, bidirectional approvals enable the reverse trip, and a subsequent F withdraws the room approach. The test uses the reviewed indoor building crossing and east elevator and checks that the final corridor stops at 2082 without doubling back to the exterior door. These fixture answers are not physical observations. All 238 non-browser tests, the build and source-data validation passed.
+
 ## Doorway and corridor localization
 
 The preceding binary decision accepted a model camera rectangle or returned only printed-label references. It could not retain a supported doorway vicinity when the model abstained on the rectangle or when the rectangle failed validation. That implementation retained neither the individual validation reasons nor a doorway assessment, so the specific branch taken by the earlier live hallway request cannot be reconstructed.

@@ -532,6 +532,104 @@
       "rationale": "공식 도면의 3600 복도를 따라 기존 엘리베이터 승강장에서 3615호의 3604 전실 맞은편 문 앞까지 통행 가능한지 확인해주세요.",
       "preparedBy": "assistant-source-review",
       "preparedOn": "2026-11-13"
+    },
+    {
+      "id": "se12-f3-302-to-sw03-link",
+      "version": 1,
+      "title": "SE12 3층 · 302호 문 앞 → 312A의 SW03 연결통로 입구",
+      "kind": "corridor",
+      "from": {
+        "planId": "SE12-F3-p1",
+        "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+        "point": {
+          "x": 0.1508,
+          "y": 0.5821
+        },
+        "label": "302 · 외벽 쪽 복도 문",
+        "kind": "door",
+        "description": "302 CLASS의 도면 아래쪽 문턱입니다. A는 방 안이 아니라 복도에서 문 앞에 서는 쪽입니다."
+      },
+      "to": {
+        "planId": "SE12-F3-p1",
+        "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+        "point": {
+          "x": 0.4435,
+          "y": 0.631
+        },
+        "label": "SW03 방향 연결부",
+        "kind": "junction",
+        "description": "312A에서 도면 아래쪽으로 꺾어 SW3 방향 좁은 연결통로에 들어선 기존 검수 지점입니다."
+      },
+      "endpointRefs": {
+        "to": {
+          "candidateId": "sw3-se12-floor3-passage",
+          "side": "to"
+        }
+      },
+      "drawingTrace": {
+        "bends": [
+          {
+            "x": 0.1508,
+            "y": 0.5931818
+          },
+          {
+            "x": 0.4435,
+            "y": 0.5931818
+          }
+        ],
+        "instruction": "Follow the window-side corridor past rooms 306, 308, 310 and 312 between room 302 and the SW03 passage at corridor 312A.",
+        "fromDoorId": "SE12-F3-p1:drawn-door:3"
+      },
+      "rationale": "A에서 306·308·310·312호 문 앞을 지나는 외벽 쪽 복도를 따라가면 312A가 나오고, 도면 아래쪽으로 꺾으면 B입니다. A와 B 사이의 점선 전체를 같은 층에서 통과할 수 있는지 확인해주세요.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-13"
+    },
+    {
+      "id": "sw3-f2-exterior-door-to-2082",
+      "version": 1,
+      "title": "SW03 2층 · 2063·2080 사이 출입문 안쪽 → 2082호 문 앞",
+      "kind": "corridor",
+      "from": {
+        "planId": "SW3-F2-p1",
+        "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+        "point": {
+          "x": 0.5125,
+          "y": 0.096
+        },
+        "label": "SE12 방향 2층 외부 출입문 후보",
+        "kind": "outdoor-access",
+        "description": "2063호와 2080호 사이, 2000 복도 끝에 있는 기존 출입문 지점입니다. 질문은 이 문 안쪽에서 시작합니다."
+      },
+      "to": {
+        "planId": "SW3-F2-p1",
+        "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+        "point": {
+          "x": 0.5195588,
+          "y": 0.1501136
+        },
+        "label": "2082 · 2000 복도 문",
+        "kind": "door",
+        "description": "도면 오른쪽 사무실 줄에서 2081호 다음, 2083 회의실 앞에 있는 2082 OFFICE의 문턱입니다. B는 복도 쪽입니다."
+      },
+      "endpointRefs": {
+        "from": {
+          "candidateId": "sw3-se12-floor2-passage",
+          "side": "from"
+        }
+      },
+      "drawingTrace": {
+        "bends": [
+          {
+            "x": 0.5125,
+            "y": 0.1501136
+          }
+        ],
+        "instruction": "Use corridor 2000 between the doorway by rooms 2063 and 2080 and the door to office 2082, between office 2081 and meeting room 2083.",
+        "toDoorId": "SW3-F2-p1:drawn-door:3"
+      },
+      "rationale": "A에서 건물 안쪽으로 2000 복도를 따라가면 2080호와 2081호를 지나 도면 오른쪽에 2082호 문(B)이 있습니다. 이 구간은 실내입니다. 두 문 사이를 실제로 걸을 수 있는지 확인해주세요.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-13"
     }
   ]
 }
