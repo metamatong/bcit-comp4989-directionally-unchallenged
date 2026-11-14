@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { Camera, LoaderCircle, Search, ShieldCheck, Upload, X } from 'lucide-react';
+import { Camera, LoaderCircle, Search, ShieldCheck, Upload, X, MapPin } from 'lucide-react';
 import type { PreparedPhoto } from '../photo';
 
 type PhotoLocationInputProps = {
@@ -9,6 +9,8 @@ type PhotoLocationInputProps = {
   reading: boolean;
   busy: boolean;
   status: string;
+  destination: string;
+  onDestinationChange: (value: string) => void;
   onPhoto: (file?: File) => void;
   onConsent: (consent: boolean) => void;
   onAnalyze: () => void;
@@ -22,6 +24,8 @@ export function PhotoLocationInput({
   reading,
   busy,
   status,
+  destination,
+  onDestinationChange,
   onPhoto,
   onConsent,
   onAnalyze,
@@ -33,7 +37,6 @@ export function PhotoLocationInput({
   return (
     <section className="photo-location-input" aria-labelledby="location-heading">
       <h1 id="location-heading">Find my location</h1>
-      <p className="photo-description">Compare a photo with official BCIT Burnaby floor plans.</p>
       <div className="photo-actions">
         <button
           type="button"
@@ -94,6 +97,22 @@ export function PhotoLocationInput({
           </button>
         </div>
       )}
+      <div className="destination-field">
+        <label htmlFor="trip-destination">Destination</label>
+        <div>
+          <MapPin size={19} />
+          <input
+            id="trip-destination"
+            type="text"
+            maxLength={150}
+            value={destination}
+            autoComplete="off"
+            placeholder="Building and room, e.g. SW03 2605"
+            onChange={(event) => onDestinationChange(event.target.value)}
+          />
+        </div>
+        <small>BCIT Burnaby · SE12, SW03 and SW01</small>
+      </div>
       {status && (
         <p className="photo-status" role="status">
           {(reading || busy) && <LoaderCircle className="spin" size={15} />}
@@ -121,7 +140,7 @@ export function PhotoLocationInput({
           </label>
           <button className="primary full-width" disabled={busy || reading || !consent || !ready}>
             {busy ? <LoaderCircle className="spin" size={17} /> : <Search size={17} />}
-            Analyze photo against BCIT plans
+            {destination.trim() ? 'Find my route' : 'Analyze photo against BCIT plans'}
           </button>
         </form>
       )}

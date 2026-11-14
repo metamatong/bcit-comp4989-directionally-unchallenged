@@ -21,6 +21,8 @@ function renderInput(overrides: Partial<ComponentProps<typeof PhotoLocationInput
     reading: false,
     busy: false,
     status: '',
+    destination: '',
+    onDestinationChange: vi.fn(),
     onPhoto: vi.fn(),
     onConsent: vi.fn(),
     onAnalyze: vi.fn(),
@@ -45,6 +47,7 @@ describe('inline photo input (Node rendering, no browser)', () => {
     expect(button(markup, 'Upload photo')).not.toContain('disabled');
     expect(button(markup, 'Take a photo')).not.toContain('disabled');
     expect(markup).toContain('capture="environment"');
+    expect(markup).toContain('<label for="trip-destination">Destination</label>');
     expect(markup).toContain('DirectionallyUnchallenged does not save photos');
     expect(markup).not.toContain('<dialog');
     expect(markup).not.toContain('Analyze a photo');
@@ -63,6 +66,17 @@ describe('inline photo input (Node rendering, no browser)', () => {
   it('enables analysis only after the photo is consented and the provider is ready', () => {
     const { markup } = renderInput({ photo, consent: true });
     expect(button(markup, 'Analyze photo against BCIT plans')).not.toContain('disabled');
+  });
+  it('starts a journey from a typed destination with the same per-photo consent gate', () => {
+    expect(
+      button(renderInput({ photo, destination: 'SW03 3615' }).markup, 'Find my route'),
+    ).toContain('disabled');
+    expect(
+      button(
+        renderInput({ photo, consent: true, destination: 'SW03 3615' }).markup,
+        'Find my route',
+      ),
+    ).not.toContain('disabled');
   });
   it('keeps local upload available while provider configuration is unavailable', () => {
     const { markup } = renderInput({ photo, consent: true, ready: false });

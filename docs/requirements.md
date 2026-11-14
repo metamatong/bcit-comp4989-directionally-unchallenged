@@ -13,11 +13,14 @@ The supplied original [brief](project-brief.txt) remains unchanged. The user's l
 | Mobile photo/camera input | Local resizing, photo picker and native camera capture |
 | Privacy and governance | Per-photo consent; transient media/session state; untrusted source evidence; no hidden reasoning logs |
 | Failure behavior | Setup, timeout, overload, quota, blocked and incomplete-response errors; no synthetic fallback |
-| Source plans behind the scenes | Full official dataset remains available to Gemini; only relevant plan images and original-source links appear with location results |
-| Destination routing, closures, ETAs | Removed with synthetic routes; unavailable pending verified campus topology |
+| Source plans behind the scenes | Wayfinding photo requests use only the 12 pilot plans. The UI shows relevant source images with results and directions. |
+| Destination routing, closures, ETAs | Reviewed pilot paths with per-floor arrows, directional crossings and explicit gaps. Live closures and ETAs are unavailable. |
+| Internal topology authoring | Local-only editor for 12 SE12/SW3/SW1 plans, manual point/connection placement, evidence, review history and persistent JSON |
+| Candidate confirmation | Separate source-grounded A/B proposals; T/F/unknown and explicit permitted direction; source-bound response history; user confirmation is distinct from physical field validation |
+| Reviewed-graph route checks | Internal deterministic edge-count/measured-distance queries; excludes drafts, rejected/stale records and invalid endpoints; uses revisioned topology |
 | Verification/evaluation | Mocked unit/API/browser checks and source hashes; live successful localization and field accuracy remain unverified |
 | Documentation/proposal | README, architecture/data/provider/operations/verification notes, walkthrough and two-page proposal |
 
 Old mode preferences are cleared and mode/fixture/replay/simulation/destination/checkpoint actions are rejected. Tests explicitly verify that legacy requests cannot restore the removed functionality.
 
-Future routing requires source-reviewed and field-validated corridors, entrances, transitions, cost assumptions and accessibility evidence. The empty real-campus graph/landmark placeholders do not enable routes. Removing the demo is not evidence that real navigation has been implemented.
+Visitor routing requires a confirmed photo region, an explicitly selected checkpoint and a reachable reviewed destination. The editor stores current approvals in `topology.json`. Four traced corridors can be drawn on source pages. User reports supply connectivity evidence. Independent field validation, measured costs and accessibility evidence remain outstanding.

@@ -1,5 +1,6 @@
 import { ArrowUpRight, Check, FileText, MapPin } from 'lucide-react';
 import type { CampusLocationCandidate, CampusPhotoAnalysis, VisualPlan } from '../types';
+import { buildingLabel } from '../topology';
 
 export function PlanRegion({
   plan,
@@ -61,7 +62,7 @@ export function CampusLocationResults({
             <div className="section-heading">
               <h3>
                 <MapPin size={18} />
-                {candidate.building} · Floor {candidate.floor}
+                {buildingLabel(candidate.building)} · Floor {candidate.floor}
               </h3>
               <span className="pill">Unverified estimate</span>
             </div>
@@ -107,9 +108,7 @@ export function CampusLocationResults({
         );
       })}
       {analysis.clarification && <p className="clarification-note">{analysis.clarification}</p>}
-      <p className="helper">
-        AI estimate only. Confirm it against your surroundings; walking routes are not available.
-      </p>
+      <p className="helper">Confirm the highlighted region only if it matches your surroundings.</p>
     </section>
   );
 }

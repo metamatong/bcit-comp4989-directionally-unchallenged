@@ -1,0 +1,216 @@
+.visitor-shell {
+  --ink: #173d37;
+  --muted: #506b63;
+  color: var(--ink);
+}
+.visitor-shell > main {
+  max-width: 990px;
+  padding: 32px clamp(16px, 4vw, 44px) 18px;
+}
+.visitor-shell .workspace {
+  max-width: 800px;
+}
+.visitor-shell .photo-location-input,
+.journey-panel {
+  background: #fff;
+  border: 1px solid #cbd8d0;
+  border-radius: 18px;
+  padding: clamp(19px, 4vw, 32px);
+  margin-bottom: 16px;
+}
+.visitor-shell .photo-location-input h1 {
+  font-size: clamp(26px, 4.5vw, 37px);
+  line-height: 1.16;
+  letter-spacing: -0.04em;
+}
+.visitor-shell .photo-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0 0;
+}
+.visitor-shell .photo-actions .secondary {
+  background: #f1f7f3;
+  color: #224e42;
+  min-height: 48px;
+  font-size: 14px;
+}
+.destination-field {
+  border-top: 1px solid #dce4dc;
+  padding-top: 19px;
+  margin: 22px 0 12px;
+}
+.destination-field label {
+  display: block;
+  font-size: 18px;
+  font-weight: 650;
+  margin: 0 0 10px;
+}
+.destination-field > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 13px;
+  border: 1px solid #9db1a6;
+  background: white;
+  border-radius: 8px;
+  color: #376450;
+}
+.destination-field input {
+  width: 100%;
+  min-width: 0;
+  min-height: 46px;
+  border: 0;
+  background: transparent;
+  color: #1e3a32;
+  font-size: 16px;
+  outline-offset: 0;
+}
+.destination-field small,
+.map-credit {
+  display: block;
+  color: #52695e;
+  font-size: 12px;
+  line-height: 1.6;
+  margin-top: 6px;
+}
+.visitor-shell .helper,
+.visitor-shell .photo-status {
+  color: #536b60;
+}
+.selected-start,
+.trip-ends,
+.way-heading,
+.map-bar,
+.route-paging,
+.pin-legend {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.selected-start {
+  margin: 18px 2px 12px;
+  font-size: 14px;
+}
+.selected-start strong {
+  color: #174f3a;
+}
+.journey-panel {
+  margin: 16px 0 22px;
+}
+.journey-panel h2 {
+  font-size: clamp(20px, 3vw, 26px);
+  letter-spacing: -0.025em;
+}
+.journey-panel h3 {
+  font-size: 18px;
+  margin: 16px 0 6px;
+}
+.journey-panel p,
+.trip-ends {
+  line-height: 1.6;
+  font-size: 15px;
+  margin: 10px 0;
+}
+.journey-map {
+  overflow: hidden;
+  border: 1px solid #bfcfc5;
+  border-radius: 10px;
+  background: #fff;
+  margin: 14px 0 10px;
+}
+.map-bar,
+.map-credit {
+  justify-content: space-between;
+  background: #f1f5f1;
+  padding: 6px 12px;
+  border-bottom: 1px solid #d1dcd4;
+  font-size: 13px;
+}
+.map-bar button,
+.map-credit a {
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  color: #215642;
+  text-decoration: underline;
+}
+.map-credit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  margin: 0;
+  border-bottom: 0;
+  border-top: 1px solid #d1dcd4;
+}
+.walking-map {
+  display: block;
+  width: 100%;
+  height: clamp(210px, 43vw, 420px);
+}
+.step-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 14px 0;
+}
+.step-tabs button {
+  min-width: 38px;
+  min-height: 38px;
+  border-radius: 50%;
+  background: #f0f4f0;
+  border: 1px solid #c0cdc2;
+  font-weight: 600;
+}
+.step-tabs button[aria-current] {
+  background: #194f40;
+  color: white;
+  border-color: #194f40;
+}
+.route-paging {
+  justify-content: space-between;
+  margin: 16px 0 8px;
+}
+.place-choices {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+}
+.place-choices button,
+.place-choice button {
+  white-space: normal;
+  font-size: 14px;
+}
+.pin-legend {
+  font-size: 13px;
+  line-height: 1.6;
+}
+.pin-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.pin-legend b {
+  border-radius: 50%;
+  background: #124f40;
+  color: white;
+  padding: 1px 7px;
+}
+.pin-legend .end {
+  background: #a84b29;
+}
+@media (max-width: 520px) {
+  .visitor-shell > main {
+    padding: 16px 12px;
+  }
+  .visitor-shell .brand-name {
+    font-size: 16px;
+  }
+  .trip-ends {
+    display: grid;
+    gap: 3px;
+  }
+}

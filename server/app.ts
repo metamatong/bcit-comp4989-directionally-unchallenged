@@ -9,6 +9,9 @@ import { visualPlans } from './visual-data';
 import { analyzeCampusPhoto, confirmCampusRegion } from './photo-localization';
 import { readPhotoEvidence, PhotoEvidenceError, type PhotoEvidenceRecord } from './photo-evidence';
 import { photoEvidenceRequestSchema, photoRequestSchema, releasePhotoBytes } from './photo-media';
+import { createTopologyRouter, protectTopologyFiles, requireLocalTopology } from './topology-api';
+import { TopologyError, TopologyStore } from './topology';
+import { navigationSchema, planVisitorJourney } from './wayfinding';
 
 export const actionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('confirm-campus-region'), candidateId: z.string().uuid() }).strict(),
@@ -20,8 +23,10 @@ export function createApp(options: {
   liveAvailable: boolean;
   model: string;
   setupNotice?: string | null;
+  topologyStore?: TopologyStore;
 }) {
   const app = express();
+  const topologyStore = options.topologyStore ?? new TopologyStore();
   const sessions = new Map<string, Session>(),
     busy = new Set<string>();
   const photoEvidence = new Map<string, PhotoEvidenceRecord>();
@@ -44,6 +49,7 @@ export function createApp(options: {
   }, 60000);
   cleanup.unref();
   app.disable('x-powered-by');
+  app.use(protectTopologyFiles);
   app.use('/api', (_req, res, next) => {
     res.set('Cache-Control', 'no-store');
     next();
@@ -69,6 +75,8 @@ export function createApp(options: {
   });
   app.use('/api/sessions/:id/photo', express.json({ limit: '4mb' }));
   app.use(express.json({ limit: '12kb' }));
+  app.use('/api/internal/topology', createTopologyRouter(topologyStore));
+  app.use('/internal/topology', requireLocalTopology);
   app.get('/api/bootstrap', (_req, res) =>
     res.json({
       coverage,
@@ -160,6 +168,10 @@ export function createApp(options: {
     });
     try {
       if (stage === 'evidence') {
+        session.campusAnalysis = null;
+        session.campusLocation = null;
+        session.photoEvidence = null;
+        photoEvidence.delete(session.id);
         const record = await readPhotoEvidence(session, input, options.provider, controller.signal);
         photoEvidence.set(session.id, record);
       } else if ('evidenceId' in input && typeof input.evidenceId === 'string') {
@@ -216,6 +228,43 @@ export function createApp(options: {
     handlePhotoStage(req, res, 'evidence'),
   );
   app.post('/api/sessions/:id/photo', (req, res) => handlePhotoStage(req, res, 'location'));
+  app.post('/api/sessions/:id/navigation', (req, res) => {
+    const session = sessions.get(req.params.id);
+    if (!session || Date.now() - session.lastTouched > 1800000) {
+      res.status(404).json({ error: 'Session expired. Reload and confirm a new photo.' });
+      return;
+    }
+    const input = navigationSchema.safeParse(req.body);
+    if (!input.success) {
+      res.status(400).json({
+        error: 'Enter a destination and confirm the marked starting point from the current map.',
+      });
+      return;
+    }
+    if (
+      busy.has(session.id) ||
+      input.data.revision !== session.revision ||
+      session.campusLocation?.id !== input.data.candidateId ||
+      !session.campusAnalysis?.candidates.some((c) => c.id === input.data.candidateId)
+    ) {
+      res
+        .status(409)
+        .json({ error: 'Confirm the current photo region before requesting directions.', session });
+      return;
+    }
+    try {
+      const result = planVisitorJourney(session.campusLocation, input.data, topologyStore);
+      session.lastTouched = Date.now();
+      res.json(result);
+    } catch (error) {
+      res.status(error instanceof TopologyError ? error.httpStatus : 503).json({
+        error:
+          error instanceof TopologyError
+            ? error.message
+            : 'The walking map is unavailable. Try again after its source data is restored.',
+      });
+    }
+  });
   app.post('/api/sessions/:id/actions', async (req, res) => {
     const session = sessions.get(req.params.id);
     if (!session || Date.now() - session.lastTouched > 1800000) {

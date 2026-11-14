@@ -36,6 +36,7 @@ export const photoEvidenceRequestSchema = z
     consent: z.literal(true),
     description: z.string().max(1000).default(''),
     buildingHint: z.string().max(8).nullable().optional(),
+    scope: z.literal('wayfinding-pilot').optional(),
     image: imageSchema,
     detailCrops: z
       .array(detailCropSchema)
@@ -84,7 +85,11 @@ export function validatePhotoBundle(input: PhotoEvidenceRequest) {
 export function photoFingerprint(input: PhotoEvidenceRequest): string {
   const hash = createHash('sha256');
   hash.update(
-    JSON.stringify({ description: input.description, buildingHint: input.buildingHint ?? null }),
+    JSON.stringify({
+      description: input.description,
+      buildingHint: input.buildingHint ?? null,
+      scope: input.scope,
+    }),
   );
   hash.update(input.image.mimeType).update('\0').update(input.image.data);
   for (const crop of [...input.detailCrops].sort((a, b) => a.id.localeCompare(b.id)))

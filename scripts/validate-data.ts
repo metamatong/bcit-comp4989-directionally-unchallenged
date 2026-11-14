@@ -6,6 +6,8 @@ import { retrieveRoomLabels, roomLabelIndex } from '../server/room-labels';
 import { pilotCoverage } from '../server/spatial-retrieval';
 import { pilotEvidence } from '../server/pilot-evidence';
 import { reviewedNetwork } from '../server/pilot-network';
+import { TopologyStore } from '../server/topology';
+import { validateCorridorTraces } from '../server/visitor-paths';
 const manifest = readJson<{ sources: { file: string; sha256: string; campus: string }[] }>(
   'data/campus/manifest.json',
 );
@@ -90,4 +92,32 @@ console.log(
 const network = reviewedNetwork();
 console.log(
   `Pilot RAG: ${pilot.length} pages, ${pilot.reduce((sum, page) => sum + page.ocrWords, 0)} OCR observations; approved network revision ${network.revision}, ${network.nodes.length} points, ${network.edges.length} passages.`,
+);
+
+const store = new TopologyStore();
+const topology = store.snapshot();
+console.log(
+  `Validated ${validateCorridorTraces(store.candidates, store.plans)} source-bound visitor corridor traces.`,
+);
+for (const candidate of topology.candidates) {
+  if (candidate.blockedReason)
+    throw new Error(`Connection candidate needs current source evidence: ${candidate.id}`);
+}
+for (const node of topology.document.nodes) {
+  const plan = topology.plans.find((item) => item.id === node.planId);
+  if (!plan || plan.sourceSha256 !== node.sourceSha256)
+    throw new Error(`Topology point needs a current pilot source: ${node.id}`);
+}
+for (const record of [...topology.document.nodes, ...topology.document.edges]) {
+  if (
+    record.review?.status === 'verified' &&
+    topology.eligibility.issues.some((issue) => issue.id === record.id)
+  )
+    throw new Error(`Topology record has an invalid approval: ${record.id}`);
+}
+console.log(
+  `Validated topology revision ${topology.document.revision}: ${topology.document.nodes.length} points, ${topology.document.edges.length} connections, ${topology.eligibility.edgeIds.length} eligible for routing.`,
+);
+console.log(
+  `Validated ${topology.candidates.length} connection questions, ${topology.document.candidateAnswers.length} marked-point answers and ${topology.document.floorObservations.length} floor observations.`,
 );

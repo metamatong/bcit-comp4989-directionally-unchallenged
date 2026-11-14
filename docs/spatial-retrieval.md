@@ -1,6 +1,6 @@
 # Spatial retrieval for SE12, SW03 and SW01
 
-A caller can resolve a complete identifier to source pages and printed positions, inspect nearby labels and drawing doors, and query the published graph for approved passages. The photo pipeline uses the pilot labels after Gemini reads the image. A visitor-facing destination form and start-point confirmation are future consumers.
+A caller can resolve a complete identifier to source pages and printed positions, inspect nearby labels and drawing doors, and query the published graph for approved passages. The photo pipeline uses the pilot labels after Gemini reads the image. The visitor form uses the same index to resolve destination text and the live editor graph to confirm that a specific room door can be reached.
 
 ## Try a lookup
 
@@ -13,8 +13,8 @@ npm run spatial:query -- get_spatial_coverage
 
 | Input | Result in the published data |
 |---|---|
-| `SW03 2605` | SW03 floor 2 classroom. Two door symbols adjoin the 2600 corridor. Both await a reviewed route connection. |
-| `SW03 3615` | SW03 floor 3 classroom. The source shows a door on corridor 3600. |
+| `SW03 2605` | SW03 floor 2 classroom. Two door symbols adjoin the 2600 corridor. The door opposite vestibule 2604 has a bidirectional walking approach from the east elevator. The other door remains unbound. |
+| `SW03 3615` | SW03 floor 3 classroom. The door opposite vestibule 3604 has a reviewed bidirectional approach along corridor 3600. |
 | `SW01 2004` | SW01 floor 2 classroom. The source shows a door on corridor 2000. |
 | `SE12 101N` | SE12 floor 1 conference room, with bounds on the original portrait sheet. |
 | `S300` | Ambiguous across SE12 and SW01. Both candidates have source references. |
@@ -39,10 +39,10 @@ The twelve pages contain 4,641 original geometry labels, 16,659 additional OCR o
 | Building | Floors | Identifier candidates by floor 1 / 2 / 3 / 4 | Source-read labels | Drawn door symbols | Approved checkpoints |
 |---|---|---|---:|---:|---:|
 | SE12 | 1–4 | 45 / 74 / 72 / 75 | 125 | 6 | 10 |
-| SW03 | 1–4 | 48 / 118 / 76 / 81 | 125 | 5 | 10 |
+| SW03 | 1–4 | 48 / 118 / 76 / 81 | 125 | 5 | 12 |
 | SW01 | 1–4 | 249 / 235 / 206 / 109 | 127 | 5 | 0 |
 
-The approved network is an export of editor revision 23. It contains 20 points and 12 bidirectional passages. Five passages form the continuous SE12 floor 2 → outdoor → SW03 floor 2 corridor → elevator → SW03 floor 3 corridor → SE12 floor 3 journey. The latest SE12 floor 2–3 elevator report is F and is stored as floor evidence. The earlier fourth-floor building passage does not qualify for this revision. No distance has been measured for the five-step journey.
+The approved network is an export of editor revision 25. It contains 22 points and 14 bidirectional passages. Four corridors have original-page traces, including the east elevator approaches to rooms 2605 and 3615. Five passages form the continuous SE12 floor 2 → outdoor → SW03 floor 2 corridor → elevator → SW03 floor 3 corridor → SE12 floor 3 journey. The latest SE12 floor 2–3 elevator report is F and is stored as floor evidence. The earlier fourth-floor building passage does not qualify for this revision. No distance has been measured for the five-step journey.
 
 The SW01–SW03 questions on floors 2, 3 and 4 pair visible openings on the official plans for future review. The SW01 markers are near S290, S390 and S490 respectively. The SW03 markers are at the end of the office wing. These questions carry a supporting campus-map URL and hash. They appear in region context with `status: unreviewed` and have no graph edges. Complete room-to-room routing requires more reviewed doors, indoor corridor connections and a confirmed SW01 crossing.
 
@@ -50,7 +50,8 @@ The SW01–SW03 questions on floors 2, 3 and 4 pair visible openings on the offi
 
 1. Install Python with Pillow, Poppler's `pdftoppm`, Tesseract and its English data. The shipped JSON supports normal Node runtime use without Python. Rebuild the optical layer with `python3 scripts/prepare_pilot_labels.py`. The generator verifies the twelve original PDF hashes, renders at 300 and 400 dpi, reads multiple orientations, and transforms every accepted word box back to the original top-left page coordinates. A second RGB pass at 400 dpi captures strokes that rasterize differently in grayscale. Engine and renderer versions are stored alongside the results.
 2. Update `plan-annotations.json` from the official PDF page when adding a source-read label, a plan-use classification or a door symbol. The broad drawing rectangle separates marginal sheet text. A correction applies to one wrong reading at one page region and cites the transcribed printed value. Source hash changes require a new review. All 12 floors have source-read samples. The initial review used enlarged original PDF regions, including rotated details for SE12 floor 1.
-3. To update the approved network, run `node --import tsx scripts/export-pilot-network.ts /path/to/private/topology.json data/campus/spatial`. The exporter checks content-bound approvals, endpoint versions, source hashes and withdrawals. The published projection uses allowlisted data fields and omits raw review history, reviewer names, timestamps and free-text evidence notes. A source-document fingerprint and record review hashes support auditing against a private copy. Treat each export as a versioned snapshot and re-export after review changes.
-4. Run `npm run data:validate`, `npm run test:unit` and `npm run build`. Restart a running server after replacing the assets. These tests exercise retrieval, data integrity and mocked photo requests. Physical localization accuracy requires independent campus photos and ground truth.
+3. To update the approved network, run `node --import tsx scripts/export-pilot-network.ts /path/to/private/topology.json data/campus/spatial`. The exporter checks content-bound approvals, endpoint versions, source hashes and withdrawals. The published projection uses allowlisted data fields and omits raw review history, reviewer names, timestamps and free-text evidence notes. A source-document fingerprint and record review hashes support auditing against a private copy. Confirmed candidate bindings include the A/B node IDs and definition and presentation hashes. A fresh checkout imports these receipts to enable the same reviewed corridors and room doors. Treat each export as a versioned snapshot and re-export after review changes.
+4. For a drawable passage add its original-page bend positions, the candidate definition and source hashes to `corridor-traces.json`. Recheck the source drawing and update the corresponding SHA-256 sidecar. Room approaches carry the exact drawn door ID. The visitor planner checks the current answer, approved edge hash and endpoint positions at request time.
+5. Run `npm run data:validate`, `npm run test:unit` and `npm run build`. Restart a running server after replacing the assets. These tests exercise retrieval, data integrity and mocked photo requests. Physical localization accuracy requires independent campus photos and ground truth.
 
 All plan references, label positions and door annotations are derived from © British Columbia Institute of Technology. Original PDF files, hashes and use conditions are listed in the existing manifest. [BCIT floor plans](https://www.bcit.ca/facilities/campus-maps/floor-plans/) · [Source-data notes](data.md)
