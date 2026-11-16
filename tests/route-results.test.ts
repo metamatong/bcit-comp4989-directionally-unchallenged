@@ -16,6 +16,7 @@ import { TopologyStore } from '../server/topology';
 import { pilotEvidence } from '../server/pilot-evidence';
 import { labelReading, comparison, photoInput } from './photo-fixtures';
 import type { Provider } from '../server/provider';
+import { position } from './location-fixtures';
 
 vi.mock('../src/photo', () => ({ preparePhoto: vi.fn() }));
 
@@ -57,6 +58,7 @@ const provider: Provider = {
   },
 };
 let server: Server;
+const requestBodies: string[] = [];
 beforeAll(async () => {
   server = createApp({ provider, model: 'mock', liveAvailable: true, topologyStore: store }).listen(
     0,
@@ -65,9 +67,10 @@ beforeAll(async () => {
   await once(server, 'listening');
   const base = 'http://127.0.0.1:' + (server.address() as { port: number }).port;
   const realFetch = globalThis.fetch;
-  vi.stubGlobal('fetch', (path: string, options?: RequestInit) =>
-    realFetch(new URL(path, base), options),
-  );
+  vi.stubGlobal('fetch', (path: string, options?: RequestInit) => {
+    if (typeof options?.body === 'string') requestBodies.push(options.body);
+    return realFetch(new URL(path, base), options);
+  });
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
   if (!HTMLDialogElement.prototype.close)
     Object.defineProperty(HTMLDialogElement.prototype, 'close', {
@@ -94,90 +97,136 @@ afterAll(async () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-it('turns a photo and typed destination into the complete three-floor route after one start selection', async () => {
-  const host = document.createElement('div');
-  document.body.append(host);
-  const root = createRoot(host);
-  const wait = async (assertion: () => void) =>
-    vi.waitFor(
-      async () => {
+it.each([false, true])(
+  'turns a photo into the complete three-floor route with optional device evidence %s',
+  async (useDevice) => {
+    provider.calls = 0;
+    requestBodies.length = 0;
+    let deviceSuccess: PositionCallback = () => {};
+    const getCurrentPosition = vi.fn((success: PositionCallback) => success(position()));
+    const clearWatch = vi.fn();
+    const watchPosition = vi.fn((success: PositionCallback) => {
+      deviceSuccess = success;
+      return 42;
+    });
+    vi.stubGlobal('isSecureContext', true);
+    vi.stubGlobal('navigator', { geolocation: { getCurrentPosition, watchPosition, clearWatch } });
+    const host = document.createElement('div');
+    document.body.append(host);
+    const root = createRoot(host);
+    const wait = async (assertion: () => void) => {
+      let lastFailure: unknown;
+      // Keep network-driven React updates inside act during every polling interval.
+      for (let attempt = 0; attempt < 500; attempt++) {
         await act(async () => {
-          await new Promise((r) => setTimeout(r, 5));
+          await new Promise((resolve) => setTimeout(resolve, 20));
         });
-        assertion();
-      },
-      { timeout: 10_000, interval: 20 },
-    );
-  const click = (element: HTMLElement) => act(async () => element.click());
-  const button = (name: string) =>
-    [...host.querySelectorAll('button')].find((b) => b.textContent?.includes(name))!;
-  const setDestination = async (value: string) =>
-    act(async () => {
-      const field = host.querySelector<HTMLInputElement>('#trip-destination')!;
-      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(field, value);
-      field.dispatchEvent(new Event('input', { bubbles: true }));
-    });
-  try {
-    await act(async () => root.render(createElement(App)));
-    await wait(() => expect(host.querySelector('#trip-destination')).not.toBeNull());
-    await setDestination('SW03 2082');
-    const fileInput = host.querySelector<HTMLInputElement>(
-      'input[aria-label="Upload campus photo"]',
-    )!;
-    await act(async () => {
-      Object.defineProperty(fileInput, 'files', {
-        value: [new File(['fixture'], 'test.jpg', { type: 'image/jpeg' })],
+        try {
+          assertion();
+          return;
+        } catch (failure) {
+          lastFailure = failure;
+        }
+      }
+      throw lastFailure;
+    };
+    const click = (element: HTMLElement) => act(async () => element.click());
+    const button = (name: string) =>
+      [...host.querySelectorAll('button')].find((b) => b.textContent?.includes(name))!;
+    const setDestination = async (value: string) =>
+      act(async () => {
+        const field = host.querySelector<HTMLInputElement>('#trip-destination')!;
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(
+          field,
+          value,
+        );
+        field.dispatchEvent(new Event('input', { bubbles: true }));
       });
-      fileInput.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-    expect(host.querySelector('input[type=checkbox]')).toBeNull();
-    expect(provider.calls).toBe(0);
-    await click(button('Find my route'));
-    await wait(() => expect(button('Start at 302')).toBeDefined());
-    expect(button('Start at 302').textContent).toContain('302 · window-side corridor door');
-    expect(host.querySelector('.route-directions')).toBeNull();
-    expect(host.querySelector('.journey-evidence[open]')).toBeNull();
-    await click(button('Start at 302'));
-    await wait(() => expect(host.querySelector('.route-directions')).not.toBeNull());
-    const result = host.querySelector('.workspace > section')!;
-    expect(result.getAttribute('aria-label')).toBe('Your walking route');
-    for (const label of [
-      'Passage to SW03',
-      'Passage to SE12',
-      'East elevator at 3696',
-      'East elevator at 2696',
-    ])
-      expect(result.textContent).toContain(label);
-    expect(result.textContent).not.toMatch(/\p{Script=Hangul}/u);
-    expect([...result.querySelectorAll('.floor-directions h3')].map((h) => h.textContent)).toEqual([
-      'SE12 · Floor 3',
-      'SW03 · Floor 3',
-      'SW03 · Floor 2',
-    ]);
-    expect(result.querySelectorAll('[data-walking-line=true]')).toHaveLength(3);
-    expect(result.querySelectorAll('.floor-transfer')).toHaveLength(2);
-    expect(result.querySelector('.route-arrival')?.textContent).toContain('2082');
-    expect(host.querySelector('.journey-inputs[open], .journey-evidence[open]')).toBeNull();
-    expect(host.querySelector('img.evidence-photo')).toBeNull();
-    expect(provider.calls).toBe(2);
-    await click(button('One floor at a time'));
-    expect(result.querySelectorAll('.floor-directions')).toHaveLength(1);
-    await click(button('Next floor'));
-    expect(result.querySelector('.floor-directions h3')?.textContent).toBe('SW03 · Floor 3');
-    await click(button('Show all floors'));
-    expect(result.querySelectorAll('.floor-directions')).toHaveLength(3);
-    await click(host.querySelector<HTMLElement>('.journey-inputs > summary')!);
-    await setDestination('SW03 2458');
-    expect(host.querySelector('.route-directions')).toBeNull();
-    await click(button('Show directions to SW03 2458'));
-    await wait(() =>
-      expect(host.querySelector('.journey-panel [role=status]')?.textContent).toContain(
-        'no exact label',
-      ),
-    );
-    expect(provider.calls).toBe(2);
-  } finally {
-    await act(async () => root.unmount());
-    host.remove();
-  }
-}, 15_000);
+    try {
+      await act(async () => root.render(createElement(App)));
+      await wait(() => expect(host.querySelector('#trip-destination')).not.toBeNull());
+      await setDestination('SW03 2082');
+      const fileInput = host.querySelector<HTMLInputElement>(
+        'input[aria-label="Upload campus photo"]',
+      )!;
+      await act(async () => {
+        Object.defineProperty(fileInput, 'files', {
+          value: [new File(['fixture'], 'test.jpg', { type: 'image/jpeg' })],
+        });
+        fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      expect(host.querySelector<HTMLInputElement>('input[type=checkbox]')?.checked).toBe(false);
+      expect(getCurrentPosition).not.toHaveBeenCalled();
+      if (useDevice) await click(host.querySelector<HTMLInputElement>('input[type=checkbox]')!);
+      expect(getCurrentPosition).not.toHaveBeenCalled();
+      expect(provider.calls).toBe(0);
+      await click(button('Find my route'));
+      await wait(() => expect(button('Start at 302')).toBeDefined());
+      expect(getCurrentPosition).toHaveBeenCalledTimes(useDevice ? 1 : 0);
+      expect(
+        host.textContent?.includes('Device reading associated with this photo submission'),
+      ).toBe(useDevice);
+      expect(button('Start at 302').textContent).toContain('302 · window-side corridor door');
+      expect(host.querySelector('.route-directions')).toBeNull();
+      expect(host.querySelector('.journey-evidence[open]')).toBeNull();
+      await click(button('Start at 302'));
+      await wait(() => expect(host.querySelector('.route-directions')).not.toBeNull());
+      const result = host.querySelector('.workspace > section')!;
+      expect(result.getAttribute('aria-label')).toBe('Your walking route');
+      for (const label of [
+        'Passage to SW03',
+        'Passage to SE12',
+        'East elevator at 3696',
+        'East elevator at 2696',
+      ])
+        expect(result.textContent).toContain(label);
+      expect(result.textContent).not.toMatch(/\p{Script=Hangul}/u);
+      expect(
+        [...result.querySelectorAll('.floor-directions h3')].map((h) => h.textContent),
+      ).toEqual(['SE12 · Floor 3', 'SW03 · Floor 3', 'SW03 · Floor 2']);
+      expect(result.querySelectorAll('[data-walking-line=true]')).toHaveLength(3);
+      expect(result.querySelectorAll('.floor-transfer')).toHaveLength(2);
+      expect(result.querySelector('.route-arrival')?.textContent).toContain('2082');
+      expect(host.querySelector('.journey-inputs[open], .journey-evidence[open]')).toBeNull();
+      expect(host.querySelector('img.evidence-photo')).toBeNull();
+      expect(provider.calls).toBe(2);
+      await click(button('Show my position'));
+      expect(watchPosition).toHaveBeenCalledTimes(1);
+      await act(async () => deviceSuccess(position()));
+      expect(result.querySelectorAll('.device-position')).toHaveLength(1);
+      expect(getCurrentPosition).toHaveBeenCalledTimes(useDevice ? 1 : 0);
+      await click(button('One floor at a time'));
+      expect(result.querySelectorAll('.floor-directions')).toHaveLength(1);
+      await click(button('Next floor'));
+      expect(result.querySelector('.floor-directions h3')?.textContent).toBe('SW03 · Floor 3');
+      expect(result.querySelector('[aria-label="Walking device location"]')?.textContent).toContain(
+        'Tracking floor · SE12 · Floor 3',
+      );
+      expect(result.querySelector('.device-position')).toBeNull();
+      await click(button('I’m on this floor'));
+      expect(clearWatch).toHaveBeenCalledWith(42);
+      expect(result.querySelector('[aria-label="Walking device location"]')?.textContent).toContain(
+        'Position overlay unavailable for this floor',
+      );
+      await click(button('Show all floors'));
+      expect(result.querySelectorAll('.floor-directions')).toHaveLength(3);
+      await click(host.querySelector<HTMLElement>('.journey-inputs > summary')!);
+      await setDestination('SW03 2458');
+      expect(host.querySelector('.route-directions')).toBeNull();
+      await click(button('Show directions to SW03 2458'));
+      await wait(() =>
+        expect(host.querySelector('.journey-panel [role=status]')?.textContent).toContain(
+          'no exact label',
+        ),
+      );
+      expect(provider.calls).toBe(2);
+      expect(requestBodies.join('\n')).not.toMatch(
+        /"(?:latitude|longitude|receivedAt|deviceReading|locationCatalogue)"/,
+      );
+    } finally {
+      await act(async () => root.unmount());
+      host.remove();
+    }
+  },
+  15_000,
+);

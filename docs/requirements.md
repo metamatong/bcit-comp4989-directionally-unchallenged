@@ -11,6 +11,7 @@ The supplied original [brief](project-brief.txt) remains unchanged. The user's l
 | Free-tier provider and server-side key | `server/provider.ts`, `.env.example`, [provider record](provider.md) |
 | User confirmation and uncertainty | One unverified location estimate, observable evidence, source links and explicit confirmation |
 | Mobile photo/camera input | Local resizing, photo picker and native camera capture |
+| Device-assisted photo localization and walking | Explicit opt-in, historical photo reading, geographic comparison and foreground walking overlay. SE12 floor 3 alignment is approximate. Eleven floor calibrations remain unresolved. [Coverage and validation](device-location.md) |
 | Privacy and governance | Per-photo consent; transient media/session state; untrusted source evidence; no hidden reasoning logs |
 | Failure behavior | Setup, timeout, overload, quota, blocked and incomplete-response errors; no synthetic fallback |
 | Source plans behind the scenes | Wayfinding photo requests use only the 12 pilot plans. The UI shows relevant source images with results and directions. |

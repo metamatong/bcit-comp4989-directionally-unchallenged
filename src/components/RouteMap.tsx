@@ -3,6 +3,8 @@ import { useState } from 'react';
 import type { PlanBounds, VisualPlan } from '../types';
 import type { PagePoint } from '../wayfinding';
 import { planLabel } from '../topology';
+import type { DeviceOverlay } from '../location/types';
+import { DevicePosition } from './DevicePosition';
 
 export type MapMarker = { point: PagePoint; label: string; symbol: string; end?: boolean };
 export function RouteMap({
@@ -12,6 +14,7 @@ export function RouteMap({
   bounds,
   label,
   showPlanTitle = true,
+  device,
 }: {
   plan: VisualPlan;
   markers?: MapMarker[];
@@ -19,6 +22,7 @@ export function RouteMap({
   bounds?: PlanBounds;
   label: string;
   showPlanTitle?: boolean;
+  device?: DeviceOverlay | null;
 }) {
   const [whole, setWhole] = useState(false);
   const points = [
@@ -115,6 +119,7 @@ export function RouteMap({
               </g>
             );
           })}
+        {device && <DevicePosition overlay={device} width={width} height={height} />}
         {markers.map((m, i) => (
           <g key={i} transform={`translate(${m.point.x * width} ${m.point.y * height})`}>
             <title>{m.label}</title>

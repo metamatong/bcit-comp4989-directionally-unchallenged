@@ -8,6 +8,11 @@ import { pilotEvidence } from '../server/pilot-evidence';
 import { reviewedNetwork } from '../server/pilot-network';
 import { TopologyStore } from '../server/topology';
 import { validateCorridorTraces } from '../server/visitor-paths';
+import { locationCatalogue } from '../server/geolocation';
+const locationCoverage = locationCatalogue();
+console.log(
+  `Validated official geographic source and ${locationCoverage.floors.length} floor calibration records.`,
+);
 const manifest = readJson<{ sources: { file: string; sha256: string; campus: string }[] }>(
   'data/campus/manifest.json',
 );

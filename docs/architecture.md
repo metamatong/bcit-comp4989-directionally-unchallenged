@@ -20,7 +20,7 @@ The server exposes `pilotToolDeclarations` and `runPilotTool` for exact label re
 
 ## API and state
 
-- `GET /api/bootstrap`: coverage, visual plan metadata used to display results and provider readiness. The general source catalogue is not exposed. No fictional graph or default-mode setting.
+- `GET /api/bootstrap`: coverage, visual plan metadata, provider readiness and a validated device-location calibration catalogue. A source validation failure supplies `locationNotice` and leaves photo analysis available.
 - `POST /api/sessions`: empty object creates a live-analysis session. Provider readiness controls the setup notice, not a fallback mode.
 - `POST /api/sessions/:id/photo/evidence`: consented photo label reading; returns structured evidence in session state.
 - `POST /api/sessions/:id/photo`: exact retrieval and visual comparison using the evidence ID and identical media bundle.
@@ -42,6 +42,8 @@ Source PDFs, image rasters, text/geometry and reviewed topology are distinct lay
 No provider can create a route, confirm the user's position, turn raw drawing paths into verified campus connections, or execute instructions found in images/documents. Internal thinking is not requested or logged. Keys remain server-side; photos are never saved with source assets or in session logs.
 
 See [photo localization](photo-localization.md), [provider](provider.md), [data](data.md) and [verification](verification.md).
+
+Device acquisition and photo/device comparison run in `src/location/`. An optional one-shot reading belongs to the browser photo submission, independently of Gemini. Walking uses one explicitly started foreground watch. Historical photo evidence and walking freshness have separate lifecycles. `server/geolocation.ts` validates archived official footprints and calibration records for bootstrap. Photo/session/navigation requests omit device coordinates. [Device state and coverage](device-location.md)
 
 ## Internal topology authoring
 

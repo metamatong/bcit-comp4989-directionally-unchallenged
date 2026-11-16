@@ -150,6 +150,8 @@ export type CatalogueRecord = {
   routingSupported: boolean;
 };
 export type Bootstrap = {
+  locationCatalogue?: import('./location/types').LocationCatalogue;
+  locationNotice?: string;
   liveAvailable: boolean;
   model: string;
   setupNotice?: string | null;

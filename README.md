@@ -42,7 +42,9 @@ The visitor and review interfaces use English. Enter a building and room identif
 
 A connected example runs from the SW03 2605 door opposite vestibule 2604 to the SW03 3615 door opposite vestibule 3604 via the east elevator. SE12 floor 2 joins this network at its exterior door and floor 3 at its indoor passage. SW01 has searchable labels and zero reviewed connections in this revision. `SW01 2004` shows its source location and `SW03 2458` returns no exact match.
 
-The photo workflow is inline, with no location popup or extra launch button. A submission button and a short Gemini data-use notice appear after choosing a photo. The full view and four detail crops are prepared locally from the original image. Pressing the analysis button authorizes both photo requests for that submission. No photo is saved in application storage. Removing a photo, confirming a result or leaving the page discards the browser's prepared photo. Mobile capture uses the device's photo picker/camera; the app has no live camera preview or movement tracking. Google's free-tier data handling applies.
+The photo workflow is inline. The full view and four detail crops are prepared locally from the original image. Pressing the analysis button authorizes both Gemini requests for that submission. Its data-use notice appears beside the button. Removing a photo, confirming a result or leaving the page discards the browser's prepared photo. Mobile capture uses the device's photo picker/camera. Google's free-tier data handling applies.
+
+Optionally select **Use device location with this photo** while standing where it was taken. Analysis requests one timestamped reading, then compares its reported uncertainty with the photo hypothesis. Walking directions offer **Show my position**, **Stop tracking** and **Resume tracking**. Fresh readings have a two-second display window. Confirm **I’m on this floor** after a transfer, then resume tracking. Device coordinates stay in browser memory. Phone geolocation requires HTTPS and permission. All three pilot buildings have official footprint comparison. The approximate walking overlay currently covers **SE12 floor 3**. Eleven floor calibrations remain unresolved. Indoor accuracy and physical-phone behavior remain unverified. [Coverage and device-location details](docs/device-location.md)
 
 ## Internal connection editor
 
@@ -90,6 +92,7 @@ Photo reading/shortlisting and detailed comparison use 4,096/8,192-token allowan
 
 - [Supplied original brief](docs/project-brief.txt) and [current requirements coverage](docs/requirements.md)
 - [Photo localization and conversion](docs/photo-localization.md)
+- [Device location, calibration coverage and walking](docs/device-location.md)
 - [Architecture](docs/architecture.md), [source data](docs/data.md), [operations and privacy](docs/operations.md)
 - [Internal topology editor and manual connection review](docs/topology-editor.md)
 - [Provider configuration and diagnostics](docs/provider.md)
@@ -112,7 +115,8 @@ mvp/
 │   ├── App.tsx, main.tsx, styles.css, wayfinding.ts, wayfinding.css
 │   ├── TopologyEditor.tsx, topology.ts, topology.css
 │   ├── api.ts, photo.ts, photo-views.ts, types.ts
-│   └── components/  PhotoLocationInput, CampusLocationResults, JourneyPanel, RouteDirections, RouteMap, TopologyPlan, TopologyForms, ConnectionReview
+│   ├── location/  Device acquisition, page projection, photo comparison and foreground lifecycle
+│   └── components/  Photo/result inputs, walking directions, DevicePosition, PhotoDeviceLocation, WalkingDeviceLocation and topology review
 ├── server/
 │   ├── index.ts, app.ts, runtime.ts
 │   ├── provider.ts, photo-localization.ts, session.ts
@@ -121,6 +125,7 @@ mvp/
 │   ├── topology-candidates.ts, topology-provenance.ts, topology-import.ts, topology-english.ts
 │   ├── pilot-evidence.ts, pilot-network.ts, pilot-inquiries.ts
 │   ├── spatial-retrieval.ts, pilot-tools.ts
+│   ├── geolocation.ts              Source-bound calibration validation
 │   └── data.ts, visual-data.ts
 ├── data/campus/
 │   ├── floor-plans-source.html, manifest.json, coverage.json, catalogue.json
@@ -130,11 +135,13 @@ mvp/
 │   ├── connection-candidates.json  Unverified source-grounded questions; never route edges
 │   ├── raw/                       90 unmodified official PDFs
 │   ├── spatial/                   pilot-ocr, plan-annotations, reviewed-network, passage-inquiries, corridor-traces JSON and checksums
+│   ├── geolocation/               Archived official GIS footprints and twelve floor calibration records
 │   ├── text/                      Extracted text, boxes and provenance
 │   └── visual/                    index.json, png/, geometry/, atlas/
 ├── scripts/
 │   ├── prepare_maps.py, prepare_visual_maps.py, prepare_pilot_labels.py
 │   ├── export-pilot-network.ts, query-spatial.ts
+│   ├── prepare-geolocation.ts
 │   ├── validate-data.ts
 │   └── render_proposal.py
 ├── tests/
@@ -142,12 +149,14 @@ mvp/
 │   ├── provider.test.ts, provider-response.test.ts, spatial-retrieval.test.ts
 │   ├── photo-localization.test.ts, photo-doorways.test.ts, photo-api.test.ts, route-results.test.ts
 │   ├── photo.test.ts, photo-location-input.test.ts, room-labels.test.ts, photo-fixtures.ts
+│   ├── device-location.test.ts, browser-location.test.ts, device-location-lifecycle.test.ts, location-fixtures.ts
 │   ├── topology.test.ts, topology-api.test.ts, topology-editor.test.ts
 │   ├── topology-candidates.test.ts, topology-english.test.ts, wayfinding.test.ts, wayfinding-api.test.ts
 │   └── e2e/journey.spec.ts, photo.spec.ts
 ├── docs/
 │   ├── project-brief.txt, requirements.md, architecture.md, data.md
 │   ├── provider.md, operations.md, photo-localization.md, walkthrough.md
+│   ├── device-location.md
 │   ├── verification.md, proposal.md, topology-editor.md, spatial-retrieval.md
 │   └── screenshots/  Automated test artifacts; mocked results are labeled
 ├── output/pdf/proposal_groupnumber.pdf

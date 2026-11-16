@@ -14,6 +14,8 @@ The app uses the actual photo and detailed views in two separate API stages. Gem
 
 The local server must be restarted after backend edits. Frontend HMR does not reload Node. Existing converted source files work without regeneration.
 
+An optional device reading accompanies a photo submission when the visitor confirms they are standing at its location. The browser compares it after visual verification and retains its acquisition timestamp through slow inference. Every candidate and confirmation requirement remains available. Both API stages and Gemini prompts omit device coordinates. [Device evidence and walking controls](device-location.md)
+
 ## API stages and agent tools
 
 | Stage | Endpoint | Behavior |
