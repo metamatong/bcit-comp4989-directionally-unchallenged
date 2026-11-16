@@ -6,15 +6,20 @@ import type {
   VisualPlan,
 } from '../types';
 import { buildingLabel, planLabel } from '../topology';
+import type { DeviceReading, LocationCatalogue, DeviceOverlay } from '../location/types';
+import { comparePhotoLocation } from '../location/photo-comparison';
+import { DevicePosition } from './DevicePosition';
 
 export function PlanRegion({
   plan,
   candidate,
   labels = candidate?.sourceLabels ?? [],
+  device,
 }: {
   plan: VisualPlan;
   candidate?: CampusLocationCandidate | null;
   labels?: PlanLabelReference[];
+  device?: DeviceOverlay | null;
 }) {
   const vicinity = candidate?.doorwayVicinity;
   const box = candidate?.bounds;
@@ -28,6 +33,16 @@ export function PlanRegion({
         src={plan.overview.url}
         alt={`Official BCIT ${plan.building} floor ${plan.floor}, page ${plan.page}`}
       />
+      {device && (
+        <svg
+          className="photo-device-overlay"
+          viewBox={`0 0 ${plan.width} ${plan.height}`}
+          aria-label="Device reading associated with this photo"
+          role="img"
+        >
+          <DevicePosition overlay={device} width={plan.width} height={plan.height} />
+        </svg>
+      )}
       {box && (
         <div
           className={vicinity ? 'estimated-region corridor-vicinity' : 'estimated-region'}
@@ -76,6 +91,8 @@ export function CampusLocationResults({
   onConfirm,
   busy,
   evidenceOnly = false,
+  deviceReading,
+  locationCatalogue,
 }: {
   analysis: CampusPhotoAnalysis;
   plans: VisualPlan[];
@@ -83,6 +100,8 @@ export function CampusLocationResults({
   onConfirm: (id: string) => void;
   busy: boolean;
   evidenceOnly?: boolean;
+  deviceReading?: DeviceReading;
+  locationCatalogue?: LocationCatalogue;
 }) {
   const references = analysis.referenceLabels ?? [];
   return (
@@ -118,6 +137,10 @@ export function CampusLocationResults({
       {analysis.candidates.map((candidate) => {
         const plan = plans.find((plan) => plan.id === candidate.planId);
         if (!plan) return null;
+        const device =
+          deviceReading && locationCatalogue
+            ? comparePhotoLocation(candidate, plan, deviceReading, locationCatalogue)
+            : null;
         return (
           <article className="campus-candidate" key={candidate.id}>
             <div className="section-heading">
@@ -129,7 +152,13 @@ export function CampusLocationResults({
                 {candidate.doorwayVicinity ? 'Approximate vicinity' : 'Unverified estimate'}
               </span>
             </div>
-            <PlanRegion plan={plan} candidate={candidate} />
+            <PlanRegion plan={plan} candidate={candidate} device={device?.overlay} />
+            {device && (
+              <p className="helper">
+                {device.message} Blue shading shows reported device uncertainty. Drawing alignment
+                has separate uncertainty.
+              </p>
+            )}
             {!!candidate.sourceLabels?.length && (
               <p className="plan-label-legend">
                 {candidate.doorwayVicinity

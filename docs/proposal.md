@@ -20,7 +20,7 @@ The server-side adapter uses a configured Gemini model and can fall through to a
 
 ### 3. Core components and current scope
 
-The MVP includes photo upload/native capture, original-image detail crops, per-photo consent, separate reading/comparison requests, exact whole-label lookup, a source-linked region overlay and transient session state. Clearing analysis removes the current result. No live camera stream or automatic location tracking is used. No provider error can produce a substitute sample location.
+The MVP includes photo upload/native capture, original-image detail crops, per-photo consent, separate reading/comparison requests, exact whole-label lookup, a source-linked region overlay and transient session state. Optional device readings support geographic comparison and an explicitly started foreground walking overlay. SE12 floor 3 has approximate alignment. Indoor accuracy remains unverified. Clearing analysis removes the current result. [Device coverage](device-location.md)
 
 The source pipeline downloaded 89 Burnaby floor plans across 45 buildings and one campus map from official BCIT pages [1,2]. It records URLs, retrieval times, hashes, attribution, and page references. All 89 plans now have full PNGs, overviews, four detail crops, and geometry JSON. Eight overview sheets support visual shortlisting. The 566,620 extracted drawing primitives remain unclassified; they are not verified walls, doors, rooms or walking edges. All 5,463 extracted labels are searchable; the older 80-label preview is ignored. Whole identifiers such as 302 and 3021 are distinct. Original PDFs remain unmodified.
 

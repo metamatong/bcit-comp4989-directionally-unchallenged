@@ -12,13 +12,13 @@ Without provider configuration, users see setup guidance. Photo submission is di
 
 The browser accepts JPEG/PNG/WebP up to 8 MB and 50 million pixels, creates a full view and four overlapping original-image crops, each with at most a 1,600-pixel long edge and 450 KB JPEG bytes, without original metadata. The server limits photo bodies to 4 MB and aggregate decoded bytes across all five views to 2.5 MB. Two API stages send the same consented image bundle transiently to Google, first for reading labels and then for source-grounded location comparison; the application saves no media to disk, caches or session logs. Google free-tier handling is disclosed under its terms.
 
-Mobile photo capture uses the browser/device photo picker. DirectionallyUnchallenged does not open a live camera stream or track movement. Physical-device capture behavior remains unverified.
+Mobile photo capture uses the browser/device photo picker. Optional device location supports a photo-associated reading and a foreground walking overlay. Phone use requires HTTPS and permission. Physical-device capture and geolocation behavior remain unverified. [Controls and coverage](device-location.md)
 
 Upload and capture controls are shown inline under Find my location. A selected photo reveals the analysis button and its Gemini data-use notice. Remove photo, Cancel analysis, result confirmation or leaving the page releases the client photo; the coverage/privacy dialog does not clear it. When a destination is present, confirming a marked start opens the floor-by-floor route overview, with the photo evidence and trip inputs in collapsed sections below it. A newly selected photo clears the previous route.
 
 Routes exist only in the active browser view. Editing the destination or replacing the photo clears directions. Recheck current route reads current topology approvals and asks for the starting point again.
 
-First-stage evidence IDs expire after five minutes and are bound to a session and image/crop fingerprint. No media is stored between API stages. A failed comparison may retry with the accepted evidence until expiry. Session results expire after 30 minutes. Reload creates a new session. Clear analysis removes the current result. No accounts, saved positions, browser location history or automatic tracking exist. Obsolete mode preferences are removed from browser storage. API responses use `no-store` and reject cross-origin requests.
+First-stage evidence IDs expire after five minutes and are bound to a session and image/crop fingerprint. No media is stored between API stages. A failed comparison may retry with the accepted evidence until expiry. Session results expire after 30 minutes. Reload creates a new session. Clear analysis removes the current result. Device coordinates stay in browser memory and are omitted from server/provider requests, storage and logs. Walking tracking requires an explicit start and pauses when the page hides. Browser/device location services have their own handling. Obsolete mode preferences are removed from browser storage. API responses use `no-store` and reject cross-origin requests.
 
 ## Failures and recovery
 

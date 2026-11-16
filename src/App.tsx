@@ -25,8 +25,11 @@ import { JourneyPanel } from './components/JourneyPanel';
 import { buildingLabel } from './topology';
 import './wayfinding.css';
 import type { Bootstrap, Session } from './types';
+import { usePhotoDeviceLocation } from './location/use-device-location';
+import { PhotoDeviceOption, PhotoDeviceSummary } from './components/PhotoDeviceLocation';
 
 export default function App() {
+  const devicePhoto = usePhotoDeviceLocation();
   const [data, setData] = useState<Bootstrap>();
   const [session, setSession] = useState<Session>();
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -83,6 +86,7 @@ export default function App() {
     setReading(false);
   }
   function removePhoto() {
+    devicePhoto.clear();
     discardPhoto();
     setShowPhotoResults(false);
     setActiveDestination('');
@@ -121,6 +125,7 @@ export default function App() {
   }
   async function readPhoto(file?: File) {
     if (!file) return;
+    devicePhoto.clear();
     const generation = evidenceGate.current.next();
     photoAbort.current?.abort();
     setPreparedPhoto(null);
@@ -154,6 +159,7 @@ export default function App() {
       return;
     const generation = evidenceGate.current.next();
     const controller = new AbortController();
+    devicePhoto.capture();
     photoAbort.current = controller;
     busyRef.current = true;
     setBusy(true);
@@ -255,6 +261,7 @@ export default function App() {
   }
   async function confirmCampus(candidateId: string) {
     if (await send({ type: 'confirm-campus-region', candidateId })) {
+      devicePhoto.cancelPending();
       discardPhoto();
       return true;
     }
@@ -282,36 +289,62 @@ export default function App() {
   const photoReady = data.liveAvailable && data.photoLocalizationAvailable;
   const analysis = showPhotoResults ? session.campusAnalysis : null;
   const region = analysis ? session.campusLocation : null;
-  const routeCandidate = region ?? analysis?.candidates[0];
+  const routeCandidate =
+    region ?? (analysis?.candidates.length === 1 ? analysis.candidates[0] : undefined);
   const directionsMode = Boolean(analysis && activeDestination);
-  const photoInput = (
-    <PhotoLocationInput
-      destination={destination}
-      canUsePhotoResult={!!analysis?.candidates.length}
-      onDestinationChange={(value) => {
-        setDestination(value);
-        setActiveDestination('');
-      }}
-      photo={preparedPhoto}
-      ready={photoReady}
-      reading={reading}
-      busy={busy}
-      status={readStatus}
-      error={photoError}
-      onPhoto={(file) => void readPhoto(file)}
-      onAnalyze={() => void analyzePhoto()}
-      onDiscard={removePhoto}
+  const deviceSummary = (
+    <PhotoDeviceSummary
+      snapshot={devicePhoto.snapshot}
+      status={devicePhoto.status}
+      onRetry={devicePhoto.capture}
+      busy={busy || !devicePhoto.enabled}
     />
   );
+  const photoInput = (
+    <>
+      <PhotoLocationInput
+        destination={destination}
+        canUsePhotoResult={!!analysis?.candidates.length}
+        onDestinationChange={(value) => {
+          setDestination(value);
+          setActiveDestination('');
+        }}
+        photo={preparedPhoto}
+        ready={photoReady}
+        reading={reading}
+        busy={busy}
+        status={readStatus}
+        error={photoError}
+        onPhoto={(file) => void readPhoto(file)}
+        onAnalyze={() => void analyzePhoto()}
+        onDiscard={removePhoto}
+        locationControl={
+          <PhotoDeviceOption
+            enabled={devicePhoto.enabled}
+            onChange={devicePhoto.setEnabled}
+            disabled={busy || reading || !data.locationCatalogue}
+          />
+        }
+      />
+      {!analysis && deviceSummary}
+      {!analysis && data.locationNotice && <p role="status">{data.locationNotice}</p>}
+    </>
+  );
   const photoResults = analysis && (
-    <CampusLocationResults
-      analysis={analysis}
-      plans={plans}
-      selectedId={region?.id}
-      onConfirm={(id) => void confirmCampus(id)}
-      busy={busy}
-      evidenceOnly={directionsMode && !!routeCandidate}
-    />
+    <>
+      {deviceSummary}
+      {data.locationNotice && <p role="status">{data.locationNotice}</p>}
+      <CampusLocationResults
+        analysis={analysis}
+        plans={plans}
+        selectedId={region?.id}
+        onConfirm={(id) => void confirmCampus(id)}
+        busy={busy}
+        evidenceOnly={directionsMode && !!routeCandidate}
+        deviceReading={devicePhoto.snapshot?.reading}
+        locationCatalogue={data.locationCatalogue}
+      />
+    </>
   );
   const updateDestination = analysis &&
     destination.trim() &&
@@ -402,6 +435,7 @@ export default function App() {
                   confirmed={region?.id === routeCandidate.id}
                   destination={activeDestination}
                   plans={data.visualPlans}
+                  locationCatalogue={data.locationCatalogue}
                   busy={busy}
                   onConfirm={confirmCampus}
                 />
@@ -519,9 +553,10 @@ export default function App() {
               <div className="about-section">
                 <h3>Your data stays transient</h3>
                 <p>
-                  Only the explicitly submitted photo goes to Google. No accounts or saved media.
-                  Session results expire after 30 minutes; reloading starts a new session. Clear
-                  analysis removes the current result. Google’s free-tier data handling applies.
+                  Explicitly submitted photos go to Google Gemini. Optional device readings stay in
+                  this browser tab. Your browser or device may use its own location service. Session
+                  results expire after 30 minutes; reloading starts a new session. Clear analysis
+                  removes the current result. Google’s free-tier data handling applies.
                 </p>
               </div>
             </>

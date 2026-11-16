@@ -6,6 +6,7 @@ import type { MapStop, NavigationResult, PlaceChoice, StartingPoints } from '../
 import { planLabel } from '../topology';
 import { RouteMap } from './RouteMap';
 import { RouteDirections } from './RouteDirections';
+import type { LocationCatalogue } from '../location/types';
 
 function choiceMap(place: PlaceChoice, plans: VisualPlan[], symbol: string) {
   const plan = plans.find((p) => p.id === place.planId);
@@ -77,6 +78,7 @@ export function JourneyPanel({
   plans,
   busy,
   onConfirm,
+  locationCatalogue,
 }: {
   sessionId: string;
   revision: number;
@@ -86,6 +88,7 @@ export function JourneyPanel({
   plans: VisualPlan[];
   busy: boolean;
   onConfirm: (candidateId: string) => Promise<boolean>;
+  locationCatalogue?: LocationCatalogue;
 }) {
   const [selection, setSelection] = useState<{
     originId?: string;
@@ -166,7 +169,12 @@ export function JourneyPanel({
   if (result.status === 'route')
     return (
       <section className="journey-panel" aria-label="Your walking route">
-        <RouteDirections route={result} plans={plans} onRecheck={recheck} />
+        <RouteDirections
+          route={result}
+          plans={plans}
+          onRecheck={recheck}
+          locationCatalogue={locationCatalogue}
+        />
       </section>
     );
   const selected =

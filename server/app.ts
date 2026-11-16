@@ -6,6 +6,8 @@ import { newSession } from './session';
 import { ProviderError, type Provider } from './provider';
 import type { Session } from '../src/types';
 import { visualPlans } from './visual-data';
+import { locationCatalogue } from './geolocation';
+import type { LocationCatalogue } from '../src/location/types';
 import { analyzeCampusPhoto, confirmCampusRegion } from './photo-localization';
 import { readPhotoEvidence, PhotoEvidenceError, type PhotoEvidenceRecord } from './photo-evidence';
 import { photoEvidenceRequestSchema, photoRequestSchema, releasePhotoBytes } from './photo-media';
@@ -31,6 +33,14 @@ export function createApp(options: {
   topologyStore?: TopologyStore;
 }) {
   const app = express();
+  let locationData: LocationCatalogue | undefined;
+  let locationNotice: string | undefined;
+  try {
+    locationData = locationCatalogue();
+  } catch {
+    locationNotice =
+      'Device-location source validation failed. Photo analysis remains available. Restore the location source data and restart the server.';
+  }
   const topologyStore = options.topologyStore ?? new TopologyStore();
   const sessions = new Map<string, Session>(),
     busy = new Set<string>();
@@ -89,6 +99,8 @@ export function createApp(options: {
       model: options.model,
       setupNotice: options.liveAvailable ? null : (options.setupNotice ?? null),
       visualPlans,
+      locationCatalogue: locationData,
+      locationNotice,
       photoLocalizationAvailable: visualPlans.length > 0,
     }),
   );

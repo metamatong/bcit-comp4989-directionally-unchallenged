@@ -4,6 +4,10 @@ import { planLabel } from '../topology';
 import type { VisualPlan } from '../types';
 import type { MapStop, NavigationResult, WalkingStep } from '../wayfinding';
 import { RouteMap, type MapMarker } from './RouteMap';
+import type { DeviceOverlay, LocationCatalogue } from '../location/types';
+import { deviceOverlay, overlapsFootprint } from '../location/geometry';
+import { useWalkingLocation } from '../location/use-device-location';
+import { WalkingDeviceLocation } from './WalkingDeviceLocation';
 
 type FoundRoute = Extract<NavigationResult, { status: 'route' }>;
 type FloorVisit = { start: MapStop; end: MapStop; walks: WalkingStep[]; transfer?: WalkingStep };
@@ -31,11 +35,17 @@ function FloorDirections({
   plan,
   first,
   last,
+  device,
+  active,
+  onConfirmFloor,
 }: {
   visit: FloorVisit;
   plan: VisualPlan;
   first: boolean;
   last: boolean;
+  device?: DeviceOverlay | null;
+  active: boolean;
+  onConfirmFloor: () => void;
 }) {
   const markers: MapMarker[] = [];
   function mark(stop: MapStop, symbol: string, caption: string, end = false) {
@@ -60,6 +70,11 @@ function FloorDirections({
   return (
     <article className="floor-directions" aria-label={heading}>
       <h3>{heading}</h3>
+      {!active && (
+        <button type="button" className="secondary" onClick={onConfirmFloor}>
+          I’m on this floor · {heading}
+        </button>
+      )}
       {visit.walks.length > 0 && (
         <div className="floor-endpoints">
           {visit.start.label}
@@ -71,6 +86,7 @@ function FloorDirections({
         paths={visit.walks.map((step) => step.path)}
         markers={markers}
         showPlanTitle={false}
+        device={device}
         label={`${heading}, ${visit.walks.length ? 'walking directions from ' + visit.start.label + ' to ' + visit.end.label : visit.end.label}`}
       />
       <div className="pin-legend">
@@ -107,13 +123,17 @@ export function RouteDirections({
   route,
   plans,
   onRecheck,
+  locationCatalogue,
 }: {
   route: FoundRoute;
   plans: VisualPlan[];
   onRecheck: () => void;
+  locationCatalogue?: LocationCatalogue;
 }) {
   // null shows the whole journey. A floor changes only when the visitor chooses one.
   const [floor, setFloor] = useState<number | null>(null);
+  const [activeVisit, setActiveVisit] = useState(0);
+  const tracking = useWalkingLocation();
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true });
@@ -122,6 +142,19 @@ export function RouteDirections({
   const visits = floorItinerary(route);
   const planById = new Map(plans.map((p) => [p.id, p]));
   const destinationPlan = planById.get(route.destination.planId)!;
+  const activePlan = planById.get(visits[activeVisit].start.planId)!;
+  const calibration = locationCatalogue?.floors.find((f) => f.planId === activePlan.id);
+  const building = locationCatalogue?.buildings.find((b) => b.building === activePlan.building);
+  const outside = !!(
+    tracking.fresh &&
+    tracking.reading &&
+    building &&
+    !overlapsFootprint(tracking.reading, building.rings)
+  );
+  const overlay =
+    tracking.fresh && tracking.reading
+      ? deviceOverlay(tracking.reading, activePlan, calibration)
+      : null;
   return (
     <div className="route-directions">
       <div className="way-heading">
@@ -130,6 +163,16 @@ export function RouteDirections({
           Walking directions
         </h2>
       </div>
+      <p className="helper">
+        Last confirmed route start · {route.origin.label} ·{' '}
+        {planLabel(planById.get(route.origin.planId)!)}
+      </p>
+      <WalkingDeviceLocation
+        tracking={tracking}
+        floorLabel={planLabel(activePlan)}
+        calibration={calibration}
+        outside={outside}
+      />
       <div className="trip-ends">
         <span>
           {planLabel(planById.get(route.origin.planId)!)} · {route.origin.label}
@@ -156,6 +199,12 @@ export function RouteDirections({
                   plan={planById.get(visit.start.planId)!}
                   first={index === 0}
                   last={index === visits.length - 1}
+                  active={index === activeVisit}
+                  device={index === activeVisit ? overlay : null}
+                  onConfirmFloor={() => {
+                    tracking.stop();
+                    setActiveVisit(index);
+                  }}
                 />
               </li>
             ),

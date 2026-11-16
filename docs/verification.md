@@ -1,5 +1,9 @@
 # Verification record
 
+## Optional device location · November 16, 2026
+
+The device-location change passed 259 unit/API tests, production build/type checking and source validation. New checks cover photo association, coordinate privacy, walking lifecycle, floor confirmation, source hashes and projection geometry. Provider and device inputs are mocked. Browser/screenshot checks were skipped as requested. Physical-phone behavior and indoor accuracy remain unverified. SE12 floor 3 has an approximate overlay. Eleven floor calibrations remain unresolved. [Coverage and evaluation](device-location.md)
+
 ## English checkpoint labels and existing reviews
 
 Revision 29 uses English labels for all 24 approved checkpoints and 16 passages. A migrated journal produced the five-step route from SE12 room 302 to SW03 room 2605. The visitor form test also checks the start button, transfer points and floor directions for the 302-to-2082 route using mocked photo inference. Migration tests check one-way travel, withdrawn or stale approvals, original review fingerprints, all six corridor traces and four room-door bindings. The local journal retained its 19 marked-point answers and six floor-service observations through the upgrade. No physical walk or live Gemini inference was part of these checks.
