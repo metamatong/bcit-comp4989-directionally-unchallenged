@@ -143,14 +143,15 @@ test('submits a prepared photo in one action and confirms the plan result (mocke
 }, info) => {
   const { uploads, evidenceUploads, requests } = await setup(page);
   await choosePhoto(page);
-  const analyze = page.getByRole('button', {
+  const form = page.getByRole('form', { name: 'Photo analysis' });
+  const analyze = form.getByRole('button', {
     name: 'Analyze photo against BCIT plans',
     exact: true,
   });
   await expect(analyze).toBeEnabled();
-  await expect(
-    page.getByRole('form', { name: 'Photo analysis' }).getByRole('checkbox'),
-  ).toHaveCount(0);
+  const checkbox = form.getByRole('checkbox');
+  await expect(checkbox).toHaveAccessibleName('Use device location with this photo');
+  await expect(checkbox).not.toBeChecked();
   expect(evidenceUploads).toHaveLength(0);
   expect(uploads).toHaveLength(0);
   await analyze.click();
