@@ -1,29 +1,19 @@
 import express from 'express';
 import { randomUUID } from 'node:crypto';
-import { z } from 'zod';
 import { coverage, root } from './data';
-import { newSession } from './session';
-import { ProviderError, type Provider } from './provider';
-import type { Session } from '../src/types';
+import type { Provider } from './provider';
 import { visualPlans } from './visual-data';
 import { locationCatalogue } from './geolocation';
 import type { LocationCatalogue } from '../src/location/types';
-import { analyzeCampusPhoto, confirmCampusRegion } from './photo-localization';
-import { readPhotoEvidence, PhotoEvidenceError, type PhotoEvidenceRecord } from './photo-evidence';
-import { photoEvidenceRequestSchema, photoRequestSchema, releasePhotoBytes } from './photo-media';
 import { createTopologyRouter, protectTopologyFiles, requireLocalTopology } from './topology-api';
-import { TopologyError, TopologyStore } from './topology';
+import { TopologyStore } from './topology';
 import {
-  navigationSchema,
-  planVisitorJourney,
-  startingPoints,
-  startingPointsSchema,
-} from './wayfinding';
-
-export const actionSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('confirm-campus-region'), candidateId: z.string().uuid() }).strict(),
-  z.object({ type: z.literal('reset') }).strict(),
-]);
+  MemoryVisitorSessions,
+  SessionStorageError,
+  type VisitorSessions,
+} from './visitor-sessions';
+import { visitorRouter } from './visitor-api';
+export { actionSchema } from './visitor-api';
 
 export function createApp(options: {
   provider: Provider;
@@ -31,6 +21,8 @@ export function createApp(options: {
   model: string;
   setupNotice?: string | null;
   topologyStore?: TopologyStore;
+  sessions?: VisitorSessions;
+  hosted?: boolean;
 }) {
   const app = express();
   let locationData: LocationCatalogue | undefined;
@@ -42,23 +34,9 @@ export function createApp(options: {
       'Device-location source validation failed. Photo analysis remains available. Restore the location source data and restart the server.';
   }
   const topologyStore = options.topologyStore ?? new TopologyStore();
-  const sessions = new Map<string, Session>(),
-    busy = new Set<string>();
-  const photoEvidence = new Map<string, PhotoEvidenceRecord>();
   const requestCounts = new Map<string, { count: number; start: number }>();
   const cleanup = setInterval(() => {
     const now = Date.now();
-    for (const [id, session] of sessions)
-      if (!busy.has(id) && now - session.lastTouched > 1800000) {
-        sessions.delete(id);
-        photoEvidence.delete(id);
-      }
-    for (const [id, record] of photoEvidence)
-      if (!busy.has(id) && Date.parse(record.evidence.expiresAt) <= now) {
-        photoEvidence.delete(id);
-        const session = sessions.get(id);
-        if (session?.photoEvidence?.id === record.evidence.id) session.photoEvidence = null;
-      }
     for (const [ip, counter] of requestCounts)
       if (now - counter.start > 60000) requestCounts.delete(ip);
   }, 60000);
@@ -90,8 +68,16 @@ export function createApp(options: {
   });
   app.use('/api/sessions/:id/photo', express.json({ limit: '4mb' }));
   app.use(express.json({ limit: '12kb' }));
-  app.use('/api/internal/topology', createTopologyRouter(topologyStore));
-  app.use('/internal/topology', requireLocalTopology);
+  if (options.hosted) {
+    app.use(['/api/internal/topology', '/internal/topology'], (_req, res) => {
+      res
+        .status(403)
+        .json({ error: 'The topology editor is available only on the local workstation.' });
+    });
+  } else {
+    app.use('/api/internal/topology', createTopologyRouter(topologyStore));
+    app.use('/internal/topology', requireLocalTopology);
+  }
   app.get('/api/bootstrap', (_req, res) =>
     res.json({
       coverage,
@@ -104,289 +90,10 @@ export function createApp(options: {
       photoLocalizationAvailable: visualPlans.length > 0,
     }),
   );
-  app.post('/api/sessions', (req, res) => {
-    if (
-      !z
-        .object({})
-        .strict()
-        .safeParse(req.body ?? {}).success
-    ) {
-      res.status(400).json({ error: 'Start a session without mode or location overrides.' });
-      return;
-    }
-    for (const [id, session] of sessions)
-      if (Date.now() - session.lastTouched > 1800000) sessions.delete(id);
-    if (sessions.size >= 200) {
-      res.status(503).json({ error: 'Session capacity reached. Try again later.' });
-      return;
-    }
-    const session = newSession(options.liveAvailable);
-    sessions.set(session.id, session);
-    res.status(201).json(session);
-  });
-  app.get('/api/sessions/:id', (req, res) => {
-    const session = sessions.get(req.params.id);
-    if (!session || Date.now() - session.lastTouched > 1800000) {
-      sessions.delete(req.params.id);
-      res.status(404).json({ error: 'Session expired. Reload to start a new private session.' });
-      return;
-    }
-    res.json(session);
-  });
-  async function handlePhotoStage(
-    req: express.Request<{ id: string }>,
-    res: express.Response,
-    stage: 'evidence' | 'location',
-  ) {
-    const session = sessions.get(req.params.id);
-    if (!session || Date.now() - session.lastTouched > 1800000) {
-      res.status(404).json({ error: 'Session expired. Reload to start again.' });
-      return;
-    }
-    const parsed = (
-      stage === 'evidence' ? photoEvidenceRequestSchema : photoRequestSchema
-    ).safeParse(req.body);
-    if (!parsed.success) {
-      res.status(400).json({
-        error:
-          stage === 'evidence'
-            ? 'Choose a valid photo with its detail crops and explicitly agree to send it to Gemini.'
-            : 'Read the photo labels first, then submit the same photo and detail crops with its evidence ID.',
-      });
-      return;
-    }
-    if (!options.liveAvailable) {
-      res.status(503).json({
-        error:
-          options.setupNotice ??
-          'Gemini is not configured. Add the server API key and free-tier confirmation, then restart.',
-        providerError: { code: 'configuration', retryable: false },
-        session,
-      });
-      return;
-    }
-    const input = parsed.data;
-    const actionKey = `photo:${stage}:${input.requestId}`;
-    if (session.appliedActions.includes(actionKey)) {
-      res.json(session);
-      return;
-    }
-    if (busy.has(session.id) || input.revision !== session.revision) {
-      res.status(409).json({
-        error: 'The session changed. Your view has been refreshed; try the photo again.',
-        session,
-      });
-      return;
-    }
-    busy.add(session.id);
-    const controller = new AbortController();
-    res.on('close', () => {
-      if (!res.writableEnded) controller.abort();
-    });
-    try {
-      if (stage === 'evidence') {
-        session.campusAnalysis = null;
-        session.campusLocation = null;
-        session.photoEvidence = null;
-        photoEvidence.delete(session.id);
-        const record = await readPhotoEvidence(session, input, options.provider, controller.signal);
-        photoEvidence.set(session.id, record);
-      } else if ('evidenceId' in input && typeof input.evidenceId === 'string') {
-        await analyzeCampusPhoto(
-          session,
-          { ...input, evidenceId: input.evidenceId },
-          options.provider,
-          photoEvidence.get(session.id),
-          controller.signal,
-        );
-        photoEvidence.delete(session.id);
-      } else {
-        throw new PhotoEvidenceError('Read this photo’s labels before comparing plans.');
-      }
-      session.appliedActions.push(actionKey);
-      session.appliedActions = session.appliedActions.slice(-80);
-      session.revision++;
-      session.lastTouched = Date.now();
-      if (!res.destroyed) res.json(session);
-    } catch (error) {
-      session.revision++;
-      session.lastTouched = Date.now();
-      if (!res.destroyed) {
-        if (error instanceof ProviderError && error.retryAfterSeconds)
-          res.set('Retry-After', String(error.retryAfterSeconds));
-        res
-          .status(
-            error instanceof ProviderError || error instanceof PhotoEvidenceError
-              ? error.httpStatus
-              : 400,
-          )
-          .json({
-            error: error instanceof Error ? error.message : 'The photo could not be compared.',
-            ...(error instanceof ProviderError
-              ? {
-                  providerError: {
-                    code: error.code,
-                    retryable: error.retryable,
-                    retryAfterSeconds: error.retryAfterSeconds,
-                  },
-                }
-              : {}),
-            session,
-          });
-      }
-    } finally {
-      // No media is copied into session state, disk, or logs; release request references.
-      releasePhotoBytes(input);
-      releasePhotoBytes(req.body);
-      busy.delete(session.id);
-    }
-  }
-  app.post('/api/sessions/:id/photo/evidence', (req, res) =>
-    handlePhotoStage(req, res, 'evidence'),
+  app.use(
+    '/api/sessions',
+    visitorRouter(options, options.sessions ?? new MemoryVisitorSessions(), topologyStore),
   );
-  app.post('/api/sessions/:id/photo', (req, res) => handlePhotoStage(req, res, 'location'));
-  app.post('/api/sessions/:id/navigation/origins', (req, res) => {
-    const session = sessions.get(req.params.id);
-    if (!session || Date.now() - session.lastTouched > 1800000) {
-      res.status(404).json({ error: 'Session expired. Reload and confirm a new photo.' });
-      return;
-    }
-    const input = startingPointsSchema.safeParse(req.body);
-    if (!input.success) {
-      res.status(400).json({ error: 'Choose a starting area from the current photo.' });
-      return;
-    }
-    const candidate = session.campusAnalysis?.candidates.find(
-      (c) => c.id === input.data.candidateId,
-    );
-    if (!candidate || busy.has(session.id) || input.data.revision !== session.revision) {
-      res.status(409).json({
-        error: 'The photo session changed. Refresh before choosing a starting point.',
-        session,
-      });
-      return;
-    }
-    try {
-      const points = startingPoints(candidate, topologyStore);
-      session.lastTouched = Date.now();
-      res.json(points);
-    } catch (error) {
-      res.status(error instanceof TopologyError ? error.httpStatus : 503).json({
-        error:
-          error instanceof TopologyError
-            ? error.message
-            : 'The walking map is unavailable. Try again after its source data is restored.',
-      });
-    }
-  });
-  app.post('/api/sessions/:id/navigation', (req, res) => {
-    const session = sessions.get(req.params.id);
-    if (!session || Date.now() - session.lastTouched > 1800000) {
-      res.status(404).json({ error: 'Session expired. Reload and confirm a new photo.' });
-      return;
-    }
-    const input = navigationSchema.safeParse(req.body);
-    if (!input.success) {
-      res.status(400).json({
-        error: 'Enter a destination and confirm the marked starting point from the current map.',
-      });
-      return;
-    }
-    if (
-      busy.has(session.id) ||
-      input.data.revision !== session.revision ||
-      session.campusLocation?.id !== input.data.candidateId ||
-      !session.campusAnalysis?.candidates.some((c) => c.id === input.data.candidateId)
-    ) {
-      res
-        .status(409)
-        .json({ error: 'Confirm the current photo region before requesting directions.', session });
-      return;
-    }
-    try {
-      const result = planVisitorJourney(session.campusLocation, input.data, topologyStore);
-      session.lastTouched = Date.now();
-      res.json(result);
-    } catch (error) {
-      res.status(error instanceof TopologyError ? error.httpStatus : 503).json({
-        error:
-          error instanceof TopologyError
-            ? error.message
-            : 'The walking map is unavailable. Try again after its source data is restored.',
-      });
-    }
-  });
-  app.post('/api/sessions/:id/actions', async (req, res) => {
-    const session = sessions.get(req.params.id);
-    if (!session || Date.now() - session.lastTouched > 1800000) {
-      sessions.delete(req.params.id);
-      res.status(404).json({ error: 'Session expired. Reload to start again.' });
-      return;
-    }
-    const envelope = z
-      .object({
-        requestId: z.string().uuid(),
-        revision: z.number().int().min(0),
-        action: actionSchema,
-      })
-      .strict()
-      .safeParse(req.body);
-    if (!envelope.success) {
-      res.status(400).json({ error: 'Invalid action. Check the fields and try again.' });
-      return;
-    }
-    const { requestId, revision, action } = envelope.data;
-    if (session.appliedActions.includes(requestId)) {
-      res.json(session);
-      return;
-    }
-    if (busy.has(session.id) || revision !== session.revision) {
-      res.status(409).json({
-        error: 'The session changed. Your view has been refreshed; try the action again.',
-        session,
-      });
-      return;
-    }
-    busy.add(session.id);
-    try {
-      if (action.type === 'confirm-campus-region') {
-        confirmCampusRegion(session, action.candidateId);
-      } else if (action.type === 'reset') {
-        photoEvidence.delete(session.id);
-        Object.assign(session, newSession(options.liveAvailable), {
-          id: session.id,
-          revision: session.revision,
-          appliedActions: session.appliedActions,
-        });
-      }
-      session.appliedActions.push(requestId);
-      session.appliedActions = session.appliedActions.slice(-80);
-      session.revision++;
-      session.lastTouched = Date.now();
-      res.json(session);
-    } catch (error) {
-      session.revision++;
-      session.lastTouched = Date.now();
-      if (error instanceof ProviderError && error.retryAfterSeconds) {
-        res.set('Retry-After', String(error.retryAfterSeconds));
-      }
-      res.status(error instanceof ProviderError ? error.httpStatus : 400).json({
-        error: error instanceof Error ? error.message : 'Action could not be completed.',
-        ...(error instanceof ProviderError
-          ? {
-              providerError: {
-                code: error.code,
-                retryable: error.retryable,
-                retryAfterSeconds: error.retryAfterSeconds,
-              },
-            }
-          : {}),
-        session,
-      });
-    } finally {
-      busy.delete(session.id);
-    }
-  });
   // Uploaded photos are transient request bodies. Only public source-derived assets are served.
   app.use(
     '/data/campus/visual',
@@ -403,11 +110,19 @@ export function createApp(options: {
     }),
   );
   app.get('/api/health', (_req, res) =>
-    res.json({ ok: true, mode: 'local-prototype', requestId: randomUUID() }),
+    res.json({
+      ok: true,
+      mode: options.hosted ? 'hosted-prototype' : 'local-prototype',
+      requestId: randomUUID(),
+    }),
   );
   app.use('/api', (_req, res) => res.status(404).json({ error: 'Unknown API endpoint.' }));
   app.use(
     (error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+      if (error instanceof SessionStorageError) {
+        res.status(503).json({ error: error.message });
+        return;
+      }
       const tooLarge = (error as { type?: string })?.type === 'entity.too.large';
       res.status(tooLarge ? 413 : 400).json({
         error: tooLarge

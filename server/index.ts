@@ -2,32 +2,12 @@ import { existsSync } from 'node:fs';
 import { createServer as createHttpServer } from 'node:http';
 import express from 'express';
 import react from '@vitejs/plugin-react';
-import {
-  GeminiProvider,
-  defaultGeminiModel,
-  liveAiFallbackModels,
-  liveAiSetupIssue,
-} from './provider';
-import { createApp } from './app';
+import { configuredApplication } from './configured-app';
 import { root } from './data';
 import { listenServer } from './runtime';
 if (existsSync(`${root}/.env`)) process.loadEnvFile(`${root}/.env`);
-const bounded = (value: string | undefined, fallback: number, max: number) =>
-  Math.max(1, Math.min(max, Number(value) || fallback));
-const model = process.env.GEMINI_MODEL ?? defaultGeminiModel;
-const fallbackModels = liveAiFallbackModels(process.env);
-const setupNotice = liveAiSetupIssue(process.env);
+const { app, setupNotice } = configuredApplication(process.env);
 const liveAvailable = setupNotice === null;
-const provider = new GeminiProvider({
-  apiKey: liveAvailable ? process.env.GEMINI_API_KEY! : '',
-  model,
-  fallbackModels,
-  requestsPerMinute: bounded(process.env.AI_REQUESTS_PER_MINUTE, 6, 20),
-  requestsPerDay: bounded(process.env.AI_REQUESTS_PER_DAY, 60, 1000),
-  timeoutMs: bounded(process.env.AI_TIMEOUT_MS, 15000, 20000),
-  onModelFailure: (event) => console.warn('Gemini request failed', JSON.stringify(event)),
-});
-const app = createApp({ provider, liveAvailable, model, setupNotice });
 const httpServer = createHttpServer(app);
 let closeDevelopmentServer: (() => Promise<void>) | undefined;
 if (process.env.NODE_ENV === 'production') {

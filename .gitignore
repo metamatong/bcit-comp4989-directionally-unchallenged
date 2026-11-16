@@ -12,3 +12,4 @@ __pycache__/
 data/campus/topology.json.lock
 data/campus/topology.json
 data/campus/topology.json.*.tmp
+.vercel

@@ -554,9 +554,10 @@ export default function App() {
                 <h3>Your data stays transient</h3>
                 <p>
                   Explicitly submitted photos go to Google Gemini. Optional device readings stay in
-                  this browser tab. Your browser or device may use its own location service. Session
-                  results expire after 30 minutes; reloading starts a new session. Clear analysis
-                  removes the current result. Google’s free-tier data handling applies.
+                  this browser tab. Your browser or device may use its own location service. Hosted
+                  session results are encrypted and expire after 30 minutes; reloading starts a new
+                  session. Clear analysis removes the current result. Google’s free-tier data
+                  handling applies.
                 </p>
               </div>
             </>

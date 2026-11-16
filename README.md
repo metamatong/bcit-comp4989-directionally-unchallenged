@@ -31,6 +31,10 @@ Open [DirectionallyUnchallenged locally](http://127.0.0.1:3000). Configure `GEMI
 
 The Node server does not restart automatically when files change. Restart it manually after backend or environment changes: Ctrl+C, then `npm run dev`. Frontend edits can still refresh through Vite HMR on the same port. Do not launch another instance on port 3000. Without valid provider configuration, photo analysis is disabled and the app displays setup guidance.
 
+## Vercel deployment
+
+The Git-connected Vercel project builds the frontend and the visitor API with `npm run build:vercel`. Preview and Production use server-side Gemini settings and a free Upstash for Redis connection for expiring sessions. The build verifies the source archive and packages compact summaries for all 89 plans. The annotation editor runs on the local workstation. [Setup and Preview checks](docs/operations.md#vercel)
+
 ## Use
 
 The visitor and review interfaces use English. Enter a building and room identifier such as `SW03 2082`, or an English request such as `Take me to SW03 room 2082`. A destination and a starting photo open a walking itinerary. A photo-only submission shows the location evidence.
@@ -100,14 +104,14 @@ Photo reading/shortlisting and detailed comparison use 4,096/8,192-token allowan
 - [Project walkthrough](docs/walkthrough.md) and [mobile landing screen](outputs/screenshots/landing-mobile-390x844.png)
 - [Proposal source](docs/proposal.md) and [two-page proposal](output/pdf/proposal_groupnumber.pdf)
 
-The latest user direction removes the synthetic fallback described in the original brief. Visitor directions use approved passages and source-bound walking traces. Closures, ETAs, campus-wide routing and accessibility remain outside this pilot. The separately referenced assignment PDF was not supplied. Verify assignment requirements and dates against it before submission. The supplied brief lists October 21, 2026, 23:59 (timezone unspecified) for the proposal and October 22 for the presentation. Group/member placeholders remain. No coursework has been submitted and the app has not been deployed.
+The latest user direction removes the synthetic fallback described in the original brief. Visitor directions use approved passages and source-bound walking traces. Closures, ETAs, campus-wide routing and accessibility remain outside this pilot. The separately referenced assignment PDF was not supplied. Verify assignment requirements and dates against it before submission. The supplied brief lists October 21, 2026, 23:59 (timezone unspecified) for the proposal and October 22 for the presentation. Group/member placeholders remain. Coursework submission is separate from hosting the visitor app.
 
 ## Project hierarchy
 
 ```text
 mvp/
 ├── README.md, AGENTS.md
-├── package.json, package-lock.json, tsconfig.json, vite.config.ts
+├── package.json, package-lock.json, tsconfig.json, vite.config.ts, vercel.json
 ├── vitest.config.ts, playwright.config.ts
 ├── .env.example, .gitignore, .gitattributes, .prettierrc.json, .prettierignore
 ├── requirements-data.txt, index.html
@@ -118,7 +122,8 @@ mvp/
 │   ├── location/  Device acquisition, page projection, photo comparison and foreground lifecycle
 │   └── components/  Photo/result inputs, walking directions, DevicePosition, PhotoDeviceLocation, WalkingDeviceLocation and topology review
 ├── server/
-│   ├── index.ts, app.ts, runtime.ts
+│   ├── index.ts, app.ts, runtime.ts, configured-app.ts, vercel.ts
+│   ├── visitor-api.ts, visitor-sessions.ts, redis-visitor-sessions.ts
 │   ├── provider.ts, photo-localization.ts, session.ts
 │   ├── photo-evidence.ts, photo-media.ts, photo-grounding.ts, photo-doorways.ts, room-labels.ts
 │   ├── topology.ts, topology-api.ts, routing.ts, visitor-paths.ts, wayfinding.ts
@@ -142,9 +147,10 @@ mvp/
 │   ├── prepare_maps.py, prepare_visual_maps.py, prepare_pilot_labels.py
 │   ├── export-pilot-network.ts, query-spatial.ts
 │   ├── prepare-geolocation.ts
-│   ├── validate-data.ts
+│   ├── validate-data.ts, build-vercel.ts
 │   └── render_proposal.py
 ├── tests/
+│   ├── visitor-sessions.test.ts
 │   ├── api.test.ts, client-state.test.ts, data.test.ts, visual-data.test.ts, runtime.test.ts
 │   ├── provider.test.ts, provider-response.test.ts, spatial-retrieval.test.ts
 │   ├── photo-localization.test.ts, photo-doorways.test.ts, photo-api.test.ts, route-results.test.ts
@@ -161,7 +167,7 @@ mvp/
 │   └── screenshots/  Automated test artifacts; mocked results are labeled
 ├── output/pdf/proposal_groupnumber.pdf
 ├── outputs/screenshots/landing-mobile-390x844.png
-└── dist/, node_modules/, test-results/, tmp/  Generated local output
+└── .vercel/, dist/, node_modules/, test-results/, tmp/  Generated local output
 ```
 
 Original BCIT documents retain their attribution and usage restrictions; no endorsement is implied. See the source manifest and data notes.

@@ -144,7 +144,36 @@ function loadGeometrySummary(plan: VisualPlan) {
     omittedLabelCount: 0,
   };
 }
-const geometryCache = new Map<string, ReturnType<typeof loadGeometrySummary>>();
+type GeometrySummary = ReturnType<typeof loadGeometrySummary>;
+export const preparedGeometryPath = 'data/campus/visual/geometry-summaries.json';
+// The hosted build pins the digest of summaries generated from verified source bytes.
+declare const HOSTED_GEOMETRY_DIGEST: string;
+export function readPreparedGeometry(digest: string) {
+  const entries: { sourceSha256: string; geometrySha256: string; summary: GeometrySummary }[] =
+    JSON.parse(
+      verifiedVisualBytes({ file: preparedGeometryPath, sha256: digest }).toString('utf8'),
+    );
+  const summaries = new Map<string, GeometrySummary>();
+  for (const { sourceSha256, geometrySha256, summary } of entries) {
+    const plan = getVisualPlan(summary.planId);
+    if (
+      plan.geometry.sha256 !== geometrySha256 ||
+      plan.sourceSha256 !== sourceSha256 ||
+      plan.sourceRef !== summary.sourceRef ||
+      summary.labels.length !== plan.labelCount ||
+      summary.omittedLabelCount !== 0 ||
+      summaries.has(geometrySha256)
+    )
+      throw new Error('Prepared geometry does not match the official plan index.');
+    summaries.set(geometrySha256, summary);
+  }
+  if (summaries.size !== visualPlans.length) throw new Error('Incomplete prepared geometry.');
+  return summaries;
+}
+const geometryCache =
+  typeof HOSTED_GEOMETRY_DIGEST === 'string'
+    ? readPreparedGeometry(HOSTED_GEOMETRY_DIGEST)
+    : new Map<string, GeometrySummary>();
 export function planGeometrySummary(plan: VisualPlan) {
   let summary = geometryCache.get(plan.geometry.sha256);
   if (!summary) {

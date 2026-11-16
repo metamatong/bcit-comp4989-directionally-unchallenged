@@ -1,8 +1,28 @@
 import { describe, expect, it, vi } from 'vitest';
-import { ApiError, clearLegacyModePreference, readPhotoInSession, RequestGate } from '../src/api';
+import {
+  ApiError,
+  bootstrap,
+  clearLegacyModePreference,
+  readPhotoInSession,
+  RequestGate,
+} from '../src/api';
 import { newSession } from '../server/session';
 
 describe('removed preferences and transient evidence', () => {
+  it('reports the HTTP status when a host returns a plain-text error for the bootstrap API', async () => {
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue(new Response('The page could not be found', { status: 404 })),
+    );
+    try {
+      await expect(bootstrap()).rejects.toMatchObject({
+        httpStatus: 404,
+        message: expect.stringContaining('campus API'),
+      });
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
   it('renews an expired photo session once and runs the workflow using the new session', async () => {
     const initial = newSession(),
       fresh = newSession();
