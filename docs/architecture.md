@@ -1,6 +1,8 @@
 # Architecture
 
-DirectionallyUnchallenged is a local React/TypeScript client and Express server for photo comparison against official BCIT Burnaby floor plans. Gemini is the only inference provider. The previous fictional map, deterministic demo routing, closure simulation, OCR sign matching and mode switch have been removed at the user's request.
+DirectionallyUnchallenged uses a React/TypeScript client and an Express server for photo comparison against official BCIT Burnaby floor plans. Gemini is the only inference provider. The previous fictional map, deterministic demo routing, closure simulation, OCR sign matching and mode switch have been removed at the user's request.
+
+The local listener and Vercel function share the visitor API. Vercel serves a static frontend, verifies compact plan evidence at cold start, and shares encrypted session state across workers. [Deployment and retention](operations.md#vercel)
 
 ## Request flow
 

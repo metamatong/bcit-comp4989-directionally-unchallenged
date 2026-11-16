@@ -37,7 +37,16 @@ export async function request<T>(
       'Connection lost or request timed out. Check your connection, then retry. Refresh the session before retrying.',
     );
   }
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    throw new ApiError(
+      `The campus API returned an unreadable response (HTTP ${response.status}). Check the server deployment and try again.`,
+      undefined,
+      response.status,
+    );
+  }
   if (!response.ok)
     throw new ApiError(
       data.error ?? 'The request could not be completed.',

@@ -243,6 +243,7 @@ export class GeminiProvider implements Provider {
       fallbackModels?: string[];
       requestsPerMinute: number;
       requestsPerDay: number;
+      reserveSharedBudget?: (minute: number, day: number) => Promise<void>;
       timeoutMs: number;
       fetchImpl?: typeof fetch;
       waitForRetry?: (milliseconds: number, signal?: AbortSignal) => Promise<void>;
@@ -441,7 +442,13 @@ export class GeminiProvider implements Provider {
           'timeout',
           true,
         );
-      this.reserve();
+      if (this.options.reserveSharedBudget) {
+        await this.options.reserveSharedBudget(
+          this.options.requestsPerMinute,
+          this.options.requestsPerDay,
+        );
+        this.calls++;
+      } else this.reserve();
       onAttempt?.();
       let response: Response;
       const attemptDeadline = AbortSignal.timeout(timeoutMs);

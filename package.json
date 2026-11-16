@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "node --import tsx server/index.ts",
     "build": "tsc --noEmit && vite build",
+    "build:vercel": "npm run build && npm run data:validate && node --import tsx scripts/build-vercel.ts",
     "start": "NODE_ENV=production node --import tsx server/index.ts",
     "test": "vitest run && playwright test",
     "test:unit": "vitest run",
@@ -31,7 +32,9 @@
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
+    "@vercel/nft": "1.10.0",
     "@vitejs/plugin-react": "^4.3.4",
+    "esbuild": "0.28.2",
     "jsdom": "26.1.0",
     "prettier": "^3.9.10",
     "tsx": "^4.19.3",

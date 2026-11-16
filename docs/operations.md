@@ -8,6 +8,14 @@ Set `GEMINI_API_KEY` in private `.env`, choose a primary `GEMINI_MODEL`, and set
 
 Without provider configuration, users see setup guidance. Photo submission is disabled in the client and rejected by the server. With configuration, pressing the analysis button authorizes that submission. Destination lookup and routing are local server operations and consume no provider quota.
 
+## Vercel
+
+Connect the GitHub repository to Vercel and track `main` for Production. The repository build command writes Build Output API v3 artifacts to `.vercel/output`. It validates the 90 source PDFs and 631 derived assets, then packages verified PNGs, source-bound geometry summaries and the published reviewed network. Source PDF links resolve to BCIT. The build constructs the hosted routing snapshot from the reviewed network in Git. Local annotations stay on the workstation.
+
+Configure `GEMINI_API_KEY` and `AI_FREE_TIER_CONFIRMED` for each target environment after verifying project eligibility. Connect Upstash for Redis to Preview and Production with its free plan and automatic upgrades disabled. The integration supplies `KV_REST_API_URL` and `KV_REST_API_TOKEN`. Hosted workers use encrypted session records with a 30-minute expiry. Photo label evidence has its own five-minute expiry. The database receives neither photo bytes nor device coordinates. A per-session lease protects revisions and retries across workers. All workers using the same Gemini key share its rolling request budget.
+
+On a PR Preview, check that `GET /api/health` and `GET /api/bootstrap` return JSON, then use a consented test photo to complete both analysis stages under the same session. Check the returned plan image URLs and that `/internal/topology` denies access. A merge into the tracked production branch starts a new deployment. [Vercel Git deployments](https://vercel.com/docs/git#production-branch)
+
 ## Media and state
 
 The browser accepts JPEG/PNG/WebP up to 8 MB and 50 million pixels, creates a full view and four overlapping original-image crops, each with at most a 1,600-pixel long edge and 450 KB JPEG bytes, without original metadata. The server limits photo bodies to 4 MB and aggregate decoded bytes across all five views to 2.5 MB. Two API stages send the same consented image bundle transiently to Google, first for reading labels and then for source-grounded location comparison; the application saves no media to disk, caches or session logs. Google free-tier handling is disclosed under its terms.
@@ -34,7 +42,7 @@ Fallback is limited to configured Gemini models; there is no alternate provider 
 
 `npm run test:unit` checks code/API contracts, `npm run build` checks TypeScript and builds production files, and `npm run data:validate` checks official assets. `npm test` additionally runs browser automation with Gemini disabled on isolated port 3100. The user currently requested no further screen checks. No live provider calls are needed for regression tests.
 
-The local service has not undergone a public-hosting review. No deployment or coursework submission has occurred. See [verification](verification.md) and [provider notes](provider.md).
+Keep infrastructure smoke tests, live Gemini results and physical-campus evaluation separate. See [verification](verification.md) and [provider notes](provider.md).
 
 ## Local topology editing
 
