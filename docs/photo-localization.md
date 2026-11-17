@@ -6,15 +6,15 @@ The app uses the actual photo and detailed views in two separate API stages. Gem
 
 ## User flow
 
-1. Use Upload photo or Take a photo directly under the first screen's Find my location heading. The browser prepares a full view and four overlapping detail crops from the **original decoded image**, before discarding original metadata.
-2. Enter the destination and select **Find my route** to authorize and start analysis of the selected photo. Photo-only comparison is also available. The visitor client binds both photo requests to `wayfinding-pilot`, restricting visual comparison to the 12 SE12, SW03 and SW01 plans.
-3. The client calls the label-reading endpoint and shows progress while Gemini reads visible identifiers.
-4. The client sends the same image bundle with the returned evidence ID to the location endpoint. Relevant source plans appear only with the resulting hypothesis, below the inline photo input.
-5. Confirm a region only if it agrees with the surroundings. Confirmation releases the local photo while keeping the selected result visible. The model can abstain and ask for another photo. Remove photo or Cancel analysis discards the current photo and prevents late results from appearing.
+1. Use **Upload photo** or **Take a photo**, then tap **Next**. The browser prepares a full view and four overlapping detail crops from the **original decoded image**, before discarding original metadata.
+2. Enter a destination and tap **Go** to authorize and start analysis. The visitor client binds both photo requests to `wayfinding-pilot`, restricting visual comparison to the 12 SE12, SW03 and SW01 plans.
+3. The client calls the label-reading endpoint, then sends the same image bundle with the returned evidence ID to the location endpoint. The UI shows one simple progress message while both stages run.
+4. The app selects its single best source-grounded photo hypothesis automatically. It attempts routing without asking the visitor to confirm a region or starting point. A route uses the hypothesis only when exactly one approved checkpoint lies within it; otherwise the visitor is asked for a clearer photo.
+5. Relevant source plans remain available below the route as optional evidence. The model can abstain and ask for another photo. Remove photo or Cancel analysis discards the current photo and prevents late results from appearing.
 
 The local server must be restarted after backend edits. Frontend HMR does not reload Node. Existing converted source files work without regeneration.
 
-An optional device reading accompanies a photo submission when the visitor confirms they are standing at its location. The browser compares it after visual verification and retains its acquisition timestamp through slow inference. Every candidate and confirmation requirement remains available. Both API stages and Gemini prompts omit device coordinates. [Device evidence and walking controls](device-location.md)
+The photo flow does not request device location. Optional foreground tracking is available only from walking directions and does not advance route progress automatically. [Walking controls and coverage](device-location.md)
 
 ## API stages and agent tools
 
@@ -45,7 +45,7 @@ Gemini compares the photo and plan and must identify a matching architectural fe
 
 For each eligible printed identifier with a unique source occurrence and mapped door symbols on a shortlisted plan, the server crops the hash-checked full drawing around the label and each corresponding doorway. Each unmarked crop is sent with its whole-page bounds and doorway ID, alongside the existing page evidence. This applies to every mapped door in the pilot. Gemini compares the sign at the physical door and a second layout relationship such as opposite-side glazing, a junction or a sequence of doors. It assesses each alternative separately. A missing assessment, unresolved competing door, incompatible layout or unsupported identifier cannot select a doorway. Additional corroborated signs must have a unique compatible printed position or mapped doorway in the same drawing detail.
 
-A consistent visual assessment can identify the starting corridor even when the precise camera rectangle is unavailable. The server takes the marker and optional corridor frontage from the current source drawing. Cropping margins are for inspection only. A room without a mapped doorway can still use the existing visual-region workflow. Session-only decision codes distinguish model abstention, label or bounding-region conflicts and doorway assessment outcomes. User confirmation and an explicitly reviewed doorway-to-route binding are required before route calculation from a doorway vicinity.
+A consistent visual assessment can identify the starting corridor even when the precise camera rectangle is unavailable. The server takes the marker and optional corridor frontage from the current source drawing. Cropping margins are for inspection only. A room without a mapped doorway can still use the existing visual-region workflow. Session-only decision codes distinguish model abstention, label or bounding-region conflicts and doorway assessment outcomes. Route calculation from a doorway vicinity still requires an explicitly reviewed doorway-to-route binding and exactly one matching approved checkpoint.
 
 ## Photo views and coordinate systems
 

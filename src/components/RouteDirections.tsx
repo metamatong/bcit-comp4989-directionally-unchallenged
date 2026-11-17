@@ -164,7 +164,7 @@ export function RouteDirections({
         </h2>
       </div>
       <p className="helper">
-        Last confirmed route start · {route.origin.label} ·{' '}
+        Starting point acquired · {route.origin.label} ·{' '}
         {planLabel(planById.get(route.origin.planId)!)}
       </p>
       <WalkingDeviceLocation

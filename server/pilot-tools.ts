@@ -21,7 +21,7 @@ const empty = z.object({}).strict();
 export const pilotToolDeclarations = [
   tool(
     'resolve_spatial_labels',
-    'Find complete labels in the three pilot buildings. Return all exact occurrences, source coordinates and evidence. Origin candidates require visual and user confirmation. A destination requires an explicit reviewed door binding for routing.',
+    'Find complete labels in the three pilot buildings. Return all exact occurrences, source coordinates and evidence. A photo start is usable only when its source-grounded hypothesis contains one unique approved checkpoint. A destination requires an explicit reviewed door binding for routing.',
     lookupSchema,
   ),
   tool(

@@ -20,11 +20,11 @@ On a PR Preview, check that `GET /api/health` and `GET /api/bootstrap` return JS
 
 The browser accepts JPEG/PNG/WebP up to 8 MB and 50 million pixels, creates a full view and four overlapping original-image crops, each with at most a 1,600-pixel long edge and 450 KB JPEG bytes, without original metadata. The server limits photo bodies to 4 MB and aggregate decoded bytes across all five views to 2.5 MB. Two API stages send the same consented image bundle transiently to Google, first for reading labels and then for source-grounded location comparison; the application saves no media to disk, caches or session logs. Google free-tier handling is disclosed under its terms.
 
-Mobile photo capture uses the browser/device photo picker. Optional device location supports a photo-associated reading and a foreground walking overlay. Phone use requires HTTPS and permission. Physical-device capture and geolocation behavior remain unverified. [Controls and coverage](device-location.md)
+Mobile photo capture uses the browser/device photo picker. Optional device location is available in walking directions as a foreground overlay; the photo-start flow does not request device location. Phone geolocation requires HTTPS and permission. Physical-device capture and geolocation behavior remain unverified. [Controls and coverage](device-location.md)
 
-Upload and capture controls are shown inline under Find my location. A selected photo reveals the analysis button and its Gemini data-use notice. Remove photo, Cancel analysis, result confirmation or leaving the page releases the client photo; the coverage/privacy dialog does not clear it. When a destination is present, confirming a marked start opens the floor-by-floor route overview, with the photo evidence and trip inputs in collapsed sections below it. A newly selected photo clears the previous route.
+The visitor flow is **photo → Next → destination → Go**. Photo preparation stays local. The notice beside Go explains which configured AI provider receives the image and detail views. Cancel analysis, successful analysis, replacing the photo, or leaving the page releases the client photo. The app selects the sole source-grounded photo hypothesis automatically and opens directions when it maps to exactly one reviewed checkpoint. Photo evidence and trip editing stay below the route. A newly selected photo clears the previous route.
 
-Routes exist only in the active browser view. Editing the destination or replacing the photo clears directions. Recheck current route reads current topology approvals and asks for the starting point again.
+Routes exist only in the active browser view. Editing the destination or replacing the photo clears directions. Recheck reads current topology approvals and resolves the same photo hypothesis again; a zero or multiple checkpoint match asks for a closer photo rather than a starting-point selection.
 
 First-stage evidence IDs expire after five minutes and are bound to a session and image/crop fingerprint. No media is stored between API stages. A failed comparison may retry with the accepted evidence until expiry. Session results expire after 30 minutes. Reload creates a new session. Clear analysis removes the current result. Device coordinates stay in browser memory and are omitted from server/provider requests, storage and logs. Walking tracking requires an explicit start and pauses when the page hides. Browser/device location services have their own handling. Obsolete mode preferences are removed from browser storage. API responses use `no-store` and reject cross-origin requests.
 
@@ -36,7 +36,7 @@ First-stage evidence IDs expire after five minutes and are bound to a session an
 - A slow model: the server temporarily prioritizes an available configured backup. The photo status reports the failed stage and cause. A retry keeps the selected photo and reuses unexpired readings when possible. An expired session is renewed once on submission.
 - Insufficient evidence: provide another view. This is an analysis result, not a transport failure.
 
-Fallback is limited to configured Gemini models; there is no alternate provider or sample-location substitution. Refresh state after an interrupted connection before retrying. Per-photo consent, typed validation, source constraints and user confirmation remain required.
+Fallback is limited to configured Gemini models in this checkout; there is no sample-location substitution. Refresh state after an interrupted connection before retrying. Per-photo consent, typed validation and source constraints remain required. Photo selection is an unverified app hypothesis, not a field-verified user position.
 
 ## Validation
 

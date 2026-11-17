@@ -1,7 +1,7 @@
 /** Resolve the two ends of a visitor journey, then route over currently approved passages. */
 import { z } from 'zod';
 import type { CampusLocationCandidate, VisualPlan } from '../src/types';
-import { planLabel, type TopologyNode, type TopologyEdge } from '../src/topology';
+import { buildingLabel, planLabel, type TopologyNode, type TopologyEdge } from '../src/topology';
 import type {
   NavigationChoice,
   NavigationResult,
@@ -10,7 +10,13 @@ import type {
   StartingPoints,
   WalkingStep,
 } from '../src/wayfinding';
-import { canonicalBuilding, isPilotPlan, labelKey } from './pilot-evidence';
+import {
+  canonicalBuilding,
+  isPilotPlan,
+  labelKey,
+  looksLikeIdentifier,
+  pilotEvidence,
+} from './pilot-evidence';
 import { reviewedNetwork } from './pilot-network';
 import { lookupPilotLabels } from './spatial-retrieval';
 import { computeTopologyRoute } from './routing';
@@ -48,15 +54,32 @@ function destinationText(value: string) {
     .normalize('NFKC')
     .trim()
     .replace(/^(?:take me to|directions to|navigate to|go to)\s+/i, '')
+    .replace(
+      /\b(NE|NW|SE|SW)\s*O(\d+)\b/i,
+      (_match, area: string, digits: string) => `${area}0${digits}`,
+    )
+    .replace(/\b(NE|NW|SE|SW)\s*[- ]?\s*(\d+)\b/i, '$1$2')
     .replace(/^((?:(?:NE|NW|SE|SW)\d+[\s-]+)?)room\s+/i, '$1')
     .trim();
 }
 
-type Destination = { place: PlaceChoice; nodes: TopologyNode[] };
+type Destination = { place: PlaceChoice; nodes: TopologyNode[]; typoCorrection?: string };
+type PublishedCheckpoint = { reviewContentHash: string; aliases: string[] };
+
+function oneCharacterTypo(value: string, candidate: string) {
+  if (value.length < 4 || value.length !== candidate.length) return false;
+  let differences = 0;
+  for (let index = 0; index < value.length; index++) {
+    if (value[index] !== candidate[index] && ++differences > 1) return false;
+  }
+  return differences === 1;
+}
+
 function resolveDestination(
   text: string,
   nodes: TopologyNode[],
   doors: Map<string, string>,
+  published: Map<string, PublishedCheckpoint>,
 ): Destination[] {
   const cleaned = labelKey(destinationText(text));
   if (!cleaned) return [];
@@ -79,14 +102,43 @@ function resolveDestination(
   ]).get(labelKey(token));
   if (kind)
     return scopedNodes.filter((n) => n.kind === kind).map((n) => ({ place: stop(n), nodes: [n] }));
-  const query = lookupPilotLabels({
+  let query = lookupPilotLabels({
     purpose: 'destination',
     labels: [token],
     ...(building ? { building } : {}),
     ...(floor ? { floor } : {}),
   }).results[0];
+  let typoCorrection: string | undefined;
+  if (!query.matches.length && looksLikeIdentifier(token)) {
+    const routeableLabels = new Set<string>();
+    for (const node of scopedNodes) {
+      const record = published.get(node.id);
+      const aliases =
+        record?.reviewContentHash === node.review?.contentHash ? (record?.aliases ?? []) : [];
+      const stair = node.kind === 'stair-landing' && /^([A-Z]?\d+[A-Z]?) · /.exec(node.label)?.[1];
+      for (const label of [node.label, ...aliases, ...(stair ? [stair] : [])])
+        if (looksLikeIdentifier(labelKey(label))) routeableLabels.add(labelKey(label));
+    }
+    for (const page of pilotEvidence()) {
+      if ((building && page.plan.building !== building) || (floor && page.plan.floor !== floor))
+        continue;
+      for (const door of page.drawnDoors)
+        if (doors.has(door.id)) routeableLabels.add(labelKey(door.room));
+    }
+    const corrections = [...routeableLabels].filter((label) =>
+      oneCharacterTypo(labelKey(token), label),
+    );
+    if (corrections.length === 1) {
+      typoCorrection = corrections[0];
+      query = lookupPilotLabels({
+        purpose: 'destination',
+        labels: [typoCorrection],
+        ...(building ? { building } : {}),
+        ...(floor ? { floor } : {}),
+      }).results[0];
+    }
+  }
   if (query.unsupportedScope) return [];
-  const published = new Map(reviewedNetwork().nodes.map((n) => [n.id, n]));
   // Look up live-approved aliases too. A nearby room number on a landing is never a room-door alias.
   const named = scopedNodes.filter((node) => {
     const record = published.get(node.id);
@@ -122,7 +174,7 @@ function resolveDestination(
     }
   }
   for (const node of named) choices.push({ place: stop(node), nodes: [node] });
-  return choices;
+  return choices.map((choice) => ({ ...choice, typoCorrection }));
 }
 
 function stepText(kind: TopologyEdge['kind'], to: MapStop, plans: VisualPlan[]) {
@@ -179,7 +231,7 @@ function readVisitorMap(
 ) {
   const plans = store.plans.filter(isPilotPlan);
   if (!plans.some((p) => p.id === candidate.planId))
-    throw new TopologyError('Confirm a current photo region in SE12, SW03 or SW01 first.', 409);
+    throw new TopologyError('Analyze a current photo from SE12, SW03 or SW01 first.', 409);
   const doc = store.read();
   if (expectedRevision !== undefined && expectedRevision !== doc.revision)
     throw new TopologyError(
@@ -215,7 +267,7 @@ function readVisitorMap(
   return { plans, doc, network, nodes, origins };
 }
 
-/** Only selectable points are exposed before the visitor confirms their starting location. */
+/** Source-bound checkpoints inside the photo hypothesis; routing uses a point only when unique. */
 export function startingPoints(
   candidate: CampusLocationCandidate,
   store: TopologyStore,
@@ -230,14 +282,28 @@ export function planVisitorJourney(
   store: TopologyStore,
 ): NavigationResult {
   if (candidate.id !== request.candidateId)
-    throw new TopologyError('Confirm the current photo region before requesting directions.', 409);
+    throw new TopologyError('Analyze the current photo before requesting directions.', 409);
   const { plans, doc, network, nodes, origins } = readVisitorMap(
     candidate,
     store,
     request.networkRevision,
   );
   const vicinity = candidate.doorwayVicinity;
-  const choices = resolveDestination(request.destination, nodes, network.doors);
+  const candidateBuildingPrefix = candidate.planId.split('-')[0] + '-';
+  const hasBuildingCheckpoints = nodes.some((node) =>
+    node.planId.startsWith(candidateBuildingPrefix),
+  );
+  if (!origins.length && !hasBuildingCheckpoints)
+    return {
+      networkRevision: doc.revision,
+      origins,
+      destinations: [],
+      status: 'unsupported-building',
+      message: `${buildingLabel(candidate.building)} does not have reviewed route starting points yet. Routes through this building are not available in the current pilot map.`,
+    };
+  const published = new Map<string, PublishedCheckpoint>();
+  for (const node of reviewedNetwork().nodes) published.set(node.id, node);
+  const choices = resolveDestination(request.destination, nodes, network.doors, published);
   const context = {
     networkRevision: doc.revision,
     origins,
@@ -248,7 +314,7 @@ export function planVisitorJourney(
       ...context,
       status: 'unknown-destination',
       message:
-        'This destination has no exact label on the pilot plans. Check the building and complete room or stair identifier.',
+        'No matching destination was found in the three-building pilot. Check the room number and building.',
     };
   const choice = request.destinationId
     ? choices.find((c) => c.place.id === request.destinationId)
@@ -262,16 +328,24 @@ export function planVisitorJourney(
       message:
         'This label identifies more than one place. Choose the one you mean on its floor plan.',
     };
+  const destinationMatch = choice.typoCorrection
+    ? {
+        requested: request.destination,
+        matched: `${planLabel(plans.find((plan) => plan.id === choice.place.planId)!)} · ${choice.place.label}`,
+      }
+    : undefined;
   if (!choice.nodes.length && !origins.length)
     return {
       ...context,
+      ...(destinationMatch ? { destinationMatch } : {}),
       status: 'unmapped-origin-and-destination',
       message:
-        'The destination label is marked. The confirmed photo region has no reviewed starting point, and this destination still needs a reviewed walking connection.',
+        'The destination is marked, but this photo area and destination do not yet have a complete reviewed route.',
     };
   if (!choice.nodes.length)
     return {
       ...context,
+      ...(destinationMatch ? { destinationMatch } : {}),
       status: 'unmapped-destination',
       message:
         'The label is marked on the floor plan. A walking connection to this destination still needs review.',
@@ -279,17 +353,26 @@ export function planVisitorJourney(
   if (!origins.length)
     return {
       ...context,
+      ...(destinationMatch ? { destinationMatch } : {}),
       status: 'unmapped-origin',
       message: vicinity
         ? `The corridor outside room ${vicinity.room} is identified. Its connection to the walking network still needs review.`
-        : 'There is no reviewed starting point inside your confirmed region. Try a photo at a marked doorway, stair landing or elevator.',
+        : 'There is no single reviewed starting point in this photo area. Try a closer photo of a mapped doorway, stair landing, or elevator.',
     };
-  const origin = origins.find((n) => n.id === request.originId);
+  const origin = request.originId
+    ? origins.find((n) => n.id === request.originId)
+    : origins.length === 1
+      ? origins[0]
+      : undefined;
   if (!origin)
     return {
       ...context,
-      status: 'choose-origin',
-      message: 'Which marked point are you standing at? Check it against your surroundings.',
+      ...(destinationMatch ? { destinationMatch } : {}),
+      status: origins.length > 1 ? 'unmapped-origin' : 'choose-origin',
+      message:
+        origins.length > 1
+          ? 'The photo covers more than one reviewed starting point. Take a closer photo of the doorway or sign beside you.'
+          : 'The exact starting point could not be identified. Try a closer photo of a mapped doorway, stair landing, or elevator.',
     };
   const routes = choice.nodes
     .map((n) =>
@@ -311,6 +394,7 @@ export function planVisitorJourney(
   if (!route)
     return {
       ...context,
+      ...(destinationMatch ? { destinationMatch } : {}),
       status: 'no-route',
       message:
         'The marked places are known, but a continuous reviewed walking route between them is missing.',
@@ -332,6 +416,7 @@ export function planVisitorJourney(
   });
   return {
     ...context,
+    ...(destinationMatch ? { destinationMatch } : {}),
     status: 'route',
     origin,
     destination: stop(byId.get(route.nodeIds.at(-1)!)!),

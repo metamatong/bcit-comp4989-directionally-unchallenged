@@ -22,14 +22,10 @@ import { PHOTO_STAGE_TIMEOUT_MS, PHOTO_RESPONSE_GRACE_MS } from './photo-views';
 import { CampusLocationResults } from './components/CampusLocationResults';
 import { PhotoLocationInput } from './components/PhotoLocationInput';
 import { JourneyPanel } from './components/JourneyPanel';
-import { buildingLabel } from './topology';
 import './wayfinding.css';
 import type { Bootstrap, Session } from './types';
-import { usePhotoDeviceLocation } from './location/use-device-location';
-import { PhotoDeviceOption, PhotoDeviceSummary } from './components/PhotoDeviceLocation';
 
 export default function App() {
-  const devicePhoto = usePhotoDeviceLocation();
   const [data, setData] = useState<Bootstrap>();
   const [session, setSession] = useState<Session>();
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -40,6 +36,7 @@ export default function App() {
   const [photoError, setPhotoError] = useState('');
   const [preparedPhoto, setPreparedPhoto] = useState<PreparedPhoto | null>(null);
   const [showPhotoResults, setShowPhotoResults] = useState(false);
+  const [flowStep, setFlowStep] = useState<'photo' | 'destination'>('photo');
   const [destination, setDestination] = useState('');
   const [activeDestination, setActiveDestination] = useState('');
   const photoAbort = useRef<AbortController | null>(null);
@@ -86,10 +83,10 @@ export default function App() {
     setReading(false);
   }
   function removePhoto() {
-    devicePhoto.clear();
     discardPhoto();
     setShowPhotoResults(false);
     setActiveDestination('');
+    setFlowStep('photo');
     setError('');
   }
   async function send(action: unknown): Promise<Session | undefined> {
@@ -125,13 +122,13 @@ export default function App() {
   }
   async function readPhoto(file?: File) {
     if (!file) return;
-    devicePhoto.clear();
     const generation = evidenceGate.current.next();
     photoAbort.current?.abort();
     setPreparedPhoto(null);
     evidenceForPhoto.current = null;
     setShowPhotoResults(false);
     setActiveDestination('');
+    setFlowStep('photo');
     setReading(true);
     setPhotoError('');
     setError('');
@@ -159,7 +156,6 @@ export default function App() {
       return;
     const generation = evidenceGate.current.next();
     const controller = new AbortController();
-    devicePhoto.capture();
     photoAbort.current = controller;
     busyRef.current = true;
     setBusy(true);
@@ -167,6 +163,7 @@ export default function App() {
     setShowPhotoResults(false);
     setPhotoError('');
     setActiveDestination(destination.trim());
+    setReadStatus('Finding your starting point and route…');
     let stage: 'evidence' | 'comparison' = 'evidence';
     try {
       const media = {
@@ -180,7 +177,7 @@ export default function App() {
         async (active) => {
           let latest = active;
           stage = 'evidence';
-          setReadStatus('Reading room labels from your photo and detail views…');
+          setReadStatus('Finding your starting point and route…');
           const cached = evidenceForPhoto.current;
           if (!(
             cached?.photo === preparedPhoto &&
@@ -208,14 +205,7 @@ export default function App() {
           const evidence = latest.photoEvidence;
           if (!evidence) throw new Error('Read this photo again before comparing plans.');
           stage = 'comparison';
-          const labels = evidence.labels
-            .filter((label) => label.clarity === 'clear')
-            .map((label) => label.text);
-          setReadStatus(
-            labels.length
-              ? `Read room label${labels.length === 1 ? '' : 's'} ${[...new Set(labels)].join(', ')}. Comparing the photo with matching floor plans…`
-              : 'No clear room label found. Comparing the scene with the floor plans…',
-          );
+          setReadStatus('Finding your starting point and route…');
           return request<Session>(
             `/api/sessions/${active.id}/photo`,
             {
@@ -243,7 +233,9 @@ export default function App() {
       updateSession(result);
       evidenceForPhoto.current = null;
       setShowPhotoResults(true);
-      setReadStatus('Comparison complete.');
+      setPreparedPhoto(null);
+      setPhotoError('');
+      setReadStatus('');
     } catch (failure) {
       if (evidenceGate.current.isCurrent(generation)) {
         if (failure instanceof ApiError && failure.session) updateSession(failure.session);
@@ -259,15 +251,6 @@ export default function App() {
       if (photoAbort.current === controller) photoAbort.current = null;
     }
   }
-  async function confirmCampus(candidateId: string) {
-    if (await send({ type: 'confirm-campus-region', candidateId })) {
-      devicePhoto.cancelPending();
-      discardPhoto();
-      return true;
-    }
-    return false;
-  }
-
   if (!data || !session)
     return (
       <main className="loading-page">
@@ -287,23 +270,19 @@ export default function App() {
       session.campusAnalysis?.referenceLabels?.some((ref) => ref.planId === plan.id),
   );
   const photoReady = data.liveAvailable && data.photoLocalizationAvailable;
+  const submissionNotice = data.model.toLowerCase().includes('gemini')
+    ? 'Tapping Go sends this photo and its detail views to Google Gemini to find your location. Google may use free-tier inputs to improve its products.'
+    : 'Tapping Go sends this photo and its detail views to the configured AI provider to find your location.';
   const analysis = showPhotoResults ? session.campusAnalysis : null;
   const region = analysis ? session.campusLocation : null;
-  const routeCandidate =
-    region ?? (analysis?.candidates.length === 1 ? analysis.candidates[0] : undefined);
+  const routeCandidate = region ?? undefined;
   const directionsMode = Boolean(analysis && activeDestination);
-  const deviceSummary = (
-    <PhotoDeviceSummary
-      snapshot={devicePhoto.snapshot}
-      status={devicePhoto.status}
-      onRetry={devicePhoto.capture}
-      busy={busy || !devicePhoto.enabled}
-    />
-  );
   const photoInput = (
     <>
       <PhotoLocationInput
+        step={analysis ? 'destination' : preparedPhoto ? flowStep : 'photo'}
         destination={destination}
+        submissionNotice={submissionNotice}
         canUsePhotoResult={!!analysis?.candidates.length}
         onDestinationChange={(value) => {
           setDestination(value);
@@ -316,34 +295,16 @@ export default function App() {
         status={readStatus}
         error={photoError}
         onPhoto={(file) => void readPhoto(file)}
+        onNext={() => setFlowStep('destination')}
+        onBack={() => (preparedPhoto ? setFlowStep('photo') : removePhoto())}
         onAnalyze={() => void analyzePhoto()}
         onDiscard={removePhoto}
-        locationControl={
-          <PhotoDeviceOption
-            enabled={devicePhoto.enabled}
-            onChange={devicePhoto.setEnabled}
-            disabled={busy || reading || !data.locationCatalogue}
-          />
-        }
       />
-      {!analysis && deviceSummary}
-      {!analysis && data.locationNotice && <p role="status">{data.locationNotice}</p>}
     </>
   );
   const photoResults = analysis && (
     <>
-      {deviceSummary}
-      {data.locationNotice && <p role="status">{data.locationNotice}</p>}
-      <CampusLocationResults
-        analysis={analysis}
-        plans={plans}
-        selectedId={region?.id}
-        onConfirm={(id) => void confirmCampus(id)}
-        busy={busy}
-        evidenceOnly={directionsMode && !!routeCandidate}
-        deviceReading={devicePhoto.snapshot?.reading}
-        locationCatalogue={data.locationCatalogue}
-      />
+      <CampusLocationResults analysis={analysis} plans={plans} />
     </>
   );
   const updateDestination = analysis &&
@@ -354,7 +315,7 @@ export default function App() {
         disabled={busy}
         onClick={() => setActiveDestination(destination.trim())}
       >
-        Show directions to {destination.trim()}
+        GO to {destination.trim()}
       </button>
     );
   return (
@@ -383,7 +344,7 @@ export default function App() {
             data-testid="provider-status"
           >
             <span className="status-dot" />
-            {data.liveAvailable ? 'Gemini ready' : 'Setup required'}
+            {data.liveAvailable ? 'AI ready' : 'Setup required'}
           </span>
           <button
             className="icon-button"
@@ -399,11 +360,8 @@ export default function App() {
           <div className="setup-notice" role="note">
             <ShieldCheck size={21} />
             <div>
-              <strong>Gemini setup required</strong>
-              <p>
-                {data.setupNotice ??
-                  'Photo analysis needs a Gemini key configured on the server. Add your key and restart the app.'}
-              </p>
+              <strong>AI setup required</strong>
+              <p>{data.setupNotice ?? 'Photo analysis is not configured on this server.'}</p>
             </div>
           </div>
         )}
@@ -432,22 +390,33 @@ export default function App() {
                   sessionId={session.id}
                   revision={session.revision}
                   candidate={routeCandidate}
-                  confirmed={region?.id === routeCandidate.id}
                   destination={activeDestination}
                   plans={data.visualPlans}
                   locationCatalogue={data.locationCatalogue}
                   busy={busy}
-                  onConfirm={confirmCampus}
+                  onTryAnotherPhoto={() => {
+                    setShowPhotoResults(false);
+                    setFlowStep('photo');
+                  }}
                 />
               ) : (
                 <section className="journey-panel">
-                  <h2>Starting point needed for {activeDestination}</h2>
-                  {photoResults}
+                  <h2>Couldn’t find your starting point</h2>
+                  <p>Try another photo showing a nearby room sign, doorway, or hallway junction.</p>
+                  <button
+                    className="primary full-width"
+                    onClick={() => {
+                      setShowPhotoResults(false);
+                      setFlowStep('photo');
+                    }}
+                  >
+                    Try another photo
+                  </button>
                 </section>
               )}
-              {routeCandidate && (
+              {analysis && (
                 <details className="journey-evidence">
-                  <summary>Photo location evidence</summary>
+                  <summary>Location evidence</summary>
                   {photoResults}
                 </details>
               )}
@@ -455,18 +424,6 @@ export default function App() {
           ) : (
             <>
               {!analysis && photoInput}
-              {region && (
-                <div className="selected-start">
-                  <strong>
-                    {region.doorwayVicinity
-                      ? `Starting corridor confirmed · Room ${region.doorwayVicinity.room}`
-                      : 'Photo region confirmed'}
-                  </strong>
-                  <span>
-                    {buildingLabel(region.building)} · Floor {region.floor}
-                  </span>
-                </div>
-              )}
               {photoResults}
             </>
           )}
@@ -484,6 +441,7 @@ export default function App() {
                 disabled={busy}
                 onClick={() => {
                   removePhoto();
+                  setDestination('');
                   void send({ type: 'reset' });
                 }}
               >
@@ -537,9 +495,8 @@ export default function App() {
               <div className="about-section">
                 <h3>What you can do</h3>
                 <p>
-                  Enter a destination, submit a photo, and select the marked point where you are
-                  standing. Follow the arrows and transfer instructions on the floor plans in
-                  walking order.
+                  Add a photo, enter a destination, and tap Go. The app finds a starting point from
+                  the photo and shows a route when one reviewed checkpoint matches it.
                 </p>
               </div>
               <div className="about-section">
@@ -553,11 +510,10 @@ export default function App() {
               <div className="about-section">
                 <h3>Your data stays transient</h3>
                 <p>
-                  Explicitly submitted photos go to Google Gemini. Optional device readings stay in
-                  this browser tab. Your browser or device may use its own location service. Hosted
-                  session results are encrypted and expire after 30 minutes; reloading starts a new
-                  session. Clear analysis removes the current result. Google’s free-tier data
-                  handling applies.
+                  Tapping Go sends the photo and its detail views to the configured AI provider. The
+                  app does not save photos or route history. Optional device tracking in walking
+                  directions stays in this browser tab. Hosted session results expire after 30
+                  minutes; reloading starts a new session.
                 </p>
               </div>
             </>

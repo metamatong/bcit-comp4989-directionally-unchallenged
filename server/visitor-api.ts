@@ -218,8 +218,7 @@ function navigation(store: TopologyStore, origins: boolean): Operation {
           return {
             status: 400,
             body: {
-              error:
-                'Enter a destination and confirm the marked starting point from the current map.',
+              error: 'Enter a destination for the current photo location.',
             },
           };
         if (
@@ -230,7 +229,7 @@ function navigation(store: TopologyStore, origins: boolean): Operation {
           return {
             status: 409,
             body: {
-              error: 'Confirm the current photo region before requesting directions.',
+              error: 'Analyze a current photo before requesting directions.',
               session,
             },
           };

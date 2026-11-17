@@ -1,6 +1,6 @@
 # Current requirements and evidence
 
-The supplied original [brief](project-brief.txt) remains unchanged. The user's latest direction explicitly removes Demo mode and its fictional fallback. The separately referenced assignment PDF is absent, so assignment compliance must still be checked against that document.
+The supplied original [brief](project-brief.txt) remains unchanged. The user's latest direction limits the visitor pilot to SE12, SW03 and SW01, removes Demo mode and its fictional fallback, and asks the app to resolve a photo start without visitor confirmation. The separately referenced assignment PDF is absent, so assignment compliance must still be checked against that document.
 
 | Requirement | Current implementation/evidence |
 |---|---|
@@ -9,9 +9,9 @@ The supplied original [brief](project-brief.txt) remains unchanged. The user's l
 | Actual-photo interpretation | Both API stages send the context image and four crops from the original photo; plan comparison remains visual and source-grounded |
 | LLM agent and tools | One orchestrator shortlists supplied plans, eliminates conflicts, and returns only its best supported hypothesis or abstains |
 | Free-tier provider and server-side key | `server/provider.ts`, `.env.example`, [provider record](provider.md) |
-| User confirmation and uncertainty | One unverified location estimate, observable evidence, source links and explicit confirmation |
+| Photo start and uncertainty | Automatically selects the sole photo hypothesis; routes only when exactly one approved checkpoint fits it. Unresolved or ambiguous starts prompt for a closer photo. Location evidence stays available below the route. |
 | Mobile photo/camera input | Local resizing, photo picker and native camera capture |
-| Device-assisted photo localization and walking | Explicit opt-in, historical photo reading, geographic comparison and foreground walking overlay. SE12 floor 3 alignment is approximate. Eleven floor calibrations remain unresolved. [Coverage and validation](device-location.md) |
+| Device-assisted walking | Optional foreground position tracking in walking directions. Photo start acquisition uses the submitted photo and does not request device location. SE12 floor 3 alignment is approximate. Eleven floor calibrations remain unresolved. [Coverage and validation](device-location.md) |
 | Privacy and governance | Per-photo consent; transient media/session state; untrusted source evidence; no hidden reasoning logs |
 | Failure behavior | Setup, timeout, overload, quota, blocked and incomplete-response errors; no synthetic fallback |
 | Source plans behind the scenes | Wayfinding photo requests use only the 12 pilot plans. The UI shows relevant source images with results and directions. |
@@ -24,4 +24,4 @@ The supplied original [brief](project-brief.txt) remains unchanged. The user's l
 
 Old mode preferences are cleared and mode/fixture/replay/simulation/destination/checkpoint actions are rejected. Tests explicitly verify that legacy requests cannot restore the removed functionality.
 
-Visitor routing requires a confirmed photo region, an explicitly selected checkpoint and a reachable reviewed destination. The editor stores current approvals in `topology.json`. Six traced corridors can be drawn on source pages. For a typed destination the default result shows every floor in walking order and labels each transfer. User reports supply connectivity evidence. Independent field validation, measured costs and accessibility evidence remain outstanding.
+Visitor routing is scoped to SE12, SW03 and SW01. Photo localization selects its single hypothesis automatically, then uses it only if exactly one current approved checkpoint falls inside it. A unique one-character destination-code typo may resolve to an exact reviewed label; ambiguous destinations remain explicit choices. The current local graph connects parts of SE12 and SW03. SW01 has no reviewed route checkpoints or connections yet. The editor stores approvals in `topology.json`; routes use only those approvals. The default result shows every floor in walking order and labels each transfer. Independent field validation, measured costs and accessibility evidence remain outstanding.

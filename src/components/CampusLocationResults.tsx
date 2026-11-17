@@ -1,4 +1,4 @@
-import { ArrowUpRight, Check, FileText, MapPin } from 'lucide-react';
+import { ArrowUpRight, FileText, MapPin } from 'lucide-react';
 import type {
   CampusLocationCandidate,
   CampusPhotoAnalysis,
@@ -6,20 +6,15 @@ import type {
   VisualPlan,
 } from '../types';
 import { buildingLabel, planLabel } from '../topology';
-import type { DeviceReading, LocationCatalogue, DeviceOverlay } from '../location/types';
-import { comparePhotoLocation } from '../location/photo-comparison';
-import { DevicePosition } from './DevicePosition';
 
 export function PlanRegion({
   plan,
   candidate,
   labels = candidate?.sourceLabels ?? [],
-  device,
 }: {
   plan: VisualPlan;
   candidate?: CampusLocationCandidate | null;
   labels?: PlanLabelReference[];
-  device?: DeviceOverlay | null;
 }) {
   const vicinity = candidate?.doorwayVicinity;
   const box = candidate?.bounds;
@@ -33,16 +28,6 @@ export function PlanRegion({
         src={plan.overview.url}
         alt={`Official BCIT ${plan.building} floor ${plan.floor}, page ${plan.page}`}
       />
-      {device && (
-        <svg
-          className="photo-device-overlay"
-          viewBox={`0 0 ${plan.width} ${plan.height}`}
-          aria-label="Device reading associated with this photo"
-          role="img"
-        >
-          <DevicePosition overlay={device} width={plan.width} height={plan.height} />
-        </svg>
-      )}
       {box && (
         <div
           className={vicinity ? 'estimated-region corridor-vicinity' : 'estimated-region'}
@@ -87,21 +72,13 @@ export function PlanRegion({
 export function CampusLocationResults({
   analysis,
   plans,
-  selectedId,
-  onConfirm,
-  busy,
-  evidenceOnly = false,
-  deviceReading,
-  locationCatalogue,
 }: {
   analysis: CampusPhotoAnalysis;
   plans: VisualPlan[];
+  /** Legacy props accepted for old render fixtures; location confirmation is no longer shown. */
   selectedId?: string;
-  onConfirm: (id: string) => void;
-  busy: boolean;
-  evidenceOnly?: boolean;
-  deviceReading?: DeviceReading;
-  locationCatalogue?: LocationCatalogue;
+  onConfirm?: (id: string) => void;
+  busy?: boolean;
 }) {
   const references = analysis.referenceLabels ?? [];
   return (
@@ -137,10 +114,6 @@ export function CampusLocationResults({
       {analysis.candidates.map((candidate) => {
         const plan = plans.find((plan) => plan.id === candidate.planId);
         if (!plan) return null;
-        const device =
-          deviceReading && locationCatalogue
-            ? comparePhotoLocation(candidate, plan, deviceReading, locationCatalogue)
-            : null;
         return (
           <article className="campus-candidate" key={candidate.id}>
             <div className="section-heading">
@@ -152,13 +125,7 @@ export function CampusLocationResults({
                 {candidate.doorwayVicinity ? 'Approximate vicinity' : 'Unverified estimate'}
               </span>
             </div>
-            <PlanRegion plan={plan} candidate={candidate} device={device?.overlay} />
-            {device && (
-              <p className="helper">
-                {device.message} Blue shading shows reported device uncertainty. Drawing alignment
-                has separate uncertainty.
-              </p>
-            )}
+            <PlanRegion plan={plan} candidate={candidate} />
             {!!candidate.sourceLabels?.length && (
               <p className="plan-label-legend">
                 {candidate.doorwayVicinity
@@ -197,29 +164,10 @@ export function CampusLocationResults({
                 {plan.attribution} · {plan.sourceRef}
               </p>
             </details>
-            {!evidenceOnly && (
-              <button
-                className="primary full-width"
-                disabled={busy || selectedId === candidate.id}
-                onClick={() => onConfirm(candidate.id)}
-              >
-                <Check size={17} />
-                {selectedId === candidate.id
-                  ? 'Region selected'
-                  : candidate.doorwayVicinity
-                    ? 'I’m in this corridor'
-                    : 'Confirm this possible region'}
-              </button>
-            )}
           </article>
         );
       })}
       {analysis.clarification && <p className="clarification-note">{analysis.clarification}</p>}
-      {!evidenceOnly && !!analysis.candidates.length && (
-        <p className="helper">
-          Confirm the highlighted region only if it matches your surroundings.
-        </p>
-      )}
     </section>
   );
 }

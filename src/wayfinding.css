@@ -4,11 +4,11 @@
   color: var(--ink);
 }
 .visitor-shell > main {
-  max-width: 990px;
-  padding: 32px clamp(16px, 4vw, 44px) 18px;
+  max-width: 760px;
+  padding: 24px clamp(16px, 4vw, 36px) 18px;
 }
 .visitor-shell .workspace {
-  max-width: 800px;
+  max-width: 540px;
 }
 .visitor-shell .photo-location-input,
 .journey-panel {
@@ -22,6 +22,21 @@
   font-size: clamp(26px, 4.5vw, 37px);
   line-height: 1.16;
   letter-spacing: -0.04em;
+  margin-top: 9px;
+}
+.flow-progress {
+  display: flex;
+  gap: 9px;
+  align-items: center;
+  color: #829187;
+  font-size: 13px;
+}
+.flow-progress .current {
+  color: #174f3a;
+  font-weight: 700;
+}
+.flow-progress .complete {
+  color: #42705c;
 }
 .visitor-shell .photo-actions {
   display: grid;
@@ -59,11 +74,11 @@
 .destination-field input {
   width: 100%;
   min-width: 0;
-  min-height: 46px;
+  min-height: 54px;
   border: 0;
   background: transparent;
   color: #1e3a32;
-  font-size: 16px;
+  font-size: 18px;
   outline-offset: 0;
 }
 .destination-field small,
@@ -78,7 +93,6 @@
 .visitor-shell .photo-status {
   color: #536b60;
 }
-.selected-start,
 .trip-ends,
 .way-heading,
 .map-bar,
@@ -89,12 +103,48 @@
   gap: 10px;
   flex-wrap: wrap;
 }
-.selected-start {
-  margin: 18px 2px 12px;
-  font-size: 14px;
+.photo-step-summary {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 10px;
+  margin: 18px 0 22px;
+  border: 1px solid #dce4dc;
+  border-radius: 10px;
+  background: #f7faf7;
+  color: #305849;
+  font-size: 13px;
+  font-weight: 600;
 }
-.selected-start strong {
-  color: #174f3a;
+.photo-step-summary img {
+  display: block;
+  width: 56px;
+  height: 56px;
+  border-radius: 7px;
+  object-fit: cover;
+  background: #eef0e7;
+}
+.photo-step-summary .text-button {
+  margin-left: auto;
+}
+.visitor-shell .go-button {
+  min-height: 56px;
+  font-size: 17px;
+  font-weight: 700;
+}
+.visitor-shell .back-step {
+  margin-top: 8px;
+}
+.route-loading {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.destination-match {
+  padding: 9px 11px;
+  border-radius: 8px;
+  background: #f1f7f3;
+  color: #315e4b;
 }
 .journey-panel {
   margin: 16px 0 22px;
@@ -240,7 +290,13 @@
 }
 @media (max-width: 520px) {
   .visitor-shell > main {
-    padding: 16px 12px;
+    padding: 12px 10px 16px;
+  }
+  .visitor-shell .photo-location-input,
+  .visitor-shell .journey-panel {
+    border-radius: 14px;
+    padding: 19px;
+    margin-bottom: 12px;
   }
   .visitor-shell .brand-name {
     font-size: 16px;

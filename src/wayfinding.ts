@@ -10,6 +10,7 @@ export type PlaceChoice = {
   bounds?: PlanBounds;
   point?: PagePoint;
 };
+export type DestinationMatch = { requested: string; matched: string };
 export type WalkingStep = {
   kind: 'corridor' | 'stairs' | 'elevator' | 'building-link' | 'outdoor';
   from: MapStop;
@@ -30,6 +31,7 @@ export type NavigationResult = {
   networkRevision: number;
   origins: MapStop[];
   destinations: PlaceChoice[];
+  destinationMatch?: DestinationMatch;
 } & (
   | {
       status:
@@ -37,6 +39,7 @@ export type NavigationResult = {
         | 'choose-destination'
         | 'unknown-destination'
         | 'unmapped-origin'
+        | 'unsupported-building'
         | 'unmapped-destination'
         | 'unmapped-origin-and-destination'
         | 'no-route';
