@@ -165,7 +165,7 @@ export class RedisVisitorSessions implements VisitorSessions {
   }
 }
 
-// One rolling budget per Gemini key, including retries and calls on different deployments.
+// One rolling budget per provider key, including retries and calls on different deployments.
 const reserveScript = `
 local now = tonumber(ARGV[1])
 redis.call('ZREMRANGEBYSCORE', KEYS[1], '-inf', now - 86400000)

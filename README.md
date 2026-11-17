@@ -4,7 +4,7 @@ Add a photo, enter a destination, and tap **Go** to request a reviewed walking r
 
 The internal reference dataset contains **89 official floor plans covering 45 Burnaby buildings**, plus the campus map. All floor plans have PNGs and structured geometry JSON. Photo results are **unverified AI location hypotheses**. A separate local topology editor supports T/F/unknown candidate confirmation, manual annotation and route checks for SE12, SW03 and SW01. The visitor planner reads current approvals from that editor. It displays a coverage gap for destinations without a reviewed approach.
 
-This does not train a model on BCIT. Gemini is pretrained and compares a photo with plan drawings; the plans are not labeled camera-view examples, so reliable exact positioning is not guaranteed.
+This does not train a model on BCIT. The selected model is pretrained and compares a photo with plan drawings; the plans are not labeled camera-view examples, so reliable exact positioning is not guaranteed.
 
 ## Run locally
 
@@ -27,13 +27,15 @@ npm ci
 npm run dev
 ```
 
-Open [DirectionallyUnchallenged locally](http://127.0.0.1:3000). Configure `GEMINI_API_KEY`, a primary `GEMINI_MODEL`, and an ordered `GEMINI_FALLBACK_MODELS` list in the private `.env`. New installations default to Gemini 3.5 Flash-Lite with Gemini 3.8 Flash as fallback; Google lists both on its free tier. Existing primary selections are preserved; a 3.8 primary defaults to a 3.5 Flash-Lite backup. Gemini 2.5 is no longer an automatic fallback because Google restricts generation access for new users. Set `AI_FREE_TIER_CONFIRMED=true` only after verifying model access and eligibility for your API project. Keys stay server-side. Explicit fallback settings are preserved, including an empty list to disable fallback.
+Open [DirectionallyUnchallenged locally](http://127.0.0.1:3000). Keep `AI_PROVIDER=gemini` (the default) and configure `GEMINI_API_KEY`, a primary `GEMINI_MODEL`, and an ordered `GEMINI_FALLBACK_MODELS` list in the private `.env`. New installations default to Gemini 3.5 Flash-Lite with Gemini 3.8 Flash as fallback; Google lists both on its free tier. Existing primary selections are preserved; a 3.8 primary defaults to a 3.5 Flash-Lite backup. Gemini 2.5 is no longer an automatic fallback because Google restricts generation access for new users. Set `AI_FREE_TIER_CONFIRMED=true` only after verifying model access and eligibility for your API project. Keys stay server-side. Explicit fallback settings are preserved, including an empty list to disable fallback.
+
+To use paid OpenAI later, set `AI_PROVIDER=openai` and fill in the blank `OPENAI_API_KEY` in `.env`. `OPENAI_MODEL=luna-6.0` is the default configuration alias for OpenAI's documented API ID `gpt-6-luna`; other image/function-capable API model IDs can be specified directly. OpenAI does not require Gemini's free-tier confirmation. Both providers use the same source-grounded photo stages; errors never switch providers. See [provider setup](docs/provider.md).
 
 The Node server does not restart automatically when files change. Restart it manually after backend or environment changes: Ctrl+C, then `npm run dev`. Frontend edits can still refresh through Vite HMR on the same port. Do not launch another instance on port 3000. Without valid provider configuration, photo analysis is disabled and the app displays setup guidance.
 
 ## Vercel deployment
 
-The Git-connected Vercel project builds the frontend and the visitor API with `npm run build:vercel`. Preview and Production use server-side Gemini settings and a free Upstash for Redis connection for expiring sessions. The build verifies the source archive and packages compact summaries for all 89 plans. The annotation editor runs on the local workstation. [Setup and Preview checks](docs/operations.md#vercel)
+The Git-connected Vercel project builds the frontend and the visitor API with `npm run build:vercel`. Preview and Production use server-side settings for the selected AI provider and a free Upstash for Redis connection for expiring sessions. The build verifies the source archive and packages compact summaries for all 89 plans. The annotation editor runs on the local workstation. [Setup and Preview checks](docs/operations.md#vercel)
 
 ## Use
 
@@ -52,7 +54,7 @@ Walking directions offer **Show my position**, **Stop tracking** and **Resume tr
 
 ## Internal connection editor
 
-Open [the local topology editor](http://127.0.0.1:3000/internal/topology) after starting or restarting the server. It works without a Gemini key and is separate from the photo screen. Access is limited to this computer through `localhost` or `127.0.0.1` (IPv6 loopback also works); it is not a phone/LAN editing service.
+Open [the local topology editor](http://127.0.0.1:3000/internal/topology) after starting or restarting the server. It works without an AI key and is separate from the photo screen. Access is limited to this computer through `localhost` or `127.0.0.1` (IPv6 loopback also works); it is not a phone/LAN editing service.
 
 1. The default **Review candidates · T / F** view selects the first unanswered proposal. Enter a reviewer name or nickname, compare the two official floor plans and answer **T**, **F** or **Unknown**. For stairs and elevators the direction choices show the floor numbers.
 2. After T, explicitly choose **Both directions A ↔ B**, **A → B only**, **B → A only**, or **Unknown**. T plus a known direction records approval of the displayed endpoints and that passage in one atomic save. F and unknown are saved without adding routes; an unknown direction also stays outside routing.
@@ -82,7 +84,7 @@ npm start                 # Serve the production build locally
 npm run format
 ```
 
-Tests mock Gemini and spend no provider quota. Browser automation, when requested, uses an isolated server on port 3100 with credentials disabled and installed Google Chrome. It is not a physical-phone or Safari test. The browser OCR packages, worker assets and installation hook have been removed; optional local PDF preprocessing can still use Tesseract.
+Tests mock AI providers and spend no provider quota. Browser automation, when requested, uses an isolated server on port 3100 with credentials disabled and installed Google Chrome. It is not a physical-phone or Safari test. The browser OCR packages, worker assets and installation hook have been removed; optional local PDF preprocessing can still use Tesseract.
 
 SE12, SW03 and SW01 have a server-side spatial index across floors 1–4. It includes 378 source-read labels, 20 drawn door locations, whole-page OCR evidence and a revisioned graph of 24 approved checkpoints and 16 passages. Try a label with `npm run spatial:query -- resolve_spatial_labels '{"purpose":"destination","labels":["SW03 2605"]}'`. Unknown labels return `unsupported`. [Tool contracts, coverage and examples](docs/spatial-retrieval.md)
 
@@ -118,13 +120,14 @@ mvp/
 ├── src/
 │   ├── App.tsx, main.tsx, styles.css, wayfinding.ts, wayfinding.css
 │   ├── TopologyEditor.tsx, topology.ts, topology.css
-│   ├── api.ts, photo.ts, photo-views.ts, types.ts
+│   ├── api.ts, ai-provider.ts, photo.ts, photo-views.ts, types.ts
 │   ├── location/  Device acquisition, page projection, photo comparison and foreground lifecycle
 │   └── components/  Photo/result inputs, walking directions, DevicePosition, PhotoDeviceLocation, WalkingDeviceLocation and topology review
 ├── server/
 │   ├── index.ts, app.ts, runtime.ts, configured-app.ts, vercel.ts
 │   ├── visitor-api.ts, visitor-sessions.ts, redis-visitor-sessions.ts
-│   ├── provider.ts, photo-localization.ts, session.ts
+│   ├── provider.ts, provider-config.ts, provider-budget.ts
+│   ├── openai-provider.ts, openai-response.ts, photo-localization.ts, session.ts
 │   ├── photo-evidence.ts, photo-media.ts, photo-grounding.ts, photo-doorways.ts, room-labels.ts
 │   ├── topology.ts, topology-api.ts, routing.ts, visitor-paths.ts, wayfinding.ts
 │   ├── topology-candidates.ts, topology-provenance.ts, topology-import.ts, topology-english.ts
@@ -152,7 +155,8 @@ mvp/
 ├── tests/
 │   ├── visitor-sessions.test.ts
 │   ├── api.test.ts, client-state.test.ts, data.test.ts, visual-data.test.ts, runtime.test.ts
-│   ├── provider.test.ts, provider-response.test.ts, spatial-retrieval.test.ts
+│   ├── provider.test.ts, provider-response.test.ts, provider-config.test.ts
+│   ├── openai-provider.test.ts, openai-api.test.ts, spatial-retrieval.test.ts
 │   ├── photo-localization.test.ts, photo-doorways.test.ts, photo-api.test.ts, route-results.test.ts
 │   ├── photo.test.ts, photo-location-input.test.ts, room-labels.test.ts, photo-fixtures.ts
 │   ├── device-location.test.ts, browser-location.test.ts, device-location-lifecycle.test.ts, location-fixtures.ts

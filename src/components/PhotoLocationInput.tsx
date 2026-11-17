@@ -11,9 +11,11 @@ import {
   X,
 } from 'lucide-react';
 import type { PreparedPhoto } from '../photo';
+import { aiProviderDetails, type AiProviderName } from '../ai-provider';
 
 type PhotoLocationInputProps = {
   step?: 'photo' | 'destination';
+  providerName?: AiProviderName;
   photo: PreparedPhoto | null;
   ready: boolean;
   reading: boolean;
@@ -50,6 +52,7 @@ function ElapsedTime() {
 
 export function PhotoLocationInput({
   step = 'photo',
+  providerName,
   photo,
   ready,
   reading,
@@ -57,7 +60,7 @@ export function PhotoLocationInput({
   status,
   error,
   destination,
-  submissionNotice = 'Tapping Go sends your photo and detail views to the configured AI provider to find your location.',
+  submissionNotice,
   canUsePhotoResult = false,
   onDestinationChange,
   onPhoto,
@@ -66,6 +69,10 @@ export function PhotoLocationInput({
   onAnalyze,
   onDiscard,
 }: PhotoLocationInputProps) {
+  const provider = aiProviderDetails(providerName);
+  const photoSubmissionNotice =
+    submissionNotice ??
+    `Tapping Go sends this photo and its detail views to ${provider.recipient}. ${provider.dataUse}`;
   const upload = useRef<HTMLInputElement>(null);
   const phonePhoto = useRef<HTMLInputElement>(null);
   const canSubmitPhoto = !!photo && ready && !reading && !busy && !!destination.trim();
@@ -221,7 +228,7 @@ export function PhotoLocationInput({
             {!canUsePhotoResult && (
               <>
                 <p className="helper" id="photo-submission-note">
-                  {submissionNotice}
+                  {photoSubmissionNotice}
                 </p>
                 <button
                   type="submit"

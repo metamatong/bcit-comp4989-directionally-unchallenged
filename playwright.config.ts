@@ -28,6 +28,8 @@ export default defineConfig({
       PORT: '3100',
       HOST: '127.0.0.1',
       GEMINI_API_KEY: '',
+      AI_PROVIDER: 'gemini',
+      OPENAI_API_KEY: '',
       GEMINI_MODEL: 'gemini-3.5-flash-lite',
       AI_FREE_TIER_CONFIRMED: 'false',
     },

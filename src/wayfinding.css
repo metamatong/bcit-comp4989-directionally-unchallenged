@@ -140,6 +140,34 @@
   align-items: center;
   gap: 9px;
 }
+.route-ready {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 12px 14px;
+  border: 1px solid #b9d8c6;
+  border-radius: 10px;
+  background: #f0f8f3;
+  color: #205540;
+  margin-bottom: 14px;
+}
+.route-ready-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #d9eddf;
+}
+.route-ready > span:last-child {
+  display: grid;
+  gap: 2px;
+}
+.route-ready small {
+  color: #426b54;
+  font-size: 13px;
+}
 .destination-match {
   padding: 9px 11px;
   border-radius: 8px;

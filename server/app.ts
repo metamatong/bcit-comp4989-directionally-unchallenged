@@ -83,6 +83,7 @@ export function createApp(options: {
       coverage,
       liveAvailable: options.liveAvailable,
       model: options.model,
+      provider: options.provider.name ?? 'gemini',
       setupNotice: options.liveAvailable ? null : (options.setupNotice ?? null),
       visualPlans,
       locationCatalogue: locationData,

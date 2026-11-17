@@ -115,7 +115,7 @@ export type CampusPhotoAnalysis = {
   atlasPlanCount: number;
   detailedPlanIds: string[];
   buildingHint: string | null;
-  method: 'gemini-photo-floorplan';
+  method: 'gemini-photo-floorplan' | 'openai-photo-floorplan';
   evidenceId: string;
   labelRetrieval: { indexedLabels: number; exactMatchPlanIds: string[]; clearLabels: string[] };
   usedFallbackModel: boolean;
@@ -150,6 +150,7 @@ export type CatalogueRecord = {
   routingSupported: boolean;
 };
 export type Bootstrap = {
+  provider?: import('./ai-provider').AiProviderName;
   locationCatalogue?: import('./location/types').LocationCatalogue;
   locationNotice?: string;
   liveAvailable: boolean;

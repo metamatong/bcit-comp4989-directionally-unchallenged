@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, MapPin, Route } from 'lucide-react';
+import { ArrowRight, Check, MapPin, Route } from 'lucide-react';
 import { request } from '../api';
 import type { CampusLocationCandidate, VisualPlan } from '../types';
 import type { NavigationResult, PlaceChoice } from '../wayfinding';
@@ -86,14 +86,31 @@ export function JourneyPanel({
   if (!result)
     return (
       <section className="journey-panel" role="status">
-        <span className="route-loading">
-          <Route size={19} className="spin" /> Finding your starting point and route…
-        </span>
+        <div className="route-ready" aria-live="polite">
+          <span className="route-ready-icon" aria-hidden="true">
+            <Check size={18} />
+          </span>
+          <span>
+            <strong>Starting position acquired</strong>
+            <small className="route-loading">
+              <Route size={15} className="spin" /> Finding your route…
+            </small>
+          </span>
+        </div>
       </section>
     );
   if (result.status === 'route')
     return (
       <section className="journey-panel" aria-label="Your walking route">
+        <div className="route-ready" role="status" aria-live="polite">
+          <span className="route-ready-icon" aria-hidden="true">
+            <Check size={18} />
+          </span>
+          <span>
+            <strong>Starting position acquired</strong>
+            <small>Your route is ready.</small>
+          </span>
+        </div>
         {result.destinationMatch && (
           <p className="destination-match" role="status">
             Matching “{result.destinationMatch.requested}” to {result.destinationMatch.matched}.

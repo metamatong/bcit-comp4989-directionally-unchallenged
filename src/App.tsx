@@ -1,3 +1,4 @@
+import { aiProviderDetails } from './ai-provider';
 import { useEffect, useRef, useState } from 'react';
 import {
   AlertTriangle,
@@ -270,9 +271,8 @@ export default function App() {
       session.campusAnalysis?.referenceLabels?.some((ref) => ref.planId === plan.id),
   );
   const photoReady = data.liveAvailable && data.photoLocalizationAvailable;
-  const submissionNotice = data.model.toLowerCase().includes('gemini')
-    ? 'Tapping Go sends this photo and its detail views to Google Gemini to find your location. Google may use free-tier inputs to improve its products.'
-    : 'Tapping Go sends this photo and its detail views to the configured AI provider to find your location.';
+  const provider = aiProviderDetails(data.provider);
+  const submissionNotice = `Tapping Go sends this photo and its detail views to ${provider.recipient} to find your location. ${provider.dataUse}`;
   const analysis = showPhotoResults ? session.campusAnalysis : null;
   const region = analysis ? session.campusLocation : null;
   const routeCandidate = region ?? undefined;
@@ -281,6 +281,7 @@ export default function App() {
     <>
       <PhotoLocationInput
         step={analysis ? 'destination' : preparedPhoto ? flowStep : 'photo'}
+        providerName={data.provider}
         destination={destination}
         submissionNotice={submissionNotice}
         canUsePhotoResult={!!analysis?.candidates.length}
@@ -344,7 +345,7 @@ export default function App() {
             data-testid="provider-status"
           >
             <span className="status-dot" />
-            {data.liveAvailable ? 'AI ready' : 'Setup required'}
+            {data.liveAvailable ? `${provider.label} ready` : 'Setup required'}
           </span>
           <button
             className="icon-button"
@@ -360,8 +361,11 @@ export default function App() {
           <div className="setup-notice" role="note">
             <ShieldCheck size={21} />
             <div>
-              <strong>AI setup required</strong>
-              <p>{data.setupNotice ?? 'Photo analysis is not configured on this server.'}</p>
+              <strong>{provider.label} setup required</strong>
+              <p>
+                {data.setupNotice ??
+                  `Photo analysis needs a ${provider.label} key configured on the server. Add your key and restart the app.`}
+              </p>
             </div>
           </div>
         )}
@@ -510,10 +514,10 @@ export default function App() {
               <div className="about-section">
                 <h3>Your data stays transient</h3>
                 <p>
-                  Tapping Go sends the photo and its detail views to the configured AI provider. The
-                  app does not save photos or route history. Optional device tracking in walking
-                  directions stays in this browser tab. Hosted session results expire after 30
-                  minutes; reloading starts a new session.
+                  Tapping Go sends this photo and its detail views to {provider.recipient}. The app
+                  does not save photos or route history. Optional device tracking in walking
+                  directions stays in this browser tab. Hosted session results are encrypted and
+                  expire after 30 minutes; reloading starts a new session. {provider.dataUse}
                 </p>
               </div>
             </>

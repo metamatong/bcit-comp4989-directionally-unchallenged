@@ -163,10 +163,6 @@ export function RouteDirections({
           Walking directions
         </h2>
       </div>
-      <p className="helper">
-        Starting point acquired · {route.origin.label} ·{' '}
-        {planLabel(planById.get(route.origin.planId)!)}
-      </p>
       <WalkingDeviceLocation
         tracking={tracking}
         floorLabel={planLabel(activePlan)}

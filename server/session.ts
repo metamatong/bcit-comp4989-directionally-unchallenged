@@ -1,16 +1,21 @@
 import { randomUUID } from 'node:crypto';
 import type { Session } from '../src/types';
+import { aiProviderDetails, type AiProviderName } from '../src/ai-provider';
 
-export function newSession(providerAvailable = true): Session {
+export function newSession(
+  providerAvailable = true,
+  providerName: AiProviderName = 'gemini',
+): Session {
+  const { label, recipient } = aiProviderDetails(providerName);
   return {
     id: randomUUID(),
     revision: 0,
     mode: 'live',
     activity: [],
     notice: providerAvailable
-      ? 'Choose a campus photo. Submitting it sends the photo and its detail views to Google Gemini for analysis.'
-      : 'Photo analysis needs Gemini setup. Configure the server and restart to enable analysis.',
-    agentStatus: providerAvailable ? 'Gemini · ready' : 'Gemini · setup required',
+      ? `Choose a campus photo. Submitting it sends the photo and its detail views to ${recipient} for analysis.`
+      : `Photo analysis needs ${label} setup. Configure the server and restart to enable analysis.`,
+    agentStatus: `${label} · ${providerAvailable ? 'ready' : 'setup required'}`,
     providerCalls: 0,
     lastTouched: Date.now(),
     appliedActions: [],

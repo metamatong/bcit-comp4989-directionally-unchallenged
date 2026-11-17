@@ -39,6 +39,16 @@ function button(markup: string, label: string) {
 }
 
 describe('inline photo input (Node rendering, no browser)', () => {
+  it('discloses OpenAI beside the analysis button only when selected by the server', () => {
+    const { markup, props } = renderInput({ photo, providerName: 'openai' });
+    expect(markup).toContain('Submitting sends this photo and its detail views to OpenAI.');
+    expect(markup).toContain('OpenAI API data handling applies.');
+    expect(markup).not.toContain('Google');
+    expect(button(markup, 'Analyze photo against BCIT plans')).toContain(
+      'aria-describedby="photo-submission-note"',
+    );
+    expect(props.onAnalyze).not.toHaveBeenCalled();
+  });
   it('exposes upload and native capture immediately under Find my location', () => {
     const { markup, props } = renderInput();
     expect(markup).toContain('<h1 id="location-heading">Find my location</h1>');

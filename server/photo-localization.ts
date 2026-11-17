@@ -201,7 +201,7 @@ function singleCall(parts: ModelPart[], toolName: string): unknown {
   const calls = parts.flatMap((part) => (part.functionCall ? [part.functionCall] : []));
   if (calls.length !== 1 || calls[0].name !== toolName)
     throw new ProviderError(
-      'Gemini did not return a valid floor-plan comparison. No location was applied.',
+      'The AI provider did not return a valid floor-plan comparison. No location was applied.',
       502,
       'response',
       false,
@@ -371,7 +371,7 @@ export async function analyzeCampusPhoto(
       const selection = selectionSchema.safeParse(singleCall(parts, selectTool.name));
       if (!selection.success || selection.data.planIds.some((id) => !candidateIds.has(id)))
         throw new ProviderError(
-          'Gemini selected an invalid or unsupplied floor plan. No location was applied.',
+          'The AI provider selected an invalid or unsupplied floor plan. No location was applied.',
           502,
           'response',
           false,
@@ -397,7 +397,7 @@ export async function analyzeCampusPhoto(
       atlasPlanCount: needsVisualShortlist ? candidatePlans.length : 0,
       detailedPlanIds: selectedPlanIds,
       buildingHint: input.buildingHint ?? null,
-      method: 'gemini-photo-floorplan',
+      method: provider.name === 'openai' ? 'openai-photo-floorplan' : 'gemini-photo-floorplan',
       evidenceId: evidence.id,
       labelRetrieval: {
         indexedLabels: retrieval.indexedLabels,
@@ -455,10 +455,10 @@ export async function analyzeCampusPhoto(
         );
         throw new ProviderError(
           invalidCandidateCount
-            ? 'Gemini returned more than one location suggestion. No location was applied.'
+            ? 'The AI provider returned more than one location suggestion. No location was applied.'
             : invalidCoordinates
-              ? 'Gemini returned invalid region coordinates. No location was applied.'
-              : 'Gemini returned invalid comparison data. No location was applied.',
+              ? 'The AI provider returned invalid region coordinates. No location was applied.'
+              : 'The AI provider returned invalid comparison data. No location was applied.',
           502,
           'response',
           false,
@@ -468,7 +468,7 @@ export async function analyzeCampusPhoto(
         comparison.data.candidates.some((candidate) => !selectedPlanIds.includes(candidate.planId))
       )
         throw new ProviderError(
-          'Gemini returned invalid source IDs. No location was applied.',
+          'The AI provider returned invalid source IDs. No location was applied.',
           502,
           'response',
           false,

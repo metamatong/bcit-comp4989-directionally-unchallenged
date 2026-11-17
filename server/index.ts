@@ -6,7 +6,7 @@ import { configuredApplication } from './configured-app';
 import { root } from './data';
 import { listenServer } from './runtime';
 if (existsSync(`${root}/.env`)) process.loadEnvFile(`${root}/.env`);
-const { app, setupNotice } = configuredApplication(process.env);
+const { app, setupNotice, providerLabel } = configuredApplication(process.env);
 const liveAvailable = setupNotice === null;
 const httpServer = createHttpServer(app);
 let closeDevelopmentServer: (() => Promise<void>) | undefined;
@@ -32,9 +32,9 @@ const port = Number(process.env.PORT ?? 3000),
 try {
   await listenServer(httpServer, port, host);
   console.log(
-    `DirectionallyUnchallenged is ready at http://${host}:${port} · ${liveAvailable ? 'Gemini configured' : 'Gemini setup required'}`,
+    `DirectionallyUnchallenged is ready at http://${host}:${port} · ${providerLabel} ${liveAvailable ? 'configured' : 'setup required'}`,
   );
-  if (setupNotice) console.log(`Gemini configuration: ${setupNotice}`);
+  if (setupNotice) console.log(`${providerLabel} configuration: ${setupNotice}`);
 } catch (error) {
   const code = (error as NodeJS.ErrnoException).code;
   console.error(

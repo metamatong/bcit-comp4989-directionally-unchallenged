@@ -1,6 +1,6 @@
 # Spatial retrieval for SE12, SW03 and SW01
 
-A caller can resolve a complete identifier to source pages and printed positions, inspect nearby labels and drawing doors, and query the published graph for approved passages. The photo pipeline uses the pilot labels after Gemini reads the image. The visitor form uses the same index to resolve destination text and the live editor graph to confirm that a specific room door can be reached.
+A caller can resolve a complete identifier to source pages and printed positions, inspect nearby labels and drawing doors, and query the published graph for approved passages. The photo pipeline uses the pilot labels after the selected AI provider reads the image. The visitor form uses the same index to resolve destination text and the live editor graph to confirm that a specific room door can be reached.
 
 ## Try a lookup
 
