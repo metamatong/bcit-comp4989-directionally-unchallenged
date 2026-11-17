@@ -1,5 +1,11 @@
 # Verification record
 
+## Selectable OpenAI provider · November 17, 2026
+
+All 295 unit/API tests passed with mocked provider transport. New coverage checks server-only provider selection, Gemini defaults/free-tier checks, the `luna-6.0` alias, paid OpenAI configuration, per-photo recipient disclosure, Responses image/tool serialization, output completion/refusal validation, bounded retries, cancellation, request budgets and the complete two-stage visitor API. The workflow still requires exact source retrieval, visual comparison and user confirmation, with image-free session storage.
+
+`npm test -- --list` ran the unit/API suite and listed browser tests without executing them, preserving the requested skip of screen checks. `npm run build`, `npm run data:validate` and `npm run format` passed. Dependency installation was restored from the existing lockfile. Local loopback and topology initialization required normal filesystem/network permissions after sandbox-only attempts failed. No live OpenAI request, new live Gemini comparison, browser/screenshot check or physical-campus validation was performed. The private environment remains on Gemini with a blank OpenAI key placeholder.
+
 ## Optional device location · November 16, 2026
 
 The device-location change passed 259 unit/API tests, production build/type checking and source validation. New checks cover photo association, coordinate privacy, walking lifecycle, floor confirmation, source hashes and projection geometry. Provider and device inputs are mocked. Browser/screenshot checks were skipped as requested. Physical-phone behavior and indoor accuracy remain unverified. SE12 floor 3 has an approximate overlay. Eleven floor calibrations remain unresolved. [Coverage and evaluation](device-location.md)

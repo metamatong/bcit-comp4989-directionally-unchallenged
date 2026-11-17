@@ -116,7 +116,7 @@ export function CampusLocationResults({
             : 'No clear match'}
       </h3>
       <p>{analysis.summary}</p>
-      {analysis.usedFallbackModel && <p className="helper">Backup Gemini model used.</p>}
+      {analysis.usedFallbackModel && <p className="helper">Backup AI model used.</p>}
       {!analysis.candidates.length &&
         plans
           .filter((p) =>

@@ -1,3 +1,4 @@
+import { aiProviderDetails } from './ai-provider';
 import { useEffect, useRef, useState } from 'react';
 import {
   AlertTriangle,
@@ -303,6 +304,7 @@ export default function App() {
   const photoInput = (
     <>
       <PhotoLocationInput
+        providerName={data.provider}
         destination={destination}
         canUsePhotoResult={!!analysis?.candidates.length}
         onDestinationChange={(value) => {
@@ -383,7 +385,9 @@ export default function App() {
             data-testid="provider-status"
           >
             <span className="status-dot" />
-            {data.liveAvailable ? 'Gemini ready' : 'Setup required'}
+            {data.liveAvailable
+              ? `${aiProviderDetails(data.provider).label} ready`
+              : 'Setup required'}
           </span>
           <button
             className="icon-button"
@@ -399,10 +403,10 @@ export default function App() {
           <div className="setup-notice" role="note">
             <ShieldCheck size={21} />
             <div>
-              <strong>Gemini setup required</strong>
+              <strong>{aiProviderDetails(data.provider).label} setup required</strong>
               <p>
                 {data.setupNotice ??
-                  'Photo analysis needs a Gemini key configured on the server. Add your key and restart the app.'}
+                  `Photo analysis needs a ${aiProviderDetails(data.provider).label} key configured on the server. Add your key and restart the app.`}
               </p>
             </div>
           </div>
@@ -553,11 +557,11 @@ export default function App() {
               <div className="about-section">
                 <h3>Your data stays transient</h3>
                 <p>
-                  Explicitly submitted photos go to Google Gemini. Optional device readings stay in
-                  this browser tab. Your browser or device may use its own location service. Hosted
-                  session results are encrypted and expire after 30 minutes; reloading starts a new
-                  session. Clear analysis removes the current result. Google’s free-tier data
-                  handling applies.
+                  Explicitly submitted photos go to {aiProviderDetails(data.provider).recipient}.
+                  Optional device readings stay in this browser tab. Your browser or device may use
+                  its own location service. Hosted session results are encrypted and expire after 30
+                  minutes; reloading starts a new session. Clear analysis removes the current
+                  result. {aiProviderDetails(data.provider).dataUse}
                 </p>
               </div>
             </>

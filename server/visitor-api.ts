@@ -1,4 +1,5 @@
 /** Visitor HTTP routes share one committed session and evidence record per operation. */
+import { aiProviderDetails, type AiProviderName } from '../src/ai-provider';
 import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 export const actionSchema = z.discriminatedUnion('type', [
@@ -53,7 +54,12 @@ function mutation(sessions: VisitorSessions, operate: Operation) {
 const actionEnvelope = z
   .object({ requestId: z.string().uuid(), revision: z.number().int().min(0), action: actionSchema })
   .strict();
-function action(req: Request, record: VisitorRecord, available: boolean): Reply {
+function action(
+  req: Request,
+  record: VisitorRecord,
+  available: boolean,
+  providerName?: AiProviderName,
+): Reply {
   const { session } = record;
   const parsed = actionEnvelope.safeParse(req.body);
   if (!parsed.success)
@@ -72,7 +78,7 @@ function action(req: Request, record: VisitorRecord, available: boolean): Reply 
     if (action.type === 'confirm-campus-region') confirmCampusRegion(session, action.candidateId);
     else {
       delete record.evidence;
-      Object.assign(session, newSession(available), {
+      Object.assign(session, newSession(available, providerName), {
         id: session.id,
         revision: session.revision,
         appliedActions: session.appliedActions,
@@ -97,6 +103,7 @@ function action(req: Request, record: VisitorRecord, available: boolean): Reply 
 }
 type Options = { provider: Provider; liveAvailable: boolean; setupNotice?: string | null };
 function photoStage(options: Options, stage: 'evidence' | 'location'): Operation {
+  const provider = aiProviderDetails(options.provider.name);
   return async (req, res, record) => {
     const { session } = record;
     const parsed = (
@@ -108,7 +115,7 @@ function photoStage(options: Options, stage: 'evidence' | 'location'): Operation
         body: {
           error:
             stage === 'evidence'
-              ? 'Choose a valid photo with its detail crops and explicitly agree to send it to Gemini.'
+              ? `Choose a valid photo with its detail crops and explicitly agree to send it to ${provider.recipient}.`
               : 'Read the photo labels first, then submit the same photo and detail crops with its evidence ID.',
         },
       };
@@ -118,7 +125,7 @@ function photoStage(options: Options, stage: 'evidence' | 'location'): Operation
         body: {
           error:
             options.setupNotice ??
-            'Gemini is not configured. Add the server API key and free-tier confirmation, then restart.',
+            `${provider.label} is not configured. Add the server API key and required provider settings, then restart.`,
           providerError: { code: 'configuration', retryable: false },
           session,
         },
@@ -267,7 +274,7 @@ export function visitorRouter(
       res.status(400).json({ error: 'Start a session without mode or location overrides.' });
       return;
     }
-    const session = newSession(options.liveAvailable);
+    const session = newSession(options.liveAvailable, options.provider.name);
     if (!(await sessions.create(session))) {
       res.status(503).json({ error: 'Session capacity reached. Try again later.' });
       return;
@@ -288,7 +295,9 @@ export function visitorRouter(
   router.post('/:id/navigation', mutation(sessions, navigation(topology, false)));
   router.post(
     '/:id/actions',
-    mutation(sessions, (req, _res, record) => action(req, record, options.liveAvailable)),
+    mutation(sessions, (req, _res, record) =>
+      action(req, record, options.liveAvailable, options.provider.name),
+    ),
   );
   return router;
 }

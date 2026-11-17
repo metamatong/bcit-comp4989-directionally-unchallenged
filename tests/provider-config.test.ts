@@ -1,0 +1,47 @@
+/** Provider selection is server-owned and inactive-provider credentials are irrelevant. */
+import { describe, expect, it } from 'vitest';
+import {
+  liveAiModel,
+  liveAiProvider,
+  liveAiSetupIssue,
+  liveAiFallbackModels,
+  openAiApiModel,
+} from '../server/provider-config';
+
+describe('provider configuration', () => {
+  const gemini = { GEMINI_API_KEY: 'private-gemini', AI_FREE_TIER_CONFIRMED: 'true' };
+  const openai = { AI_PROVIDER: 'openai', OPENAI_API_KEY: 'private-openai' };
+  it('defaults to Gemini and preserves its current model/fallback settings', () => {
+    expect(liveAiProvider({})).toBe('gemini');
+    expect(liveAiSetupIssue({ ...gemini, OPENAI_MODEL: '', OPENAI_API_KEY: '' })).toBeNull();
+    expect(liveAiModel({ GEMINI_MODEL: 'gemini-3.6-flash' })).toBe('gemini-3.6-flash');
+    expect(liveAiFallbackModels({})).toEqual(['gemini-3.8-flash']);
+  });
+  it('selects paid OpenAI without requiring Gemini credentials or free-tier confirmation', () => {
+    expect(liveAiProvider(openai)).toBe('openai');
+    expect(liveAiModel(openai)).toBe('luna-6.0');
+    expect(openAiApiModel(liveAiModel(openai))).toBe('gpt-6-luna');
+    expect(
+      liveAiSetupIssue({ ...openai, AI_FREE_TIER_CONFIRMED: 'false', GEMINI_MODEL: 'invalid' }),
+    ).toBeNull();
+    expect(liveAiFallbackModels({ ...openai, GEMINI_FALLBACK_MODELS: 'invalid' })).toEqual([]);
+    expect(liveAiModel({ ...openai, OPENAI_MODEL: 'gpt-6-sol' })).toBe('gpt-6-sol');
+  });
+  it('rejects unknown provider choices and missing selected credentials without using another key', () => {
+    expect(liveAiSetupIssue({ ...gemini, AI_PROVIDER: 'other' })).toContain('AI_PROVIDER must be');
+    expect(liveAiSetupIssue({ ...gemini, AI_PROVIDER: '' })).toContain('AI_PROVIDER must be');
+    expect(liveAiSetupIssue({ ...gemini, AI_PROVIDER: 'openai' })).toContain(
+      'OPENAI_API_KEY is missing',
+    );
+    expect(liveAiSetupIssue({ ...openai, AI_PROVIDER: 'gemini' })).toContain(
+      'GEMINI_API_KEY is missing',
+    );
+    expect(liveAiSetupIssue({ ...openai, OPENAI_API_KEY: '  ' })).toContain(
+      'OPENAI_API_KEY is missing',
+    );
+    expect(liveAiSetupIssue({ ...openai, OPENAI_MODEL: '' })).toContain('OPENAI_MODEL');
+    expect(liveAiSetupIssue({ ...gemini, AI_FREE_TIER_CONFIRMED: 'false' })).toContain(
+      'AI_FREE_TIER_CONFIRMED',
+    );
+  });
+});

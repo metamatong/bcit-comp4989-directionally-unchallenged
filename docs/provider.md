@@ -1,8 +1,30 @@
-# Gemini provider configuration and verification
+# AI provider configuration and verification
 
-Documentation checked October 16, 2026. Gemini is the only photo-analysis provider. The configured primary model is preserved; ordered Gemini model fallbacks are supported. Exact account quotas and free-tier eligibility require operator verification; a key alone cannot establish them.
+OpenAI documentation checked November 17, 2026; the Gemini record below retains its October 16 checks. Select `AI_PROVIDER=gemini` (default) or `AI_PROVIDER=openai` on the server. Both providers run the same label-reading and source-grounded visual comparison stages. The configured primary model is preserved; ordered Gemini model fallbacks are supported. Exact account quotas and free-tier eligibility require operator verification; a key alone cannot establish them.
 
-## Selected adapter
+## Paid OpenAI
+
+The private `.env` and `.env.example` include:
+
+```dotenv
+AI_PROVIDER=gemini
+OPENAI_API_KEY=
+OPENAI_MODEL=luna-6.0
+```
+
+Leave the key blank until ready. To activate OpenAI, add a paid API key, change `AI_PROVIDER=openai` and restart the existing server. Gemini credentials and `AI_FREE_TIER_CONFIRMED` are ignored while OpenAI is selected. Switching back to Gemini restores its existing model, fallback list and free-tier eligibility check. Unknown provider names and missing selected-provider credentials disable analysis instead of switching providers.
+
+`luna-6.0` is an explicit application alias for **`gpt-6-luna`**, the public ID listed by OpenAI. The [Luna model record](https://developers.openai.com/api/docs/models/gpt-6-luna) documents image input, function calling and bounded reasoning. Bootstrap reports the actual API model ID. Other model IDs can be configured directly; the operator must verify image input, Responses function calling, low reasoning support, billing and project access. Local configuration validation does not establish account eligibility or generation access.
+
+`server/openai-provider.ts` uses `POST https://api.openai.com/v1/responses`, server-side Bearer authentication, high-detail inline image inputs, forced named functions and `parallel_tool_calls=false`. Shared uppercase tool schemas are converted to JSON Schema without changing property names, enums or exact labels. `strict=false` preserves optional fields; existing Zod and source-grounding validators remain authoritative. The app sends fresh text/images for each stage and does not replay stored provider conversations. [Image input](https://developers.openai.com/api/docs/guides/images-vision), [function calling](https://developers.openai.com/api/docs/guides/function-calling).
+
+Requests set `store=false`, omit provider conversation IDs, and do not request reasoning summaries. Responses must be completed; incomplete responses, partial calls, invalid JSON arguments, undeclared functions and refusals cannot become results. Reasoning items and extra metadata are discarded. No photo bytes enter app sessions or logs. Disabling response storage does not establish zero provider retention; [OpenAI API data controls](https://developers.openai.com/api/docs/guides/your-data) still apply.
+
+Application ceilings (`AI_REQUESTS_PER_MINUTE`, `AI_REQUESTS_PER_DAY`) apply to paid OpenAI too, including each retry. Hosted workers reserve the same shared budget per API key. Attempts use the stage allowance up to 30 seconds; `AI_TIMEOUT_MS` is the default when no stage allowance is supplied. HTTP 500/502/503/504 receive at most three attempts with bounded backoff. Long Retry-After intervals are returned without waiting; HTTP 429, authentication and model-access errors are explicit and sanitized. There are no OpenAI backup models or automatic provider switches. Photo selection alone never calls either provider.
+
+Validation uses mocked OpenAI transport and source protocol fixtures, not a paid key or a campus-photo benchmark. No live OpenAI generation, provider accuracy or physical-campus position has been verified.
+
+## Gemini adapter
 
 Google Gemini Developer API. The new-install default is **`gemini-3.5-flash-lite`**, with **`gemini-3.8-flash`** as its default fallback. Google's current [model catalogue](https://ai.google.dev/gemini-api/docs/models) describes both as multimodal models; the [pricing page](https://ai.google.dev/gemini-api/docs/pricing) currently lists free-tier input and output for them. The existing private `.env` model is preserved and remains the primary model unless changed by the operator. An existing 3.8 primary defaults to a 3.5 Flash-Lite backup. Explicit fallback lists, including an empty list, are preserved. Photo analysis sends the actual image, official plan PNGs and geometry summaries. Selection/detail use 4,096/8,192 total output-and-thinking token allowances.
 
@@ -20,11 +42,11 @@ The code retains Gemini 3.6 and explicitly selected Gemini 2.5 IDs for existing 
 4. Restart the existing server and refresh. Gemini readiness is displayed directly. `AI_DEFAULT_MODE` is unused and old browser mode preferences are cleared.
 5. Choose a photo, then select **Analyze photo against BCIT plans** or **Find my route** to send it to Gemini. No request occurs merely because a key is configured.
 
-Missing configuration displays setup guidance and disables/rejects photo submissions. Source plans remain internal; only relevant plans are shown with location results. Adding JSON or changing browser storage cannot restore fictional locations. Model failover is limited to the configured Gemini list; there is no paid or alternate-provider fallback.
+Missing configuration displays setup guidance and disables/rejects photo submissions. Source plans remain internal; only relevant plans are shown with location results. Adding JSON or changing browser storage cannot restore fictional locations. Model failover is limited to the configured Gemini list; there is no automatic alternate-provider fallback. Paid OpenAI is available only through explicit server selection.
 
 ## Transport, budgets and privacy
 
-The adapter sends keys in the server-side `x-goog-api-key` header and uses `generateContent` with forced typed functions. See [function calling](https://ai.google.dev/gemini-api/docs/function-calling). The first app API request calls Gemini to read photo labels from the context image and four original-image crops, without source-plan hints. The second app API request performs exact local label retrieval and calls Gemini with relevant source plans. Clear exact matches normally need two Gemini calls total; unreadable/ambiguous labels can add a visual-shortlist call. Only the single best location is returned; if the plans do not support a defensible result, it abstains.
+The Gemini adapter sends keys in the server-side `x-goog-api-key` header and uses `generateContent` with forced typed functions. See [function calling](https://ai.google.dev/gemini-api/docs/function-calling). The first app API request calls Gemini to read photo labels from the context image and four original-image crops, without source-plan hints. The second app API request performs exact local label retrieval and calls Gemini with relevant source plans. Clear exact matches normally need two Gemini calls total; unreadable/ambiguous labels can add a visual-shortlist call. Only the single best location is returned; if the plans do not support a defensible result, it abstains.
 
 Photo analysis gives a single model attempt up to 30 seconds. When a healthy configured alternative is available, the primary attempt uses the server's shorter `AI_TIMEOUT_MS` threshold (15 seconds by default). An upstream timeout, overload or quota response moves that model behind the other configured choices for 60 seconds or the reported retry interval, whichever is longer. A successful backup can handle the next photo stage immediately. The configured primary regains priority after recovery. All choices share the free-tier request budget.
 

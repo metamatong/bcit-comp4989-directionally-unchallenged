@@ -1,7 +1,7 @@
 # Project walkthrough
 
 1. Open the app. Upload photo and Take a photo are immediately available under Find my location; choose either without opening a popup.
-2. Enter a destination such as `SW03 3615`. The notice beside the button explains that submitting sends the photo and its detail views to Google Gemini.
+2. Enter a destination such as `SW03 3615`. The notice beside the button explains that submitting sends the photo and its detail views to the selected AI provider (Gemini by default).
 3. Select **Find my route** to submit the photo. The first API request reads visible room labels. The second searches all source labels exactly, then compares the image and crops with matching floor plans and full label/geometry evidence. If no usable exact match is available, visual shortlisting remains supported.
 4. With a destination entered, the app shows the reviewed starting points in the proposed photo area. Select **Start at …** only for the point where you are standing. Multiple destination matches show their plan locations for selection.
 5. The first result is the full walking itinerary. On the revision 29 pilot map, SE12 room 302 → SW03 office 2082 shows the SE12 third-floor window-side corridor, the indoor connecting passage, the SW03 third-floor east elevator and the second-floor walk to the office door. Each floor has its own map and arrows. Transfers use the reviewed departure and arrival locations.

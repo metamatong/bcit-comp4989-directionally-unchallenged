@@ -8,7 +8,7 @@ The supplied original [brief](project-brief.txt) remains unchanged. The user's l
 | PDF conversion | Full PNGs, overviews, overlapping crops, atlas and geometry JSON for every floor plan |
 | Actual-photo interpretation | Both API stages send the context image and four crops from the original photo; plan comparison remains visual and source-grounded |
 | LLM agent and tools | One orchestrator shortlists supplied plans, eliminates conflicts, and returns only its best supported hypothesis or abstains |
-| Free-tier provider and server-side key | `server/provider.ts`, `.env.example`, [provider record](provider.md) |
+| Selectable Gemini/free-tier or OpenAI/paid provider and server-side keys | `server/provider-config.ts`, `server/provider.ts`, `server/openai-provider.ts`, `.env.example`, [provider record](provider.md) |
 | User confirmation and uncertainty | One unverified location estimate, observable evidence, source links and explicit confirmation |
 | Mobile photo/camera input | Local resizing, photo picker and native camera capture |
 | Device-assisted photo localization and walking | Explicit opt-in, historical photo reading, geographic comparison and foreground walking overlay. SE12 floor 3 alignment is approximate. Eleven floor calibrations remain unresolved. [Coverage and validation](device-location.md) |

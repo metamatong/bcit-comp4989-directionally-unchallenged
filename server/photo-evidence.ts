@@ -1,3 +1,4 @@
+import { aiProviderDetails } from '../src/ai-provider';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import type { PhotoEvidence, Session } from '../src/types';
@@ -143,7 +144,7 @@ export async function readPhotoEvidence(
     );
     if (!parsed.success)
       throw new ProviderError(
-        'Gemini returned invalid photo label evidence. No location was applied.',
+        'The AI provider returned invalid photo label evidence. No location was applied.',
         502,
         'response',
         false,
@@ -163,7 +164,7 @@ export async function readPhotoEvidence(
       evidence: structuredClone(evidence),
     };
     session.photoEvidence = evidence;
-    session.agentStatus = 'Gemini · photo labels read; comparison pending';
+    session.agentStatus = `${aiProviderDetails(provider.name).label} · photo labels read; comparison pending`;
     logActivity(
       session,
       'read_photo_labels',
@@ -173,7 +174,7 @@ export async function readPhotoEvidence(
     );
     return record;
   } catch (error) {
-    session.agentStatus = 'Gemini · photo label reading unavailable';
+    session.agentStatus = `${aiProviderDetails(provider.name).label} · photo label reading unavailable`;
     logActivity(
       session,
       'photo_labels_stopped',

@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import { Camera, LoaderCircle, Search, ShieldCheck, Upload, X, MapPin } from 'lucide-react';
 import type { PreparedPhoto } from '../photo';
 import type { ReactNode } from 'react';
+import { aiProviderDetails, type AiProviderName } from '../ai-provider';
 
 type PhotoLocationInputProps = {
+  providerName?: AiProviderName;
   locationControl?: ReactNode;
   photo: PreparedPhoto | null;
   ready: boolean;
@@ -37,6 +39,7 @@ function ElapsedTime() {
 }
 
 export function PhotoLocationInput({
+  providerName,
   photo,
   ready,
   reading,
@@ -51,6 +54,7 @@ export function PhotoLocationInput({
   onDiscard,
   locationControl,
 }: PhotoLocationInputProps) {
+  const provider = aiProviderDetails(providerName);
   const upload = useRef<HTMLInputElement>(null);
   const phonePhoto = useRef<HTMLInputElement>(null);
 
@@ -158,8 +162,8 @@ export function PhotoLocationInput({
         >
           {locationControl}
           <p className="helper" id="photo-submission-note">
-            Submitting sends this photo and its detail views to Google Gemini. Google may use
-            free-tier inputs to improve its products.
+            Submitting sends this photo and its detail views to {provider.recipient}.{' '}
+            {provider.dataUse}
           </p>
           <button
             type="submit"
