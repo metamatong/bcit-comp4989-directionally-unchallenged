@@ -1,8 +1,14 @@
 # Verification record
 
+## AI route generation without approval prompts · November 17, 2026
+
+Visitor navigation now asks the selected provider to choose the destination occurrence and generate start/end points and floor paths from official plans. Room checkpoints, door bindings and corridor reviews no longer gate visitor routes; only mapped inter-building links constrain building transfers. The visitor panel no longer offers destination-occurrence selection, and the starting-position notice appears before the route request completes. One-character destination typos are matched against source labels across the pilot, independent of manual door bindings.
+
+`npm run format`, `npm run build` and `git diff --check` passed. No automated tests, live provider request, browser check or physical-campus validation were run for this change.
+
 ## Selectable OpenAI provider · November 17, 2026
 
-All 295 unit/API tests passed with mocked provider transport. New coverage checks server-only provider selection, Gemini defaults/free-tier checks, the `luna-6.0` alias, paid OpenAI configuration, per-photo recipient disclosure, Responses image/tool serialization, output completion/refusal validation, bounded retries, cancellation, request budgets and the complete two-stage visitor API. The workflow still requires exact source retrieval, visual comparison and user confirmation, with image-free session storage.
+At the time of this provider migration, the workflow required exact source retrieval, visual comparison and user confirmation, with image-free session storage. All 295 unit/API tests passed with mocked provider transport. New coverage checks server-only provider selection, Gemini defaults/free-tier checks, the `luna-6.0` alias, paid OpenAI configuration, per-photo recipient disclosure, Responses image/tool serialization, output completion/refusal validation, bounded retries, cancellation, request budgets and the then-current visitor API.
 
 `npm test -- --list` ran the unit/API suite and listed browser tests without executing them, preserving the requested skip of screen checks. `npm run build`, `npm run data:validate` and `npm run format` passed. Dependency installation was restored from the existing lockfile. Local loopback and topology initialization required normal filesystem/network permissions after sandbox-only attempts failed. No live OpenAI request, new live Gemini comparison, browser/screenshot check or physical-campus validation was performed. The private environment remains on Gemini with a blank OpenAI key placeholder.
 

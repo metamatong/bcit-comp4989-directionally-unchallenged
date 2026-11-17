@@ -46,7 +46,7 @@ The pilot spatial evidence under `data/campus/spatial/` includes additional OCR,
 
 Floor-plan coordinates use PDF points with a top-left origin. Separate official geographic footprints and source-bound calibration records under `data/campus/geolocation/` support device overlays. SE12 floor 3 has approximate drawing alignment. Eleven pilot floor calibrations remain unresolved. Routing distances and cross-floor alignment require independent evidence. Raw drawing primitives remain unclassified. [Geographic provenance and coverage](device-location.md)
 
-A limited visual source review inspected SE12 floor 1, SW1 floor 1 and the campus wayfinding map. No complete set of campus entrances, corridor connections or accessibility properties is verified. Visitor routing uses the subsequent reviewed pilot topology and four page-bound corridor traces. Fictional routing data and controls have been removed at the user's request.
+A limited visual source review inspected SE12 floor 1, SW1 floor 1 and the campus wayfinding map. No complete set of campus entrances, corridor connections or accessibility properties is verified. Visitor routes are generated from official floor plans; only mapped building connections constrain transfers. Fictional routing data and controls have been removed at the user's request.
 
 ## Downloaded building/floor coverage
 

@@ -22,7 +22,7 @@ import { preparePhoto, type PreparedPhoto } from './photo';
 import { PHOTO_STAGE_TIMEOUT_MS, PHOTO_RESPONSE_GRACE_MS } from './photo-views';
 import { CampusLocationResults } from './components/CampusLocationResults';
 import { PhotoLocationInput } from './components/PhotoLocationInput';
-import { JourneyPanel } from './components/JourneyPanel';
+import { JourneyPanel, StartingPositionNotice } from './components/JourneyPanel';
 import './wayfinding.css';
 import type { Bootstrap, Session } from './types';
 
@@ -272,7 +272,7 @@ export default function App() {
   );
   const photoReady = data.liveAvailable && data.photoLocalizationAvailable;
   const provider = aiProviderDetails(data.provider);
-  const submissionNotice = `Tapping Go sends this photo and its detail views to ${provider.recipient} to find your location. ${provider.dataUse}`;
+  const submissionNotice = `Tapping Go sends this photo and its detail views to ${provider.recipient} to find your starting area. Relevant official floor plans and your destination are also sent to generate directions. ${provider.dataUse}`;
   const analysis = showPhotoResults ? session.campusAnalysis : null;
   const region = analysis ? session.campusLocation : null;
   const routeCandidate = region ?? undefined;
@@ -388,6 +388,7 @@ export default function App() {
           )}
           {directionsMode ? (
             <>
+              {routeCandidate && analysis?.candidates.length ? <StartingPositionNotice /> : null}
               {routeCandidate ? (
                 <JourneyPanel
                   key={JSON.stringify([session.id, routeCandidate.id, activeDestination])}
@@ -499,22 +500,23 @@ export default function App() {
               <div className="about-section">
                 <h3>What you can do</h3>
                 <p>
-                  Add a photo, enter a destination, and tap Go. The app finds a starting point from
-                  the photo and shows a route when one reviewed checkpoint matches it.
+                  Add a photo, enter a destination, and tap Go. The AI finds the starting area and
+                  destination on the official plans, then generates the route.
                 </p>
               </div>
               <div className="about-section">
                 <h3>What still needs validation</h3>
                 <p>
-                  Walking directions cover reviewed connections and mapped room doors. Outdoor
-                  crossings show the two doorways. Distances, travel times, accessibility and live
-                  conditions have not been verified.
+                  Cross-building directions use mapped building connections. Generated floor paths,
+                  distances, travel times, accessibility and live conditions have not been
+                  independently field-verified.
                 </p>
               </div>
               <div className="about-section">
                 <h3>Your data stays transient</h3>
                 <p>
-                  Tapping Go sends this photo and its detail views to {provider.recipient}. The app
+                  Tapping Go sends this photo and its detail views to {provider.recipient}; relevant
+                  official plans and the destination are also sent to generate directions. The app
                   does not save photos or route history. Optional device tracking in walking
                   directions stays in this browser tab. Hosted session results are encrypted and
                   expire after 30 minutes; reloading starts a new session. {provider.dataUse}

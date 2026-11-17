@@ -115,7 +115,7 @@ export type CampusPhotoAnalysis = {
   atlasPlanCount: number;
   detailedPlanIds: string[];
   buildingHint: string | null;
-  method: 'gemini-photo-floorplan' | 'openai-photo-floorplan';
+  method: 'gemini-photo-floorplan' | 'openai-photo-floorplan' | 'groq-photo-floorplan';
   evidenceId: string;
   labelRetrieval: { indexedLabels: number; exactMatchPlanIds: string[]; clearLabels: string[] };
   usedFallbackModel: boolean;

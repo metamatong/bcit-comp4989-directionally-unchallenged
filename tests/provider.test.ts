@@ -16,14 +16,14 @@ describe('live configuration', () => {
       'gemini-3.5-flash-lite',
     ]);
   });
-  it('preserves explicit fallback choices, including opting out or eligible legacy models', () => {
+  it('preserves explicit supported fallback choices, including opting out', () => {
     expect(liveAiFallbackModels({ GEMINI_FALLBACK_MODELS: '' })).toEqual([]);
     expect(
       liveAiFallbackModels({
         GEMINI_MODEL: 'gemini-3.8-flash',
-        GEMINI_FALLBACK_MODELS: 'gemini-2.5-flash,gemini-2.5-flash,gemini-3.8-flash',
+        GEMINI_FALLBACK_MODELS: 'gemini-3.7-flash,gemini-3.7-flash,gemini-3.8-flash',
       }),
-    ).toEqual(['gemini-2.5-flash']);
+    ).toEqual(['gemini-3.7-flash']);
   });
   it.each([
     { environment: {}, expected: 'GEMINI_API_KEY is missing' },
@@ -48,20 +48,23 @@ describe('live configuration', () => {
       expect(issue).not.toContain('private-invalid-value');
     },
   );
-  it.each(['gemini-3.5-flash-lite', 'gemini-3.6-flash', 'gemini-3.8-flash'])(
-    'accepts the reviewed model %s with a key and free-tier confirmation',
-    (model) => {
-      expect(
-        isLiveAiConfigured({
-          GEMINI_API_KEY: 'test-key',
-          GEMINI_MODEL: model,
-          AI_FREE_TIER_CONFIRMED: 'true',
-        }),
-      ).toBe(true);
-    },
-  );
-  it('accepts documented Gemini Flash free-tier fallback models', () => {
-    for (const model of ['gemini-2.5-flash-lite', 'gemini-2.5-flash']) {
+  it.each([
+    'gemini-3.5-flash',
+    'gemini-3.5-flash-lite',
+    'gemini-3.6-flash',
+    'gemini-3.7-flash',
+    'gemini-3.8-flash',
+  ])('accepts the reviewed model %s with a key and free-tier confirmation', (model) => {
+    expect(
+      isLiveAiConfigured({
+        GEMINI_API_KEY: 'test-key',
+        GEMINI_MODEL: model,
+        AI_FREE_TIER_CONFIRMED: 'true',
+      }),
+    ).toBe(true);
+  });
+  it('accepts current Gemini Flash free-tier fallback models', () => {
+    for (const model of ['gemini-3.5-flash', 'gemini-3.7-flash']) {
       expect(
         isLiveAiConfigured({
           GEMINI_API_KEY: 'test-key',
@@ -75,7 +78,7 @@ describe('live configuration', () => {
   it('rejects unsupported or excessive Gemini fallbacks', () => {
     const configured = {
       GEMINI_API_KEY: 'test-key',
-      GEMINI_MODEL: 'gemini-2.5-flash-lite',
+      GEMINI_MODEL: 'gemini-3.8-flash',
       AI_FREE_TIER_CONFIRMED: 'true',
     };
     expect(liveAiSetupIssue({ ...configured, GEMINI_FALLBACK_MODELS: 'unknown-model' })).toContain(
@@ -84,7 +87,7 @@ describe('live configuration', () => {
     expect(
       liveAiSetupIssue({
         ...configured,
-        GEMINI_FALLBACK_MODELS: 'gemini-2.5-flash,gemini-3.6-flash,gemini-3.8-flash',
+        GEMINI_FALLBACK_MODELS: 'gemini-3.5-flash,gemini-3.6-flash,gemini-3.7-flash',
       }),
     ).toContain('at most 2');
   });

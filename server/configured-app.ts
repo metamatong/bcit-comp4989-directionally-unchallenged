@@ -23,7 +23,12 @@ export function configuredApplication(environment: NodeJS.ProcessEnv, hosted = f
   const setupNotice = liveAiSetupIssue(environment);
   const liveAvailable = setupNotice === null;
   const apiKey = liveAvailable
-    ? (providerName === 'openai' ? environment.OPENAI_API_KEY! : environment.GEMINI_API_KEY!).trim()
+    ? (providerName === 'openai'
+        ? environment.OPENAI_API_KEY!
+        : providerName === 'groq'
+          ? environment.GROQ_API_KEY!
+          : environment.GEMINI_API_KEY!
+      ).trim()
     : '';
   const redis = hosted
     ? redisRestCommand(
@@ -47,11 +52,15 @@ export function configuredApplication(environment: NodeJS.ProcessEnv, hosted = f
     }) => console.warn(`${providerLabel} request failed`, JSON.stringify(event)),
   };
   const provider =
-    providerName === 'openai'
-      ? new OpenAiProvider(providerOptions)
-      : new GeminiProvider({
+    providerName === 'gemini'
+      ? new GeminiProvider({
           ...providerOptions,
           fallbackModels: liveAiFallbackModels(environment),
+        })
+      : new OpenAiProvider({
+          ...providerOptions,
+          providerName,
+          ...(providerName === 'groq' ? { apiBaseUrl: 'https://api.groq.com/openai/v1' } : {}),
         });
   // Preview deployments cannot resume another deployment's visitor session.
   const sessions = redis

@@ -129,11 +129,8 @@ export function lookupPilotLabels(input: z.infer<typeof lookupSchema>) {
   else outcome = 'candidate';
   let nextStep = 'report-no-supported-label';
   if (outcome === 'candidate')
-    nextStep =
-      query.purpose === 'origin'
-        ? 'visually-verify-and-confirm-start'
-        : 'check-reviewed-destination-door';
-  else if (outcome === 'ambiguous') nextStep = 'clarify-building-floor-or-occurrence';
+    nextStep = query.purpose === 'origin' ? 'use-photo-start-automatically' : 'generate-route';
+  else if (outcome === 'ambiguous') nextStep = 'select-best-matching-occurrence-automatically';
   else if (outcome === 'partial' || outcome === 'conflicting') nextStep = 'clarify-observed-labels';
   return {
     purpose: query.purpose,

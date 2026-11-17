@@ -21,12 +21,12 @@ const empty = z.object({}).strict();
 export const pilotToolDeclarations = [
   tool(
     'resolve_spatial_labels',
-    'Find complete labels in the three pilot buildings. Return all exact occurrences, source coordinates and evidence. A photo start is usable only when its source-grounded hypothesis contains one unique approved checkpoint. A destination requires an explicit reviewed door binding for routing.',
+    'Find complete labels in the three pilot buildings. Return all exact occurrences, source coordinates and evidence. The photo-derived start and matched destination can be used by the AI route planner without approved room checkpoints or door bindings. Only cross-building passages must come from mapped connections.',
     lookupSchema,
   ),
   tool(
     'get_spatial_context',
-    'Read every drawing observation intersecting a normalized source-page rectangle and the reviewed checkpoints inside it. Proximity is drawing context only.',
+    'Read every drawing observation intersecting a normalized source-page rectangle. Proximity is drawing context only; the AI route planner selects floor paths and only mapped cross-building links constrain transfers.',
     contextSchema,
   ),
   tool(

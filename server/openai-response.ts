@@ -26,16 +26,16 @@ const messageSchema = z.object({
     )
     .max(8),
 });
-const invalid = () =>
+const invalid = (provider = 'OpenAI') =>
   new ProviderError(
-    'OpenAI returned an unsupported response. No AI action was applied.',
+    `${provider} returned an unsupported response. No AI action was applied.`,
     502,
     'response',
     false,
   );
-const blocked = () =>
+const blocked = (provider = 'OpenAI') =>
   new ProviderError(
-    'OpenAI blocked this request or response. Try another photo. No AI action was applied.',
+    `${provider} blocked this request or response. Try another photo. No AI action was applied.`,
     422,
     'blocked',
     false,
@@ -45,41 +45,42 @@ export function parseOpenAiResponse(
   body: unknown,
   allowedNames: string[],
   forceTool?: string,
+  provider = 'OpenAI',
 ): ModelPart[] {
   const parsed = responseSchema.safeParse(body);
-  if (!parsed.success) throw invalid();
+  if (!parsed.success) throw invalid(provider);
   if (parsed.data.status === 'incomplete') {
-    if (parsed.data.incomplete_details?.reason === 'content_filter') throw blocked();
+    if (parsed.data.incomplete_details?.reason === 'content_filter') throw blocked(provider);
     throw new ProviderError(
-      'OpenAI did not finish its response. No AI action was applied. Try again.',
+      `${provider} did not finish its response. No AI action was applied. Try again.`,
       502,
       'response_limit',
       true,
     );
   }
-  if (parsed.data.status !== 'completed') throw invalid();
+  if (parsed.data.status !== 'completed') throw invalid(provider);
   const parts: ModelPart[] = [];
   for (const item of parsed.data.output ?? []) {
-    if (!item || typeof item !== 'object' || !('type' in item)) throw invalid();
+    if (!item || typeof item !== 'object' || !('type' in item)) throw invalid(provider);
     // Do not expose or retain reasoning items, signatures, usage or other provider metadata.
     if (item.type === 'reasoning') continue;
     if (item.type === 'function_call') {
       const call = functionSchema.safeParse(item);
-      if (!call.success || !allowedNames.includes(call.data.name)) throw invalid();
+      if (!call.success || !allowedNames.includes(call.data.name)) throw invalid(provider);
       let args: unknown;
       try {
         args = JSON.parse(call.data.arguments);
       } catch {
-        throw invalid();
+        throw invalid(provider);
       }
       const object = z.record(z.string(), z.unknown()).safeParse(args);
-      if (!object.success) throw invalid();
+      if (!object.success) throw invalid(provider);
       parts.push({ functionCall: { name: call.data.name, args: object.data } });
     } else {
       const message = messageSchema.safeParse(item);
-      if (!message.success) throw invalid();
+      if (!message.success) throw invalid(provider);
       for (const content of message.data.content) {
-        if (content.type === 'refusal') throw blocked();
+        if (content.type === 'refusal') throw blocked(provider);
         if (content.text.trim()) parts.push({ text: content.text });
       }
     }
@@ -90,6 +91,6 @@ export function parseOpenAiResponse(
     parts.length > 8 ||
     (forceTool && (calls.length !== 1 || calls[0].name !== forceTool))
   )
-    throw invalid();
+    throw invalid(provider);
   return parts;
 }

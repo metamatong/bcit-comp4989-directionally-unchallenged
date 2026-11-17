@@ -243,7 +243,7 @@ export function matchDoorwayVicinity(
     floor: plan.floor,
     page: plan.page,
     sourceRef: plan.sourceRef,
-    // A point-only doorway carries no corridor extent. Consumers render the reference and require an exact reviewed checkpoint.
+    // A point-only doorway carries no corridor extent; the route model receives only the point.
     bounds: door.corridorBounds ?? null,
     confidence: 'low',
     verification: 'unverified-ai-hypothesis',

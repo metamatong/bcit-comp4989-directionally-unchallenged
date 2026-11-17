@@ -14,7 +14,7 @@ import { photoEvidenceRequestSchema, photoRequestSchema, releasePhotoBytes } fro
 import { TopologyError, type TopologyStore } from './topology';
 import {
   navigationSchema,
-  planVisitorJourney,
+  planAiVisitorJourney,
   startingPoints,
   startingPointsSchema,
 } from './wayfinding';
@@ -199,8 +199,9 @@ function photoStage(options: Options, stage: 'evidence' | 'location'): Operation
     }
   };
 }
-function navigation(store: TopologyStore, origins: boolean): Operation {
-  return (req, _res, { session }) => {
+function navigation(store: TopologyStore, origins: boolean, provider: Provider): Operation {
+  return async (req, _res, { session }) => {
+    let providerAttempts = 0;
     try {
       let result;
       if (origins) {
@@ -240,20 +241,35 @@ function navigation(store: TopologyStore, origins: boolean): Operation {
               session,
             },
           };
-        result = planVisitorJourney(session.campusLocation, input.data, store);
+        result = await planAiVisitorJourney(
+          session.campusLocation,
+          input.data,
+          store,
+          provider,
+          () => providerAttempts++,
+        );
       }
       session.lastTouched = Date.now();
       return { body: result, changed: true };
     } catch (error) {
       return {
-        status: error instanceof TopologyError ? error.httpStatus : 503,
+        status:
+          error instanceof ProviderError
+            ? error.httpStatus
+            : error instanceof TopologyError
+              ? error.httpStatus
+              : 503,
         body: {
           error:
-            error instanceof TopologyError
+            error instanceof ProviderError || error instanceof TopologyError
               ? error.message
-              : 'The walking map is unavailable. Try again after its source data is restored.',
+              : 'Route planning is unavailable. Try again shortly.',
         },
+        changed: true,
       };
+    } finally {
+      session.providerCalls += providerAttempts;
+      session.lastTouched = Date.now();
     }
   };
 }
@@ -290,8 +306,11 @@ export function visitorRouter(
   });
   router.post('/:id/photo/evidence', mutation(sessions, photoStage(options, 'evidence')));
   router.post('/:id/photo', mutation(sessions, photoStage(options, 'location')));
-  router.post('/:id/navigation/origins', mutation(sessions, navigation(topology, true)));
-  router.post('/:id/navigation', mutation(sessions, navigation(topology, false)));
+  router.post(
+    '/:id/navigation/origins',
+    mutation(sessions, navigation(topology, true, options.provider)),
+  );
+  router.post('/:id/navigation', mutation(sessions, navigation(topology, false, options.provider)));
   router.post(
     '/:id/actions',
     mutation(sessions, (req, _res, record) =>

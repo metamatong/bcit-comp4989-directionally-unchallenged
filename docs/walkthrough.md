@@ -1,10 +1,10 @@
 # Project walkthrough
 
-1. Open the app and choose **Upload photo** or **Take a photo**. The photo is resized on the device; it is not submitted yet.
-2. Tap **Next**, enter a destination such as `SW03 3615`, then tap **Go**. The adjacent notice describes the configured AI provider's photo processing. A unique one-character room-code typo may resolve to an exact reviewed destination.
-3. The app reads the photo and compares it with the 12 official pilot plans in SE12, SW03 and SW01. It automatically selects its single best source-grounded location hypothesis. The destination is resolved against pilot labels and the reviewed topology.
-4. When the photo region contains exactly one approved starting checkpoint and a connected destination route exists, the app opens directions and says **Starting point acquired**. No starting-location confirmation is shown. If the start is missing or ambiguous, it asks for a closer photo. If the destination is ambiguous, select the intended occurrence from its plan.
-5. The route view shows floor-by-floor maps and transfer instructions. On revision 29, SE12 room 302 → SW03 office 2082 passes through the SE12 third-floor corridor, the indoor building passage, the SW03 third-floor east elevator and the second-floor approach to the office door.
-6. Use **One floor at a time** to navigate manually. Expand **Edit photo or destination** to change the trip, or **Location evidence** to inspect the source-linked hypothesis. **Start over** clears the journey.
+1. Upload or take a photo, then tap **Next**. The image stays on the device until the visitor taps **Go**.
+2. Enter a destination such as `SW03 3615` and tap **Go**. These are the only visitor inputs needed to request a route.
+3. The configured AI provider reads the photo, identifies a starting area on the 12 official plans for SE12, SW03 and SW01, matches the destination label and generates the route. The app displays **Starting position acquired** as soon as it has the photo-derived start, before route generation finishes.
+4. Walking directions show the floor plans in travel order with generated corridor paths and transfer steps. No visitor selection or approval of the start, room door, corridor, destination occurrence or route segment is required.
+5. Cross-building travel can use only mapped building connections. The current SE12–SW03 links are available; a route requiring a transfer to or from SW01 cannot use an inferred crossing.
+6. **Start over** clears the trip. Location evidence and trip editing are optional details below the route.
 
-The visitor pilot covers only SE12, SW03 and SW01. Its reviewed route graph currently connects parts of SE12 and SW03; SW01 still needs reviewed checkpoints and connections. There is no Campus library, plan-search screen, introductory promotional banner, fictional landmark or sample location. A provider error shows setup/retry guidance. Never present mocked results as a successful live localization. Physical traversal and real-photo localization accuracy remain unmeasured. Nothing has been deployed or submitted as coursework.
+The visitor pilot covers only SE12, SW03 and SW01. AI-generated floor paths have not been field-verified, and real-photo localization accuracy remains unmeasured. A provider error shows setup/retry guidance. Nothing has been deployed or submitted as coursework.

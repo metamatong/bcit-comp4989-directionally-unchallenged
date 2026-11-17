@@ -1,8 +1,8 @@
 # Device location and walking
 
-The visitor photo flow does not request device location. It selects the single best photo-location hypothesis automatically and uses it only when exactly one reviewed checkpoint falls inside the source-bound region. This remains an unverified estimate, not a confirmed physical position.
+The visitor photo flow does not request device location. It selects the single best photo-location hypothesis automatically and asks the AI planner to use that area as the route start. The estimate is based on the submitted photo, not device coordinates, and is not a field-confirmed physical position.
 
-Walking directions still offer optional foreground device tracking. The browser overlays fresh device readings on a supported floor calibration or official building footprint. Building overlap cannot select a floor, and raw position readings never advance the route. The route begins at a unique approved point within the app-selected photo hypothesis; ambiguous or unmapped starts prompt for a clearer photo.
+Walking directions still offer optional foreground device tracking. The browser overlays fresh device readings on a supported floor calibration or official building footprint. Building overlap cannot select a floor, and raw position readings never advance or change the AI-generated route. The route starts from the photo-derived area; device tracking is optional and separate from route generation.
 
 ## Walking and permissions
 

@@ -24,13 +24,13 @@ The MVP includes photo upload/native capture, original-image detail crops, per-p
 
 The source pipeline downloaded 89 Burnaby floor plans across 45 buildings and one campus map from official BCIT pages [1,2]. It records URLs, retrieval times, hashes, attribution, and page references. All 89 plans now have full PNGs, overviews, four detail crops, and geometry JSON. Eight overview sheets support visual shortlisting. The 566,620 extracted drawing primitives remain unclassified; they are not verified walls, doors, rooms or walking edges. All 5,463 extracted labels are searchable; the older 80-label preview is ignored. Whole identifiers such as 302 and 3021 are distinct. Original PDFs remain unmodified.
 
-Real-campus routes remain unsupported pending source review and field checks. The user explicitly removed the earlier synthetic fallback, including mode controls, fictional landmarks, routing, simulated closures and browser OCR. No custom training is required: source preprocessing, visual retrieval and pretrained LLM interpretation are separate operations. Raw drawing paths are not automatically promoted to navigable links.
+The current pilot generates within-building visitor routes from official plans with a configured AI provider. Only mapped building connections constrain transfers between buildings. Generated photo locations and floor paths remain unverified until checked against real trips; no custom model training is required. Raw drawing paths are not automatically treated as verified connections.
 
 ---page---
 
 ### 4. Implementation challenges and controls
 
-**Reliable visual localization.** A photograph and a top-down plan have different viewpoints; repeated corridors may not be distinguishable from one image. Coarse shortlisting can omit the correct plan. Extracted paths include text and symbols, and their architectural meaning remains unreviewed. Proposed regions therefore require confirmation. Scale, floor alignment, real routes and accessibility need source review and field checks.
+**Reliable visual localization.** A photograph and a top-down plan have different viewpoints; repeated corridors may not be distinguishable from one image. Coarse shortlisting can omit the correct plan. Extracted paths include text and symbols, and their architectural meaning remains unreviewed. The app uses the best-supported photo hypothesis automatically; location confidence, scale, floor alignment, generated paths and accessibility still need field checks.
 
 **Incomplete responses and uncertainty.** An HTTP-success response may still end before producing an answer. The adapter checks completion status and rejects partial tool calls, unknown IDs and invalid coordinates. Low thinking and bounded output allowances leave room for structured results. Ambiguous scenes lead to clarification; a confirmed hypothesis remains unverified.
 
@@ -44,7 +44,7 @@ Next milestones are original-assignment reconciliation, a successful live photo 
 
 ### Governance and ethics
 
-Photos are resized locally and sent transiently to Google only after per-photo consent; no media is saved in application storage. Provider free-tier data handling requires disclosure. Retrieved PDFs, images, and text are untrusted evidence, never instructions. Action logs show tools and sources, not hidden reasoning. Accessibility and travel-time precision are not asserted without evidence. Original BCIT files retain attribution and usage restrictions [1,7]. The prototype is not for emergency routing.
+Photos are resized locally and sent transiently to the configured AI provider only after per-photo consent; no media is saved in application storage. Provider data handling requires disclosure. Retrieved PDFs, images, and text are untrusted evidence, never instructions. Action logs show tools and sources, not hidden reasoning. Accessibility and travel-time precision are not asserted without evidence. Original BCIT files retain attribution and usage restrictions [1,7]. The prototype is not for emergency routing.
 
 ### Assignment record and references
 

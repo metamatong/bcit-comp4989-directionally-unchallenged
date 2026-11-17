@@ -1,23 +1,32 @@
 import { useEffect, useRef, useState } from 'react';
-import { ArrowRight, Check, MapPin, Route } from 'lucide-react';
+import { Check, MapPin, Route } from 'lucide-react';
 import { request } from '../api';
 import type { CampusLocationCandidate, VisualPlan } from '../types';
-import type { NavigationResult, PlaceChoice } from '../wayfinding';
-import { planLabel } from '../topology';
-import { RouteMap } from './RouteMap';
+import type { NavigationResult } from '../wayfinding';
 import { RouteDirections } from './RouteDirections';
 import type { LocationCatalogue } from '../location/types';
 
-function choiceMap(place: PlaceChoice, plans: VisualPlan[], symbol: string) {
-  const plan = plans.find((p) => p.id === place.planId);
-  if (!plan) return null;
+export function StartingPositionNotice({
+  detail,
+  loading = false,
+}: {
+  detail?: string;
+  loading?: boolean;
+}) {
   return (
-    <RouteMap
-      plan={plan}
-      bounds={place.bounds}
-      markers={place.point ? [{ point: place.point, label: place.label, symbol }] : []}
-      label={`${place.label} on ${planLabel(plan)}`}
-    />
+    <div className="route-ready" role="status" aria-live="polite">
+      <span className="route-ready-icon" aria-hidden="true">
+        <Check size={18} />
+      </span>
+      <span>
+        <strong>Starting position acquired</strong>
+        {detail && (
+          <small className={loading ? 'route-loading' : undefined}>
+            {loading && <Route size={15} className="spin" />} {detail}
+          </small>
+        )}
+      </span>
+    </div>
   );
 }
 
@@ -40,10 +49,6 @@ export function JourneyPanel({
   onTryAnotherPhoto: () => void;
   locationCatalogue?: LocationCatalogue;
 }) {
-  const [selection, setSelection] = useState<{
-    destinationId?: string;
-    networkRevision?: number;
-  }>({});
   const [result, setResult] = useState<NavigationResult>();
   const [error, setError] = useState('');
   const [refresh, setRefresh] = useState(0);
@@ -55,7 +60,7 @@ export function JourneyPanel({
     setError('');
     request<NavigationResult>(
       `/api/sessions/${sessionId}/navigation`,
-      { revision, candidateId: candidate.id, destination, ...selection },
+      { revision, candidateId: candidate.id, destination },
       { signal: controller.signal },
     )
       .then((value) => {
@@ -65,7 +70,7 @@ export function JourneyPanel({
         if (!controller.signal.aborted) setError(failure.message);
       });
     return () => controller.abort();
-  }, [sessionId, revision, candidate.id, destination, selection, refresh]);
+  }, [sessionId, revision, candidate.id, destination, refresh]);
 
   useEffect(() => {
     if (result && result.status !== 'route') {
@@ -86,31 +91,14 @@ export function JourneyPanel({
   if (!result)
     return (
       <section className="journey-panel" role="status">
-        <div className="route-ready" aria-live="polite">
-          <span className="route-ready-icon" aria-hidden="true">
-            <Check size={18} />
-          </span>
-          <span>
-            <strong>Starting position acquired</strong>
-            <small className="route-loading">
-              <Route size={15} className="spin" /> Finding your route…
-            </small>
-          </span>
-        </div>
+        <p className="photo-status">
+          <Route size={15} className="spin" /> Finding your route…
+        </p>
       </section>
     );
   if (result.status === 'route')
     return (
       <section className="journey-panel" aria-label="Your walking route">
-        <div className="route-ready" role="status" aria-live="polite">
-          <span className="route-ready-icon" aria-hidden="true">
-            <Check size={18} />
-          </span>
-          <span>
-            <strong>Starting position acquired</strong>
-            <small>Your route is ready.</small>
-          </span>
-        </div>
         {result.destinationMatch && (
           <p className="destination-match" role="status">
             Matching “{result.destinationMatch.requested}” to {result.destinationMatch.matched}.
@@ -120,7 +108,6 @@ export function JourneyPanel({
           route={result}
           plans={plans}
           onRecheck={() => {
-            setSelection({});
             setRefresh((value) => value + 1);
           }}
           locationCatalogue={locationCatalogue}
@@ -128,12 +115,9 @@ export function JourneyPanel({
       </section>
     );
 
-  const selected =
-    result.destinations.find((p) => p.id === selection.destinationId) ??
-    (result.destinations.length === 1 ? result.destinations[0] : undefined);
   const headings = {
     'choose-origin': 'Starting point is unclear',
-    'choose-destination': 'Choose your destination',
+    'choose-destination': 'Destination match is unclear',
     'unknown-destination': 'Destination not found',
     'unmapped-destination': 'Destination found on the plan',
     'unsupported-building': 'Routes are not mapped here yet',
@@ -160,30 +144,6 @@ export function JourneyPanel({
           Try another photo
         </button>
       )}
-      {result.status === 'choose-destination' &&
-        result.destinations.map((place, index) => (
-          <div className="place-choice" key={place.id}>
-            {choiceMap(place, plans, String(index + 1))}
-            <button
-              className="secondary"
-              disabled={busy}
-              onClick={() =>
-                setSelection({
-                  destinationId: place.id,
-                  networkRevision: result.networkRevision,
-                })
-              }
-            >
-              Go to {place.label} · {planLabel(plans.find((plan) => plan.id === place.planId)!)}
-              <ArrowRight size={16} />
-            </button>
-          </div>
-        ))}
-      {(result.status === 'unmapped-destination' ||
-        result.status === 'unmapped-origin-and-destination' ||
-        result.status === 'no-route') &&
-        selected &&
-        choiceMap(selected, plans, 'B')}
     </section>
   );
 }

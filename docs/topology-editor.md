@@ -1,6 +1,6 @@
 # Internal topology editor
 
-The local editor at `/internal/topology` lets a human confirm proposed connections on 12 official SE12, SW03 and SW01 floor plans, correct markers, manually annotate additional passages and check routes over reviewed records.
+The local editor at `/internal/topology` lets a human confirm proposed connections on 12 official SE12, SW03 and SW01 floor plans, correct markers, manually annotate additional passages and check routes over reviewed records. This is an internal graph tool. Visitor routing generates within-building paths with AI and reads this topology only for mapped inter-building connections; visitors do not approve rooms, doors or corridors.
 
 ## Answer-first workflow
 
@@ -64,7 +64,7 @@ Plan review, user confirmation, field observation and combined plan/field eviden
 
 Each approval includes its date, reviewer, decision note, record version, a hash of the exact reviewed content and an evidence snapshot. Records retain review history. Editing a point returns it and incident connections to draft. Withdrawing a point approval also invalidates incident connection approvals. Editing a connection clears its current approval. Original-source changes, altered reviewed content and stale endpoint versions exclude affected records from routes. Saving a point against a refreshed official source attaches the current hash and requires a new review.
 
-Approved records alone are not enough: both endpoints must also be approved, current, and source-linked. The server enforces this on every route request, independent of the browser. Missing routes return an explicit no-route result; neither Gemini nor label proximity fills gaps. Photo evidence and topology are separate: selecting an AI region does not create a graph point, connection or route start.
+The editor's graph check requires both endpoints to be approved, current, and source-linked. That check is separate from visitor routing: the visitor planner uses AI-generated room and corridor paths from official plans, and reads this topology only for mapped building connections. Photo analysis does not create or alter those mapped connections.
 
 ## What the route check means
 
@@ -95,7 +95,7 @@ The editor page and its API require an actual loopback connection and a local Ho
 - `POST /api/internal/topology/edits` accepts `{ revision, command }`. Use `answer-candidate` for two marked points and `record-floor-observation` for a floor inquiry with one or both elevator positions unknown. The server checks the revision, presentation and original source hashes for both operations. The manual editor also uses `save-node`, `save-edge`, `delete-node`, `delete-edge` and `review`.
 - `POST /api/internal/topology/route`: `{ revision, fromNodeId, toNodeId, mode }`. The server reloads the document and computes only over eligible records.
 
-`src/topology.ts` defines the shared types/schemas. `server/topology.ts` owns storage, source binding, review and eligibility; `server/routing.ts` owns deterministic routing; `server/topology-api.ts` owns internal access and API handling. The visitor bootstrap and photo sessions do not expose the editable graph. The local visitor planner reads current approvals from the same store. Withdrawing a room approach also withdraws its corridor overlay from subsequent route requests.
+`src/topology.ts` defines the shared types/schemas. `server/topology.ts` owns storage, source binding, review and eligibility; `server/routing.ts` owns deterministic routing for the internal graph checker; `server/topology-api.ts` owns internal access and API handling. The visitor bootstrap and photo sessions do not expose the editable graph. Visitor route generation reads mapped inter-building connections from the same store; withdrawing a room approach or corridor does not block AI-generated floor paths.
 
 ## SE12 room 302 to SW03 office 2082
 

@@ -1,6 +1,6 @@
 # AI provider configuration and verification
 
-OpenAI documentation checked November 17, 2026; the Gemini record below retains its October 16 checks. Select `AI_PROVIDER=gemini` (default) or `AI_PROVIDER=openai` on the server. Both providers run the same label-reading and source-grounded visual comparison stages. The configured primary model is preserved; ordered Gemini model fallbacks are supported. Exact account quotas and free-tier eligibility require operator verification; a key alone cannot establish them.
+OpenAI and Groq documentation checked November 17, 2026; the Gemini record below retains its October 16 checks. Select `AI_PROVIDER=gemini` (default), `openai`, or `groq` on the server. All providers run the same label-reading, source-grounded visual comparison, and floor-plan route-generation stages. The configured primary model is preserved; ordered Gemini model fallbacks are supported. Exact account quotas and free-tier eligibility require operator verification; a key alone cannot establish them.
 
 ## Paid OpenAI
 
@@ -15,6 +15,12 @@ OPENAI_MODEL=luna-6.0
 Leave the key blank until ready. To activate OpenAI, add a paid API key, change `AI_PROVIDER=openai` and restart the existing server. Gemini credentials and `AI_FREE_TIER_CONFIRMED` are ignored while OpenAI is selected. Switching back to Gemini restores its existing model, fallback list and free-tier eligibility check. Unknown provider names and missing selected-provider credentials disable analysis instead of switching providers.
 
 `luna-6.0` is an explicit application alias for **`gpt-6-luna`**, the public ID listed by OpenAI. The [Luna model record](https://developers.openai.com/api/docs/models/gpt-6-luna) documents image input, function calling and bounded reasoning. Bootstrap reports the actual API model ID. Other model IDs can be configured directly; the operator must verify image input, Responses function calling, low reasoning support, billing and project access. Local configuration validation does not establish account eligibility or generation access.
+
+## Groq
+
+Set `AI_PROVIDER=groq`, `GROQ_API_KEY`, and `GROQ_MODEL=qwen/qwen3.8-27b`. Groq's [Responses API](https://console.groq.com/docs/responses-api) is OpenAI-compatible and supports image inputs and function calling. Qwen 3.8 27B supports vision and tools, with a limit of three images per request. The adapter creates one labeled contact sheet from the request's image views to fit that limit. This reduces per-image resolution, so evaluate localization quality with the actual photo workflow before relying on it.
+
+Groq says inference data is not retained by default, but may be temporarily logged for reliability or abuse investigations for up to 30 days. Check the account's [data controls](https://console.groq.com/docs/your-data). Free-tier limits vary by model and account; confirm current quota in GroqCloud.
 
 `server/openai-provider.ts` uses `POST https://api.openai.com/v1/responses`, server-side Bearer authentication, high-detail inline image inputs, forced named functions and `parallel_tool_calls=false`. Shared uppercase tool schemas are converted to JSON Schema without changing property names, enums or exact labels. `strict=false` preserves optional fields; existing Zod and source-grounding validators remain authoritative. The app sends fresh text/images for each stage and does not replay stored provider conversations. [Image input](https://developers.openai.com/api/docs/guides/images-vision), [function calling](https://developers.openai.com/api/docs/guides/function-calling).
 
@@ -32,7 +38,7 @@ Free-tier content may be used to improve Google's products. DirectionallyUnchall
 
 Quotas are account/project dependent and must be inspected in AI Studio. The public documentation does not guarantee a universal RPM/TPM/RPD allowance; do not copy outdated numbers from a blog. [Rate-limit documentation](https://ai.google.dev/gemini-api/docs/rate-limits).
 
-The code retains Gemini 3.6 and explicitly selected Gemini 2.5 IDs for existing eligible configurations. Google now restricts 2.5 generation access for new users, so those models are never implicit defaults or backups. A successful model-list or metadata response does not prove generation access. Google's exact model availability and quotas can change and must be checked for the operator's account.
+The supported stable Flash model IDs are Gemini 3.5 Flash, 3.5 Flash-Lite, 3.6 Flash, 3.7 Flash and 3.8 Flash. Gemini 2.5 is excluded from configuration even though Google currently lists the Flash models as available: access is restricted to existing users, and they are not appropriate new defaults or fallbacks. A successful model-list or metadata response does not prove generation access. Google's exact model availability and quotas can change and must be checked for the operator's account.
 
 ## Activation
 

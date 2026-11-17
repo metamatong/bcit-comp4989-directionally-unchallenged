@@ -2,15 +2,15 @@
 
 For the three pilot buildings, the label retrieval stage also reads digitized plan transcriptions and optical observations. The label-reading request sees only the consented photo and crops. Exact source matches carry their page-specific evidence into visual comparison. When automatic pilot OCR alone supplies a match, all eligible building plans remain available for the visual shortlist. [Pilot retrieval contract](spatial-retrieval.md)
 
-The app uses the actual photo and detailed views in two separate API stages. The selected provider reads visible evidence first, a deterministic tool retrieves exact labels from all available source records, and a later provider call compares the photo against the retrieved plans. Set `AI_PROVIDER=gemini` (default) or `openai` on the server; [setup and privacy](provider.md). There is no training step or general Campus library screen.
+The app uses the actual photo and detailed views in two photo-analysis API stages. The selected provider reads visible evidence first, a deterministic tool retrieves exact labels from all available source records, and a later provider call compares the photo against the retrieved plans. After a location and destination are identified, a route-generation call plans the journey using official floor plans and mapped building connections. Set `AI_PROVIDER=gemini` (default), `openai`, or `groq` on the server; [setup and privacy](provider.md). There is no training step or general Campus library screen.
 
 ## User flow
 
 1. Use **Upload photo** or **Take a photo**, then tap **Next**. The browser prepares a full view and four overlapping detail crops from the **original decoded image**, before discarding original metadata.
 2. Enter a destination and tap **Go** to authorize and start analysis. The visitor client binds both photo requests to `wayfinding-pilot`, restricting visual comparison to the 12 SE12, SW03 and SW01 plans.
 3. The client calls the label-reading endpoint, then sends the same image bundle with the returned evidence ID to the location endpoint. The UI shows one simple progress message while both stages run.
-4. The app selects its single best source-grounded photo hypothesis automatically. It attempts routing without asking the visitor to confirm a region or starting point. A route uses the hypothesis only when exactly one approved checkpoint lies within it; otherwise the visitor is asked for a clearer photo.
-5. Relevant source plans remain available below the route as optional evidence. The model can abstain and ask for another photo. Remove photo or Cancel analysis discards the current photo and prevents late results from appearing.
+4. The app selects its single best source-grounded starting area automatically and shows **Starting position acquired** before route generation begins. The route planner uses this area and the destination label to generate paths on the relevant official plans. No starting checkpoint or room doorway requires manual approval.
+5. Relevant source plans remain available below the route as optional evidence. The model can abstain when it cannot identify a continuous path; inter-building travel is allowed only through mapped connections. Remove photo or Cancel analysis discards the current photo and prevents late results from appearing.
 
 The local server must be restarted after backend edits. Frontend HMR does not reload Node. Existing converted source files work without regeneration.
 
@@ -45,7 +45,7 @@ The selected provider compares the photo and plan and must identify a matching a
 
 For each eligible printed identifier with a unique source occurrence and mapped door symbols on a shortlisted plan, the server crops the hash-checked full drawing around the label and each corresponding doorway. Each unmarked crop is sent with its whole-page bounds and doorway ID, alongside the existing page evidence. This applies to every mapped door in the pilot. The selected provider compares the sign at the physical door and a second layout relationship such as opposite-side glazing, a junction or a sequence of doors. It assesses each alternative separately. A missing assessment, unresolved competing door, incompatible layout or unsupported identifier cannot select a doorway. Additional corroborated signs must have a unique compatible printed position or mapped doorway in the same drawing detail.
 
-A consistent visual assessment can identify the starting corridor even when the precise camera rectangle is unavailable. The server takes the marker and optional corridor frontage from the current source drawing. Cropping margins are for inspection only. A room without a mapped doorway can still use the existing visual-region workflow. Session-only decision codes distinguish model abstention, label or bounding-region conflicts and doorway assessment outcomes. Route calculation from a doorway vicinity still requires an explicitly reviewed doorway-to-route binding and exactly one matching approved checkpoint.
+A consistent visual assessment can identify the starting area even when the precise camera rectangle is unavailable. The route model chooses a practical start point within that area and a destination doorway near the matched room label. Cropping margins are for inspection only. Session-only decision codes distinguish model abstention, label or bounding-region conflicts and doorway assessment outcomes. Visitor routing does not require a manually reviewed room-door binding.
 
 ## Photo views and coordinate systems
 
