@@ -1,53 +1,57 @@
+/** Browser transport checks use mocked AI results and do not measure campus accuracy. */
 import { test, expect, type Page } from '@playwright/test';
 import { resolve } from 'node:path';
-import { mkdir } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import type { CampusPhotoAnalysis, Session } from '../../src/types';
+import type { NavigationResult } from '../../src/wayfinding';
+import { photoStartFixture, walkingRouteFixture } from '../wayfinding-fixtures';
 
-function analysis(requestId: string, evidenceId: string, hasCandidate = true): CampusPhotoAnalysis {
+function analysis(
+  requestId: string,
+  evidenceId: string,
+  hasCandidate: boolean,
+): CampusPhotoAnalysis {
   return {
     requestId,
     outcome: hasCandidate ? 'candidates' : 'insufficient_evidence',
-    observations: ['The test image contains visible scene structure.'],
+    observations: ['Mocked photo and floor-plan comparison.'],
     summary: hasCandidate
-      ? 'Mocked transport example: review this unverified region in an actual BCIT plan.'
+      ? 'Mocked photo starting area.'
       : 'The image does not distinguish a specific campus region.',
     clarification: 'A second view showing a corridor intersection would help.',
-    atlasPlanCount: 89,
-    detailedPlanIds: hasCandidate ? ['SE12-F1-p1'] : [],
+    atlasPlanCount: 12,
+    detailedPlanIds: hasCandidate ? ['SE12-F3-p1'] : [],
     buildingHint: null,
     method: 'gemini-photo-floorplan',
     evidenceId,
     labelRetrieval: { indexedLabels: 5463, exactMatchPlanIds: [], clearLabels: [] },
     usedFallbackModel: false,
     generatedAt: new Date().toISOString(),
-    candidates: hasCandidate
-      ? [
-          {
-            id: randomUUID(),
-            planId: 'SE12-F1-p1',
-            sourceRef: 'SE12-F1#page=1',
-            building: 'SE12',
-            floor: '1',
-            page: 1,
-            bounds: [0.4, 0.25, 0.7, 0.55],
-            confidence: 'low',
-            matches: [
-              {
-                photoFeature: 'An elongated scene',
-                planFeature: 'A passage region in the supplied drawing',
-              },
-            ],
-            limitations: [
-              'This screenshot uses mocked provider results to verify the interface, not localization accuracy.',
-            ],
-            labelMatches: [],
-            verification: 'unverified-ai-hypothesis',
-          },
-        ]
-      : [],
+    candidates: hasCandidate ? [photoStartFixture()] : [],
   };
 }
+
+function navigation(): NavigationResult {
+  const generated = walkingRouteFixture();
+  const stops = [
+    { ...generated.origin, id: randomUUID() },
+    ...generated.steps.map((step) => ({ ...step.to, id: randomUUID() })),
+  ];
+  return {
+    networkRevision: 29,
+    status: 'route',
+    origins: [stops[0]],
+    destinations: [stops.at(-1)!],
+    origin: stops[0],
+    destination: stops.at(-1)!,
+    steps: generated.steps.map((step, index) => ({
+      ...step,
+      from: stops[index],
+      to: stops[index + 1],
+    })),
+  };
+}
+
 async function setup(page: Page, hasCandidate = true) {
   let current!: Session;
   const uploads: {
@@ -63,11 +67,7 @@ async function setup(page: Page, hasCandidate = true) {
     await route.fulfill({ json: { ...data, liveAvailable: true } });
   });
   await page.route('**/api/sessions', async (route) => {
-    current = {
-      ...(await (await route.fetch()).json()),
-      mode: 'live',
-      agentStatus: 'Live AI · ready',
-    };
+    current = await (await route.fetch()).json();
     await route.fulfill({ json: current });
   });
   await page.route('**/api/sessions/*/photo/evidence', async (route) => {
@@ -81,7 +81,7 @@ async function setup(page: Page, hasCandidate = true) {
         id: randomUUID(),
         requestId: body.requestId,
         labels: [],
-        observations: ['Visible scene structure.'],
+        observations: ['Mocked photo evidence.'],
         readAt: new Date().toISOString(),
         expiresAt: new Date(Date.now() + 300000).toISOString(),
         usedFallbackModel: false,
@@ -92,45 +92,37 @@ async function setup(page: Page, hasCandidate = true) {
   await page.route('**/api/sessions/*/photo', async (route) => {
     const body = route.request().postDataJSON();
     uploads.push(body);
+    const result = analysis(body.requestId, current.photoEvidence!.id, hasCandidate);
     current = {
       ...current,
       revision: current.revision + 1,
-      campusAnalysis: analysis(body.requestId, current.photoEvidence!.id, hasCandidate),
+      campusAnalysis: result,
+      campusLocation: result.candidates[0] ?? null,
       photoEvidence: null,
-      providerCalls: 3,
-      agentStatus: 'Live AI · photo and floor-plan comparison completed',
+      providerCalls: 2,
     };
     await route.fulfill({ json: current });
   });
+  await page.route('**/api/sessions/*/navigation', async (route) => {
+    expect(route.request().postDataJSON().candidateId).toBe(current.campusLocation?.id);
+    await route.fulfill({ json: navigation() });
+  });
   await page.route('**/api/sessions/*/actions', async (route) => {
-    const body = route.request().postDataJSON();
-    if (body.action.type === 'confirm-campus-region') {
-      current = {
-        ...current,
-        revision: current.revision + 1,
-        campusLocation: current.campusAnalysis!.candidates.find(
-          (candidate) => candidate.id === body.action.candidateId,
-        )!,
-        notice:
-          'You selected a possible region in SE12, floor 1. Real walking routes are not yet supported.',
-      };
-    } else if (body.action.type === 'reset') {
-      current = {
-        ...current,
-        revision: current.revision + 1,
-        campusLocation: null,
-        campusAnalysis: null,
-        photoEvidence: null,
-        activity: [],
-        providerCalls: 0,
-      };
-    } else throw new Error('Unexpected action in photo test');
+    expect(route.request().postDataJSON().action.type).toBe('reset');
+    current = {
+      ...current,
+      revision: current.revision + 1,
+      campusLocation: null,
+      campusAnalysis: null,
+      photoEvidence: null,
+    };
     await route.fulfill({ json: current });
   });
   await page.goto('/');
   await expect(page.getByTestId('provider-status')).toBeVisible();
   return { uploads, evidenceUploads, requests };
 }
+
 async function choosePhoto(page: Page) {
   await page
     .getByLabel('Upload campus photo', { exact: true })
@@ -138,95 +130,77 @@ async function choosePhoto(page: Page) {
   await expect(page.getByText('Photo ready.', { exact: true })).toBeVisible();
 }
 
-test('submits a prepared photo in one action and confirms the plan result (mocked provider)', async ({
+async function submitPhoto(page: Page) {
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.getByLabel('Destination', { exact: true }).fill('SW03 2082');
+  await page.getByRole('button', { name: 'GO', exact: true }).click();
+}
+
+test('submits photo and destination and displays directions without route confirmations', async ({
   page,
 }, info) => {
   const { uploads, evidenceUploads, requests } = await setup(page);
   await choosePhoto(page);
-  const form = page.getByRole('form', { name: 'Photo analysis' });
-  const analyze = form.getByRole('button', {
-    name: 'Analyze photo against BCIT plans',
-    exact: true,
-  });
-  await expect(analyze).toBeEnabled();
-  const checkbox = form.getByRole('checkbox');
-  await expect(checkbox).toHaveAccessibleName('Use device location with this photo');
-  await expect(checkbox).not.toBeChecked();
   expect(evidenceUploads).toHaveLength(0);
   expect(uploads).toHaveLength(0);
-  await analyze.click();
+  await submitPhoto(page);
   await expect(
-    page
-      .getByRole('region', { name: 'Photo comparison results' })
-      .getByRole('heading', { name: 'SE12 · Floor 1' }),
-  ).toHaveCount(1);
+    page.getByRole('heading', { name: 'Walking directions', exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText('Starting position acquired', { exact: true })).toBeVisible();
+  await expect(page.locator('.floor-directions h3')).toHaveText([
+    'SE12 · Floor 3',
+    'SW03 · Floor 3',
+    'SW03 · Floor 2',
+  ]);
   await expect(
-    page.getByRole('region', { name: 'Photo comparison results' }).locator('.plan-region img'),
-  ).toHaveCount(1);
-  await expect(
-    page.getByRole('region', { name: 'Photo comparison results' }).locator('.plan-region img'),
-  ).toHaveAttribute('src', /SE12-F1-p1\/overview\.png$/);
+    page.getByRole('button', { name: /^Start at|Confirm this possible region/ }),
+  ).toHaveCount(0);
+  expect(
+    requests.some((url) => url.endsWith('/actions') || url.endsWith('/navigation/origins')),
+  ).toBe(false);
   expect(uploads).toHaveLength(1);
   expect(evidenceUploads).toHaveLength(1);
   expect(uploads[0].detailCrops).toHaveLength(4);
   expect(uploads[0].consent).toBe(true);
   expect(uploads[0].image.mimeType).toBe('image/jpeg');
   expect(uploads[0].image.data.length).toBeGreaterThan(1000);
-  expect(uploads[0]).not.toHaveProperty('description');
   expect(requests.some((url) => url.includes('/ocr/'))).toBe(false);
-  await expect(
-    page
-      .getByRole('region', { name: 'Photo comparison results' })
-      .getByText('Source files', { exact: true }),
-  ).toBeVisible();
-  await page
-    .getByRole('region', { name: 'Photo comparison results' })
-    .getByText('Source files', { exact: true })
-    .click();
-  await expect(
-    page
-      .getByRole('region', { name: 'Photo comparison results' })
-      .getByRole('link', { name: 'View full plan' }),
-  ).toHaveAttribute('href', /SE12-F1-p1\/full\.png$/);
-  await page
-    .getByRole('region', { name: 'Photo comparison results' })
-    .getByRole('button', { name: 'Confirm this possible region', exact: true })
-    .first()
-    .click();
-  await expect(page.getByRole('button', { name: 'Region selected', exact: true })).toBeDisabled();
-  await expect(page.getByRole('img', { name: /Synthetic navigation map/ })).toHaveCount(0);
+  await page.getByText('Location evidence', { exact: true }).click();
+  const evidence = page.getByRole('region', { name: 'Photo comparison results' });
+  await expect(evidence.getByRole('heading', { name: 'SE12 · Floor 3' })).toBeVisible();
+  await expect(evidence.locator('.plan-region img')).toHaveAttribute(
+    'src',
+    /SE12-F3-p1\/overview\.png$/,
+  );
+  await evidence.getByText('Source files', { exact: true }).click();
+  await expect(evidence.getByRole('link', { name: 'View full plan' })).toHaveAttribute(
+    'href',
+    /SE12-F3-p1\/full\.png$/,
+  );
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(
     true,
   );
-  await mkdir('docs/screenshots', { recursive: true });
-  await page.screenshot({
-    path: `docs/screenshots/${info.project.name}-photo-comparison-mocked.png`,
-    fullPage: true,
-  });
+  await page.screenshot({ path: info.outputPath('photo-comparison-mocked.png'), fullPage: true });
 });
 
-test('ambiguous photo asks for another view and never supplies a demo match', async ({ page }) => {
-  await setup(page, false);
+test('ambiguous photo asks for another view without generating a route', async ({ page }) => {
+  const { requests } = await setup(page, false);
   await choosePhoto(page);
-  await page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }).click();
+  await submitPhoto(page);
   await expect(
-    page
-      .getByRole('region', { name: 'Photo comparison results' })
-      .getByText('No clear match', { exact: true }),
+    page.getByRole('heading', { name: 'Couldn’t find your starting point' }),
   ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Try another photo', exact: true })).toBeVisible();
+  expect(requests.some((url) => url.endsWith('/navigation'))).toBe(false);
+  await page.getByText('Location evidence', { exact: true }).click();
+  await expect(page.getByText('No clear match', { exact: true })).toBeVisible();
   await expect(
-    page
-      .getByRole('region', { name: 'Photo comparison results' })
-      .getByRole('button', { name: 'Confirm this possible region' }),
-  ).toHaveCount(0);
-  await expect(
-    page
-      .getByRole('region', { name: 'Photo comparison results' })
-      .getByText('A second view showing a corridor intersection would help.'),
+    page.getByText('A second view showing a corridor intersection would help.'),
   ).toBeVisible();
 });
 
-test('cancelling inline analysis discards a late comparison response', async ({ page }) => {
+test('cancelling analysis discards a late comparison response', async ({ page }) => {
   await setup(page);
   await choosePhoto(page);
   let release!: () => void;
@@ -239,46 +213,43 @@ test('cancelling inline analysis discards a late comparison response', async ({ 
     await wait;
     await route.abort().catch(() => {});
   });
-  await page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }).click();
+  await submitPhoto(page);
   await expect.poll(() => requested).toBe(true);
   await page.getByRole('button', { name: 'Cancel analysis', exact: true }).click();
   release();
   await expect(page.getByRole('region', { name: 'Photo comparison results' })).toHaveCount(0);
-  await expect(page.getByRole('img', { name: /Uploaded location photo/ })).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Best match' })).toHaveCount(0);
-  await expect(page.getByTestId('provider-status')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Take a photo of where you are' })).toBeVisible();
 });
 
-test('clearing an analysis removes the result without changing provider or loading sample data', async ({
-  page,
-}) => {
+test('starting over clears the photo and directions', async ({ page }) => {
   const { uploads } = await setup(page);
   await choosePhoto(page);
-  await page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }).click();
-  await page
-    .getByRole('region', { name: 'Photo comparison results' })
-    .getByRole('button', { name: 'Confirm this possible region', exact: true })
-    .click();
-  await page.getByRole('button', { name: 'Clear', exact: true }).click();
-  await expect(page.getByRole('heading', { name: 'Find my location', exact: true })).toBeVisible();
-  await expect(page.getByRole('heading', { name: 'Best match' })).toHaveCount(0);
+  await submitPhoto(page);
+  await expect(
+    page.getByRole('heading', { name: 'Walking directions', exact: true }),
+  ).toBeVisible();
+  await page.getByRole('button', { name: 'Start over', exact: true }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Take a photo of where you are', exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Walking directions', exact: true })).toHaveCount(
+    0,
+  );
   await expect(page.getByTestId('provider-status')).toHaveText('Gemini ready');
   expect(uploads).toHaveLength(1);
 });
 
-test('opening and closing privacy information keeps the photo ready without submitting it', async ({
-  page,
-}) => {
+test('privacy information keeps the photo local and ready for the next step', async ({ page }) => {
   const { evidenceUploads, uploads } = await setup(page);
   await choosePhoto(page);
   await page.getByRole('button', { name: /Coverage & privacy/ }).click();
   await expect(page.getByRole('dialog', { name: 'About DirectionallyUnchallenged' })).toBeVisible();
   await page.getByRole('dialog').press('Escape');
   await expect(page.getByRole('dialog')).not.toBeVisible();
-  await expect(page.getByRole('img', { name: /Uploaded location photo/ })).toBeVisible();
   await expect(
-    page.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }),
-  ).toBeEnabled();
+    page.getByRole('img', { name: 'Selected campus location', exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Next', exact: true })).toBeEnabled();
   expect(evidenceUploads).toHaveLength(0);
   expect(uploads).toHaveLength(0);
 });

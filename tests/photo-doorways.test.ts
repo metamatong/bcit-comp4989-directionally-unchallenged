@@ -6,7 +6,7 @@ import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import sharp from 'sharp';
 import { afterAll, describe, expect, it } from 'vitest';
-import { analyzeCampusPhoto, confirmCampusRegion } from '../server/photo-localization';
+import { analyzeCampusPhoto } from '../server/photo-localization';
 import { readPhotoEvidence } from '../server/photo-evidence';
 import { sourcePhotoReferences } from '../server/photo-grounding';
 import {
@@ -62,11 +62,11 @@ function supported(doorId: string, room: string) {
 }
 describe('visually supported doorway vicinities', () => {
   it.each([
-    ['302', 'SE12-F3-p1', 'SW03 2082', 'choose-origin'],
-    ['3615', 'SW3-F3-p1', 'SW03 2605', 'choose-origin'],
-    ['2004', 'SW1-F2-p1', 'SW03 3615', 'unmapped-origin'],
+    ['302', 'SE12-F3-p1', 'SW03 2082', 'route'],
+    ['3615', 'SW3-F3-p1', 'SW03 2605', 'route'],
+    ['2004', 'SW1-F2-p1', 'SW03 3615', 'unsupported-building'],
   ])(
-    'allows a confirmed starting vicinity for %s even without a camera rectangle',
+    'selects a supported starting vicinity for %s even without a camera rectangle',
     async (room, planId, destination, routeState) => {
       const { options } = sources([room]);
       expect(options).toHaveLength(1);
@@ -122,15 +122,15 @@ describe('visually supported doorway vicinities', () => {
           busy: false,
         }),
       );
-      expect(markup).toContain('I’m in this corridor');
+      expect(markup).toContain('Possible starting corridor');
+      expect(markup).not.toContain('<button');
       expect(markup).toContain(door.corridorBounds ? 'corridor-vicinity' : 'doorway-reference');
-      expect(session.campusLocation).toBeNull();
-      confirmCampusRegion(session, match.id);
+      expect(session.campusLocation).toEqual(match);
       const store = fixtureStore;
       const query = { revision: session.revision, candidateId: match.id, destination };
       const choices = planVisitorJourney(session.campusLocation!, query, store);
       expect(choices.status).toBe(routeState);
-      if (choices.status === 'choose-origin') {
+      if (choices.status === 'route') {
         expect(choices.origins).toHaveLength(1);
         expect(
           planVisitorJourney(

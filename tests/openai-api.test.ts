@@ -85,7 +85,7 @@ it('keeps OpenAI disabled without its key even with configured Gemini and reject
   expect((await response.json()).error).toContain('OPENAI_API_KEY is missing');
 });
 
-it('uses OpenAI for both photo stages, preserves exact retrieval and requires confirmation without storing images', async () => {
+it('uses OpenAI for both photo stages and selects the supported start without storing images', async () => {
   const bodies: Record<string, any>[] = [];
   const fetcher = vi.fn<typeof fetch>().mockImplementation(async (_url, init) => {
     const body = JSON.parse(String(init?.body));
@@ -140,7 +140,7 @@ it('uses OpenAI for both photo stages, preserves exact retrieval and requires co
     planId: 'SE12-F3-p1',
     verification: 'unverified-ai-hypothesis',
   });
-  expect(result.campusLocation).toBeNull();
+  expect(result.campusLocation).toEqual(result.campusAnalysis?.candidates[0]);
   expect(result.providerCalls).toBe(2);
   expect(result.photoEvidence).toBeNull();
   expect(fetcher).toHaveBeenCalledTimes(2);

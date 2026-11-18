@@ -65,7 +65,7 @@ it('performs two separate API calls before any location result, with idempotency
   const result: Session = await response.json();
   expect(result.providerCalls).toBe(2);
   expect(result.campusAnalysis?.candidates[0].planId).toBe('SE12-F3-p1');
-  expect(result.campusLocation).toBeNull();
+  expect(result.campusLocation).toEqual(result.campusAnalysis?.candidates[0]);
   expect(result.photoEvidence).toBeNull();
   expect(result.campusAnalysis?.labelRetrieval.exactMatchPlanIds).toEqual(['SE12-F3-p1']);
   expect(JSON.stringify(result)).not.toContain(input.image.data);

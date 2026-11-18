@@ -1,5 +1,21 @@
 # Verification record
 
+## Source-drawing crossing regression · November 17, 2026
+
+The reported SW03 floor 3 diagonal was reproducible using the source passage and stair points. The AI route validator had checked endpoints and step continuity while accepting the intervening straight line. The earlier transport fixture also used endpoint-only lines, so its passing results did not test corridor geometry. The map renderer drew the supplied polyline faithfully.
+
+The planner now receives the six source-traced corridor polylines and checks every displayed floor path against the complete extracted long-stroke list. Geometry checks combine consecutive corridor steps and include their marker connections, preventing shortcuts hidden by a waypoint or step boundary. A rejected path receives one regeneration attempt within the existing 30-second deadline. A second crossing produces an explicit unavailable result. The hosted bundle includes the same hash-bound stroke data.
+
+All 325 unit/API tests and 24 desktop/mobile browser tests passed. The production build, source-data validation and Vercel package build passed. New cases cover the passage-to-stairs diagonal, split-line bypasses, corrected regeneration and preservation of all six existing corridor traces. Successful mocked route responses now contain the source corridor bends. AI inference is mocked, and the attached screenshots supplied visual evidence. Live provider behavior and physical-campus accuracy were not measured. The drawing strokes remain unclassified, with possible conservative rejections of annotations and no proof of physical walkability.
+
+## Routing regression review · November 17, 2026
+
+The updated visitor flow passed 311 unit/API tests and 24 desktop/mobile Chrome browser tests through `npm test`, plus the production build and source-data validation. AI responses are mocked. The DOM integration test also mocks photo preparation. Browser tests prepare a source-plan image as a transport fixture, with captures written under the ignored `test-results/` directory. Live provider behavior and physical-campus route accuracy remain unmeasured in this review.
+
+New AI planner tests cover floor-by-floor output, routing between source labels without approved indoor checkpoints, unknown destinations, invalid coordinates, disconnected steps, invented building links, withdrawn approvals and one-way crossings. A reproduced race allowed a building link withdrawn during generation to remain in the response. The planner now rejects topology revision changes during the provider call with HTTP 409. Existing photo, API and browser assertions follow the automatic starting-area selection and Photo → Next → Destination → Go flow.
+
+Route validation checks source-plan membership, endpoint regions, step continuity and mapped building connections. The generated floor paths and stair/elevator locations still depend on the provider's interpretation of the drawings. These checks do not establish wall clearance or physical walkability.
+
 ## AI route generation without approval prompts · November 17, 2026
 
 Visitor navigation now asks the selected provider to choose the destination occurrence and generate start/end points and floor paths from official plans. Room checkpoints, door bindings and corridor reviews no longer gate visitor routes; only mapped inter-building links constrain building transfers. The visitor panel no longer offers destination-occurrence selection, and the starting-position notice appears before the route request completes. One-character destination typos are matched against source labels across the pilot, independent of manual door bindings.

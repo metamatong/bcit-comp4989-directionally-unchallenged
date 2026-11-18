@@ -110,6 +110,18 @@ const sourceLabelSchema = z.object({
   verified: z.boolean(),
 });
 export type SourceLabel = z.infer<typeof sourceLabelSchema>;
+const drawingSegmentSchema = z.object({
+  primitiveId: z.string(),
+  coordinates: z.tuple([
+    z.number().min(0).max(1),
+    z.number().min(0).max(1),
+    z.number().min(0).max(1),
+    z.number().min(0).max(1),
+  ]),
+  lengthPdfPoints: z.number().positive(),
+  semanticClass: z.literal('unclassified'),
+});
+export type DrawingSegment = z.infer<typeof drawingSegmentSchema>;
 const geometryEvidenceSchema = z.object({
   id: z.string(),
   sourceSha256: z.string(),
@@ -117,6 +129,7 @@ const geometryEvidenceSchema = z.object({
   extraction: z.record(z.string(), z.unknown()),
   regions: z.array(z.unknown()),
   labels: z.array(sourceLabelSchema),
+  longSegments: z.array(drawingSegmentSchema),
   modelSummary: z.object({
     totalPrimitives: z.number(),
     totalLongSegments: z.number(),
@@ -142,6 +155,7 @@ function loadGeometrySummary(plan: VisualPlan) {
     labels: data.labels,
     totalLabelCount: data.labels.length,
     omittedLabelCount: 0,
+    drawingSegments: data.longSegments,
   };
 }
 type GeometrySummary = ReturnType<typeof loadGeometrySummary>;
@@ -149,23 +163,30 @@ export const preparedGeometryPath = 'data/campus/visual/geometry-summaries.json'
 // The hosted build pins the digest of summaries generated from verified source bytes.
 declare const HOSTED_GEOMETRY_DIGEST: string;
 export function readPreparedGeometry(digest: string) {
-  const entries: { sourceSha256: string; geometrySha256: string; summary: GeometrySummary }[] =
-    JSON.parse(
-      verifiedVisualBytes({ file: preparedGeometryPath, sha256: digest }).toString('utf8'),
-    );
+  const entries: {
+    sourceSha256: string;
+    geometrySha256: string;
+    summary: Omit<GeometrySummary, 'drawingSegments'>;
+    drawingSegments: DrawingSegment[];
+  }[] = JSON.parse(
+    verifiedVisualBytes({ file: preparedGeometryPath, sha256: digest }).toString('utf8'),
+  );
   const summaries = new Map<string, GeometrySummary>();
-  for (const { sourceSha256, geometrySha256, summary } of entries) {
+  for (const { sourceSha256, geometrySha256, summary, drawingSegments } of entries) {
     const plan = getVisualPlan(summary.planId);
+    const strokes = z.array(drawingSegmentSchema).safeParse(drawingSegments);
     if (
       plan.geometry.sha256 !== geometrySha256 ||
       plan.sourceSha256 !== sourceSha256 ||
       plan.sourceRef !== summary.sourceRef ||
       summary.labels.length !== plan.labelCount ||
       summary.omittedLabelCount !== 0 ||
+      !strokes.success ||
+      strokes.data.length !== summary.totalLongSegments ||
       summaries.has(geometrySha256)
     )
       throw new Error('Prepared geometry does not match the official plan index.');
-    summaries.set(geometrySha256, summary);
+    summaries.set(geometrySha256, { ...summary, drawingSegments: strokes.data });
   }
   if (summaries.size !== visualPlans.length) throw new Error('Incomplete prepared geometry.');
   return summaries;
@@ -174,11 +195,21 @@ const geometryCache =
   typeof HOSTED_GEOMETRY_DIGEST === 'string'
     ? readPreparedGeometry(HOSTED_GEOMETRY_DIGEST)
     : new Map<string, GeometrySummary>();
-export function planGeometrySummary(plan: VisualPlan) {
+function geometryRecord(plan: VisualPlan) {
   let summary = geometryCache.get(plan.geometry.sha256);
   if (!summary) {
     summary = loadGeometrySummary(plan);
     geometryCache.set(plan.geometry.sha256, summary);
   }
   return summary;
+}
+
+export function planGeometrySummary(plan: VisualPlan) {
+  const { drawingSegments: _drawingSegments, ...summary } = geometryRecord(plan);
+  return summary;
+}
+
+/** Complete extracted long strokes, retained as unclassified drawing evidence. */
+export function planDrawingSegments(plan: VisualPlan) {
+  return geometryRecord(plan).drawingSegments;
 }

@@ -74,6 +74,17 @@ function corridorTraces(candidates: ConnectionCandidate[]): Trace[] {
   });
   return [...catalogue.traces, ...proposals];
 }
+
+/** Drawing geometry can guide AI routing independently of a topology approval. */
+export function sourceCorridorTraces(candidates: ConnectionCandidate[], plans: VisualPlan[]) {
+  return corridorTraces(candidates)
+    .filter((trace) => matchesSource(trace, candidates, plans))
+    .map((trace) => ({
+      planId: trace.planId,
+      sourceSha256: trace.sourceSha256,
+      path: [trace.from, ...trace.bends, trace.to],
+    }));
+}
 function doorForTrace(trace: Trace, doorId: string, point: PagePoint) {
   return pilotEvidence()
     .find((p) => p.plan.id === trace.planId)

@@ -9,6 +9,7 @@ import { nodeFileTrace } from '@vercel/nft';
 import { root, readJson } from '../server/data';
 import {
   planGeometrySummary,
+  planDrawingSegments,
   preparedGeometryPath,
   visualPlans,
   planAtlases,
@@ -55,6 +56,7 @@ async function packageCampusData() {
     sourceSha256: plan.sourceSha256,
     geometrySha256: plan.geometry.sha256,
     summary: planGeometrySummary(plan),
+    drawingSegments: planDrawingSegments(plan),
   }));
   const bytes = Buffer.from(JSON.stringify(summaries));
   await writeFile(join(functionDir, preparedGeometryPath), bytes);
