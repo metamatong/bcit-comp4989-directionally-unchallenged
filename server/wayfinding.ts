@@ -23,7 +23,8 @@ import { reviewedNetwork } from './pilot-network';
 import { lookupPilotLabels } from './spatial-retrieval';
 import { computeTopologyRoute } from './routing';
 import { TopologyError, TopologyStore, topologyEligibility } from './topology';
-import { visitorPassages } from './visitor-paths';
+import { sourceCorridorTraces, visitorPassages } from './visitor-paths';
+import { attachPathEndpoints, routeDrawingCrossings } from './route-geometry';
 import { planImagePart } from './visual-data';
 import type { Provider } from './provider';
 
@@ -674,6 +675,7 @@ export async function planAiVisitorJourney(
     samePageRoute ? plan.id === candidate.planId : participatingBuildings.has(plan.building),
   );
   const planIds = routePlans.map((plan) => plan.id);
+  const drawingTraces = sourceCorridorTraces(store.candidates, routePlans);
   const tool = routeTool(planIds);
   const destinationContext = choices.map((choice) => ({
     id: choice.place.id,
@@ -709,6 +711,9 @@ export async function planAiVisitorJourney(
       role: 'user' as const,
       parts: [
         {
+          text: `Source-drawing corridor polylines in normalized page coordinates: ${JSON.stringify(drawingTraces)}. These are drawing evidence. Follow their intermediate bends when they describe your corridor. Preserve every bend needed to stay inside a corridor. Generate other floor-local legs from the supplied plan images. All returned floor paths will be checked for intersections with source drawing strokes. A direct line between endpoints is valid only when the entire segment follows the visible corridor.`,
+        },
+        {
           text: `Find a route from this photo-derived starting area to the requested destination. The destination text is ${JSON.stringify(request.destination)}. Starting area: ${JSON.stringify(startContext)}. Destination candidates read from the official plans: ${JSON.stringify(destinationContext)}. Official building connections that are allowed between buildings: ${JSON.stringify(connectorContext)}. Supplied floor-plan IDs: ${JSON.stringify(planIds)}. Choose the most plausible matching destination candidate. On each floor, route through corridors and doorways shown in the image; never draw through a room or wall. You may use stairs or elevators by matching their visible locations across plans in the same building. To change buildings, use an allowed building connection exactly as listed and provide its connectionId; never invent an outdoor path or building passage. Return normalized whole-page coordinates from 0 to 1. The origin must lie inside the supplied starting bounds (or match the supplied doorway point); the destination must be at the selected room's doorway near its printed label. Each corridor step needs an ordered path from its from point to its to point. Transfer steps have an empty path. Do not ask the visitor to confirm anything. If the plans do not show a plausible continuous route, return outcome no-route.`,
         },
         ...routePlans.flatMap((plan) => [
@@ -720,22 +725,7 @@ export async function planAiVisitorJourney(
       ],
     },
   ];
-  const response = await provider.generate(
-    contents,
-    [tool],
-    AbortSignal.timeout(30_000),
-    onAttempt,
-    {
-      forceTool: tool.name,
-      maxOutputTokens: 8192,
-      thinkingLevel: 'low',
-      timeoutMs: 25_000,
-    },
-  );
-  const calls = response.flatMap((part) => (part.functionCall ? [part.functionCall] : []));
-  const parsed = generatedRouteSchema.safeParse(
-    calls.length === 1 && calls[0].name === tool.name ? calls[0].args : null,
-  );
+  const deadline = AbortSignal.timeout(30_000);
   const networkRevision = doc.revision;
   const noRoute = (message: string): NavigationResult => ({
     networkRevision,
@@ -744,37 +734,75 @@ export async function planAiVisitorJourney(
     status: 'no-route',
     message,
   });
-  if (!parsed.success)
-    return noRoute('The AI could not find a confident route from the supplied floor plans.');
-  if (parsed.data.outcome === 'no-route')
-    return noRoute('The AI could not find a continuous route in the supplied floor plans.');
-  const choice = choices.find((item) => item.place.id === parsed.data.destinationId);
-  if (!choice || !generatedRouteIsValid(candidate, choice, parsed.data, routePlans, connectors))
-    return noRoute('The proposed route did not match the supplied floor plans and building links.');
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const response = await provider.generate(contents, [tool], deadline, onAttempt, {
+      forceTool: tool.name,
+      maxOutputTokens: 8192,
+      thinkingLevel: 'low',
+      timeoutMs: 25_000,
+    });
+    // The editor can withdraw a building connection while the provider is generating a route.
+    if (store.read().revision !== doc.revision)
+      throw new TopologyError(
+        'The walking map changed while planning. Request directions again.',
+        409,
+      );
+    const calls = response.flatMap((part) => (part.functionCall ? [part.functionCall] : []));
+    const parsed = generatedRouteSchema.safeParse(
+      calls.length === 1 && calls[0].name === tool.name ? calls[0].args : null,
+    );
+    if (!parsed.success)
+      return noRoute('The AI could not find a confident route from the supplied floor plans.');
+    if (parsed.data.outcome === 'no-route')
+      return noRoute('The AI could not find a continuous route in the supplied floor plans.');
+    const choice = choices.find((item) => item.place.id === parsed.data.destinationId);
+    if (!choice || !generatedRouteIsValid(candidate, choice, parsed.data, routePlans, connectors))
+      return noRoute(
+        'The proposed route did not match the supplied floor plans and building links.',
+      );
 
-  const origin = generatedStop(parsed.data.origin!),
-    destination = generatedStop(parsed.data.destination!);
-  const steps: WalkingStep[] = [];
-  for (let index = 0; index < parsed.data.steps!.length; index++) {
-    const step = parsed.data.steps![index];
-    const from = index === 0 ? origin : steps[index - 1].to;
-    const to = index === parsed.data.steps!.length - 1 ? destination : generatedStop(step.to);
-    steps.push({ kind: step.kind, from, to, path: step.path, instruction: step.instruction });
+    const origin = generatedStop(parsed.data.origin!),
+      destination = generatedStop(parsed.data.destination!);
+    const steps: WalkingStep[] = [];
+    for (let index = 0; index < parsed.data.steps!.length; index++) {
+      const step = parsed.data.steps![index];
+      const from = index === 0 ? origin : steps[index - 1].to;
+      const to = index === parsed.data.steps!.length - 1 ? destination : generatedStop(step.to);
+      steps.push({
+        kind: step.kind,
+        from,
+        to,
+        path: step.kind === 'corridor' ? attachPathEndpoints(from.point, step.path, to.point) : [],
+        instruction: step.instruction,
+      });
+    }
+    const crossings = routeDrawingCrossings(steps, routePlans);
+    if (crossings.length) {
+      if (attempt === 1)
+        return noRoute(
+          'The generated route crosses source drawing lines. A corridor-following route could not be established. Try another photo or destination.',
+        );
+      contents[0].parts.push({
+        text: `The proposed route was rejected because it crossed source drawing strokes at these points: ${JSON.stringify(crossings)}. Rejected proposal: ${JSON.stringify(parsed.data)}. Inspect the floor plans and corridor evidence again. Follow each corridor turn and doorway, and return the complete intermediate path points. Subdividing a diagonal at a crossing does not resolve it. If you cannot establish a continuous corridor-following route, return outcome no-route.`,
+      });
+      continue;
+    }
+    const destinationMatch = choice.typoCorrection
+      ? {
+          requested: request.destination,
+          matched: `${planLabel(routePlans.find((plan) => plan.id === choice.place.planId)!)} · ${choice.place.label}`,
+        }
+      : undefined;
+    return {
+      networkRevision,
+      origins: [origin],
+      destinations,
+      ...(destinationMatch ? { destinationMatch } : {}),
+      status: 'route',
+      origin,
+      destination,
+      steps,
+    };
   }
-  const destinationMatch = choice.typoCorrection
-    ? {
-        requested: request.destination,
-        matched: `${planLabel(routePlans.find((plan) => plan.id === choice.place.planId)!)} · ${choice.place.label}`,
-      }
-    : undefined;
-  return {
-    networkRevision,
-    origins: [origin],
-    destinations,
-    ...(destinationMatch ? { destinationMatch } : {}),
-    status: 'route',
-    origin,
-    destination,
-    steps,
-  };
+  return noRoute('A corridor-following route could not be established.');
 }

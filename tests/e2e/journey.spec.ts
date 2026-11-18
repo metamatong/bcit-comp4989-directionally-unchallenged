@@ -18,7 +18,9 @@ test('starts with photo controls, with no library, plan images or promotional he
   await expect(page.locator('.brand')).toHaveText('DirectionallyUnchallenged.');
   await expect(page.locator('footer')).toContainText('DirectionallyUnchallenged.');
   await expect(page.getByTestId('provider-status')).toHaveText('Setup required');
-  await expect(page.getByRole('heading', { name: 'Find my location', exact: true })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Take a photo of where you are', exact: true }),
+  ).toBeVisible();
   await expect(page.getByRole('button', { name: 'Upload photo', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Take a photo', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Find my location', exact: true })).toHaveCount(0);
@@ -69,13 +71,10 @@ test('prepares an image locally but disables analysis and sending when the key i
   await page.getByLabel('Upload campus photo', { exact: true }).setInputFiles(fixture);
   await expect(page.getByText('Photo ready.', { exact: true })).toBeVisible();
   await expect(page.getByRole('note')).toContainText('GEMINI_API_KEY is missing');
-  const form = page.getByRole('form', { name: 'Photo analysis' });
-  await expect(
-    form.getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true }),
-  ).toBeDisabled();
-  const checkbox = form.getByRole('checkbox');
-  await expect(checkbox).toHaveAccessibleName('Use device location with this photo');
-  await expect(checkbox).not.toBeChecked();
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.getByLabel('Destination', { exact: true }).fill('SW03 2082');
+  const form = page.getByRole('form', { name: 'Find a route' });
+  await expect(form.getByRole('button', { name: 'GO', exact: true })).toBeDisabled();
   expect(sent).toEqual([]);
 });
 
@@ -132,9 +131,9 @@ for (const failure of [
     );
     await page.goto('/');
     await page.getByLabel('Upload campus photo', { exact: true }).setInputFiles(fixture);
-    await page
-      .getByRole('button', { name: 'Analyze photo against BCIT plans', exact: true })
-      .click();
+    await page.getByRole('button', { name: 'Next', exact: true }).click();
+    await page.getByLabel('Destination', { exact: true }).fill('SW03 2082');
+    await page.getByRole('button', { name: 'GO', exact: true }).click();
     await expect(page.getByRole('alert')).toContainText(failure.message);
     await expect(page.getByRole('button', { name: /Demo|landmark|checkpoint/i })).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Best match' })).toHaveCount(0);

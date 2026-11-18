@@ -86,7 +86,7 @@ describe('twelve source pages', () => {
         .commonPlanIds,
     ).toEqual([]);
     expect(lookupPilotLabels({ labels: ['SW03 3615'], purpose: 'origin' }).nextStep).toBe(
-      'visually-verify-and-confirm-start',
+      'use-photo-start-automatically',
     );
   });
   it('inverts the portrait source rotation and keeps independent optical readings inspectable', () => {

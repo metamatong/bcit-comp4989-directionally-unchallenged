@@ -2,6 +2,8 @@
 
 Add a photo, enter a destination, and tap **Go** to get an AI-generated route in the BCIT Burnaby SE12, SW03 and SW01 pilot. The app identifies the starting area from the photo, finds the destination on the official plans, and generates floor-by-floor directions. Cross-building travel uses only mapped building connections.
 
+Floor paths are checked against every extracted long drawing stroke before display. The planner receives source-traced corridor bends and can regenerate a crossing path once within the same request deadline. A second crossing produces an explicit route-unavailable result. Drawing strokes remain unclassified, so this conservative check can also reject annotation crossings and does not establish physical walkability.
+
 The internal reference dataset contains **89 official floor plans covering 45 Burnaby buildings**, plus the campus map. All floor plans have PNGs and structured geometry JSON. Photo results are **AI-estimated starting areas**. A separate local topology editor maintains mapped connections between buildings; visitors do not need a manually approved room doorway or corridor route.
 
 This does not train a model on BCIT. The selected model is pretrained and compares a photo with plan drawings; the plans are not labeled camera-view examples, so reliable exact positioning is not guaranteed.
@@ -114,7 +116,7 @@ mvp/
 │   ├── provider.ts, provider-config.ts, provider-budget.ts
 │   ├── openai-provider.ts, openai-response.ts, photo-localization.ts, session.ts
 │   ├── photo-evidence.ts, photo-media.ts, photo-grounding.ts, photo-doorways.ts, room-labels.ts
-│   ├── topology.ts, topology-api.ts, routing.ts, visitor-paths.ts, wayfinding.ts
+│   ├── topology.ts, topology-api.ts, routing.ts, visitor-paths.ts, wayfinding.ts, route-geometry.ts
 │   ├── topology-candidates.ts, topology-provenance.ts, topology-import.ts, topology-english.ts
 │   ├── pilot-evidence.ts, pilot-network.ts, pilot-inquiries.ts
 │   ├── spatial-retrieval.ts, pilot-tools.ts
@@ -147,6 +149,7 @@ mvp/
 │   ├── device-location.test.ts, browser-location.test.ts, device-location-lifecycle.test.ts, location-fixtures.ts
 │   ├── topology.test.ts, topology-api.test.ts, topology-editor.test.ts
 │   ├── topology-candidates.test.ts, topology-english.test.ts, wayfinding.test.ts, wayfinding-api.test.ts
+│   ├── ai-wayfinding.test.ts, wayfinding-fixtures.ts, route-geometry.test.ts
 │   └── e2e/journey.spec.ts, photo.spec.ts
 ├── docs/
 │   ├── project-brief.txt, requirements.md, architecture.md, data.md

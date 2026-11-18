@@ -5,6 +5,7 @@ import { expect, it, vi } from 'vitest';
 import {
   getVisualPlan,
   planGeometrySummary,
+  planDrawingSegments,
   preparedGeometryPath,
   readPreparedGeometry,
   visualPlans,
@@ -57,6 +58,7 @@ it('binds all hosted summaries and labels to their source bytes and detects miss
     sourceSha256: plan.sourceSha256,
     geometrySha256: plan.geometry.sha256,
     summary: planGeometrySummary(plan),
+    drawingSegments: planDrawingSegments(plan),
   }));
   function prepare() {
     modifiedRead.prepared = Buffer.from(JSON.stringify(entries));
@@ -69,6 +71,15 @@ it('binds all hosted summaries and labels to their source bytes and detects miss
     expect(
       [...summaries.values()].reduce((count, summary) => count + summary.labels.length, 0),
     ).toBe(5463);
+    expect(
+      [...summaries.values()].every(
+        (summary) => summary.drawingSegments.length === summary.totalLongSegments,
+      ),
+    ).toBe(true);
+    const strokes = entries[0].drawingSegments;
+    entries[0].drawingSegments = [];
+    expect(() => readPreparedGeometry(prepare())).toThrow('Prepared geometry');
+    entries[0].drawingSegments = strokes;
     entries.pop();
     const incomplete = prepare();
     expect(() => readPreparedGeometry(digest)).toThrow('asset changed');

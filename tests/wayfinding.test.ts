@@ -130,7 +130,7 @@ describe('visitor routes on the current three-building pilot', () => {
       }
       // Start with the real published journey, then withdraw both approvals in this isolated editor.
       const initialStart = nav();
-      expect(initialStart.status).toBe('choose-origin');
+      expect(initialStart.status).toBe('route');
       expect(nav(initialStart.origins[0].id).status).toBe('route');
       answer(first, 'false', null);
       const baseline = answer(last, 'false', null);
@@ -157,7 +157,7 @@ describe('visitor routes on the current three-building pilot', () => {
       expect(saved.eligibility.nodeIds).toHaveLength(baseline.eligibility.nodeIds.length);
       expect(saved.eligibility.edgeIds.length - baseline.eligibility.edgeIds.length).toBe(2);
       const choice = nav();
-      expect(choice.status).toBe('choose-origin');
+      expect(choice.status).toBe('route');
       expect(choice.origins).toHaveLength(1);
       const forward = nav(choice.origins[0].id);
       if (forward.status !== 'route')
@@ -307,10 +307,10 @@ describe('visitor routes on the current three-building pilot', () => {
       expect(markup).not.toContain('<polyline');
     },
   );
-  it('offers only points inside the confirmed region and requires explicit selection even for one', () => {
+  it('uses a unique point inside the photo region and rejects an unrelated selection', () => {
     const n = bound(lower);
     expect(journey(n, 'SW03 3615', { originId: undefined })).toMatchObject({
-      status: 'choose-origin',
+      status: 'route',
       origins: [{ id: n.id }],
     });
     expect(journey(n, 'SW03 3615', { originId: bound(upper).id }).status).toBe('choose-origin');
@@ -332,7 +332,7 @@ describe('visitor routes on the current three-building pilot', () => {
         { revision: 1, candidateId: c.id, destination: 'SW03 3615' },
         store,
       ),
-    ).toThrow('Confirm');
+    ).toThrow('Analyze a current photo');
   });
   it('keeps missing labels, unreviewed doors, disconnected stairs and arrival distinct', () => {
     for (const text of ['SW03 2458', 'SW03 03615', 'NE01 3615', 'SW03 3615 and 2605'])

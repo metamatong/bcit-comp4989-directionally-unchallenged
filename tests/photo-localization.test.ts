@@ -270,7 +270,7 @@ describe('separate photo evidence and source-grounded localization stages (mocke
     });
     expect(captures[1].options?.forceTool).toBe('select_floor_plans');
     expect(result.atlasPlanCount).toBe(4);
-    expect(session.campusLocation).toBeNull();
+    expect(session.campusLocation).toEqual(result.candidates[0]);
   });
   it('uses the pilot RAG evidence for SW03 3615 only after the independent image reading', async () => {
     const input = photoInput({ buildingHint: 'SW03' });
@@ -294,7 +294,7 @@ describe('separate photo evidence and source-grounded localization stages (mocke
       verification: 'unverified-ai-hypothesis',
     });
     expect(JSON.stringify(captures[1].contents)).toContain('manual-plan-transcription');
-    expect(session.campusLocation).toBeNull();
+    expect(session.campusLocation).toEqual(result.candidates[0]);
   });
   it('reads the photo without plan hints, then retrieves all exact labels and compares SE12 floor 3 directly', async () => {
     const session = newSession();
@@ -334,7 +334,7 @@ describe('separate photo evidence and source-grounded localization stages (mocke
     expect(result.candidates[0].floor).toBe('3');
     expect(result.candidates[0].labelMatches).toEqual([{ observedLabel: '302', planLabel: '302' }]);
     expect(session.photoEvidence).toBeNull();
-    expect(session.campusLocation).toBeNull();
+    expect(session.campusLocation).toEqual(result.candidates[0]);
     expect(JSON.stringify(session)).not.toContain(input.image.data);
     expect(session.activity.map((entry) => entry.tool)).toEqual([
       'read_photo_labels',
@@ -360,14 +360,15 @@ describe('separate photo evidence and source-grounded localization stages (mocke
       input = photoInput();
     const { provider } = fixture([labelReading(), comparison({}, 'SW1-F3-p1')]);
     const record = await readPhotoEvidence(session, input, provider);
-    await expect(
-      analyzeCampusPhoto(session, comparisonInput(input, record.evidence.id), provider, record),
-    ).rejects.toThrow('invalid source IDs');
-    expect(session.campusAnalysis).toBeNull();
-    expect(session.activity.map((entry) => entry.tool)).toEqual([
-      'read_photo_labels',
-      'photo_comparison_stopped',
-    ]);
+    const result = await analyzeCampusPhoto(
+      session,
+      comparisonInput(input, record.evidence.id),
+      provider,
+      record,
+    );
+    expect(result).toMatchObject({ outcome: 'insufficient_evidence', candidates: [] });
+    expect(result.summary).toContain('outside the supplied shortlist');
+    expect(session.campusLocation).toBeNull();
   });
   it.each(['3021', '0302', '302A'])(
     'rejects a model claim that 302 matches %s',
@@ -458,9 +459,15 @@ describe('separate photo evidence and source-grounded localization stages (mocke
         input = photoInput();
       const { provider } = fixture([labelReading(null), shortlist([id])]);
       const record = await readPhotoEvidence(session, input, provider);
-      await expect(
-        analyzeCampusPhoto(session, comparisonInput(input, record.evidence.id), provider, record),
-      ).rejects.toThrow('invalid or unsupplied');
+      const result = await analyzeCampusPhoto(
+        session,
+        comparisonInput(input, record.evidence.id),
+        provider,
+        record,
+      );
+      expect(result).toMatchObject({ outcome: 'insufficient_evidence', candidates: [] });
+      expect(result.summary).toContain('unavailable plan');
+      expect(session.campusLocation).toBeNull();
     },
   );
   it('rejects invented labels or mismatched source coordinates instead of setting a position', async () => {
@@ -472,9 +479,14 @@ describe('separate photo evidence and source-grounded localization stages (mocke
     ).candidates[0].bounds = [0.8, 0.1, 0.2, 0.5];
     const { provider } = fixture([labelReading(), response]);
     const record = await readPhotoEvidence(session, input, provider);
-    await expect(
-      analyzeCampusPhoto(session, comparisonInput(input, record.evidence.id), provider, record),
-    ).rejects.toThrow('region coordinates');
+    const result = await analyzeCampusPhoto(
+      session,
+      comparisonInput(input, record.evidence.id),
+      provider,
+      record,
+    );
+    expect(result).toMatchObject({ outcome: 'insufficient_evidence', candidates: [] });
+    expect(result.summary).toContain('did not match the supplied plans');
     expect(session.campusLocation).toBeNull();
   });
   it('rejects more than one final candidate', () => {

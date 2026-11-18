@@ -1,16 +1,27 @@
 import { randomUUID } from 'node:crypto';
 import { once } from 'node:events';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import type { Server } from 'node:http';
 import { afterAll, beforeAll, expect, it } from 'vitest';
 import { createApp } from '../server/app';
 import type { Provider } from '../server/provider';
 import { TopologyStore } from '../server/topology';
+import { reviewedNetwork } from '../server/pilot-network';
 import type { Session } from '../src/types';
 import type { NavigationResult, StartingPoints } from '../src/wayfinding';
 import { comparison, comparisonInput, labelReading, photoInput, shortlist } from './photo-fixtures';
+import { routeResponse } from './wayfinding-fixtures';
 
-const store = new TopologyStore();
-const room = store.read().nodes.find((n) => n.label === '2605 · 2600 corridor door')!;
+const directory = mkdtempSync(join(tmpdir(), 'wayfinding-api-'));
+const store = new TopologyStore(
+  join(directory, 'topology.json'),
+  undefined,
+  undefined,
+  reviewedNetwork,
+);
+const room = store.read().nodes.find((n) => n.label === '302 · window-side corridor door')!;
 const captions: string[][] = [];
 const provider: Provider = {
   calls: 0,
@@ -19,7 +30,8 @@ const provider: Provider = {
     attempt?.();
     captions.push(contents.flatMap((c) => c.parts.flatMap((p) => (p.text ? [p.text] : []))));
     if (options?.forceTool === 'read_photo_labels') return labelReading(null);
-    if (options?.forceTool === 'select_floor_plans') return shortlist(['SW3-F2-p1']);
+    if (options?.forceTool === 'select_floor_plans') return shortlist([room.planId]);
+    if (options?.forceTool === 'generate_walking_route') return routeResponse();
     if (options?.forceTool === 'propose_campus_locations') {
       const response = comparison({}, room.planId);
       const args = response[0].functionCall!.args as {
@@ -46,7 +58,10 @@ beforeAll(async () => {
   await once(server, 'listening');
   base = `http://127.0.0.1:${(server.address() as { port: number }).port}/api/sessions`;
 });
-afterAll(() => new Promise<void>((resolve) => server.close(() => resolve())));
+afterAll(async () => {
+  await new Promise<void>((resolve) => server.close(() => resolve()));
+  rmSync(directory, { recursive: true, force: true });
+});
 const post = (path: string, body: unknown) =>
   fetch(base + path, {
     method: 'POST',
@@ -54,7 +69,7 @@ const post = (path: string, body: unknown) =>
     body: JSON.stringify(body),
   });
 
-it('takes a consented pilot photo through two stages, region and point confirmation to a room-door overlay', async () => {
+it('takes a consented photo through both stages and directly generates a route with session checks', async () => {
   const session: Session = await (await post('', {})).json();
   const prefix = '/' + session.id;
   const input = photoInput({ scope: 'wayfinding-pilot' });
@@ -77,9 +92,11 @@ it('takes a consented pilot photo through two stages, region and point confirmat
   expect(overviewIds.every((c) => /^Official plan (?:SW1|SW3|SE12)-F/.test(c))).toBe(true);
   expect(captions.flat().join(' ')).not.toContain('Destination:');
   const candidateId = match.campusAnalysis!.candidates[0].id;
-  const query = { candidateId, destination: 'SW03 3615', revision: match.revision };
+  expect(match.campusLocation?.id).toBe(candidateId);
+  const query = { candidateId, destination: 'SW03 2082', revision: match.revision };
   const nav = (request: object) => post(prefix + '/navigation', request);
-  expect((await nav(query)).status).toBe(409);
+  expect((await nav({ ...query, candidateId: randomUUID() })).status).toBe(409);
+  expect((await nav({ ...query, revision: 0 })).status).toBe(409);
   const preview = (body: object) => post(prefix + '/navigation/origins', body);
   const identifying = { candidateId, revision: match.revision };
   expect((await preview({ ...identifying, candidateId: randomUUID() })).status).toBe(409);
@@ -90,47 +107,33 @@ it('takes a consented pilot photo through two stages, region and point confirmat
   const points: StartingPoints = await options.json();
   expect(points.origins.map((s) => s.id)).toEqual([room.id]);
   expect(Object.keys(points).sort()).toEqual(['networkRevision', 'origins']);
-  expect(
-    (await nav({ ...query, originId: room.id, networkRevision: points.networkRevision })).status,
-  ).toBe(409);
-  const confirmed: Session = await (
-    await post(prefix + '/actions', {
-      requestId: randomUUID(),
-      revision: match.revision,
-      action: { type: 'confirm-campus-region', candidateId },
-    })
-  ).json();
-  const request = { ...query, revision: confirmed.revision };
-  const choices: NavigationResult = await (await nav(request)).json();
-  expect(choices).toMatchObject({ status: 'choose-origin', origins: [{ id: room.id }] });
-  const complete = {
-    ...request,
-    networkRevision: points.networkRevision,
-    originId: points.origins[0].id,
-  };
-  const route = await nav(complete);
+  const route = await nav(query);
   expect(route.status).toBe(200);
   expect(route.headers.get('cache-control')).toBe('no-store');
   const directions: NavigationResult = await route.json();
   expect(directions.status).toBe('route');
   if (directions.status !== 'route') throw Error('missing route');
-  expect(directions.steps.map((s) => s.kind)).toEqual(['corridor', 'elevator', 'corridor']);
+  expect(directions.steps.map((s) => s.kind)).toEqual([
+    'corridor',
+    'building-link',
+    'corridor',
+    'elevator',
+    'corridor',
+  ]);
   expect(JSON.stringify(directions)).not.toMatch(/reviewer|reviewHistory|data:image|answeredAt/);
-  expect((await nav({ ...complete, networkRevision: choices.networkRevision - 1 })).status).toBe(
-    409,
-  );
-  expect((await nav({ ...complete, path: [{ x: 0, y: 0 }] })).status).toBe(400);
+  expect((await nav({ ...query, networkRevision: points.networkRevision - 1 })).status).toBe(409);
+  expect((await nav({ ...query, path: [{ x: 0, y: 0 }] })).status).toBe(400);
   const other: Session = await (await post('', {})).json();
   expect(
-    (await post('/' + other.id + '/navigation', { ...complete, revision: other.revision })).status,
+    (await post('/' + other.id + '/navigation', { ...query, revision: other.revision })).status,
   ).toBe(409);
   const newPhoto: Session = await (
     await post(
       prefix + '/photo/evidence',
-      photoInput({ scope: 'wayfinding-pilot', revision: confirmed.revision }),
+      photoInput({ scope: 'wayfinding-pilot', revision: match.revision }),
     )
   ).json();
   expect(newPhoto.campusLocation).toBeNull();
-  expect((await nav({ ...complete, revision: newPhoto.revision })).status).toBe(409);
-  expect(provider.calls).toBe(4);
+  expect((await nav({ ...query, revision: newPhoto.revision })).status).toBe(409);
+  expect(provider.calls).toBe(5);
 });
