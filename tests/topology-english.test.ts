@@ -33,8 +33,8 @@ function legacyJournal() {
   document.schemaVersion = 1;
   for (const receipt of [...document.candidateAnswers, ...document.floorObservations]) {
     const original = previousHashes.get(receipt.definitionHash);
-    if (!original) throw Error('Missing translation for a published candidate');
-    receipt.definitionHash = original;
+    // Later coordinate corrections have no Korean predecessor. Never bind an old review to new geometry.
+    if (original) receipt.definitionHash = original;
   }
   return document;
 }
@@ -96,8 +96,8 @@ it('upgrades a saved journal once and retains the exact directions, history and 
   expect(document.candidateAnswers.map((a) => a.id)).toEqual(
     original.candidateAnswers.map((a) => a.id),
   );
-  expect(eligibility.nodeIds).toHaveLength(24);
-  expect(eligibility.edgeIds).toHaveLength(16);
+  expect(eligibility.nodeIds).toHaveLength(reviewedNetwork().nodes.length);
+  expect(eligibility.edgeIds).toHaveLength(reviewedNetwork().edges.length);
   const network = visitorPassages(document, eligibility, candidates, store.plans);
   expect(network.traces.size).toBe(6);
   expect(network.doors.size).toBe(4);
@@ -173,12 +173,20 @@ it('keeps stale approvals, withdrawn passages and changed candidate definitions 
   );
 });
 
-it('ships English map and review text and binds every prior definition to its specific translation', () => {
+it('keeps English translation fingerprints separate from later coordinate corrections', () => {
   const source = reviewedNetwork();
   expect(JSON.stringify([candidates, source])).not.toMatch(/\p{Script=Hangul}/u);
-  expect(new Set(Object.values(translations.definitionHashes))).toEqual(
-    new Set(candidates.map((c) => topologyContentHash(c))),
-  );
+  const translatedHashes = new Set(Object.values(translations.definitionHashes));
+  for (const candidate of candidates)
+    expect(translatedHashes.has(topologyContentHash(candidate))).toBe(
+      candidate.version === 1 && candidate.preparedOn === '2026-11-13',
+    );
+  expect(
+    translatedHashes.has('c94970fa338a29b3f0bee289860ccde2fe5e5034b45fc4bba7b15637d9da2e31'),
+  ).toBe(true);
+  expect(
+    translatedHashes.has('832dec64a9b54e803173f593b103532169701c5b693a5240fe96fa165d02481c'),
+  ).toBe(true);
   expect(
     source.nodes.find((n) => n.kind === 'elevator-stop' && n.planId === 'SW3-F3-p1')?.label,
   ).toBe('East elevator at 3696 · corridor 3600');

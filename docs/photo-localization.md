@@ -35,3 +35,7 @@ Location lookup, navigation and drawing the arrows make no provider requests. Re
 ## Verification
 
 Tests cover a single provider stage, metadata-only lookup, exact identifier boundaries, directional-sign abstention, source doorway ambiguity, GPS consent/freshness/conflict, session/evidence binding, stale writes, retries and cancellation. Normal visitor API tests use a provider that rejects every operation except evidence extraction. Browser tests assert that only the extraction request carries media. Live checks and mocked GPS tests are recorded separately in the [verification record](verification.md).
+
+## Door plaques and direction signs
+
+The evidence prompt distinguishes room-identification plaques beside or above a visible doorway, including projecting plaques, from signs whose visible arrows or wording direct travel to another location. Mounting orientation alone is not a direction. Unclear placement remains unknown. Directional-only evidence still cannot establish the starting doorway.

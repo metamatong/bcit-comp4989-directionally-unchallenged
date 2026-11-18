@@ -143,9 +143,9 @@ it('returns unknown-destination without spending a provider call', async () => {
   expect(provider.generate).not.toHaveBeenCalled();
 });
 
-it('rejects a wall-crossing diagonal even when all endpoints and building links match', async () => {
+it('rejects a path through an adjacent room even when all endpoints and building links match', async () => {
   const route = walkingRouteFixture();
-  route.steps[2].path = [route.steps[2].from.point, route.steps[2].to.point];
+  route.steps[2].path = [route.steps[2].from.point, { x: 0.7, y: 0.58 }, route.steps[2].to.point];
   const provider = providerFixture(routeResponse(route));
   const result = await plan(provider);
   expect(result).toMatchObject({
@@ -157,7 +157,11 @@ it('rejects a wall-crossing diagonal even when all endpoints and building links 
 
 it('regenerates a shortcut once with drawing feedback and returns the corridor-following path', async () => {
   const badRoute = walkingRouteFixture();
-  badRoute.steps[2].path = [badRoute.steps[2].from.point, badRoute.steps[2].to.point];
+  badRoute.steps[2].path = [
+    badRoute.steps[2].from.point,
+    { x: 0.7, y: 0.58 },
+    badRoute.steps[2].to.point,
+  ];
   const provider = providerFixture();
   provider.generate.mockResolvedValueOnce(routeResponse(badRoute));
   const result = await plan(provider);
