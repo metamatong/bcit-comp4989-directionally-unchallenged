@@ -183,6 +183,21 @@ function CorridorPlan({
         aria-label={`Review the corridor from ${candidate.from.label} to ${candidate.to.label}`}
       >
         <image href={plan.full.url} x={0} y={0} width={plan.width} height={plan.height} />
+        {trace?.doorwayOpenings?.map((opening, index) => (
+          <rect
+            key={index}
+            x={opening.bounds[0] * plan.width}
+            y={opening.bounds[1] * plan.height}
+            width={(opening.bounds[2] - opening.bounds[0]) * plan.width}
+            height={(opening.bounds[3] - opening.bounds[1]) * plan.height}
+            fill="#b8dfcf55"
+            stroke="#226d52"
+            strokeWidth="1"
+            vectorEffect="non-scaling-stroke"
+          >
+            <title>{opening.description}</title>
+          </rect>
+        ))}
         {trace && (
           <polyline
             aria-label="Corridor segment under review"

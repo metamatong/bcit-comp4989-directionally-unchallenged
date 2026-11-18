@@ -1847,6 +1847,34 @@
             "y": 0.5939394
           },
           "adjoiningLabel": null
+        },
+        {
+          "room": "1710",
+          "point": {
+            "x": 0.4833333,
+            "y": 0.5575758
+          },
+          "adjoiningLabel": "1602",
+          "corridorBounds": [
+            0.482,
+            0.548,
+            0.505,
+            0.568
+          ]
+        },
+        {
+          "room": "1710",
+          "point": {
+            "x": 0.474183,
+            "y": 0.489899
+          },
+          "adjoiningLabel": "1700",
+          "corridorBounds": [
+            0.465,
+            0.474,
+            0.48,
+            0.492
+          ]
         }
       ],
       "rejectedOcr": [

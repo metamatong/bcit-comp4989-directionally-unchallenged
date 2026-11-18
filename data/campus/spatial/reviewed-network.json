@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 37,
-  "sourceDocumentSha256": "50d435064ad25ca8db029f05d8eb335bc51dafdeb8ab1da630b30938aa552200",
+  "revision": 41,
+  "sourceDocumentSha256": "3a2f8f01e77cae0f87741ad755a5f33547a210a2af4d6f55e7624a979f2f29c7",
   "nodes": [
     {
       "version": 2,
@@ -493,6 +493,58 @@
         "x": 0.754902,
         "y": 0.5959596
       }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "2c5fe39bcf78f4c782a61361a9bd17ceeca81e213ce65bd2d449f310e432e838",
+      "reviewBasis": "user-confirmation",
+      "id": "97fdec6c-5dab-48b8-a116-6968dae55b3c",
+      "planId": "SW3-F1-p1",
+      "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "label": "S160 · east stair landing",
+      "aliases": [
+        "S160 · east stair landing",
+        "S160"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.7779412,
+        "y": 0.5136364
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "f1d9cbf342b319953b46580f67f367e2bd5b38fb8333fda46af44079a0615757",
+      "reviewBasis": "user-confirmation",
+      "id": "d0028cf2-ca39-4d73-9d61-1371cad8c94d",
+      "planId": "SW3-F1-p1",
+      "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "label": "1710 · lobby 1602 doorway",
+      "aliases": [
+        "1710 · lobby 1602 doorway"
+      ],
+      "kind": "door",
+      "point": {
+        "x": 0.4833333,
+        "y": 0.5575758
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "3f96f7c547d076efeae6e62657645af185b87c80e390e0d82f42ee8267af6030",
+      "reviewBasis": "user-confirmation",
+      "id": "8fe98872-4af9-4d66-824b-faf9341aa6c1",
+      "planId": "SW3-F1-p1",
+      "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "label": "1710 · corridor 1700 doorway",
+      "aliases": [
+        "1710 · corridor 1700 doorway"
+      ],
+      "kind": "door",
+      "point": {
+        "x": 0.474183,
+        "y": 0.489899
+      }
     }
   ],
   "edges": [
@@ -923,6 +975,98 @@
         "fromNodeId": "e66f5029-dec9-4314-b471-d343261c4734",
         "toNodeId": "ac20e75b-9094-4284-bfbe-6c4223635ab4",
         "reviewedEdgeHash": "14268ea6afecf40fe4c21074d1639cee9c3142ab3d616963b9a92ca8409c08ba"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "17b3c8f2dac52527ad0f9ac51802aca94130bb7e24b6872efd4b4382504f1483",
+      "reviewBasis": "user-confirmation",
+      "id": "aba7b4eb-2994-4418-bdb8-1cf936b90f9d",
+      "fromNodeId": "5ab26f71-aabe-4414-af8f-d195a668bd65",
+      "toNodeId": "97fdec6c-5dab-48b8-a116-6968dae55b3c",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "forward",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw3-f1-f2-s160-s260",
+      "candidateBinding": {
+        "definitionHash": "2865a9822a9e40b36ee9e3fe30881f205546b5cfef47125088bc10d53b628494",
+        "presentedHash": "b1056699523ccd08db79543dad93b8e3e288cbace72e1a52ac306ba46f6e239b",
+        "fromNodeId": "97fdec6c-5dab-48b8-a116-6968dae55b3c",
+        "toNodeId": "5ab26f71-aabe-4414-af8f-d195a668bd65",
+        "reviewedEdgeHash": "17b3c8f2dac52527ad0f9ac51802aca94130bb7e24b6872efd4b4382504f1483"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "cdb1da262946e499a97d5eac2a6d0ac76daf5e9a5d472c5b3e88682c9e5d7ed0",
+      "reviewBasis": "user-confirmation",
+      "id": "82f2a4f7-6da1-4660-bd14-040839a8c9e1",
+      "fromNodeId": "e2c6b5b4-8af8-4eaa-a1e0-066c0cae5e3b",
+      "toNodeId": "e66f5029-dec9-4314-b471-d343261c4734",
+      "endpointVersions": {
+        "from": 2,
+        "to": 1
+      },
+      "kind": "corridor",
+      "direction": "forward",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw3-f3-east-passage-to-s360",
+      "candidateBinding": {
+        "definitionHash": "c34a585d190c06a319bb80f5e6a1a3730261a15187662ac18dd66e545f174e00",
+        "presentedHash": "e4d55060cdad869904efc36f2aa4500a6116cd299a3b058c46112ec9092835db",
+        "fromNodeId": "e2c6b5b4-8af8-4eaa-a1e0-066c0cae5e3b",
+        "toNodeId": "e66f5029-dec9-4314-b471-d343261c4734",
+        "reviewedEdgeHash": "cdb1da262946e499a97d5eac2a6d0ac76daf5e9a5d472c5b3e88682c9e5d7ed0"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "097027dfd5fd4497bc919fcaf631184784c2e5343afaceb1ae20cc7c1cc6297e",
+      "reviewBasis": "user-confirmation",
+      "id": "1ca40e1e-574b-4e32-8cbd-607df37220ae",
+      "fromNodeId": "97fdec6c-5dab-48b8-a116-6968dae55b3c",
+      "toNodeId": "d0028cf2-ca39-4d73-9d61-1371cad8c94d",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "corridor",
+      "direction": "forward",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw3-f1-s160-to-1710",
+      "candidateBinding": {
+        "definitionHash": "39c2978aaabc709233de401a83ab3e5f99e2711cc4000447a3a54960aa35b123",
+        "presentedHash": "6f682f4208c7155fd0dd66037a5638dd8b40f7b60098ccbbb1c863b27301aaa8",
+        "fromNodeId": "97fdec6c-5dab-48b8-a116-6968dae55b3c",
+        "toNodeId": "d0028cf2-ca39-4d73-9d61-1371cad8c94d",
+        "reviewedEdgeHash": "097027dfd5fd4497bc919fcaf631184784c2e5343afaceb1ae20cc7c1cc6297e"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "90db9b5c30a89690d47b8673d9c25614023a2df2f7245c9c9df0212ed8518c72",
+      "reviewBasis": "user-confirmation",
+      "id": "9aa6cfd6-9eb9-4638-9bd1-50948f5d9844",
+      "fromNodeId": "97fdec6c-5dab-48b8-a116-6968dae55b3c",
+      "toNodeId": "8fe98872-4af9-4d66-824b-faf9341aa6c1",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "corridor",
+      "direction": "forward",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw3-f1-s160-to-1710-corridor-1700",
+      "candidateBinding": {
+        "definitionHash": "78812e62626f1727c9c6f9c3ecfd5aa19f8248c6118b3713fbee16db3eb4ea30",
+        "presentedHash": "d03937a14b7681e3996dab975e9a82006ba641b3e74ed8739441136f0a367c77",
+        "fromNodeId": "97fdec6c-5dab-48b8-a116-6968dae55b3c",
+        "toNodeId": "8fe98872-4af9-4d66-824b-faf9341aa6c1",
+        "reviewedEdgeHash": "90db9b5c30a89690d47b8673d9c25614023a2df2f7245c9c9df0212ed8518c72"
       }
     }
   ],

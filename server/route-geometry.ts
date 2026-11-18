@@ -1,9 +1,11 @@
 /** Reject crossings of source drawing strokes. A clear line is not proof of walkability. */
 import type { VisualPlan } from '../src/types';
 import type { PagePoint, WalkingStep } from '../src/wayfinding';
+import type { DoorwayOpening } from '../src/topology';
 import { planDrawingSegments } from './visual-data';
 
 export type DrawingCrossing = { planId: string; primitiveId: string; point: PagePoint };
+export type SourceDoorwayOpening = DoorwayOpening & { planId: string; sourceSha256: string };
 const numericalTolerance = 1e-8;
 // Source doorway markers can lie on the ink at the start/end of a floor visit.
 const endpointTolerancePdfPoints = 0.5;
@@ -46,11 +48,18 @@ export function attachPathEndpoints(
   );
 }
 
-function crossingsOnFloor(path: PagePoint[], plan: VisualPlan): DrawingCrossing[] {
+function crossingsOnFloor(
+  path: PagePoint[],
+  plan: VisualPlan,
+  openings: SourceDoorwayOpening[],
+): DrawingCrossing[] {
   const points = path.map((point) => pixels(point, plan));
   const first = points[0],
     last = points.at(-1)!;
   const crossings = new Map<string, DrawingCrossing>();
+  const sourceOpenings = openings.filter(
+    (opening) => opening.planId === plan.id && opening.sourceSha256 === plan.sourceSha256,
+  );
   for (const stroke of planDrawingSegments(plan)) {
     const [x0, y0, x1, y1] = stroke.coordinates;
     const start = pixels({ x: x0, y: y0 }, plan),
@@ -63,10 +72,25 @@ function crossingsOnFloor(path: PagePoint[], plan: VisualPlan): DrawingCrossing[
         separation(hit, last) <= endpointTolerancePdfPoints
       )
         continue;
+      const point = { x: hit.x / plan.width, y: hit.y / plan.height };
+      // A PDF curve can contain many walls. Exempt only the intersection inside the reviewed aperture.
+      if (
+        sourceOpenings.some((opening) => {
+          const [left, top, right, bottom] = opening.bounds;
+          return (
+            opening.primitiveIds.includes(stroke.primitiveId) &&
+            point.x >= left &&
+            point.x <= right &&
+            point.y >= top &&
+            point.y <= bottom
+          );
+        })
+      )
+        continue;
       crossings.set(stroke.primitiveId, {
         planId: plan.id,
         primitiveId: stroke.primitiveId,
-        point: { x: hit.x / plan.width, y: hit.y / plan.height },
+        point,
       });
     }
   }
@@ -77,6 +101,7 @@ function crossingsOnFloor(path: PagePoint[], plan: VisualPlan): DrawingCrossing[
 export function routeDrawingCrossings(
   steps: WalkingStep[],
   plans: VisualPlan[],
+  openings: SourceDoorwayOpening[] = [],
 ): DrawingCrossing[] {
   const crossings: DrawingCrossing[] = [];
   let path: PagePoint[] = [],
@@ -85,7 +110,7 @@ export function routeDrawingCrossings(
     if (path.length > 1) {
       const plan = plans.find((item) => item.id === planId);
       if (!plan) throw new Error('Route drawing checks require the source plan.');
-      crossings.push(...crossingsOnFloor(path, plan));
+      crossings.push(...crossingsOnFloor(path, plan, openings));
     }
     path = [];
     planId = undefined;
