@@ -43,7 +43,7 @@ The Git-connected Vercel project builds the frontend and the visitor API with `n
 4. Source lookup chooses a unique starting estimate. Conflicting labels, directional-only signs or a GPS contradiction produce an explanation. Scene features are retained as observations, and doorway placement helps choose the relevant label. Unavailable window/count annotations do not imply a spatial match.
 5. The app resolves the destination and calculates a route over approved graph connections. **Walking directions** shows one arrow-separated route overview, followed by a continuous stack of maps with A/B descriptions. Floor changes appear in the overview; one zoom control applies to all maps. Photo bytes, floor-plan images and destinations are sent to no later AI stage.
 
-SE12 302 to SW03 2605 uses the recorded third-floor connecting passage, SW03 east elevator from floor 3 to floor 2, and reviewed corridor bends. `SW03 2604` is a distinct vestibule whose source label exists but has no reviewed arrival approach. Such destinations display a coverage gap. Route costs currently minimize recorded connection count. Physical distance and accessibility remain unmeasured.
+SE12 302 to SW03 2605 enters SW03 through the east third-floor passage beside S360 and shaft 3696, follows the short approach to the east elevator, and continues on floor 2. Reviewed network revision 37 also places the floor-2 outdoor entrance beside 2696/S260, with short access to the elevator and corridor 2600; it no longer uses the doorway between 2063 and 2080. The corrected fourth-floor east passage is confirmed for both directions between SE12 and SW03. The east elevator and S360/S460 stair transfer between SW03 floors 3 and 4 are also confirmed in both directions. Fourth-floor entrance-to-landing corridors, stair approaches and individual room approaches still need separate reviews. `SW03 2604` is a distinct vestibule whose source label exists but has no reviewed arrival approach. Such destinations display a coverage gap. Route costs currently minimize recorded connection count. Physical distance and accessibility remain unmeasured.
 
 The full photo and four detail crops are prepared locally from the original image. The footer’s **Coverage & privacy** dialog identifies the extraction provider and data handling. The server keeps image-free evidence receipts, and the browser discards its prepared photo after locating the result, removal or navigation away. Explicit retries can reuse unexpired extraction evidence.
 
@@ -51,7 +51,7 @@ Expand **Device position** below the maps for optional **Show my position** trac
 
 ## Internal connection editor
 
-The [local topology editor](http://127.0.0.1:3000/internal/topology) maintains source-linked checkpoints, corridor traces and stair/elevator/building connections. Only current approvals and permitted directions enter routing. Editing a point invalidates incident approvals. Local review history persists in the ignored `data/campus/topology.json`. [Editor workflow](docs/topology-editor.md)
+The [local topology editor](http://127.0.0.1:3000/internal/topology) maintains source-linked checkpoints, corridor traces and stair/elevator/building connections. Only current approvals and permitted directions enter routing. The east SW03 elevator and S360/S460 stairs for floors 3–4 have confirmed bidirectional transfers using the existing third-floor landing identities. Editing a point invalidates incident approvals. Local review history persists in the ignored `data/campus/topology.json`. [Editor workflow](docs/topology-editor.md)
 
 ## Checks
 
@@ -144,7 +144,7 @@ mvp/
 │   ├── topology.test.ts, topology-api.test.ts, topology-editor.test.ts
 │   ├── topology-candidates.test.ts, topology-english.test.ts, wayfinding.test.ts, wayfinding-api.test.ts
 │   ├── ai-wayfinding.test.ts, wayfinding-fixtures.ts, route-geometry.test.ts, route-recovery.test.ts
-│   ├── reviewed-navigation.test.ts, label-localization.test.ts
+│   ├── reviewed-navigation.test.ts, label-localization.test.ts, floor-four-passage.test.ts
 │   └── e2e/journey.spec.ts, photo.spec.ts
 ├── docs/
 │   ├── project-brief.txt, requirements.md, architecture.md, data.md

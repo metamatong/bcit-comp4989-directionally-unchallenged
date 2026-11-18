@@ -58,8 +58,8 @@ export function readConnectionCandidates() {
         `A proposed corridor line must join two marked points on one floor: ${candidate.id}`,
       );
     if (candidate.endpointRefs) {
-      if (kind !== 'corridor' || from.planId !== to.planId)
-        throw new Error(`Expected one floor for corridor ${candidate.id}`);
+      if (kind === 'corridor' ? from.planId !== to.planId : !['stairs', 'elevator'].includes(kind))
+        throw new Error(`Invalid shared-endpoint connection: ${candidate.id}`);
       for (const side of ['from', 'to'] as const) {
         const ref = candidate.endpointRefs[side];
         if (!ref) continue;
@@ -68,7 +68,7 @@ export function readConnectionCandidates() {
         const pin = candidate[side];
         if (
           !owner ||
-          owner.endpointRefs ||
+          owner.endpointRefs?.[ref.side] ||
           owner.id === candidate.id ||
           !target?.point ||
           target.planId !== pin.planId ||

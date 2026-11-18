@@ -3,12 +3,12 @@
   "traces": [
     {
       "candidateId": "sw3-f2-door-to-lift-corridor",
-      "definitionHash": "b106686c118bddf0ee8e2fc4499b14d83a0f4311edbffebae815b5d50f362f71",
+      "definitionHash": "8b004b4b4359a44367276efec864c6d57c48b5c949c31f2672f96f51d6a0757b",
       "planId": "SW3-F2-p1",
       "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
       "from": {
-        "x": 0.5125,
-        "y": 0.096
+        "x": 0.8675,
+        "y": 0.45
       },
       "to": {
         "x": 0.828922,
@@ -16,28 +16,15 @@
       },
       "bends": [
         {
-          "x": 0.5125,
-          "y": 0.1501136
-        },
-        {
-          "x": 0.5125,
-          "y": 0.45
-        },
-        {
-          "x": 0.5346569,
-          "y": 0.45
-        },
-        {
           "x": 0.8289216,
           "y": 0.45
         }
       ],
-      "instruction": "Follow corridors 2000 and 2600 between the SE12 exterior door and the east elevator.",
-      "initialReviewHash": "f57a4f2fc86ee795740eb310ff78ab0777a78ed59f7c5dca16772257c050b13e"
+      "instruction": "Follow the short east end of corridor 2600 between the entrance beside S260 and the elevator at 2696."
     },
     {
       "candidateId": "sw3-f3-lift-to-building-link-corridor",
-      "definitionHash": "832dec64a9b54e803173f593b103532169701c5b693a5240fe96fa165d02481c",
+      "definitionHash": "ddef8a944dd4ecad472cf4bbc5984e505da428800d2a31bb8ed496aac084d818",
       "planId": "SW3-F3-p1",
       "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
       "from": {
@@ -45,25 +32,16 @@
         "y": 0.640909
       },
       "to": {
-        "x": 0.4875,
-        "y": 0.352
+        "x": 0.77,
+        "y": 0.6325758
       },
       "bends": [
         {
           "x": 0.7401961,
           "y": 0.6325758
-        },
-        {
-          "x": 0.5409314,
-          "y": 0.6325758
-        },
-        {
-          "x": 0.4875,
-          "y": 0.6325758
         }
       ],
-      "instruction": "Follow corridors 3600 and 3000 between the east elevator and the SE12 passage.",
-      "initialReviewHash": "f63b79401b0cce761a7188c5c2c98a4fb3556f4cad374786a1377a583a33e713"
+      "instruction": "Follow the short east end of corridor 3600 between the elevator at 3696 and the SE12 connecting passage beside S360."
     },
     {
       "candidateId": "sw3-f2-east-lift-to-2605",

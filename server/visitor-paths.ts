@@ -115,8 +115,28 @@ export function visitorPassages(
   const nodes = new Map(doc.nodes.map((node) => [node.id, node]));
   const edges = new Map(doc.edges.filter((e) => approved.has(e.id)).map((edge) => [edge.id, edge]));
   const latest = new Map(doc.candidateAnswers.map((answer) => [answer.candidateId, answer]));
+  const definitions = new Map(
+    candidates.map((candidate) => [candidate.id, topologyContentHash(candidate)]),
+  );
+  const transferAnswers = new Map(
+    [...latest.values()].flatMap((answer) =>
+      answer.bindings ? [[answer.bindings.edgeId, answer] as const] : [],
+    ),
+  );
   const allowed = new Set(
-    [...edges.values()].filter((e) => e.kind !== 'corridor').map((e) => e.id),
+    [...edges.values()]
+      .filter((edge) => {
+        if (edge.kind === 'corridor') return false;
+        const answer = transferAnswers.get(edge.id);
+        // A corrected building-passage definition must not keep an older endpoint approval routable.
+        return (
+          !answer ||
+          (answer.answer === 'true' &&
+            answer.direction !== 'unknown' &&
+            answer.definitionHash === definitions.get(answer.candidateId))
+        );
+      })
+      .map((edge) => edge.id),
   );
   const traces = new Map<string, { fromId: string; path: PagePoint[]; instruction: string }>();
   const doors = new Map<string, string>();

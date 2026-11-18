@@ -27,29 +27,34 @@ it.each(traces)('preserves the source corridor bends on $planId', (trace) => {
 });
 
 const planId = 'SW3-F3-p1';
-const passage = { x: 0.4875, y: 0.352 };
+// Keep the original diagonal as a geometry regression; this north point is not the SE12 passage.
+const northCorridor = { x: 0.4875, y: 0.352 };
 const stairs = { x: 0.754412, y: 0.643939 };
-it('rejects a direct SW03 passage-to-stairs line across the intervening rooms', () => {
-  const hits = routeDrawingCrossings([corridor(planId, [passage, stairs])], visualPlans);
+it('rejects a direct SW03 north-corridor-to-stairs line across the intervening rooms', () => {
+  const hits = routeDrawingCrossings([corridor(planId, [northCorridor, stairs])], visualPlans);
   expect(hits.length).toBeGreaterThan(1);
   expect(hits.every((hit) => hit.planId === planId)).toBe(true);
 });
 
 it('rejects the same shortcut when a waypoint is placed exactly on a crossed stroke', () => {
-  const hit = routeDrawingCrossings([corridor(planId, [passage, stairs])], visualPlans)[0];
+  const hit = routeDrawingCrossings([corridor(planId, [northCorridor, stairs])], visualPlans)[0];
   expect(
-    routeDrawingCrossings([corridor(planId, [passage, hit.point, stairs])], visualPlans).length,
+    routeDrawingCrossings([corridor(planId, [northCorridor, hit.point, stairs])], visualPlans)
+      .length,
   ).toBeGreaterThan(0);
 });
 
 it('rejects a shortcut split into adjacent corridor steps at the crossed stroke', () => {
-  const hit = routeDrawingCrossings([corridor(planId, [passage, stairs])], visualPlans)[0];
-  const steps = [corridor(planId, [passage, hit.point]), corridor(planId, [hit.point, stairs])];
+  const hit = routeDrawingCrossings([corridor(planId, [northCorridor, stairs])], visualPlans)[0];
+  const steps = [
+    corridor(planId, [northCorridor, hit.point]),
+    corridor(planId, [hit.point, stairs]),
+  ];
   expect(routeDrawingCrossings(steps, visualPlans).length).toBeGreaterThan(0);
 });
 
 it('checks the connections from displayed markers to the AI path', () => {
-  const path = [passage, { x: 0.4875, y: 0.6325758 }, { x: 0.740196, y: 0.6325758 }];
+  const path = [northCorridor, { x: 0.4875, y: 0.6325758 }, { x: 0.740196, y: 0.6325758 }];
   const step = corridor(planId, path);
   step.from.point = stairs;
   expect(routeDrawingCrossings([step], visualPlans).length).toBeGreaterThan(0);

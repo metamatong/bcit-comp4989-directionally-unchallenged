@@ -1,5 +1,49 @@
 # Verification record
 
+## Confirmed SW03 vertical transfers and merge validation · November 17, 2026
+
+The user confirmed both displayed third/fourth-floor facilities and bidirectional travel. Their captured presentation hashes and the unchanged revision-35 journal matched before recording the answers. Revision 37 adds the fourth-floor elevator and S460 landing with two vertical edges, reusing the existing third-floor elevator/S360 nodes. All 25 previous answers remain unchanged; the journal now has 27 answers, 28 approved points and 19 approved connections.
+
+All 386 unit/API tests and 24 desktop/mobile browser tests passed, with formatting, production build, source-data validation and Vercel packaging. The restarted local HTTP API checked both directions of all three SE12–SW03 crossings and both SW03 floor-3/floor-4 transfers. SE12 302 reaches the fourth-floor elevator through four approved connections. These API checks used no provider calls; the photo-driven live test is recorded separately below.
+
+The fourth-floor building-passage endpoint still has no reviewed corridor connection to the fourth-floor elevator or stairs. Stair approaches and individual fourth-floor room approaches also require their own reviews. The API and regression tests continue to report no route for these gaps instead of inferring connections. The confirmed facility transfers do not establish campus-wide coverage, physical distance, accessibility or current operating status.
+
+## Pending SW03 third-to-fourth-floor review · November 17, 2026
+
+Two source-bound questions were prepared for the east elevator and adjacent S360/S460 stairs, with A on floor 3 and B on floor 4. The fourth-floor proposed landing points were read independently from the source drawing. Enlarged A/B pairs were captured from the local review UI with their proposal hashes, source hashes, shared-node versions and graph revision retained in the local review context. Both questions remain unanswered; the approved graph and private review journal are unchanged at revision 35.
+
+Vertical candidates can reuse an owned endpoint from an earlier reviewed connection. This keeps the existing third-floor landing identity when a later user confirmation creates the fourth-floor transfer, and permits a subsequent corridor to reference the newly owned fourth-floor landing. Unanswered proposals create no graph records. Tests simulate confirmations only in isolated temporary journals.
+
+All 383 unit/API tests and 24 desktop/mobile browser tests passed, along with formatting, production build, data validation and Vercel packaging. The source catalogue now contains 20 questions, while the approved graph retains 26 points and 17 connections. No live provider request or field validation was performed.
+
+## Confirmed fourth-floor east passage · November 17, 2026
+
+The user reviewed the captured fourth-floor A/B markers at revision 34, confirmed SE12 B, corrected SW03 A to the east elevator/stairwell entrance, and explicitly confirmed bidirectional travel. Revision 35 moves A from `(0.4875, 0.298)` to `(0.77, 0.585)` on the original SW03 fourth-floor drawing. B retains its plan, source hash and point `(0.44, 0.673)`. The SE12 description now correctly identifies corridor 408C. The earlier hold is superseded by a new user-confirmation receipt, with all 24 previous answers and existing review histories retained.
+
+Both fourth-floor endpoints and their building link now have current approvals and are included in the public snapshot: 26 approved points and 17 connections. The existing record IDs are retained. No fourth-floor corridor, room approach or vertical elevator/stair service is inferred from this confirmation.
+
+All 379 unit/API tests and 24 desktop/mobile browser tests passed, along with formatting, production build, source-data validation and Vercel packaging. New tests check the independently read fourth-floor point in both travel directions, reject the superseded upper-wing receipt, and confirm that the crossing does not fabricate a route to floor 3. The restarted local HTTP API returned the single approved crossing in both directions, and a capture from the actual editor verified the corrected A marker. Provider/device responses in automated tests are mocked; this edit used no additional provider call or physical-campus validation.
+
+## SW03 second-floor east entrance · November 17, 2026
+
+The user reviewed the saved A/B images and corrected SW03 point A from the doorway between 2063/2080 to the east entrance beside 2696/S260. The captured presentation matched editor revision 31 and its source-bound markers before the edit. Revision 34 moves A to `(0.8675, 0.45)` on the corridor side of the east doorway. SE12 point B at `(0.5395, 0.5365)` retains its exact record and approval. The existing outdoor classification and permitted directions remain, with outdoor geometry unmapped.
+
+The elevator approach now uses one shared corridor vertex `(0.8289216, 0.45)` before the existing landing `(0.828922, 0.459848)`. The dependent 2082 approach is also updated to start at the east entrance and follow the existing corridor 2600/2000 vertices to the unchanged office doorway. Both paths pass the drawing-crossing validator. The three affected definitions are version 2, and the private journal retains all 21 earlier answers plus three correction receipts. Original source hashes and unrelated reviews remain unchanged.
+
+All 375 unit/API tests and 24 desktop/mobile browser tests passed, with formatting, production build, source-data validation and Vercel packaging. New cases assert the east entry and unchanged SE12 exit independently, test approaches to both 2605 and 2082, reject the obsolete floor-2 transfer receipt, and verify reverse travel. The restarted local HTTP API returned the corrected direct transfer in both directions at revision 34. A capture from the actual editor verified that marker A appears beside 2696/S260. Automated provider/device inputs are mocked; this correction used no additional provider call and makes no physical-campus validation claim.
+
+## SE12–SW03 east-passage correction · November 17, 2026
+
+The user identified that SE12 floor 3 joins the east side of SW03 beside the displayed elevator marker, rather than the upper corridor. The original proposal had paired SE12 `(0.4435, 0.631)` with SW03 `(0.4875, 0.352)`. Both the local journal and public revision-29 graph reproduced that incorrect pairing with all provider calls disabled.
+
+Revision 31 moves the SW03 passage junction to `(0.77, 0.6325758)` on the original floor-3 drawing, in the east connecting neck beside S360 and shaft 3696. Its corridor approach uses the shared vertex `(0.7401961, 0.6325758)` and the existing elevator landing `(0.740196, 0.640909)`. The long detour through corridor 3000 is removed. The two affected candidate definitions are version 2, the original record IDs and directions are retained, and the local journal preserves all 19 previous answers plus two new user-correction receipts. Source hashes remain unchanged. Superseded candidate definitions no longer authorize visitor transfers, and the public network and trace checksums were regenerated.
+
+The first authorized live `photoooo.jpg` test extracted `302` as a directional sign and correctly abstained before routing. Inspection showed a projecting room-identification plaque next to the visible doorway. The extraction prompt now explicitly distinguishes such plaques from signs with directional arrows or wording; it contains no room-specific or map hints. Directional-only evidence remains insufficient for localization.
+
+The subsequent live test through `http://127.0.0.1:3000` with `gpt-6-luna` extracted `302` with `placement: door`, one doorway, left-side windows and a straight corridor. Extraction took 4.418 seconds, the 117-byte metadata lookup resolved SE12 floor 3 in 3.310 seconds with a cold index, and navigation to SW03 2605 took 20 ms. Total test time was 7.750 seconds with one provider call for the successful request. The returned revision-31 route enters the corrected east passage, takes the short elevator approach, descends to floor 2 and reaches 2605. It never visits the old upper-corridor point. Session results contained no media bytes or raw device coordinates. Across the initial and subsequent live tests, two extraction calls were made in total.
+
+All 371 unit/API tests and 24 desktop/mobile browser tests passed, along with formatting, the production build, source-data validation and Vercel packaging. Regression checks independently assert the corrected passage coordinates in both travel directions, reject an obsolete building-link receipt, preserve shared corridor vertices and retain the old diagonal as a wall-crossing test. Automated provider/device responses are mocked. The two live calls are a small diagnostic sample; no physical-campus walk or additional manual browser check was performed.
+
 ## Compact route display · November 17, 2026
 
 Walking directions now use one arrow-separated overview and a continuous vertical stack of floor maps with A/B legends. Transfer endpoints are combined in the overview; floor changes and unmapped outdoor gaps remain explicit. Zoom and source attribution appear once for the stack. Optional device controls are collapsed below it, with an active tracking indicator and an explicit floor selector that stops the previous watch.

@@ -1,6 +1,6 @@
 # Internal topology editor
 
-The local editor at `/internal/topology` lets a human confirm proposed connections on 12 official SE12, SW03 and SW01 floor plans, correct markers, manually annotate additional passages and check routes over reviewed records. This is an internal graph tool. Visitor routing generates within-building paths with AI and reads this topology only for mapped inter-building connections; visitors do not approve rooms, doors or corridors.
+The local editor at `/internal/topology` lets a human confirm proposed connections on 12 official SE12, SW03 and SW01 floor plans, correct markers, manually annotate additional passages and check routes over reviewed records. This is an internal graph tool. Visitor routing uses this reviewed graph and source corridor traces after the single photo-evidence stage; visitors do not approve rooms, doors or corridors.
 
 ## Answer-first workflow
 
@@ -15,6 +15,32 @@ The answer stores the reviewer, server timestamp, exact endpoint snapshots, sour
 Answers are append-only within the graph document. Changing a prior T to F/unknown/unknown direction withdraws the generated connection from routing. Re-answering uses the same generated records when they still exist, avoiding duplicate graph nodes/edges. Manual point changes invalidate approvals and appear in the next question for explicit re-confirmation. Stale graph revisions, proposal presentations and source hashes are rejected. The existing point/connection editor remains available under **Edit map and check routes**; approved candidates offer **Check this route** with the direction-appropriate endpoints selected.
 
 To extend the question set, inspect the original plans and add versioned definitions to `data/campus/connection-candidates.json`. Each definition references the source hash for each endpoint and explains how to identify it on the page. Restart the server after changing the catalogue and run data validation.
+
+## Corrected SE12–SW03 third-floor passage
+
+Revision 31 applies the user's November 17 correction. On `SW3-F3-p1`, `sw3-se12-floor3-passage` now uses the east passage junction at `(0.77, 0.6325758)` instead of the upper corridor point `(0.4875, 0.352)`. The SE12 endpoint remains `(0.4435, 0.631)`. The elevator at `(0.740196, 0.640909)` remains a separate point. The approach reuses the corridor vertex `(0.7401961, 0.6325758)` shared with the classroom approach, so a route continuing along corridor 3600 does not double back into the elevator landing.
+
+Both affected definitions are version 2. Their existing node/edge IDs and permitted directions are retained; the moved point and dependent edges receive fresh content-bound approvals. The original answers remain in the private journal, and the two new receipts record the explicit user correction without claiming a field visit. The public network and corridor-trace checksums are regenerated from this corrected data.
+
+An existing private editor journal is never replaced by a newer public snapshot. For an older journal, review the version-2 building passage first, then `sw3-f3-lift-to-building-link-corridor` using the corrected displayed markers. Superseded candidate receipts do not authorize visitor transfers. Withdrawn approvals and unrelated manual annotations remain untouched.
+
+## Corrected second-floor outdoor entrance
+
+After reviewing the stored A/B drawings, the user corrected only SW03 point A to the east entrance beside 2696/S260. Revision 34 places it at `(0.8675, 0.45)` on the corridor side of the doorway on `SW3-F2-p1`. SE12 point B at `(0.5395, 0.5365)` and its original approval remain unchanged. The outdoor connection retains its existing bidirectional permission and does not draw an assumed outdoor walking line.
+
+The two corridors sharing A are updated together. The elevator approach uses `(0.8289216, 0.45)` to reach landing `(0.828922, 0.459848)`. The approach to 2082 follows the existing source vertices through corridors 2600 and 2000, stopping at the unchanged room doorway instead of the obsolete 2063/2080 transfer point. All three affected definitions are version 2; prior answers remain in the private journal with three appended correction receipts. An older journal should review the corrected outdoor entrance first, followed by the elevator and 2082 approaches.
+
+## Confirmed fourth-floor east passage
+
+The user reviewed the stored fourth-floor A/B images, confirmed SE12 B and bidirectional travel, and corrected SW03 A to the east elevator/stairwell entrance. Revision 35 places A at `(0.77, 0.585)` on `SW3-F4-p1`, read independently from that floor's original drawing. B remains at `(0.44, 0.673)` on `SE12-F4-p1`, at the end of the passage from corridor 408C. The obsolete upper office-wing endpoint is no longer used.
+
+Definition version 2 and a new user-confirmation receipt replace the previous hold, while preserving the original record IDs and all earlier answers and reviews. Both endpoints and the building link now have current approvals. This adds the fourth-floor crossing to the public network; it does not establish elevator/stair service to other floors or walking approaches to individual fourth-floor rooms.
+
+## Confirmed SW03 floor 3–4 transfers
+
+The user confirmed both source-bound candidates for the east elevator (`sw3-f3-f4-east-lift`) and adjacent S360/S460 stairwell (`sw3-f3-f4-s360-s460`). A is floor 3 and B is floor 4. A reuses the exact approved third-floor landing from the existing floor 2–3 record. B is an independently read fourth-floor landing. Revision 37 records the user confirmation of both facilities and bidirectional travel, creating two fourth-floor landings and two vertical edges while reusing the existing third-floor nodes.
+
+The proposed fourth-floor elevator point is `(0.7401961, 0.5929293)` beside S460 on corridor 4600. The stair doorway point is `(0.754902, 0.5959596)`. The user confirmed these marked landings and their floor-to-floor service. Fourth-floor entrance-to-landing corridors and stair access from the existing corridor network still need their own review; the transfer confirmation does not approve those approaches. Shared endpoint references may belong to a corridor or vertical transfer and must target an endpoint owned by its original record. Confirmation reuses the third-floor node, avoiding duplicate landings that would leave the new transfer disconnected from the existing route.
 
 ## Stairs and elevators between floors 2 and 3
 
@@ -31,7 +57,7 @@ The short steps between the SW03 lounge and hall, SE12 S203 marked “down” on
 
 ## First continuous route
 
-Two SW03 questions connect the doors and lift stops that have already been reviewed. On floor 2, check whether the entrance by 2063/2080 leads through corridors 2000 and 2600 to the boarding point by 2696. On floor 3, check whether the boarding point by 3696 leads through corridors 3600 and 3000 to the SE12 passage by 3081/3086. Compare both points on the same plan, confirm the whole passage and select the permitted direction.
+Two SW03 questions connect the doors and lift stops that have already been reviewed. On floor 2, the corrected east entrance beside 2696/S260 reaches the nearby elevator through a short segment of corridor 2600. On floor 3, the corrected SE12 passage is at the east end of corridor 3600 beside S360 and shaft 3696. Its short approach leads directly to the nearby elevator landing; the upper corridor by 3081/3086 is not this connection. Compare both points on the same plan, confirm the whole passage and select the permitted direction.
 
 When both corridors support the proposed journey, open **Edit map and check routes → Route check** and choose the SE12 floor 2 exterior doorway and the SE12 floor 3 SW03 passage as endpoints. With travel permitted in the forward directions, the recorded path has five connections: the outdoor passage, the SW03 floor 2 corridor, the SW03 elevator, the SW03 floor 3 corridor and the building link. Use **Fewest recorded connections** while distances are unknown.
 
@@ -41,7 +67,7 @@ Each corridor definition references the candidate and side that own each endpoin
 
 The user clarified that SE12 floor 2 connects to SW03 floor 2, and SE12 floor 3 connects to SW03 floor 3. The second-floor journey exits one building, travels outdoors and enters the other. The user also reported that part of SE12 floor 2 meets the ground. Keep its official floor label `2`; do not rename it floor 1, assign a global elevation, assume every floor-2 door reaches ground, or infer step-free access.
 
-The original fourth-floor T answers remain in history and the linked points and connection are in draft. The user subsequently confirmed the two second-floor exterior doorways and bidirectional outdoor travel. This and the third-floor building link are the two eligible connections at graph revision 7. Intermediate geometry, grade and distance are unknown.
+At that historical revision, the original fourth-floor T answers remained in history and the linked points and connection were returned to draft. The November 17 fourth-floor correction below supersedes that hold. The user subsequently confirmed the two second-floor exterior doorways and bidirectional outdoor travel. This and the third-floor building link are the two eligible connections at graph revision 7. Intermediate geometry, grade and distance are unknown.
 
 ## Who enters the first data?
 
@@ -102,7 +128,7 @@ The editor page and its API require an actual loopback connection and a local Ho
 Two source-bound questions complete the ends of the indoor itinerary through the third-floor connecting passage and SW03 east elevator. Both have user-confirmed bidirectional answers in revision 29.
 
 - **SE12 floor 3**. A is the drawn threshold of classroom 302 on the window-side corridor. Follow the frontage of 306, 308, 310 and 312 to 312A, then turn into the narrow SW03 passage to B, its existing reviewed junction. [Review this segment](http://127.0.0.1:3000/internal/topology?candidate=se12-f3-302-to-sw03-link)
-- **SW03 floor 2**. A is the interior side of the existing exterior doorway between rooms 2063 and 2080. Follow corridor 2000 into the building to B, the corridor-side threshold of office 2082 between office 2081 and meeting room 2083. This question covers indoor travel only. [Review this segment](http://127.0.0.1:3000/internal/topology?candidate=sw3-f2-exterior-door-to-2082)
+- **SW03 floor 2**. A is the corrected east entrance beside 2696/S260. Follow corridor 2600 west, then corridor 2000 to B, the corridor-side threshold of office 2082 between office 2081 and meeting room 2083. This question covers indoor travel only. [Review this segment](http://127.0.0.1:3000/internal/topology?candidate=sw3-f2-exterior-door-to-2082)
 
 The combined view displays both pins and the proposed bends on one source page. Expand the endpoint details to inspect or adjust an editable pin. The proposed bends and room-door references are included in the candidate definition hash. A current T and its permitted direction can activate the trace only while its endpoints and source still match. Changing an endpoint disables its original trace until the source line is revised and reviewed.
 

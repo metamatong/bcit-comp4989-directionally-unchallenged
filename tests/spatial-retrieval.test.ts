@@ -219,7 +219,12 @@ describe('reviewed graph revision', () => {
       }
       expect(current).toBe(reverse ? start : end);
     }
-    expect(data.edges.some((e) => e.sourceCandidateId === 'sw3-se12-floor4-passage')).toBe(false);
+    expect(data.edges.find((e) => e.sourceCandidateId === 'sw3-se12-floor4-passage')).toMatchObject(
+      {
+        kind: 'building-link',
+        direction: 'both',
+      },
+    );
     expect(data.elevatorReports).toMatchObject([
       {
         candidateId: 'se12-f2-f3-lift-location',

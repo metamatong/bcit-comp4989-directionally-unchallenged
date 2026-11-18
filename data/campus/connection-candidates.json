@@ -3,19 +3,19 @@
   "candidates": [
     {
       "id": "sw3-se12-floor3-passage",
-      "version": 1,
-      "title": "SW03 floor 3 to SE12 floor 3 indoor passage",
+      "version": 2,
+      "title": "SW03 east passage to SE12 · floor 3",
       "kind": "building-link",
       "from": {
         "planId": "SW3-F3-p1",
         "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
         "point": {
-          "x": 0.4875,
-          "y": 0.352
+          "x": 0.77,
+          "y": 0.6325758
         },
         "label": "Passage to SE12",
-        "kind": "door",
-        "description": "The door is at the end of the long corridor at the top of the SW03 drawing, where it meets the outline of another building."
+        "kind": "junction",
+        "description": "The corridor-side entry of the east connecting passage beside S360 and shaft 3696, continuing directly from corridor 3600. This is separate from the elevator landing."
       },
       "to": {
         "planId": "SE12-F3-p1",
@@ -28,25 +28,25 @@
         "kind": "junction",
         "description": "At the lower centre of the SE12 drawing, a narrow passage leads from corridor 312A toward the SW3 label. The marker is inside the passage."
       },
-      "rationale": "The official SE12 sheet shows a lower passage labelled SW3. The SW03 sheet shows a door at the upper corridor and an adjacent building outline. Review whether these points connect and which directions are passable. The sheets use independent coordinates and do not establish a common elevation.",
+      "rationale": "The user corrected the SE12 floor 3 passage correspondence to the east end of SW03 beside S360 and shaft 3696. The SW03 source drawing shows the connecting neck continuing east from corridor 3600. The former upper corridor point between 3081 and 3086 is not this SE12 connection. Preserve the previously confirmed travel directions; no new field visit is claimed.",
       "preparedBy": "assistant-source-review",
-      "preparedOn": "2026-11-13"
+      "preparedOn": "2026-11-17"
     },
     {
       "id": "sw3-se12-floor4-passage",
-      "version": 1,
-      "title": "SW03 floor 4 to SE12 floor 4 indoor passage",
+      "version": 2,
+      "title": "SW03 east passage to SE12 · floor 4",
       "kind": "building-link",
       "from": {
         "planId": "SW3-F4-p1",
         "sourceSha256": "ec9b5c3ae80da356b78dc7ea89e3228e6cd6b5e882d9c20a6b7e10bbd5ec034a",
         "point": {
-          "x": 0.4875,
-          "y": 0.298
+          "x": 0.77,
+          "y": 0.585
         },
         "label": "Passage to SE12",
-        "kind": "door",
-        "description": "The end of the upper corridor on the SW03 floor 4 drawing appears to have double doors. Confirm the building and floor reached through them."
+        "kind": "junction",
+        "description": "The corridor-side entry of the east connecting passage beside the elevator and stairwell on the original SW03 fourth-floor drawing. The marker is just inside the passage threshold, not at the upper office-wing doors."
       },
       "to": {
         "planId": "SE12-F4-p1",
@@ -57,27 +57,27 @@
         },
         "label": "Passage to SW03",
         "kind": "door",
-        "description": "A door appears at the tip of the passage extending from corridor 406C near the lower centre of the SE12 floor 4 drawing."
+        "description": "The unchanged doorway at the end of the passage extending downward from corridor 408C on the SE12 fourth-floor drawing."
       },
-      "rationale": "Both official fourth-floor drawings show a door at the end of a projecting passage. Confirm whether these openings connect, which floor they reach and the permitted directions of travel.",
+      "rationale": "After reviewing the saved fourth-floor A/B drawings, the user confirmed B in SE12, corrected SW03 A to the east elevator/stairwell entrance, and explicitly confirmed travel in both directions. The SW03 point was read independently from its fourth-floor source drawing. This confirmation covers the building passage only; no floor-3/floor-4 elevator or stair service is inferred.",
       "preparedBy": "assistant-source-review",
-      "preparedOn": "2026-11-13"
+      "preparedOn": "2026-11-17"
     },
     {
       "id": "sw3-se12-floor2-passage",
-      "version": 1,
-      "title": "SW03 floor 2 to SE12 floor 2 outdoor passage",
+      "version": 2,
+      "title": "SW03 east entrance to SE12 · floor 2 outdoor passage",
       "kind": "outdoor",
       "from": {
         "planId": "SW3-F2-p1",
         "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
         "point": {
-          "x": 0.5125,
-          "y": 0.096
+          "x": 0.8675,
+          "y": 0.45
         },
         "label": "Exterior door toward SE12",
         "kind": "outdoor-access",
-        "description": "At the top of the SW03 floor 2 drawing, the marker indicates the apparent door between 2063 and 2080 at the end of corridor 2000. Its position was taken directly from this sheet."
+        "description": "The corridor side of the east entrance at the end of corridor 2600, beside shaft 2696 and stairwell S260. The marker is just inside the doorway, separate from the elevator landing."
       },
       "to": {
         "planId": "SE12-F2-p1",
@@ -90,9 +90,9 @@
         "kind": "outdoor-access",
         "description": "The marker indicates a possible outward-opening door from 203F OFFICE-OPN beside stairs S203 at the bottom of the SE12 floor 2 drawing. Move B if another door serves the trip to SW03."
       },
-      "rationale": "On November 13, 2026, the user identified floors 2 and 3 as the connected levels. They reported going outside between buildings on floor 2 and that part of SE12 floor 2 meets the ground. The two door candidates were marked on their respective floor 2 sheets. Confirm the endpoints and direction before routing. The outdoor line, gradients, stairs, distance, elevation and accessibility remain unknown. The report applies only to the described part of SE12.",
+      "rationale": "After reviewing the displayed A/B plans, the user corrected only A: the SW03 floor 2 entrance is at the east end by elevator 2696 and S260, not between 2063 and 2080. SE12 point B remains unchanged. Retain the existing outdoor classification and permitted directions. The outdoor walking line, gradients, distance and accessibility remain unmeasured.",
       "preparedBy": "assistant-source-review",
-      "preparedOn": "2026-11-13"
+      "preparedOn": "2026-11-17"
     },
     {
       "id": "se12-f2-f3-s209-s327",
@@ -379,19 +379,19 @@
     },
     {
       "id": "sw3-f2-door-to-lift-corridor",
-      "version": 1,
-      "title": "SW03 floor 2 · exterior door to the east elevator",
+      "version": 2,
+      "title": "SW03 floor 2 · east entrance to the nearby elevator",
       "kind": "corridor",
       "from": {
         "planId": "SW3-F2-p1",
         "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
         "point": {
-          "x": 0.5125,
-          "y": 0.096
+          "x": 0.8675,
+          "y": 0.45
         },
-        "label": "Exterior door between 2063 and 2080",
+        "label": "Exterior door toward SE12",
         "kind": "outdoor-access",
-        "description": "At the top of the SW03 floor 2 drawing, the marker indicates the apparent door between 2063 and 2080 at the end of corridor 2000. Its position was taken directly from this sheet."
+        "description": "The corridor side of the east entrance at the end of corridor 2600, beside shaft 2696 and stairwell S260. The marker is just inside the doorway, separate from the elevator landing."
       },
       "to": {
         "planId": "SW3-F2-p1",
@@ -414,13 +414,13 @@
           "side": "from"
         }
       },
-      "rationale": "The door between 2063 and 2080 is at the end of corridor 2000. Confirm whether you can walk past 2605, along corridor 2600, to the elevator at 2696 beside stairwell S260 on the same floor.",
+      "rationale": "The user corrected the SE12-facing entrance to the east end of corridor 2600 beside 2696 and S260. The entrance reaches the existing nearby elevator landing along this short corridor segment; corridor 2000 is not part of this approach.",
       "preparedBy": "assistant-source-review",
-      "preparedOn": "2026-11-13"
+      "preparedOn": "2026-11-17"
     },
     {
       "id": "sw3-f3-lift-to-building-link-corridor",
-      "version": 1,
+      "version": 2,
       "title": "SW03 floor 3 · east elevator to the SE12 passage",
       "kind": "corridor",
       "from": {
@@ -438,12 +438,12 @@
         "planId": "SW3-F3-p1",
         "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
         "point": {
-          "x": 0.4875,
-          "y": 0.352
+          "x": 0.77,
+          "y": 0.6325758
         },
         "label": "Entrance to the SE12 passage",
-        "kind": "door",
-        "description": "The door is at the end of the long corridor at the top of the SW03 drawing, where it meets the outline of another building."
+        "kind": "junction",
+        "description": "The corridor-side entry of the east connecting passage beside S360 and shaft 3696, continuing directly from corridor 3600. This is separate from the elevator landing."
       },
       "endpointRefs": {
         "from": {
@@ -455,9 +455,9 @@
           "side": "from"
         }
       },
-      "rationale": "The SW03 floor 3 drawing shows corridor 3600 at elevator 3696 beside S360, the junction beside 3615 and corridor 3000. Confirm whether you can follow them to the SE12 passage door between 3081 and 3086 on this floor.",
+      "rationale": "The user confirmed the SE12 connection at the east end of SW03. Follow the short corridor 3600 segment between the existing elevator landing at 3696 and the adjacent east passage. The upper corridor 3000 is not part of this approach.",
       "preparedBy": "assistant-source-review",
-      "preparedOn": "2026-11-13"
+      "preparedOn": "2026-11-17"
     },
     {
       "id": "sw3-f2-east-lift-to-2605",
@@ -586,19 +586,19 @@
     },
     {
       "id": "sw3-f2-exterior-door-to-2082",
-      "version": 1,
-      "title": "SW03 floor 2 · exterior door between 2063 and 2080 to room 2082",
+      "version": 2,
+      "title": "SW03 floor 2 · east entrance to room 2082 via corridors 2600 and 2000",
       "kind": "corridor",
       "from": {
         "planId": "SW3-F2-p1",
         "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
         "point": {
-          "x": 0.5125,
-          "y": 0.096
+          "x": 0.8675,
+          "y": 0.45
         },
         "label": "Exterior door toward SE12",
         "kind": "outdoor-access",
-        "description": "The existing doorway is at the end of corridor 2000 between 2063 and 2080. A marks the indoor side."
+        "description": "The corridor side of the east entrance at the end of corridor 2600, beside shaft 2696 and stairwell S260. The marker is just inside the doorway, separate from the elevator landing."
       },
       "to": {
         "planId": "SW3-F2-p1",
@@ -620,16 +620,102 @@
       "drawingTrace": {
         "bends": [
           {
+            "x": 0.8289216,
+            "y": 0.45
+          },
+          {
+            "x": 0.5346569,
+            "y": 0.45
+          },
+          {
+            "x": 0.5125,
+            "y": 0.45
+          },
+          {
             "x": 0.5125,
             "y": 0.1501136
           }
         ],
-        "instruction": "Use corridor 2000 between the doorway by rooms 2063 and 2080 and the door to office 2082, between office 2081 and meeting room 2083.",
+        "instruction": "From the east entrance beside 2696 and S260, follow corridor 2600 to corridor 2000, then continue to the doorway of office 2082 between 2081 and meeting room 2083.",
         "toDoorId": "SW3-F2-p1:drawn-door:3"
       },
-      "rationale": "Walk indoors from A along corridor 2000 past rooms 2080 and 2081. B is the doorway to 2082 on the right of the sheet. Confirm whether this entire indoor stretch is passable.",
+      "rationale": "The exterior entrance has been corrected to the east end. Reuse the existing source bends along corridors 2600 and 2000 to reach the unchanged reviewed doorway of office 2082. The old entrance between 2063 and 2080 is not a transfer endpoint and is not part of this path.",
       "preparedBy": "assistant-source-review",
-      "preparedOn": "2026-11-13"
+      "preparedOn": "2026-11-17"
+    },
+    {
+      "id": "sw3-f3-f4-east-lift",
+      "version": 1,
+      "title": "SW03 floors 3 and 4 · east elevator",
+      "kind": "elevator",
+      "from": {
+        "planId": "SW3-F3-p1",
+        "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+        "point": {
+          "x": 0.740196,
+          "y": 0.640909
+        },
+        "label": "East elevator at 3696 · corridor 3600",
+        "kind": "elevator-stop",
+        "description": "The existing reviewed third-floor landing. A marks this point; confirm its connection to the proposed fourth-floor landing B."
+      },
+      "to": {
+        "planId": "SW3-F4-p1",
+        "sourceSha256": "ec9b5c3ae80da356b78dc7ea89e3228e6cd6b5e882d9c20a6b7e10bbd5ec034a",
+        "point": {
+          "x": 0.7401961,
+          "y": 0.5929293
+        },
+        "label": "East elevator · corridor 4600",
+        "kind": "elevator-stop",
+        "description": "The proposed corridor-side boarding point at the shaft opening immediately left of stairwell S460 on the fourth-floor drawing. Confirm that this is the elevator entrance and that it serves floor 3."
+      },
+      "endpointRefs": {
+        "from": {
+          "candidateId": "sw3-f2-f3-east-lift",
+          "side": "to"
+        }
+      },
+      "rationale": "The third-floor point is the existing reviewed landing by 3696. The fourth-floor source independently shows a shaft opening beside S460. The matching elevator identity and service between floors 3 and 4 are unconfirmed; neither matching drawing shapes nor floor numbers grants a route.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-17"
+    },
+    {
+      "id": "sw3-f3-f4-s360-s460",
+      "version": 1,
+      "title": "SW03 floors 3 and 4 · east stairs S360 and S460",
+      "kind": "stairs",
+      "from": {
+        "planId": "SW3-F3-p1",
+        "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+        "point": {
+          "x": 0.754412,
+          "y": 0.643939
+        },
+        "label": "S360 · beside shaft 3696",
+        "kind": "stair-landing",
+        "description": "The existing reviewed third-floor landing. A marks this point; confirm its connection to the proposed fourth-floor landing B."
+      },
+      "to": {
+        "planId": "SW3-F4-p1",
+        "sourceSha256": "ec9b5c3ae80da356b78dc7ea89e3228e6cd6b5e882d9c20a6b7e10bbd5ec034a",
+        "point": {
+          "x": 0.754902,
+          "y": 0.5959596
+        },
+        "label": "S460 · east stair landing",
+        "kind": "stair-landing",
+        "description": "The proposed corridor-side landing at the double doors into S460, beside the east shaft on the fourth-floor drawing. Confirm the doorway and whether this stair connects to S360 on floor 3."
+      },
+      "endpointRefs": {
+        "from": {
+          "candidateId": "sw3-f2-f3-s260-s360",
+          "side": "to"
+        }
+      },
+      "rationale": "The original third- and fourth-floor drawings label the east stair cores S360 and S460. The fourth-floor doorway was read independently. Confirm that both doors enter the same traversable stairway and give the permitted direction.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-17"
     }
   ]
 }
