@@ -1,4 +1,5 @@
 import { aiProviderDetails } from '../src/ai-provider';
+import { stageDeadline } from './provider-timing';
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import type { PhotoEvidence, Session } from '../src/types';
@@ -100,8 +101,7 @@ export async function readPhotoEvidence(
   cancellation?: AbortSignal,
 ): Promise<PhotoEvidenceRecord> {
   validatePhotoBundle(input);
-  const deadline = AbortSignal.timeout(PHOTO_STAGE_TIMEOUT_MS.evidence);
-  const signal = cancellation ? AbortSignal.any([cancellation, deadline]) : deadline;
+  const { signal, deadlineAt } = stageDeadline(PHOTO_STAGE_TIMEOUT_MS.evidence, cancellation);
   let attempts = 0,
     usedFallbackModel = false;
   const started = performance.now();
@@ -125,7 +125,7 @@ export async function readPhotoEvidence(
         forceTool: labelTool.name,
         maxOutputTokens: 4096,
         thinkingLevel: 'low',
-        timeoutMs: 30000,
+        deadlineAt,
         onModelFallback: () => {
           usedFallbackModel = true;
         },

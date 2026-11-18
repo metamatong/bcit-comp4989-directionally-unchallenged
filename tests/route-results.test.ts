@@ -15,7 +15,7 @@ import { reviewedNetwork } from '../server/pilot-network';
 import { TopologyStore } from '../server/topology';
 import { pilotEvidence } from '../server/pilot-evidence';
 import { labelReading, comparison, photoInput } from './photo-fixtures';
-import type { Provider } from '../server/provider';
+import { ProviderError, type Provider } from '../server/provider';
 import { position } from './location-fixtures';
 import { routeResponse } from './wayfinding-fixtures';
 
@@ -29,15 +29,31 @@ const store = new TopologyStore(join(dir, 'topology.json'), plans, undefined, ()
 const room = pilotEvidence()
   .find((p) => p.plan.id === 'SE12-F3-p1')!
   .drawnDoors.find((d) => d.room === '302')!;
+let rejectRoute = false;
+let rejectComparisonOnce = false;
+let labelReads = 0;
 const provider: Provider = {
   calls: 0,
   async generate(_contents, _tools, _signal, onAttempt, options) {
     this.calls++;
     onAttempt?.();
-    if (options?.forceTool === 'read_photo_labels') return labelReading('302');
-    if (options?.forceTool === 'generate_walking_route') return routeResponse();
+    if (options?.forceTool === 'read_photo_labels') {
+      labelReads++;
+      return labelReading('302');
+    }
+    if (options?.forceTool === 'generate_walking_route') {
+      const route = routeResponse();
+      if (rejectRoute)
+        (route[0].functionCall!.args as { destinationId: string }).destinationId =
+          'unavailable-room';
+      return route;
+    }
     if (options?.forceTool !== 'propose_campus_locations')
       throw Error('Unexpected model operation');
+    if (rejectComparisonOnce) {
+      rejectComparisonOnce = false;
+      throw new ProviderError('Photo comparison timed out.', 504, 'timeout', true);
+    }
     return comparison({
       outcome: 'insufficient_evidence',
       candidates: [],
@@ -155,11 +171,26 @@ it('turns a photo and destination into a three-floor route with opt-in walking l
     await setDestination('SW03 2082');
     expect(getCurrentPosition).not.toHaveBeenCalled();
     expect(provider.calls).toBe(0);
+    rejectComparisonOnce = true;
+    labelReads = 0;
     await click(button('GO'));
+    await wait(() => expect(button('Try again')).toBeDefined());
+    expect(host.textContent).toContain('Comparing the floor plans stopped');
+    expect(labelReads).toBe(1);
+    await click(button('Try again'));
     await wait(() => expect(host.querySelector('.route-directions')).not.toBeNull());
+    expect(labelReads).toBe(1);
     expect(host.textContent).toContain('Starting position acquired');
     expect(button('Start at')).toBeUndefined();
     expect(getCurrentPosition).not.toHaveBeenCalled();
+    rejectRoute = true;
+    await click(button('Recheck current route'));
+    await wait(() => expect(button('Retry route')).toBeDefined());
+    expect(host.textContent).toContain('destination outside the supplied room matches');
+    rejectRoute = false;
+    await click(button('Retry route'));
+    await wait(() => expect(host.querySelector('.route-directions')).not.toBeNull());
+    expect(requestBodies.filter((body) => body.includes('"image":'))).toHaveLength(3);
     const result = host.querySelector('.workspace > section')!;
     expect(result.getAttribute('aria-label')).toBe('Your walking route');
     for (const label of [
@@ -180,7 +211,7 @@ it('turns a photo and destination into a three-floor route with opt-in walking l
     expect(result.querySelector('.route-arrival')?.textContent).toContain('2082');
     expect(host.querySelector('.journey-inputs[open], .journey-evidence[open]')).toBeNull();
     expect(host.querySelector('img.evidence-photo')).toBeNull();
-    expect(provider.calls).toBe(3);
+    expect(provider.calls).toBe(7);
     await click(button('Show my position'));
     expect(watchPosition).toHaveBeenCalledTimes(1);
     await act(async () => deviceSuccess(position()));
@@ -210,12 +241,13 @@ it('turns a photo and destination into a three-floor route with opt-in walking l
         'did not match a room',
       ),
     );
-    expect(provider.calls).toBe(3);
+    expect(provider.calls).toBe(7);
     expect(requestBodies.join('\n')).not.toContain('confirm-campus-region');
     expect(requestBodies.join('\n')).not.toMatch(
       /"(?:latitude|longitude|receivedAt|deviceReading|locationCatalogue)"/,
     );
   } finally {
+    rejectRoute = false;
     await act(async () => root.unmount());
     host.remove();
   }

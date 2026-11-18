@@ -200,7 +200,11 @@ function photoStage(options: Options, stage: 'evidence' | 'location'): Operation
   };
 }
 function navigation(store: TopologyStore, origins: boolean, provider: Provider): Operation {
-  return async (req, _res, { session }) => {
+  return async (req, res, { session }) => {
+    const controller = new AbortController();
+    res.on('close', () => {
+      if (!res.writableEnded) controller.abort();
+    });
     let providerAttempts = 0;
     try {
       let result;
@@ -247,6 +251,7 @@ function navigation(store: TopologyStore, origins: boolean, provider: Provider):
           store,
           provider,
           () => providerAttempts++,
+          controller.signal,
         );
       }
       session.lastTouched = Date.now();

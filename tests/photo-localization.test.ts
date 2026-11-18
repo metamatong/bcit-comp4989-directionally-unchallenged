@@ -317,7 +317,7 @@ describe('separate photo evidence and source-grounded localization stages (mocke
     expect(provider.calls).toBe(2);
     expect(session.providerCalls).toBe(2);
     expect(captures[1].options?.forceTool).toBe('propose_campus_locations');
-    expect(captures[1].contents[0].parts.filter((part) => part.inlineData)).toHaveLength(11);
+    expect(captures[1].contents[0].parts.filter((part) => part.inlineData)).toHaveLength(7);
     expect(
       captures[1].contents[0].parts.filter((part) => part.inlineData?.data === fixtureImage.data),
     ).toHaveLength(5);
@@ -326,7 +326,7 @@ describe('separate photo evidence and source-grounded localization stages (mocke
       .join('\n');
     expect(detailText).toContain('EXTRACTED GEOMETRY');
     expect(detailText).toContain('SE12-F3#page=1');
-    expect(detailText).toContain('"text":"302"');
+    expect(detailText).toContain('["302",');
     expect(detailText).not.toContain('SW1-F3-p1');
     expect(result.labelRetrieval.exactMatchPlanIds).toEqual(['SE12-F3-p1']);
     expect(result.labelRetrieval.indexedLabels).toBeGreaterThan(5463);
