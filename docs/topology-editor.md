@@ -1,6 +1,6 @@
 # Internal topology editor
 
-The local editor at `/internal/topology` lets a human confirm proposed connections on 12 official SE12, SW03 and SW01 floor plans, correct markers, manually annotate additional passages and check routes over reviewed records. This is an internal graph tool. Visitor routing uses this reviewed graph and source corridor traces after the single photo-evidence stage; visitors do not approve rooms, doors or corridors.
+The local editor at `/internal/topology` lets a human confirm proposed connections on the supplied Burnaby floor plans, correct markers, manually annotate additional passages and check routes over reviewed records. This is an internal graph tool. Visitor routing combines the current reviewed connections with the compiled floor walking networks; visitors do not approve rooms, doors or corridors.
 
 ## Answer-first workflow
 
@@ -125,7 +125,7 @@ To restore: stop the local server, copy a valid exported document over `data/cam
 
 The editor page and its API require an actual loopback connection and a local Host header. Forwarded headers do not grant access. Cross-site requests are rejected; the application also checks API Origin. Raw topology JSON, lock and temporary-file requests are blocked before the development/static fallback, including filesystem-style URLs. It works without Gemini configuration. It cannot be opened from another phone or computer on the LAN. Campus checks can be recorded on the local workstation after the walk; a remote staff workflow would require separate authentication and access design.
 
-- `GET /api/internal/topology`: pilot plan metadata, saved document, routing eligibility and source-bound candidate presentations with current answer state.
+- `GET /api/internal/topology`: supplied plan metadata, saved document, routing eligibility and source-bound candidate presentations with current answer state.
 - `POST /api/internal/topology/edits` accepts `{ revision, command }`. Use `answer-candidate` for two marked points and `record-floor-observation` for a floor inquiry with one or both elevator positions unknown. The server checks the revision, presentation and original source hashes for both operations. The manual editor also uses `save-node`, `save-edge`, `delete-node`, `delete-edge` and `review`.
 - `POST /api/internal/topology/route`: `{ revision, fromNodeId, toNodeId, mode }`. The server reloads the document and computes only over eligible records.
 

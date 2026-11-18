@@ -9,19 +9,15 @@ import type {
   PlaceChoice,
   StartingPoints,
   WalkingStep,
+  OriginIssue,
 } from '../src/wayfinding';
-import {
-  canonicalBuilding,
-  isPilotPlan,
-  labelKey,
-  looksLikeIdentifier,
-  pilotEvidence,
-} from './pilot-evidence';
+import { canonicalBuilding, labelKey, looksLikeIdentifier, pilotEvidence } from './pilot-evidence';
 import { reviewedNetwork } from './pilot-network';
+import { CampusJourney } from './campus-journey';
 import { lookupPilotLabels } from './spatial-retrieval';
 import { computeTopologyRoute } from './routing';
 import { TopologyError, TopologyStore, topologyEligibility } from './topology';
-import { sourceCorridorTraces, visitorPassages } from './visitor-paths';
+import { sourceCorridorTraces, visitorPassages, stepText } from './visitor-paths';
 import { attachPathEndpoints, routeDrawingCrossings } from './route-geometry';
 import { planImagePart } from './visual-data';
 import type { Provider } from './provider';
@@ -43,7 +39,7 @@ export const startingPointsSchema = z
 export const navigationSchema = startingPointsSchema
   .extend({
     destination: z.string().trim().min(1).max(150),
-    originId: z.string().uuid().optional(),
+    originId: z.string().min(1).max(180).optional(),
     destinationId: z.string().min(1).max(180).optional(),
     networkRevision: z.number().int().nonnegative().optional(),
   })
@@ -180,22 +176,6 @@ function resolveDestination(
   return choices.map((choice) => ({ ...choice, typoCorrection }));
 }
 
-function stepText(kind: TopologyEdge['kind'], to: MapStop, plans: VisualPlan[]) {
-  const target = planLabel(plans.find((p) => p.id === to.planId)!);
-  switch (kind) {
-    case 'stairs':
-      return `Take the stairs to ${target}.`;
-    case 'elevator':
-      return `Take the elevator to ${target}.`;
-    case 'building-link':
-      return `Use the connecting passage to ${target}.`;
-    case 'outdoor':
-      return `Go outside and enter through the marked door on ${target}. The outdoor walking line has not been mapped.`;
-    case 'corridor':
-      return `Follow the marked corridor to ${to.label}.`;
-  }
-}
-
 /** Omit a doubled-back segment only when both approved traces traverse the exact same vertices. */
 function removeBacktracking(steps: WalkingStep[]) {
   const result: WalkingStep[] = [];
@@ -232,9 +212,9 @@ function readVisitorMap(
   store: TopologyStore,
   expectedRevision?: number,
 ) {
-  const plans = store.plans.filter(isPilotPlan);
+  const plans = store.plans;
   if (!plans.some((p) => p.id === candidate.planId))
-    throw new TopologyError('Analyze a current photo from SE12, SW03 or SW01 first.', 409);
+    throw new TopologyError('Select a place on a current Burnaby floor plan first.', 409);
   const doc = store.read();
   if (expectedRevision !== undefined && expectedRevision !== doc.revision)
     throw new TopologyError(
@@ -275,8 +255,36 @@ export function startingPoints(
   candidate: CampusLocationCandidate,
   store: TopologyStore,
 ): StartingPoints {
-  const { doc, origins } = readVisitorMap(candidate, store);
-  return { networkRevision: doc.revision, origins };
+  const map = readVisitorMap(candidate, store);
+  const origins = candidate.sourcePlaceId
+    ? new CampusJourney(map).origins(candidate).map((entry) => entry.stop)
+    : map.origins;
+  return { networkRevision: map.doc.revision, origins };
+}
+
+/** Distinguish missing map coverage from evidence that could refer to multiple mapped doorways. */
+function missingOriginIssue(
+  candidate: CampusLocationCandidate,
+  map: ReturnType<typeof readVisitorMap>,
+): OriginIssue {
+  if (candidate.doorwayVicinity) return 'unmapped-connection';
+  if (!candidate.anchorLabel) return 'unmapped-connection';
+  const doors = pilotEvidence()
+    .find((page) => page.plan.id === candidate.planId)!
+    .drawnDoors.filter((door) => labelKey(door.room) === labelKey(candidate.anchorLabel!));
+  if (!doors.length) return 'unmapped-doorway';
+  const hasDeparture = doors.some((door) => {
+    const nodeId = map.network.doors.get(door.id);
+    return (
+      nodeId &&
+      map.doc.edges.some(
+        (edge) =>
+          map.network.allowed.has(edge.id) &&
+          (edge.fromNodeId === nodeId || (edge.direction === 'both' && edge.toNodeId === nodeId)),
+      )
+    );
+  });
+  return doors.length > 1 && hasDeparture ? 'ambiguous-doorway' : 'unmapped-connection';
 }
 
 export function planVisitorJourney(
@@ -286,12 +294,9 @@ export function planVisitorJourney(
 ): NavigationResult {
   if (candidate.id !== request.candidateId)
     throw new TopologyError('Analyze the current photo before requesting directions.', 409);
-  const { plans, doc, network, nodes, origins } = readVisitorMap(
-    candidate,
-    store,
-    request.networkRevision,
-  );
-  const vicinity = candidate.doorwayVicinity;
+  const map = readVisitorMap(candidate, store, request.networkRevision);
+  if (candidate.sourcePlaceId) return new CampusJourney(map).route(candidate, request);
+  const { plans, doc, network, nodes, origins } = map;
   const candidateBuildingPrefix = candidate.planId.split('-')[0] + '-';
   const hasBuildingCheckpoints = nodes.some((node) =>
     node.planId.startsWith(candidateBuildingPrefix),
@@ -341,6 +346,7 @@ export function planVisitorJourney(
       ...context,
       ...(destinationMatch ? { destinationMatch } : {}),
       status: 'unmapped-origin-and-destination',
+      originIssue: missingOriginIssue(candidate, map),
       message:
         'The starting place and destination need mapped approaches before a reviewed route can be calculated.',
     };
@@ -352,15 +358,21 @@ export function planVisitorJourney(
       message:
         'This destination is shown in the source plan, but its arrival approach has not been connected to the reviewed graph.',
     };
-  if (!origins.length)
+  if (!origins.length) {
+    const originIssue = missingOriginIssue(candidate, map);
     return {
       ...context,
       ...(destinationMatch ? { destinationMatch } : {}),
       status: 'unmapped-origin',
-      message: vicinity
-        ? `The source doorway outside room ${vicinity.room} has no current reviewed starting connection.`
-        : 'The extracted starting place has no unique reviewed starting point.',
+      originIssue,
+      message:
+        originIssue === 'ambiguous-doorway'
+          ? 'This room has multiple source doorways. The extracted label does not identify a unique starting doorway.'
+          : originIssue === 'unmapped-doorway'
+            ? 'The room label was found on the plan, but its doorway and walking connection have not been mapped for routing yet.'
+            : 'This place is on the plan, but a walking route from it has not been mapped yet.',
     };
+  }
   const origin = request.originId
     ? origins.find((n) => n.id === request.originId)
     : origins.length === 1
@@ -371,6 +383,7 @@ export function planVisitorJourney(
       ...context,
       ...(destinationMatch ? { destinationMatch } : {}),
       status: origins.length > 1 ? 'unmapped-origin' : 'choose-origin',
+      ...(origins.length > 1 ? { originIssue: 'ambiguous-region' as const } : {}),
       message:
         origins.length > 1
           ? 'The photo covers more than one reviewed starting point. Take a closer photo of the doorway or sign beside you.'
@@ -435,7 +448,9 @@ export async function planVisitorNavigation(
 ): Promise<NavigationResult> {
   cancellation?.throwIfAborted();
   const reviewed = planVisitorJourney(candidate, request, store);
-  if (reviewed.status !== 'route') return reviewed;
+  // Compiled paths use full cell-footprint and doorway checks. Reviewed portions are
+  // independently checked against drawing strokes before entering the combined search.
+  if (candidate.sourcePlaceId || reviewed.status !== 'route') return reviewed;
   // Read exemptions only from current approved traces, never from a visitor or model response.
   const { network } = readVisitorMap(candidate, store, reviewed.networkRevision);
   const openings = [...network.traces.values()].flatMap((trace) => trace.doorwayOpenings);

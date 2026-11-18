@@ -140,12 +140,10 @@ function resaveEdge(edge: TopologyEdge, changes: { notes?: string } = {}) {
   });
 }
 describe('persistent human-reviewed topology', () => {
-  it('starts empty with exactly the twelve pilot plans and binds point coordinates to original source hashes', () => {
+  it('starts empty with the supplied Burnaby plans and binds point coordinates to original source hashes', () => {
     const initial = store.snapshot();
-    expect(initial.plans).toHaveLength(12);
-    expect(new Set(initial.plans.map((plan) => plan.building))).toEqual(
-      new Set(['SE12', 'SW3', 'SW1']),
-    );
+    expect(initial.plans).toHaveLength(89);
+    expect(new Set(initial.plans.map((plan) => plan.building)).size).toBe(45);
     expect(initial.document.nodes).toEqual([]);
     const node = point('0302A');
     expect(node.label).toBe('0302A');

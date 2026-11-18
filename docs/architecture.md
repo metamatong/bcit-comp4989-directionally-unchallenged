@@ -1,6 +1,6 @@
 # Architecture
 
-DirectionallyUnchallenged uses a React/TypeScript client and Express server for one-pass photo evidence extraction, exact source lookup and reviewed-graph navigation. The server selects Gemini (default), OpenAI, or Groq through `AI_PROVIDER`. The previous fictional map, deterministic demo routing, closure simulation, OCR sign matching and mode switch have been removed at the user's request.
+DirectionallyUnchallenged uses a React/TypeScript client and Express server for one-pass photo evidence extraction, exact source lookup and floor-graph navigation. The server selects Gemini (default), OpenAI, or Groq through `AI_PROVIDER`. The previous fictional map, deterministic demo routing, closure simulation, OCR sign matching and mode switch have been removed at the user's request.
 
 The local listener and Vercel function share the visitor API. Vercel serves a static frontend, verifies compact plan evidence at cold start, and shares encrypted session state across workers. [Deployment and retention](operations.md#vercel)
 
@@ -10,8 +10,8 @@ The local listener and Vercel function share the visitor API. Vercel serves a st
 2. `POST /api/sessions/:id/photo/evidence` is the only vision stage. The configured provider reads labels, label kind/placement, visible door count, window side and corridor shape without map hints.
 3. A session-bound evidence receipt retains structured fields and the image fingerprint for five minutes. Server media bytes are released after extraction.
 4. If the GPS checkbox is selected, the browser requests one fresh reading after extraction and intersects its accuracy area with the official building footprints. Raw coordinates stay in the browser. Only matching building IDs, timestamp, accuracy and the footprint source hash enter the next request.
-5. `POST /api/sessions/:id/photo/location` sends the evidence ID and optional building hint. It rejects images and client-supplied labels. `label-localization.ts` uses exact source retrieval, all clear nondirectional labels, explicit building/floor signs, door-sign placement and GPS candidates to identify one source-linked estimate. Directional labels remain evidence but cannot establish the current doorway. Conflicts and ambiguity cause abstention. Window/count features are recorded as observations, with contradictory zero-door/door-sign evidence rejected.
-6. `POST /api/sessions/:id/navigation` resolves the destination and runs Dijkstra over currently approved points, connections, endpoint versions and source corridor traces. The current visitor objective minimizes connection count. Missing source doorway bindings or graph passages produce explicit coverage results.
+5. `POST /api/sessions/:id/photo/location` sends the evidence ID and optional building hint. It rejects images and client-supplied labels. `label-localization.ts` uses exact source retrieval, all clear nondirectional labels, explicit building/floor signs, door-sign placement and GPS candidates to identify one source-linked estimate. Directional labels remain evidence but cannot establish the current doorway. Repeated locations are offered for selection. Conflicting evidence leaves the start unresolved. Window/count features are recorded as observations, with contradictory zero-door/door-sign evidence rejected.
+6. `POST /api/sessions/:id/navigation` resolves the destination and runs Dijkstra over the compiled floor grids, source doorways and current reviewed transfers. Exact place occurrences stay bound to the source and graph version. Multiple entrances have individual markers. [Floor routing](floor-routing.md)
 7. The client shows one route overview with combined transfer endpoints, then draws the returned coordinates and arrows in a continuous map stack. Each map has a floor label and A/B legend. Zoom and source attribution are shared. Optional walking-position controls are collapsed below the maps; changing the explicitly selected tracking floor stops the watch until resumed.
 
 Photo interpretation occurs only in step 2. Source lookup, GPS narrowing and graph routing perform no provider calls. Earlier visual-comparison utilities remain isolated from the visitor API.
@@ -22,9 +22,9 @@ Photo interpretation occurs only in step 2. Source lookup, GPS narrowing and gra
 - `POST /api/sessions`: empty object creates a live-analysis session. Provider readiness controls the setup notice, not a fallback mode.
 - `POST /api/sessions/:id/photo/evidence`: consented photo label reading; returns structured evidence in session state.
 - `POST /api/sessions/:id/photo/location`: metadata-only exact lookup using the evidence receipt and optional GPS building candidates. The `/photo` alias accepts the same metadata-only contract.
-- `POST /api/sessions/:id/navigation/origins` returns eligible checkpoints inside the current photo hypothesis for internal clients. It is not used by the visitor screen.
+- `POST /api/sessions/:id/navigation/origins` returns the walking approaches associated with the current source occurrence.
 - `POST /api/sessions/:id/navigation`: current reviewed-graph route calculation, with source-bound start and destination checks.
-- `POST /api/sessions/:id/actions`: `reset` and a legacy explicit region-selection action; the current visitor UI does not call the latter.
+- `POST /api/sessions/:id/actions`: `reset` and explicit selection of a matching starting place.
 - `GET /api/sessions/:id`, `GET /api/health`: state and readiness. The removed `/api/search` endpoint returns HTTP 404.
 
 The private evidence map holds a fingerprint and structured readings only, never media. Location lookup can reuse the receipt until expiry. A new extraction or reset invalidates it.

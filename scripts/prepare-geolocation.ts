@@ -5,11 +5,17 @@ import { visualPlans } from '../server/visual-data';
 import { fitCalibration } from '../src/location/geometry';
 import type { CalibrationControl, LocationCatalogue } from '../src/location/types';
 
-const file = 'data/campus/geolocation/bcit-pilot-footprints.json';
+const file = 'data/campus/geolocation/bcit-burnaby-footprints.json';
 const bytes = readFileSync(file);
 const source = JSON.parse(bytes.toString());
-if (source.error || source.spatialReference?.wkid !== 4326 || source.features?.length !== 3)
-  throw Error('Expected three official BCIT WGS84 building footprints.');
+const suppliedBuildings = new Set(visualPlans.map((plan) => plan.building));
+if (
+  source.error ||
+  source.exceededTransferLimit ||
+  source.spatialReference?.wkid !== 4326 ||
+  !source.features?.length
+)
+  throw Error('Expected complete official BCIT WGS84 building footprints.');
 
 // Prototype controls came from the same SE12-F3 PDF. Undo crop (200,660)-(3800,1800)
 // and resize (2800,887) against a 4000px-wide rendering of its 1224x792pt page.
@@ -48,51 +54,53 @@ const controls: CalibrationControl[] = measuredControls.map((c) => ({
   x: (200 + (c.x * 3600) / 2800) / 4000,
   y: (660 + (c.y * 1140) / 887) / ((4000 * 792) / 1224),
 }));
-const floors = visualPlans
-  .filter((p) => ['SE12', 'SW3', 'SW1'].includes(p.building))
-  .map((plan) => {
-    const available = plan.id === 'SE12-F3-p1';
-    if (
-      available &&
-      plan.sourceSha256 !== '521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1'
-    )
-      throw Error('SE12 floor 3 source changed. Review controls before regenerating.');
-    const fit = available ? fitCalibration(controls, plan.width, plan.height) : null;
-    const reasons: Record<string, string> = {
-      'SE12-F1-p1':
-        'Partial footprint on a rotated first-floor drawing. Four geographic corner correspondences remain unresolved.',
-      'SE12-F2-p1':
-        'Different drawing extent and incomplete main-corner correspondence. Independent controls remain unresolved.',
-      'SE12-F4-p1':
-        'Main rectangle resembles floor 3, but independent geographic corner correspondence remains unreviewed.',
-    };
-    return {
-      planId: plan.id,
-      sourceSha256: plan.sourceSha256,
-      status: available ? ('approximate' as const) : ('unavailable' as const),
-      reason: available
-        ? 'Prototype corner correspondence reviewed against the same source PDF. Ground footprint may differ from floor 3. Indoor accuracy remains unmeasured.'
-        : (reasons[plan.id] ??
-          `${plan.building} floor ${plan.floor} drawing extent reviewed. Four independently matched geographic controls remain unresolved for this floor.`),
-      version: 'bcit-pilot-2026-11-16-v1',
-      controls: available ? controls : [],
-      residualsMetres: fit?.residuals.slice(0, -1) ?? [],
-      heldOutMetres: fit?.residuals.at(-1) ?? null,
-    };
-  });
+const floors = visualPlans.map((plan) => {
+  const available = plan.id === 'SE12-F3-p1';
+  if (
+    available &&
+    plan.sourceSha256 !== '521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1'
+  )
+    throw Error('SE12 floor 3 source changed. Review controls before regenerating.');
+  const fit = available ? fitCalibration(controls, plan.width, plan.height) : null;
+  const reasons: Record<string, string> = {
+    'SE12-F1-p1':
+      'Partial footprint on a rotated first-floor drawing. Four geographic corner correspondences remain unresolved.',
+    'SE12-F2-p1':
+      'Different drawing extent and incomplete main-corner correspondence. Independent controls remain unresolved.',
+    'SE12-F4-p1':
+      'Main rectangle resembles floor 3, but independent geographic corner correspondence remains unreviewed.',
+  };
+  return {
+    planId: plan.id,
+    sourceSha256: plan.sourceSha256,
+    status: available ? ('approximate' as const) : ('unavailable' as const),
+    reason: available
+      ? 'Prototype corner correspondence reviewed against the same source PDF. Ground footprint may differ from floor 3. Indoor accuracy remains unmeasured.'
+      : (reasons[plan.id] ??
+        `${plan.building} floor ${plan.floor} has no floor-specific geographic alignment.`),
+    version: 'bcit-pilot-2026-11-16-v1',
+    controls: available ? controls : [],
+    residualsMetres: fit?.residuals.slice(0, -1) ?? [],
+    heldOutMetres: fit?.residuals.at(-1) ?? null,
+  };
+});
 const catalogue: LocationCatalogue = {
   geographicSource: {
-    url: 'https://services2.arcgis.com/IgcrRjRW95F0HKSw/arcgis/rest/services/Bsite_Building_Footprint_20241022/FeatureServer/0/query?objectIds=19%2C21%2C33&outFields=BuildingName%2COBJECTID&outSR=4326&returnGeometry=true&f=json',
-    retrievedAt: '2026-11-16',
+    url: 'https://services2.arcgis.com/IgcrRjRW95F0HKSw/arcgis/rest/services/Bsite_Building_Footprint_20241022/FeatureServer/0/query?where=1%3D1&outFields=BuildingName%2COBJECTID&outSR=4326&returnGeometry=true&f=json',
+    retrievedAt: '2026-11-18',
     file,
     sha256: createHash('sha256').update(bytes).digest('hex'),
   },
-  buildings: source.features.map(
-    (feature: { attributes: { BuildingName: string }; geometry: { rings: number[][][] } }) => ({
-      building: feature.attributes.BuildingName,
-      rings: feature.geometry.rings,
-    }),
-  ),
+  buildings: source.features
+    .filter((f: { attributes: { BuildingName: string } }) =>
+      suppliedBuildings.has(f.attributes.BuildingName),
+    )
+    .map(
+      (feature: { attributes: { BuildingName: string }; geometry: { rings: number[][][] } }) => ({
+        building: feature.attributes.BuildingName,
+        rings: feature.geometry.rings,
+      }),
+    ),
   floors,
 };
 writeFileSync(

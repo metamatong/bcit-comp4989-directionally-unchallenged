@@ -1,7 +1,6 @@
 import { z } from 'zod';
 import type { VisualPlan } from './types';
 
-export const topologyBuildings = ['SE12', 'SW3', 'SW1'] as const;
 export const pointKinds = [
   'door',
   'junction',

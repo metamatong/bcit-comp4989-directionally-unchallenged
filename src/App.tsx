@@ -20,7 +20,7 @@ import {
 } from './api';
 import { preparePhoto, type PreparedPhoto } from './photo';
 import { PHOTO_STAGE_TIMEOUT_MS, PHOTO_RESPONSE_GRACE_MS } from './photo-views';
-import { CampusLocationResults } from './components/CampusLocationResults';
+import { CampusLocationResults, StartingPlaceChoices } from './components/CampusLocationResults';
 import { PhotoLocationInput } from './components/PhotoLocationInput';
 import { JourneyPanel, StartingPositionNotice } from './components/JourneyPanel';
 import { PhotoDeviceOption } from './components/PhotoDeviceLocation';
@@ -175,7 +175,6 @@ export default function App() {
     try {
       const media = {
         consent: true,
-        scope: 'wayfinding-pilot',
         image: { mimeType: preparedPhoto.mimeType, data: preparedPhoto.data },
         detailCrops: preparedPhoto.detailCrops,
       };
@@ -415,7 +414,11 @@ export default function App() {
           )}
           {directionsMode ? (
             <>
-              {routeCandidate && analysis?.candidates.length ? <StartingPositionNotice /> : null}
+              {routeCandidate && analysis?.candidates.length ? (
+                <StartingPositionNotice
+                  labelOnly={!!routeCandidate.anchorLabel && !routeCandidate.doorwayVicinity}
+                />
+              ) : null}
               {routeCandidate ? (
                 <JourneyPanel
                   key={JSON.stringify([session.id, routeCandidate.id, activeDestination])}
@@ -430,6 +433,13 @@ export default function App() {
                     setShowPhotoResults(false);
                     setFlowStep('photo');
                   }}
+                />
+              ) : analysis?.candidates.length ? (
+                <StartingPlaceChoices
+                  candidates={analysis.candidates}
+                  plans={plans}
+                  busy={busy}
+                  onSelect={(id) => void send({ type: 'confirm-campus-region', candidateId: id })}
                 />
               ) : (
                 <section className="journey-panel">
@@ -521,8 +531,8 @@ export default function App() {
               </span>
               <h2 id="about-heading">About DirectionallyUnchallenged</h2>
               <p>
-                Visitor wayfinding covers SE12, SW03 and SW01 at BCIT Burnaby using official source
-                labels and reviewed connections.
+                Visitor wayfinding searches the supplied BCIT Burnaby floor plans using official
+                source labels and reviewed connections.
               </p>
               <div className="about-section">
                 <h3>What you can do</h3>

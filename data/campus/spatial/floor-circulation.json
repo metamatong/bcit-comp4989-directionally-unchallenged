@@ -1,0 +1,2593 @@
+{
+  "schemaVersion": 1,
+  "plans": [
+    {
+      "planId": "SE12-F3-p1",
+      "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "basis": "Source-plan transcription of the window corridors, corridor 317C and the passage at 312A. Clip all areas to the original walls and door thresholds.",
+      "areas": [
+        [
+          [
+            0.0875,
+            0.3304348
+          ],
+          [
+            0.715,
+            0.3304348
+          ],
+          [
+            0.715,
+            0.3497585
+          ],
+          [
+            0.0875,
+            0.3497585
+          ]
+        ],
+        [
+          [
+            0.0875,
+            0.3381643
+          ],
+          [
+            0.105625,
+            0.3381643
+          ],
+          [
+            0.105625,
+            0.6028986
+          ],
+          [
+            0.0875,
+            0.6028986
+          ]
+        ],
+        [
+          [
+            0.0875,
+            0.5845411
+          ],
+          [
+            0.76,
+            0.5845411
+          ],
+          [
+            0.76,
+            0.6019324
+          ],
+          [
+            0.0875,
+            0.6019324
+          ]
+        ],
+        [
+          [
+            0.43625,
+            0.3352657
+          ],
+          [
+            0.465625,
+            0.3352657
+          ],
+          [
+            0.465625,
+            0.5971014
+          ],
+          [
+            0.43625,
+            0.5971014
+          ]
+        ],
+        [
+          [
+            0.435625,
+            0.5990338
+          ],
+          [
+            0.451875,
+            0.5990338
+          ],
+          [
+            0.451875,
+            0.6396135
+          ],
+          [
+            0.435625,
+            0.6396135
+          ]
+        ],
+        [
+          [
+            0.714375,
+            0.3304348
+          ],
+          [
+            0.725,
+            0.3304348
+          ],
+          [
+            0.725,
+            0.5990338
+          ],
+          [
+            0.714375,
+            0.5990338
+          ]
+        ],
+        [
+          [
+            0.74625,
+            0.331401
+          ],
+          [
+            0.759375,
+            0.331401
+          ],
+          [
+            0.759375,
+            0.5961353
+          ],
+          [
+            0.74625,
+            0.5961353
+          ]
+        ],
+        [
+          [
+            0.715,
+            0.331401
+          ],
+          [
+            0.759375,
+            0.331401
+          ],
+          [
+            0.759375,
+            0.3690821
+          ],
+          [
+            0.715,
+            0.3690821
+          ]
+        ],
+        [
+          [
+            0.715,
+            0.468599
+          ],
+          [
+            0.759375,
+            0.468599
+          ],
+          [
+            0.759375,
+            0.4830918
+          ],
+          [
+            0.715,
+            0.4830918
+          ]
+        ]
+      ],
+      "accessPoints": [
+        {
+          "label": "S327",
+          "point": [
+            0.735625,
+            0.3690821
+          ],
+          "basis": "North end of the drawn third-floor stair flight, beside corridor 328T."
+        }
+      ]
+    },
+    {
+      "planId": "SE12-F4-p1",
+      "sourceSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "areas": [
+        [
+          [
+            0.07625,
+            0.3275362
+          ],
+          [
+            0.779375,
+            0.3275362
+          ],
+          [
+            0.779375,
+            0.3487923
+          ],
+          [
+            0.07625,
+            0.3487923
+          ]
+        ],
+        [
+          [
+            0.07625,
+            0.3381643
+          ],
+          [
+            0.0925,
+            0.3381643
+          ],
+          [
+            0.0925,
+            0.6086957
+          ],
+          [
+            0.07625,
+            0.6086957
+          ]
+        ],
+        [
+          [
+            0.07625,
+            0.5884058
+          ],
+          [
+            0.77875,
+            0.5884058
+          ],
+          [
+            0.77875,
+            0.6086957
+          ],
+          [
+            0.07625,
+            0.6086957
+          ]
+        ],
+        [
+          [
+            0.431875,
+            0.3342995
+          ],
+          [
+            0.4625,
+            0.3342995
+          ],
+          [
+            0.4625,
+            0.6067633
+          ],
+          [
+            0.431875,
+            0.6067633
+          ]
+        ],
+        [
+          [
+            0.43125,
+            0.6067633
+          ],
+          [
+            0.44875,
+            0.6067633
+          ],
+          [
+            0.44875,
+            0.6666667
+          ],
+          [
+            0.43125,
+            0.6666667
+          ]
+        ],
+        [
+          [
+            0.716875,
+            0.3371981
+          ],
+          [
+            0.72875,
+            0.3371981
+          ],
+          [
+            0.72875,
+            0.5980676
+          ],
+          [
+            0.716875,
+            0.5980676
+          ]
+        ]
+      ]
+    },
+    {
+      "planId": "SW3-F2-p1",
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "areas": [
+        [
+          [
+            0.231875,
+            0.4067633
+          ],
+          [
+            0.485625,
+            0.4067633
+          ],
+          [
+            0.485625,
+            0.4357488
+          ],
+          [
+            0.231875,
+            0.4357488
+          ]
+        ],
+        [
+          [
+            0.504375,
+            0.0975845
+          ],
+          [
+            0.51875,
+            0.0975845
+          ],
+          [
+            0.51875,
+            0.4521739
+          ],
+          [
+            0.504375,
+            0.4521739
+          ]
+        ],
+        [
+          [
+            0.485,
+            0.436715
+          ],
+          [
+            0.868125,
+            0.436715
+          ],
+          [
+            0.868125,
+            0.4599034
+          ],
+          [
+            0.485,
+            0.4599034
+          ]
+        ],
+        [
+          [
+            0.485625,
+            0.4077295
+          ],
+          [
+            0.505625,
+            0.4077295
+          ],
+          [
+            0.505625,
+            0.4396135
+          ],
+          [
+            0.485625,
+            0.4396135
+          ]
+        ]
+      ]
+    },
+    {
+      "planId": "SW3-F3-p1",
+      "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "areas": [
+        [
+          [
+            0.273125,
+            0.6
+          ],
+          [
+            0.4925,
+            0.6
+          ],
+          [
+            0.4925,
+            0.6193237
+          ],
+          [
+            0.273125,
+            0.6193237
+          ]
+        ],
+        [
+          [
+            0.48125,
+            0.3545894
+          ],
+          [
+            0.4925,
+            0.3545894
+          ],
+          [
+            0.4925,
+            0.6386473
+          ],
+          [
+            0.48125,
+            0.6386473
+          ]
+        ],
+        [
+          [
+            0.475625,
+            0.6241546
+          ],
+          [
+            0.7725,
+            0.6241546
+          ],
+          [
+            0.7725,
+            0.6425121
+          ],
+          [
+            0.475625,
+            0.6425121
+          ]
+        ]
+      ]
+    },
+    {
+      "planId": "SW3-F4-p1",
+      "sourceSha256": "ec9b5c3ae80da356b78dc7ea89e3228e6cd6b5e882d9c20a6b7e10bbd5ec034a",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "areas": [
+        [
+          [
+            0.274375,
+            0.5516908
+          ],
+          [
+            0.49125,
+            0.5516908
+          ],
+          [
+            0.49125,
+            0.5719807
+          ],
+          [
+            0.274375,
+            0.5719807
+          ]
+        ],
+        [
+          [
+            0.48125,
+            0.305314
+          ],
+          [
+            0.493125,
+            0.305314
+          ],
+          [
+            0.493125,
+            0.5932367
+          ],
+          [
+            0.48125,
+            0.5932367
+          ]
+        ],
+        [
+          [
+            0.47625,
+            0.5748792
+          ],
+          [
+            0.7725,
+            0.5748792
+          ],
+          [
+            0.7725,
+            0.5942029
+          ],
+          [
+            0.47625,
+            0.5942029
+          ]
+        ]
+      ]
+    },
+    {
+      "planId": "SE12-F2-p1",
+      "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "areas": [
+        [
+          [
+            0.5325,
+            0.3584541
+          ],
+          [
+            0.739375,
+            0.3584541
+          ],
+          [
+            0.739375,
+            0.3700483
+          ],
+          [
+            0.5325,
+            0.3700483
+          ]
+        ],
+        [
+          [
+            0.644375,
+            0.3623188
+          ],
+          [
+            0.653125,
+            0.3623188
+          ],
+          [
+            0.653125,
+            0.5333333
+          ],
+          [
+            0.644375,
+            0.5333333
+          ]
+        ],
+        [
+          [
+            0.706875,
+            0.3642512
+          ],
+          [
+            0.715,
+            0.3642512
+          ],
+          [
+            0.715,
+            0.410628
+          ],
+          [
+            0.706875,
+            0.410628
+          ]
+        ]
+      ]
+    },
+    {
+      "planId": "NE1-F1-p1",
+      "sourceSha256": "e1cd3e6fafda64dc760db39c8b7e7f1260f03bb45701ff7b198fccc403f25063",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.2929293,
+          0.689951
+        ],
+        [
+          0.2916667,
+          0.4375
+        ]
+      ],
+      "labels": [
+        {
+          "text": "S150",
+          "kind": "stairs",
+          "bounds": [
+            0.3282828,
+            0.8468137,
+            0.3513258,
+            0.8539624
+          ]
+        }
+      ]
+    },
+    {
+      "planId": "NE1-F2-p1",
+      "sourceSha256": "faa60aee96e54e113f2cd3db05318eb32807f81e0360425cdab335787e9f3569",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.2563131,
+          0.4971405
+        ],
+        [
+          0.2563131,
+          0.3541667
+        ]
+      ]
+    },
+    {
+      "planId": "NE1-F3-p1",
+      "sourceSha256": "b2f9b412c8c35643f8b98ef2c777c4ecd698ecff16cc42faf0be864cbee11d98",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.5694444,
+          0.5935458
+        ],
+        [
+          0.3724747,
+          0.2504085
+        ],
+        [
+          0.344697,
+          0.3590686
+        ],
+        [
+          0.2525253,
+          0.6699346
+        ]
+      ]
+    },
+    {
+      "planId": "NE1-F4-p1",
+      "sourceSha256": "7de553763ef82a28e8a5231299d9350e2ff724da092f0a81ff5935bc76fa613c",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.2638889,
+          0.4620098
+        ],
+        [
+          0.2619949,
+          0.5122549
+        ]
+      ]
+    },
+    {
+      "planId": "NE3-F2-p1",
+      "sourceSha256": "deaff5a543a64a0f25ba23f4e6414ad5d9ec5f61d8dda7f1acc4be086f30d169",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.3353758,
+          0.1786616
+        ]
+      ],
+      "areas": [
+        [
+          [
+            0.310625,
+            0.1671498
+          ],
+          [
+            0.35875,
+            0.1671498
+          ],
+          [
+            0.35875,
+            0.2038647
+          ],
+          [
+            0.310625,
+            0.2038647
+          ]
+        ],
+        [
+          [
+            0.31125,
+            0.1816425
+          ],
+          [
+            0.41875,
+            0.1816425
+          ],
+          [
+            0.41875,
+            0.2028986
+          ],
+          [
+            0.31125,
+            0.2028986
+          ]
+        ],
+        [
+          [
+            0.31125,
+            0.1497585
+          ],
+          [
+            0.359375,
+            0.1497585
+          ],
+          [
+            0.359375,
+            0.2019324
+          ],
+          [
+            0.31125,
+            0.2019324
+          ]
+        ]
+      ],
+      "labels": [
+        {
+          "text": "CORRIDOR",
+          "kind": "corridor",
+          "bounds": [
+            0.369375,
+            0.1768116,
+            0.398125,
+            0.1864734
+          ]
+        },
+        {
+          "text": "217",
+          "kind": "storage",
+          "bounds": [
+            0.2925,
+            0.1178744,
+            0.305,
+            0.1275362
+          ]
+        },
+        {
+          "text": "215",
+          "kind": "room",
+          "bounds": [
+            0.36625,
+            0.1140097,
+            0.3775,
+            0.1236715
+          ]
+        },
+        {
+          "text": "214",
+          "kind": "washroom",
+          "bounds": [
+            0.4325,
+            0.1120773,
+            0.44375,
+            0.1217391
+          ]
+        },
+        {
+          "text": "213",
+          "kind": "bedroom",
+          "bounds": [
+            0.481875,
+            0.1439614,
+            0.494375,
+            0.1536232
+          ]
+        },
+        {
+          "text": "211",
+          "kind": "classroom",
+          "bounds": [
+            0.35,
+            0.2492754,
+            0.36125,
+            0.2589372
+          ]
+        },
+        {
+          "text": "212",
+          "kind": "bedroom",
+          "bounds": [
+            0.465625,
+            0.2492754,
+            0.476875,
+            0.2589372
+          ]
+        },
+        {
+          "text": "S200",
+          "kind": "stairs",
+          "bounds": [
+            0.39625,
+            0.1536232,
+            0.40875,
+            0.1613527
+          ]
+        },
+        {
+          "text": "212A",
+          "kind": "storage",
+          "bounds": [
+            0.40375,
+            0.2859903,
+            0.4225,
+            0.2956522
+          ]
+        },
+        {
+          "text": "213A",
+          "kind": "storage",
+          "bounds": [
+            0.454375,
+            0.1816425,
+            0.473125,
+            0.1913043
+          ]
+        },
+        {
+          "text": "215A",
+          "kind": "storage",
+          "bounds": [
+            0.406875,
+            0.1864734,
+            0.425625,
+            0.1961353
+          ]
+        }
+      ],
+      "accessPoints": [
+        {
+          "label": "CORRIDOR",
+          "point": [
+            0.3375,
+            0.1758454
+          ],
+          "basis": "West circulating space beside the S200 enclosure."
+        },
+        {
+          "label": "215",
+          "point": [
+            0.3525,
+            0.1497585
+          ],
+          "basis": "Corridor side of the resource room door west of S200."
+        },
+        {
+          "label": "S200",
+          "point": [
+            0.358125,
+            0.163285
+          ],
+          "basis": "Corridor approach at the west end of the labelled stair enclosure."
+        }
+      ]
+    },
+    {
+      "planId": "NE6-F2-p1",
+      "sourceSha256": "df1c4f99febd8759739eca7cd42c8aa01e8d101bc5270085ff510e7a2f028d36",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.7287582,
+          0.4854798
+        ],
+        [
+          0.7283497,
+          0.3566919
+        ]
+      ]
+    },
+    {
+      "planId": "NE7-F1-p1",
+      "sourceSha256": "4dc5e3b247f209f9ba5591abe5b82b71ea42a3a97f244aac190bb14da30fb3c3",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.6938131,
+          0.25
+        ]
+      ]
+    },
+    {
+      "planId": "NE8-F1-p1",
+      "sourceSha256": "c6750e5a52b98f5f8da904f1205c537e522ec044531027d59787d44e48b42059",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.3668301,
+          0.7777778
+        ],
+        [
+          0.7822712,
+          0.5896465
+        ],
+        [
+          0.373366,
+          0.2234848
+        ],
+        [
+          0.2659314,
+          0.3263889
+        ]
+      ]
+    },
+    {
+      "planId": "NE9-F1-p1",
+      "sourceSha256": "12d494551733c7b053d0f05c6b844fea20976f41f03c242cb5655d2164fb0336",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.2745098,
+          0.5782828
+        ]
+      ]
+    },
+    {
+      "planId": "NE9-F2-p1",
+      "sourceSha256": "27fc98b2577ce64466833fe236d2e3e9b717c11a47ac8b349802ce04c592d064",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.2565359,
+          0.3699495
+        ],
+        [
+          0.2569444,
+          0.5397727
+        ]
+      ]
+    },
+    {
+      "planId": "NE10-F1-p1",
+      "sourceSha256": "c73a86c17a1b1c72d69f0f48d4ac7934db9c5ba80a3fec0d3106cac51e4eedf0",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.3112745,
+          0.5991162
+        ],
+        [
+          0.307598,
+          0.2733586
+        ]
+      ]
+    },
+    {
+      "planId": "NE12-F1-p1",
+      "sourceSha256": "745bbe7055d35633d508e93d29193294a65defb111d82fd908e7da6a0c9b4753",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.3227124,
+          0.5012626
+        ]
+      ]
+    },
+    {
+      "planId": "NE12-F2-p1",
+      "sourceSha256": "2d36756fde5e71f391e0510402f06e76e4e56fad9a47f7cb71b8b9b8ffaf9f3a",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.3398693,
+          0.4892677
+        ]
+      ]
+    },
+    {
+      "planId": "NE21-F1-p1",
+      "sourceSha256": "2dc9851ab8cb94d85760211500788ac55b6bb19097240f5381c80f94f3dcb962",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.5739379,
+          0.7935606
+        ],
+        [
+          0.5739379,
+          0.2556818
+        ]
+      ]
+    },
+    {
+      "planId": "NE22-F1-p1",
+      "sourceSha256": "0712f878d5cc01f9c015214bc9b1f978d287cbb42c82813ea4bd08c28af2d4e2",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.4526515,
+          0.2663399
+        ]
+      ]
+    },
+    {
+      "planId": "NE23-F1-p1",
+      "sourceSha256": "2ef12ddaa7e25ea33b3ed2617da2156faee8fd032d31e6abc07ea3ac8b49b41c",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.5596405,
+          0.3768939
+        ]
+      ]
+    },
+    {
+      "planId": "NE24-F1-p1",
+      "sourceSha256": "57f0cedf9eb458970ed0039d3edb97a10116aa4cf1db63e6b7df6d9e53d2e6d1",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.4289216,
+          0.3213384
+        ],
+        [
+          0.4289216,
+          0.6117424
+        ]
+      ]
+    },
+    {
+      "planId": "NE25-F1-p1",
+      "sourceSha256": "2cf4b481bb70c2afc1b8c97f7fcf739cab946a033019ddaec87b215bc1ee120f",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.2965686,
+          0.5075758
+        ],
+        [
+          0.5710784,
+          0.4545455
+        ]
+      ]
+    },
+    {
+      "planId": "NE25-F2-p1",
+      "sourceSha256": "b38116c8cf312f8898ecc577346f7c2a10e1c09f14d5c660412f9f0607c6d7f1",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.3178105,
+          0.4090909
+        ]
+      ]
+    },
+    {
+      "planId": "NE25-F3-p1",
+      "sourceSha256": "7a5dfbeced7bc46f888b79f0d94712b438a74cabad5981447f0098faca03cd6e",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.3451797,
+          0.4785354
+        ],
+        [
+          0.6405229,
+          0.4690657
+        ]
+      ]
+    },
+    {
+      "planId": "NE28-F1-p1",
+      "sourceSha256": "426204fd07b3045101ad059536f7204d334d9a7e69c20e6068b7319c4115fbe6",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.8472222,
+          0.3615196
+        ],
+        [
+          0.8510101,
+          0.6013072
+        ]
+      ]
+    },
+    {
+      "planId": "NW1-F1-p1",
+      "sourceSha256": "5fe97df581ec4b29147c9bbe7cf50154b5ce4b518f889b086930884e867e9e6f",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.2708333,
+          0.3232323
+        ],
+        [
+          0.754085,
+          0.6376263
+        ],
+        [
+          0.7406046,
+          0.3895202
+        ],
+        [
+          0.5976307,
+          0.4532828
+        ]
+      ]
+    },
+    {
+      "planId": "NW3-F2-p1",
+      "sourceSha256": "fe77a8d0661f8c8f5d2a749f0d795339c2cb46f00c2de8a3604e8fbe1f65feaf",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.2671569,
+          0.6205808
+        ]
+      ]
+    },
+    {
+      "planId": "NW4-F2-p1",
+      "sourceSha256": "a2cc781a104420e59321f9c7bc9e62dce9732d5339025d13a5dfedc6775d0e50",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.6521465,
+          0.5637255
+        ]
+      ]
+    },
+    {
+      "planId": "NW5-F1-p1",
+      "sourceSha256": "1c5787cad49efdd8699606289c7daabf4eaac2b9b495f1a6710e85b72bf9256b",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.5902778,
+          0.1988636
+        ],
+        [
+          0.5829248,
+          0.5126263
+        ]
+      ],
+      "labels": [
+        {
+          "text": "101D",
+          "kind": "room",
+          "bounds": [
+            0.295,
+            0.189372,
+            0.3175,
+            0.2048309
+          ]
+        },
+        {
+          "text": "101C",
+          "kind": "room",
+          "bounds": [
+            0.355625,
+            0.1980676,
+            0.378125,
+            0.2135266
+          ]
+        },
+        {
+          "text": "101B",
+          "kind": "room",
+          "bounds": [
+            0.42875,
+            0.1971014,
+            0.45125,
+            0.2125604
+          ]
+        },
+        {
+          "text": "101A",
+          "kind": "room",
+          "bounds": [
+            0.51375,
+            0.189372,
+            0.53625,
+            0.2048309
+          ]
+        },
+        {
+          "text": "101",
+          "kind": "room",
+          "bounds": [
+            0.405625,
+            0.363285,
+            0.428125,
+            0.378744
+          ]
+        },
+        {
+          "text": "100",
+          "kind": "corridor",
+          "bounds": [
+            0.56625,
+            0.3613527,
+            0.58875,
+            0.3768116
+          ]
+        },
+        {
+          "text": "102",
+          "kind": "room",
+          "bounds": [
+            0.683125,
+            0.2231884,
+            0.705625,
+            0.2386473
+          ]
+        },
+        {
+          "text": "102A",
+          "kind": "room",
+          "bounds": [
+            0.635625,
+            0.2705314,
+            0.658125,
+            0.2859903
+          ]
+        },
+        {
+          "text": "S102",
+          "kind": "stairs",
+          "bounds": [
+            0.62125,
+            0.1700483,
+            0.64375,
+            0.1855072
+          ]
+        },
+        {
+          "text": "104",
+          "kind": "room",
+          "bounds": [
+            0.65875,
+            0.3642512,
+            0.68125,
+            0.3797101
+          ]
+        },
+        {
+          "text": "106",
+          "kind": "room",
+          "bounds": [
+            0.65875,
+            0.436715,
+            0.68125,
+            0.4521739
+          ]
+        },
+        {
+          "text": "108D",
+          "kind": "room",
+          "bounds": [
+            0.728125,
+            0.4289855,
+            0.750625,
+            0.4444444
+          ]
+        },
+        {
+          "text": "108C",
+          "kind": "room",
+          "bounds": [
+            0.729375,
+            0.5719807,
+            0.751875,
+            0.5874396
+          ]
+        },
+        {
+          "text": "108B",
+          "kind": "room",
+          "bounds": [
+            0.655,
+            0.6144928,
+            0.6775,
+            0.6299517
+          ]
+        },
+        {
+          "text": "108A",
+          "kind": "room",
+          "bounds": [
+            0.5825,
+            0.6086957,
+            0.605,
+            0.6241546
+          ]
+        },
+        {
+          "text": "108",
+          "kind": "corridor",
+          "bounds": [
+            0.611875,
+            0.505314,
+            0.634375,
+            0.5207729
+          ]
+        },
+        {
+          "text": "107",
+          "kind": "room",
+          "bounds": [
+            0.520625,
+            0.573913,
+            0.543125,
+            0.589372
+          ]
+        },
+        {
+          "text": "100A",
+          "kind": "room",
+          "bounds": [
+            0.50875,
+            0.4396135,
+            0.53125,
+            0.4550725
+          ]
+        },
+        {
+          "text": "S101",
+          "kind": "stairs",
+          "bounds": [
+            0.5025,
+            0.5217391,
+            0.525,
+            0.5371981
+          ]
+        },
+        {
+          "text": "110",
+          "kind": "room",
+          "bounds": [
+            0.33125,
+            0.6454106,
+            0.35375,
+            0.6608696
+          ]
+        }
+      ]
+    },
+    {
+      "planId": "NW6-F2-p1",
+      "sourceSha256": "861b09c471e21d456ce6bf1e3c4975691755ebcd7c74cc18f0000f64d528db99",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.2696078,
+          0.1849747
+        ],
+        [
+          0.7299837,
+          0.1401515
+        ]
+      ]
+    },
+    {
+      "planId": "SE1-F1-p1",
+      "sourceSha256": "6d9d47c2ead6d127243ebcc52539e2d82fc7c587cf083e5cdeb6756c1b828b2f",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.374183,
+          0.4261364
+        ]
+      ]
+    },
+    {
+      "planId": "SE1-F2-p1",
+      "sourceSha256": "bdc50f57a5a2577bf15b723ceb482cbddff79426587cbff4cd91d7f0af42ffc1",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.4199346,
+          0.3522727
+        ]
+      ]
+    },
+    {
+      "planId": "SE2-F3-p1",
+      "sourceSha256": "295b20fa5d44325925363e6f1054647b2c5a87e27faf9e62d42d18657ea613f2",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.2136438,
+          0.4823232
+        ],
+        [
+          0.3014706,
+          0.4993687
+        ]
+      ]
+    },
+    {
+      "planId": "SE4-F1-p1",
+      "sourceSha256": "ea46965300370a40cc2e0f4e6f3cfe1ef5904b0306342f339a7574bad372d214",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.2418301,
+          0.2897727
+        ],
+        [
+          0.2794118,
+          0.5479798
+        ],
+        [
+          0.3864379,
+          0.552399
+        ]
+      ]
+    },
+    {
+      "planId": "SE6-F1-p1",
+      "sourceSha256": "fb9c9521bc97ed18738f43b9a0d2d55836c6cc5cf614ff0e5c22d3f2974b5649",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.4627525,
+          0.2050654
+        ]
+      ]
+    },
+    {
+      "planId": "SE6-F2-p1",
+      "sourceSha256": "a654145dd55e0d876a9af6f60bd7f6074ffebf5bb9791a6fbbdd6a10f927e4ba",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.4507576,
+          0.6384804
+        ]
+      ]
+    },
+    {
+      "planId": "SE8-F2-p1",
+      "sourceSha256": "308c5edc163b6f9bfea4b45caac9f84fc32904b833d4aab35507cbd0e4b813a1",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.6674837,
+          0.6893939
+        ]
+      ]
+    },
+    {
+      "planId": "SE10-F2-p1",
+      "sourceSha256": "d2d25372a244ebca9d00fe5f55f9aa05e561a63723c90bd0c0be71c35d04c8b7",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.5189394,
+          0.6895425
+        ],
+        [
+          0.3011364,
+          0.4963235
+        ]
+      ]
+    },
+    {
+      "planId": "SE14-F1-p1",
+      "sourceSha256": "a1abfb2b5a1f4b2edf29c113877ecb10bfdee1a15572db256f7dfa561486e115",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.3337418,
+          0.4059343
+        ],
+        [
+          0.6184641,
+          0.5195707
+        ]
+      ]
+    },
+    {
+      "planId": "SE40-F1-p1",
+      "sourceSha256": "fa5531e5397aa83c3d49459ab38968d34e267bbb9fbe278f375064a08fb7097f",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.7945261,
+          0.4842172
+        ]
+      ]
+    },
+    {
+      "planId": "SE40-F2-p1",
+      "sourceSha256": "61cdd12eaad71adb44350f0bb3b6a3aefa8b8bd1fdb66b1f253d00c16e475c11",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.3153595,
+          0.4974747
+        ]
+      ],
+      "areas": [
+        [
+          [
+            0.269375,
+            0.4434783
+          ],
+          [
+            0.770625,
+            0.4434783
+          ],
+          [
+            0.770625,
+            0.5478261
+          ],
+          [
+            0.269375,
+            0.5478261
+          ]
+        ],
+        [
+          [
+            0.268125,
+            0.378744
+          ],
+          [
+            0.329375,
+            0.378744
+          ],
+          [
+            0.329375,
+            0.5932367
+          ],
+          [
+            0.268125,
+            0.5932367
+          ]
+        ],
+        [
+          [
+            0.77375,
+            0.4434783
+          ],
+          [
+            0.79875,
+            0.4434783
+          ],
+          [
+            0.79875,
+            0.6309179
+          ],
+          [
+            0.77375,
+            0.6309179
+          ]
+        ]
+      ],
+      "labels": [
+        {
+          "text": "200",
+          "kind": "corridor",
+          "bounds": [
+            0.54125,
+            0.4985507,
+            0.5525,
+            0.5062802
+          ]
+        },
+        {
+          "text": "270",
+          "kind": "classroom",
+          "bounds": [
+            0.399375,
+            0.7217391,
+            0.410625,
+            0.7294686
+          ]
+        }
+      ]
+    },
+    {
+      "planId": "SE41-F2-p1",
+      "sourceSha256": "beacac3caaf9b7c8f280a6c6447be242bd839adcae52aee450e10086f032809c",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.5953283,
+          0.7103758
+        ],
+        [
+          0.5972222,
+          0.064951
+        ]
+      ]
+    },
+    {
+      "planId": "SE42-F1-p1",
+      "sourceSha256": "3ecce3687ca074b3ab877fae9e6fab37c2a6816931d3cc46336f679b708547a7",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.6368464,
+          0.5246212
+        ]
+      ]
+    },
+    {
+      "planId": "SE42-F2-p1",
+      "sourceSha256": "e8c802e70d4b6b60d4327e59aecf4017d71216a2ee592a129580e1c4de02e8a6",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.4460784,
+          0.7146465
+        ]
+      ]
+    },
+    {
+      "planId": "SE50-F1-p1",
+      "sourceSha256": "e15e88f03a45ab790b61644b5feb7e949bd68a1b9fee647d97f1ea1c0a22ba09",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.5531046,
+          0.7367424
+        ]
+      ]
+    },
+    {
+      "planId": "SW1-F3-p1",
+      "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.7336601,
+          0.2436869
+        ]
+      ]
+    },
+    {
+      "planId": "SW1-F4-p1",
+      "sourceSha256": "ed111bbfb9b7423af5a9369253f7820ed4e7eddbe6bf3a3421cda77bf3f53e30",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.8521242,
+          0.4381313
+        ],
+        [
+          0.1981209,
+          0.4494949
+        ]
+      ]
+    },
+    {
+      "planId": "SW2-F1-p1",
+      "sourceSha256": "5e9a307920757c5cc581ab5b3d15b5abeee637bf5064f145bfd23b280136f0b2",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.4861111,
+          0.1811869
+        ],
+        [
+          0.4501634,
+          0.6988636
+        ]
+      ]
+    },
+    {
+      "planId": "SW2-F2-p1",
+      "sourceSha256": "eca0df928f4fae9b954bebed2d13a9075b0e30193b38e435bd9242f733e5a9ae",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.5428922,
+          0.1565657
+        ],
+        [
+          0.375,
+          0.5284091
+        ],
+        [
+          0.5751634,
+          0.6957071
+        ]
+      ]
+    },
+    {
+      "planId": "SW2-F3-p1",
+      "sourceSha256": "e4e37fcf1075c893df1edd0ddb595451e68070bd252a6376bca02636728137b7",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.5159314,
+          0.6849747
+        ]
+      ]
+    },
+    {
+      "planId": "SW3-F1-p1",
+      "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.251634,
+          0.5839646
+        ],
+        [
+          0.7091503,
+          0.5050505
+        ]
+      ]
+    },
+    {
+      "planId": "SW5-F2-p1",
+      "sourceSha256": "3157fabbf5eeaa7751c0d66c3baa88ba6bc1029bce0013b7b75fe5f8bdb007b1",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.4477124,
+          0.3017677
+        ]
+      ]
+    },
+    {
+      "planId": "SW9-F1-p1",
+      "sourceSha256": "7e78bd140b8e62e6da91bb9b0d17f1b165c5637cd523903815642722b5ded28f",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.7148693,
+          0.457702
+        ],
+        [
+          0.8455882,
+          0.6540404
+        ],
+        [
+          0.0931373,
+          0.4419192
+        ]
+      ]
+    },
+    {
+      "planId": "SW9-F2-p1",
+      "sourceSha256": "369a31fa5c234b90a0217f4eab70d602fb99117e180a38a6a68cfbb732b6dc02",
+      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "corridorSeeds": [
+        [
+          0.8468137,
+          0.3333333
+        ]
+      ]
+    },
+    {
+      "planId": "NW5-F2-p1",
+      "sourceSha256": "630a10d041db9a4b6a9bdfd413db0b9c4bf396a84b570f0994efc6c768d794da",
+      "basis": "Labels read from this official source drawing.",
+      "labels": [
+        {
+          "text": "210",
+          "kind": "office",
+          "bounds": [
+            0.339375,
+            0.1942029,
+            0.366875,
+            0.2115942
+          ]
+        },
+        {
+          "text": "208",
+          "kind": "office",
+          "bounds": [
+            0.47,
+            0.1835749,
+            0.4975,
+            0.2009662
+          ]
+        },
+        {
+          "text": "206",
+          "kind": "office",
+          "bounds": [
+            0.585625,
+            0.1835749,
+            0.613125,
+            0.2009662
+          ]
+        },
+        {
+          "text": "S200",
+          "kind": "stairs",
+          "bounds": [
+            0.7275,
+            0.2009662,
+            0.755,
+            0.2183575
+          ]
+        },
+        {
+          "text": "201",
+          "kind": "office",
+          "bounds": [
+            0.81875,
+            0.3285024,
+            0.84625,
+            0.3458937
+          ]
+        },
+        {
+          "text": "211",
+          "kind": "electrical",
+          "bounds": [
+            0.336875,
+            0.3623188,
+            0.364375,
+            0.3797101
+          ]
+        },
+        {
+          "text": "200A",
+          "kind": "corridor",
+          "bounds": [
+            0.695,
+            0.363285,
+            0.7225,
+            0.3806763
+          ]
+        },
+        {
+          "text": "204",
+          "kind": "office",
+          "bounds": [
+            0.508125,
+            0.5275362,
+            0.535625,
+            0.5449275
+          ]
+        },
+        {
+          "text": "202",
+          "kind": "office",
+          "bounds": [
+            0.69375,
+            0.4917874,
+            0.72125,
+            0.5091787
+          ]
+        },
+        {
+          "text": "205",
+          "kind": "office",
+          "bounds": [
+            0.714375,
+            0.6251208,
+            0.741875,
+            0.6425121
+          ]
+        },
+        {
+          "text": "203",
+          "kind": "office",
+          "bounds": [
+            0.82625,
+            0.6637681,
+            0.85375,
+            0.6811594
+          ]
+        },
+        {
+          "text": "207",
+          "kind": "office",
+          "bounds": [
+            0.683125,
+            0.7004831,
+            0.710625,
+            0.7178744
+          ]
+        }
+      ]
+    },
+    {
+      "planId": "SE30-F1-p1",
+      "sourceSha256": "fcf21f8eebcec31d83c18749b6a6eb8e5ea923bcf7e126b4e6e9c907362e32d6",
+      "basis": "Labels read from this official source drawing.",
+      "labels": [
+        {
+          "text": "101",
+          "kind": "warehouse",
+          "bounds": [
+            0.54625,
+            0.515942,
+            0.5575,
+            0.5256039
+          ]
+        },
+        {
+          "text": "102",
+          "kind": "storage",
+          "bounds": [
+            0.864375,
+            0.7671498,
+            0.875625,
+            0.7768116
+          ]
+        }
+      ]
+    },
+    {
+      "planId": "SW5-F1-p1",
+      "sourceSha256": "37105ff14e81094e4e968500a70da3cea6cd2e13803dd2853909ee35bcd10790",
+      "basis": "Labels read from this official source drawing.",
+      "labels": [
+        {
+          "text": "1800",
+          "kind": "corridor",
+          "bounds": [
+            0.511875,
+            0.1681159,
+            0.529375,
+            0.1777778
+          ]
+        },
+        {
+          "text": "1845",
+          "kind": "room",
+          "bounds": [
+            0.4375,
+            0.2956522,
+            0.455,
+            0.305314
+          ]
+        },
+        {
+          "text": "1855",
+          "kind": "room",
+          "bounds": [
+            0.5625,
+            0.2985507,
+            0.58,
+            0.3082126
+          ]
+        },
+        {
+          "text": "1856",
+          "kind": "janitor",
+          "bounds": [
+            0.670625,
+            0.247343,
+            0.688125,
+            0.2570048
+          ]
+        },
+        {
+          "text": "1854",
+          "kind": "corridor",
+          "bounds": [
+            0.633125,
+            0.2985507,
+            0.650625,
+            0.3082126
+          ]
+        },
+        {
+          "text": "S180",
+          "kind": "stairs",
+          "bounds": [
+            0.26625,
+            0.4115942,
+            0.28375,
+            0.421256
+          ]
+        },
+        {
+          "text": "S189",
+          "kind": "stairs",
+          "bounds": [
+            0.761875,
+            0.4115942,
+            0.779375,
+            0.421256
+          ]
+        },
+        {
+          "text": "1843",
+          "kind": "corridor",
+          "bounds": [
+            0.36,
+            0.426087,
+            0.3775,
+            0.4357488
+          ]
+        },
+        {
+          "text": "1853",
+          "kind": "corridor",
+          "bounds": [
+            0.65625,
+            0.426087,
+            0.67375,
+            0.4357488
+          ]
+        },
+        {
+          "text": "1840",
+          "kind": "lecture",
+          "bounds": [
+            0.406875,
+            0.578744,
+            0.424375,
+            0.5884058
+          ]
+        },
+        {
+          "text": "1850",
+          "kind": "lecture",
+          "bounds": [
+            0.613125,
+            0.578744,
+            0.630625,
+            0.5884058
+          ]
+        }
+      ]
+    },
+    {
+      "planId": "NE2-F1-p1",
+      "sourceSha256": "5b72c8327a3537d4f8ac653894c8296f5319218ebf600a303c254d03f53e748b",
+      "basis": "Circulation areas and printed place identifiers read on this source sheet.",
+      "areas": [
+        [
+          [
+            0.30875,
+            0.778744
+          ],
+          [
+            0.3425,
+            0.778744
+          ],
+          [
+            0.3425,
+            0.9024155
+          ],
+          [
+            0.30875,
+            0.9024155
+          ]
+        ],
+        [
+          [
+            0.2775,
+            0.0492754
+          ],
+          [
+            0.400625,
+            0.0492754
+          ],
+          [
+            0.400625,
+            0.1043478
+          ],
+          [
+            0.2775,
+            0.1043478
+          ]
+        ]
+      ],
+      "labels": [
+        {
+          "text": "105",
+          "kind": "corridor",
+          "bounds": [
+            0.32125,
+            0.8309179,
+            0.33,
+            0.8386473
+          ]
+        },
+        {
+          "text": "VESTIBULE",
+          "kind": "corridor",
+          "bounds": [
+            0.32875,
+            0.0811594,
+            0.35125,
+            0.0888889
+          ]
+        }
+      ]
+    },
+    {
+      "planId": "NE2-F2-p1",
+      "sourceSha256": "c44395c2fcb996c0d7776e130fe980c08b8a8e4f4b631484eb7e0e7ace6f545d",
+      "basis": "Circulation areas and printed place identifiers read on this source sheet.",
+      "areas": [
+        [
+          [
+            0.210625,
+            0.8415459
+          ],
+          [
+            0.266875,
+            0.8415459
+          ],
+          [
+            0.266875,
+            0.8599034
+          ],
+          [
+            0.210625,
+            0.8599034
+          ]
+        ]
+      ],
+      "labels": [
+        {
+          "text": "208B",
+          "kind": "corridor",
+          "bounds": [
+            0.233125,
+            0.8425121,
+            0.245625,
+            0.8502415
+          ]
+        },
+        {
+          "text": "208A",
+          "kind": "office",
+          "bounds": [
+            0.23375,
+            0.8763285,
+            0.24625,
+            0.884058
+          ]
+        },
+        {
+          "text": "207",
+          "kind": "office",
+          "bounds": [
+            0.290625,
+            0.8647343,
+            0.303125,
+            0.8724638
+          ]
+        }
+      ]
+    },
+    {
+      "planId": "NE8-F2-p1",
+      "sourceSha256": "6c5db12fde7c91871a442022a90df6612d466c349cbbad58fe5e4147e4c80a64",
+      "basis": "Circulation areas and printed place identifiers read on this source sheet.",
+      "areas": [
+        [
+          [
+            0.309375,
+            0.3178744
+          ],
+          [
+            0.523125,
+            0.3178744
+          ],
+          [
+            0.523125,
+            0.3371981
+          ],
+          [
+            0.309375,
+            0.3371981
+          ]
+        ]
+      ],
+      "labels": [
+        {
+          "text": "201",
+          "kind": "corridor",
+          "bounds": [
+            0.4225,
+            0.3198068,
+            0.43375,
+            0.3275362
+          ]
+        },
+        {
+          "text": "202",
+          "kind": "workshop",
+          "bounds": [
+            0.493125,
+            0.4850242,
+            0.504375,
+            0.4927536
+          ]
+        },
+        {
+          "text": "203",
+          "kind": "workshop",
+          "bounds": [
+            0.40875,
+            0.484058,
+            0.42,
+            0.4917874
+          ]
+        },
+        {
+          "text": "204",
+          "kind": "workshop",
+          "bounds": [
+            0.336875,
+            0.484058,
+            0.348125,
+            0.4917874
+          ]
+        },
+        {
+          "text": "218A",
+          "kind": "office",
+          "bounds": [
+            0.533125,
+            0.1729469,
+            0.546875,
+            0.1826087
+          ]
+        },
+        {
+          "text": "218",
+          "kind": "office",
+          "bounds": [
+            0.5975,
+            0.1410628,
+            0.60875,
+            0.1507246
+          ]
+        },
+        {
+          "text": "221",
+          "kind": "office",
+          "bounds": [
+            0.436875,
+            0.1729469,
+            0.448125,
+            0.1826087
+          ]
+        },
+        {
+          "text": "222",
+          "kind": "storage",
+          "bounds": [
+            0.39,
+            0.0975845,
+            0.40125,
+            0.1072464
+          ]
+        }
+      ],
+      "accessPoints": [
+        {
+          "label": "201",
+          "point": [
+            0.37,
+            0.3275362
+          ],
+          "basis": "Clear strip in signed corridor 201."
+        },
+        {
+          "label": "202",
+          "point": [
+            0.499375,
+            0.3333333
+          ],
+          "basis": "Corridor side of the east pair of welding-room doors."
+        },
+        {
+          "label": "203",
+          "point": [
+            0.413125,
+            0.3333333
+          ],
+          "basis": "Corridor side of the middle pair of welding-room doors."
+        },
+        {
+          "label": "204",
+          "point": [
+            0.335625,
+            0.3333333
+          ],
+          "basis": "Corridor side of the west pair of welding-room doors."
+        }
+      ]
+    },
+    {
+      "planId": "NE20-F2-p1",
+      "sourceSha256": "9370e3ebdb420bcd9533b483b43d55f16d105b998fd1c33890ff8e82a42d3b26",
+      "basis": "Circulation areas and printed place identifiers read on this source sheet.",
+      "areas": [
+        [
+          [
+            0.235,
+            0.2222222
+          ],
+          [
+            0.249375,
+            0.2222222
+          ],
+          [
+            0.249375,
+            0.426087
+          ],
+          [
+            0.235,
+            0.426087
+          ]
+        ],
+        [
+          [
+            0.261875,
+            0.6376812
+          ],
+          [
+            0.279375,
+            0.6376812
+          ],
+          [
+            0.279375,
+            0.8396135
+          ],
+          [
+            0.261875,
+            0.8396135
+          ]
+        ]
+      ],
+      "labels": [
+        {
+          "text": "220",
+          "kind": "corridor",
+          "bounds": [
+            0.2325,
+            0.3120773,
+            0.245,
+            0.3217391
+          ]
+        },
+        {
+          "text": "202",
+          "kind": "corridor",
+          "bounds": [
+            0.264375,
+            0.731401,
+            0.276875,
+            0.7410628
+          ]
+        }
+      ]
+    },
+    {
+      "planId": "NW6-F1-p1",
+      "sourceSha256": "47ed7ca662fd42a730bf1c3912414e11c71207605ca698d3582b9642c901f38b",
+      "basis": "Circulation areas and printed place identifiers read on this source sheet.",
+      "areas": [
+        [
+          [
+            0.265,
+            0.1555556
+          ],
+          [
+            0.286875,
+            0.1555556
+          ],
+          [
+            0.286875,
+            0.7198068
+          ],
+          [
+            0.265,
+            0.7198068
+          ]
+        ],
+        [
+          [
+            0.71375,
+            0.1400966
+          ],
+          [
+            0.735,
+            0.1400966
+          ],
+          [
+            0.735,
+            0.7188406
+          ],
+          [
+            0.71375,
+            0.7188406
+          ]
+        ]
+      ],
+      "labels": [
+        {
+          "text": "100A",
+          "kind": "corridor",
+          "bounds": [
+            0.27,
+            0.4096618,
+            0.2825,
+            0.4173913
+          ]
+        },
+        {
+          "text": "100B",
+          "kind": "corridor",
+          "bounds": [
+            0.718125,
+            0.4202899,
+            0.730625,
+            0.4280193
+          ]
+        },
+        {
+          "text": "103",
+          "kind": "room",
+          "bounds": [
+            0.75375,
+            0.5826087,
+            0.76375,
+            0.5903382
+          ]
+        },
+        {
+          "text": "102",
+          "kind": "office",
+          "bounds": [
+            0.763125,
+            0.6328502,
+            0.773125,
+            0.6405797
+          ]
+        },
+        {
+          "text": "101",
+          "kind": "mechanical",
+          "bounds": [
+            0.775625,
+            0.7149758,
+            0.785625,
+            0.7227053
+          ]
+        },
+        {
+          "text": "113",
+          "kind": "mechanical",
+          "bounds": [
+            0.215,
+            0.1285024,
+            0.225,
+            0.1362319
+          ]
+        },
+        {
+          "text": "112",
+          "kind": "lab",
+          "bounds": [
+            0.21375,
+            0.2347826,
+            0.22375,
+            0.2425121
+          ]
+        }
+      ]
+    },
+    {
+      "planId": "NW7-F1-p1",
+      "sourceSha256": "6e475b29d8e27bd3447a1bf91ecd3f47747fe573dda7efd2448066ad7cb0abc4",
+      "basis": "Circulation areas and printed place identifiers read on this source sheet.",
+      "areas": [
+        [
+          [
+            0.6067633,
+            0.28375
+          ],
+          [
+            0.6618357,
+            0.28375
+          ],
+          [
+            0.6618357,
+            0.465
+          ],
+          [
+            0.6067633,
+            0.465
+          ]
+        ],
+        [
+          [
+            0.5681159,
+            0.64
+          ],
+          [
+            0.5980676,
+            0.64
+          ],
+          [
+            0.5980676,
+            0.7525
+          ],
+          [
+            0.5681159,
+            0.7525
+          ]
+        ]
+      ],
+      "labels": [
+        {
+          "text": "140B",
+          "kind": "corridor",
+          "bounds": [
+            0.6202899,
+            0.366875,
+            0.6492754,
+            0.375625
+          ]
+        },
+        {
+          "text": "150A",
+          "kind": "corridor",
+          "bounds": [
+            0.5700483,
+            0.688125,
+            0.5990338,
+            0.696875
+          ]
+        },
+        {
+          "text": "110",
+          "kind": "office",
+          "bounds": [
+            0.5227053,
+            0.333125,
+            0.5458937,
+            0.340625
+          ]
+        },
+        {
+          "text": "120",
+          "kind": "room",
+          "bounds": [
+            0.6966184,
+            0.30375,
+            0.7198068,
+            0.31125
+          ]
+        },
+        {
+          "text": "190",
+          "kind": "classroom",
+          "bounds": [
+            0.5942029,
+            0.8075,
+            0.6173913,
+            0.815
+          ]
+        },
+        {
+          "text": "160",
+          "kind": "lab",
+          "bounds": [
+            0.6676329,
+            0.630625,
+            0.6908213,
+            0.638125
+          ]
+        }
+      ]
+    },
+    {
+      "planId": "NE18-F1-p1",
+      "sourceSha256": "df5defb058adc8faacca09567879cb412d91f78b84e4e23c3a97862fda29b71e",
+      "basis": "Exact place text and approach positions read on the supplied sheet.",
+      "labels": [
+        {
+          "text": "100",
+          "kind": "workshop",
+          "bounds": [
+            0.480625,
+            0.4714976,
+            0.493125,
+            0.4792271
+          ]
+        },
+        {
+          "text": "109",
+          "kind": "storage",
+          "bounds": [
+            0.39375,
+            0.1217391,
+            0.40625,
+            0.1294686
+          ]
+        },
+        {
+          "text": "110",
+          "kind": "storage",
+          "bounds": [
+            0.53625,
+            0.1207729,
+            0.54875,
+            0.1285024
+          ]
+        }
+      ]
+    }
+  ]
+}

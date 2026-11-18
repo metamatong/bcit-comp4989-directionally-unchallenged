@@ -55,7 +55,7 @@ const post = (path: string, body: unknown) =>
 it('takes a consented photo through both stages and uses its complete reviewed route with session checks', async () => {
   const session: Session = await (await post('', {})).json();
   const prefix = '/' + session.id;
-  const input = photoInput({ scope: 'wayfinding-pilot' });
+  const input = photoInput({ buildingHint: 'SE12' });
   const evidence: Session = await (await post(prefix + '/photo/evidence', input)).json();
   expect(evidence.photoEvidence).not.toBeNull();
   const response = await post(

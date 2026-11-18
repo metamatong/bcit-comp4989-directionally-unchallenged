@@ -11,7 +11,6 @@ import {
 import { resolve } from 'node:path';
 import type { VisualPlan } from '../src/types';
 import {
-  topologyBuildings,
   topologyDocumentSchema,
   topologyMutationSchema,
   type TopologyDocument,
@@ -40,9 +39,7 @@ export class TopologyError extends Error {
     super(message);
   }
 }
-export const topologyPlans = visualPlans.filter((plan) =>
-  (topologyBuildings as readonly string[]).includes(plan.building),
-);
+export const topologyPlans = visualPlans;
 export { topologyRecordHash } from './topology-provenance';
 function reviewed(record: TopologyRecord) {
   return (

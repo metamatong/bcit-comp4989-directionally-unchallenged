@@ -24,14 +24,17 @@ const reading: DeviceReading = {
 };
 
 describe('source-grounded device location', () => {
-  it('covers all twelve pilot floors with hash-bound availability and archived official footprints', () => {
-    expect(catalogue.floors).toHaveLength(12);
-    expect(catalogue.buildings.map((b) => b.building).sort()).toEqual(['SE12', 'SW1', 'SW3']);
+  it('covers all supplied floors with hash-bound availability and archived official footprints', () => {
+    expect(catalogue.floors).toHaveLength(visualPlans.length);
+    expect(catalogue.buildings).toHaveLength(43);
+    expect(catalogue.buildings.some((b) => b.building === 'NE25')).toBe(true);
     for (const floor of catalogue.floors) {
       expect(floor.sourceSha256).toBe(visualPlans.find((p) => p.id === floor.planId)?.sourceSha256);
       expect(floor.reason.length).toBeGreaterThan(20);
     }
-    expect(catalogue.floors.filter((f) => f.status === 'unavailable')).toHaveLength(11);
+    expect(catalogue.floors.filter((f) => f.status === 'unavailable')).toHaveLength(
+      visualPlans.length - 1,
+    );
   });
   it('undoes prototype crop/resize and preserves pixel aspect ratio through normalization', () => {
     expect(calibration.controls[0].x).toBeCloseTo((200 + (115 * 3600) / 2800) / 4000, 12);

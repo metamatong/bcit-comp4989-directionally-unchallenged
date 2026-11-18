@@ -67,7 +67,7 @@ it('loads the empty scoped editor without a Gemini key and keeps it out of visit
   expect(response.status).toBe(200);
   expect(response.headers.get('cache-control')).toBe('no-store');
   data = await response.json();
-  expect(data.plans).toHaveLength(12);
+  expect(data.plans).toHaveLength(89);
   expect(data.document.nodes).toEqual([]);
   expect(data.candidates.some((candidate) => candidate.kind === 'stairs')).toBe(true);
   expect(data.candidates.some((candidate) => candidate.kind === 'elevator')).toBe(true);

@@ -20,7 +20,7 @@ Browsers can combine GPS and network signals, and may ignore a high-accuracy req
 
 `data/campus/geolocation/bcit-pilot-footprints.json` archives official BCIT WGS84 footprints for SW1 (OBJECTID 19), SW3 (21) and SE12 (33), retrieved November 16, 2026. The exact query URL, date and SHA-256 appear in `calibrations.json`. Existing source PDFs remain unchanged. Original BCIT attribution and usage restrictions continue to apply. [Official GIS layer](https://services2.arcgis.com/IgcrRjRW95F0HKSw/arcgis/rest/services/Bsite_Building_Footprint_20241022/FeatureServer/0) · [Source terms](data.md)
 
-All twelve official pilot drawings were inspected for extent and orientation. Every coverage entry binds to its individual PDF hash.
+The visitor catalogue now records calibration availability for all 89 sheets. The additional official campus footprint response is archived as `bcit-burnaby-footprints.json`. It includes matches for 43 of the 45 supplied building IDs. NE21 and NW7 have no matching footprint. SE12 floor 3 retains its original controls and the other sheets use building-level evidence when available.
 
 | Building | Floor | Device comparison | Walking overlay |
 |---|---|---|---|

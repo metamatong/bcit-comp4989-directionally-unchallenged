@@ -203,7 +203,7 @@ export function PhotoLocationInput({
                   onChange={(event) => onDestinationChange(event.target.value)}
                 />
               </div>
-              <small>SE12 · SW03 · SW01 · Unique close matches accepted</small>
+              <small>Include the building and room, for example SW03 2605.</small>
             </div>
             {!canUsePhotoResult && deviceOption}
             {error ? (
