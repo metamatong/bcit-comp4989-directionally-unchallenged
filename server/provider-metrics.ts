@@ -24,6 +24,7 @@ export type ProviderMetric = {
   cachedInputTokens?: number;
   outputTokens?: number;
   reasoningTokens?: number;
+  incompleteReason?: 'max_output_tokens' | 'content_filter' | 'other';
 };
 export type MetricSink = (metric: ProviderMetric) => void;
 
@@ -52,6 +53,7 @@ export function upstreamRequestId(response: Response) {
 
 export function tokenUsage(body: unknown, provider: string): Partial<ProviderMetric> {
   const object = body as {
+    incomplete_details?: { reason?: string } | null;
     usage?: {
       input_tokens?: number;
       output_tokens?: number;
@@ -81,11 +83,21 @@ export function tokenUsage(body: unknown, provider: string): Partial<ProviderMet
           outputTokens: usage?.output_tokens,
           reasoningTokens: usage?.output_tokens_details?.reasoning_tokens,
         };
-  return Object.fromEntries(
+  const tokens = Object.fromEntries(
     Object.entries(values).filter(
       ([, value]) => typeof value === 'number' && Number.isSafeInteger(value) && value >= 0,
     ),
   );
+  const reason = object?.incomplete_details?.reason;
+  return {
+    ...tokens,
+    ...(reason
+      ? {
+          incompleteReason:
+            reason === 'max_output_tokens' || reason === 'content_filter' ? reason : 'other',
+        }
+      : {}),
+  };
 }
 
 export function emitMetric(sink: MetricSink | undefined, metric: ProviderMetric) {

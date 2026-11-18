@@ -22,8 +22,9 @@ export function PhotoDeviceOption({
       </label>
       <p className="helper">
         By selecting this, I confirm I am standing where this photo was taken. Submitting requests
-        my current location. Device readings stay in this browser tab. My browser or device may use
-        its own location service.
+        my current location. Only matching building IDs, accuracy and reading time are sent to the
+        app to narrow label matches. Coordinates stay in this tab. My browser or device may use its
+        own location service.
       </p>
     </div>
   );

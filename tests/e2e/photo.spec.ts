@@ -59,7 +59,7 @@ async function setup(page: Page, hasCandidate = true) {
     image: { data: string; mimeType: string };
     detailCrops: { id: string; image: { data: string; mimeType: string } }[];
   }[] = [];
-  const evidenceUploads: unknown[] = [];
+  const evidenceUploads: typeof uploads = [];
   const requests: string[] = [];
   page.on('request', (request) => requests.push(request.url()));
   await page.route('**/api/bootstrap', async (route) => {
@@ -89,7 +89,7 @@ async function setup(page: Page, hasCandidate = true) {
     };
     await route.fulfill({ json: current });
   });
-  await page.route('**/api/sessions/*/photo', async (route) => {
+  await page.route('**/api/sessions/*/photo/location', async (route) => {
     const body = route.request().postDataJSON();
     uploads.push(body);
     const result = analysis(body.requestId, current.photoEvidence!.id, hasCandidate);
@@ -99,7 +99,7 @@ async function setup(page: Page, hasCandidate = true) {
       campusAnalysis: result,
       campusLocation: result.candidates[0] ?? null,
       photoEvidence: null,
-      providerCalls: 2,
+      providerCalls: 1,
     };
     await route.fulfill({ json: current });
   });
@@ -147,12 +147,29 @@ test('submits photo and destination and displays directions without route confir
   await expect(
     page.getByRole('heading', { name: 'Walking directions', exact: true }),
   ).toBeVisible();
-  await expect(page.getByText('Starting position acquired', { exact: true })).toBeVisible();
-  await expect(page.locator('.floor-directions h3')).toHaveText([
+  await expect(page.getByText('Starting area estimated', { exact: true })).toBeVisible();
+  await expect(page.locator('.route-floor-label')).toHaveText([
     'SE12 · Floor 3',
     'SW03 · Floor 3',
     'SW03 · Floor 2',
   ]);
+  const maps = page.getByRole('group', { name: 'Route maps in travel order' });
+  await expect(maps).toHaveCount(1);
+  await expect(maps.locator('figure')).toHaveCount(3);
+  await expect(maps.locator('figcaption .pin-legend')).toHaveCount(3);
+  await expect(page.getByLabel('Route overview', { exact: true })).toHaveText(
+    '302 · window-side corridor door → Connecting passage to SW03 · Floor 3 → East elevator at 3696 · corridor 3600 (Floor 3 → 2) → 2082 · 2000 corridor door',
+  );
+  await expect(page.getByRole('button', { name: 'Show full floors', exact: true })).toHaveCount(1);
+  await expect(page.getByRole('button', { name: 'Show my position', exact: true })).toBeHidden();
+  for (let index = 1; index < 3; index++) {
+    const previous = await maps
+      .locator('figure')
+      .nth(index - 1)
+      .boundingBox();
+    const current = await maps.locator('figure').nth(index).boundingBox();
+    expect(current!.y).toBeGreaterThanOrEqual(previous!.y + previous!.height - 1);
+  }
   await expect(
     page.getByRole('button', { name: /^Start at|Confirm this possible region/ }),
   ).toHaveCount(0);
@@ -161,10 +178,12 @@ test('submits photo and destination and displays directions without route confir
   ).toBe(false);
   expect(uploads).toHaveLength(1);
   expect(evidenceUploads).toHaveLength(1);
-  expect(uploads[0].detailCrops).toHaveLength(4);
-  expect(uploads[0].consent).toBe(true);
-  expect(uploads[0].image.mimeType).toBe('image/jpeg');
-  expect(uploads[0].image.data.length).toBeGreaterThan(1000);
+  expect(evidenceUploads[0].detailCrops).toHaveLength(4);
+  expect(uploads[0]).not.toHaveProperty('image');
+  expect(uploads[0]).not.toHaveProperty('detailCrops');
+  expect(evidenceUploads[0].consent).toBe(true);
+  expect(evidenceUploads[0].image.mimeType).toBe('image/jpeg');
+  expect(evidenceUploads[0].image.data.length).toBeGreaterThan(1000);
   expect(requests.some((url) => url.includes('/ocr/'))).toBe(false);
   await page.getByText('Location evidence', { exact: true }).click();
   const evidence = page.getByRole('region', { name: 'Photo comparison results' });
@@ -208,7 +227,7 @@ test('cancelling analysis discards a late comparison response', async ({ page })
     release = resolve;
   });
   let requested = false;
-  await page.route('**/api/sessions/*/photo', async (route) => {
+  await page.route('**/api/sessions/*/photo/location', async (route) => {
     requested = true;
     await wait;
     await route.abort().catch(() => {});

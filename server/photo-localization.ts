@@ -100,7 +100,7 @@ export const comparisonSchema = z
   );
 
 const string = { type: 'STRING' };
-const strings = { type: 'ARRAY', items: string };
+const strings = { type: 'ARRAY', items: string, maxItems: 8 };
 const selectTool = {
   name: 'select_floor_plans',
   description:
@@ -129,12 +129,15 @@ const comparisonTool = {
       clarification: string,
       candidates: {
         type: 'ARRAY',
+        maxItems: 1,
         items: {
           type: 'OBJECT',
           properties: {
             planId: string,
             bounds: {
               type: 'ARRAY',
+              minItems: 4,
+              maxItems: 4,
               items: { type: 'NUMBER' },
               description:
                 'Camera vicinity [left, top, right, bottom] in whole-page coordinates from the top-left, each 0..1. Compare with the supplied normalized source label bounds. When a drawn doorway is supplied, the camera region may include that doorway instead of the print. Never enlarge a box merely to include a label. Abstain if the camera vicinity cannot be established from visual features.',
@@ -142,6 +145,8 @@ const comparisonTool = {
             confidence: { type: 'STRING', enum: ['low', 'medium', 'high'] },
             matches: {
               type: 'ARRAY',
+              minItems: 1,
+              maxItems: 6,
               items: {
                 type: 'OBJECT',
                 properties: {
@@ -157,9 +162,10 @@ const comparisonTool = {
                 required: ['photoFeature', 'planFeature', 'kind'],
               },
             },
-            limitations: strings,
+            limitations: { ...strings, minItems: 1, maxItems: 6 },
             labelMatches: {
               type: 'ARRAY',
+              maxItems: 12,
               items: {
                 type: 'OBJECT',
                 properties: {
@@ -180,14 +186,25 @@ const comparisonTool = {
   },
 };
 
-function comparisonToolForDoorways() {
+function comparisonToolForDoorways(doorIds: string[]) {
   return {
     ...comparisonTool,
     parameters: {
       ...comparisonTool.parameters,
       properties: {
         ...comparisonTool.parameters.properties,
-        doorwayAssessments: doorwayAssessmentToolField,
+        doorwayAssessments: {
+          ...doorwayAssessmentToolField,
+          minItems: doorIds.length,
+          maxItems: doorIds.length,
+          items: {
+            ...doorwayAssessmentToolField.items,
+            properties: {
+              ...doorwayAssessmentToolField.items.properties,
+              doorId: { type: 'STRING', enum: doorIds },
+            },
+          },
+        },
       },
       required: [...comparisonTool.parameters.required, 'doorwayAssessments'],
     },
@@ -424,7 +441,9 @@ export async function analyzeCampusPhoto(
       const references = sourcePhotoReferences(retrieval, eligible);
       const context = await detailedPlanContext(selected, references);
       const { doorways } = context;
-      const tool = doorways.length ? comparisonToolForDoorways() : comparisonTool;
+      const tool = doorways.length
+        ? comparisonToolForDoorways(doorways.map((option) => option.door.id))
+        : comparisonTool;
       const doorwayInstruction = doorways.length
         ? ' Assess each supplied doorway detail independently of the camera rectangle. Look for the exact sign attached to its visible doorway and compare the arrangement of the corridor, its opposite boundary, openings and junctions in the photo and the drawing. Consider both viewing directions. A line on the plan may establish an exterior boundary without identifying its glazing height or material. A matching doorway vicinity may be supported even when camera coordinates are unknown. In that case return insufficient_evidence and no candidates for the camera rectangle, and a supported doorway assessment. Mark indistinguishable doorways ambiguous. A sign alone cannot support a doorway vicinity.'
         : '';

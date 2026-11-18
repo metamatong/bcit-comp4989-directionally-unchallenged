@@ -1,16 +1,17 @@
+/** One route overview followed by a continuous stack of source maps and endpoint legends. */
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, Route } from 'lucide-react';
+import { Route } from 'lucide-react';
 import { planLabel } from '../topology';
 import type { VisualPlan } from '../types';
 import type { MapStop, NavigationResult, WalkingStep } from '../wayfinding';
-import { RouteMap, type MapMarker } from './RouteMap';
+import { RouteMapImage, type MapMarker } from './RouteMap';
 import type { DeviceOverlay, LocationCatalogue } from '../location/types';
 import { deviceOverlay, overlapsFootprint } from '../location/geometry';
 import { useWalkingLocation } from '../location/use-device-location';
 import { WalkingDeviceLocation } from './WalkingDeviceLocation';
 
 type FoundRoute = Extract<NavigationResult, { status: 'route' }>;
-type FloorVisit = { start: MapStop; end: MapStop; walks: WalkingStep[]; transfer?: WalkingStep };
+type FloorVisit = { start: MapStop; end: MapStop; walks: WalkingStep[] };
 
 function floorItinerary(route: FoundRoute): FloorVisit[] {
   let visit: FloorVisit = { start: route.origin, end: route.origin, walks: [] };
@@ -21,7 +22,6 @@ function floorItinerary(route: FoundRoute): FloorVisit[] {
       visit.end = step.to;
     } else {
       visit.end = step.from;
-      visit.transfer = step;
       // Re-entering a floor is a new visit. Never connect points across different maps or an outdoor gap.
       visit = { start: step.to, end: step.to, walks: [] };
       visits.push(visit);
@@ -30,92 +30,84 @@ function floorItinerary(route: FoundRoute): FloorVisit[] {
   return visits;
 }
 
-function FloorDirections({
+function routeOverview(route: FoundRoute, plans: Map<string, VisualPlan>) {
+  if (!route.steps.length) return `${route.destination.label} · You are at the destination.`;
+  const parts = [route.origin.label];
+  for (let index = 0; index < route.steps.length; index++) {
+    const step = route.steps[index];
+    const next = route.steps[index + 1];
+    if (step.kind === 'corridor') {
+      // A transfer describes its boarding point once, together with the floor change.
+      if ((!next || next.kind === 'corridor') && parts.at(-1) !== step.to.label)
+        parts.push(step.to.label);
+    } else if (step.kind === 'building-link') {
+      parts.push(`Connecting passage to ${planLabel(plans.get(step.to.planId)!)}`);
+    } else if (step.kind === 'outdoor') {
+      parts.push(`Outside to ${planLabel(plans.get(step.to.planId)!)} (outdoor path unmapped)`);
+    } else {
+      const fromFloor = plans.get(step.from.planId)!.floor;
+      const toFloor = plans.get(step.to.planId)!.floor;
+      parts.push(`${step.from.label} (Floor ${fromFloor} → ${toFloor})`);
+    }
+  }
+  if (route.steps.at(-1)?.kind !== 'corridor') parts.push(route.destination.label);
+  return parts.join(' → ');
+}
+
+function FloorMap({
   visit,
   plan,
   first,
   last,
+  whole,
   device,
-  active,
-  onConfirmFloor,
 }: {
   visit: FloorVisit;
   plan: VisualPlan;
   first: boolean;
   last: boolean;
+  whole: boolean;
   device?: DeviceOverlay | null;
-  active: boolean;
-  onConfirmFloor: () => void;
 }) {
-  const markers: MapMarker[] = [];
-  function mark(stop: MapStop, symbol: string, caption: string, end = false) {
-    markers.push({ point: stop.point, symbol, label: caption, end });
-  }
-  mark(visit.start, 'A', `${first ? 'Start' : 'Enter'} · ${visit.start.label}`);
-  for (const step of visit.walks) {
-    if (step.to.id === visit.end.id) continue;
-    mark(step.to, String(markers.length), step.to.label);
-  }
-  if (visit.start.id !== visit.end.id || visit.walks.length > 0) {
-    mark(visit.end, 'B', `${last ? 'Destination' : 'Continue at'} · ${visit.end.label}`, true);
-  } else if (last) {
-    markers[0] = {
+  const samePoint = visit.start.id === visit.end.id && !visit.walks.length;
+  const markers: MapMarker[] = [
+    {
+      point: visit.start.point,
+      symbol: samePoint && last ? 'B' : 'A',
+      label: `${samePoint && last ? 'Destination' : first ? 'Start' : 'Enter'} · ${visit.start.label}`,
+      end: samePoint && last,
+    },
+  ];
+  if (!samePoint)
+    markers.push({
       point: visit.end.point,
-      label: `Destination · ${visit.end.label}`,
       symbol: 'B',
+      label: `${last ? 'Destination' : 'Continue at'} · ${visit.end.label}`,
       end: true,
-    };
-  }
+    });
   const heading = planLabel(plan);
   return (
-    <article className="floor-directions" aria-label={heading}>
-      <h3>{heading}</h3>
-      {!active && (
-        <button type="button" className="secondary" onClick={onConfirmFloor}>
-          I’m on this floor · {heading}
-        </button>
-      )}
-      {visit.walks.length > 0 && (
-        <div className="floor-endpoints">
-          {visit.start.label}
-          <ArrowRight size={15} /> {visit.end.label}
-        </div>
-      )}
-      <RouteMap
+    <figure className="route-map-visit" aria-label={heading}>
+      <RouteMapImage
         plan={plan}
         paths={visit.walks.map((step) => step.path)}
         markers={markers}
-        showPlanTitle={false}
+        whole={whole}
         device={device}
-        label={`${heading}, ${visit.walks.length ? 'walking directions from ' + visit.start.label + ' to ' + visit.end.label : visit.end.label}`}
+        label={`${heading}, walking directions from ${visit.start.label} to ${visit.end.label}`}
       />
-      <div className="pin-legend">
-        {markers.map((m, i) => (
-          <span key={i}>
-            <b className={m.end ? 'end' : ''}>{m.symbol}</b>
-            {m.label}
-          </span>
-        ))}
-      </div>
-      {visit.walks.map((step, i) => (
-        <p key={i} className="floor-walk">
-          {step.instruction}
-        </p>
-      ))}
-      {visit.transfer && (
-        <p className="floor-transfer">
-          <ArrowRight size={18} />
-          {visit.transfer.instruction}
-        </p>
-      )}
-      {last && (
-        <p className="route-arrival">
-          {first && !visit.walks.length
-            ? 'Your starting point is the destination.'
-            : `Arrive at ${visit.end.label}.`}
-        </p>
-      )}
-    </article>
+      <figcaption>
+        <span className="route-floor-label">{heading}</span>
+        <div className="pin-legend">
+          {markers.map((marker) => (
+            <span key={marker.symbol}>
+              <b className={marker.end ? 'end' : ''}>{marker.symbol}</b>
+              {marker.label}
+            </span>
+          ))}
+        </div>
+      </figcaption>
+    </figure>
   );
 }
 
@@ -130,8 +122,7 @@ export function RouteDirections({
   onRecheck: () => void;
   locationCatalogue?: LocationCatalogue;
 }) {
-  // null shows the whole journey. A floor changes only when the visitor chooses one.
-  const [floor, setFloor] = useState<number | null>(null);
+  const [whole, setWhole] = useState(false);
   const [activeVisit, setActiveVisit] = useState(0);
   const tracking = useWalkingLocation();
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -140,11 +131,12 @@ export function RouteDirections({
     headingRef.current?.scrollIntoView?.({ block: 'start' });
   }, [route.origin.id, route.destination.id]);
   const visits = floorItinerary(route);
-  const planById = new Map(plans.map((p) => [p.id, p]));
-  const destinationPlan = planById.get(route.destination.planId)!;
+  const planById = new Map(plans.map((plan) => [plan.id, plan]));
   const activePlan = planById.get(visits[activeVisit].start.planId)!;
-  const calibration = locationCatalogue?.floors.find((f) => f.planId === activePlan.id);
-  const building = locationCatalogue?.buildings.find((b) => b.building === activePlan.building);
+  const calibration = locationCatalogue?.floors.find((floor) => floor.planId === activePlan.id);
+  const building = locationCatalogue?.buildings.find(
+    (item) => item.building === activePlan.building,
+  );
   const outside = !!(
     tracking.fresh &&
     tracking.reading &&
@@ -155,6 +147,9 @@ export function RouteDirections({
     tracking.fresh && tracking.reading
       ? deviceOverlay(tracking.reading, activePlan, calibration)
       : null;
+  const routePlans = [...new Set(visits.map((visit) => visit.start.planId))].map((id) =>
+    planById.get(id)!,
+  );
   return (
     <div className="route-directions">
       <div className="way-heading">
@@ -163,62 +158,70 @@ export function RouteDirections({
           Walking directions
         </h2>
       </div>
-      <WalkingDeviceLocation
-        tracking={tracking}
-        floorLabel={planLabel(activePlan)}
-        calibration={calibration}
-        outside={outside}
-      />
-      <div className="trip-ends">
-        <span>
-          {planLabel(planById.get(route.origin.planId)!)} · {route.origin.label}
-        </span>
-        <ArrowRight size={16} />
-        <strong>
-          {planLabel(destinationPlan)} · {route.destination.label}
-        </strong>
-      </div>
-      {visits.length > 1 && (
-        <div className="itinerary-toggle">
-          <button className="secondary" onClick={() => setFloor(floor === null ? 0 : null)}>
-            {floor === null ? 'One floor at a time' : 'Show all floors'}
+      <p className="route-overview" aria-label="Route overview">
+        {routeOverview(route, planById)}
+      </p>
+      <div className="route-map-stack" role="group" aria-label="Route maps in travel order">
+        <div className="map-bar">
+          <button type="button" aria-pressed={whole} onClick={() => setWhole(!whole)}>
+            {whole ? 'Zoom to route' : 'Show full floors'}
           </button>
         </div>
-      )}
-      <ol className="floor-itinerary" aria-label="Floors in walking order">
-        {visits.map(
-          (visit, index) =>
-            (floor === null || index === floor) && (
-              <li key={index} value={index + 1}>
-                <FloorDirections
-                  visit={visit}
-                  plan={planById.get(visit.start.planId)!}
-                  first={index === 0}
-                  last={index === visits.length - 1}
-                  active={index === activeVisit}
-                  device={index === activeVisit ? overlay : null}
-                  onConfirmFloor={() => {
-                    tracking.stop();
-                    setActiveVisit(index);
-                  }}
-                />
-              </li>
-            ),
+        {visits.map((visit, index) => (
+          <FloorMap
+            key={index}
+            visit={visit}
+            plan={planById.get(visit.start.planId)!}
+            first={index === 0}
+            last={index === visits.length - 1}
+            whole={whole}
+            device={index === activeVisit ? overlay : null}
+          />
+        ))}
+        <div className="map-credit">
+          <span>{[...new Set(routePlans.map((plan) => plan.attribution))].join(' · ')}</span>
+          <details className="route-sources">
+            <summary>Source plans</summary>
+            {routePlans.map((plan) => (
+              <a key={plan.id} href={plan.sourceUrl} target="_blank" rel="noreferrer">
+                {planLabel(plan)} ↗
+              </a>
+            ))}
+          </details>
+        </div>
+      </div>
+      <details className="route-device-controls">
+        <summary>
+          {tracking.active
+            ? `Device position · tracking ${planLabel(activePlan)}`
+            : 'Device position'}
+        </summary>
+        {visits.length > 1 && (
+          <label className="tracking-floor-choice">
+            Current floor
+            <select
+              aria-label="Current tracking floor"
+              value={activeVisit}
+              onChange={(event) => {
+                tracking.stop();
+                setActiveVisit(Number(event.target.value));
+              }}
+            >
+              {visits.map((visit, index) => (
+                <option key={index} value={index}>
+                  {planLabel(planById.get(visit.start.planId)!)} · {visit.start.label}
+                </option>
+              ))}
+            </select>
+          </label>
         )}
-      </ol>
-      {floor !== null && (
-        <nav className="route-paging" aria-label="Floor navigation">
-          <button className="secondary" disabled={floor === 0} onClick={() => setFloor(floor - 1)}>
-            <ArrowLeft size={16} />
-            Previous floor
-          </button>
-          {floor + 1 < visits.length && (
-            <button className="primary" onClick={() => setFloor(floor + 1)}>
-              Next floor <ArrowRight size={16} />
-            </button>
-          )}
-        </nav>
-      )}
+        <WalkingDeviceLocation
+          tracking={tracking}
+          floorLabel={planLabel(activePlan)}
+          calibration={calibration}
+          outside={outside}
+        />
+      </details>
       <button type="button" className="text-button" onClick={onRecheck}>
         Recheck current route
       </button>

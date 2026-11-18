@@ -1,10 +1,10 @@
 # Project walkthrough
 
 1. Upload or take a photo, then tap **Next**. The image stays on the device until the visitor taps **Go**.
-2. Enter a destination such as `SW03 3615` and tap **Go**. These are the only visitor inputs needed to request a route.
-3. The configured AI provider reads the photo, identifies a starting area on the 12 official plans for SE12, SW03 and SW01, matches the destination label and generates the route. The app displays **Starting position acquired** as soon as it has the photo-derived start, before route generation finishes.
-4. Walking directions show the floor plans in travel order with generated corridor paths and transfer steps. No visitor selection or approval of the start, room door, corridor, destination occurrence or route segment is required.
+2. Enter a destination such as `SW03 2605` and tap **Go**. Optionally enable device location if standing where the photo was taken.
+3. The configured AI provider reads the photo once for labels and visible features. Exact source lookup uses those readings and optional GPS building candidates to estimate a starting area. The app displays **Starting area estimated**, then calculates the route over the saved reviewed graph without further model calls.
+4. Walking directions show one arrow-separated overview with the building passage and floor changes. Below it, maps and their A/B descriptions form one vertical stack. **Show full floors** changes all map views together; **Source plans** expands the official PDF links. Optional **Device position** controls are below the maps. No route confirmation prompts interrupt this flow.
 5. Cross-building travel can use only mapped building connections. The current SE12–SW03 links are available; a route requiring a transfer to or from SW01 cannot use an inferred crossing.
 6. **Start over** clears the trip. Location evidence and trip editing are optional details below the route.
 
-The visitor pilot covers only SE12, SW03 and SW01. AI-generated floor paths have not been field-verified, and real-photo localization accuracy remains unmeasured. A provider error shows setup/retry guidance. Nothing has been deployed or submitted as coursework.
+The visitor pilot covers only SE12, SW03 and SW01. Routes require complete reviewed connections and source corridor traces. Missing coverage is explicit. Photo-based starting estimates and walking routes have not been independently validated on campus. A provider error shows setup/retry guidance. This walkthrough performs no deployment or coursework submission.

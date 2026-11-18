@@ -1,12 +1,8 @@
 # DirectionallyUnchallenged
 
-Add a photo, enter a destination, and tap **Go** to get an AI-generated route in the BCIT Burnaby SE12, SW03 and SW01 pilot. The app identifies the starting area from the photo, finds the destination on the official plans, and generates floor-by-floor directions. Cross-building travel uses only mapped building connections.
+Add a photo, enter a destination, and tap **Go** to get floor-by-floor directions in the BCIT Burnaby SE12, SW03 and SW01 pilot. AI reads the photo once to extract labels and visible features. The app then resolves the starting place from those readings and optional GPS building candidates, and calculates directions over the saved reviewed graph.
 
-Floor paths are checked against every extracted long drawing stroke before display. The planner receives source-traced corridor bends and can correct an invalid response once within a shared 90-second deadline. Feedback identifies destination, floor, endpoint, connection, continuity or drawing-crossing failures. A second failure displays its specific cause and offers **Retry route** using the existing photo-derived starting area. Drawing strokes remain unclassified, so this conservative check can also reject annotation crossings and does not establish physical walkability.
-
-The internal reference dataset contains **89 official floor plans covering 45 Burnaby buildings**, plus the campus map. All floor plans have PNGs and structured geometry JSON. Photo results are **AI-estimated starting areas**. A separate local topology editor maintains mapped connections between buildings; visitors do not need a manually approved room doorway or corridor route.
-
-This does not train a model on BCIT. The selected model is pretrained and compares a photo with plan drawings; the plans are not labeled camera-view examples, so reliable exact positioning is not guaranteed.
+The reference dataset contains **89 official floor plans covering 45 Burnaby buildings**. The visitor pilot covers SE12, SW03 and SW01. Exact source labels identify estimated starting places. A route requires mapped endpoints and a complete approved connection path. Missing coverage is shown explicitly.
 
 ## Run locally
 
@@ -31,7 +27,7 @@ npm run dev
 
 Open [DirectionallyUnchallenged locally](http://127.0.0.1:3000). Keep `AI_PROVIDER=gemini` (the default) and configure `GEMINI_API_KEY`, a primary `GEMINI_MODEL`, and an ordered `GEMINI_FALLBACK_MODELS` list in the private `.env`. New installations default to Gemini 3.5 Flash-Lite with Gemini 3.8 Flash as fallback. The supported stable Flash models are Gemini 3.5 Flash, 3.5 Flash-Lite, 3.6 Flash, 3.7 Flash and 3.8 Flash. Gemini 2.5 is excluded because Google restricts it to existing users; Google does not currently list it as shut down. Set `AI_FREE_TIER_CONFIRMED=true` only after verifying model access and eligibility for your API project. Keys stay server-side. Explicit fallback settings are preserved, including an empty list to disable fallback.
 
-To use OpenAI, set `AI_PROVIDER=openai` and fill in `OPENAI_API_KEY` in `.env`. To use Groq, set `AI_PROVIDER=groq`, fill in `GROQ_API_KEY`, and use the default `GROQ_MODEL=qwen/qwen3.8-27b`. Groq uses the same source-grounded photo stages through its OpenAI-compatible Responses API. The adapter combines input views into a labeled contact sheet for Groq's three-image limit. Providers never switch automatically. See [provider setup](docs/provider.md).
+To use OpenAI, set `AI_PROVIDER=openai` and fill in `OPENAI_API_KEY` in `.env`. To use Groq, set `AI_PROVIDER=groq`, fill in `GROQ_API_KEY`, and use the default `GROQ_MODEL=qwen/qwen3.8-27b`. Groq performs the same first-stage extraction through its OpenAI-compatible Responses API. The adapter combines input views into a labeled contact sheet for Groq's three-image limit. Providers never switch automatically. See [provider setup](docs/provider.md).
 
 The Node server does not restart automatically when files change. Restart it manually after backend or environment changes: Ctrl+C, then `npm run dev`. Frontend edits can still refresh through Vite HMR on the same port. Do not launch another instance on port 3000. Without valid provider configuration, photo analysis is disabled and the app displays setup guidance.
 
@@ -41,24 +37,21 @@ The Git-connected Vercel project builds the frontend and the visitor API with `n
 
 ## Use
 
-The visitor and review interfaces use English. Enter a building and room identifier such as `SW03 2082`, or a request such as `Take me to SW03 room 2082`. The app resolves the room against official plan labels and uses the AI planner to select the matching occurrence and generate directions.
+1. Upload or capture a photo containing a nearby room sign, then tap **Next**.
+2. Enter a destination such as `SW03 2605`. Optionally check **Use device location with this photo** while standing where it was taken. The checkbox starts no request until submission.
+3. Tap **Go**. The configured provider extracts exact labels, sign placement, visible door count, window side and corridor shape in the first stage. The following location request sends only the evidence ID and optional GPS-derived building candidates. Raw device coordinates stay in the browser.
+4. Source lookup chooses a unique starting estimate. Conflicting labels, directional-only signs or a GPS contradiction produce an explanation. Scene features are retained as observations, and doorway placement helps choose the relevant label. Unavailable window/count annotations do not imply a spatial match.
+5. The app resolves the destination and calculates a route over approved graph connections. **Walking directions** shows one arrow-separated route overview, followed by a continuous stack of maps with A/B descriptions. Floor changes appear in the overview; one zoom control applies to all maps. Photo bytes, floor-plan images and destinations are sent to no later AI stage.
 
-1. Use **Upload photo** or **Take a photo**, then tap **Next**. The photo is prepared locally and stays on the device until submission.
-2. Enter a destination such as `SW03 3615`, then tap **Go**. The adjacent notice explains which configured AI provider receives the photo and detail views, relevant official plans, and destination for route generation.
-3. The app displays **Starting position acquired** when photo analysis returns a starting area, then generates the route. It does not ask visitors to choose a starting point, pick among room doors, or approve corridor segments. Cross-building legs are limited to mapped building connections.
-4. **Walking directions** shows floor plans in travel order. Follow each floor map and the transfer instructions. **One floor at a time** opens manual floor navigation. **Location evidence** and destination editing stay available below the itinerary. **Start over** clears the current result.
+SE12 302 to SW03 2605 uses the recorded third-floor connecting passage, SW03 east elevator from floor 3 to floor 2, and reviewed corridor bends. `SW03 2604` is a distinct vestibule whose source label exists but has no reviewed arrival approach. Such destinations display a coverage gap. Route costs currently minimize recorded connection count. Physical distance and accessibility remain unmeasured.
 
-A cross-building route between SE12 and SW03 may use the mapped third-floor indoor passage or second-floor outdoor connection. The AI generates the paths within each floor from the source plans. There is no mapped cross-building connection to SW01 yet; routes that require such a transfer cannot use an inferred crossing.
+The full photo and four detail crops are prepared locally from the original image. The footer’s **Coverage & privacy** dialog identifies the extraction provider and data handling. The server keeps image-free evidence receipts, and the browser discards its prepared photo after locating the result, removal or navigation away. Explicit retries can reuse unexpired extraction evidence.
 
-The full view and four detail crops are prepared locally from the original image. Tapping **Go** authorizes photo reading, photo-to-plan comparison and route generation with the configured provider. The data-use notice appears beside the button. The browser discards the prepared photo after analysis, when removed, or when leaving the page. Mobile capture uses the device's camera picker.
-
-Walking directions offer **Show my position**, **Stop tracking** and **Resume tracking**. Fresh readings have a two-second display window. Confirm **I’m on this floor** after a transfer, then resume tracking. Device coordinates stay in browser memory. Phone geolocation requires HTTPS and permission. All three pilot buildings have official footprint comparison. The approximate walking overlay currently covers **SE12 floor 3**. Eleven floor calibrations remain unresolved. Indoor accuracy and physical-phone behavior remain unverified. [Coverage and device-location details](docs/device-location.md)
+Expand **Device position** below the maps for optional **Show my position** tracking and manual floor selection. The initial GPS checkbox is a one-shot reading used for building candidates. GPS cannot determine a floor. Position overlay calibration currently covers SE12 floor 3. [Device-location coverage](docs/device-location.md)
 
 ## Internal connection editor
 
-The visitor route does not require manual approval of room doors, corridors, stairs, elevators or checkpoints. The AI generates the start, destination point and floor-level path from the photo and official plans. Only travel between buildings is constrained to mapped connections; the current mapped links connect SE12 and SW03. SW01 is in scope for within-building routes, but has no mapped building transfer yet.
-
-The [local topology editor](http://127.0.0.1:3000/internal/topology) is a separate, loopback-only tool for maintaining map annotations and inspecting graph records. Its internal checkpoints and corridor reviews do not block visitor routes. Changes persist in the Git-ignored `data/campus/topology.json`. See [the editor guide](docs/topology-editor.md) for its internal workflow.
+The [local topology editor](http://127.0.0.1:3000/internal/topology) maintains source-linked checkpoints, corridor traces and stair/elevator/building connections. Only current approvals and permitted directions enter routing. Editing a point invalidates incident approvals. Local review history persists in the ignored `data/campus/topology.json`. [Editor workflow](docs/topology-editor.md)
 
 ## Checks
 
@@ -74,15 +67,9 @@ npm run ai:metrics -- /path/to/server.log  # Summarize AI attempt latency and to
 
 Tests mock AI providers and spend no provider quota. Browser automation, when requested, uses an isolated server on port 3100 with credentials disabled and installed Google Chrome. It is not a physical-phone or Safari test. The browser OCR packages, worker assets and installation hook have been removed; optional local PDF preprocessing can still use Tesseract.
 
-SE12, SW03 and SW01 have a server-side spatial index across floors 1–4. It includes 378 source-read labels, 20 drawn door locations and whole-page OCR evidence. The separate revisioned graph supports internal map inspection; its approved room checkpoints and corridor passages are not prerequisites for visitor routes. Try a label with `npm run spatial:query -- resolve_spatial_labels '{"purpose":"destination","labels":["SW03 2605"]}'`. Unknown labels return `unsupported`. [Tool contracts, coverage and examples](docs/spatial-retrieval.md)
+Exact retrieval preserves every digit, prefix, suffix and leading zero, including `302`, `3021` and `0302`. All 5,463 original labels remain available as evidence. The pilot index also contains transcribed labels and source doorway positions. Try `npm run spatial:query -- resolve_spatial_labels '{"purpose":"destination","labels":["SW03 2605"]}'`.
 
-Photo retrieval preserves exact identifiers, including `302`, `3021` and `0302`. All 5,463 original labels remain available as source evidence. The second stage uses the pilot drawing index to retrieve matching observations and their page boxes. Optical-only hits go through visual shortlisting. Detailed photo-to-plan comparison selects a starting area automatically; the route planner uses that area and the destination label to generate a path on the relevant official plans.
-
-Photo reading has a 45-second server budget. Plan selection and comparison share 90 seconds, and route generation has a separate 90-second budget. The browser allows ten additional seconds for each response. Exact source references select doorway or label-context crops, and every original label remains in compact geometry context. OpenAI uses streamed transport, with completed outputs validated before display.
-
-During photo analysis the input shows one simple progress message and elapsed time. A failure appears beside the photo with its cause and a retry button. A retry reuses any valid label reading and recovers an expired session with the same selected photo.
-
-Photo reading/shortlisting and detailed comparison use 4,096/8,192-token allowances with bounded thinking. When a Gemini model hits quota, is unavailable, or returns an unusable response, the server tries the configured Gemini fallback models. Incomplete responses cannot become location results. See [provider notes](docs/provider.md).
+Extraction has a 45-second server budget and uses strict OpenAI output schemas when OpenAI is selected. Retries honor that deadline and request budgets. Provider metrics record timings, payload sizes and token counts without photos, prompts or visitor identifiers. Location lookup and routing perform no model inference. [Provider details](docs/provider.md)
 
 ## Documentation
 
@@ -96,7 +83,7 @@ Photo reading/shortlisting and detailed comparison use 4,096/8,192-token allowan
 - [Project walkthrough](docs/walkthrough.md) and [mobile landing screen](outputs/screenshots/landing-mobile-390x844.png)
 - [Proposal source](docs/proposal.md) and [two-page proposal](output/pdf/proposal_groupnumber.pdf)
 
-The latest user direction removes the synthetic fallback described in the original brief. Visitor routes are generated from official plans, with mapped building connections as the only manual route constraint. Generated floor paths have not been field-verified. Closures, ETAs, campus-wide routing and accessibility remain outside this pilot. The separately referenced assignment PDF was not supplied. Verify assignment requirements and dates against it before submission. The supplied brief lists October 21, 2026, 23:59 (timezone unspecified) for the proposal and October 22 for the presentation. Group/member placeholders remain. Coursework submission is separate from hosting the visitor app.
+The latest user direction removes the synthetic fallback described in the original brief. Visitor routes use the saved reviewed network and source corridor traces. Photo-label estimates and route records have not been independently field-verified. Closures, ETAs, campus-wide routing and accessibility remain outside this pilot. The separately referenced assignment PDF was not supplied. Verify assignment requirements and dates against it before submission. The supplied brief lists October 21, 2026, 23:59 (timezone unspecified) for the proposal and October 22 for the presentation. Group/member placeholders remain. Coursework submission is separate from hosting the visitor app.
 
 ## Project hierarchy
 
@@ -111,14 +98,15 @@ mvp/
 │   ├── App.tsx, main.tsx, styles.css, wayfinding.ts, wayfinding.css
 │   ├── TopologyEditor.tsx, topology.ts, topology.css
 │   ├── api.ts, ai-provider.ts, photo.ts, photo-views.ts, types.ts
-│   ├── location/  Device acquisition, page projection, photo comparison and foreground lifecycle
+│   ├── location/  Device acquisition, building hints, page projection and foreground lifecycle
 │   └── components/  Photo/result inputs, walking directions, DevicePosition, PhotoDeviceLocation, WalkingDeviceLocation and topology review
 ├── server/
 │   ├── index.ts, app.ts, runtime.ts, configured-app.ts, vercel.ts
 │   ├── visitor-api.ts, visitor-sessions.ts, redis-visitor-sessions.ts
 │   ├── provider.ts, provider-config.ts, provider-budget.ts, provider-timing.ts, provider-metrics.ts
-│   ├── openai-provider.ts, openai-input.ts, openai-response.ts, openai-stream.ts
-│   ├── photo-localization.ts, photo-plan-context.ts, session.ts
+│   ├── openai-provider.ts, openai-input.ts, openai-schema.ts, openai-response.ts, openai-stream.ts
+│   ├── label-localization.ts, session.ts
+│   ├── photo-localization.ts, photo-plan-context.ts  Legacy source-comparison utilities
 │   ├── photo-evidence.ts, photo-media.ts, photo-grounding.ts, photo-doorways.ts, room-labels.ts
 │   ├── topology.ts, topology-api.ts, routing.ts, visitor-paths.ts
 │   ├── wayfinding.ts, generated-route.ts, route-geometry.ts
@@ -149,13 +137,14 @@ mvp/
 │   ├── api.test.ts, client-state.test.ts, data.test.ts, visual-data.test.ts, runtime.test.ts
 │   ├── provider.test.ts, provider-response.test.ts, provider-config.test.ts
 │   ├── openai-provider.test.ts, openai-api.test.ts, spatial-retrieval.test.ts
-│   ├── ai-runtime.test.ts, photo-plan-context.test.ts
+│   ├── ai-runtime.test.ts, photo-plan-context.test.ts, openai-schema.test.ts
 │   ├── photo-localization.test.ts, photo-doorways.test.ts, photo-api.test.ts, route-results.test.ts
 │   ├── photo.test.ts, photo-location-input.test.ts, room-labels.test.ts, photo-fixtures.ts
 │   ├── device-location.test.ts, browser-location.test.ts, device-location-lifecycle.test.ts, location-fixtures.ts
 │   ├── topology.test.ts, topology-api.test.ts, topology-editor.test.ts
 │   ├── topology-candidates.test.ts, topology-english.test.ts, wayfinding.test.ts, wayfinding-api.test.ts
 │   ├── ai-wayfinding.test.ts, wayfinding-fixtures.ts, route-geometry.test.ts, route-recovery.test.ts
+│   ├── reviewed-navigation.test.ts, label-localization.test.ts
 │   └── e2e/journey.spec.ts, photo.spec.ts
 ├── docs/
 │   ├── project-brief.txt, requirements.md, architecture.md, data.md

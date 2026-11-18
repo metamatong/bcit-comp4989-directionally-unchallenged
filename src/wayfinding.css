@@ -93,10 +93,8 @@
 .visitor-shell .photo-status {
   color: #536b60;
 }
-.trip-ends,
 .way-heading,
 .map-bar,
-.route-paging,
 .pin-legend {
   display: flex;
   align-items: center;
@@ -185,8 +183,7 @@
   font-size: 18px;
   margin: 16px 0 6px;
 }
-.journey-panel p,
-.trip-ends {
+.journey-panel p {
   line-height: 1.6;
   font-size: 15px;
   margin: 10px 0;
@@ -229,52 +226,68 @@
   width: 100%;
   height: clamp(210px, 43vw, 420px);
 }
-.itinerary-toggle {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 12px;
+.route-overview {
+  overflow-wrap: anywhere;
 }
-.floor-itinerary {
-  list-style: none;
-  padding: 0;
+.route-map-stack {
+  overflow: hidden;
+  border: 1px solid #bfcfc5;
+  border-radius: 10px;
+  margin: 16px 0;
+  background: #fff;
+}
+.route-map-visit {
   margin: 0;
 }
-.floor-directions {
-  margin-top: 20px;
-  padding-top: 16px;
-  border-top: 1px solid #cad6cf;
-}
-.floor-directions h3 {
-  font-size: 21px;
-  margin: 0 0 6px;
-}
-.floor-endpoints {
-  display: flex;
-  gap: 6px;
-  align-items: center;
-  flex-wrap: wrap;
-  font-size: 14px;
-}
-.floor-directions .walking-map {
+.route-map-visit .walking-map {
   height: auto;
   min-height: 140px;
   max-height: 52vh;
 }
+.route-map-visit figcaption {
+  padding: 12px 14px 16px;
+}
+.route-floor-label {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+.route-map-visit .pin-legend {
+  display: grid;
+  gap: 4px;
+}
+.route-sources summary,
+.route-device-controls > summary {
+  cursor: pointer;
+  min-height: 36px;
+  align-content: center;
+}
+.route-sources a {
+  display: block;
+}
+.route-device-controls {
+  margin: 12px 0;
+}
+.tracking-floor-choice {
+  display: grid;
+  gap: 6px;
+  margin: 10px 0;
+  font-size: 14px;
+}
+.tracking-floor-choice select {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  color: var(--ink);
+  background: #fff;
+  border: 1px solid #bfcfc5;
+  border-radius: 6px;
+  padding: 6px;
+}
 .map-bar > button:only-child {
   margin-left: auto;
-}
-.floor-directions .floor-transfer,
-.floor-directions .route-arrival {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin: 12px 0 0;
-  font-weight: 600;
-  color: #205540;
-}
-.route-paging {
-  justify-content: space-between;
-  margin: 16px 0 8px;
 }
 .journey-inputs,
 .journey-evidence {
@@ -328,10 +341,6 @@
   }
   .visitor-shell .brand-name {
     font-size: 16px;
-  }
-  .trip-ends {
-    display: grid;
-    gap: 3px;
   }
 }
 

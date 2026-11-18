@@ -184,8 +184,8 @@ describe('visitor routes on the current three-building pilot', () => {
         'href="/data/campus/visual/png/SW3-F2-p1/full.png"',
       ]);
       expect(overview.match(/data-walking-line="true"/g)).toHaveLength(3);
-      for (const step of forward.steps) expect(overview).toContain(step.instruction);
-      expect(overview).toContain('Arrive at 2082');
+      for (const step of forward.steps) expect(overview).not.toContain(step.instruction);
+      expect(overview).toContain('Destination · 2082');
       const office = saved.document.nodes.find((n) => n.id === forward.destination.id)!;
       expect(office.point).toEqual(
         pilotEvidence()
@@ -278,10 +278,45 @@ describe('visitor routes on the current three-building pilot', () => {
     );
     expect(markup).toContain('data-walking-line="true"');
     expect(markup).toContain('SW3-F2-p1/full.png');
-    expect(markup).toContain('Take the elevator to SW03 · Floor 3.');
-    expect(markup).toContain('Arrive at 3615');
+    expect(markup).toContain('East elevator at 2696 · corridor 2600 (Floor 2 → 3)');
+    expect(markup).toContain('Destination · 3615');
     expect(markup).toContain('SW3-F3-p1/full.png');
-    expect(markup).toContain('One floor at a time');
+    expect(markup).toContain('Show full floors');
+    expect(markup.match(/class="route-map-visit"/g)).toHaveLength(2);
+    expect(markup.match(/class="map-credit"/g)).toHaveLength(1);
+  });
+  it('shows one destination map without a walking line when already at the destination', () => {
+    const route = journey(bound(lower), 'SW03 2605');
+    if (route.status !== 'route') throw Error('Expected the current destination');
+    expect(route.steps).toEqual([]);
+    const markup = renderToStaticMarkup(
+      createElement(RouteDirections, { route, plans: store.plans, onRecheck: () => {} }),
+    );
+    expect(markup).toContain('You are at the destination.');
+    expect(markup).toContain('Destination · 2605');
+    expect(markup.match(/class="route-map-visit"/g)).toHaveLength(1);
+    expect(markup).not.toContain('data-walking-line');
+    expect(markup).not.toContain('Current tracking floor');
+  });
+  it('retains separate maps for repeat floor visits in travel order', () => {
+    const forward = journey(bound(lower), 'SW03 3615');
+    const reverse = journey(bound(upper), 'SW03 2605');
+    if (forward.status !== 'route' || reverse.status !== 'route')
+      throw Error('Expected the reviewed elevator routes');
+    const route = {
+      ...forward,
+      destination: reverse.destination,
+      steps: [...forward.steps, ...reverse.steps],
+    };
+    const markup = renderToStaticMarkup(
+      createElement(RouteDirections, { route, plans: store.plans, onRecheck: () => {} }),
+    );
+    expect(
+      [...markup.matchAll(/class="route-floor-label">([^<]+)</g)].map((match) => match[1]),
+    ).toEqual(['SW03 · Floor 2', 'SW03 · Floor 3', 'SW03 · Floor 2']);
+    expect(markup).toContain('Floor 2 → 3');
+    expect(markup).toContain('Floor 3 → 2');
+    expect(markup.match(/data-walking-line="true"/g)).toHaveLength(4);
   });
   it.each([
     ['sw3-se12-floor2-passage', 'SW03 2605', lower, 'outdoor'],
@@ -305,6 +340,13 @@ describe('visitor routes on the current three-building pilot', () => {
         }),
       );
       expect(markup).not.toContain('<polyline');
+      const directions = renderToStaticMarkup(
+        createElement(RouteDirections, { route: r, plans: store.plans, onRecheck: () => {} }),
+      );
+      expect(directions.match(/class="route-map-visit"/g)).toHaveLength(2);
+      expect(directions.match(/data-walking-line="true"/g)).toHaveLength(1);
+      if (kind === 'outdoor') expect(directions).toContain('(outdoor path unmapped)');
+      else expect(directions).toContain('Connecting passage to SW03 · Floor 3');
     },
   );
   it('uses a unique point inside the photo region and rejects an unrelated selection', () => {

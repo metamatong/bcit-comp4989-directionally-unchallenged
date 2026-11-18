@@ -43,12 +43,20 @@ export type PhotoLabelReading = {
   text: string;
   clarity: 'clear' | 'uncertain';
   viewId: 'full' | PhotoDetailCrop['id'];
+  kind?: 'room' | 'building' | 'floor';
+  placement?: 'door' | 'directional-sign' | 'other' | 'unknown';
+};
+export type PhotoFeatures = {
+  visibleDoorCount: number | null;
+  windowsSide: 'left' | 'right' | 'both' | 'not-visible' | 'unknown';
+  corridorShape: 'straight' | 'turn' | 'junction' | 'unknown';
 };
 export type PhotoEvidence = {
   id: string;
   requestId: string;
   labels: PhotoLabelReading[];
   observations: string[];
+  features?: PhotoFeatures;
   readAt: string;
   expiresAt: string;
   usedFallbackModel: boolean;
@@ -87,7 +95,7 @@ export type CampusLocationCandidate = {
   sourceLabels?: PlanLabelReference[];
   verification: 'unverified-ai-hypothesis';
 } & (
-  | { bounds: PlanBounds; doorwayVicinity?: undefined }
+  | { bounds: PlanBounds | null; doorwayVicinity?: undefined }
   | {
       bounds: PlanBounds | null;
       doorwayVicinity: {
@@ -115,7 +123,12 @@ export type CampusPhotoAnalysis = {
   atlasPlanCount: number;
   detailedPlanIds: string[];
   buildingHint: string | null;
-  method: 'gemini-photo-floorplan' | 'openai-photo-floorplan' | 'groq-photo-floorplan';
+  method:
+    | 'gemini-photo-floorplan'
+    | 'openai-photo-floorplan'
+    | 'groq-photo-floorplan'
+    | 'photo-label-retrieval';
+  gpsStatus?: 'used' | 'conflict' | 'outside-pilot' | 'not-used';
   evidenceId: string;
   labelRetrieval: { indexedLabels: number; exactMatchPlanIds: string[]; clearLabels: string[] };
   usedFallbackModel: boolean;

@@ -38,17 +38,17 @@ function button(markup: string, label: string) {
 }
 
 describe('inline photo input (Node rendering, no browser)', () => {
-  it('discloses OpenAI beside the analysis button only when selected by the server', () => {
+  it('keeps Go available without the long provider notice or a dangling description', () => {
     const { markup, props } = renderInput({
       photo,
-      providerName: 'openai',
       step: 'destination',
       destination: 'SW03 2082',
     });
-    expect(markup).toContain('Tapping Go sends this photo and its detail views to OpenAI.');
-    expect(markup).toContain('OpenAI API data handling applies.');
-    expect(markup).not.toContain('Google');
-    expect(button(markup, 'GO')).toContain('aria-describedby="photo-submission-note"');
+    expect(markup).not.toContain('Tapping Go sends');
+    expect(markup).not.toContain('API data handling applies');
+    expect(markup).not.toContain('photo-submission-note');
+    expect(button(markup, 'GO')).not.toContain('aria-describedby');
+    expect(button(markup, 'GO')).not.toContain('disabled');
     expect(props.onAnalyze).not.toHaveBeenCalled();
   });
   it('exposes upload and native capture before the destination step', () => {
@@ -65,17 +65,14 @@ describe('inline photo input (Node rendering, no browser)', () => {
     expect(markup).not.toContain('aria-label="Photo analysis"');
     expect(props.onAnalyze).not.toHaveBeenCalled();
   });
-  it('keeps the preview local before Next and discloses photo use beside Go', () => {
+  it('keeps the preview local before Next and submits only after Go', () => {
     const { markup, props } = renderInput({ photo });
     expect(markup).toContain(photo.preview);
     expect(button(markup, 'Next')).not.toContain('disabled');
     expect(button(markup, 'Remove photo')).not.toContain('disabled');
     const submission = renderInput({ photo, step: 'destination', destination: 'SE12 302' }).markup;
-    expect(submission).toContain(
-      'Tapping Go sends this photo and its detail views to Google Gemini.',
-    );
     expect(markup).not.toContain('type="checkbox"');
-    expect(button(submission, 'GO')).toContain('aria-describedby="photo-submission-note"');
+    expect(submission).not.toContain('photo-submission-note');
     expect(button(submission, 'GO')).not.toContain('disabled');
     expect(props.onAnalyze).not.toHaveBeenCalled();
   });

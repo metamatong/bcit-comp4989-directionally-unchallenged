@@ -1,11 +1,14 @@
 import { randomUUID } from 'node:crypto';
-import { readFileSync } from 'node:fs';
 import type { Server } from 'node:http';
 import { afterAll, beforeAll, expect, it, vi } from 'vitest';
 import { createApp } from '../server/app';
-import { GeminiProvider, type Provider } from '../server/provider';
+import type { Provider } from '../server/provider';
 import type { Session } from '../src/types';
-import { comparison, comparisonInput, labelReading, photoInput } from './photo-fixtures';
+import { labelReading, locationInput, photoInput } from './photo-fixtures';
+import type { PhotoEvidenceRequest } from '../server/photo-media';
+import { locationCatalogue } from '../server/geolocation';
+const comparisonInput = (input: PhotoEvidenceRequest, id: string, revision = input.revision + 1) =>
+  locationInput(id, revision);
 
 let server: Server, base: string;
 const provider: Provider = {
@@ -14,7 +17,6 @@ const provider: Provider = {
     this.calls++;
     onAttempt?.();
     if (options?.forceTool === 'read_photo_labels') return labelReading();
-    if (options?.forceTool === 'propose_campus_locations') return comparison();
     throw new Error('Exact 302 lookup must bypass visual shortlisting.');
   },
 };
@@ -63,15 +65,15 @@ it('performs two separate API calls before any location result, with idempotency
   const response = await post(`/api/sessions/${initial.id}/photo`, request);
   expect(response.status).toBe(200);
   const result: Session = await response.json();
-  expect(result.providerCalls).toBe(2);
+  expect(result.providerCalls).toBe(1);
   expect(result.campusAnalysis?.candidates[0].planId).toBe('SE12-F3-p1');
   expect(result.campusLocation).toEqual(result.campusAnalysis?.candidates[0]);
-  expect(result.photoEvidence).toBeNull();
+  expect(result.photoEvidence?.id).toBe(observed.photoEvidence!.id);
   expect(result.campusAnalysis?.labelRetrieval.exactMatchPlanIds).toEqual(['SE12-F3-p1']);
   expect(JSON.stringify(result)).not.toContain(input.image.data);
   const repeated = await post(`/api/sessions/${initial.id}/photo`, request);
   expect(repeated.status).toBe(200);
-  expect(provider.calls - before).toBe(2);
+  expect(provider.calls - before).toBe(1);
 
   const confirmed: Session = await (
     await post(`/api/sessions/${initial.id}/actions`, {
@@ -117,26 +119,23 @@ it('rejects location requests with missing, invented or cross-session evidence w
   expect(provider.calls - before).toBe(1);
 });
 
-it('rejects a changed detail crop but permits retrying the same evidence with the original photo', async () => {
+it('rejects image bytes and forged labels in the location request', async () => {
   const initial = await start();
   const { session: observed, input } = await readLabels(initial);
-  const request = comparisonInput(input, observed.photoEvidence!.id, observed.revision);
-  const changed = structuredClone(request);
-  changed.detailCrops[0].image.data = readFileSync(
-    'data/campus/visual/png/SE12-F3-p1/overview.png',
-  ).toString('base64');
+  const request = locationInput(observed.photoEvidence!.id, observed.revision);
   const before = provider.calls;
-  const response = await post(`/api/sessions/${initial.id}/photo`, changed);
-  expect(response.status).toBe(409);
-  const failure = await response.json();
-  expect(failure.error).toContain('changed');
+  for (const extra of [
+    { image: input.image },
+    { detailCrops: input.detailCrops },
+    { labels: ['999'] },
+  ]) {
+    expect(
+      (await post(`/api/sessions/${initial.id}/photo/location`, { ...request, ...extra })).status,
+    ).toBe(400);
+  }
+  const response = await post(`/api/sessions/${initial.id}/photo/location`, request);
+  expect(response.status).toBe(200);
   expect(provider.calls).toBe(before);
-  const retry = await post(`/api/sessions/${initial.id}/photo`, {
-    ...request,
-    revision: failure.session.revision,
-  });
-  expect(retry.status).toBe(200);
-  expect(provider.calls - before).toBe(1);
 });
 
 it('rejects expired evidence and invalidates it on reset', async () => {
@@ -174,7 +173,7 @@ it('rejects expired evidence and invalidates it on reset', async () => {
   expect(provider.calls).toBe(before);
 });
 
-it('requires consent for both stages and rejects stale revisions before provider work', async () => {
+it('requires consent for extraction and rejects stale revisions before provider work', async () => {
   const initial = await start(),
     input = photoInput();
   const before = provider.calls;
@@ -251,7 +250,7 @@ it('serializes the two stages through the same session lock', async () => {
   }
 });
 
-it('serves the same source PNG/geometry while making all labels available to the model', async () => {
+it('serves the same source PNG/geometry and preserves every label for retrieval', async () => {
   const bootstrap = await (await fetch(`${base}/api/bootstrap`)).json();
   expect(bootstrap.visualPlans).toHaveLength(89);
   const plan = bootstrap.visualPlans.find((plan: { id: string }) => plan.id === 'SE12-F3-p1');
@@ -262,57 +261,28 @@ it('serves the same source PNG/geometry while making all labels available to the
   expect(geometry.labels.some((label: { text: string }) => label.text === '302')).toBe(true);
 });
 
-it('keeps accepted first-stage evidence when comparison fails and retries only comparison', async () => {
-  const wire = (parts: unknown) =>
-    Response.json({ candidates: [{ finishReason: 'STOP', content: { parts } }] });
-  const fetcher = vi
-    .fn<typeof fetch>()
-    .mockResolvedValueOnce(wire(labelReading()))
-    .mockResolvedValueOnce(
-      Response.json({ candidates: [{ finishReason: 'MAX_TOKENS', content: { role: 'model' } }] }),
-    )
-    .mockResolvedValueOnce(wire(comparison({ outcome: 'insufficient_evidence', candidates: [] })));
-  const transport = new GeminiProvider({
-    apiKey: 'fake-test-key',
-    model: 'gemini-3.8-flash',
-    requestsPerMinute: 6,
-    requestsPerDay: 60,
-    timeoutMs: 1000,
-    fetchImpl: fetcher,
+it('reuses extracted evidence after a stale GPS hint without another provider request', async () => {
+  const initial = await start();
+  const { session: observed } = await readLabels(initial);
+  const request = locationInput(observed.photoEvidence!.id, observed.revision);
+  const before = provider.calls;
+  const failed = await post(`/api/sessions/${initial.id}/photo/location`, {
+    ...request,
+    gps: {
+      buildings: ['SE12'],
+      capturedAt: Date.now() - 60000,
+      accuracy: 5,
+      sourceSha256: locationCatalogue().geographicSource.sha256,
+    },
   });
-  const isolated = createApp({
-    provider: transport,
-    liveAvailable: true,
-    model: 'gemini-3.8-flash',
-  }).listen(0, '127.0.0.1');
-  await new Promise<void>((resolve) => isolated.once('listening', resolve));
-  const origin = `http://127.0.0.1:${(isolated.address() as { port: number }).port}`;
-  try {
-    const initial: Session = await (await post('/api/sessions', {}, origin)).json();
-    const input = photoInput();
-    const observed: Session = await (
-      await post(`/api/sessions/${initial.id}/photo/evidence`, input, origin)
-    ).json();
-    const request = comparisonInput(input, observed.photoEvidence!.id, observed.revision);
-    const failed = await post(`/api/sessions/${initial.id}/photo`, request, origin);
-    expect(failed.status).toBe(502);
-    const failure = await failed.json();
-    expect(failure.providerError.code).toBe('response_limit');
-    expect(failure.session.photoEvidence.id).toBe(observed.photoEvidence!.id);
-    expect(failure.session.campusAnalysis).toBeNull();
-    expect(failure.session.activity.map((entry: { tool: string }) => entry.tool)).toEqual([
-      'read_photo_labels',
-      'photo_comparison_stopped',
-    ]);
-    const retried = await post(
-      `/api/sessions/${initial.id}/photo`,
-      { ...request, revision: failure.session.revision },
-      origin,
-    );
-    expect(retried.status).toBe(200);
-    expect((await retried.json()).campusAnalysis.outcome).toBe('insufficient_evidence');
-    expect(transport.calls).toBe(3);
-  } finally {
-    await new Promise<void>((resolve) => isolated.close(() => resolve()));
-  }
+  expect(failed.status).toBe(409);
+  const failure = await failed.json();
+  expect(failure.session.photoEvidence.id).toBe(observed.photoEvidence!.id);
+  const retry = await post(`/api/sessions/${initial.id}/photo/location`, {
+    ...request,
+    revision: failure.session.revision,
+  });
+  expect(retry.status).toBe(200);
+  expect((await retry.json()).campusLocation.planId).toBe('SE12-F3-p1');
+  expect(provider.calls).toBe(before);
 });

@@ -328,7 +328,7 @@ export function planVisitorJourney(
     return {
       ...context,
       status: 'choose-destination',
-      message: 'The AI could not select one destination confidently from the supplied plan labels.',
+      message: 'The destination matches multiple source locations. Include its building and floor.',
     };
   const destinationMatch = choice.typoCorrection
     ? {
@@ -341,14 +341,16 @@ export function planVisitorJourney(
       ...context,
       ...(destinationMatch ? { destinationMatch } : {}),
       status: 'unmapped-origin-and-destination',
-      message: 'The AI could not generate a route between the photo location and this destination.',
+      message:
+        'The starting place and destination need mapped approaches before a reviewed route can be calculated.',
     };
   if (!choice.nodes.length)
     return {
       ...context,
       ...(destinationMatch ? { destinationMatch } : {}),
       status: 'unmapped-destination',
-      message: 'No route could be generated for this destination.',
+      message:
+        'This destination is shown in the source plan, but its arrival approach has not been connected to the reviewed graph.',
     };
   if (!origins.length)
     return {
@@ -356,8 +358,8 @@ export function planVisitorJourney(
       ...(destinationMatch ? { destinationMatch } : {}),
       status: 'unmapped-origin',
       message: vicinity
-        ? `The AI could not continue a route from the estimated corridor outside room ${vicinity.room}. Try another photo.`
-        : 'The AI could not place a route start in this photo area. Try another photo.',
+        ? `The source doorway outside room ${vicinity.room} has no current reviewed starting connection.`
+        : 'The extracted starting place has no unique reviewed starting point.',
     };
   const origin = request.originId
     ? origins.find((n) => n.id === request.originId)
@@ -424,6 +426,26 @@ export function planVisitorJourney(
   };
 }
 
+/** Visitor navigation uses only the current reviewed graph and its source corridor traces. */
+export async function planVisitorNavigation(
+  candidate: CampusLocationCandidate,
+  request: NavigationChoice,
+  store: TopologyStore,
+  cancellation?: AbortSignal,
+): Promise<NavigationResult> {
+  cancellation?.throwIfAborted();
+  const reviewed = planVisitorJourney(candidate, request, store);
+  if (reviewed.status === 'route' && routeDrawingCrossings(reviewed.steps, store.plans).length)
+    return {
+      networkRevision: reviewed.networkRevision,
+      origins: [],
+      destinations: reviewed.destinations,
+      status: 'no-route',
+      message: 'The saved corridor geometry needs review before directions can be displayed.',
+    };
+  return reviewed;
+}
+
 /** Use AI to locate route endpoints and draw floor-local legs; only inter-building links are fixed inputs. */
 export async function planAiVisitorJourney(
   candidate: CampusLocationCandidate,
@@ -466,6 +488,16 @@ export async function planAiVisitorJourney(
     )
       return [];
     return [{ id: edge.id, kind: edge.kind, direction: edge.direction, from, to }];
+  });
+  const floorConnections = doc.edges.flatMap((edge) => {
+    if (!eligibleEdges.has(edge.id) || (edge.kind !== 'stairs' && edge.kind !== 'elevator'))
+      return [];
+    const from = nodeById.get(edge.fromNodeId),
+      to = nodeById.get(edge.toNodeId);
+    if (!from || !to) return [];
+    return [
+      { id: edge.id, kind: edge.kind, direction: edge.direction, from: stop(from), to: stop(to) },
+    ];
   });
   const participatingBuildings = new Set([
     candidate.building,
@@ -517,6 +549,9 @@ export async function planAiVisitorJourney(
     {
       role: 'user' as const,
       parts: [
+        {
+          text: `Current reviewed floor connections: ${JSON.stringify(floorConnections.filter((connection) => planIds.includes(connection.from.planId) && planIds.includes(connection.to.planId)))}. These source-bound landings and permitted directions are available when joining floor-local paths. Use their recorded points and direction when using these transfers.`,
+        },
         {
           text: `Source-drawing corridor polylines in normalized page coordinates: ${JSON.stringify(drawingTraces)}. These are drawing evidence. Follow their intermediate bends when they describe your corridor. Preserve every bend needed to stay inside a corridor. Generate other floor-local legs from the supplied plan images. All returned floor paths will be checked for intersections with source drawing strokes. A direct line between endpoints is valid only when the entire segment follows the visible corridor.`,
         },

@@ -7,7 +7,7 @@ import { createApp } from '../server/app';
 import { configuredApplication } from '../server/configured-app';
 import { OpenAiProvider } from '../server/openai-provider';
 import type { Session } from '../src/types';
-import { comparison, comparisonInput, labelReading, photoInput } from './photo-fixtures';
+import { comparison, locationInput, labelReading, photoInput } from './photo-fixtures';
 
 const servers: Server[] = [];
 async function listen(app: Express) {
@@ -85,7 +85,7 @@ it('keeps OpenAI disabled without its key even with configured Gemini and reject
   expect((await response.json()).error).toContain('OPENAI_API_KEY is missing');
 });
 
-it('uses OpenAI for both photo stages and selects the supported start without storing images', async () => {
+it('uses OpenAI only for evidence extraction and resolves the start from source labels', async () => {
   const bodies: Record<string, any>[] = [];
   const fetcher = vi.fn<typeof fetch>().mockImplementation(async (_url, init) => {
     const body = JSON.parse(String(init?.body));
@@ -128,12 +128,12 @@ it('uses OpenAI for both photo stages and selects the supported start without st
     bodies[0].input[0].content.filter((part: any) => part.type === 'input_image'),
   ).toHaveLength(5);
   expect(JSON.stringify(bodies[0])).not.toContain('SE12-F3-p1');
-  const request = comparisonInput(input, observed.photoEvidence!.id, observed.revision);
+  const request = locationInput(observed.photoEvidence!.id, observed.revision);
   const response = await client.post(`/api/sessions/${initial.id}/photo`, request);
   expect(response.status).toBe(200);
   const result: Session = await response.json();
   expect(result.campusAnalysis).toMatchObject({
-    method: 'openai-photo-floorplan',
+    method: 'photo-label-retrieval',
     labelRetrieval: { exactMatchPlanIds: ['SE12-F3-p1'] },
   });
   expect(result.campusAnalysis?.candidates[0]).toMatchObject({
@@ -141,11 +141,11 @@ it('uses OpenAI for both photo stages and selects the supported start without st
     verification: 'unverified-ai-hypothesis',
   });
   expect(result.campusLocation).toEqual(result.campusAnalysis?.candidates[0]);
-  expect(result.providerCalls).toBe(2);
-  expect(result.photoEvidence).toBeNull();
-  expect(fetcher).toHaveBeenCalledTimes(2);
+  expect(result.providerCalls).toBe(1);
+  expect(result.photoEvidence?.id).toBe(observed.photoEvidence!.id);
+  expect(fetcher).toHaveBeenCalledTimes(1);
   expect(bodies.every((body) => body.store === false && body.model === 'gpt-6-luna')).toBe(true);
-  expect(JSON.stringify(bodies[1])).toContain('SE12-F3-p1');
+  expect(bodies).toHaveLength(1);
   const stored = await client.get(`/api/sessions/${initial.id}`);
   expect(JSON.stringify(stored)).not.toContain(input.image.data);
   expect(JSON.stringify(stored)).not.toContain('private-openai');

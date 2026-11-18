@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -11,11 +11,9 @@ import {
   X,
 } from 'lucide-react';
 import type { PreparedPhoto } from '../photo';
-import { aiProviderDetails, type AiProviderName } from '../ai-provider';
 
 type PhotoLocationInputProps = {
   step?: 'photo' | 'destination';
-  providerName?: AiProviderName;
   photo: PreparedPhoto | null;
   ready: boolean;
   reading: boolean;
@@ -23,8 +21,8 @@ type PhotoLocationInputProps = {
   status: string;
   error?: string;
   destination: string;
-  submissionNotice?: string;
   canUsePhotoResult?: boolean;
+  deviceOption?: ReactNode;
   onDestinationChange: (value: string) => void;
   onPhoto: (file?: File) => void;
   onNext?: () => void;
@@ -52,7 +50,6 @@ function ElapsedTime() {
 
 export function PhotoLocationInput({
   step = 'photo',
-  providerName,
   photo,
   ready,
   reading,
@@ -60,8 +57,8 @@ export function PhotoLocationInput({
   status,
   error,
   destination,
-  submissionNotice,
   canUsePhotoResult = false,
+  deviceOption,
   onDestinationChange,
   onPhoto,
   onNext,
@@ -69,10 +66,6 @@ export function PhotoLocationInput({
   onAnalyze,
   onDiscard,
 }: PhotoLocationInputProps) {
-  const provider = aiProviderDetails(providerName);
-  const photoSubmissionNotice =
-    submissionNotice ??
-    `Tapping Go sends this photo and its detail views to ${provider.recipient}. ${provider.dataUse}`;
   const upload = useRef<HTMLInputElement>(null);
   const phonePhoto = useRef<HTMLInputElement>(null);
   const canSubmitPhoto = !!photo && ready && !reading && !busy && !!destination.trim();
@@ -212,6 +205,7 @@ export function PhotoLocationInput({
               </div>
               <small>SE12 · SW03 · SW01 · Unique close matches accepted</small>
             </div>
+            {!canUsePhotoResult && deviceOption}
             {error ? (
               <p className="photo-failure" role="alert">
                 {error}
@@ -226,20 +220,14 @@ export function PhotoLocationInput({
               )
             )}
             {!canUsePhotoResult && (
-              <>
-                <p className="helper" id="photo-submission-note">
-                  {photoSubmissionNotice}
-                </p>
-                <button
-                  type="submit"
-                  className="primary full-width go-button"
-                  aria-describedby="photo-submission-note"
-                  disabled={!canSubmitPhoto}
-                >
-                  {busy ? <LoaderCircle className="spin" size={17} /> : <Search size={17} />}
-                  {busy ? 'Finding your route…' : error ? 'Try again' : 'GO'}
-                </button>
-              </>
+              <button
+                type="submit"
+                className="primary full-width go-button"
+                disabled={!canSubmitPhoto}
+              >
+                {busy ? <LoaderCircle className="spin" size={17} /> : <Search size={17} />}
+                {busy ? 'Finding your route…' : error ? 'Try again' : 'GO'}
+              </button>
             )}
           </form>
           <button
