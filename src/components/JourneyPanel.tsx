@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, MapPin, Route } from 'lucide-react';
 import { request } from '../api';
-import { NAVIGATION_TIMEOUT_MS, PHOTO_RESPONSE_GRACE_MS } from '../photo-views';
 import type { CampusLocationCandidate, VisualPlan } from '../types';
 import type { NavigationResult } from '../wayfinding';
 import { RouteDirections } from './RouteDirections';
@@ -20,7 +19,7 @@ export function StartingPositionNotice({
         <Check size={18} />
       </span>
       <span>
-        <strong>Starting position acquired</strong>
+        <strong>Starting area estimated</strong>
         {detail && (
           <small className={loading ? 'route-loading' : undefined}>
             {loading && <Route size={15} className="spin" />} {detail}
@@ -62,7 +61,7 @@ export function JourneyPanel({
     request<NavigationResult>(
       `/api/sessions/${sessionId}/navigation`,
       { revision, candidateId: candidate.id, destination },
-      { signal: controller.signal, timeoutMs: NAVIGATION_TIMEOUT_MS + PHOTO_RESPONSE_GRACE_MS },
+      { signal: controller.signal },
     )
       .then((value) => {
         if (!controller.signal.aborted) setResult(value);

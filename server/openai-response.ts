@@ -52,7 +52,9 @@ export function parseOpenAiResponse(
   if (parsed.data.status === 'incomplete') {
     if (parsed.data.incomplete_details?.reason === 'content_filter') throw blocked(provider);
     throw new ProviderError(
-      `${provider} did not finish its response. No AI action was applied. Try again.`,
+      parsed.data.incomplete_details?.reason === 'max_output_tokens'
+        ? `${provider} reached the response length limit before completing the result. No AI action was applied. Try again.`
+        : `${provider} did not finish its response. No AI action was applied. Try again.`,
       502,
       'response_limit',
       true,

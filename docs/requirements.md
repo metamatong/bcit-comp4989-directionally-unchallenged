@@ -6,8 +6,8 @@ The supplied original [brief](project-brief.txt) remains unchanged. The user's l
 |---|---|
 | Burnaby-only official sources | 89 floor plans / 45 buildings plus campus map; manifest, hashes and source links |
 | PDF conversion | Full PNGs, overviews, overlapping crops, atlas and geometry JSON for every floor plan |
-| Actual-photo interpretation | Both API stages send the context image and four crops from the original photo; plan comparison remains visual and source-grounded |
-| LLM agent and tools | One orchestrator shortlists supplied plans, eliminates conflicts, and returns only its best supported hypothesis or abstains |
+| Actual-photo interpretation | One provider stage extracts labels and structured visible features. Subsequent metadata-only lookup uses those fields and opted-in GPS building candidates. |
+| LLM agent and tools | One extraction call followed by exact source retrieval and reviewed-graph route calculation. Ambiguous location evidence causes abstention. |
 | Free-tier provider and server-side key | `server/provider.ts`, `.env.example`, [provider record](provider.md) |
 | Photo start and uncertainty | Automatically selects the sole photo-derived starting area and displays “Starting position acquired” before route planning. The visitor does not select a checkpoint. |
 | Mobile photo/camera input | Local resizing, photo picker and native camera capture |
@@ -18,7 +18,7 @@ The supplied original [brief](project-brief.txt) remains unchanged. The user's l
 | Destination routing, closures, ETAs | AI generates room-to-room paths from official floor plans. Cross-building travel is constrained to mapped building connections. Live closures and ETAs are unavailable. |
 | Internal topology authoring | Local-only editor for 12 SE12/SW3/SW1 plans, manual point/connection placement, evidence, review history and persistent JSON |
 | Candidate confirmation | Separate source-grounded A/B proposals; T/F/unknown and explicit permitted direction; source-bound response history; user confirmation is distinct from physical field validation |
-| Reviewed-graph route checks | Internal deterministic edge-count/measured-distance queries; excludes drafts, rejected/stale records and invalid endpoints; uses revisioned topology |
+| Reviewed-graph route checks | Deterministic graph checks and complete reviewed visitor routes. Excludes drafts, rejected/stale records and invalid endpoints. Visitor paths minimize recorded connection count. |
 | Verification/evaluation | Mocked unit/API/browser checks and source hashes; live successful localization and field accuracy remain unverified |
 | Documentation/proposal | README, architecture/data/provider/operations/verification notes, walkthrough and two-page proposal |
 

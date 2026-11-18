@@ -54,12 +54,16 @@ afterEach(async () => {
 describe('device evidence lifecycle', () => {
   it('keeps photo-associated evidence historical through slow inference and clears it on replacement', async () => {
     await act(async () => photo.setEnabled(true));
-    await act(async () => photo.capture());
+    await act(async () => {
+      void photo.capture();
+    });
     await act(async () => onceSuccess[0](position()));
     await act(async () => vi.advanceTimersByTimeAsync(90000));
     expect(photo.snapshot?.reading.timestamp).toBe(10000);
     expect(walking.reading).toBeUndefined();
-    await act(async () => photo.capture());
+    await act(async () => {
+      void photo.capture();
+    });
     await act(async () => photo.clear());
     await act(async () => onceSuccess[1](position()));
     expect(photo.snapshot).toBeUndefined();
@@ -94,7 +98,9 @@ describe('device evidence lifecycle', () => {
     expect(walking.active).toBe(false);
     expect(walking.status).toContain('revoked');
     await act(async () => photo.setEnabled(true));
-    await act(async () => photo.capture());
+    await act(async () => {
+      void photo.capture();
+    });
     vi.spyOn(document, 'hidden', 'get').mockReturnValue(true);
     await act(async () => document.dispatchEvent(new Event('visibilitychange')));
     await act(async () => onceSuccess[0](position()));
@@ -109,7 +115,9 @@ describe('device evidence lifecycle', () => {
   });
   it('ends pending photo acquisition on confirmation before the visitor starts walking', async () => {
     await act(async () => photo.setEnabled(true));
-    await act(async () => photo.capture());
+    await act(async () => {
+      void photo.capture();
+    });
     await act(async () => photo.cancelPending());
     await act(async () => walking.start());
     await act(async () => onceSuccess[0](position()));

@@ -99,11 +99,11 @@ describe('OpenAI image/tool transport', () => {
       { type: 'input_text', text: 'Read 0302 exactly' },
       { type: 'input_image', detail: 'high', image_url: 'data:image/png;base64,photo-bytes' },
     ]);
-    expect(body.tools[0].parameters.properties.labels.items.properties.type).toEqual({
-      type: 'string',
-      enum: ['0302', 'SW03'],
+    expect(body.tools[0].parameters.properties.labels.anyOf[0].items.properties.type).toEqual({
+      anyOf: [{ type: 'string', enum: ['0302', 'SW03'], maxLength: 350 }, { type: 'null' }],
     });
-    expect(body.tools[0].strict).toBe(false);
+    expect(body.tools[0].strict).toBe(true);
+    expect(body.tools[0].parameters.additionalProperties).toBe(false);
     expect(body).not.toHaveProperty('previous_response_id');
     expect(body).not.toHaveProperty('temperature');
     expect(provider.calls).toBe(1);

@@ -99,3 +99,10 @@ export function comparison(
     },
   ];
 }
+
+export function locationInput(
+  evidenceId: string,
+  revision: number,
+): { requestId: string; revision: number; evidenceId: string } {
+  return { requestId: randomUUID(), revision, evidenceId };
+}

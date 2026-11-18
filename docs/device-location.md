@@ -1,12 +1,14 @@
 # Device location and walking
 
-The visitor photo flow does not request device location. It selects the single best photo-location hypothesis automatically and asks the AI planner to use that area as the route start. The estimate is based on the submitted photo, not device coordinates, and is not a field-confirmed physical position.
+The visitor can check **Use device location with this photo** while standing at its capture location. After the one-pass photo extraction, the browser requests one fresh location reading and computes which official building footprints intersect its accuracy area. Only those building IDs, accuracy, timestamp and source hash are sent to the metadata-only location endpoint. The server checks freshness and source provenance, then intersects building candidates with exact photo-label matches. GPS cannot choose a floor or route point. A GPS contradiction produces an explicit unresolved location result.
 
-Walking directions still offer optional foreground device tracking. The browser overlays fresh device readings on a supported floor calibration or official building footprint. Building overlap cannot select a floor, and raw position readings never advance or change the AI-generated route. The route starts from the photo-derived area; device tracking is optional and separate from route generation.
+The default is unchecked. Permission denial or acquisition failure is shown, and extracted labels can still resolve a unique place. Photo replacement, cancellation, page hiding and unmount cancel pending acquisition. Coordinates remain in browser memory. Current device location applies to the device now, so an uploaded photograph from another location should be tested with GPS unchecked.
+
+Walking directions retain the explicitly started foreground watch. Raw position readings never advance the route.
 
 ## Walking and permissions
 
-Select **Show my position** to start one foreground watch. **Stop tracking** cancels it. **Resume tracking** requires a new reading. Browsing itinerary pages changes the view. After physically transferring floors or buildings, select **I’m on this floor**, then resume. Confirmation applies to the individual floor visit, including repeat visits to one page.
+Expand **Device position** below the continuous map stack, then select **Show my position** to start one foreground watch. **Stop tracking** cancels it. **Resume tracking** requires a new reading. After physically transferring floors or buildings, select the new **Current floor**, then resume. Selection applies to the individual floor visit, including repeat visits to one page, and stops the previous watch. All route maps stay visible. Collapsing the controls preserves the watch and displays the active tracking floor in the summary.
 
 Acquisition requests high accuracy, zero cached age and a 15-second timeout. Valid coordinates and non-negative accuracy with acquisition age between zero and two seconds at receipt are eligible. Watch timestamps must increase. Raw readings draw an approximate position and its reported uncertainty area. A 500 ms freshness check removes the live overlay after two seconds even if callbacks stop. The dated last reading and app-acquired route start remain available. Raw projection preserves off-corridor readings and the viewport stays fixed. Visitors manually follow route transfers and outdoor geometry gaps.
 

@@ -65,6 +65,7 @@ export function routeTool(planIds: string[], destinationIds: string[]) {
         destination: stop,
         steps: {
           type: 'ARRAY',
+          maxItems: 40,
           items: {
             type: 'OBJECT',
             properties: {
@@ -74,7 +75,7 @@ export function routeTool(planIds: string[], destinationIds: string[]) {
               },
               from: stop,
               to: stop,
-              path: { type: 'ARRAY', items: point },
+              path: { type: 'ARRAY', items: point, maxItems: 100 },
               instruction: { type: 'STRING' },
               connectionId: { type: 'STRING' },
             },

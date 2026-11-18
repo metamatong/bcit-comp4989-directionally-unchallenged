@@ -1,85 +1,37 @@
-# Photo labels, exact retrieval and floor-plan localization
+# Photo evidence and source localization
 
-For the three pilot buildings, the label retrieval stage also reads digitized plan transcriptions and optical observations. The label-reading request sees only the consented photo and crops. Exact source matches carry their page-specific evidence into visual comparison. When automatic pilot OCR alone supplies a match, all eligible building plans remain available for the visual shortlist. [Pilot retrieval contract](spatial-retrieval.md)
+The visitor workflow uses the photograph in one vision stage. Every later request uses structured evidence and saved source records.
 
-The app uses the actual photo and detailed views in two photo-analysis API stages. The selected provider reads visible evidence first, a deterministic tool retrieves exact labels from all available source records, and a later provider call compares the photo against the retrieved plans. After a location and destination are identified, a route-generation call plans the journey using official floor plans and mapped building connections. Set `AI_PROVIDER=gemini` (default), `openai`, or `groq` on the server; [setup and privacy](provider.md). There is no training step or general Campus library screen.
+## Extraction
 
-## User flow
+The browser prepares one full view and four overlapping detail crops directly from the original image. Selection stays local. **Go** sends the consented bundle to `POST /api/sessions/:id/photo/evidence`. The configured provider receives these views without map hints or the destination.
 
-1. Use **Upload photo** or **Take a photo**, then tap **Next**. The browser prepares a full view and four overlapping detail crops from the **original decoded image**, before discarding original metadata.
-2. Enter a destination and tap **Go** to authorize and start analysis. The visitor client binds both photo requests to `wayfinding-pilot`, restricting visual comparison to the 12 SE12, SW03 and SW01 plans.
-3. The client calls the label-reading endpoint, then sends the same image bundle with the returned evidence ID to the location endpoint. The UI shows one simple progress message while both stages run.
-4. The app selects its single best source-grounded starting area automatically and shows **Starting position acquired** before route generation begins. The route planner uses this area and the destination label to generate paths on the relevant official plans. No starting checkpoint or room doorway requires manual approval.
-5. Relevant source plans remain available below the route as optional evidence. The model can abstain when it cannot identify a continuous path; inter-building travel is allowed only through mapped connections. Remove photo or Cancel analysis discards the current photo and prevents late results from appearing.
+The bounded result contains exact labels, clarity, source view, label kind and sign placement. Kinds distinguish room identifiers, explicitly printed building identifiers and explicitly printed floor numbers. Placement distinguishes door signs, directional signs and other/unknown contexts. Structured features record visible door count, window side relative to the photo and corridor shape. Unclear fields remain null or unknown.
 
-The local server must be restarted after backend edits. Frontend HMR does not reload Node. Existing converted source files work without regeneration.
+Exact identifiers preserve all digits, prefixes, suffixes and leading zeroes. Labels are not derived from expected room numbering. A strict OpenAI schema bounds the response, and application validation rejects unusable or incomplete output. Explicit transport recovery shares the extraction deadline.
 
-The photo flow does not request device location. Optional foreground tracking is available only from walking directions and does not advance route progress automatically. [Walking controls and coverage](device-location.md)
+## Evidence receipt and location
 
-## API stages and agent tools
+The server retains an image-free, session-bound receipt containing the image/crop fingerprint, extracted fields, source scope and expiry. It releases request media bytes after extraction. Receipts expire after five minutes and are invalidated by a new extraction or reset.
 
-| Stage | Endpoint | Behavior |
-|---|---|---|
-| Read photo labels | `POST /api/sessions/:id/photo/evidence` | The selected provider receives only the full photo and four photo crops, with no candidate plan IDs or drawings to bias its reading. The forced `read_photo_labels` tool returns complete room identifiers, clear/uncertain flags, source view IDs and brief observable scene features. No location is selected. |
-| Retrieve and localize | `POST /api/sessions/:id/photo` | Requires the first stage's server-issued `evidenceId`, the next session revision and the identical image/context bundle. The server executes `retrieve_room_labels`, fetches matching plan details, and asks the selected provider to verify a single supported region or abstain. |
+`POST /api/sessions/:id/photo/location` accepts a request UUID, current session revision, evidence ID and optional GPS-derived building hint. It rejects photos, crops and client-supplied extracted labels. The `/photo` alias accepts the same metadata-only request. Requests are serialized by the existing session lease and remain idempotent by stage/request ID.
 
-Both endpoints require per-photo consent, a new request UUID, current revision, the full image and four detail crops. Idempotency is scoped to each API stage; both stages use the same per-session lock. The second endpoint rejects absent, cross-session, expired or changed-photo evidence before model work. Clients cannot supply their own trusted label readings.
+`label-localization.ts` searches complete source identifiers, using every clear nondirectional room label to constrain the source floor. Explicit building and floor labels constrain that search. Door-sign placement identifies the relevant label when several observations are present. Directional labels remain evidence without establishing the current doorway. A unique matching source doorway supplies an estimated vicinity. A source label with an ambiguous or missing doorway is shown without inventing a route origin. Conflicting, uncertain and unsupported evidence produces an unresolved result.
 
-The first response places short-lived structured evidence in `session.photoEvidence`. Its ID is valid for five minutes. A private in-memory SHA-256 fingerprint binds it to that session's full image, crops, crop bounds and optional context. The fingerprint and media bytes are never returned in session state. Only the structured readings and fingerprint are held between requests; no image bytes are retained. The cleanup sweep runs once a minute. Reset, newer successful label reading, or a successful location result invalidates the previous receipt.
+Window and corridor features remain visible observations because most source records lack equivalent semantic annotations. The resolver rejects an internally contradictory zero-visible-door result paired with a door-attached sign. It does not infer a camera heading, scale, distance or exact physical position from the photo features.
 
-If comparison fails, its partial source/region hypotheses roll back while the already accepted first-stage evidence remains valid until expiry. The browser can retry comparison without spending another label-reading call for the same prepared image. Replacing or closing the photo clears its local reuse reference.
+## Optional GPS
 
-This is a bounded observe → retrieve → verify workflow. The model chooses the observed label queries; source lookup is deterministic; the next model stage must use those tool results and the actual imagery. Observable activity records each stage without hidden reasoning.
+The unchecked-by-default photo option confirms the visitor is currently at the photographed location. After extraction, the browser requests a fresh reading and compares its accuracy area with official building footprints. Raw latitude/longitude stay in browser memory. The location request sends only matching building IDs, accuracy, capture time and the footprint hash.
 
-## Exact label lookup
+The server validates freshness and map provenance before intersecting the building candidates with source label matches. GPS narrows buildings and cannot identify floors or route points. Contradictory or outside-pilot readings produce an explicit unresolved result. GPS failure is displayed, while unique label evidence can still resolve a place. [Device lifecycle](device-location.md)
 
-`server/room-labels.ts` indexes **all 5,463 currently extracted source labels** from the complete `geometry.labels` arrays across the 89 plans. This is a count of source labels, including annotations, not 5,463 verified rooms. Extraction is incomplete in some PDFs.
+## Navigation and rendering
 
-Lookup normalizes Unicode compatibility forms, letter case and whitespace. It preserves digits, leading zeroes, letters, prefixes, suffixes and punctuation. It never performs substring, prefix, numeric or fuzzy matching. Thus `302`, `3021`, `0302`, `302A`, `A302`, `3O2` and `302-1` are distinct identifiers.
+`POST /api/sessions/:id/navigation` resolves the destination and computes a route over current approved graph points and connections, respecting source hashes, endpoint versions and direction. Source corridor bends produce the walking lines. The visitor objective minimizes recorded connection count. Missing endpoints or connections produce a coverage gap.
 
-The SE12 third-floor `302` label is at index 155 in its full 285-label list. The old first-80-label preview omitted it. Runtime retrieval and model geometry now use the complete `labels` array; legacy `modelSummary.labels` previews are ignored. The regeneration script also writes complete label summaries for future regenerated artifacts. No source PDF or existing PNG/geometry hash needs to change to activate the runtime fix.
+Location lookup, navigation and drawing the arrows make no provider requests. Relevant source plans are loaded only for displaying the result. Legacy visual-comparison helpers are outside the visitor request path.
 
-When a clear reading has at least one original-source or manually transcribed match, the server searches the matching plans. One to three matching plans proceed to detailed comparison. A larger set receives a visual shortlist. A match supplied solely by supplemental machine OCR keeps all eligible plans in the visual shortlist. The model can still abstain or locate a region through visual features.
+## Verification
 
-The selected provider compares the photo and plan and must identify a matching architectural feature before the server offers a camera region. For sign-guided results, the server checks every clear source-corroborated reading, whole-identifier equality and the location of the relevant printed occurrence on the exact page. A unique room can also be supported by a drawn doorway inside the proposed region. The source doorway is drawing evidence only. Contradictory room identifiers in the explanation, ambiguous print and regions spanning unrelated source-read room numbers yield an unresolved result. The interface can still show the retrieved label positions in blue. Camera-region and doorway-vicinity hypotheses are independently assessed. An image without readable signs can use the independent architectural comparison.
-
-For each eligible printed identifier with a unique source occurrence and mapped door symbols on a shortlisted plan, the server crops the hash-checked full drawing around the label and each corresponding doorway. Each unmarked crop is sent with its whole-page bounds and doorway ID, alongside the existing page evidence. This applies to every mapped door in the pilot. The selected provider compares the sign at the physical door and a second layout relationship such as opposite-side glazing, a junction or a sequence of doors. It assesses each alternative separately. A missing assessment, unresolved competing door, incompatible layout or unsupported identifier cannot select a doorway. Additional corroborated signs must have a unique compatible printed position or mapped doorway in the same drawing detail.
-
-A consistent visual assessment can identify the starting area even when the precise camera rectangle is unavailable. The route model chooses a practical start point within that area and a destination doorway near the matched room label. Cropping margins are for inspection only. Session-only decision codes distinguish model abstention, label or bounding-region conflicts and doorway assessment outcomes. Visitor routing does not require a manually reviewed room-door binding.
-
-## Photo views and coordinate systems
-
-The client creates a context JPEG with a maximum 1,600-pixel long edge and four detail JPEGs, each also bounded to 1,600 pixels. Detail crops are cut directly from the original bitmap and are not enlargements of the already-resized preview. Each pair of adjacent quadrants overlaps by 10% of the original image dimension. Small images are not upscaled.
-
-Each view is capped at 450,000 encoded JPEG bytes, reducing quality and then size if necessary. This keeps five views within the server's existing 2.5 MB aggregate decoded-media limit and 4 MB JSON request limit. Original uploads remain limited to 8 MB and 50 million pixels. All output views are re-encoded to strip original metadata.
-
-Photo crop coordinates and floor-plan coordinates are separate. Photo crop bounds describe the original uploaded scene. Final location bounds are `[left, top, right, bottom]` in normalized coordinates of the **whole original floor-plan page**, never relative to a photo or plan crop. Source-label text boxes are not camera-position coordinates.
-
-## BCIT source preparation
-
-The corpus contains 89 official Burnaby floor-plan PDFs covering 45 buildings, plus a separate campus map. Each floor plan has a full PNG at 180 dpi, an overview, four overlapping detail PNGs and geometry JSON. Eight overview sheets support visual shortlisting. Source and derived hashes and BCIT attribution are retained. The geometry contains 566,620 raw unclassified drawing primitives; no semantic walls, doors, accessibility or walking connections are invented.
-
-For detailed comparison The selected provider receives the full photo and four photo crops again, along with each selected plan's overview, four plan crops, and source-linked geometry containing **every extracted label**. Long drawing segments remain a disclosed sample of up to 128 per plan. All 90 original PDFs and 631 derived asset hashes remain unchanged by this retrieval fix.
-
-```bash
-python scripts/prepare_visual_maps.py --workers 3  # Optional source regeneration
-npm run data:validate                            # Source, asset and complete-label-index checks
-```
-
-Original PDFs remain unmodified. © British Columbia Institute of Technology. See [data.md](data.md) and the manifest for source restrictions.
-
-## Budgets, failures and privacy
-
-A clear exact-label case normally uses two provider calls across the two app API requests: photo reading, then detailed comparison. Visual-only or ambiguous-label cases can use a third model call for shortlisting. An empty visual shortlist can abstain without detail comparison. Existing retries, configured Gemini fallbacks and shared minute/day limits still apply to every attempt.
-
-Label reading has a 45-second deadline and a 55-second client timeout. Localization has a 90-second shared deadline for visual shortlisting and detailed comparison, and a 100-second client timeout. Each model attempt allows up to 30 seconds. When another healthy model is configured, failover begins at the server’s shorter attempt threshold. Reading/shortlisting allow 4,096 combined thinking/output tokens; detailed comparison allows 8,192. Gemini 3 uses low thinking; the adapter maps the photo setting to a 1,024-token thinking budget for Gemini 2.5. Thought summaries remain disabled. Inline provider bodies remain capped at 18 MB.
-
-Uploads/crops stay in client memory until closure/replacement. Both API stages release their media references after processing. The public source cache contains only official plan assets. Google free-tier data handling remains disclosed; the app cannot promise immediate provider deletion. No photo reference dataset or persistent user-image collection has been added.
-
-## Verification and next work
-
-Code/API tests cover the SE12 `302` regression, exact identifier boundaries, complete label inclusion, original-image crop coordinates, per-view/aggregate size budgets, isolated first-stage model input, two API calls, idempotency, evidence binding/expiry/reset, comparison-only retry, cancellation, rollback and retained visual matching without signs. Model responses are mocked. Browser/screen tests are not run per the user's request.
-
-This fixes information loss and prefix confusion in retrieval. It does not establish that Gemini always reads an image correctly or identifies a physical location. Next, evaluate the supplied SE12 photograph and separate SE12/SW1 photographs with known ground truth, then build a small mapped reference-photo collection if appearance-based ambiguity remains. Reference photos and evaluation photos must be separate.
-
-References: [Gemini image inputs](https://ai.google.dev/gemini-api/docs/generate-content/image-understanding), [Gemini thinking settings](https://ai.google.dev/gemini-api/docs/generate-content/thinking), [BCIT floor plans](https://www.bcit.ca/facilities/campus-maps/floor-plans/).
+Tests cover a single provider stage, metadata-only lookup, exact identifier boundaries, directional-sign abstention, source doorway ambiguity, GPS consent/freshness/conflict, session/evidence binding, stale writes, retries and cancellation. Normal visitor API tests use a provider that rejects every operation except evidence extraction. Browser tests assert that only the extraction request carries media. Live checks and mocked GPS tests are recorded separately in the [verification record](verification.md).

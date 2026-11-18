@@ -23,10 +23,14 @@ import { PHOTO_STAGE_TIMEOUT_MS, PHOTO_RESPONSE_GRACE_MS } from './photo-views';
 import { CampusLocationResults } from './components/CampusLocationResults';
 import { PhotoLocationInput } from './components/PhotoLocationInput';
 import { JourneyPanel, StartingPositionNotice } from './components/JourneyPanel';
+import { PhotoDeviceOption } from './components/PhotoDeviceLocation';
+import { usePhotoDeviceLocation } from './location/use-device-location';
+import { gpsBuildingHint } from './location/building-hint';
 import './wayfinding.css';
 import type { Bootstrap, Session } from './types';
 
 export default function App() {
+  const photoDevice = usePhotoDeviceLocation();
   const [data, setData] = useState<Bootstrap>();
   const [session, setSession] = useState<Session>();
   const [aboutOpen, setAboutOpen] = useState(false);
@@ -75,6 +79,7 @@ export default function App() {
   }, [aboutOpen]);
 
   function discardPhoto() {
+    photoDevice.clear();
     evidenceGate.current.cancel();
     photoAbort.current?.abort();
     setPreparedPhoto(null);
@@ -123,6 +128,7 @@ export default function App() {
   }
   async function readPhoto(file?: File) {
     if (!file) return;
+    photoDevice.clear();
     const generation = evidenceGate.current.next();
     photoAbort.current?.abort();
     setPreparedPhoto(null);
@@ -165,7 +171,7 @@ export default function App() {
     setPhotoError('');
     setActiveDestination(destination.trim());
     setReadStatus('Finding your starting point and route…');
-    let stage: 'evidence' | 'comparison' = 'evidence';
+    let stage: 'evidence' | 'location' = 'evidence';
     try {
       const media = {
         consent: true,
@@ -205,18 +211,23 @@ export default function App() {
           }
           const evidence = latest.photoEvidence;
           if (!evidence) throw new Error('Read this photo again before comparing plans.');
-          stage = 'comparison';
-          setReadStatus('Finding your starting point and route…');
+          stage = 'location';
+          setReadStatus('Finding your starting place from the extracted evidence…');
+          const device = await photoDevice.capture();
+          controller.signal.throwIfAborted();
+          const gps =
+            device && data.locationCatalogue
+              ? gpsBuildingHint(device.reading, data.locationCatalogue)
+              : undefined;
           return request<Session>(
-            `/api/sessions/${active.id}/photo`,
+            `/api/sessions/${active.id}/photo/location`,
             {
-              ...media,
               requestId: crypto.randomUUID(),
               revision: latest.revision,
               evidenceId: evidence.id,
+              ...(gps ? { gps } : {}),
             },
             {
-              timeoutMs: PHOTO_STAGE_TIMEOUT_MS.comparison + PHOTO_RESPONSE_GRACE_MS,
               signal: controller.signal,
             },
           );
@@ -241,7 +252,7 @@ export default function App() {
       if (evidenceGate.current.isCurrent(generation)) {
         if (failure instanceof ApiError && failure.session) updateSession(failure.session);
         setReadStatus('');
-        const step = stage === 'evidence' ? 'Reading the photo' : 'Comparing the floor plans';
+        const step = stage === 'evidence' ? 'Reading the photo' : 'Finding your starting place';
         setPhotoError(
           `${step} stopped. ${failure instanceof Error ? failure.message : 'Please try again.'}`,
         );
@@ -272,7 +283,6 @@ export default function App() {
   );
   const photoReady = data.liveAvailable && data.photoLocalizationAvailable;
   const provider = aiProviderDetails(data.provider);
-  const submissionNotice = `Tapping Go sends this photo and its detail views to ${provider.recipient} to find your starting area. Relevant official floor plans and your destination are also sent to generate directions. ${provider.dataUse}`;
   const analysis = showPhotoResults ? session.campusAnalysis : null;
   const region = analysis ? session.campusLocation : null;
   const routeCandidate = region ?? undefined;
@@ -281,10 +291,22 @@ export default function App() {
     <>
       <PhotoLocationInput
         step={analysis ? 'destination' : preparedPhoto ? flowStep : 'photo'}
-        providerName={data.provider}
         destination={destination}
-        submissionNotice={submissionNotice}
         canUsePhotoResult={!!analysis?.candidates.length}
+        deviceOption={
+          <>
+            <PhotoDeviceOption
+              enabled={photoDevice.enabled}
+              onChange={photoDevice.setEnabled}
+              disabled={busy || !data.locationCatalogue}
+            />
+            {photoDevice.status && (
+              <p className="helper" role="status">
+                {photoDevice.status}
+              </p>
+            )}
+          </>
+        }
         onDestinationChange={(value) => {
           setDestination(value);
           setActiveDestination('');
@@ -380,6 +402,11 @@ export default function App() {
           </div>
         )}
         <div className="workspace">
+          {analysis && photoDevice.enabled && photoDevice.status && (
+            <p className="setup-notice" role="note">
+              {photoDevice.status} The starting-place estimate uses the extracted photo evidence.
+            </p>
+          )}
           {data.liveAvailable && !data.photoLocalizationAvailable && (
             <p className="setup-notice" role="note">
               Floor-plan images are not ready on this server. Restart after preparing the source
@@ -494,20 +521,20 @@ export default function App() {
               </span>
               <h2 id="about-heading">About DirectionallyUnchallenged</h2>
               <p>
-                Visitor wayfinding covers SE12, SW03 and SW01 at BCIT Burnaby. Photographs are
-                compared with the twelve official floor plans for these buildings.
+                Visitor wayfinding covers SE12, SW03 and SW01 at BCIT Burnaby using official source
+                labels and reviewed connections.
               </p>
               <div className="about-section">
                 <h3>What you can do</h3>
                 <p>
-                  Add a photo, enter a destination, and tap Go. The AI finds the starting area and
-                  destination on the official plans, then generates the route.
+                  Add a photo, enter a destination, and tap Go. The app reads the photo once, finds
+                  the starting place from its labels and calculates a route over saved connections.
                 </p>
               </div>
               <div className="about-section">
                 <h3>What still needs validation</h3>
                 <p>
-                  Cross-building directions use mapped building connections. Generated floor paths,
+                  Directions use reviewed connections and source corridor traces. Walking accuracy,
                   distances, travel times, accessibility and live conditions have not been
                   independently field-verified.
                 </p>
@@ -515,11 +542,11 @@ export default function App() {
               <div className="about-section">
                 <h3>Your data stays transient</h3>
                 <p>
-                  Tapping Go sends this photo and its detail views to {provider.recipient}; relevant
-                  official plans and the destination are also sent to generate directions. The app
-                  does not save photos or route history. Optional device tracking in walking
-                  directions stays in this browser tab. Hosted session results are encrypted and
-                  expire after 30 minutes; reloading starts a new session. {provider.dataUse}
+                  Go sends the photo and detail views to {provider.recipient} for label and feature
+                  extraction. The app uses source records for location and routing. Photo bytes are
+                  discarded after processing. Optional GPS shares building candidates with the app
+                  while coordinates stay in this tab. Hosted session results are encrypted and
+                  expire after 30 minutes. {provider.dataUse}
                 </p>
               </div>
             </>

@@ -11,8 +11,7 @@ import { TopologyStore } from '../server/topology';
 import { reviewedNetwork } from '../server/pilot-network';
 import type { Session } from '../src/types';
 import type { NavigationResult, StartingPoints } from '../src/wayfinding';
-import { comparison, comparisonInput, labelReading, photoInput, shortlist } from './photo-fixtures';
-import { routeResponse } from './wayfinding-fixtures';
+import { locationInput, labelReading, photoInput } from './photo-fixtures';
 
 const directory = mkdtempSync(join(tmpdir(), 'wayfinding-api-'));
 const store = new TopologyStore(
@@ -29,23 +28,7 @@ const provider: Provider = {
     this.calls++;
     attempt?.();
     captions.push(contents.flatMap((c) => c.parts.flatMap((p) => (p.text ? [p.text] : []))));
-    if (options?.forceTool === 'read_photo_labels') return labelReading(null);
-    if (options?.forceTool === 'select_floor_plans') return shortlist([room.planId]);
-    if (options?.forceTool === 'generate_walking_route') return routeResponse();
-    if (options?.forceTool === 'propose_campus_locations') {
-      const response = comparison({}, room.planId);
-      const args = response[0].functionCall!.args as {
-        candidates: { bounds: number[]; labelMatches: unknown[] }[];
-      };
-      args.candidates[0].bounds = [
-        room.point.x - 0.005,
-        room.point.y - 0.005,
-        room.point.x + 0.005,
-        room.point.y + 0.005,
-      ];
-      args.candidates[0].labelMatches = [];
-      return response;
-    }
+    if (options?.forceTool === 'read_photo_labels') return labelReading('302');
     throw Error('Unexpected provider tool');
   },
 };
@@ -69,28 +52,22 @@ const post = (path: string, body: unknown) =>
     body: JSON.stringify(body),
   });
 
-it('takes a consented photo through both stages and directly generates a route with session checks', async () => {
+it('takes a consented photo through both stages and uses its complete reviewed route with session checks', async () => {
   const session: Session = await (await post('', {})).json();
   const prefix = '/' + session.id;
   const input = photoInput({ scope: 'wayfinding-pilot' });
   const evidence: Session = await (await post(prefix + '/photo/evidence', input)).json();
   expect(evidence.photoEvidence).not.toBeNull();
-  const comparisonBody = comparisonInput(input, evidence.photoEvidence!.id, evidence.revision);
-  const mixed = await post(prefix + '/photo', { ...comparisonBody, scope: undefined });
-  expect(mixed.status).toBe(409);
-  const corrected: Session = (await mixed.json()).session;
-  const response = await post(prefix + '/photo', {
-    ...comparisonBody,
-    revision: corrected.revision,
-  });
+  const response = await post(
+    prefix + '/photo/location',
+    locationInput(evidence.photoEvidence!.id, evidence.revision),
+  );
   expect(response.status).toBe(200);
   const match: Session = await response.json();
-  expect(match.campusAnalysis?.atlasPlanCount).toBe(12);
+  expect(match.campusAnalysis?.method).toBe('photo-label-retrieval');
+  expect(match.campusAnalysis?.atlasPlanCount).toBe(0);
   expect(captions[0].join(' ')).not.toMatch(/SW3-F|3615|SE12-F/);
-  const overviewIds = captions[1].filter((c) => c.startsWith('Official plan '));
-  expect(overviewIds).toHaveLength(12);
-  expect(overviewIds.every((c) => /^Official plan (?:SW1|SW3|SE12)-F/.test(c))).toBe(true);
-  expect(captions.flat().join(' ')).not.toContain('Destination:');
+  expect(captions).toHaveLength(1);
   const candidateId = match.campusAnalysis!.candidates[0].id;
   expect(match.campusLocation?.id).toBe(candidateId);
   const query = { candidateId, destination: 'SW03 2082', revision: match.revision };
@@ -135,5 +112,5 @@ it('takes a consented photo through both stages and directly generates a route w
   ).json();
   expect(newPhoto.campusLocation).toBeNull();
   expect((await nav({ ...query, revision: newPhoto.revision })).status).toBe(409);
-  expect(provider.calls).toBe(5);
+  expect(provider.calls).toBe(2);
 });

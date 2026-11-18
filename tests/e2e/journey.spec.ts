@@ -65,7 +65,7 @@ test('prepares an image locally but disables analysis and sending when the key i
 }) => {
   const sent: string[] = [];
   page.on('request', (request) => {
-    if (/\/photo(?:\/evidence)?$/.test(request.url())) sent.push(request.url());
+    if (/\/photo(?:\/evidence|\/location)?$/.test(request.url())) sent.push(request.url());
   });
   await page.goto('/');
   await page.getByLabel('Upload campus photo', { exact: true }).setInputFiles(fixture);

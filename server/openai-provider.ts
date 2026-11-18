@@ -14,6 +14,7 @@ import { ProviderBudget, type ProviderBudgetOptions } from './provider-budget';
 import { parseOpenAiResponse } from './openai-response';
 import type { AiProviderName } from '../src/ai-provider';
 import { jsonSchema, inputMessages, groqInputMessages } from './openai-input';
+import { strictToolSchema, restoreOptionalFields } from './openai-schema';
 import { readOpenAiResponse } from './openai-stream';
 import { canRetryBeforeDeadline, remainingRequestMs } from './provider-timing';
 import {
@@ -134,15 +135,15 @@ export class OpenAiProvider implements Provider {
       options.deadlineAt ?? Date.now() + (options.timeoutMs ?? this.options.timeoutMs);
     const deadline = AbortSignal.timeout(Math.max(1, deadlineAt - Date.now()));
     const callSignal = signal ? AbortSignal.any([signal, deadline]) : deadline;
-    const tools = declarations.map((item) => {
-      const declaration = declarationSchema.parse(item);
+    const declared = declarations.map((item) => declarationSchema.parse(item));
+    const tools = declared.map((declaration) => {
+      const parameters = declaration.parameters ?? { type: 'object', properties: {} };
       return {
         type: 'function',
         name: declaration.name,
         description: declaration.description,
-        parameters: jsonSchema(declaration.parameters ?? { type: 'object', properties: {} }),
-        // Preserve optional fields in the existing contracts; application Zod schemas validate results.
-        strict: false,
+        parameters: this.name === 'openai' ? strictToolSchema(parameters) : jsonSchema(parameters),
+        strict: this.name === 'openai',
       };
     });
     if (options.forceTool && !tools.some((tool) => tool.name === options.forceTool))
@@ -151,7 +152,7 @@ export class OpenAiProvider implements Provider {
       this.name === 'groq'
         ? await groqInputMessages(contents)
         : inputMessages(contents, this.providerLabel);
-    const body = JSON.stringify({
+    const requestBody = {
       model: this.apiModel,
       instructions: options.systemInstruction ?? providerSystemInstruction,
       input,
@@ -161,7 +162,8 @@ export class OpenAiProvider implements Provider {
       ...(options.thinkingLevel ? { reasoning: { effort: options.thinkingLevel } } : {}),
       ...(tools.length ? { tools, parallel_tool_calls: false } : {}),
       ...(options.forceTool ? { tool_choice: { type: 'function', name: options.forceTool } } : {}),
-    });
+    };
+    let body = JSON.stringify(requestBody);
     if (Buffer.byteLength(body) > 18 * 1024 * 1024)
       throw new ProviderError(
         'The image comparison is too large. Use a smaller photo or narrow the plans.',
@@ -272,8 +274,21 @@ export class OpenAiProvider implements Provider {
           options.forceTool,
           this.providerLabel,
         );
+        const normalized = parts.map((part) => {
+          if (!part.functionCall || this.name !== 'openai') return part;
+          const schema = declared.find((item) => item.name === part.functionCall!.name)?.parameters;
+          return schema
+            ? {
+                ...part,
+                functionCall: {
+                  ...part.functionCall,
+                  args: restoreOptionalFields(part.functionCall.args, schema),
+                },
+              }
+            : part;
+        });
         metric.outcome = 'success';
-        return parts;
+        return normalized;
       } catch (error) {
         if (!(error instanceof ProviderError)) throw error;
         failure = error;
@@ -287,12 +302,19 @@ export class OpenAiProvider implements Provider {
       if (
         attempt === 2 ||
         callSignal.aborted ||
-        !['connection', 'unavailable', 'timeout', 'quota'].includes(failure!.code) ||
+        !['connection', 'unavailable', 'timeout', 'quota', 'response_limit'].includes(
+          failure!.code,
+        ) ||
         failure!.httpStatus === 499 ||
         !failure!.retryable ||
         !canRetryBeforeDeadline(deadlineAt, pauseMs)
       )
         throw failure;
+      if (failure!.code === 'response_limit') {
+        requestBody.instructions +=
+          '\nThe previous response exceeded its output limit. Complete the declared function with concise observed facts. Use short sentences in text fields and return only the requested structured result.';
+        body = JSON.stringify(requestBody);
+      }
       try {
         const pause =
           this.options.waitForRetry ??

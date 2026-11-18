@@ -8,13 +8,17 @@ export const actionSchema = z.discriminatedUnion('type', [
 ]);
 import { newSession } from './session';
 import { ProviderError, type Provider } from './provider';
-import { analyzeCampusPhoto, confirmCampusRegion } from './photo-localization';
+import {
+  labelLocationRequestSchema,
+  locateFromLabels,
+  selectLocatedCandidate,
+} from './label-localization';
 import { readPhotoEvidence, PhotoEvidenceError } from './photo-evidence';
-import { photoEvidenceRequestSchema, photoRequestSchema, releasePhotoBytes } from './photo-media';
+import { photoEvidenceRequestSchema, releasePhotoBytes } from './photo-media';
 import { TopologyError, type TopologyStore } from './topology';
 import {
   navigationSchema,
-  planAiVisitorJourney,
+  planVisitorNavigation,
   startingPoints,
   startingPointsSchema,
 } from './wayfinding';
@@ -75,7 +79,8 @@ function action(
       },
     };
   try {
-    if (action.type === 'confirm-campus-region') confirmCampusRegion(session, action.candidateId);
+    if (action.type === 'confirm-campus-region')
+      selectLocatedCandidate(session, action.candidateId);
     else {
       delete record.evidence;
       Object.assign(session, newSession(available, providerName), {
@@ -107,7 +112,7 @@ function photoStage(options: Options, stage: 'evidence' | 'location'): Operation
   return async (req, res, record) => {
     const { session } = record;
     const parsed = (
-      stage === 'evidence' ? photoEvidenceRequestSchema : photoRequestSchema
+      stage === 'evidence' ? photoEvidenceRequestSchema : labelLocationRequestSchema
     ).safeParse(req.body);
     if (!parsed.success)
       return {
@@ -116,10 +121,10 @@ function photoStage(options: Options, stage: 'evidence' | 'location'): Operation
           error:
             stage === 'evidence'
               ? `Choose a valid photo with its detail crops and explicitly agree to send it to ${provider.recipient}.`
-              : 'Read the photo labels first, then submit the same photo and detail crops with its evidence ID.',
+              : 'Submit the current evidence ID and optional device building candidates. This step accepts no images.',
         },
       };
-    if (!options.liveAvailable)
+    if (stage === 'evidence' && !options.liveAvailable)
       return {
         status: 503,
         body: {
@@ -146,7 +151,7 @@ function photoStage(options: Options, stage: 'evidence' | 'location'): Operation
       if (!res.writableEnded) controller.abort();
     });
     try {
-      if (stage === 'evidence') {
+      if (stage === 'evidence' && 'image' in input) {
         session.campusAnalysis = null;
         session.campusLocation = null;
         session.photoEvidence = null;
@@ -158,15 +163,9 @@ function photoStage(options: Options, stage: 'evidence' | 'location'): Operation
           controller.signal,
         );
       } else if ('evidenceId' in input && typeof input.evidenceId === 'string') {
-        await analyzeCampusPhoto(
-          session,
-          { ...input, evidenceId: input.evidenceId },
-          options.provider,
-          record.evidence,
-          controller.signal,
-        );
-        delete record.evidence;
-      } else throw new PhotoEvidenceError('Read this photo’s labels before comparing plans.');
+        locateFromLabels(session, input, record.evidence);
+      } else
+        throw new PhotoEvidenceError('Read this photo’s labels before locating its source match.');
       session.appliedActions = [...session.appliedActions, actionKey].slice(-80);
       return { body: session, changed: true };
     } catch (error) {
@@ -185,7 +184,8 @@ function photoStage(options: Options, stage: 'evidence' | 'location'): Operation
             : 400,
         retryAfter: providerError?.retryAfterSeconds,
         body: {
-          error: error instanceof Error ? error.message : 'The photo could not be compared.',
+          error:
+            error instanceof Error ? error.message : 'The photo evidence could not be located.',
           providerError,
           session,
         },
@@ -194,18 +194,19 @@ function photoStage(options: Options, stage: 'evidence' | 'location'): Operation
     } finally {
       session.revision++;
       session.lastTouched = Date.now();
-      releasePhotoBytes(input);
-      releasePhotoBytes(req.body);
+      if ('image' in input) {
+        releasePhotoBytes(input);
+        releasePhotoBytes(req.body);
+      }
     }
   };
 }
-function navigation(store: TopologyStore, origins: boolean, provider: Provider): Operation {
+function navigation(store: TopologyStore, origins: boolean): Operation {
   return async (req, res, { session }) => {
     const controller = new AbortController();
     res.on('close', () => {
       if (!res.writableEnded) controller.abort();
     });
-    let providerAttempts = 0;
     try {
       let result;
       if (origins) {
@@ -245,12 +246,10 @@ function navigation(store: TopologyStore, origins: boolean, provider: Provider):
               session,
             },
           };
-        result = await planAiVisitorJourney(
+        result = await planVisitorNavigation(
           session.campusLocation,
           input.data,
           store,
-          provider,
-          () => providerAttempts++,
           controller.signal,
         );
       }
@@ -273,7 +272,6 @@ function navigation(store: TopologyStore, origins: boolean, provider: Provider):
         changed: true,
       };
     } finally {
-      session.providerCalls += providerAttempts;
       session.lastTouched = Date.now();
     }
   };
@@ -311,11 +309,9 @@ export function visitorRouter(
   });
   router.post('/:id/photo/evidence', mutation(sessions, photoStage(options, 'evidence')));
   router.post('/:id/photo', mutation(sessions, photoStage(options, 'location')));
-  router.post(
-    '/:id/navigation/origins',
-    mutation(sessions, navigation(topology, true, options.provider)),
-  );
-  router.post('/:id/navigation', mutation(sessions, navigation(topology, false, options.provider)));
+  router.post('/:id/photo/location', mutation(sessions, photoStage(options, 'location')));
+  router.post('/:id/navigation/origins', mutation(sessions, navigation(topology, true)));
+  router.post('/:id/navigation', mutation(sessions, navigation(topology, false)));
   router.post(
     '/:id/actions',
     mutation(sessions, (req, _res, record) =>

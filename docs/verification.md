@@ -1,5 +1,38 @@
 # Verification record
 
+## Compact route display · November 17, 2026
+
+Walking directions now use one arrow-separated overview and a continuous vertical stack of floor maps with A/B legends. Transfer endpoints are combined in the overview; floor changes and unmapped outdoor gaps remain explicit. Zoom and source attribution appear once for the stack. Optional device controls are collapsed below it, with an active tracking indicator and an explicit floor selector that stops the previous watch.
+
+All 369 unit/API tests and 24 desktop/mobile browser tests passed, along with formatting, the production build and source-data validation. Regression checks cover map order and vertical placement, shared zoom, endpoint legends, repeat floor visits, zero-step arrival, outdoor gaps and manual tracking-floor changes. Provider and device inputs are mocked. No additional live provider request, manual screen check or physical-campus validation was performed for this display change.
+
+## Single-pass photo extraction and graph routing · November 17, 2026
+
+The visitor now submits media only to the first evidence endpoint. Extracted labels include kind and sign placement, with structured visible-door count, window side and corridor shape. The metadata-only location endpoint resolves the evidence receipt against exact source records and optional fresh GPS building candidates. Raw coordinates remain in the browser. The navigation endpoint calculates exclusively over the current reviewed graph, with explicit gaps when an arrival approach or connecting passage is missing.
+
+The authorized original `photoooo.jpg` was tested through the running local HTTP API using `gpt-6-luna`. One provider call extracted `302` as a clear door sign, one visible door, windows on the left and a straight corridor. Extraction took 3.314 seconds. The following location request was 117 bytes, contained no image, and resolved SE12 floor 3 in 3.012 seconds with a cold source index. The SW03 2605 graph route took 19 milliseconds and contained the five expected corridor, building-passage and elevator legs. SW03 2604 returned an explicit unmapped-arrival result. The provider-call count remained one after both routes and further metadata lookups.
+
+GPS building hints were simulated separately. SE12 corroborated the label match, SW03 produced a conflict, and stored session data contained no image bytes or raw device coordinates. Unit and DOM tests also cover the unchecked state, permission denial, fresh acquisition, repeated-label disambiguation, stale/source-mismatched hints, cancellation and zero downstream inference. This does not validate a physical GPS sensor or campus traversal.
+
+Validation passed with 367 unit/API tests, 24 desktop/mobile browser tests, formatting, production build, data validation and Vercel packaging. Legacy visual-comparison helper tests remain isolated from the active visitor API.
+
+
+## OpenAI response-length exhaustion · November 17, 2026
+
+The reported local photo comparison returned HTTP 200 from OpenAI but failed application completion checks with `response_limit`. Its first output arrived at 1.864 seconds, and it ended at 46.534 seconds with 8,192 output tokens and zero reasoning tokens. Label reading had completed in 2.122 seconds. This failure happened during photo-to-plan comparison, before destination routing.
+
+OpenAI function tools now use strict schemas with closed objects, required fields, nullable representations for optional fields, bounded text and task-specific array limits. Optional nulls are restored only for fields declared optional before existing validation. Output-limit failures receive one concise regeneration within the existing deadline and token allowance. Metrics include a sanitized incomplete reason, and the visitor error identifies response-length exhaustion.
+
+An authorized live check with the same original photo completed comparison in 7.235 seconds using 595 output tokens and selected the 302 doorway vicinity. The screenshot destination `SW03 2604` resolves to a floor-2 vestibule with no reviewed door approach. Its subsequent AI route request returned `no-route`. The existing approved route ends at the distinct 2605 doorway. All 353 unit/API tests and 24 desktop/mobile browser tests passed, along with production build, data validation, formatting and Vercel packaging. The live result is a single successful comparison and does not establish general localization accuracy.
+
+## Complete reviewed visitor routes · November 17, 2026
+
+The reported SE12 302 to SW03 2605 failure occurred while the complete revision-29 reviewed route was present. The visitor endpoint called only the AI planner, which could abstain despite that path. `planVisitorNavigation` now returns a complete current reviewed route first when the photo-derived area uniquely binds its start and the destination resolves to its reviewed approach. It uses the existing eligibility, source-hash, endpoint-version, direction and corridor-trace checks, followed by drawing-crossing validation. Additional coverage still uses the AI planner, with current reviewed stair/elevator connections supplied explicitly.
+
+The stored path is the 302 corridor, the third-floor SE12–SW03 passage, the SW03 third-floor corridor, the east elevator to floor 2, and the corridor to 2605. All five connections have current approvals, and their walking polylines pass drawing-crossing validation. Regression tests cover model abstention, withdrawal of the elevator approval, an out-of-region photo start, and an additional destination requiring AI interpretation. The visitor API regression rejects any unexpected route-generation model call for the complete reviewed path.
+
+All 350 unit/API tests and 24 desktop/mobile browser tests passed, with the production build, data validation and Vercel package build. Two authorized live runs reused the same original hallway photograph with `gpt-6-luna`. The first comparison returned unusable structured evidence and was discarded. The second supported the 302 doorway vicinity and returned the complete SW03 2605 route in 11.339 seconds overall, with 22 milliseconds after photo analysis and zero route-generation model calls. This is one successful live journey and does not establish general localization accuracy or physical-campus validation.
+
 ## AI latency, payload and recovery · November 17, 2026
 
 Provider calls now share absolute stage deadlines. Reading labels uses 45 seconds, visual shortlisting and comparison share 90 seconds, and route generation uses 90 seconds. The browser permits ten additional seconds per stage. A controlled 31-second response completes under the new 90-second budget, while a second request started 70 seconds into that budget is cancelled after the remaining 20 seconds. Transient OpenAI/Groq failures receive at most one retry when the remaining time and request budgets allow it. A DOM regression verifies that a failed comparison reuses its original label evidence on retry.

@@ -22,6 +22,12 @@ export type LocationCatalogue = {
   floors: FloorCalibration[];
 };
 export type PhotoReading = { submission: number; reading: DeviceReading };
+export type GpsBuildingHint = {
+  buildings: string[];
+  sourceSha256: string;
+  capturedAt: number;
+  accuracy: number;
+};
 export type DeviceOverlay = {
   point: { x: number; y: number };
   radiusX: number;

@@ -81,18 +81,36 @@ export function CampusLocationResults({
   busy?: boolean;
 }) {
   const references = analysis.referenceLabels ?? [];
+  const labelBased = analysis.method === 'photo-label-retrieval';
   return (
     <section className="campus-results" aria-label="Photo comparison results">
       <h3>
-        {analysis.candidates.length
-          ? analysis.candidates[0].doorwayVicinity
-            ? 'Possible starting corridor'
-            : 'Best match'
-          : references.length
-            ? 'Camera position unresolved'
-            : 'No clear match'}
+        {labelBased
+          ? analysis.candidates.length
+            ? 'Estimated starting place'
+            : 'Location needs more evidence'
+          : analysis.candidates.length
+            ? analysis.candidates[0].doorwayVicinity
+              ? 'Possible starting corridor'
+              : 'Best match'
+            : references.length
+              ? 'Camera position unresolved'
+              : 'No clear match'}
       </h3>
       <p>{analysis.summary}</p>
+      {analysis.gpsStatus === 'used' && (
+        <p className="helper">Device building matches were checked against the extracted labels.</p>
+      )}
+      {labelBased && analysis.observations.length > 0 && (
+        <details>
+          <summary>Extracted photo features</summary>
+          <ul>
+            {analysis.observations.map((observation, index) => (
+              <li key={index}>{observation}</li>
+            ))}
+          </ul>
+        </details>
+      )}
       {analysis.usedFallbackModel && <p className="helper">Backup AI model used.</p>}
       {!analysis.candidates.length &&
         plans
@@ -132,7 +150,9 @@ export function CampusLocationResults({
                   ? candidate.bounds
                     ? 'The shaded strip follows the corridor outside the room. The blue mark shows the printed room number.'
                     : 'The orange marker shows the doorway on the plan. The blue mark shows the printed room number.'
-                  : 'Blue marks show the printed labels. The orange box shows the estimated camera area.'}
+                  : labelBased
+                    ? 'Blue marks show the matching source labels.'
+                    : 'Blue marks show the printed labels. The orange box shows the estimated camera area.'}
               </p>
             )}
             <details>

@@ -30,18 +30,20 @@ export function usePhotoDeviceLocation() {
     cancel();
     setSnapshot(undefined);
     setStatus('');
-    if (!enabled) return;
+    if (!enabled) return Promise.resolve(undefined);
     const submission = generation.current;
     pending.current = true;
     setStatus('Requesting device location for this photo…');
     provider.current = new BrowserLocation();
-    provider.current
+    return provider.current
       .once()
       .then((reading) => {
         if (generation.current !== submission) return;
         pending.current = false;
-        setSnapshot({ submission, reading });
+        const next = { submission, reading };
+        setSnapshot(next);
         setStatus('');
+        return next;
       })
       .catch((error) => {
         if (generation.current !== submission) return;

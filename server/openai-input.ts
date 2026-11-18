@@ -6,6 +6,7 @@ import { ProviderError, type ModelContent } from './provider';
 // property names and literal enum values (including exact room identifiers) remain untouched.
 export function jsonSchema(schema: Record<string, unknown>): Record<string, unknown> {
   const result = { ...schema };
+  delete result.nullable;
   if (typeof result.type === 'string') result.type = result.type.toLowerCase();
   if (result.properties && typeof result.properties === 'object')
     result.properties = Object.fromEntries(
@@ -16,7 +17,7 @@ export function jsonSchema(schema: Record<string, unknown>): Record<string, unkn
     );
   if (result.items && typeof result.items === 'object')
     result.items = jsonSchema(result.items as Record<string, unknown>);
-  return result;
+  return schema.nullable === true ? { anyOf: [result, { type: 'null' }] } : result;
 }
 
 export function inputMessages(contents: ModelContent[], provider = 'OpenAI') {
