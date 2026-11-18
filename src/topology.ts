@@ -41,6 +41,22 @@ export const normalizedPointSchema = z
     y: z.number().finite().min(0).max(1),
   })
   .strict();
+/** A source-drawing doorway aperture; it grants no route access without its corridor review. */
+export const doorwayOpeningSchema = z
+  .object({
+    bounds: z
+      .tuple([
+        z.number().finite().min(0).max(1),
+        z.number().finite().min(0).max(1),
+        z.number().finite().min(0).max(1),
+        z.number().finite().min(0).max(1),
+      ])
+      .refine(([left, top, right, bottom]) => left < right && top < bottom),
+    primitiveIds: z.array(z.string().min(1).max(100)).min(1).max(32),
+    description: z.string().trim().min(1).max(500),
+  })
+  .strict();
+export type DoorwayOpening = z.infer<typeof doorwayOpeningSchema>;
 export const evidenceSchema = z
   .object({
     basis: z.enum(['plan', 'field', 'plan-and-field', 'user-confirmation']),
@@ -137,6 +153,7 @@ export const connectionCandidateSchema = z
         instruction: z.string().trim().min(1).max(500),
         fromDoorId: z.string().min(1).optional(),
         toDoorId: z.string().min(1).optional(),
+        doorwayOpenings: z.array(doorwayOpeningSchema).max(16).optional(),
       })
       .strict()
       .optional(),

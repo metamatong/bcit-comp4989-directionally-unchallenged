@@ -221,12 +221,12 @@ it('reports a source destination whose approach is absent from the reviewed grap
   const candidate = start();
   const result = await planVisitorNavigation(
     candidate,
-    { revision: 1, candidateId: candidate.id, destination: 'SW03 1710' },
+    { revision: 1, candidateId: candidate.id, destination: 'SW03 2604' },
     store,
   );
   expect(result).toMatchObject({
     status: 'unmapped-destination',
-    destinations: [{ planId: 'SW3-F1-p1', label: '1710' }],
+    destinations: [{ planId: 'SW3-F2-p1', label: '2604' }],
   });
 });
 

@@ -716,6 +716,253 @@
       "rationale": "The original third- and fourth-floor drawings label the east stair cores S360 and S460. The fourth-floor doorway was read independently. Confirm that both doors enter the same traversable stairway and give the permitted direction.",
       "preparedBy": "assistant-source-review",
       "preparedOn": "2026-11-17"
+    },
+    {
+      "id": "sw3-f1-f2-s160-s260",
+      "version": 1,
+      "title": "SW03 floors 1 and 2 · east stairs S160 and S260",
+      "kind": "stairs",
+      "from": {
+        "planId": "SW3-F1-p1",
+        "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+        "point": {
+          "x": 0.7779412,
+          "y": 0.5136364
+        },
+        "label": "S160 · east stair landing",
+        "kind": "stair-landing",
+        "description": "Proposed corridor-side point at the north-facing double doors of S160 beside shaft 1696 on the original first-floor plan. Confirm this arrival landing after descending from S260."
+      },
+      "to": {
+        "planId": "SW3-F2-p1",
+        "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+        "point": {
+          "x": 0.848039,
+          "y": 0.462121
+        },
+        "label": "S260 · beside shaft 2696",
+        "kind": "stair-landing",
+        "description": "The existing reviewed S260 landing on floor 2. Confirm its connection to S160 on floor 1."
+      },
+      "endpointRefs": {
+        "to": {
+          "candidateId": "sw3-f2-f3-s260-s360",
+          "side": "from"
+        }
+      },
+      "rationale": "The user described descending two floors from SW03 floor 3 before reaching 1710. The 2-to-3 stair transfer exists; this proposal pairs the independently read S160 landing with the existing S260 landing. Confirm the points and permitted direction before enabling it.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-17"
+    },
+    {
+      "id": "sw3-f3-east-passage-to-s360",
+      "version": 1,
+      "title": "SW03 floor 3 · east passage to stairs S360",
+      "kind": "corridor",
+      "from": {
+        "planId": "SW3-F3-p1",
+        "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+        "point": {
+          "x": 0.77,
+          "y": 0.6325758
+        },
+        "label": "Passage to SE12",
+        "kind": "junction",
+        "description": "The corridor-side entry of the east connecting passage beside S360 and shaft 3696, continuing directly from corridor 3600. This is separate from the elevator landing."
+      },
+      "to": {
+        "planId": "SW3-F3-p1",
+        "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+        "point": {
+          "x": 0.754412,
+          "y": 0.643939
+        },
+        "label": "S360 · beside shaft 3696",
+        "kind": "stair-landing",
+        "description": "At the right end of corridor 3600, the marker is at the double doors into stairwell S360 beside 3696 SHAFT."
+      },
+      "endpointRefs": {
+        "from": {
+          "candidateId": "sw3-se12-floor3-passage",
+          "side": "from"
+        },
+        "to": {
+          "candidateId": "sw3-f2-f3-s260-s360",
+          "side": "to"
+        }
+      },
+      "rationale": "The described route goes from the corrected east SE12 passage to the adjacent S360 stair doors. The proposed short corridor trace follows the original third-floor drawing.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-17",
+      "drawingTrace": {
+        "bends": [
+          {
+            "x": 0.754412,
+            "y": 0.6325758
+          }
+        ],
+        "instruction": "Follow the short corridor from the SE12 passage to the S360 stair doors beside the east elevator."
+      }
+    },
+    {
+      "id": "sw3-f1-s160-to-1710",
+      "version": 2,
+      "title": "SW03 floor 1 · S160 to the proposed 1710 lobby doorway",
+      "kind": "corridor",
+      "from": {
+        "planId": "SW3-F1-p1",
+        "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+        "point": {
+          "x": 0.7779412,
+          "y": 0.5136364
+        },
+        "label": "S160 · east stair landing",
+        "kind": "stair-landing",
+        "description": "Proposed corridor-side point at the north-facing double doors of S160 beside shaft 1696 on the original first-floor plan. Confirm this arrival landing after descending from S260."
+      },
+      "to": {
+        "planId": "SW3-F1-p1",
+        "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+        "point": {
+          "x": 0.4833333,
+          "y": 0.5575758
+        },
+        "label": "1710 · lobby 1602 doorway",
+        "kind": "door",
+        "description": "The user-confirmed lobby-side doorway of lecture room 1710, beside lobby 1602. The corridor-1700 doorway is also usable and is recorded separately."
+      },
+      "endpointRefs": {
+        "from": {
+          "candidateId": "sw3-f1-f2-s160-s260",
+          "side": "from"
+        }
+      },
+      "rationale": "The user identified stair S160 as arrival point A and confirmed that both marked 1710 entrances B and C are used. This approach reaches B through corridor 1600 and lobby 1602. The door-symbol aperture between the corridor and lobby is distinguished from the PDF outline that runs through it.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-17",
+      "drawingTrace": {
+        "bends": [
+          {
+            "x": 0.7779412,
+            "y": 0.5050505
+          },
+          {
+            "x": 0.505,
+            "y": 0.5050505
+          },
+          {
+            "x": 0.505,
+            "y": 0.5575758
+          }
+        ],
+        "instruction": "From S160, follow corridor 1600 through the double doors into lobby 1602, then continue to the lobby-side doorway of 1710.",
+        "toDoorId": "SW3-F1-p1:drawn-door:2",
+        "doorwayOpenings": [
+          {
+            "bounds": [
+              0.549,
+              0.498,
+              0.5555,
+              0.512
+            ],
+            "primitiveIds": [
+              "curve-52",
+              "curve-59",
+              "curve-1330"
+            ],
+            "description": "Double-door opening between corridor 1600 and lobby 1602. The source PDF room outlines continue across the visible door symbol inside this bounded aperture."
+          }
+        ]
+      }
+    },
+    {
+      "id": "sw3-f1-s160-to-1710-corridor-1700",
+      "version": 1,
+      "title": "SW03 floor 1 · S160 to the 1710 doorway on corridor 1700",
+      "kind": "corridor",
+      "from": {
+        "planId": "SW3-F1-p1",
+        "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+        "point": {
+          "x": 0.7779412,
+          "y": 0.5136364
+        },
+        "label": "S160 · east stair landing",
+        "kind": "stair-landing",
+        "description": "Proposed corridor-side point at the north-facing double doors of S160 beside shaft 1696 on the original first-floor plan. Confirm this arrival landing after descending from S260."
+      },
+      "to": {
+        "planId": "SW3-F1-p1",
+        "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+        "point": {
+          "x": 0.474183,
+          "y": 0.489899
+        },
+        "label": "1710 · corridor 1700 doorway",
+        "kind": "door",
+        "description": "The user-confirmed double doorway from corridor 1700 into the northern side of lecture room 1710."
+      },
+      "endpointRefs": {
+        "from": {
+          "candidateId": "sw3-f1-f2-s160-s260",
+          "side": "from"
+        }
+      },
+      "rationale": "The user confirmed that entrance C is usable as well as the lobby-side entrance B. This alternative follows corridor 1600 into lobby 1602, then corridor 1700 to the northern doorway. Both intermediate door apertures are source-bound and narrowly marked.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-17",
+      "drawingTrace": {
+        "bends": [
+          {
+            "x": 0.7779412,
+            "y": 0.5050505
+          },
+          {
+            "x": 0.505,
+            "y": 0.5050505
+          },
+          {
+            "x": 0.505,
+            "y": 0.4808081
+          },
+          {
+            "x": 0.474183,
+            "y": 0.4808081
+          }
+        ],
+        "instruction": "From S160, follow corridor 1600 through lobby 1602, enter corridor 1700 through its double doors, and continue to the northern doorway of 1710.",
+        "toDoorId": "SW3-F1-p1:drawn-door:3",
+        "doorwayOpenings": [
+          {
+            "bounds": [
+              0.549,
+              0.498,
+              0.5555,
+              0.512
+            ],
+            "primitiveIds": [
+              "curve-52",
+              "curve-59",
+              "curve-1330"
+            ],
+            "description": "Double-door opening between corridor 1600 and lobby 1602. The source PDF room outlines continue across the visible door symbol inside this bounded aperture."
+          },
+          {
+            "bounds": [
+              0.479,
+              0.4735,
+              0.4825,
+              0.486
+            ],
+            "primitiveIds": [
+              "curve-36",
+              "curve-59",
+              "curve-1330"
+            ],
+            "description": "Double-door opening between lobby 1602 and corridor 1700. Only the source outline intersections inside the visible doorway aperture belong to this opening."
+          }
+        ]
+      }
     }
   ]
 }

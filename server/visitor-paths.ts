@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { checkedSpatialJson, pilotEvidence } from './pilot-evidence';
 import {
   normalizedPointSchema,
+  doorwayOpeningSchema,
   type ConnectionCandidate,
   type TopologyDocument,
   type TopologyEligibility,
@@ -10,6 +11,7 @@ import {
 import type { PagePoint } from '../src/wayfinding';
 import type { VisualPlan } from '../src/types';
 import { topologyContentHash } from './topology-provenance';
+import type { SourceDoorwayOpening } from './route-geometry';
 
 const hash = z.string().regex(/^[a-f0-9]{64}$/);
 const traceSchema = z
@@ -25,6 +27,7 @@ const traceSchema = z
     departureDoorId: z.string().optional(),
     arrivalDoorId: z.string().optional(),
     initialReviewHash: hash.optional(),
+    doorwayOpenings: z.array(doorwayOpeningSchema).max(16).optional(),
   })
   .strict();
 type Trace = z.infer<typeof traceSchema>;
@@ -69,6 +72,7 @@ function corridorTraces(candidates: ConnectionCandidate[]): Trace[] {
         instruction: trace.instruction,
         departureDoorId: trace.fromDoorId,
         arrivalDoorId: trace.toDoorId,
+        doorwayOpenings: trace.doorwayOpenings,
       },
     ];
   });
@@ -83,6 +87,11 @@ export function sourceCorridorTraces(candidates: ConnectionCandidate[], plans: V
       planId: trace.planId,
       sourceSha256: trace.sourceSha256,
       path: [trace.from, ...trace.bends, trace.to],
+      doorwayOpenings: (trace.doorwayOpenings ?? []).map((opening) => ({
+        ...opening,
+        planId: trace.planId,
+        sourceSha256: trace.sourceSha256,
+      })),
     }));
 }
 function doorForTrace(trace: Trace, doorId: string, point: PagePoint) {
@@ -138,7 +147,15 @@ export function visitorPassages(
       })
       .map((edge) => edge.id),
   );
-  const traces = new Map<string, { fromId: string; path: PagePoint[]; instruction: string }>();
+  const traces = new Map<
+    string,
+    {
+      fromId: string;
+      path: PagePoint[];
+      instruction: string;
+      doorwayOpenings: SourceDoorwayOpening[];
+    }
+  >();
   const doors = new Map<string, string>();
   for (const trace of corridorTraces(candidates)) {
     const answer = latest.get(trace.candidateId);
@@ -175,6 +192,11 @@ export function visitorPassages(
       fromId: from.id,
       path: [trace.from, ...trace.bends, trace.to],
       instruction: trace.instruction,
+      doorwayOpenings: (trace.doorwayOpenings ?? []).map((opening) => ({
+        ...opening,
+        planId: trace.planId,
+        sourceSha256: trace.sourceSha256,
+      })),
     });
     if (trace.departureDoorId && doorForTrace(trace, trace.departureDoorId, trace.from))
       doors.set(trace.departureDoorId, from.id);

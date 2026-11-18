@@ -55,6 +55,14 @@ For the SE12 elevator inquiry, T records a report that the elevator serves both 
 
 The short steps between the SW03 lounge and hall, SE12 S203 marked “down” on floor 2, and SW03 S299 in the annex lack a matching full floor 2–3 connection on these sheets. Operational status, accessibility and travel distance need their own evidence.
 
+## Confirmed route to SW03 1710
+
+The user clarified the two-floor descent, identified first-floor S160 as A, and confirmed that both marked 1710 doors B (lobby 1602) and C (corridor 1700) are usable. Revision 41 adds the third-floor passage-to-S360 approach, S260-to-S160 descent, and separate approaches to both room doors. The S360/S260 transfer was already reviewed. These new records authorize the described travel toward 1710; reverse travel was not inferred.
+
+The two room door symbols are appended to the source annotations, preserving existing doorway IDs. Both bind to the same exact printed `1710` occurrence and retain separate reviewed arrival nodes. Withdrawing either approach leaves the other available. The private journal preserves the earlier answers and adds four user-confirmation receipts.
+
+Source PDF outlines sometimes continue through visible double-door symbols. Each new first-floor trace identifies those specific doorway apertures by normalized bounds and drawing primitive IDs. The apertures participate in the candidate hash and become usable only with a current trace approval, source hash and endpoint versions. The geometry checker excludes an intersection only inside the named aperture; other parts of the same PDF curve remain checked. Visitor/model inputs cannot supply these exemptions. Moving an aperture or withdrawing its corridor approval removes the corresponding route access.
+
 ## First continuous route
 
 Two SW03 questions connect the doors and lift stops that have already been reviewed. On floor 2, the corrected east entrance beside 2696/S260 reaches the nearby elevator through a short segment of corridor 2600. On floor 3, the corrected SE12 passage is at the east end of corridor 3600 beside S360 and shaft 3696. Its short approach leads directly to the nearby elevator landing; the upper corridor by 3081/3086 is not this connection. Compare both points on the same plan, confirm the whole passage and select the permitted direction.

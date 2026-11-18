@@ -435,7 +435,11 @@ export async function planVisitorNavigation(
 ): Promise<NavigationResult> {
   cancellation?.throwIfAborted();
   const reviewed = planVisitorJourney(candidate, request, store);
-  if (reviewed.status === 'route' && routeDrawingCrossings(reviewed.steps, store.plans).length)
+  if (reviewed.status !== 'route') return reviewed;
+  // Read exemptions only from current approved traces, never from a visitor or model response.
+  const { network } = readVisitorMap(candidate, store, reviewed.networkRevision);
+  const openings = [...network.traces.values()].flatMap((trace) => trace.doorwayOpenings);
+  if (routeDrawingCrossings(reviewed.steps, store.plans, openings).length)
     return {
       networkRevision: reviewed.networkRevision,
       origins: [],

@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { z } from 'zod';
 import type { VisualPlan } from '../src/types';
-import { visualPlans } from './visual-data';
+import { planDrawingSegments, visualPlans } from './visual-data';
 import {
   connectionCandidateSchema,
   planLabel,
@@ -80,6 +80,28 @@ export function readConnectionCandidates() {
           throw new Error(`Invalid endpoint reference for ${candidate.id} (${side})`);
         }
       }
+    }
+    for (const opening of candidate.drawingTrace?.doorwayOpenings ?? []) {
+      const plan = visualPlans.find((item) => item.id === from.planId);
+      if (!plan || plan.sourceSha256 !== from.sourceSha256)
+        throw new Error(`Doorway opening needs its current source: ${candidate.id}`);
+      const [left, top, right, bottom] = opening.bounds;
+      const strokes = planDrawingSegments(plan);
+      if (
+        !opening.primitiveIds.every((id) =>
+          strokes.some((stroke) => {
+            const [x0, y0, x1, y1] = stroke.coordinates;
+            return (
+              stroke.primitiveId === id &&
+              Math.min(x0, x1) <= right &&
+              Math.max(x0, x1) >= left &&
+              Math.min(y0, y1) <= bottom &&
+              Math.max(y0, y1) >= top
+            );
+          }),
+        )
+      )
+        throw new Error(`Doorway opening does not match source strokes: ${candidate.id}`);
     }
     if (
       (!from.point || !to.point) &&

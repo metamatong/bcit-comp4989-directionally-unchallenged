@@ -23,7 +23,49 @@ function corridor(planId: string, path: PagePoint[]): WalkingStep {
 
 const traces = sourceCorridorTraces(readConnectionCandidates(), visualPlans);
 it.each(traces)('preserves the source corridor bends on $planId', (trace) => {
-  expect(routeDrawingCrossings([corridor(trace.planId, trace.path)], visualPlans)).toEqual([]);
+  expect(
+    routeDrawingCrossings([corridor(trace.planId, trace.path)], visualPlans, trace.doorwayOpenings),
+  ).toEqual([]);
+});
+
+it('requires explicit source-bound doorway apertures for the 1710 corridor', () => {
+  const trace = traces.find((item) => item.planId === 'SW3-F1-p1')!;
+  const steps = [corridor(trace.planId, trace.path)];
+  expect(routeDrawingCrossings(steps, visualPlans).length).toBeGreaterThan(0);
+  expect(routeDrawingCrossings(steps, visualPlans, trace.doorwayOpenings)).toEqual([]);
+  const changedSource = trace.doorwayOpenings.map((opening) => ({
+    ...opening,
+    sourceSha256: '0'.repeat(64),
+  }));
+  expect(routeDrawingCrossings(steps, visualPlans, changedSource).length).toBeGreaterThan(0);
+  const misplaced = structuredClone(trace.doorwayOpenings);
+  for (const opening of misplaced) opening.bounds = [0, 0, 0.1, 0.1];
+  expect(routeDrawingCrossings(steps, visualPlans, misplaced).length).toBeGreaterThan(0);
+  const wrongPrimitives = trace.doorwayOpenings.map((opening) => ({
+    ...opening,
+    primitiveIds: ['unknown-door-stroke'],
+  }));
+  expect(routeDrawingCrossings(steps, visualPlans, wrongPrimitives).length).toBeGreaterThan(0);
+  const untrustedSteps = steps.map((step) => ({ ...step, doorwayOpenings: trace.doorwayOpenings }));
+  expect(routeDrawingCrossings(untrustedSteps, visualPlans).length).toBeGreaterThan(0);
+});
+
+it('still rejects a wall on the same PDF curve outside its doorway aperture', () => {
+  const trace = traces.find((item) => item.planId === 'SW3-F1-p1')!;
+  const path = [
+    { x: 0.6, y: 0.48 },
+    { x: 0.6, y: 0.5050505 },
+    { x: 0.53, y: 0.5050505 },
+  ];
+  const crossings = routeDrawingCrossings(
+    [corridor(trace.planId, path)],
+    visualPlans,
+    trace.doorwayOpenings,
+  );
+  const wall = crossings.find((hit) => hit.primitiveId === 'curve-52');
+  expect(wall).toBeDefined();
+  expect(wall!.point.x).toBeCloseTo(0.6);
+  expect(wall!.point.y).toBeCloseTo(0.49288);
 });
 
 const planId = 'SW3-F3-p1';

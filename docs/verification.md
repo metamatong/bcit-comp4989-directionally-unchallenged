@@ -1,5 +1,15 @@
 # Verification record
 
+## SE12 302 to both SW03 1710 entrances · November 17, 2026
+
+The user clarified the two-floor descent, confirmed the displayed S160 landing A, and corrected the doorway answer to confirm both B (lobby 1602) and C (corridor 1700). Revision 41 adds the third-floor passage-to-S360 approach, the S260-to-S160 descent, and separate source-traced approaches to both 1710 entrances. The existing 28 points, 19 edges and all 27 earlier answers remain unchanged. The new graph has 31 points, 23 edges and 31 answers. New travel permissions follow the described direction toward 1710; reverse travel was not inferred. The two door hypotheses were appended without renumbering the existing 1650 doorway.
+
+The source outlines continue through visible double-door symbols between corridor 1600 and lobby 1602, and between that lobby and corridor 1700. Treating every outline segment as a wall rejected these confirmed approaches. Source-bound doorway apertures now identify the exact drawing primitives and bounded intersections that belong to those openings. An aperture is available to visitor validation only through a current approved corridor trace. Source-hash changes, modified candidate geometry or withdrawn approvals remove that access. Other intersections on the same PDF curve remain checked, and visitor/model responses cannot submit exemptions.
+
+The live local HTTP test with the original `photoooo.jpg` extracted the clear door label `302`, resolved SE12 floor 3, and returned the complete revision-41 route to the lobby-side 1710 door. Extraction took 5.456 seconds, metadata-only localization took 2.786 seconds with a cold source index, and route calculation took 24 ms. The measured workflow took 8.268 seconds with one OpenAI call and no stored media or raw coordinates. The six route legs are the SE12 corridor, third-floor building passage, S360 approach, stairs 3→2, stairs 2→1, and the first-floor approach. A separate isolated graph check withheld each 1710 approach in turn and verified the other confirmed doorway.
+
+All 397 unit/API tests and 24 desktop/mobile browser tests passed, with formatting, production build, source-data validation and Vercel packaging. Regression checks cover both doors, missing stair access, stale aperture approvals, source/primitive/bounds mismatches, malicious client exemptions, and a wall crossing elsewhere on the same PDF curve. Automated provider/device inputs remain mocked; the original-photo check is one live sample, not a physical-campus validation.
+
 ## Confirmed SW03 vertical transfers and merge validation · November 17, 2026
 
 The user confirmed both displayed third/fourth-floor facilities and bidirectional travel. Their captured presentation hashes and the unchanged revision-35 journal matched before recording the answers. Revision 37 adds the fourth-floor elevator and S460 landing with two vertical edges, reusing the existing third-floor elevator/S360 nodes. All 25 previous answers remain unchanged; the journal now has 27 answers, 28 approved points and 19 approved connections.

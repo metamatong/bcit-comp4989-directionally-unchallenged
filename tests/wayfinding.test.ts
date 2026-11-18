@@ -225,8 +225,8 @@ describe('visitor routes on the current three-building pilot', () => {
         fresh.candidates,
         fresh.plans,
       );
-      expect(passages.traces.size).toBe(6);
-      expect(passages.doors.size).toBe(4);
+      expect(passages.traces.size).toBe(9);
+      expect(passages.doors.size).toBe(6);
       expect(journey(bound(lower), 'SW03 3615', {}, fresh).status).toBe('route');
       expect(JSON.stringify(snapshot)).not.toMatch(
         /"reviewer"|"reviewHistory"|"answeredAt"|"note"/,
