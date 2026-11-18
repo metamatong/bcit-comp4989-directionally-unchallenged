@@ -10,6 +10,7 @@ import {
   openAiApiModel,
 } from './provider-config';
 import { aiProviderDetails } from '../src/ai-provider';
+import type { ProviderMetric } from './provider-metrics';
 import { RedisVisitorSessions, redisRestCommand, sharedAiBudget } from './redis-visitor-sessions';
 
 const bounded = (value: string | undefined, fallback: number, max: number) =>
@@ -41,7 +42,8 @@ export function configuredApplication(environment: NodeJS.ProcessEnv, hosted = f
     model,
     requestsPerMinute: bounded(environment.AI_REQUESTS_PER_MINUTE, 6, 20),
     requestsPerDay: bounded(environment.AI_REQUESTS_PER_DAY, 60, 1000),
-    timeoutMs: bounded(environment.AI_TIMEOUT_MS, 15000, 20000),
+    timeoutMs: bounded(environment.AI_TIMEOUT_MS, 15000, 110000),
+    onMetric: (metric: ProviderMetric) => console.info('AI request metric', JSON.stringify(metric)),
     reserveSharedBudget: redis ? sharedAiBudget(redis, apiKey) : undefined,
     onModelFailure: (event: {
       model: string;

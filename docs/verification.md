@@ -1,5 +1,25 @@
 # Verification record
 
+## AI latency, payload and recovery · November 17, 2026
+
+Provider calls now share absolute stage deadlines. Reading labels uses 45 seconds, visual shortlisting and comparison share 90 seconds, and route generation uses 90 seconds. The browser permits ten additional seconds per stage. A controlled 31-second response completes under the new 90-second budget, while a second request started 70 seconds into that budget is cancelled after the remaining 20 seconds. Transient OpenAI/Groq failures receive at most one retry when the remaining time and request budgets allow it. A DOM regression verifies that a failed comparison reuses its original label evidence on retry.
+
+Validation passed with 346 unit/API tests and 24 desktop/mobile browser tests through `npm test`, plus formatting, the production build, source-data validation and Vercel packaging. Stream tests exercise split UTF-8/SSE frames, completion-only parsing, cancellation after the first event, bounded retries and redacted success/failure metrics.
+
+Exact source references select an overview and matching doorway or label-context crops. All extracted labels retain their exact text, coordinates and source methods in compact geometry. Unlocated pages keep quadrant coverage, and shortlist overviews fit within 900 pixels. Success and failure telemetry records request counts, image dimensions, bytes, preparation/header/response timings, provider request IDs and available token counts. OpenAI SSE is consumed through completion before validating output. Stream cancellation and incomplete responses are covered by regression tests.
+
+Two live baseline and two optimized runs used the same user-authorized 302 hallway photograph with `gpt-6-luna`. The comparison input fell from 11 images and about 2.51 MB to 7 images and about 2.04 MB. Input tokens fell from 34,712–34,716 to 26,493–26,507, approximately 24 percent. Baseline comparison calls took 6.31–6.48 seconds, and optimized comparison calls took 6.53–6.87 seconds. All four comparison calls completed within their deadlines. This small sample demonstrates input reduction and successful transport, with no claim of faster inference or a representative p95.
+
+Both baseline runs and the first optimized run abstained on location. The second optimized run returned an unverified SE12 floor 3 doorway hypothesis and proceeded to route generation for `SW03 2605`. That request completed with `no-route` after a correction attempt. Successful real-photo route generation and physical-campus accuracy remain unverified. The original photograph is outside the repository and was not added to fixtures or application storage.
+
+## Invalid route response recovery · November 17, 2026
+
+The reported local request for `SW03 1710` displayed the generic source-validation rejection before drawing-stroke checking. Exact retrieval finds one plan-read occurrence on `SW3-F1-p1`, labeled `1710` with lecture space use. The earlier provider payload was not retained, so the individual failed source constraint cannot be recovered from the screenshot. Photo-location acquisition and route generation are separate AI requests.
+
+Route generation now limits destination IDs to the retrieved source occurrences and gives malformed or source-invalid responses one correction attempt under the same 30-second deadline. Final messages distinguish wrong floors, start areas, room endpoints, disconnected steps and invalid mapped crossings. The visitor can retry the route using its existing photo-derived area without submitting the photo again. Regression cases use the exact `1710` source occurrence to check floor-1 retrieval and rejection of an incorrect floor-2 proposal. Corrected successful routes use the existing source-bound corridor fixtures. Live photo-to-1710 route success remains unverified.
+
+All 334 unit/API tests and 24 desktop/mobile browser tests passed, with mocked AI responses. Production build, source-data validation, formatting and Vercel packaging passed. The DOM integration test checks a rejected route followed by **Retry route**, and verifies that only the original two photo-stage requests contain images.
+
 ## Source-drawing crossing regression · November 17, 2026
 
 The reported SW03 floor 3 diagonal was reproducible using the source passage and stair points. The AI route validator had checked endpoints and step continuity while accepting the intervening straight line. The earlier transport fixture also used endpoint-only lines, so its passing results did not test corridor geometry. The map renderer drew the supplied polyline faithfully.

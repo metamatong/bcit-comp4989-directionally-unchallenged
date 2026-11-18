@@ -2,7 +2,7 @@
 
 Add a photo, enter a destination, and tap **Go** to get an AI-generated route in the BCIT Burnaby SE12, SW03 and SW01 pilot. The app identifies the starting area from the photo, finds the destination on the official plans, and generates floor-by-floor directions. Cross-building travel uses only mapped building connections.
 
-Floor paths are checked against every extracted long drawing stroke before display. The planner receives source-traced corridor bends and can regenerate a crossing path once within the same request deadline. A second crossing produces an explicit route-unavailable result. Drawing strokes remain unclassified, so this conservative check can also reject annotation crossings and does not establish physical walkability.
+Floor paths are checked against every extracted long drawing stroke before display. The planner receives source-traced corridor bends and can correct an invalid response once within a shared 90-second deadline. Feedback identifies destination, floor, endpoint, connection, continuity or drawing-crossing failures. A second failure displays its specific cause and offers **Retry route** using the existing photo-derived starting area. Drawing strokes remain unclassified, so this conservative check can also reject annotation crossings and does not establish physical walkability.
 
 The internal reference dataset contains **89 official floor plans covering 45 Burnaby buildings**, plus the campus map. All floor plans have PNGs and structured geometry JSON. Photo results are **AI-estimated starting areas**. A separate local topology editor maintains mapped connections between buildings; visitors do not need a manually approved room doorway or corridor route.
 
@@ -69,6 +69,7 @@ npm run build             # Type check and production frontend build
 npm run data:validate     # 90 PDF hashes and 631 derived asset hashes
 npm start                 # Serve the production build locally
 npm run format
+npm run ai:metrics -- /path/to/server.log  # Summarize AI attempt latency and token usage
 ```
 
 Tests mock AI providers and spend no provider quota. Browser automation, when requested, uses an isolated server on port 3100 with credentials disabled and installed Google Chrome. It is not a physical-phone or Safari test. The browser OCR packages, worker assets and installation hook have been removed; optional local PDF preprocessing can still use Tesseract.
@@ -76,6 +77,8 @@ Tests mock AI providers and spend no provider quota. Browser automation, when re
 SE12, SW03 and SW01 have a server-side spatial index across floors 1–4. It includes 378 source-read labels, 20 drawn door locations and whole-page OCR evidence. The separate revisioned graph supports internal map inspection; its approved room checkpoints and corridor passages are not prerequisites for visitor routes. Try a label with `npm run spatial:query -- resolve_spatial_labels '{"purpose":"destination","labels":["SW03 2605"]}'`. Unknown labels return `unsupported`. [Tool contracts, coverage and examples](docs/spatial-retrieval.md)
 
 Photo retrieval preserves exact identifiers, including `302`, `3021` and `0302`. All 5,463 original labels remain available as source evidence. The second stage uses the pilot drawing index to retrieve matching observations and their page boxes. Optical-only hits go through visual shortlisting. Detailed photo-to-plan comparison selects a starting area automatically; the route planner uses that area and the destination label to generate a path on the relevant official plans.
+
+Photo reading has a 45-second server budget. Plan selection and comparison share 90 seconds, and route generation has a separate 90-second budget. The browser allows ten additional seconds for each response. Exact source references select doorway or label-context crops, and every original label remains in compact geometry context. OpenAI uses streamed transport, with completed outputs validated before display.
 
 During photo analysis the input shows one simple progress message and elapsed time. A failure appears beside the photo with its cause and a retry button. A retry reuses any valid label reading and recovers an expired session with the same selected photo.
 
@@ -113,10 +116,12 @@ mvp/
 ├── server/
 │   ├── index.ts, app.ts, runtime.ts, configured-app.ts, vercel.ts
 │   ├── visitor-api.ts, visitor-sessions.ts, redis-visitor-sessions.ts
-│   ├── provider.ts, provider-config.ts, provider-budget.ts
-│   ├── openai-provider.ts, openai-response.ts, photo-localization.ts, session.ts
+│   ├── provider.ts, provider-config.ts, provider-budget.ts, provider-timing.ts, provider-metrics.ts
+│   ├── openai-provider.ts, openai-input.ts, openai-response.ts, openai-stream.ts
+│   ├── photo-localization.ts, photo-plan-context.ts, session.ts
 │   ├── photo-evidence.ts, photo-media.ts, photo-grounding.ts, photo-doorways.ts, room-labels.ts
-│   ├── topology.ts, topology-api.ts, routing.ts, visitor-paths.ts, wayfinding.ts, route-geometry.ts
+│   ├── topology.ts, topology-api.ts, routing.ts, visitor-paths.ts
+│   ├── wayfinding.ts, generated-route.ts, route-geometry.ts
 │   ├── topology-candidates.ts, topology-provenance.ts, topology-import.ts, topology-english.ts
 │   ├── pilot-evidence.ts, pilot-network.ts, pilot-inquiries.ts
 │   ├── spatial-retrieval.ts, pilot-tools.ts
@@ -137,19 +142,20 @@ mvp/
 │   ├── prepare_maps.py, prepare_visual_maps.py, prepare_pilot_labels.py
 │   ├── export-pilot-network.ts, query-spatial.ts
 │   ├── prepare-geolocation.ts
-│   ├── validate-data.ts, build-vercel.ts
+│   ├── validate-data.ts, build-vercel.ts, summarize-ai-metrics.ts
 │   └── render_proposal.py
 ├── tests/
 │   ├── visitor-sessions.test.ts
 │   ├── api.test.ts, client-state.test.ts, data.test.ts, visual-data.test.ts, runtime.test.ts
 │   ├── provider.test.ts, provider-response.test.ts, provider-config.test.ts
 │   ├── openai-provider.test.ts, openai-api.test.ts, spatial-retrieval.test.ts
+│   ├── ai-runtime.test.ts, photo-plan-context.test.ts
 │   ├── photo-localization.test.ts, photo-doorways.test.ts, photo-api.test.ts, route-results.test.ts
 │   ├── photo.test.ts, photo-location-input.test.ts, room-labels.test.ts, photo-fixtures.ts
 │   ├── device-location.test.ts, browser-location.test.ts, device-location-lifecycle.test.ts, location-fixtures.ts
 │   ├── topology.test.ts, topology-api.test.ts, topology-editor.test.ts
 │   ├── topology-candidates.test.ts, topology-english.test.ts, wayfinding.test.ts, wayfinding-api.test.ts
-│   ├── ai-wayfinding.test.ts, wayfinding-fixtures.ts, route-geometry.test.ts
+│   ├── ai-wayfinding.test.ts, wayfinding-fixtures.ts, route-geometry.test.ts, route-recovery.test.ts
 │   └── e2e/journey.spec.ts, photo.spec.ts
 ├── docs/
 │   ├── project-brief.txt, requirements.md, architecture.md, data.md

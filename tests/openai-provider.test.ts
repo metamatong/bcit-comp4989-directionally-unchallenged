@@ -149,14 +149,19 @@ describe('OpenAI image/tool transport', () => {
       .mockImplementation(async () => new Response('', { status: 503 }));
     const pause = vi.fn(async () => {});
     const onAttempt = vi.fn();
-    const provider = new OpenAiProvider({ ...options, fetchImpl: fetcher, waitForRetry: pause });
+    const provider = new OpenAiProvider({
+      ...options,
+      timeoutMs: 10000,
+      fetchImpl: fetcher,
+      waitForRetry: pause,
+    });
     await expect(provider.generate([], [], undefined, onAttempt)).rejects.toMatchObject({
       code: 'unavailable',
     });
-    expect(fetcher).toHaveBeenCalledTimes(3);
-    expect(onAttempt).toHaveBeenCalledTimes(3);
-    expect(provider.calls).toBe(3);
-    expect(pause.mock.calls).toHaveLength(2);
+    expect(fetcher).toHaveBeenCalledTimes(2);
+    expect(onAttempt).toHaveBeenCalledTimes(2);
+    expect(provider.calls).toBe(2);
+    expect(pause.mock.calls).toHaveLength(1);
   });
 
   it('returns long retry intervals without retrying early', async () => {
@@ -203,6 +208,7 @@ describe('OpenAI image/tool transport', () => {
     fetcher.mockResolvedValue(new Response('', { status: 503 }));
     const provider = new OpenAiProvider({
       ...options,
+      timeoutMs: 10000,
       fetchImpl: fetcher,
       waitForRetry: async () => {
         controller.abort();

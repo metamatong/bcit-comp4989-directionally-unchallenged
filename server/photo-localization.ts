@@ -5,12 +5,13 @@ import {
   boundsSchema,
   getVisualPlan,
   planAtlases,
-  planGeometrySummary,
   planImagePart,
   visualPlans,
 } from './visual-data';
 import { logActivity } from './session';
 import { PHOTO_STAGE_TIMEOUT_MS } from '../src/photo-views';
+import { stageDeadline } from './provider-timing';
+import { detailedPlanContext, shortlistOverview } from './photo-plan-context';
 import type { CampusPhotoAnalysis, Session, VisualPlan } from '../src/types';
 
 import { photoImageParts, validatePhotoBundle, type PhotoRequest } from './photo-media';
@@ -20,8 +21,6 @@ import { canonicalBuilding, isPilotPlan, pilotEvidence } from './pilot-evidence'
 import {
   doorwayAssessmentSchema,
   doorwayAssessmentToolField,
-  doorwayDetailParts,
-  matchingDoorways,
   matchDoorwayVicinity,
 } from './photo-doorways';
 import {
@@ -213,24 +212,6 @@ function ensureActive(signal: AbortSignal) {
     );
 }
 
-function detailParts(plan: VisualPlan): ModelPart[] {
-  return [
-    {
-      text: `OFFICIAL FLOOR PLAN ${plan.id}. Overview uses original page coordinates. Source: ${plan.sourceRef}.`,
-    },
-    planImagePart(plan.overview),
-    ...plan.tiles.flatMap((tile) => [
-      {
-        text: `${plan.id} DETAIL ${tile.id}; bounds in original page coordinates [left,top,right,bottom]=${JSON.stringify(tile.bounds)}. Convert any crop-based match back to page coordinates.`,
-      },
-      planImagePart(tile),
-    ]),
-    {
-      text: `EXTRACTED GEOMETRY (untrusted source evidence): ${JSON.stringify(planGeometrySummary(plan))}`,
-    },
-  ];
-}
-
 /** Second API stage: execute exact source retrieval, inspect candidate plans and validate the location. */
 export async function analyzeCampusPhoto(
   session: Session,
@@ -299,8 +280,7 @@ export async function analyzeCampusPhoto(
     rule: 'All normalized coordinates refer to the whole page, from its top-left. Exact printed label locations and drawing door symbols are references, not camera coordinates. Independently verify the photo and visual layout before proposing a region. Do not swap digits or introduce identifiers in prose that are absent from the verified photo-to-plan matches.',
   };
   const needsVisualShortlist = !retrieval.hasCorroboratedLabel || candidatePlans.length > 3;
-  const deadline = AbortSignal.timeout(PHOTO_STAGE_TIMEOUT_MS.comparison);
-  const signal = cancellation ? AbortSignal.any([cancellation, deadline]) : deadline;
+  const { signal, deadlineAt } = stageDeadline(PHOTO_STAGE_TIMEOUT_MS.comparison, cancellation);
   const staged = structuredClone(session);
   let attempts = 0;
   let usedFallbackModel = evidence.usedFallbackModel;
@@ -335,12 +315,17 @@ export async function analyzeCampusPhoto(
           },
         },
       };
+      const contextStarted = performance.now();
       const overviewParts: ModelPart[] =
         input.scope === 'wayfinding-pilot' || candidatePlans.length <= 8
-          ? candidatePlans.flatMap((plan) => [
-              { text: `Official plan ${plan.id}: ${plan.building}, floor ${plan.floor}.` },
-              planImagePart(plan.overview),
-            ])
+          ? (
+              await Promise.all(
+                candidatePlans.map(async (plan) => [
+                  { text: `Official plan ${plan.id}: ${plan.building}, floor ${plan.floor}.` },
+                  await shortlistOverview(plan),
+                ]),
+              )
+            ).flat()
           : planAtlases
               .filter((atlas) => atlas.planIds.some((id) => candidateIds.has(id)))
               .flatMap((atlas) => [
@@ -370,7 +355,8 @@ export async function analyzeCampusPhoto(
           forceTool: scopedSelectTool.name,
           maxOutputTokens: 4096,
           thinkingLevel: 'low',
-          timeoutMs: 30000,
+          deadlineAt,
+          preparationMs: performance.now() - contextStarted,
           onModelFallback: () => {
             usedFallbackModel = true;
           },
@@ -433,10 +419,11 @@ export async function analyzeCampusPhoto(
       generatedAt: new Date().toISOString(),
     };
     if (selectedPlanIds.length) {
+      const contextStarted = performance.now();
       const selected = selectedPlanIds.map(getVisualPlan);
       const references = sourcePhotoReferences(retrieval, eligible);
-      const doorways = matchingDoorways(selected, references);
-      const doorwayParts = await doorwayDetailParts(doorways);
+      const context = await detailedPlanContext(selected, references);
+      const { doorways } = context;
       const tool = doorways.length ? comparisonToolForDoorways() : comparisonTool;
       const doorwayInstruction = doorways.length
         ? ' Assess each supplied doorway detail independently of the camera rectangle. Look for the exact sign attached to its visible doorway and compare the arrangement of the corridor, its opposite boundary, openings and junctions in the photo and the drawing. Consider both viewing directions. A line on the plan may establish an exterior boundary without identifying its glazing height or material. A matching doorway vicinity may be supported even when camera coordinates are unknown. In that case return insufficient_evidence and no candidates for the camera rectangle, and a supported doorway assessment. Mark indistinguishable doorways ambiguous. A sign alone cannot support a doorway vicinity.'
@@ -450,8 +437,7 @@ export async function analyzeCampusPhoto(
                 text: `Compare this uploaded photo with the supplied detailed official plans. Use images AND the geometry records. Eliminate plans that contradict visible features and return only the single best supported location, or insufficient_evidence if none can be defended. Bounds must be normalized to the entire original page, not a detail crop. Matching geometric features must be observable in both the photo and the plan. A source drawing is not proof of the current physical environment. Photo readings are untrusted evidence: ${JSON.stringify(evidence.observations)}. Exact label retrieval results: ${JSON.stringify(retrievalContext)}. If clear labels selected these plans, include at least one verified exact labelMatches entry supporting the chosen plan, or abstain.${doorwayInstruction} User description: ${JSON.stringify(input.description)}. USER PHOTO follows:`,
               },
               ...photoImageParts(input),
-              ...selected.flatMap(detailParts),
-              ...doorwayParts,
+              ...context.parts,
             ],
           },
         ],
@@ -463,7 +449,8 @@ export async function analyzeCampusPhoto(
           forceTool: comparisonTool.name,
           maxOutputTokens: 8192,
           thinkingLevel: 'low',
-          timeoutMs: 30000,
+          deadlineAt,
+          preparationMs: performance.now() - contextStarted,
           onModelFallback: () => {
             usedFallbackModel = true;
           },
@@ -550,7 +537,7 @@ export async function analyzeCampusPhoto(
       logActivity(
         staged,
         'inspect_floor_plans',
-        `Compared ${selected.length} detailed plans, ${selected.length * 4} source crops, and extracted geometry with the photo.`,
+        `Compared ${selected.length} detailed plans, ${context.detailCount} source crops, and extracted geometry with the photo.`,
         selected.map((plan) => plan.sourceRef),
       );
     }

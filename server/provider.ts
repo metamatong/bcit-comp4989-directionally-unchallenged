@@ -1,6 +1,15 @@
 import type { AiProviderName } from '../src/ai-provider';
 import { z } from 'zod';
 import { setTimeout as wait } from 'node:timers/promises';
+import { remainingRequestMs } from './provider-timing';
+import {
+  emitMetric,
+  measureInput,
+  tokenUsage,
+  upstreamRequestId,
+  type MetricSink,
+  type ProviderMetric,
+} from './provider-metrics';
 
 export class ProviderError extends Error {
   constructor(
@@ -89,6 +98,8 @@ export type GenerationOptions = {
   maxOutputTokens?: number;
   thinkingLevel?: 'low' | 'medium' | 'high';
   timeoutMs?: number;
+  deadlineAt?: number;
+  preparationMs?: number;
   onModelFallback?: () => void;
 };
 export type Provider = {
@@ -223,6 +234,7 @@ export class GeminiProvider implements Provider {
         httpStatus: number;
         elapsedMs: number;
       }) => void;
+      onMetric?: MetricSink;
     },
   ) {}
   private reserve() {
@@ -375,6 +387,7 @@ export class GeminiProvider implements Provider {
         thinkingConfig.thinkingBudget = availableBudget < 512 ? 0 : availableBudget;
       } else thinkingConfig.thinkingLevel = options.thinkingLevel;
     }
+    const preparationStarted = performance.now();
     const requestBody = JSON.stringify({
       systemInstruction: {
         parts: [{ text: options.systemInstruction ?? providerSystemInstruction }],
@@ -400,7 +413,11 @@ export class GeminiProvider implements Provider {
         'configuration',
         false,
       );
-    const maximumWaitMs = Math.min(30000, options.timeoutMs ?? this.options.timeoutMs);
+    const inputMetrics = await measureInput(contents);
+    const preparationMs = Math.round(
+      performance.now() - preparationStarted + (options.preparationMs ?? 0),
+    );
+    const maximumWaitMs = remainingRequestMs(options, this.options.timeoutMs);
     // Use the configured failover threshold while another model is available. Give the last model its full stage allowance.
     const timeoutMs = hasAlternative
       ? Math.min(maximumWaitMs, this.options.timeoutMs)
@@ -421,94 +438,128 @@ export class GeminiProvider implements Provider {
         this.calls++;
       } else this.reserve();
       onAttempt?.();
-      let response: Response;
-      const attemptDeadline = AbortSignal.timeout(timeoutMs);
-      const requestSignal = signal ? AbortSignal.any([signal, attemptDeadline]) : attemptDeadline;
+      const started = performance.now();
+      const metric: ProviderMetric = {
+        provider: this.name,
+        model,
+        operation: options.forceTool ?? 'generate',
+        attempt: attempt + 1,
+        outcome: 'failure',
+        preparationMs,
+        requestBytes: Buffer.byteLength(requestBody),
+        ...inputMetrics,
+        elapsedMs: 0,
+      };
       try {
-        response = await fetcher(
-          `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
-          {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'x-goog-api-key': this.options.apiKey },
-            signal: requestSignal,
-            body: requestBody,
-          },
-        );
-      } catch {
-        throw transportFailure(requestSignal);
-      }
-      if (retryableStatuses.has(response.status)) {
-        const retryDelay = requestedRetryDelay(response);
-        // Honor long server backoffs by returning them, rather than retrying early or holding the UI.
-        if (attempt === maximumAttempts - 1 || (retryDelay !== undefined && retryDelay > 8000)) {
-          await response.body?.cancel();
-          throw unavailableError(response.status, retryDelay);
-        }
-        const delay = Math.max(
-          1000 * 2 ** attempt + Math.floor(Math.random() * 250),
-          retryDelay ?? 0,
-        );
-        await response.body?.cancel();
+        let response: Response;
+        const attemptDeadline = AbortSignal.timeout(timeoutMs);
+        const requestSignal = signal ? AbortSignal.any([signal, attemptDeadline]) : attemptDeadline;
         try {
-          const pause =
-            this.options.waitForRetry ??
-            (async (milliseconds: number, cancellation?: AbortSignal) => {
-              await wait(milliseconds, undefined, { signal: cancellation });
-            });
-          await pause(delay, signal);
+          response = await fetcher(
+            `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:generateContent`,
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'x-goog-api-key': this.options.apiKey,
+              },
+              signal: requestSignal,
+              body: requestBody,
+            },
+          );
         } catch {
+          throw transportFailure(requestSignal);
+        }
+        metric.headersMs = Math.round(performance.now() - started);
+        metric.requestId = upstreamRequestId(response);
+        metric.httpStatus = response.status;
+        if (retryableStatuses.has(response.status)) {
+          metric.code = 'unavailable';
+          const retryDelay = requestedRetryDelay(response);
+          // Honor long server backoffs by returning them, rather than retrying early or holding the UI.
+          if (attempt === maximumAttempts - 1 || (retryDelay !== undefined && retryDelay > 8000)) {
+            await response.body?.cancel();
+            throw unavailableError(response.status, retryDelay);
+          }
+          const delay = Math.max(
+            1000 * 2 ** attempt + Math.floor(Math.random() * 250),
+            retryDelay ?? 0,
+          );
+          await response.body?.cancel();
+          try {
+            const pause =
+              this.options.waitForRetry ??
+              (async (milliseconds: number, cancellation?: AbortSignal) => {
+                await wait(milliseconds, undefined, { signal: cancellation });
+              });
+            await pause(delay, signal);
+          } catch {
+            throw new ProviderError(
+              'The AI request timed out while waiting to retry. Live AI remains selected.',
+              504,
+              'timeout',
+              true,
+            );
+          }
+          continue;
+        }
+        if (response.status === 429) {
+          const delay = requestedRetryDelay(response);
+          const seconds = delay === undefined ? undefined : Math.max(1, Math.ceil(delay / 1000));
+          await response.body?.cancel();
           throw new ProviderError(
-            'The AI request timed out while waiting to retry. Live AI remains selected.',
-            504,
-            'timeout',
+            `Gemini quota exhausted. ${seconds ? `Try again in ${seconds} seconds.` : 'Wait for the provider limit to reset before trying again.'}`,
+            429,
+            'quota',
+            true,
+            seconds,
+          );
+        }
+        if (response.status === 404) {
+          await response.body?.cancel();
+          throw new ProviderError(
+            'A configured Gemini model is unavailable for this API project (HTTP 404). Check GEMINI_MODEL and GEMINI_FALLBACK_MODELS; model listings alone do not confirm generation access.',
+            502,
+            'configuration',
+            false,
+            undefined,
             true,
           );
         }
-        continue;
-      }
-      if (response.status === 429) {
-        const delay = requestedRetryDelay(response);
-        const seconds = delay === undefined ? undefined : Math.max(1, Math.ceil(delay / 1000));
-        await response.body?.cancel();
-        throw new ProviderError(
-          `Gemini quota exhausted. ${seconds ? `Try again in ${seconds} seconds.` : 'Wait for the provider limit to reset before trying again.'}`,
-          429,
-          'quota',
-          true,
-          seconds,
-        );
-      }
-      if (response.status === 404) {
-        await response.body?.cancel();
-        throw new ProviderError(
-          'A configured Gemini model is unavailable for this API project (HTTP 404). Check GEMINI_MODEL and GEMINI_FALLBACK_MODELS; model listings alone do not confirm generation access.',
-          502,
-          'configuration',
-          false,
-          undefined,
-          true,
-        );
-      }
-      if (!response.ok) {
-        await response.body?.cancel();
-        throw new ProviderError(
-          `Gemini rejected the request (HTTP ${response.status}). Check the API key, model access, and server configuration. Live AI remains selected.`,
-          502,
-          'configuration',
-          false,
-          undefined,
-          response.status === 400,
-        );
-      }
-      let json: unknown;
-      try {
-        json = await response.json();
+        if (!response.ok) {
+          await response.body?.cancel();
+          throw new ProviderError(
+            `Gemini rejected the request (HTTP ${response.status}). Check the API key, model access, and server configuration. Live AI remains selected.`,
+            502,
+            'configuration',
+            false,
+            undefined,
+            response.status === 400,
+          );
+        }
+        let json: unknown;
+        try {
+          json = await response.json();
+        } catch (error) {
+          if (requestSignal.aborted || !(error instanceof SyntaxError))
+            throw transportFailure(requestSignal);
+          throw unsupportedResponse();
+        }
+        if (requestSignal.aborted) throw transportFailure(requestSignal);
+        Object.assign(metric, tokenUsage(json, this.name));
+        const parts = parseResponse(json);
+        metric.outcome = 'success';
+        return parts;
       } catch (error) {
-        if (requestSignal.aborted || !(error instanceof SyntaxError))
-          throw transportFailure(requestSignal);
-        throw unsupportedResponse();
+        if (error instanceof ProviderError) {
+          metric.code = error.code;
+          metric.httpStatus ??= error.httpStatus;
+        }
+        throw error;
+      } finally {
+        metric.elapsedMs = Math.round(performance.now() - started);
+        emitMetric(this.options.onMetric, metric);
       }
-      return parseResponse(json);
     }
     throw unavailableError(503);
   }

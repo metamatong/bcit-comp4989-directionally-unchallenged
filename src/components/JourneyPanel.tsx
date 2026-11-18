@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, MapPin, Route } from 'lucide-react';
 import { request } from '../api';
+import { NAVIGATION_TIMEOUT_MS, PHOTO_RESPONSE_GRACE_MS } from '../photo-views';
 import type { CampusLocationCandidate, VisualPlan } from '../types';
 import type { NavigationResult } from '../wayfinding';
 import { RouteDirections } from './RouteDirections';
@@ -61,7 +62,7 @@ export function JourneyPanel({
     request<NavigationResult>(
       `/api/sessions/${sessionId}/navigation`,
       { revision, candidateId: candidate.id, destination },
-      { signal: controller.signal },
+      { signal: controller.signal, timeoutMs: NAVIGATION_TIMEOUT_MS + PHOTO_RESPONSE_GRACE_MS },
     )
       .then((value) => {
         if (!controller.signal.aborted) setResult(value);
@@ -139,6 +140,15 @@ export function JourneyPanel({
         </h2>
       </div>
       <p role="status">{result.message}</p>
+      {result.status === 'no-route' && (
+        <button
+          className="secondary"
+          disabled={busy}
+          onClick={() => setRefresh((value) => value + 1)}
+        >
+          Retry route
+        </button>
+      )}
       {needsAnotherPhoto && (
         <button className="primary full-width" disabled={busy} onClick={onTryAnotherPhoto}>
           Try another photo

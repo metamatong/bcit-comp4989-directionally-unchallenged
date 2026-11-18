@@ -13,140 +13,23 @@ import { openAiApiModel } from './provider-config';
 import { ProviderBudget, type ProviderBudgetOptions } from './provider-budget';
 import { parseOpenAiResponse } from './openai-response';
 import type { AiProviderName } from '../src/ai-provider';
-import sharp from 'sharp';
+import { jsonSchema, inputMessages, groqInputMessages } from './openai-input';
+import { readOpenAiResponse } from './openai-stream';
+import { canRetryBeforeDeadline, remainingRequestMs } from './provider-timing';
+import {
+  emitMetric,
+  measureInput,
+  tokenUsage,
+  upstreamRequestId,
+  type MetricSink,
+  type ProviderMetric,
+} from './provider-metrics';
 
 const declarationSchema = z.object({
   name: z.string().min(1).max(80),
   description: z.string().optional(),
   parameters: z.record(z.string(), z.unknown()).optional(),
 });
-
-// Shared tool declarations use Gemini's uppercase schema types. Convert schema nodes only;
-// property names and literal enum values (including exact room identifiers) remain untouched.
-function jsonSchema(schema: Record<string, unknown>): Record<string, unknown> {
-  const result = { ...schema };
-  if (typeof result.type === 'string') result.type = result.type.toLowerCase();
-  if (result.properties && typeof result.properties === 'object')
-    result.properties = Object.fromEntries(
-      Object.entries(result.properties).map(([name, value]) => [
-        name,
-        jsonSchema(value as Record<string, unknown>),
-      ]),
-    );
-  if (result.items && typeof result.items === 'object')
-    result.items = jsonSchema(result.items as Record<string, unknown>);
-  return result;
-}
-
-function inputMessages(contents: ModelContent[], provider = 'OpenAI') {
-  return contents.map((message) => ({
-    role: message.role === 'model' ? 'assistant' : 'user',
-    content: message.parts.map((part) => {
-      if (part.thought || part.functionCall || part.functionResponse)
-        throw new ProviderError(
-          `${provider} photo requests require fresh text and image input.`,
-          502,
-          'configuration',
-          false,
-        );
-      if (part.inlineData)
-        return {
-          type: 'input_image',
-          detail: 'high',
-          image_url: `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`,
-        };
-      if (part.text !== undefined) return { type: 'input_text', text: part.text };
-      throw new ProviderError(`Unsupported ${provider} photo input.`, 502, 'configuration', false);
-    }),
-  }));
-}
-
-function escapeSvg(value: string) {
-  return value.replace(/[&<>"']/g, (character) => {
-    const entities: Record<string, string> = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&apos;',
-    };
-    return entities[character];
-  });
-}
-
-async function groqInputMessages(contents: ModelContent[]) {
-  const converted = [];
-  for (const message of contents) {
-    const texts: string[] = [];
-    const images: Array<{ data: Buffer; label: string }> = [];
-    let label = 'Image';
-    for (const part of message.parts) {
-      if (part.thought || part.functionCall || part.functionResponse)
-        throw new ProviderError(
-          'Groq photo requests require fresh text and image input.',
-          502,
-          'configuration',
-          false,
-        );
-      if (part.text !== undefined) {
-        texts.push(part.text);
-        label = part.text.replace(/\s+/g, ' ').slice(0, 110) || label;
-      } else if (part.inlineData) {
-        images.push({ data: Buffer.from(part.inlineData.data, 'base64'), label });
-      } else {
-        throw new ProviderError('Unsupported Groq photo input.', 502, 'configuration', false);
-      }
-    }
-    const content: unknown[] = [];
-    if (texts.length) content.push({ type: 'input_text', text: texts.join('\n\n') });
-    if (images.length) {
-      const columns = 3;
-      const cellWidth = 480;
-      const cellHeight = 400;
-      const rows = Math.ceil(images.length / columns);
-      const composites = await Promise.all(
-        images.map(async (image, index) => {
-          const left = (index % columns) * cellWidth;
-          const top = Math.floor(index / columns) * cellHeight;
-          const labelSvg = Buffer.from(
-            `<svg width="${cellWidth}" height="44"><rect width="100%" height="100%" fill="#f0f3f2"/><text x="10" y="28" font-size="16" font-family="sans-serif" fill="#173d37">${escapeSvg(image.label)}</text></svg>`,
-          );
-          const resized = await sharp(image.data)
-            .resize(cellWidth - 12, cellHeight - 56, { fit: 'inside', withoutEnlargement: true })
-            .png()
-            .toBuffer();
-          const imageMeta = await sharp(resized).metadata();
-          return [
-            { input: labelSvg, left, top },
-            {
-              input: resized,
-              left: left + Math.floor((cellWidth - (imageMeta.width ?? 0)) / 2),
-              top: top + 44 + Math.floor((cellHeight - 44 - (imageMeta.height ?? 0)) / 2),
-            },
-          ];
-        }),
-      );
-      const sheet = await sharp({
-        create: {
-          width: columns * cellWidth,
-          height: rows * cellHeight,
-          channels: 3,
-          background: '#ffffff',
-        },
-      })
-        .composite(composites.flat())
-        .jpeg({ quality: 82, mozjpeg: true })
-        .toBuffer();
-      content.push({
-        type: 'input_image',
-        detail: 'high',
-        image_url: `data:image/jpeg;base64,${sheet.toString('base64')}`,
-      });
-    }
-    converted.push({ role: message.role === 'model' ? 'assistant' : 'user', content });
-  }
-  return converted;
-}
 
 function transportError(signal: AbortSignal, provider = 'OpenAI'): ProviderError {
   if (signal.aborted)
@@ -181,6 +64,7 @@ type OpenAiOptions = ProviderBudgetOptions & {
   providerName?: 'openai' | 'groq';
   apiBaseUrl?: string;
   fetchImpl?: typeof fetch;
+  onMetric?: MetricSink;
   waitForRetry?: (milliseconds: number, signal?: AbortSignal) => Promise<void>;
   onModelFailure?: (event: {
     model: string;
@@ -245,6 +129,11 @@ export class OpenAiProvider implements Provider {
         'configuration',
         false,
       );
+    const preparationStarted = performance.now();
+    const deadlineAt =
+      options.deadlineAt ?? Date.now() + (options.timeoutMs ?? this.options.timeoutMs);
+    const deadline = AbortSignal.timeout(Math.max(1, deadlineAt - Date.now()));
+    const callSignal = signal ? AbortSignal.any([signal, deadline]) : deadline;
     const tools = declarations.map((item) => {
       const declaration = declarationSchema.parse(item);
       return {
@@ -267,6 +156,7 @@ export class OpenAiProvider implements Provider {
       instructions: options.systemInstruction ?? providerSystemInstruction,
       input,
       store: false,
+      ...(this.name === 'openai' ? { stream: true } : {}),
       max_output_tokens: Math.min(8192, Math.max(1, options.maxOutputTokens ?? 1800)),
       ...(options.thinkingLevel ? { reasoning: { effort: options.thinkingLevel } } : {}),
       ...(tools.length ? { tools, parallel_tool_calls: false } : {}),
@@ -279,102 +169,140 @@ export class OpenAiProvider implements Provider {
         'configuration',
         false,
       );
-    const timeoutMs = Math.min(30000, options.timeoutMs ?? this.options.timeoutMs);
-    for (let attempt = 0; attempt < 3; attempt++) {
-      if (signal?.aborted) throw transportError(signal, this.providerLabel);
-      await this.budget.reserve();
-      // Shared budget reservation is asynchronous; cancellation must be checked before sending media.
-      if (signal?.aborted) throw transportError(signal, this.providerLabel);
-      this.calls++;
-      onAttempt?.();
-      const deadline = AbortSignal.timeout(timeoutMs);
-      const requestSignal = signal ? AbortSignal.any([signal, deadline]) : deadline;
-      let response: Response;
+    const inputMetrics = await measureInput(contents);
+    const preparationMs = Math.round(
+      performance.now() - preparationStarted + (options.preparationMs ?? 0),
+    );
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      const started = performance.now();
+      const metric: ProviderMetric = {
+        provider: this.name,
+        model: this.apiModel,
+        operation: options.forceTool ?? 'generate',
+        attempt,
+        outcome: 'failure',
+        preparationMs,
+        requestBytes: Buffer.byteLength(body),
+        ...inputMetrics,
+        elapsedMs: 0,
+      };
+      let failure: ProviderError | undefined;
+      const attemptDeadline = AbortSignal.timeout(
+        remainingRequestMs({ ...options, deadlineAt }, this.options.timeoutMs),
+      );
+      const requestSignal = AbortSignal.any([callSignal, attemptDeadline]);
       try {
-        response = await (this.options.fetchImpl ?? fetch)(
-          `${this.options.apiBaseUrl ?? 'https://api.openai.com/v1'}/responses`,
-          {
-            method: 'POST',
-            signal: requestSignal,
-            headers: {
-              'Content-Type': 'application/json',
-              Authorization: `Bearer ${this.options.apiKey}`,
+        if (requestSignal.aborted) throw transportError(requestSignal, this.providerLabel);
+        await this.budget.reserve();
+        if (requestSignal.aborted) throw transportError(requestSignal, this.providerLabel);
+        this.calls++;
+        onAttempt?.();
+        let response: Response;
+        try {
+          response = await (this.options.fetchImpl ?? fetch)(
+            `${this.options.apiBaseUrl ?? 'https://api.openai.com/v1'}/responses`,
+            {
+              method: 'POST',
+              signal: requestSignal,
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${this.options.apiKey}`,
+              },
+              body,
             },
-            body,
-          },
-        );
-      } catch {
-        throw transportError(requestSignal, this.providerLabel);
-      }
-      if (!response.ok) {
-        const delay = retryDelay(response);
-        const seconds = delay === undefined ? undefined : Math.max(1, Math.ceil(delay / 1000));
-        await response.body?.cancel();
-        if ([500, 502, 503, 504].includes(response.status)) {
-          if (attempt < 2 && (delay === undefined || delay <= 8000)) {
-            try {
-              const pause =
-                this.options.waitForRetry ??
-                (async (ms: number, cancellation?: AbortSignal) => {
-                  await wait(ms, undefined, { signal: cancellation });
-                });
-              await pause(Math.max(1000 * 2 ** attempt, delay ?? 0), signal);
-            } catch {
-              if (signal?.aborted) throw transportError(signal, this.providerLabel);
-              throw new ProviderError(
-                `${this.providerLabel} retry was interrupted. Try again.`,
-                503,
-                'connection',
-                true,
-              );
-            }
-            continue;
-          }
+          );
+        } catch {
+          throw transportError(requestSignal, this.providerLabel);
+        }
+        metric.headersMs = Math.round(performance.now() - started);
+        metric.requestId = upstreamRequestId(response);
+        metric.httpStatus = response.status;
+        if (!response.ok) {
+          const delay = retryDelay(response);
+          const seconds = delay === undefined ? undefined : Math.max(1, Math.ceil(delay / 1000));
+          await response.body?.cancel();
+          if ([500, 502, 503, 504].includes(response.status))
+            throw new ProviderError(
+              `${this.providerLabel} is temporarily unavailable. Try again later.`,
+              503,
+              'unavailable',
+              true,
+              seconds,
+            );
+          if (response.status === 429)
+            throw new ProviderError(
+              `${this.providerLabel} quota or rate limit reached. Check your account limits before retrying.`,
+              429,
+              'quota',
+              true,
+              seconds,
+            );
           throw new ProviderError(
-            `${this.providerLabel} is temporarily unavailable. Try again later.`,
-            503,
-            'unavailable',
-            true,
-            seconds,
+            response.status === 404
+              ? `The ${this.providerLabel} model is unavailable for this API account. Check the configured model ID and access.`
+              : `${this.providerLabel} rejected the request (HTTP ${response.status}). Check the selected provider key, model, and API access.`,
+            502,
+            'configuration',
+            false,
           );
         }
-        if (response.status === 429)
+        let json: unknown;
+        try {
+          json = await readOpenAiResponse(response, (hasOutput) => {
+            metric.firstEventMs ??= Math.round(performance.now() - started);
+            if (hasOutput) metric.firstOutputMs ??= Math.round(performance.now() - started);
+          });
+        } catch (error) {
+          if (requestSignal.aborted) throw transportError(requestSignal, this.providerLabel);
+          if (error instanceof ProviderError) throw error;
+          if (!(error instanceof SyntaxError))
+            throw transportError(requestSignal, this.providerLabel);
           throw new ProviderError(
-            `${this.providerLabel} quota or rate limit reached. Check your account limits before retrying.`,
-            429,
-            'quota',
-            true,
-            seconds,
+            `${this.providerLabel} returned unreadable JSON. No AI action was applied.`,
+            502,
+            'response',
+            false,
           );
-        throw new ProviderError(
-          response.status === 404
-            ? `The ${this.providerLabel} model is unavailable for this API account. Check the configured model ID and access.`
-            : `${this.providerLabel} rejected the request (HTTP ${response.status}). Check the selected provider key, model, and API access.`,
-          502,
-          'configuration',
-          false,
+        }
+        if (requestSignal.aborted) throw transportError(requestSignal, this.providerLabel);
+        Object.assign(metric, tokenUsage(json, this.name));
+        const parts = parseOpenAiResponse(
+          json,
+          tools.map((tool) => tool.name),
+          options.forceTool,
+          this.providerLabel,
         );
-      }
-      let json: unknown;
-      try {
-        json = await response.json();
+        metric.outcome = 'success';
+        return parts;
       } catch (error) {
-        if (requestSignal.aborted || !(error instanceof SyntaxError))
-          throw transportError(requestSignal, this.providerLabel);
-        throw new ProviderError(
-          `${this.providerLabel} returned unreadable JSON. No AI action was applied.`,
-          502,
-          'response',
-          false,
-        );
+        if (!(error instanceof ProviderError)) throw error;
+        failure = error;
+        metric.code = error.code;
+        metric.httpStatus ??= error.httpStatus;
+      } finally {
+        metric.elapsedMs = Math.round(performance.now() - started);
+        emitMetric(this.options.onMetric, metric);
       }
-      if (requestSignal.aborted) throw transportError(requestSignal, this.providerLabel);
-      return parseOpenAiResponse(
-        json,
-        tools.map((tool) => tool.name),
-        options.forceTool,
-        this.providerLabel,
-      );
+      const pauseMs = Math.max(1000, (failure!.retryAfterSeconds ?? 0) * 1000);
+      if (
+        attempt === 2 ||
+        callSignal.aborted ||
+        !['connection', 'unavailable', 'timeout', 'quota'].includes(failure!.code) ||
+        failure!.httpStatus === 499 ||
+        !failure!.retryable ||
+        !canRetryBeforeDeadline(deadlineAt, pauseMs)
+      )
+        throw failure;
+      try {
+        const pause =
+          this.options.waitForRetry ??
+          (async (ms: number, cancellation?: AbortSignal) => {
+            await wait(ms, undefined, { signal: cancellation });
+          });
+        await pause(pauseMs, callSignal);
+      } catch {
+        throw transportError(callSignal, this.providerLabel);
+      }
     }
     throw new ProviderError(
       `${this.providerLabel} is temporarily unavailable.`,

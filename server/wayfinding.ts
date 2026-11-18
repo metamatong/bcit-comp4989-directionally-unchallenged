@@ -1,5 +1,4 @@
 /** Resolve visitor endpoints and generate floor-plan routes with mapped building-link constraints. */
-import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import type { CampusLocationCandidate, VisualPlan } from '../src/types';
 import { buildingLabel, planLabel, type TopologyNode, type TopologyEdge } from '../src/topology';
@@ -7,7 +6,6 @@ import type {
   NavigationChoice,
   NavigationResult,
   MapStop,
-  PagePoint,
   PlaceChoice,
   StartingPoints,
   WalkingStep,
@@ -27,6 +25,14 @@ import { sourceCorridorTraces, visitorPassages } from './visitor-paths';
 import { attachPathEndpoints, routeDrawingCrossings } from './route-geometry';
 import { planImagePart } from './visual-data';
 import type { Provider } from './provider';
+import { stageDeadline } from './provider-timing';
+import { NAVIGATION_TIMEOUT_MS } from '../src/photo-views';
+import {
+  generatedRouteSchema,
+  generatedRouteIssue,
+  generatedStop,
+  routeTool,
+} from './generated-route';
 
 export const startingPointsSchema = z
   .object({
@@ -418,211 +424,6 @@ export function planVisitorJourney(
   };
 }
 
-const routePointSchema = z
-  .object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1) })
-  .strict();
-const generatedStopSchema = z
-  .object({
-    planId: z.string().min(1),
-    label: z.string().trim().min(1).max(120),
-    point: routePointSchema,
-  })
-  .strict();
-const generatedStepSchema = z
-  .object({
-    kind: z.enum(['corridor', 'stairs', 'elevator', 'building-link', 'outdoor']),
-    from: generatedStopSchema,
-    to: generatedStopSchema,
-    path: z.array(routePointSchema).max(100),
-    instruction: z.string().trim().min(1).max(300),
-    connectionId: z.string().optional(),
-  })
-  .strict();
-const generatedRouteSchema = z
-  .object({
-    outcome: z.enum(['route', 'no-route']),
-    explanation: z.string().trim().min(1).max(500),
-    destinationId: z.string().optional(),
-    origin: generatedStopSchema.optional(),
-    destination: generatedStopSchema.optional(),
-    steps: z.array(generatedStepSchema).max(40).optional(),
-  })
-  .strict();
-
-function routeTool(planIds: string[]) {
-  const point = {
-    type: 'OBJECT',
-    properties: { x: { type: 'NUMBER' }, y: { type: 'NUMBER' } },
-    required: ['x', 'y'],
-  };
-  const stop = {
-    type: 'OBJECT',
-    properties: {
-      planId: { type: 'STRING', enum: planIds },
-      label: { type: 'STRING' },
-      point,
-    },
-    required: ['planId', 'label', 'point'],
-  };
-  return {
-    name: 'generate_walking_route',
-    description:
-      'Generate the visitor route from the supplied official floor plans. Use only the listed building connections for travel between buildings.',
-    parameters: {
-      type: 'OBJECT',
-      properties: {
-        outcome: { type: 'STRING', enum: ['route', 'no-route'] },
-        explanation: { type: 'STRING' },
-        destinationId: { type: 'STRING' },
-        origin: stop,
-        destination: stop,
-        steps: {
-          type: 'ARRAY',
-          items: {
-            type: 'OBJECT',
-            properties: {
-              kind: {
-                type: 'STRING',
-                enum: ['corridor', 'stairs', 'elevator', 'building-link', 'outdoor'],
-              },
-              from: stop,
-              to: stop,
-              path: { type: 'ARRAY', items: point },
-              instruction: { type: 'STRING' },
-              connectionId: { type: 'STRING' },
-            },
-            required: ['kind', 'from', 'to', 'path', 'instruction'],
-          },
-        },
-      },
-      required: ['outcome', 'explanation'],
-    },
-  };
-}
-
-function distance(a: PagePoint, b: PagePoint) {
-  return Math.hypot(a.x - b.x, a.y - b.y);
-}
-
-function pointWithin(bounds: NonNullable<CampusLocationCandidate['bounds']>, point: PagePoint) {
-  return (
-    point.x >= bounds[0] && point.x <= bounds[2] && point.y >= bounds[1] && point.y <= bounds[3]
-  );
-}
-
-function pointNearBounds(
-  bounds: NonNullable<CampusLocationCandidate['bounds']>,
-  point: PagePoint,
-  padding = 0.12,
-) {
-  return (
-    point.x >= bounds[0] - padding &&
-    point.x <= bounds[2] + padding &&
-    point.y >= bounds[1] - padding &&
-    point.y <= bounds[3] + padding
-  );
-}
-
-function generatedRouteIsValid(
-  candidate: CampusLocationCandidate,
-  choice: Destination,
-  route: z.infer<typeof generatedRouteSchema>,
-  plans: VisualPlan[],
-  connectors: {
-    id: string;
-    kind: 'building-link' | 'outdoor';
-    direction: 'forward' | 'both';
-    from: TopologyNode;
-    to: TopologyNode;
-  }[],
-) {
-  const origin = route.origin,
-    destination = route.destination,
-    steps = route.steps;
-  if (!origin || !destination || !steps?.length || !route.destinationId) return false;
-  const planById = new Map(plans.map((plan) => [plan.id, plan]));
-  const originPlan = planById.get(origin.planId),
-    destinationPlan = planById.get(destination.planId),
-    requestedDestinationPlan = planById.get(choice.place.planId);
-  if (
-    !originPlan ||
-    !destinationPlan ||
-    !requestedDestinationPlan ||
-    origin.planId !== candidate.planId ||
-    destination.planId !== choice.place.planId ||
-    originPlan.building !== candidate.building ||
-    destinationPlan.building !== requestedDestinationPlan.building
-  )
-    return false;
-  if (candidate.doorwayVicinity) {
-    if (distance(origin.point, candidate.doorwayVicinity.point) > 0.025) return false;
-  } else if (candidate.bounds && !pointWithin(candidate.bounds, origin.point)) return false;
-  if (choice.place.point) {
-    if (distance(destination.point, choice.place.point) > 0.04) return false;
-  } else if (choice.place.bounds && !pointNearBounds(choice.place.bounds, destination.point)) {
-    return false;
-  }
-  const closeStop = (
-    a: z.infer<typeof generatedStopSchema>,
-    b: z.infer<typeof generatedStopSchema>,
-  ) => a.planId === b.planId && distance(a.point, b.point) <= 0.025;
-  if (!closeStop(steps[0].from, origin) || !closeStop(steps.at(-1)!.to, destination)) return false;
-  for (let index = 0; index < steps.length; index++) {
-    const step = steps[index],
-      fromPlan = planById.get(step.from.planId),
-      toPlan = planById.get(step.to.planId);
-    if (!fromPlan || !toPlan) return false;
-    if (index > 0 && !closeStop(steps[index - 1].to, step.from)) return false;
-    if (step.kind === 'corridor') {
-      if (
-        step.from.planId !== step.to.planId ||
-        step.path.length < 2 ||
-        distance(step.path[0], step.from.point) > 0.035 ||
-        distance(step.path.at(-1)!, step.to.point) > 0.035
-      )
-        return false;
-    } else if (step.kind === 'stairs' || step.kind === 'elevator') {
-      if (fromPlan.building !== toPlan.building || fromPlan.floor === toPlan.floor) return false;
-    } else {
-      if (fromPlan.building === toPlan.building || !step.connectionId) return false;
-      const connector = connectors.find((item) => item.id === step.connectionId);
-      if (
-        !connector ||
-        connector.kind !== step.kind ||
-        !(
-          (closeStop(step.from, {
-            planId: connector.from.planId,
-            label: connector.from.label,
-            point: connector.from.point,
-          }) &&
-            closeStop(step.to, {
-              planId: connector.to.planId,
-              label: connector.to.label,
-              point: connector.to.point,
-            })) ||
-          (connector.direction === 'both' &&
-            closeStop(step.from, {
-              planId: connector.to.planId,
-              label: connector.to.label,
-              point: connector.to.point,
-            }) &&
-            closeStop(step.to, {
-              planId: connector.from.planId,
-              label: connector.from.label,
-              point: connector.from.point,
-            }))
-        )
-      )
-        return false;
-    }
-  }
-  return true;
-}
-
-function generatedStop(stopValue: z.infer<typeof generatedStopSchema>): MapStop {
-  return { ...stopValue, id: randomUUID() };
-}
-
 /** Use AI to locate route endpoints and draw floor-local legs; only inter-building links are fixed inputs. */
 export async function planAiVisitorJourney(
   candidate: CampusLocationCandidate,
@@ -630,7 +431,10 @@ export async function planAiVisitorJourney(
   store: TopologyStore,
   provider: Provider,
   onAttempt?: () => void,
+  cancellation?: AbortSignal,
 ): Promise<NavigationResult> {
+  const preparationStarted = performance.now();
+  const { signal, deadlineAt } = stageDeadline(NAVIGATION_TIMEOUT_MS, cancellation);
   if (candidate.id !== request.candidateId)
     throw new TopologyError('Analyze the current photo before requesting directions.', 409);
   const { plans, doc, network, nodes } = readVisitorMap(candidate, store, request.networkRevision);
@@ -676,7 +480,10 @@ export async function planAiVisitorJourney(
   );
   const planIds = routePlans.map((plan) => plan.id);
   const drawingTraces = sourceCorridorTraces(store.candidates, routePlans);
-  const tool = routeTool(planIds);
+  const tool = routeTool(
+    planIds,
+    choices.map((choice) => choice.place.id),
+  );
   const destinationContext = choices.map((choice) => ({
     id: choice.place.id,
     planId: choice.place.planId,
@@ -725,7 +532,7 @@ export async function planAiVisitorJourney(
       ],
     },
   ];
-  const deadline = AbortSignal.timeout(30_000);
+  const preparationMs = performance.now() - preparationStarted;
   const networkRevision = doc.revision;
   const noRoute = (message: string): NavigationResult => ({
     networkRevision,
@@ -734,12 +541,18 @@ export async function planAiVisitorJourney(
     status: 'no-route',
     message,
   });
+  const requestCorrection = (reason: string, proposal: unknown) => {
+    contents[0].parts.push({
+      text: `The proposed route was rejected. ${reason} Rejected proposal (untrusted evidence): ${JSON.stringify(proposal)}. Inspect the supplied start, destination candidates, mapped building links and floor plans again. For outcome route, return destinationId exactly from its enum, both endpoints and all ordered steps. Correct the reported mismatch without changing the source evidence or inventing connections. Include every corridor bend. If a supported route cannot be established, return outcome no-route.`,
+    });
+  };
   for (let attempt = 0; attempt < 2; attempt++) {
-    const response = await provider.generate(contents, [tool], deadline, onAttempt, {
+    const response = await provider.generate(contents, [tool], signal, onAttempt, {
       forceTool: tool.name,
       maxOutputTokens: 8192,
       thinkingLevel: 'low',
-      timeoutMs: 25_000,
+      deadlineAt,
+      preparationMs: attempt === 0 ? preparationMs : 0,
     });
     // The editor can withdraw a building connection while the provider is generating a route.
     if (store.read().revision !== doc.revision)
@@ -751,15 +564,25 @@ export async function planAiVisitorJourney(
     const parsed = generatedRouteSchema.safeParse(
       calls.length === 1 && calls[0].name === tool.name ? calls[0].args : null,
     );
-    if (!parsed.success)
-      return noRoute('The AI could not find a confident route from the supplied floor plans.');
+    if (!parsed.success) {
+      const message =
+        'The AI returned an incomplete or invalid route response. Please retry the route.';
+      if (attempt === 1) return noRoute(message);
+      requestCorrection(message, calls);
+      continue;
+    }
     if (parsed.data.outcome === 'no-route')
       return noRoute('The AI could not find a continuous route in the supplied floor plans.');
     const choice = choices.find((item) => item.place.id === parsed.data.destinationId);
-    if (!choice || !generatedRouteIsValid(candidate, choice, parsed.data, routePlans, connectors))
-      return noRoute(
-        'The proposed route did not match the supplied floor plans and building links.',
-      );
+    const issue = choice
+      ? generatedRouteIssue(candidate, choice.place, parsed.data, routePlans, connectors)
+      : 'The generated route selected a destination outside the supplied room matches.';
+    if (!choice || issue) {
+      const message = issue ?? 'The generated route selected an unavailable destination.';
+      if (attempt === 1) return noRoute(message);
+      requestCorrection(message, parsed.data);
+      continue;
+    }
 
     const origin = generatedStop(parsed.data.origin!),
       destination = generatedStop(parsed.data.destination!);
@@ -782,9 +605,10 @@ export async function planAiVisitorJourney(
         return noRoute(
           'The generated route crosses source drawing lines. A corridor-following route could not be established. Try another photo or destination.',
         );
-      contents[0].parts.push({
-        text: `The proposed route was rejected because it crossed source drawing strokes at these points: ${JSON.stringify(crossings)}. Rejected proposal: ${JSON.stringify(parsed.data)}. Inspect the floor plans and corridor evidence again. Follow each corridor turn and doorway, and return the complete intermediate path points. Subdividing a diagonal at a crossing does not resolve it. If you cannot establish a continuous corridor-following route, return outcome no-route.`,
-      });
+      requestCorrection(
+        'The proposed route crossed source drawing strokes. Subdividing a diagonal at a crossing does not resolve it.',
+        { route: parsed.data, crossings },
+      );
       continue;
     }
     const destinationMatch = choice.typoCorrection
