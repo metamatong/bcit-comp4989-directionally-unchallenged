@@ -10,7 +10,7 @@ export function locationCatalogue(): LocationCatalogue {
   const catalogue = readJson<LocationCatalogue>('data/campus/geolocation/calibrations.json');
   const source = catalogue.geographicSource;
   if (
-    source.file !== 'data/campus/geolocation/bcit-pilot-footprints.json' ||
+    source.file !== 'data/campus/geolocation/bcit-burnaby-footprints.json' ||
     createHash('sha256')
       .update(readFileSync(`${root}/${source.file}`))
       .digest('hex') !== source.sha256
@@ -19,15 +19,16 @@ export function locationCatalogue(): LocationCatalogue {
   const footprint = readJson<{
     features: { attributes: { BuildingName: string }; geometry: { rings: number[][][] } }[];
   }>(source.file);
-  const buildings = footprint.features.map((f) => ({
-    building: f.attributes.BuildingName,
-    rings: f.geometry.rings,
-  }));
+  const supplied = new Set(visualPlans.map((plan) => plan.building));
+  const buildings = footprint.features
+    .filter((f) => supplied.has(f.attributes.BuildingName))
+    .map((f) => ({
+      building: f.attributes.BuildingName,
+      rings: f.geometry.rings,
+    }));
   if (
-    buildings
-      .map((b) => b.building)
-      .sort()
-      .join(',') !== 'SE12,SW1,SW3' ||
+    !buildings.length ||
+    new Set(buildings.map((b) => b.building)).size !== buildings.length ||
     buildings.some(
       (b) =>
         !b.rings.length ||
@@ -44,17 +45,17 @@ export function locationCatalogue(): LocationCatalogue {
         ),
     )
   )
-    throw Error('Invalid pilot building footprint coordinates.');
+    throw Error('Invalid campus building footprint coordinates.');
   if (JSON.stringify(buildings) !== JSON.stringify(catalogue.buildings))
     throw Error('Footprint catalogue differs from the official source.');
-  const pilot = visualPlans.filter((p) => ['SE12', 'SW3', 'SW1'].includes(p.building));
+  const plans = visualPlans;
   if (
-    catalogue.floors.length !== pilot.length ||
-    new Set(catalogue.floors.map((f) => f.planId)).size !== pilot.length
+    catalogue.floors.length !== plans.length ||
+    new Set(catalogue.floors.map((f) => f.planId)).size !== plans.length
   )
-    throw Error('Expected one calibration coverage entry for every pilot floor.');
+    throw Error('Expected one calibration coverage entry for every supplied floor.');
   for (const floor of catalogue.floors) {
-    const plan = pilot.find((p) => p.id === floor.planId);
+    const plan = plans.find((p) => p.id === floor.planId);
     if (!plan || floor.sourceSha256 !== plan.sourceSha256 || !floor.reason || !floor.version)
       throw Error(`Invalid calibration provenance: ${floor.planId}`);
     if (floor.status === 'approximate') {

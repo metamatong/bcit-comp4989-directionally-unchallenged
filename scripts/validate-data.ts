@@ -8,7 +8,12 @@ import { pilotEvidence } from '../server/pilot-evidence';
 import { reviewedNetwork } from '../server/pilot-network';
 import { TopologyStore } from '../server/topology';
 import { validateCorridorTraces } from '../server/visitor-paths';
+import { floorGraphs } from '../server/floor-graph';
 import { locationCatalogue } from '../server/geolocation';
+const graphs = floorGraphs();
+console.log(
+  `Validated ${graphs.places.length} source-place occurrences across ${graphs.ordered.length} compiled floor graphs.`,
+);
 const locationCoverage = locationCatalogue();
 console.log(
   `Validated official geographic source and ${locationCoverage.floors.length} floor calibration records.`,

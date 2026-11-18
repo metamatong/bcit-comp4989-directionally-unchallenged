@@ -129,7 +129,9 @@ describe('twelve source pages', () => {
       }
   });
   it('exposes validated tool signatures and fails unsupported or malformed requests explicitly', () => {
-    expect(pilotToolDeclarations).toHaveLength(4);
+    expect(pilotToolDeclarations.map((tool) => tool.name)).toEqual(
+      expect.arrayContaining(['get_floor_places', 'get_floor_routing_coverage']),
+    );
     expect(pilotToolDeclarations.every((t) => t.parametersJsonSchema.type === 'object')).toBe(true);
     expect(
       runPilotTool('get_spatial_context', { planId: 'NW1-F1-p1', bounds: [0, 0, 1, 1] }),

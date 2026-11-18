@@ -1,5 +1,31 @@
 # Verification record
 
+## Campus-wide source sample, November 18, 2026
+
+The visitor API returned complete routes for **0 of 5** randomly paired journeys. Sampling used all 3,428 indexed place occurrences in graph `3b4497fbb23af67363a67fc5151ac607f2a0287186c10680299fbb7543babe36` and seed `5872ff95`. All ten occurrences were selected without replacement before any route lookup. All five starts localized with simulated exact sign, building and floor readings. The check used no visitor images or provider calls. These results measure post-extraction routing on real source data.
+
+| Origin | Destination | Response |
+|---|---|---|
+| SE12 F3 305 | SW01 F3 3382A | Destination approach missing |
+| NW04 F4 4000A | SW02 F2 250 | Destination approach missing |
+| SE12 F4 434 | NE01 F1 5150 (sampled OCR) | Both approaches missing. The source sign reads **S150**, a stair. |
+| SE16 F1 117 | SE02 F2 226 | The destination door is known, but its public approach is missing |
+| NW05 F2 208 | NE07 F1 143A | Origin approach missing |
+
+The sampled building pairs also lack confirmed interbuilding passages. Correcting an endpoint alone would not connect these five trips. After reading the original signs, the NE01 stair received an exact S150 transcription and overlapping, conflicting OCR identifiers were excluded from the place catalogue. The five samples were retained as observed, with no replacement or additional route trials. The final build was type-checked. Physical campus travel and live photo recognition were outside this sample.
+
+
+
+## Earlier SE12 323 starting-route coverage diagnosis
+
+The supplied corridor photo and deployed screenshots showed a clear `323` label, a successful SE12 floor-3 source match, and an `unmapped-origin` response. The production bootstrap reported Gemini with primary configuration `gemini-3.8-flash`; its frontend asset matched the PR #17 build. One authorized reproduction submitted only the original corridor photo to the deployed app with destination SW03 1710. It returned `323` as a clear door label, right-side windows, one reported visible doorway and a straight corridor. Extraction used three provider attempts and a fallback model, taking 34.116 seconds. Metadata-only localization took 877 ms, and the complete check took 35.304 seconds. The response did not expose which fallback model or why earlier attempts failed.
+
+The hosted navigation response used graph revision 41 and returned `origins: []`. SE12 323 had no source doorway annotations, no reviewed starting node and no corridor approach. Its blue marker identified the printed source label, not a camera position or door. Injecting the same clear label into the local resolver with all network/provider calls disabled reproduced the result. The failure was therefore downstream map coverage; Gemini fallback did not cause the graph rejection.
+
+The initial diagnostic change retained the exact anchor label and distinguishes missing doorway/connection data from ambiguous doorways or a broad starting region. Label-only results show **Photo label matched**. Missing coverage shows **Starting route not mapped** without a primary retake-photo action. That diagnostic change covered the message only. The subsequent floor compiler identifies two separate corridor approaches for 323.
+
+All 402 unit/API tests and 24 desktop/mobile browser tests passed, with formatting, production build, source-data validation and Vercel packaging. New tests cover the 323 case with and without fallback metadata, an unmapped connection at an identified door, multiple source doors, and the retained photo action for an ambiguous region. These tests use structured evidence fixtures; the single deployed reproduction is recorded separately above.
+
 ## SE12 302 to both SW03 1710 entrances · November 17, 2026
 
 The user clarified the two-floor descent, confirmed the displayed S160 landing A, and corrected the doorway answer to confirm both B (lobby 1602) and C (corridor 1700). Revision 41 adds the third-floor passage-to-S360 approach, the S260-to-S160 descent, and separate source-traced approaches to both 1710 entrances. The existing 28 points, 19 edges and all 27 earlier answers remain unchanged. The new graph has 31 points, 23 edges and 31 answers. New travel permissions follow the described direction toward 1710; reverse travel was not inferred. The two door hypotheses were appended without renumbering the existing 1650 doorway.

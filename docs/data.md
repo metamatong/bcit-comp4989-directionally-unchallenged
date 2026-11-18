@@ -1,5 +1,8 @@
 # Source data, preprocessing and coverage
 
+The visitor catalogue and walking grids are compiled from all 89 sheets. See [floor routing](floor-routing.md) for source inputs, regeneration, coverage and the distinction between a printed sign, a doorway and a connected approach.
+
+
 ## Official sources and restrictions
 
 The only floor-plan collection used is [BCIT Facilities: Floor Plans](https://www.bcit.ca/facilities/campus-maps/floor-plans/). The importer discovers links from that page and accepts only the Burnaby NE, NW, SE and SW filename/directory patterns. It does not construct unobserved PDF URLs or ingest other campuses. The separate CARI section is excluded.

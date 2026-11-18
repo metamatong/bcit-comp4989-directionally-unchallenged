@@ -4,6 +4,8 @@ data/campus/spatial/*.json text eol=lf
 data/campus/spatial/*.sha256 text eol=lf
 data/campus/geolocation/calibrations.json text eol=lf
 data/campus/geolocation/bcit-pilot-footprints.json -text
+data/campus/geolocation/bcit-burnaby-footprints.json -text
+data/campus/connection-candidates.json text eol=lf
 
 # Preserve source documents and derived images byte-for-byte.
 *.pdf -text

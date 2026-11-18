@@ -17,7 +17,8 @@
     "data:validate": "node --import tsx scripts/validate-data.ts",
     "ai:metrics": "node --import tsx scripts/summarize-ai-metrics.ts",
     "spatial:query": "node --import tsx scripts/query-spatial.ts",
-    "format": "prettier --write src server tests scripts/*.ts *.ts"
+    "format": "prettier --write src server tests scripts/*.ts *.ts",
+    "routes:sample": "node --import tsx scripts/sample-floor-routes.ts"
   },
   "dependencies": {
     "express": "^5.1.0",

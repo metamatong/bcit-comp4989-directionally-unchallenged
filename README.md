@@ -1,8 +1,8 @@
 # DirectionallyUnchallenged
 
-Add a photo, enter a destination, and tap **Go** to get floor-by-floor directions in the BCIT Burnaby SE12, SW03 and SW01 pilot. AI reads the photo once to extract labels and visible features. The app then resolves the starting place from those readings and optional GPS building candidates, and calculates directions over the saved reviewed graph.
+Add a photo, enter a destination and tap **Go** for walking directions on the supplied BCIT Burnaby plans. The app reads the photo once, matches the signs to its catalogue and uses the saved walking network.
 
-The reference dataset contains **89 official floor plans covering 45 Burnaby buildings**. The visitor pilot covers SE12, SW03 and SW01. Exact source labels identify estimated starting places. A route requires mapped endpoints and a complete approved connection path. Missing coverage is shown explicitly.
+The catalogue covers **89 official floor plans in 45 buildings**. A place can have several entrances. When signs or entrances are ambiguous, select the building, floor or marked door. Continuous travel depends on the mapped approaches on each floor and the confirmed passages between them. [Floor graph coverage and regeneration](docs/floor-routing.md)
 
 ## Run locally
 
@@ -40,10 +40,10 @@ The Git-connected Vercel project builds the frontend and the visitor API with `n
 1. Upload or capture a photo containing a nearby room sign, then tap **Next**.
 2. Enter a destination such as `SW03 2605`. Optionally check **Use device location with this photo** while standing where it was taken. The checkbox starts no request until submission.
 3. Tap **Go**. The configured provider extracts exact labels, sign placement, visible door count, window side and corridor shape in the first stage. The following location request sends only the evidence ID and optional GPS-derived building candidates. Raw device coordinates stay in the browser.
-4. Source lookup chooses a unique starting estimate. Conflicting labels, directional-only signs or a GPS contradiction produce an explanation. Scene features are retained as observations, and doorway placement helps choose the relevant label. Unavailable window/count annotations do not imply a spatial match.
-5. The app resolves the destination and calculates a route over approved graph connections. **Walking directions** shows one arrow-separated route overview, followed by a continuous stack of maps with A/B descriptions. Floor changes appear in the overview; one zoom control applies to all maps. Photo bytes, floor-plan images and destinations are sent to no later AI stage.
+4. Source lookup selects a unique starting estimate or offers matching places. Conflicting labels, directional-only signs or a GPS contradiction produce an explanation. Scene features are retained as observations, and doorway placement helps choose the relevant label. Unavailable window/count annotations do not imply a spatial match.
+5. The app resolves the destination and calculates a route over the floor walking grids and current reviewed connections. **Walking directions** shows one arrow-separated route overview, followed by a continuous stack of maps with A/B descriptions. Floor changes appear in the overview; one zoom control applies to all maps. Photo bytes, floor-plan images and destinations are sent to no later AI stage.
 
-SE12 302 to SW03 2605 enters SW03 through the east third-floor passage beside S360 and shaft 3696, follows the short approach to the east elevator, and continues on floor 2. Reviewed network revision 41 also places the floor-2 outdoor entrance beside 2696/S260, with short access to the elevator and corridor 2600; it no longer uses the doorway between 2063 and 2080. The corrected fourth-floor east passage is confirmed for both directions between SE12 and SW03. The east elevator and S360/S460 stair transfer between SW03 floors 3 and 4 are also confirmed in both directions. Fourth-floor entrance-to-landing corridors, stair approaches and individual room approaches still need separate reviews. `SE12 302 → SW03 1710` now follows the east stairs from floor 3 through floor 2 to S160 on floor 1. Both the lobby-1602 doorway and corridor-1700 doorway have reviewed arrival approaches in the confirmed travel direction toward 1710. `SW03 2604` is a distinct vestibule whose source label exists but has no reviewed arrival approach. Such destinations display a coverage gap. Route costs currently minimize recorded connection count. Physical distance and accessibility remain unmeasured.
+SE12 302 to SW03 2605 enters SW03 through the east third-floor passage beside S360 and shaft 3696, follows the short approach to the east elevator, and continues on floor 2. Reviewed network revision 41 also places the floor-2 outdoor entrance beside 2696/S260, with short access to the elevator and corridor 2600; it no longer uses the doorway between 2063 and 2080. The corrected fourth-floor east passage is confirmed for both directions between SE12 and SW03. The east elevator and S360/S460 stair transfer between SW03 floors 3 and 4 are also confirmed in both directions. The visitor planner can join these records to the public corridor surfaces on the same sheet. `SE12 302 → SW03 1710` now follows the east stairs from floor 3 through floor 2 to S160 on floor 1. Both the lobby-1602 doorway and corridor-1700 doorway have reviewed arrival approaches in the confirmed travel direction toward 1710. `SW03 2604` is a distinct vestibule whose source label exists but has no reviewed arrival approach. The planner also checks drawing-derived approaches. Its costs express travel on the floor grid and transfers. Physical distance and accessibility remain unmeasured.
 
 The full photo and four detail crops are prepared locally from the original image. The footer’s **Coverage & privacy** dialog identifies the extraction provider and data handling. The server keeps image-free evidence receipts, and the browser discards its prepared photo after locating the result, removal or navigation away. Explicit retries can reuse unexpired extraction evidence.
 
@@ -62,12 +62,13 @@ npm run build             # Type check and production frontend build
 npm run data:validate     # 90 PDF hashes and 631 derived asset hashes
 npm start                 # Serve the production build locally
 npm run format
+npm run routes:sample         # Five unfiltered local visitor API journeys with source sign readings
 npm run ai:metrics -- /path/to/server.log  # Summarize AI attempt latency and token usage
 ```
 
 Tests mock AI providers and spend no provider quota. Browser automation, when requested, uses an isolated server on port 3100 with credentials disabled and installed Google Chrome. It is not a physical-phone or Safari test. The browser OCR packages, worker assets and installation hook have been removed; optional local PDF preprocessing can still use Tesseract.
 
-Exact retrieval preserves every digit, prefix, suffix and leading zero, including `302`, `3021` and `0302`. All 5,463 original labels remain available as evidence. The pilot index also contains transcribed labels and source doorway positions. Try `npm run spatial:query -- resolve_spatial_labels '{"purpose":"destination","labels":["SW03 2605"]}'`.
+Exact retrieval preserves every digit, prefix, suffix and leading zero, including `302`, `3021` and `0302`. All 5,463 original labels remain available as evidence. The visitor place index also contains floor-wide transcriptions, repeated OCR and doorway positions. The legacy pilot evidence is available with `npm run spatial:query -- resolve_spatial_labels '{"purpose":"destination","labels":["SW03 2605"]}'`.
 
 Extraction has a 45-second server budget and uses strict OpenAI output schemas when OpenAI is selected. Retries honor that deadline and request budgets. Provider metrics record timings, payload sizes and token counts without photos, prompts or visitor identifiers. Location lookup and routing perform no model inference. [Provider details](docs/provider.md)
 
@@ -83,7 +84,7 @@ Extraction has a 45-second server budget and uses strict OpenAI output schemas w
 - [Project walkthrough](docs/walkthrough.md) and [mobile landing screen](outputs/screenshots/landing-mobile-390x844.png)
 - [Proposal source](docs/proposal.md) and [two-page proposal](output/pdf/proposal_groupnumber.pdf)
 
-The latest user direction removes the synthetic fallback described in the original brief. Visitor routes use the saved reviewed network and source corridor traces. Photo-label estimates and route records have not been independently field-verified. Closures, ETAs, campus-wide routing and accessibility remain outside this pilot. The separately referenced assignment PDF was not supplied. Verify assignment requirements and dates against it before submission. The supplied brief lists October 21, 2026, 23:59 (timezone unspecified) for the proposal and October 22 for the presentation. Group/member placeholders remain. Coursework submission is separate from hosting the visitor app.
+The latest user direction removes the synthetic fallback described in the original brief. Visitor routes combine drawing-derived walking areas with current reviewed records. Photo-label estimates and route records have not been independently field-verified. The published transfer network currently connects SE12 and SW03. Other buildings have local coverage. Closures, ETAs and accessibility remain unverified. The separately referenced assignment PDF was not supplied. Verify assignment requirements and dates against it before submission. The supplied brief lists October 21, 2026, 23:59 (timezone unspecified) for the proposal and October 22 for the presentation. Group/member placeholders remain. Coursework submission is separate from hosting the visitor app.
 
 ## Project hierarchy
 
@@ -105,6 +106,7 @@ mvp/
 │   ├── visitor-api.ts, visitor-sessions.ts, redis-visitor-sessions.ts
 │   ├── provider.ts, provider-config.ts, provider-budget.ts, provider-timing.ts, provider-metrics.ts
 │   ├── openai-provider.ts, openai-input.ts, openai-schema.ts, openai-response.ts, openai-stream.ts
+│   ├── floor-graph.ts, floor-search.ts, floor-coverage.ts, campus-journey.ts
 │   ├── label-localization.ts, session.ts
 │   ├── photo-localization.ts, photo-plan-context.ts  Legacy source-comparison utilities
 │   ├── photo-evidence.ts, photo-media.ts, photo-grounding.ts, photo-doorways.ts, room-labels.ts
@@ -122,14 +124,15 @@ mvp/
 │   ├── topology-english-migration.json  Fingerprints of earlier application text and translated definitions
 │   ├── connection-candidates.json  Unverified source-grounded questions; never route edges
 │   ├── raw/                       90 unmodified official PDFs
-│   ├── spatial/                   pilot-ocr, plan-annotations, reviewed-network, passage-inquiries, corridor-traces JSON and checksums
-│   ├── geolocation/               Archived official GIS footprints and twelve floor calibration records
+│   ├── spatial/                   pilot-ocr, plan-annotations, reviewed-network, passage-inquiries, corridor-traces, floor-circulation and floor-graphs JSON and checksums
+│   ├── geolocation/               Archived official GIS footprints and floor calibration records
 │   ├── text/                      Extracted text, boxes and provenance
 │   └── visual/                    index.json, png/, geometry/, atlas/
 ├── scripts/
 │   ├── prepare_maps.py, prepare_visual_maps.py, prepare_pilot_labels.py
 │   ├── export-pilot-network.ts, query-spatial.ts
-│   ├── prepare-geolocation.ts
+│   ├── floor_graph/              Offline PDF label, doorway and walking-surface compiler
+│   ├── sample-floor-routes.ts, prepare-geolocation.ts
 │   ├── validate-data.ts, build-vercel.ts, summarize-ai-metrics.ts
 │   └── render_proposal.py
 ├── tests/
@@ -145,12 +148,12 @@ mvp/
 │   ├── topology-candidates.test.ts, topology-english.test.ts, wayfinding.test.ts, wayfinding-api.test.ts
 │   ├── ai-wayfinding.test.ts, wayfinding-fixtures.ts, route-geometry.test.ts, route-recovery.test.ts
 │   ├── reviewed-navigation.test.ts, label-localization.test.ts, floor-four-passage.test.ts
-│   ├── sw03-1710-route.test.ts
+│   ├── sw03-1710-route.test.ts, route-coverage-message.test.ts
 │   └── e2e/journey.spec.ts, photo.spec.ts
 ├── docs/
 │   ├── project-brief.txt, requirements.md, architecture.md, data.md
 │   ├── provider.md, operations.md, photo-localization.md, walkthrough.md
-│   ├── device-location.md
+│   ├── device-location.md, floor-routing.md
 │   ├── verification.md, proposal.md, topology-editor.md, spatial-retrieval.md
 │   └── screenshots/  Automated test artifacts; mocked results are labeled
 ├── output/pdf/proposal_groupnumber.pdf

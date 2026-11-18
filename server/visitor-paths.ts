@@ -2,13 +2,15 @@
 import { z } from 'zod';
 import { checkedSpatialJson, pilotEvidence } from './pilot-evidence';
 import {
+  planLabel,
+  type TopologyEdge,
   normalizedPointSchema,
   doorwayOpeningSchema,
   type ConnectionCandidate,
   type TopologyDocument,
   type TopologyEligibility,
 } from '../src/topology';
-import type { PagePoint } from '../src/wayfinding';
+import type { PagePoint, MapStop } from '../src/wayfinding';
 import type { VisualPlan } from '../src/types';
 import { topologyContentHash } from './topology-provenance';
 import type { SourceDoorwayOpening } from './route-geometry';
@@ -157,7 +159,9 @@ export function visitorPassages(
     }
   >();
   const doors = new Map<string, string>();
-  for (const trace of corridorTraces(candidates)) {
+  const definitionsWithTraces = corridorTraces(candidates);
+  const activeTraceIds = new Set<string>();
+  for (const trace of definitionsWithTraces) {
     const answer = latest.get(trace.candidateId);
     if (
       !answer?.bindings ||
@@ -188,6 +192,7 @@ export function visitorPassages(
     )
       continue;
     allowed.add(edge.id);
+    activeTraceIds.add(trace.candidateId);
     traces.set(edge.id, {
       fromId: from.id,
       path: [trace.from, ...trace.bends, trace.to],
@@ -203,5 +208,32 @@ export function visitorPassages(
     if (trace.arrivalDoorId && doorForTrace(trace, trace.arrivalDoorId, trace.to))
       doors.set(trace.arrivalDoorId, to.id);
   }
-  return { allowed, traces, doors };
+  const withdrawn = definitionsWithTraces
+    .filter(
+      (trace) =>
+        latest.has(trace.candidateId) &&
+        !activeTraceIds.has(trace.candidateId) &&
+        plans.some((p) => p.id === trace.planId && p.sourceSha256 === trace.sourceSha256),
+    )
+    .map((trace) => ({
+      planId: trace.planId,
+      path: [trace.from, ...trace.bends, trace.to],
+    }));
+  return { allowed, traces, doors, withdrawn };
+}
+
+export function stepText(kind: TopologyEdge['kind'], to: MapStop, plans: VisualPlan[]) {
+  const target = planLabel(plans.find((p) => p.id === to.planId)!);
+  switch (kind) {
+    case 'stairs':
+      return `Take the stairs to ${target}.`;
+    case 'elevator':
+      return `Take the elevator to ${target}.`;
+    case 'building-link':
+      return `Use the connecting passage to ${target}.`;
+    case 'outdoor':
+      return `Go outside and enter through the marked door on ${target}. The outdoor walking line has not been mapped.`;
+    case 'corridor':
+      return `Follow the marked corridor to ${to.label}.`;
+  }
 }

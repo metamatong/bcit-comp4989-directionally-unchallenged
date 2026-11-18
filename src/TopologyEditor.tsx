@@ -301,7 +301,7 @@ export default function TopologyEditor({
         <div className="topology-title-row">
           <div>
             <h1>Connect the floor plans</h1>
-            <p>SE12 · SW03 · SW01</p>
+            <p>BCIT Burnaby floor plans</p>
           </div>
           <div className="topology-actions">
             <button

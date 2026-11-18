@@ -55,7 +55,7 @@ const hint = (buildings: string[]): GpsBuildingHint => ({
 });
 
 it('resolves 302 to the unique SE12 source doorway using extracted evidence only', () => {
-  const { result, session } = locate([label('302')]);
+  const { result, session } = locate([label('302')], hint(['SE12']));
   expect(result).toMatchObject({
     outcome: 'candidates',
     method: 'photo-label-retrieval',
@@ -69,7 +69,7 @@ it('resolves 302 to the unique SE12 source doorway using extracted evidence only
 });
 
 it('uses all clear labels to constrain the floor and the attached sign to select its doorway', () => {
-  const { result } = locate([label('302'), label('306', 'other')]);
+  const { result } = locate([label('302'), label('306', 'other')], hint(['SE12']));
   expect(result.candidates[0].doorwayVicinity?.room).toBe('302');
   expect(result.candidates[0].labelMatches.map((match) => match.observedLabel)).toEqual([
     '302',
@@ -97,7 +97,7 @@ it('abstains on conflicting, unknown, uncertain and directional-only readings', 
 });
 
 it('keeps directional signs as evidence without treating them as the current doorway', () => {
-  const { result } = locate([label('302'), label('2605', 'directional-sign')]);
+  const { result } = locate([label('302'), label('2605', 'directional-sign')], hint(['SE12']));
   expect(result.candidates[0].doorwayVicinity?.room).toBe('302');
   expect(result.labelRetrieval.clearLabels).toEqual(['302', '2605']);
 });
@@ -124,7 +124,9 @@ it('uses fresh GPS building candidates and reports contradictions or an outside-
 });
 
 it('narrows a repeated source identifier using the opted-in GPS building candidates', () => {
-  expect(locate([label('S300', 'other')]).result.candidates).toEqual([]);
+  const unscoped = locate([label('S300', 'other')]);
+  expect(unscoped.session.campusLocation).toBeNull();
+  expect(unscoped.result.candidates.length).toBeGreaterThan(1);
   expect(locate([label('S300', 'other')], hint(['SE12'])).result).toMatchObject({
     outcome: 'candidates',
     gpsStatus: 'used',

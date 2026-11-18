@@ -11,6 +11,8 @@ export type PlaceChoice = {
   point?: PagePoint;
 };
 export type DestinationMatch = { requested: string; matched: string };
+export type OriginIssue =
+  'unmapped-doorway' | 'unmapped-connection' | 'ambiguous-doorway' | 'ambiguous-region';
 export type WalkingStep = {
   kind: 'corridor' | 'stairs' | 'elevator' | 'building-link' | 'outdoor';
   from: MapStop;
@@ -44,6 +46,7 @@ export type NavigationResult = {
         | 'unmapped-origin-and-destination'
         | 'no-route';
       message: string;
+      originIssue?: OriginIssue;
     }
   | { status: 'route'; origin: MapStop; destination: MapStop; steps: WalkingStep[] }
 );

@@ -43,7 +43,7 @@ export type PhotoLabelReading = {
   text: string;
   clarity: 'clear' | 'uncertain';
   viewId: 'full' | PhotoDetailCrop['id'];
-  kind?: 'room' | 'building' | 'floor';
+  kind?: 'room' | 'building' | 'floor' | 'landmark';
   placement?: 'door' | 'directional-sign' | 'other' | 'unknown';
 };
 export type PhotoFeatures = {
@@ -93,6 +93,9 @@ export type CampusLocationCandidate = {
   limitations: string[];
   labelMatches: LabelMatch[];
   sourceLabels?: PlanLabelReference[];
+  /** Exact source label used to identify this place; it is not a doorway or camera position. */
+  anchorLabel?: string;
+  sourcePlaceId?: string;
   verification: 'unverified-ai-hypothesis';
 } & (
   | { bounds: PlanBounds | null; doorwayVicinity?: undefined }

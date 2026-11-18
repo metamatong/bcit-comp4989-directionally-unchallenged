@@ -6,6 +6,7 @@ import type {
   VisualPlan,
 } from '../types';
 import { buildingLabel, planLabel } from '../topology';
+import { RouteMapImage } from './RouteMap';
 
 export function PlanRegion({
   plan,
@@ -188,6 +189,63 @@ export function CampusLocationResults({
         );
       })}
       {analysis.clarification && <p className="clarification-note">{analysis.clarification}</p>}
+    </section>
+  );
+}
+
+/** A repeated sign can be resolved using the same evidence receipt. */
+export function StartingPlaceChoices({
+  candidates,
+  plans,
+  onSelect,
+  busy,
+}: {
+  candidates: CampusLocationCandidate[];
+  plans: VisualPlan[];
+  onSelect: (id: string) => void;
+  busy: boolean;
+}) {
+  return (
+    <section className="journey-panel" aria-label="Starting location choices">
+      <h2>Which place are you at?</h2>
+      {plans.flatMap((plan) => {
+        const choices = candidates.filter((c) => c.planId === plan.id);
+        if (!choices.length) return [];
+        const markers = choices.flatMap((c, i) => {
+          const box = c.sourceLabels?.find((ref) => ref.id === c.sourcePlaceId)?.bounds;
+          return box
+            ? [
+                {
+                  point: { x: (box[0] + box[2]) / 2, y: (box[1] + box[3]) / 2 },
+                  symbol: String(i + 1),
+                  label: c.anchorLabel ?? 'Place',
+                },
+              ]
+            : [];
+        });
+        return (
+          <div key={plan.id}>
+            {choices.length > 1 && (
+              <RouteMapImage
+                plan={plan}
+                markers={markers}
+                label={'Matching signs on ' + planLabel(plan)}
+              />
+            )}
+            {choices.map((choice, i) => (
+              <button
+                key={choice.id}
+                className="secondary"
+                disabled={busy}
+                onClick={() => onSelect(choice.id)}
+              >
+                {planLabel(plan)} · {choice.anchorLabel}
+                {choices.length > 1 ? ' · Mark ' + (i + 1) : ''}
+              </button>
+            ))}
+          </div>
+        );
+      })}
     </section>
   );
 }
