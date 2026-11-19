@@ -68,6 +68,24 @@ it('resolves 302 to the unique SE12 source doorway using extracted evidence only
   expect(result.candidates[0].matches.every((match) => match.kind === 'printed-label')).toBe(true);
 });
 
+it('matches a room identifier followed by its source-grounded room type', () => {
+  const { result, session } = locate([label('302 Classroom')]);
+  expect(result).toMatchObject({
+    outcome: 'candidates',
+    labelRetrieval: {
+      exactMatchPlanIds: ['SE12-F3-p1'],
+      clearLabels: ['302 CLASSROOM'],
+      unmatchedLabels: [],
+      partial: false,
+    },
+    candidates: [{ planId: 'SE12-F3-p1', anchorLabel: '302' }],
+  });
+  expect(result.candidates[0].labelMatches).toEqual([
+    { observedLabel: '302 Classroom', planLabel: '302' },
+  ]);
+  expect(session.campusLocation?.planId).toBe('SE12-F3-p1');
+});
+
 it('uses all clear labels to constrain the floor and the attached sign to select its doorway', () => {
   const { result } = locate([label('302'), label('306', 'other')], hint(['SE12']));
   expect(result.candidates[0].doorwayVicinity?.room).toBe('302');
@@ -77,13 +95,16 @@ it('uses all clear labels to constrain the floor and the attached sign to select
   ]);
 });
 
-it.each(['3021', '0302', '302A'])('preserves the complete identifier %s', (text) => {
-  expect(
-    locate([label(text)]).result.candidates.some(
-      (candidate) => candidate.doorwayVicinity?.room === '302',
-    ),
-  ).toBe(false);
-});
+it.each(['3021', '0302', '302A', '3021 Classroom', '0302 Classroom', '302 A Classroom'])(
+  'preserves the complete identifier %s',
+  (text) => {
+    expect(
+      locate([label(text)]).result.candidates.some(
+        (candidate) => candidate.doorwayVicinity?.room === '302',
+      ),
+    ).toBe(false);
+  },
+);
 
 it('abstains on conflicting, unknown, uncertain and directional-only readings', () => {
   for (const labels of [

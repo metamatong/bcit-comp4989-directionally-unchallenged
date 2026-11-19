@@ -59,6 +59,14 @@ export function locationCatalogue(): LocationCatalogue {
     if (!plan || floor.sourceSha256 !== plan.sourceSha256 || !floor.reason || !floor.version)
       throw Error(`Invalid calibration provenance: ${floor.planId}`);
     if (floor.status === 'approximate') {
+      if (
+        !floor.method ||
+        !['manual-corners', 'footprint-outline', 'stacked-cores'].includes(floor.method) ||
+        (floor.method === 'footprint-outline' && floor.registrationRmseMetres === undefined) ||
+        (floor.registrationRmseMetres !== undefined &&
+          (!Number.isFinite(floor.registrationRmseMetres) || floor.registrationRmseMetres < 0))
+      )
+        throw Error(`Invalid calibration method: ${floor.planId}`);
       const fit = fitCalibration(floor.controls, plan.width, plan.height);
       const recorded = [...floor.residualsMetres, floor.heldOutMetres];
       if (
@@ -70,9 +78,11 @@ export function locationCatalogue(): LocationCatalogue {
         throw Error(`Calibration residual mismatch: ${floor.planId}`);
     } else if (
       floor.status !== 'unavailable' ||
+      floor.method !== undefined ||
       floor.controls.length ||
       floor.heldOutMetres !== null ||
-      floor.residualsMetres.length
+      floor.residualsMetres.length ||
+      floor.registrationRmseMetres !== undefined
     )
       throw Error(`Invalid calibration availability: ${floor.planId}`);
   }

@@ -1,4 +1,4 @@
-/** Resolve the current image-free receipt to source occurrences and optional visitor choices. */
+/** Resolve the current image-free receipt to one automatic source-linked starting estimate. */
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
 import type {
@@ -30,22 +30,12 @@ export const labelLocationRequestSchema = z
         capturedAt: z.number().finite(),
         accuracy: z.number().finite().nonnegative(),
       })
-      .strict()
-      .optional(),
+      .strict(),
   })
   .strict();
 export type LabelLocationRequest = z.infer<typeof labelLocationRequestSchema>;
 
-export function selectLocatedCandidate(session: Session, candidateId: string) {
-  const candidate = session.campusAnalysis?.candidates.find((item) => item.id === candidateId);
-  if (!candidate)
-    throw new PhotoEvidenceError('Choose a candidate from the current location result.');
-  session.campusLocation = structuredClone(candidate);
-  session.notice = `Selected the estimated area on ${candidate.building}, floor ${candidate.floor}.`;
-}
-
-function deviceScope(gps: LabelLocationRequest['gps']): DeviceScope | undefined {
-  if (!gps) return;
+function deviceScope(gps: LabelLocationRequest['gps']): DeviceScope {
   const age = Date.now() - gps.capturedAt;
   if (age < -5000 || age > 30000)
     throw new PhotoEvidenceError('The device reading expired. Request a fresh location reading.');
@@ -182,7 +172,7 @@ function corridorCandidate(
 function describe(result: Resolution, candidates: CampusLocationCandidate[], device?: DeviceScope) {
   const names = device?.buildings.join(', ');
   if (result.corridor && candidates.length) {
-    const { area, needsConfirmation, unmatched } = result.corridor;
+    const { area, unmatched } = result.corridor;
     const summary =
       'The marked rooms face corridor ' +
       area.corridor.label +
@@ -194,8 +184,7 @@ function describe(result: Resolution, candidates: CampusLocationCandidate[], dev
         summary +
         (unmatched.length
           ? ' Additional readings without a match: ' + unmatched.join(', ') + '.'
-          : '') +
-        (needsConfirmation ? ' Confirm that you are beside these rooms.' : ''),
+          : ''),
       clarification: '',
     };
   }
@@ -203,7 +192,11 @@ function describe(result: Resolution, candidates: CampusLocationCandidate[], dev
     const gaps = result.unmappedLabels.length
       ? `No floor-plan match for ${result.unmappedLabels.map((l) => '“' + l + '”').join(', ')}.`
       : 'The signs do not all match the same floor plan.';
-    return { summary: gaps + ' Confirm the sign beside you to start.', clarification: '' };
+    const best = candidates[0];
+    return {
+      summary: `${gaps} The best photo match is ${best.building}, floor ${best.floor}.`,
+      clarification: '',
+    };
   }
   if (candidates.length === 1) {
     const c = candidates[0];
@@ -214,30 +207,41 @@ function describe(result: Resolution, candidates: CampusLocationCandidate[], dev
   }
   if (candidates.length)
     return {
-      summary: 'Several places match the signs in this photo. Select your starting location.',
+      summary: `GPS narrows the building to ${candidates[0].building}. The strongest photo match is floor ${candidates[0].floor}.`,
       clarification: '',
     };
   if (result.gpsStatus === 'building-only')
     return {
       summary: `Device location points to ${names}. A floor and starting place could not be established from the signs.`,
-      clarification: 'Use a closer photo of the room or stair sign beside you.',
+      clarification: 'Use a photo with a room or stair label in view.',
     };
   if (result.gpsStatus === 'conflict' || result.gpsStatus === 'outside-pilot')
     return {
       summary: 'The device reading does not agree with the photo matches.',
-      clarification: 'Check that you are at the photographed location or use a clearer sign.',
+      clarification:
+        'The GPS building and photo labels disagree. Take a new photo from your current location.',
     };
   if (result.directionalOnly && result.references.length)
     return {
       summary:
         'The room numbers match the plans, but direction signs can point to rooms elsewhere.',
-      clarification: 'Use an identifying sign on or beside a nearby doorway.',
+      clarification: 'Use a room or stair label on or beside a nearby doorway.',
     };
   return {
     summary: 'The extracted labels do not identify a starting place on the supplied floor plans.',
     clarification:
-      'Use a photo showing the room sign beside you. Enable device location only while standing where the photo was taken.',
+      'Use a photo showing a room sign beside you, then request directions again from that location.',
   };
+}
+
+function startMatchScore(match: StartMatch) {
+  return (
+    match.matched.length * 4 +
+    Number(match.observed.placement === 'door') * 8 +
+    Number(match.observed.kind === 'room') * 2 +
+    Number(match.place.label[0] === match.floor.plan.floor) * 3 -
+    match.unmatched.length * 2
+  );
 }
 
 export function locateFromLabels(
@@ -271,16 +275,19 @@ export function locateFromLabels(
         s.clarity === 'clear' &&
         s.placement === 'door',
     );
+  const rankedMatches = [...result.matches].sort(
+    (a, b) =>
+      startMatchScore(b) - startMatchScore(a) ||
+      a.floor.plan.id.localeCompare(b.floor.plan.id) ||
+      a.place.id.localeCompare(b.place.id),
+  );
   const candidates = contradictoryDoorCount
     ? []
     : result.corridor
       ? [corridorCandidate(result.corridor, result.references)]
-      : result.matches.map((m) => candidateFromSignMatch(m, result.references));
+      : rankedMatches.map((m) => candidateFromSignMatch(m, result.references));
   if (!candidates.length && result.gpsStatus === 'used') result.gpsStatus = 'building-only';
-  const candidate =
-    !result.partial && !result.corridor?.needsConfirmation && candidates.length === 1
-      ? candidates[0]
-      : undefined;
+  const candidate = candidates[0];
   const { summary, clarification } = describe(result, candidates, device);
   const analysis: CampusPhotoAnalysis = {
     requestId: input.requestId,
@@ -315,10 +322,8 @@ export function locateFromLabels(
     session,
     'locate_from_labels',
     candidate
-      ? 'Resolved extracted evidence to a source-linked starting estimate.'
-      : candidates.length
-        ? 'Offered source matches for visitor confirmation.'
-        : 'The evidence did not establish a starting place.',
+      ? 'Selected the best source-linked starting estimate using photo evidence and GPS building scope.'
+      : 'The evidence did not establish a starting place.',
     candidate ? [candidate.sourceRef] : [],
     performance.now() - started,
   );

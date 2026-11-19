@@ -29,7 +29,6 @@ export type MapStop = {
   point: PagePoint;
   startRegion?: PlanBounds;
 };
-export type StartingPoints = { networkRevision: number; origins: MapStop[] };
 export type PlaceChoice = {
   id: string;
   planId: string;
@@ -54,9 +53,7 @@ export type NavigationChoice = {
   candidateId: string;
   destination: string;
   networkRevision?: number;
-  originId?: string;
   destinationId?: string;
-  originPoint?: FloorPin;
   destinationPoint?: FloorPin;
 };
 export type NavigationResult = {
@@ -68,7 +65,6 @@ export type NavigationResult = {
 } & (
   | {
       status:
-        | 'choose-origin'
         | 'choose-destination'
         | 'unknown-destination'
         | 'restricted-place'

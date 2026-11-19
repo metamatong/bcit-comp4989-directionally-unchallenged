@@ -10,11 +10,13 @@ export type FloorCalibration = {
   planId: string;
   sourceSha256: string;
   status: 'approximate' | 'unavailable';
+  method?: 'manual-corners' | 'footprint-outline' | 'stacked-cores';
   reason: string;
   version: string;
   controls: CalibrationControl[];
   residualsMetres: number[];
   heldOutMetres: number | null;
+  registrationRmseMetres?: number;
 };
 export type LocationCatalogue = {
   geographicSource: { url: string; retrievedAt: string; file: string; sha256: string };

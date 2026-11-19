@@ -12,7 +12,7 @@ import {
   type FloorGraph,
   type FloorPlace,
 } from './floor-graph';
-import { labelKey } from './pilot-evidence';
+import { labelKey, looksLikeIdentifier } from './pilot-evidence';
 import type { SharedCorridor } from './shared-corridor';
 
 type Sign = PhotoLabelReading;
@@ -31,8 +31,31 @@ const hasDirectionCue = (s: Sign) =>
 const isLocalSign = (sign: Sign) => sign.placement !== 'directional-sign' && !hasDirectionCue(sign);
 const keys = (signs: Sign[]) => distinct(signs.map((s) => labelKey(s.text)));
 
-function matchesSign(place: FloorPlace, sign: Sign) {
+/** A room sign may include a descriptive type beside its exact printed room identifier. */
+function placeLabel(sign: Sign) {
   const key = labelKey(sign.text);
+  if (looksLikeIdentifier(key) || (sign.kind && sign.kind !== 'room')) return key;
+  const tokens = key.split(' ');
+  const identifiers = tokens.filter(looksLikeIdentifier);
+  if (identifiers.length !== 1) return key;
+  const identifierIndex = tokens.findIndex(looksLikeIdentifier);
+  // Keep split prefixes/suffixes and other numeric tokens intact instead of truncating them.
+  if (
+    tokens.some(
+      (token, index) => index !== identifierIndex && (!/^[A-Z]+$/.test(token) || token.length < 3),
+    )
+  )
+    return key;
+  return identifiers[0];
+}
+
+function describedPlaceKind(sign: Sign) {
+  if (sign.kind && sign.kind !== 'room') return;
+  return labelKey(sign.text).split(' ').includes('CLASSROOM') ? 'classroom' : undefined;
+}
+
+function matchesSign(place: FloorPlace, sign: Sign) {
+  const key = placeLabel(sign);
   return place.label === key || (sign.kind === 'landmark' && landmarkKind(key) === place.kind);
 }
 
@@ -67,7 +90,7 @@ function matchesOnFloor(
       if (!linked?.length) return [];
       const reading = linked.includes(place)
         ? place
-        : (linked.find((p) => p.label === labelKey(sign.text)) ??
+        : (linked.find((p) => p.label === placeLabel(sign)) ??
           (linked.length === 1 ? linked[0] : undefined));
       // A generic sign may match different stair codes. Only name a specific one when grounded.
       return reading ? [{ observedLabel: sign.text, planLabel: reading.label }] : [];
@@ -101,14 +124,15 @@ function commonCorridor(
   const hallway = features?.corridorShape === 'straight' && (features.visibleDoorCount ?? 0) > 0;
   const usable = readings.filter((s) => !hasDirectionCue(s) && (isLocalSign(s) || hallway));
   const allRoomSigns = usable.filter((s) => !s.kind || s.kind === 'room');
-  if (keys(allRoomSigns).length < 2) return;
+  const roomLabels = distinct(allRoomSigns.map(placeLabel));
+  if (roomLabels.length < 2) return;
   const supported = usable.filter((s) => pages.some((p) => p.hits.has(s)));
   const possible = matchingFloors(scope, supported);
   if (possible.length !== 1) return;
   const page = possible[0],
     rooms: FloorPlace[] = [];
   const roomSigns = supported.filter((s) => !s.kind || s.kind === 'room');
-  for (const key of keys(roomSigns)) {
+  for (const key of distinct(roomSigns.map(placeLabel))) {
     const occurrences = page.floor.places.filter((p) => p.label === key);
     if (occurrences.length !== 1) return;
     rooms.push(occurrences[0]);
@@ -122,7 +146,7 @@ function commonCorridor(
   const matched = supported.flatMap((sign) => {
     const places = page.hits.get(sign) ?? [];
     const p =
-      places.find((p) => p.label === labelKey(sign.text)) ??
+      places.find((p) => p.label === placeLabel(sign)) ??
       (places.length === 1 ? places[0] : undefined);
     return p ? [{ observedLabel: sign.text, planLabel: p.label }] : [];
   });
@@ -141,10 +165,25 @@ export function resolveStartingSigns(
   const local = readings.filter(isLocalSign);
   const buildings = clear.filter((s) => s.kind === 'building' && isLocalSign(s));
   const floors = clear.filter((s) => s.kind === 'floor' && isLocalSign(s));
+  const describedKinds = new Map<Sign, string>();
+  for (const sign of readings) {
+    const kind = describedPlaceKind(sign);
+    const label = placeLabel(sign);
+    if (
+      kind &&
+      graphs.ordered.some((floor) =>
+        floor.places.some((place) => place.label === label && place.kind === kind),
+      )
+    )
+      describedKinds.set(sign, kind);
+  }
   const pages: FloorReadings[] = graphs.ordered.map((floor) => {
     const hits = new Map<Sign, FloorPlace[]>();
     for (const sign of readings) {
-      const places = floor.places.filter((p) => matchesSign(p, sign));
+      const describedKind = describedKinds.get(sign);
+      const places = floor.places.filter(
+        (p) => matchesSign(p, sign) && (!describedKind || p.kind === describedKind),
+      );
       if (places.length) hits.set(sign, places);
     }
     return { floor, hits };

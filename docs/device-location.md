@@ -1,46 +1,36 @@
 # Device location and walking
 
-The visitor can check **Use device location with this photo** while standing at its capture location. After the one-pass photo extraction, the browser requests one fresh location reading and computes which official building footprints intersect its accuracy area. Only those building IDs, accuracy, timestamp and source hash are sent to the metadata-only location endpoint. The server checks freshness and source provenance, then intersects building candidates with exact photo-label matches. GPS cannot choose a floor or route point. A GPS contradiction produces an explicit unresolved location result.
+GPS is required when a visitor taps **Get Directions**. The browser requests a fresh location reading immediately from that tap, before photo processing. If photo processing takes long enough for the reading to age, the app refreshes it before matching. On the device, the app intersects its reported accuracy area with the official campus building footprints. The metadata-only location request sends matching building IDs, accuracy, capture time and source hash; raw coordinates stay in browser memory. If the browser cannot provide GPS, the route request stops with an error.
 
-The default is unchecked. Permission denial or acquisition failure is shown, and extracted labels can still resolve a unique place. Photo replacement, cancellation, page hiding and unmount cancel pending acquisition. Coordinates remain in browser memory. Current device location applies to the device now, so an uploaded photograph from another location should be tested with GPS unchecked.
+The app combines that building match with the photo labels and automatically selects the strongest source-linked starting estimate. GPS narrows the building; it cannot identify the floor. The photo evidence identifies the floor and nearby place. Visitors are not asked to choose a starting room or doorway.
 
-Walking directions retain the explicitly started foreground watch. Raw position readings never advance the route.
+## Guided directions
 
-## Walking and permissions
+**GO** starts a fresh foreground GPS watch and opens step-by-step directions only after a fresh reading arrives. The route step selects the floor map. The position dot and reported accuracy area update from each fresh GPS reading when that floor has a geographic alignment. GPS does not identify floors or advance route steps; the visitor advances with the route controls. Tracking stops when the visitor returns to the route overview, finishes, or leaves the page.
 
-Expand **Device position** below the continuous map stack, then select **Show my position** to start one foreground watch. **Stop tracking** cancels it. **Resume tracking** requires a new reading. After physically transferring floors or buildings, select the new **Current floor**, then resume. Selection applies to the individual floor visit, including repeat visits to one page, and stops the previous watch. All route maps stay visible. Collapsing the controls preserves the watch and displays the active tracking floor in the summary.
+The browser requests high accuracy, zero cached age and a 15-second timeout. A reading is eligible only when fresh and valid. The live overlay disappears when readings become stale. Browsers may combine GPS with network signals, and reported accuracy can understate indoor error. Phone use requires HTTPS and location permission; localhost works on the computer running the app. [W3C Geolocation](https://www.w3.org/TR/geolocation/)
 
-Acquisition requests high accuracy, zero cached age and a 15-second timeout. Valid coordinates and non-negative accuracy with acquisition age between zero and two seconds at receipt are eligible. Watch timestamps must increase. Raw readings draw an approximate position and its reported uncertainty area. A 500 ms freshness check removes the live overlay after two seconds even if callbacks stop. The dated last reading and app-acquired route start remain available. Raw projection preserves off-corridor readings and the viewport stays fixed. Visitors manually follow route transfers and outdoor geometry gaps.
+## Building and floor coverage
 
-Tracking pauses on page hide, permission revocation and route replacement/unmount. Returning offers explicit resume. Phone use requires HTTPS and permission. Localhost works on the computer running the app. An ordinary HTTP LAN address cannot provide geolocation. This change includes no deployment. Physical Android/iOS and lock-screen behavior remain unverified.
+The archived official WGS84 building-footprint data includes SE12, SW03, SW05 and SW01. That gives GPS a building-level match for each requested building, but it does not align a floor drawing to latitude and longitude.
 
-Browsers can combine GPS and network signals, and may ignore a high-accuracy request. Reported accuracy may understate indoor error. The two-second window is an initial prototype-derived setting in `src/location/browser-location.ts` that needs device evaluation. [W3C Geolocation](https://www.w3.org/TR/geolocation/)
+The location catalogue covers all 89 supplied floor plans. Fourteen have approximate drawing-to-coordinate alignments: all four SE12 floors, all four SW01 floors, all four SW03 floors, and both SW05 floors. The other 75 plans remain unavailable; the app hides the dot on those drawings instead of projecting it to a guessed location.
 
-## Source provenance and floor coverage
+| Building | Building GPS footprint | Floor-plan GPS alignment |
+| -------- | ---------------------- | ------------------------ |
+| SE12     | Available              | Floors 1–4               |
+| SW03     | Available              | Floors 1–4               |
+| SW05     | Available              | Floors 1–2               |
+| SW01     | Available              | Floors 1–4               |
 
-`data/campus/geolocation/bcit-pilot-footprints.json` archives official BCIT WGS84 footprints for SW1 (OBJECTID 19), SW3 (21) and SE12 (33), retrieved November 16, 2026. The exact query URL, date and SHA-256 appear in `calibrations.json`. Existing source PDFs remain unchanged. Original BCIT attribution and usage restrictions continue to apply. [Official GIS layer](https://services2.arcgis.com/IgcrRjRW95F0HKSw/arcgis/rest/services/Bsite_Building_Footprint_20241022/FeatureServer/0) · [Source terms](data.md)
+SE12 floor 3 retains its original source-bound, four-corner control alignment; its held-out corner discrepancy is approximately 1.05 m. Twelve other floors use separate full-page registrations to their building's archived WGS84 footprint: SE12-F1/F2/F4, SW01-F1/F2/F3, all four SW03 floors, and both SW05 floors. Their boundary-registration RMS values are 0.76/0.97/0.26 m for SE12-F1/F2/F4, 0.72/0.75/0.86 m for SW01-F1/F2/F3, 0.37/0.28/0.98/1.00 m for SW03-F1/F2/F3/F4, and 0.09/0.09 m for SW05-F1/F2. SW01-F4 is aligned by stacking its drawing to SW01-F3 at three corresponding stair cores; a fourth stair-core pair was held out and differed by approximately 1.62 m. Boundary-registration RMS values measure fit to the outline used to construct the transform; they are not independent ground-truth checks, indoor GPS accuracy, or a general error bound. The stacked-core held-out check is a drawing-to-drawing consistency check, not a field measurement. The source PDF hash is pinned for every alignment so a changed drawing cannot silently reuse its old transform.
 
-The visitor catalogue now records calibration availability for all 89 sheets. The additional official campus footprint response is archived as `bcit-burnaby-footprints.json`. It includes matches for 43 of the 45 supplied building IDs. NE21 and NW7 have no matching footprint. SE12 floor 3 retains its original controls and the other sheets use building-level evidence when available.
+The footprint registration approach differs from SE12-F3's direct corner correspondences because most plans do not show the same identifiable geographic corner controls. It uses the plan outline and official footprint for those floors; SW01-F4 uses stacked stair-core correspondences. This provides approximate overlays for the requested set, but it does not establish true indoor GPS accuracy. Visitors are not asked to place or approve coordinates.
 
-| Building | Floor | Device comparison | Walking overlay |
-|---|---|---|---|
-| SE12 | 3 | Camera region when available, otherwise building | Approximate prototype alignment |
-| SE12 | 1 | Building footprint | Unavailable. Rotated partial drawing needs geographic controls. |
-| SE12 | 2 | Building footprint | Unavailable. Different extent and incomplete main-corner correspondence. |
-| SE12 | 4 | Building footprint | Unavailable. Similar rectangle requires independent geographic control review. |
-| SW03 | 1–4 | Building footprint | Unavailable. Four independent geographic controls remain unresolved on each drawing. |
-| SW01 | 1–4 | Building footprint | Unavailable. Four independent geographic controls remain unresolved on each drawing. |
+The public [BCIT Map Portal](https://experience.arcgis.com/experience/724c4dc67eed40fdbe8e5bbc358e8c55) exposes campus GIS layers such as building footprints, accessible routes and elevator/lift locations. Its public layers do not provide a floor-plan-to-coordinate transform for every floor. The supplied plans are architectural PDFs with different page extents, rotations and drawing bounds. To improve confidence in these approximate alignments and cover the remaining plans, coordinate-aware indoor CAD/BIM or GIS source data would be preferable; transforms should remain source-hash-bound and be validated against independent controls. This is a source-data/development task; visitors should never be asked to set coordinates. [BCIT Campuses & Directions](https://www.bcit.ca/about/visit/campuses-directions/)
 
-SE12 floor 3 shares the prototype PDF hash `521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1`. Preparation reverses its crop (200,660)–(3800,1800) and resize to 2800 × 887 from a 4000-pixel-wide page render. Fitting occurs in full-page pixels before normalization to preserve aspect ratio. Three controls fit a similarity transform and the fourth is held out. Its approximately 1.06 m discrepancy measures that landmark's alignment. The ground footprint can differ from floor 3. Indoor device accuracy and a general drawing error bound remain unmeasured.
+## Privacy and remaining gaps
 
-Add independently identified controls to `scripts/prepare-geolocation.ts`, regenerate with `node --import tsx scripts/prepare-geolocation.ts`, and run `npm run data:validate` before enabling another floor. Preserve source hashes, controls, residuals, held-out discrepancy, review notes and version. Changed sources require renewed review. Calibration supplies overlay projection only and has no route approval authority.
+GPS readings stay in active browser memory and are omitted from provider prompts, logs and persistent session state. The app sends only the building candidates derived on-device. Reloading clears readings. The browser and operating system may use their own location service.
 
-## Privacy and verification
-
-Walking readings stay in active browser memory and are omitted from application requests, provider prompts, logs and persistent storage. Starting location tracking is separate from submitting a photo. The browser/operating system may use its own location service. Reload clears the readings. The application saves no walk history.
-
-The November 16 implementation passed 259 unit/API tests, the TypeScript/production build and data validation. Those historical checks included an earlier photo-associated device option; that option is not part of the current visitor flow. In-memory DOM tests also cover tracking, manual floor confirmation, staleness, late callbacks, revocation and teardown. Geometry tests cover crop reversal, aspect ratio, source hashes and reported-area comparison. Provider and device inputs are mocked. Browser/screenshot checks were skipped as requested. Live photo comparison, physical-phone behavior and on-campus accuracy remain unverified.
-
-Field evaluation should compare app-selected photo starts against independently verified reference locations, then separately evaluate the optional walking overlay. Measure start-selection errors, walking error, fresh-reading coverage and misleading position displays at corridors, entrances and transfers on at least two phones. Record reference uncertainty, devices and sample counts. Improved indoor positioning remains unverified.
-
-Starting step-by-step directions with **GO** stops the overview position watch. Guided steps advance only through visitor button presses; no GPS update or timer advances them.
+Floor-plan alignment is not enabled for all 89 supplied floors yet. The remaining 75 plans need source-grounded georeference data. No transform is copied to a differently shaped drawing, and no GPS dot is fabricated when alignment is absent.

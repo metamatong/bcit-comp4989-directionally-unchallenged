@@ -35,6 +35,7 @@ export function RouteMapImage({
           { x: bounds[2], y: bounds[3] },
         ]
       : []),
+    ...(device ? [device.point] : []),
   ];
   const width = plan.width,
     height = plan.height;

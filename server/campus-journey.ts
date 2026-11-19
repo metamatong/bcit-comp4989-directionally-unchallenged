@@ -181,11 +181,6 @@ export class CampusJourney {
       return [];
     return this.stops(place);
   }
-  selectableOrigins(candidate: CampusLocationCandidate) {
-    const options = this.origins(candidate);
-    const mapped = options.filter((option) => !option.unlinked);
-    return (mapped.length ? mapped : options).map((option) => option.stop);
-  }
   private destinations(value: string) {
     const { building, floor, token } = queryParts(value);
     const scoped = floorGraphs().places.filter((place) => {
@@ -255,18 +250,10 @@ export class CampusJourney {
     return { choices, corrected };
   }
   route(candidate: CampusLocationCandidate, request: NavigationChoice): NavigationResult {
-    const starts = request.originPoint
-      ? [pinnedStop(candidate, 'origin', request.destination, request.originPoint, this.search)]
-      : this.origins(candidate);
+    const starts = this.origins(candidate);
     const pinned =
       request.destinationPoint &&
-      pinnedStop(
-        candidate,
-        'destination',
-        request.destination,
-        request.destinationPoint,
-        this.search,
-      );
+      pinnedStop(candidate, request.destination, request.destinationPoint, this.search);
     const { choices, corrected } = pinned
       ? { choices: [{ place: pinned.stop, stops: [pinned] }], corrected: false }
       : this.destinations(request.destination);
@@ -298,12 +285,11 @@ export class CampusJourney {
       .byId.get(candidate.planId)
       ?.places.find((p) => p.id === candidate.sourcePlaceId);
     const targetPlace = targetFloor.places.find((p) => p.id === goal.place.id);
-    const restricted =
-      !request.originPoint && originPlace?.visitorAccess
-        ? originPlace
-        : targetPlace?.visitorAccess
-          ? targetPlace
-          : undefined;
+    const restricted = originPlace?.visitorAccess
+      ? originPlace
+      : targetPlace?.visitorAccess
+        ? targetPlace
+        : undefined;
     if (restricted)
       return {
         ...context,
@@ -338,63 +324,17 @@ export class CampusJourney {
         message: messages[status],
       };
     }
-    const source = originPlace;
-    const selected = request.originId
-      ? starts.find((s) => s.stop.id === request.originId)
-      : starts.length === 1
-        ? starts[0]
-        : undefined;
     if (
-      !selected &&
-      starts.every((s) => s.unlinked) &&
-      !starts.some((s) => goal.stops.some((target) => s.key === target.key))
+      starts.every((start) => start.unlinked) &&
+      !starts.some((start) => goal.stops.some((target) => start.key === target.key))
     )
       return {
         ...context,
         status: 'unmapped-origin',
         originIssue: 'unmapped-connection',
-        message:
-          'The starting door is marked on the floor plan. Its connection to the public walking route is missing.',
+        message: 'The photo location has no connection to the public walking route.',
       };
-    if (!selected || (source?.sharedEntry && !request.originId && !request.originPoint)) {
-      const reachable = this.search.reachable(goal.stops, this.plans, true);
-      const options = starts.filter((s) => reachable.has(s.key));
-      if (!options.length)
-        return {
-          ...context,
-          origins: [],
-          status: goal.stops.every((s) => s.unlinked) ? 'unmapped-destination' : 'no-route',
-          message:
-            'The mapped entrances do not have a continuous approach to ' + destinationName + '.',
-        };
-      return {
-        ...context,
-        origins: options.map((s) => s.stop),
-        status: 'choose-origin',
-        message: source?.sharedEntry
-          ? 'Confirm that you are at this shared entrance to start walking.'
-          : 'Which marked entrance are you beside?',
-      };
-    }
-    if (!goal.stops.some((g) => g.key === selected.key)) {
-      if (selected.unlinked)
-        return {
-          ...context,
-          status: 'unmapped-origin',
-          originIssue: 'unmapped-connection',
-          message:
-            'The selected door is marked on the floor plan. Its connection to the public walking route is missing.',
-        };
-      if (goal.stops.every((s) => s.unlinked))
-        return {
-          ...context,
-          status: 'unmapped-destination',
-          message:
-            destinationName +
-            ' has a marked door. Its approach from the public walking route is missing.',
-        };
-    }
-    const result = this.search.route([selected], goal.stops, request.preferElevators);
+    const result = this.search.route(starts, goal.stops, request.preferElevators);
     if (!result)
       return {
         ...context,

@@ -1,61 +1,36 @@
 # Architecture
 
-DirectionallyUnchallenged uses a React/TypeScript client and Express server for one-pass photo evidence extraction, exact source lookup and floor-graph navigation. The server selects Gemini (default), OpenAI, or Groq through `AI_PROVIDER`. The previous fictional map, deterministic demo routing, closure simulation, OCR sign matching and mode switch have been removed at the user's request.
+DirectionallyUnchallenged uses a React/TypeScript client and Express server for one-pass photo evidence extraction, automatic source localization and floor-plan navigation. The server selects Gemini (default), OpenAI or Groq through `AI_PROVIDER`. Localization and routing use structured evidence and source data without later model calls.
 
-The local listener and Vercel function share the visitor API. Vercel serves a static frontend, verifies compact plan evidence at cold start, and shares encrypted session state across workers. [Deployment and retention](operations.md#vercel)
+## Visitor flow
 
-## Request flow
+1. The browser prepares a photo and detail crops locally. On **Get Directions**, it requests a fresh GPS reading immediately so the browser permission request is tied to the visitor's tap.
+2. The browser sends the photo bundle to the single vision stage for labels, label kind/placement and visible scene features. If that work makes the GPS reading stale, the browser refreshes it before matching.
+3. The browser intersects the GPS accuracy area with official building footprints. Raw coordinates stay on-device; only derived building candidates and metadata go to the location endpoint.
+4. Source localization ranks exact photo-label matches within GPS-compatible buildings and selects the strongest starting estimate. The visitor is not asked to select or confirm a start. GPS cannot distinguish floors.
+5. Navigation resolves the destination and searches generated floor walking areas plus the current mapped transfer data. The route overview is followed by step-by-step maps; the route step selects the floor. A GPS dot is shown only on floors with a geographic calibration.
 
-1. The browser prepares a full photo view and four detail crops from the original bitmap. Selection is local until **Get Directions**.
-2. `POST /api/sessions/:id/photo/evidence` is the only vision stage. The configured provider reads labels, label kind/placement, visible door count, window side and corridor shape without map hints.
-3. A session-bound evidence receipt retains structured fields and the image fingerprint for five minutes. Server media bytes are released after extraction.
-4. If the GPS checkbox is selected, the browser requests one fresh reading after extraction and intersects its accuracy area with the official building footprints. Raw coordinates stay in the browser. Only matching building IDs, timestamp, accuracy and the footprint source hash enter the next request.
-5. `POST /api/sessions/:id/photo/location` sends the evidence ID and optional building hint. It rejects images and client-supplied labels. `label-localization.ts` uses exact source retrieval, all clear nondirectional labels, explicit building/floor signs, door-sign placement and GPS candidates to identify one source-linked estimate. Directional labels remain evidence but cannot establish the current doorway. Repeated locations and partial sign matches require explicit visitor selection. An unsupported extra reading can coexist with a supported sign. Incompatible supported doorways leave the start unresolved. A footprint alone produces a building-only result. Window/count features are recorded as observations, with contradictory zero-door/door-sign evidence rejected.
-6. `POST /api/sessions/:id/navigation` resolves the destination and runs Dijkstra over the compiled floor grids, source doorways and current reviewed transfers. Exact place occurrences stay bound to the source and graph version. Multiple entrances have individual markers. [Floor routing](floor-routing.md)
-7. The client shows one route overview with combined transfer endpoints, then draws the returned coordinates and arrows in a continuous map stack. Each map has a floor label and A/B legend. Zoom and source attribution are shared. Optional walking-position controls are collapsed below the maps; changing the explicitly selected tracking floor stops the watch until resumed.
+## Visitor API
 
-Photo interpretation occurs only in step 2. Source lookup, GPS narrowing and graph routing perform no provider calls. Earlier visual-comparison utilities remain isolated from the visitor API.
+- `GET /api/bootstrap`: visual plan metadata, provider readiness, source coverage and validated building/floor location catalogue.
+- `POST /api/sessions`: creates an empty live-analysis session.
+- `POST /api/sessions/:id/photo/evidence`: the only image and vision request.
+- `POST /api/sessions/:id/photo/location`: metadata-only localization with a required GPS building hint.
+- `POST /api/sessions/:id/navigation`: calculates a route from the automatic photo/GPS start to the requested destination.
+- `POST /api/sessions/:id/navigation/surface`: returns walking cells for a custom destination point.
+- `POST /api/sessions/:id/actions`: resets the session.
+- `GET /api/sessions/:id`, `GET /api/health`: state and readiness.
 
-## API and state
+There is no visitor API for choosing a starting doorway, selecting a starting point on a floor map or approving a connection. The old topology editor route and its write API are not mounted by the application.
 
-- `GET /api/bootstrap`: coverage, visual plan metadata, selected provider/API model, provider readiness and a validated device-location calibration catalogue. A source validation failure supplies `locationNotice` and leaves photo analysis available.
-- `POST /api/sessions`: empty object creates a live-analysis session. Provider readiness controls the setup notice, not a fallback mode.
-- `POST /api/sessions/:id/photo/evidence`: consented photo label reading; returns structured evidence in session state.
-- `POST /api/sessions/:id/photo/location`: metadata-only exact lookup using the evidence receipt and optional GPS building candidates. The `/photo` alias accepts the same metadata-only contract.
-- `POST /api/sessions/:id/navigation/origins` returns mapped starting options for the current source occurrence when any exist. Unconnected physical door hypotheses remain available in the floor inventory.
-- `POST /api/sessions/:id/navigation/surface` returns selectable walking cells for an identified starting floor or an explicitly selected destination. Navigation rechecks each pin against the current sheet and graph.
-- `POST /api/sessions/:id/navigation`: current reviewed-graph route calculation, with source-bound start and destination checks.
-- `POST /api/sessions/:id/actions`: `reset` and explicit selection of a matching starting place.
-- `GET /api/sessions/:id`, `GET /api/health`: state and readiness. The removed `/api/search` endpoint returns HTTP 404.
+## Route data and known migration gap
 
-The private evidence map holds a fingerprint and structured readings only, never media. Location lookup can reuse the receipt until expiry. A new extraction or reset invalidates it.
+`server/floor-graph.ts` loads source-derived room/corridor areas for all supplied plans. `server/floor-search.ts` combines those grids with mapped corridors and floor transfers. Cross-building links are fixed source data. The current published route dataset still contains legacy hand-authored same-building stair/elevator records; replacing these with automatic transfer inference is not complete. Do not describe those records as automatically derived or add a visitor/manual approval step to compensate.
 
-A session contains its capability ID, revision, `mode: live` marker, short-lived photo evidence, campus analysis and selected location hypothesis, provider attempt count, short activity summaries, applied request IDs and expiry. It has no synthetic node, route, destination, disruption or replay fields. Removed action types are rejected. Browser mode preferences are cleared.
+Floor-plan geographic calibration is independent from route connectivity. The campus footprint catalogue supports building-level GPS narrowing, and 14 plans have approximate source-bound overlays: all floors of SE12, SW01 and SW03, plus SW05 floors 1–2. Other floor maps hide the dot until source-grounded transforms are available. See [device location](device-location.md), [photo localization](photo-localization.md) and [floor routing](floor-routing.md).
 
-Idempotency/revision checks and one active mutation per session protect state. Cancellation and deadlines prevent late results committing. Sessions expire after 30 minutes; the service caps sessions at 200 and API traffic at 180 requests/minute/IP. This is a local prototype, not a publicly hardened service.
+## Privacy and runtime
 
-## Evidence and limits
+The private photo receipt retains structured fields and an image fingerprint for five minutes. Request media bytes are released after extraction. Session state contains no raw photo or GPS coordinates. Sessions expire after 30 minutes; the service caps sessions at 200 and API traffic at 180 requests per minute per IP.
 
-Source PDFs, image rasters, text/geometry and reviewed topology are distinct layers. Geometry JSON contains raw drawing primitives, not verified semantic walls or routes. The legacy campus graph/landmark files remain empty placeholders. The local editor's separate `topology.json` stores manually entered points, explicit connections, evidence and review history; it initializes from the published reviewed network.
-
-The configured provider extracts photo evidence. Source records determine the estimated starting place and reviewed connections determine the route. It cannot create a cross-building connection: those steps must match the mapped connections. Generated route points are checked against the selected plans and the photo start/destination evidence before display. No provider confirms a user's physical position, turns raw drawing paths into verified campus connections, or executes instructions found in images/documents. Internal thinking is not requested or logged. Keys remain server-side; photos are never saved with source assets or in session logs.
-
-See [photo localization](photo-localization.md), [provider](provider.md), [data](data.md) and [verification](verification.md).
-
-Walking location runs in `src/location/` as an explicitly started foreground watch. The photo-start flow offers an explicit GPS checkbox and sends only derived building candidates to the server. `server/geolocation.ts` validates archived official footprints and calibration records for the optional walking overlay. Photo/session/navigation requests omit device coordinates. [Device state and coverage](device-location.md)
-
-## Internal topology authoring
-
-The separately loaded `/internal/topology` React view uses only the 12 official SE12/SW3/SW1 plans. Its loopback-only API in `topology-api.ts` operates independently of photo sessions and the configured vision provider. It remains an internal graph inspection/editor; visitor routing uses its approved graph and source corridor traces.
-
-`topology.ts` validates edits, attaches original-source hashes, stores page-normalized points and writes `data/campus/topology.json` using an exclusive lock, expected document revision and atomic rename. Approval records bind to content hashes and record versions, retaining evidence snapshots in review history. Point edits or withdrawal of point approval invalidate incident connection approvals. Client-supplied approval/source fields are rejected.
-
-`routing.ts` computes routes for the internal graph checker: both endpoints and the connection must be approved, have current source hashes, and match their reviewed content/endpoint versions. It respects one-way passages. Edge-count routing and measured-distance routing are explicit objectives; unknown distances never become metric costs. The visitor planner also uses this graph search when the photo start and destination bind to a complete current reviewed path. Additional coverage requires corresponding reviewed route records. See [topology editor](topology-editor.md).
-
-The editor opens on `ConnectionReview`. The server binds each question to its definition, source hashes and page-specific point snapshots. The `answer-candidate` command records a marked-point confirmation and its direction. T with a known direction can promote both endpoints and their connection in one locked transaction. F or unknown withdraws an earlier candidate approval. For an unlocated elevator, `record-floor-observation` records service to a pair of floors and returns a review state. Creating route records still requires the marked-point command. A floor change clears the old page coordinates. [Topology editor](topology-editor.md)
-
-## AI request timing and telemetry
-
-`provider-timing.ts` bounds extraction by a 45-second deadline, with ten seconds of browser response grace. Transport retries use the remaining deadline and request budget. `openai-stream.ts` applies only completed output, and strict schemas bound extracted fields. Source lookup and routing require no inference deadline.
-
-`provider-metrics.ts` emits numeric extraction success/failure telemetry and upstream request IDs. Photos, prompt text and visitor identifiers are excluded. `scripts/summarize-ai-metrics.ts` reports model latency and token distributions.
+The local listener and Vercel function share the visitor API. Vercel verifies compact source assets at cold start and shares encrypted session state across workers. Provider keys remain server-side. This is a local prototype, not a publicly hardened service.

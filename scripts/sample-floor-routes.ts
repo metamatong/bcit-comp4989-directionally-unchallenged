@@ -5,10 +5,11 @@ import type { AddressInfo } from 'node:net';
 import { parseArgs } from 'node:util';
 import { createApp } from '../server/app';
 import { floorGraphs, sourceBuilding, type FloorPlace } from '../server/floor-graph';
+import { locationCatalogue } from '../server/geolocation';
 import { newSession } from '../server/session';
 import { MemoryVisitorSessions } from '../server/visitor-sessions';
 import type { PhotoEvidence, Session } from '../src/types';
-import type { NavigationResult, StartingPoints } from '../src/wayfinding';
+import type { NavigationResult } from '../src/wayfinding';
 
 const { values, positionals } = parseArgs({
   options: { building: { type: 'string' } },
@@ -87,44 +88,49 @@ async function check(origin: FloorPlace, goal: FloorPlace) {
   lease.record.evidence = { sessionId: session.id, fingerprint: 'sample-without-media', evidence };
   await lease.finish(lease.record);
   const endpoint = (suffix: string) => session.id + '/' + suffix;
-  let located = await post<Session>(endpoint('photo/location'), {
+  const located = await post<Session>(endpoint('photo/location'), {
     requestId: randomUUID(),
     revision: session.revision,
     evidenceId: evidence.id,
+    gps: {
+      buildings: [floor.building],
+      sourceSha256: locationCatalogue().geographicSource.sha256,
+      capturedAt: Date.now(),
+      accuracy: 2,
+    },
   });
-  const candidate = located.campusAnalysis?.candidates.find((c) => c.sourcePlaceId === origin.id);
+  const candidate = located.campusLocation?.sourcePlaceId === origin.id ? located.campusLocation : null;
   const pair = {
     from: floor.building + ' F' + floor.floor + ' ' + origin.label,
     to: dest.building + ' F' + dest.floor + ' ' + goal.label,
   };
   if (!candidate) return { ...pair, status: 'unresolved-photo-label', origins: 0 };
-  if (located.campusLocation?.id !== candidate.id) {
-    located = await post<Session>(endpoint('actions'), {
-      requestId: randomUUID(),
-      revision: located.revision,
-      action: { type: 'confirm-campus-region', candidateId: candidate.id },
-    });
-  }
   const request = { revision: located.revision, candidateId: candidate.id };
-  const starts = await post<StartingPoints>(endpoint('navigation/origins'), request);
-  // When the sign has multiple doors, select one as a visitor would before the single route search.
-  const door = starts.origins.length ? starts.origins[draw(starts.origins.length)] : undefined;
-  const result = await post<NavigationResult>(endpoint('navigation'), {
+  let result = await post<NavigationResult>(endpoint('navigation'), {
     ...request,
-    originId: door?.id,
-    destinationId: goal.id,
-    networkRevision: starts.networkRevision,
     destination: dest.building + ' Floor ' + dest.floor + ' ' + goal.label,
   });
+  if (result.status === 'choose-destination') {
+    const destination = result.destinations.find(
+      (place) => place.planId === goal.planId && place.label === goal.label,
+    );
+    if (destination)
+      result = await post<NavigationResult>(endpoint('navigation'), {
+        ...request,
+        destinationId: destination.id,
+        networkRevision: result.networkRevision,
+        destination: dest.building + ' Floor ' + dest.floor + ' ' + goal.label,
+      });
+  }
   if (
     result.status === 'route' &&
-    (result.origin.id !== door?.id || result.destination.planId !== goal.planId)
+    (result.origin.planId !== origin.planId || result.destination.planId !== goal.planId)
   )
-    throw Error('The returned path does not join the selected source places.');
+    throw Error('The returned path does not join the sampled source floors.');
   return {
     ...pair,
     status: result.status,
-    origins: starts.origins.length,
+    origins: result.origins.length,
     ...(result.status === 'route'
       ? { floors: [...new Set([result.origin.planId, ...result.steps.map((s) => s.to.planId)])] }
       : { reason: result.message }),
@@ -137,7 +143,7 @@ try {
       ...(building ? { building } : {}),
       population: places.length,
       selection:
-        'First five origins and next five destinations drawn without replacement before routing.',
+        'First five photo starts and next five destinations drawn without replacement before routing.',
     }),
   );
   for (let i = 0; i < 5; i++) console.log(JSON.stringify(await check(places[i], places[i + 5])));

@@ -6,11 +6,21 @@ import { afterEach, expect, it, vi } from 'vitest';
 import { RouteDirections } from '../src/components/RouteDirections';
 import { walkingRouteFixture } from './wayfinding-fixtures';
 import { pilotEvidence } from '../server/pilot-evidence';
+import { locationCatalogue } from '../server/geolocation';
 import type { MapStop, NavigationResult } from '../src/wayfinding';
 
 afterEach(() => vi.unstubAllGlobals());
 it('opens only the current instruction, advances manually, finishes, and returns to the overview', async () => {
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+  vi.stubGlobal('isSecureContext', true);
+  const catalogue = locationCatalogue();
+  let reportLocation: PositionCallback = () => {};
+  const watchPosition = vi.fn((success: PositionCallback) => {
+    reportLocation = success;
+    return 42;
+  });
+  const clearWatch = vi.fn();
+  vi.stubGlobal('navigator', { geolocation: { watchPosition, clearWatch } });
   const fixture = walkingRouteFixture();
   const stop = (point: Omit<MapStop, 'id'>): MapStop => ({
     ...point,
@@ -38,14 +48,33 @@ it('opens only the current instruction, advances manually, finishes, and returns
         createElement(RouteDirections, {
           route,
           plans: pilotEvidence().map((p) => p.plan),
+          locationCatalogue: catalogue,
           onRecheck: recheck,
         }),
       ),
     );
     expect(host.querySelectorAll('.walking-map')).toHaveLength(3);
     await click('GO');
+    expect(host.querySelector('.guided-directions')).toBeNull();
+    expect(button('Getting GPS location…')).toBeDefined();
+    const se12 = catalogue.floors.find((floor) => floor.planId === 'SE12-F3-p1')!;
+    const emit = (latitude: number, longitude: number) =>
+      act(async () =>
+        reportLocation({
+          coords: { latitude, longitude, accuracy: 5 },
+          timestamp: Date.now(),
+        } as GeolocationPosition),
+      );
+    await emit(se12.controls[0].latitude, se12.controls[0].longitude);
     expect(host.querySelector('.route-overview')).toBeNull();
     expect(host.querySelectorAll('.walking-map')).toHaveLength(1);
+    expect(host.querySelector('.device-position')).not.toBeNull();
+    const firstPosition = host.querySelector('.device-position circle')?.getAttribute('cx');
+    await emit(se12.controls[1].latitude, se12.controls[1].longitude);
+    expect(host.querySelector('.device-position circle')?.getAttribute('cx')).not.toBe(
+      firstPosition,
+    );
+    expect(host.querySelector('.guided-map')?.nextElementSibling?.className).toBe('guided-step');
     expect(host.textContent).toContain('Step 1 of 5');
     expect(button('Previous').disabled).toBe(true);
     await click('Next step');
@@ -54,21 +83,34 @@ it('opens only the current instruction, advances manually, finishes, and returns
     await click('Show arrival floor');
     expect(host.querySelector('.walking-map')?.getAttribute('aria-label')).toContain('SW03');
     expect(host.querySelectorAll('polyline')).toHaveLength(0);
+    const sw3 = catalogue.buildings.find((building) => building.building === 'SW3')!.rings[0];
+    const sw3Latitude =
+      (Math.min(...sw3.map((point) => point[1])) + Math.max(...sw3.map((point) => point[1]))) / 2;
+    const sw3Longitude =
+      (Math.min(...sw3.map((point) => point[0])) + Math.max(...sw3.map((point) => point[0]))) / 2;
+    await emit(sw3Latitude, sw3Longitude);
+    expect(host.querySelector('.device-position')).toBeNull();
+    expect(host.querySelector('.guided-location-status')?.textContent).toContain(
+      'floor-plan alignment is unavailable for SW03 · Floor 3',
+    );
     await click('Previous');
     expect(host.textContent).toContain('Step 1 of 5');
     for (let i = 1; i < route.steps.length; i++) await click('Next step');
     await click('Finish route');
     expect(host.textContent).toContain('Route complete');
-    expect(host.textContent).toContain('your position has not been verified');
+    expect(host.textContent).toContain('floor-plan alignment is unavailable');
     await click('Done');
     expect(host.querySelectorAll('.walking-map')).toHaveLength(3);
     expect(recheck).not.toHaveBeenCalled();
     await click('GO');
+    expect(host.querySelector('.guided-directions')).toBeNull();
+    await emit(se12.controls[0].latitude, se12.controls[0].longitude);
     expect(host.textContent).toContain('Step 1 of 5');
     await click('Route overview');
     expect(host.querySelector('.route-overview')).not.toBeNull();
   } finally {
     await act(async () => root.unmount());
     host.remove();
+    expect(clearWatch).toHaveBeenCalled();
   }
 });

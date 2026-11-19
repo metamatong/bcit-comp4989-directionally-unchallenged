@@ -5,7 +5,7 @@ import type { Provider } from './provider';
 import { visualPlans } from './visual-data';
 import { locationCatalogue } from './geolocation';
 import type { LocationCatalogue } from '../src/location/types';
-import { createTopologyRouter, protectTopologyFiles, requireLocalTopology } from './topology-api';
+import { protectTopologyFiles } from './topology-api';
 import { TopologyStore } from './topology';
 import {
   MemoryVisitorSessions,
@@ -69,16 +69,6 @@ export function createApp(options: {
   });
   app.use('/api/sessions/:id/photo', express.json({ limit: '4mb' }));
   app.use(express.json({ limit: '12kb' }));
-  if (options.hosted) {
-    app.use(['/api/internal/topology', '/internal/topology'], (_req, res) => {
-      res
-        .status(403)
-        .json({ error: 'The topology editor is available only on the local workstation.' });
-    });
-  } else {
-    app.use('/api/internal/topology', createTopologyRouter(topologyStore));
-    app.use('/internal/topology', requireLocalTopology);
-  }
   app.get('/api/bootstrap', (_req, res) =>
     res.json({
       coverage,

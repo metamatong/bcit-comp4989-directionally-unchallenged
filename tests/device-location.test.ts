@@ -33,7 +33,7 @@ describe('source-grounded device location', () => {
       expect(floor.reason.length).toBeGreaterThan(20);
     }
     expect(catalogue.floors.filter((f) => f.status === 'unavailable')).toHaveLength(
-      visualPlans.length - 1,
+      visualPlans.length - 14,
     );
   });
   it('undoes prototype crop/resize and preserves pixel aspect ratio through normalization', () => {

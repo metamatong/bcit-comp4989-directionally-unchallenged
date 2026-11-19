@@ -1,4 +1,4 @@
-/** Convert an opted-in fresh device reading to source-bound building candidates on the device. */
+/** Convert the required fresh device reading to source-bound building candidates on the device. */
 import { eligibleReading } from './browser-location';
 import { overlapsFootprint } from './geometry';
 import type { DeviceReading, GpsBuildingHint, LocationCatalogue } from './types';

@@ -86,7 +86,7 @@ export function JourneyPanel(props: JourneyProps) {
   const useMapDestination =
     !!candidate.sourcePlaceId && mapDestinationScope(destination) !== undefined;
   const recheck = () => setRefresh((value) => value + 1);
-  function pointPicker(role: 'origin' | 'destination') {
+  function pointPicker() {
     if (!result || !candidate.sourcePlaceId) return null;
     return (
       <FloorPointPicker
@@ -95,13 +95,12 @@ export function JourneyPanel(props: JourneyProps) {
         candidate={candidate}
         destination={destination}
         plans={plans}
-        role={role}
-        initiallyOpen={role === 'destination' && !choice.destinationPoint}
+        initiallyOpen={!choice.destinationPoint}
         onPick={(pin) =>
           setChoice((current) => ({
             ...current,
-            [role === 'origin' ? 'originId' : 'destinationId']: undefined,
-            [role === 'origin' ? 'originPoint' : 'destinationPoint']: pin,
+            destinationId: undefined,
+            destinationPoint: pin,
             networkRevision: result.networkRevision,
           }))
         }
@@ -134,7 +133,7 @@ export function JourneyPanel(props: JourneyProps) {
       </section>
     );
   } else if (useMapDestination && !choice.destinationPoint) {
-    panel = <section className="journey-panel">{pointPicker('destination')}</section>;
+    panel = <section className="journey-panel">{pointPicker()}</section>;
   } else {
     panel = (
       <JourneyResult
@@ -158,12 +157,11 @@ export function JourneyPanel(props: JourneyProps) {
   return (
     <>
       {panel}
-      {useMapDestination && choice.destinationPoint && pointPicker('destination')}
+      {useMapDestination && choice.destinationPoint && pointPicker()}
       {locationEvidence && (
         <details className="journey-evidence">
           <summary>Location evidence</summary>
           {locationEvidence}
-          {pointPicker('origin')}
         </details>
       )}
     </>
@@ -185,7 +183,7 @@ function JourneyResult({
 > & {
   result: NavigationResult;
   onRecheck: () => void;
-  onChoose: (field: 'originId' | 'destinationId', id: string) => void;
+  onChoose: (field: 'destinationId', id: string) => void;
 }) {
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -214,21 +212,14 @@ function JourneyResult({
       </section>
     );
 
-  const selectingOrigin = result.status === 'choose-origin' && result.origins.length > 0;
   const selectingDestination =
     result.status === 'choose-destination' && result.destinations.length > 0;
-  if (selectingOrigin || selectingDestination) {
-    const options = selectingOrigin ? result.origins : result.destinations;
+  if (selectingDestination) {
+    const options = result.destinations;
     const planIds = [...new Set(options.map((option) => option.planId))];
     return (
       <section className="journey-panel" aria-label="Route location choices">
-        <h2>
-          {selectingOrigin
-            ? result.message.includes('shared entrance')
-              ? 'Start at the marked shared entrance?'
-              : 'Which doorway are you beside?'
-            : 'Which destination do you mean?'}
-        </h2>
+        <h2>{'Which destination do you mean?'}</h2>
         {planIds.map((id) => {
           const plan = plans.find((p) => p.id === id);
           if (!plan) return null;
@@ -245,8 +236,7 @@ function JourneyResult({
           return (
             <div key={id}>
               <h3>{planLabel(plan)}</h3>
-              {(group.length > 1 ||
-                (selectingOrigin && result.message.includes('shared entrance'))) && (
+              {group.length > 1 && (
                 <RouteMapImage
                   plan={plan}
                   paths={[]}
@@ -259,7 +249,7 @@ function JourneyResult({
                   className="secondary"
                   key={place.id}
                   disabled={busy}
-                  onClick={() => onChoose(selectingOrigin ? 'originId' : 'destinationId', place.id)}
+                  onClick={() => onChoose('destinationId', place.id)}
                 >
                   {group.length > 1 ? i + 1 + ' · ' : ''}
                   {place.label}
@@ -272,27 +262,17 @@ function JourneyResult({
     );
   }
   const headings = {
-    'choose-origin': 'Starting point is unclear',
     'choose-destination': 'Destination match is unclear',
     'unknown-destination': 'Destination not found',
     'unmapped-destination': 'Destination entrance not connected',
     'restricted-place': 'Staff-only area',
     'unsupported-building': 'Routes are not mapped here yet',
     'unmapped-origin-and-destination': 'Route coverage is incomplete',
-    'unmapped-origin':
-      result.originIssue === 'ambiguous-doorway'
-        ? 'Starting doorway is unclear'
-        : result.originIssue === 'ambiguous-region' ||
-            (!result.originIssue && result.origins.length > 1)
-          ? 'Starting point needs a closer match'
-          : 'Starting route not mapped',
+    'unmapped-origin': 'Could not match the photo to a mapped route',
     'no-route': 'Route unavailable',
   };
   const needsAnotherPhoto =
-    result.status === 'choose-origin' ||
-    (result.status === 'unmapped-origin' &&
-      (result.originIssue === 'ambiguous-region' ||
-        (!result.originIssue && result.origins.length > 1)));
+    result.status === 'unmapped-origin' || result.status === 'unmapped-origin-and-destination';
 
   return (
     <section className="journey-panel" aria-label="Route to destination">

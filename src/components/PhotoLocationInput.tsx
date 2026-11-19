@@ -24,7 +24,7 @@ type PhotoLocationInputProps = {
   preferElevators?: boolean;
   onPreferElevatorsChange?: (value: boolean) => void;
   canUsePhotoResult?: boolean;
-  deviceOption?: ReactNode;
+  locationRequirement?: ReactNode;
   onDestinationChange: (value: string) => void;
   onPhoto: (file?: File) => void;
   onNext?: () => void;
@@ -62,7 +62,7 @@ export function PhotoLocationInput({
   preferElevators = false,
   onPreferElevatorsChange,
   canUsePhotoResult = false,
-  deviceOption,
+  locationRequirement,
   onDestinationChange,
   onPhoto,
   onNext,
@@ -219,7 +219,7 @@ export function PhotoLocationInput({
                 Choose a map point
               </button>
             )}
-            {!canUsePhotoResult && deviceOption}
+            {!canUsePhotoResult && locationRequirement}
             <div className="device-location-option">
               <label>
                 <input
@@ -231,8 +231,8 @@ export function PhotoLocationInput({
                 Accessibility: prefer elevators
               </label>
               <p className="helper">
-                Stairs are preferred by default. Accessibility and elevator availability are
-                unverified. A route may still include stairs if no complete alternative is mapped.
+                Stairs are preferred by default. If the full route has no mapped elevator path, it
+                may still include stairs.
               </p>
             </div>
             {error ? (
