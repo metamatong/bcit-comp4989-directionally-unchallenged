@@ -26,6 +26,7 @@ import { JourneyPanel, StartingPositionNotice } from './components/JourneyPanel'
 import { PhotoDeviceOption } from './components/PhotoDeviceLocation';
 import { usePhotoDeviceLocation } from './location/use-device-location';
 import { gpsBuildingHint } from './location/building-hint';
+import { planLabel } from './topology';
 import './wayfinding.css';
 import type { Bootstrap, Session } from './types';
 
@@ -285,6 +286,10 @@ export default function App() {
   const analysis = showPhotoResults ? session.campusAnalysis : null;
   const region = analysis ? session.campusLocation : null;
   const routeCandidate = region ?? undefined;
+  const labelOnly =
+    !!routeCandidate?.anchorLabel &&
+    !routeCandidate.doorwayVicinity &&
+    !routeCandidate.corridorOrigin;
   const directionsMode = Boolean(analysis && activeDestination);
   const photoInput = (
     <>
@@ -435,10 +440,11 @@ export default function App() {
             <>
               {routeCandidate && analysis?.candidates.length ? (
                 <StartingPositionNotice
-                  labelOnly={
-                    !!routeCandidate.anchorLabel &&
-                    !routeCandidate.doorwayVicinity &&
-                    !routeCandidate.corridorOrigin
+                  labelOnly={labelOnly}
+                  detail={
+                    labelOnly
+                      ? planLabel(routeCandidate) + ' · ' + routeCandidate.anchorLabel
+                      : undefined
                   }
                 />
               ) : null}
@@ -451,6 +457,7 @@ export default function App() {
                   destination={activeDestination}
                   plans={data.visualPlans}
                   locationCatalogue={data.locationCatalogue}
+                  locationEvidence={photoResults}
                   busy={busy}
                   onTryAnotherPhoto={() => {
                     setShowPhotoResults(false);
@@ -489,7 +496,7 @@ export default function App() {
                   </button>
                 </section>
               )}
-              {analysis && (
+              {analysis && !routeCandidate && (
                 <details className="journey-evidence">
                   <summary>Location evidence</summary>
                   {photoResults}

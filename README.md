@@ -43,11 +43,11 @@ The Git-connected Vercel project builds the frontend and the visitor API with `n
 4. Source lookup selects a unique, fully supported starting estimate or offers matching signs to confirm. An extra reading missing from the plan keeps the supported sign available for confirmation. GPS alone can identify a building. A starting floor and place still require source evidence. Scene features are retained as observations, and doorway placement helps choose the relevant label. Unavailable window/count annotations do not imply a spatial match.
 5. The app resolves the destination and calculates a route over the floor walking grids and current reviewed connections. **Walking directions** shows one arrow-separated route overview, followed by a continuous stack of maps with A/B descriptions. Floor changes appear in the overview; one zoom control applies to all maps. Photo bytes, floor-plan images and destinations are sent to no later AI stage.
 
-A 302 sign can match more than one building. After choosing a location, use **Location evidence → Change starting location** to switch matches with the same photo. From SE12 302, directions to `SW03 1730` end in corridor 1700 at the first-floor AV room door.
+A 302 sign can match more than one building. Once SE12 302 is identified, typing `SW03 1730` gives directions through the floor 3 passage and down to the AV room door on floor 1. A named room uses its mapped entrance automatically. If an entrance lacks a walking connection, the result identifies the room and floor. **Location evidence** lets you change the starting match or adjust your starting point.
 
 For example, the signs for SW03 rooms 2680 and 2695 face the same stretch of corridor 2600. If their placement in a photo is unclear, the app highlights the corridor and asks **Are these room signs beside you?** Confirming lets you start there. The first route map shows the estimated starting area.
 
-Within SW01, the app uses the four original CAD sheets for room entrances, shared suites and walking areas. Eight stair chains and two elevators connect the confirmed levels. After the photo identifies your floor, **Choose a point on the map** lets you select a shaded starting or destination point. Shared entrances are labelled explicitly. [SW01 coverage by floor](docs/sw01-routing.md)
+Within SW01, the app uses the four original CAD sheets for room entrances, shared suites and walking areas. Eight stair chains and two elevators connect the confirmed levels. To walk to an unnamed point, select **Choose a map point** in the destination form. Shared entrances are labelled explicitly. [SW01 coverage by floor](docs/sw01-routing.md)
 
 SW03 and SW01 connect in both directions on floors 1–4. On floor 1, walk outdoors between SW03 lobby 1602 and SW01 vestibule 1098. On floors 2–4, the SW03 office corridor leads directly indoors to the same floor of SW01. [Doors and nearby room numbers](docs/topology-editor.md#sw03-and-sw01)
 
@@ -117,7 +117,7 @@ mvp/
 │   ├── provider.ts, provider-config.ts, provider-budget.ts, provider-timing.ts, provider-metrics.ts
 │   ├── openai-provider.ts, openai-input.ts, openai-schema.ts, openai-response.ts, openai-stream.ts
 │   ├── floor-graph.ts, floor-interior.ts, floor-search.ts, route-queue.ts, map-points.ts
-│   ├── floor-coverage.ts, shared-corridor.ts, campus-journey.ts
+│   ├── floor-coverage.ts, shared-corridor.ts, campus-journey.ts, routing-readiness.ts
 │   ├── label-localization.ts, starting-place-evidence.ts, session.ts
 │   ├── photo-localization.ts, photo-plan-context.ts  Legacy source-comparison utilities
 │   ├── photo-evidence.ts, photo-media.ts, photo-grounding.ts, photo-doorways.ts, room-labels.ts

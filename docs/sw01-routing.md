@@ -48,7 +48,7 @@ On floor 1 the user confirmed the atrium 1302 doors to 1120, 1130, 1160 and 1170
 
 ## Map points and source processing
 
-After a photo identifies a floor, **Choose a point on the map** can refine the start on that sheet or set the destination. **Choose a map point** in the destination form also supports selecting a destination building and floor. Shading represents accepted walking cells. The service verifies the source hash, graph version and cell for every selection. Staff-only interiors, walls and voids stay outside both walking meshes.
+After a photo identifies a floor, **Location evidence → Adjust starting point on the map** can refine the start on that sheet. A named destination uses its mapped entrance. To choose an unnamed destination, select **Choose a map point** in the destination form or enter just a building and optional floor. When selecting a different building, choose its floor explicitly. Shading represents accepted walking cells. The service verifies the requested building and floor, source hash, graph version and cell for each pin. Staff-only interiors, walls and voids stay outside both walking meshes.
 
 The compiler reads named CAD layers for walls, glazing, columns, furnishings, stair treads and door swings. It retains multiple cubic segments of one door leaf and recognizes opposing leaves of different widths. A floor-specific exception at the 1300–1320 threshold matches the two original fine sill strokes and the drawn leaf. Independent walls still block traversal. Through routes stay on circulation cells. A route to a suite or an interior pin can append its own checked terminal walk. These walks cannot connect unrelated public corridors.
 

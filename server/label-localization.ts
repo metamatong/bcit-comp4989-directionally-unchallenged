@@ -73,7 +73,7 @@ function observations(evidence: PhotoEvidence) {
 }
 
 type Resolution = ReturnType<typeof resolveStartingSigns>;
-function candidateFor(
+export function candidateFromSignMatch(
   match: StartMatch,
   references: Resolution['references'],
 ): CampusLocationCandidate {
@@ -275,7 +275,7 @@ export function locateFromLabels(
     ? []
     : result.corridor
       ? [corridorCandidate(result.corridor, result.references)]
-      : result.matches.map((m) => candidateFor(m, result.references));
+      : result.matches.map((m) => candidateFromSignMatch(m, result.references));
   if (!candidates.length && result.gpsStatus === 'used') result.gpsStatus = 'building-only';
   const candidate =
     !result.partial && !result.corridor?.needsConfirmation && candidates.length === 1

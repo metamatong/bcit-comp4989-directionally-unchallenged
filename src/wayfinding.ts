@@ -1,5 +1,15 @@
 import type { PlanBounds } from './types';
 
+/** A named room is always resolved by the router. Only these requests need a destination pin. */
+export function mapDestinationScope(
+  value: string,
+): { building?: string; floor?: string } | undefined {
+  const text = value.normalize('NFKC').trim();
+  if (/^map point$/i.test(text)) return {};
+  const match = /^(NE|NW|SE|SW)\s*-?\s*(\d+)(?:\s+floor\s+(\d+))?$/i.exec(text);
+  if (match) return { building: match[1].toUpperCase() + Number(match[2]), floor: match[3] };
+}
+
 export type PagePoint = { x: number; y: number };
 export type FloorPin = {
   planId: string;

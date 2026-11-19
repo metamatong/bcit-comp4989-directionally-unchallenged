@@ -1,8 +1,8 @@
 /** Recheck a visitor-selected public cell against the current source and walking graph. */
 import { z } from 'zod';
 import type { CampusLocationCandidate } from '../src/types';
-import type { FloorPin } from '../src/wayfinding';
-import { floorGraphs, sourceBuilding } from './floor-graph';
+import { mapDestinationScope, type FloorPin } from '../src/wayfinding';
+import { floorGraphs } from './floor-graph';
 import type { FloorSearch, SearchStop } from './floor-search';
 import { TopologyError } from './topology';
 
@@ -22,8 +22,12 @@ export function pointFloor(
   planId: string,
 ) {
   const floor = floorGraphs().byId.get(planId);
-  const prefix = destination.trim().match(/^(?:NE|NW|SE|SW)\s*-?\s*\d+\b/i)?.[0];
-  const building = prefix ? sourceBuilding(prefix) : candidate.building;
+  const scope = mapDestinationScope(destination);
+  if (role === 'destination' && !scope)
+    throw new TopologyError(
+      'Named destinations use their mapped entrances. Choose Map point for a custom destination.',
+      400,
+    );
   if (
     !floorGraphs()
       .byId.get(candidate.planId)
@@ -31,7 +35,8 @@ export function pointFloor(
     !floor ||
     (role === 'origin'
       ? planId !== candidate.planId
-      : destination.trim() !== 'Map point' && floor.plan.building !== building)
+      : (scope?.building && floor.plan.building !== scope.building) ||
+        (scope?.floor && floor.plan.floor !== scope.floor))
   )
     throw new TopologyError('Choose a point on the floor identified for this trip.', 400);
   return floor;

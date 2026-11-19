@@ -170,7 +170,9 @@ it('routes chosen map cells and rejects walls, stale data and an origin on anoth
     walk('S290', 'Map point', 'SW1', { originPoint: { ...pin(lobby), planId: 'SW1-F3-p1' } }),
   ).rejects.toThrow('floor identified');
   const c = sign('S290');
-  expect(() => pointFloor(c, 'destination', 'SW03 2605', 'SW1-F2-p1')).toThrow('floor identified');
+  expect(() => pointFloor(c, 'destination', 'SW03 2605', 'SW1-F2-p1')).toThrow(
+    'Named destinations',
+  );
   expect(
     navigationSchema.safeParse({
       revision: 0,

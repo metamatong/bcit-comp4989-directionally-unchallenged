@@ -1,8 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Check, MapPin, Route } from 'lucide-react';
 import { request } from '../api';
 import type { CampusLocationCandidate, VisualPlan } from '../types';
-import type { NavigationChoice, NavigationResult } from '../wayfinding';
+import { mapDestinationScope, type NavigationChoice, type NavigationResult } from '../wayfinding';
 import { FloorPointPicker } from './FloorPointPicker';
 import { RouteDirections } from './RouteDirections';
 import { RouteMapImage } from './RouteMap';
@@ -35,16 +35,7 @@ export function StartingPositionNotice({
   );
 }
 
-export function JourneyPanel({
-  sessionId,
-  revision,
-  candidate,
-  destination,
-  plans,
-  busy,
-  onTryAnotherPhoto,
-  locationCatalogue,
-}: {
+type JourneyProps = {
   sessionId: string;
   revision: number;
   candidate: CampusLocationCandidate;
@@ -53,14 +44,17 @@ export function JourneyPanel({
   busy: boolean;
   onTryAnotherPhoto: () => void;
   locationCatalogue?: LocationCatalogue;
-}) {
+  locationEvidence?: ReactNode;
+};
+
+export function JourneyPanel(props: JourneyProps) {
+  const { sessionId, revision, candidate, destination, plans, locationEvidence } = props;
   const [result, setResult] = useState<NavigationResult>();
   const [error, setError] = useState('');
   const [refresh, setRefresh] = useState(0);
   const [choice, setChoice] = useState<
     Omit<NavigationChoice, 'candidateId' | 'destination' | 'revision'>
   >({});
-  const headingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -80,59 +74,113 @@ export function JourneyPanel({
     return () => controller.abort();
   }, [sessionId, revision, candidate.id, destination, refresh, choice]);
 
-  useEffect(() => {
-    if (result && result.status !== 'route') {
-      headingRef.current?.focus({ preventScroll: true });
-      headingRef.current?.scrollIntoView?.({ block: 'start' });
-    }
-  }, [result?.status]);
-
-  if (error)
+  const useMapDestination =
+    !!candidate.sourcePlaceId && mapDestinationScope(destination) !== undefined;
+  const recheck = () => setRefresh((value) => value + 1);
+  function pointPicker(role: 'origin' | 'destination') {
+    if (!result || !candidate.sourcePlaceId) return null;
     return (
+      <FloorPointPicker
+        sessionId={sessionId}
+        revision={revision}
+        candidate={candidate}
+        destination={destination}
+        plans={plans}
+        role={role}
+        initiallyOpen={role === 'destination' && !choice.destinationPoint}
+        onPick={(pin) =>
+          setChoice((current) => ({
+            ...current,
+            [role === 'origin' ? 'originId' : 'destinationId']: undefined,
+            [role === 'origin' ? 'originPoint' : 'destinationPoint']: pin,
+            networkRevision: result.networkRevision,
+          }))
+        }
+      />
+    );
+  }
+
+  let panel: ReactNode;
+  if (error) {
+    panel = (
       <section className="journey-panel">
         <p role="alert">{error}</p>
         <button
           className="secondary"
           onClick={() => {
             setChoice({});
-            setRefresh((value) => value + 1);
+            recheck();
           }}
         >
           Try again
         </button>
       </section>
     );
-  if (!result)
-    return (
+  } else if (!result) {
+    panel = (
       <section className="journey-panel" role="status">
         <p className="photo-status">
           <Route size={15} className="spin" /> Finding your route…
         </p>
       </section>
     );
-  const requestMap =
-    destination === 'Map point' ||
-    /^(?:NE|NW|SE|SW)\s*-?\s*\d+(?:\s+floor\s+\d+)?$/i.test(destination.trim());
-  const chooseMap = candidate.sourcePlaceId && (
-    <FloorPointPicker
-      sessionId={sessionId}
-      revision={revision}
-      candidate={candidate}
-      destination={destination}
-      plans={plans}
-      initialDestination={requestMap && !choice.destinationPoint}
-      onPick={(role, pin) =>
-        setChoice((c) => ({
-          ...c,
-          [role === 'origin' ? 'originId' : 'destinationId']: undefined,
-          [role === 'origin' ? 'originPoint' : 'destinationPoint']: pin,
-          networkRevision: result.networkRevision,
-        }))
-      }
-    />
+  } else if (useMapDestination && !choice.destinationPoint) {
+    panel = <section className="journey-panel">{pointPicker('destination')}</section>;
+  } else {
+    panel = (
+      <JourneyResult
+        busy={props.busy}
+        plans={plans}
+        locationCatalogue={props.locationCatalogue}
+        onTryAnotherPhoto={props.onTryAnotherPhoto}
+        result={result}
+        onRecheck={recheck}
+        onChoose={(field, id) =>
+          setChoice((current) => ({
+            ...current,
+            [field]: id,
+            networkRevision: result.networkRevision,
+          }))
+        }
+      />
+    );
+  }
+  return (
+    <>
+      {panel}
+      {useMapDestination && choice.destinationPoint && pointPicker('destination')}
+      {locationEvidence && (
+        <details className="journey-evidence">
+          <summary>Location evidence</summary>
+          {locationEvidence}
+          {pointPicker('origin')}
+        </details>
+      )}
+    </>
   );
-  if (requestMap && !choice.destinationPoint && chooseMap)
-    return <section className="journey-panel">{chooseMap}</section>;
+}
+
+function JourneyResult({
+  result,
+  plans,
+  locationCatalogue,
+  onTryAnotherPhoto,
+  busy,
+  onRecheck,
+  onChoose,
+}: Pick<JourneyProps, 'plans' | 'locationCatalogue' | 'onTryAnotherPhoto' | 'busy'> & {
+  result: NavigationResult;
+  onRecheck: () => void;
+  onChoose: (field: 'originId' | 'destinationId', id: string) => void;
+}) {
+  const headingRef = useRef<HTMLHeadingElement>(null);
+  useEffect(() => {
+    if (result.status !== 'route') {
+      headingRef.current?.focus({ preventScroll: true });
+      headingRef.current?.scrollIntoView?.({ block: 'start' });
+    }
+  }, [result.status]);
+
   if (result.status === 'route')
     return (
       <section className="journey-panel" aria-label="Your walking route">
@@ -144,13 +192,10 @@ export function JourneyPanel({
         <RouteDirections
           route={result}
           plans={plans}
-          onRecheck={() => {
-            setRefresh((value) => value + 1);
-          }}
+          onRecheck={onRecheck}
           locationCatalogue={locationCatalogue}
         />
         {result.arrivalNote && <p role="note">{result.arrivalNote}</p>}
-        {chooseMap}
       </section>
     );
 
@@ -199,13 +244,7 @@ export function JourneyPanel({
                   className="secondary"
                   key={place.id}
                   disabled={busy}
-                  onClick={() =>
-                    setChoice({
-                      ...choice,
-                      [selectingOrigin ? 'originId' : 'destinationId']: place.id,
-                      networkRevision: result.networkRevision,
-                    })
-                  }
+                  onClick={() => onChoose(selectingOrigin ? 'originId' : 'destinationId', place.id)}
                 >
                   {group.length > 1 ? i + 1 + ' · ' : ''}
                   {place.label}
@@ -214,7 +253,6 @@ export function JourneyPanel({
             </div>
           );
         })}
-        {chooseMap}
       </section>
     );
   }
@@ -222,7 +260,7 @@ export function JourneyPanel({
     'choose-origin': 'Starting point is unclear',
     'choose-destination': 'Destination match is unclear',
     'unknown-destination': 'Destination not found',
-    'unmapped-destination': 'Destination found on the plan',
+    'unmapped-destination': 'Destination entrance not connected',
     'restricted-place': 'Staff-only area',
     'unsupported-building': 'Routes are not mapped here yet',
     'unmapped-origin-and-destination': 'Route coverage is incomplete',
@@ -250,13 +288,8 @@ export function JourneyPanel({
         </h2>
       </div>
       <p role="status">{result.message}</p>
-      {chooseMap}
       {result.status === 'no-route' && (
-        <button
-          className="secondary"
-          disabled={busy}
-          onClick={() => setRefresh((value) => value + 1)}
-        >
+        <button className="secondary" disabled={busy} onClick={onRecheck}>
           Retry route
         </button>
       )}
