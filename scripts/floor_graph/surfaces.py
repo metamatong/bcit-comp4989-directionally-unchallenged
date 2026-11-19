@@ -195,7 +195,7 @@ def labelled_corridor_strips(sealed, regions, words, seeds, radius):
 
 def surfaces(page, geometry, words, annotation):
     ink = ink_mask(page, words)
-    doors = doors_on_page(geometry, ink)
+    doors = doors_on_page(geometry, ink, angled_leaves=bool(annotation.get("cadInteriorBounds")))
     sealed = ink.copy()
     for hinge, tip, *_ in doors:
         cv2.line(

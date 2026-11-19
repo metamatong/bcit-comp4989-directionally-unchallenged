@@ -2,13 +2,20 @@
 import type { CampusLocationCandidate } from '../src/types';
 import type { NavigationChoice, NavigationResult, PlaceChoice } from '../src/wayfinding';
 import { planLabel } from '../src/topology';
-import { floorGraphs, sourceBuilding, landmarkKind, type FloorPlace } from './floor-graph';
+import { floorGraphs, sourceBuilding, landmarkKind, visitorExclusion, type FloorPlace } from './floor-graph';
 import { FloorSearch, type SearchStop, type VisitorMap } from './floor-search';
 import { labelKey, pilotEvidence } from './pilot-evidence';
 import { reviewedNetwork } from './pilot-network';
 import { pinnedStop } from './map-points';
+import {commonDoorDeparture} from './shared-corridor';
 
 type BoundPlace = { place: PlaceChoice; stops: SearchStop[]; arrivalNote?: string };
+type TripContext = Pick<NavigationResult,'origins'|'destinations'|'networkRevision'>;
+function stopTiers(stops:SearchStop[]):SearchStop[][] {
+  const groups=[stops.filter(s=>!s.stop.sharedEntrance && !s.stop.corridorVicinity),
+    stops.filter(s=>s.stop.sharedEntrance),stops.filter(s=>s.stop.corridorVicinity)].filter(group=>group.length);
+  return groups.length?groups:[[]];
+}
 function closeToken(a: string, b: string) {
   return a.length >= 4 && a.length === b.length && [...a].filter((c, i) => c !== b[i]).length === 1;
 }
@@ -40,7 +47,7 @@ export class CampusJourney {
     this.plans = new Set(map.plans.map((p) => p.id));
   }
   stops(place: FloorPlace): SearchStop[] {
-    if (place.visitorAccess) return [];
+    if (visitorExclusion(place)) return [];
     const floor = floorGraphs().byId.get(place.planId)!;
     const choices: SearchStop[] = [];
     const binding = place.reviewedLanding ?? place.reviewedDoor;
@@ -141,7 +148,25 @@ export class CampusJourney {
         continue;
       choices.push(this.search.threshold(place.planId, { x, y }, place.label));
     }
-    return [...new Map(choices.map((c) => [c.key, c])).values()];
+    const precise = [...new Map(choices.map((c) => [c.key, c])).values()];
+    if (binding || reviewedCoordinates.length) return precise;
+    const keys = new Set(precise.map(s=>s.key));
+    return [...precise,...this.alternativeStops(place).filter(s=>!keys.has(s.key))];
+  }
+  private alternativeStops(place: FloorPlace): SearchStop[] {
+    if (visitorExclusion(place) || place.reviewedDoor || place.reviewedLanding) return [];
+    const floor = floorGraphs().byId.get(place.planId)!;
+    const access=place.sharedAccess;
+    const label=place.label + ' · entrance to ' + access?.host;
+    const shared=access?[...access.cells.map(cell=>({key:cell,stop:floor.stop(cell,label)})),
+      ...access.terminalPaths.map(p=>this.search.terminal(place.planId,label,p.cell,p.via.map(([x,y])=>({x,y}))))]
+      .map(s=>({...s,stop:{...s.stop,sharedEntrance:access.host}})):[];
+    const vicinity = (place.corridorVicinities ?? []).map(v => ({
+      key:v.cell,
+      stop:{ ...floor.stop(v.cell, 'Corridor alongside ' + place.label), startRegion:v.bounds,
+             corridorVicinity:true },
+    }));
+    return [...shared,...vicinity];
   }
   origins(candidate: CampusLocationCandidate): SearchStop[] {
     const floor = floorGraphs().byId.get(candidate.planId);
@@ -184,7 +209,7 @@ export class CampusJourney {
   selectableOrigins(candidate: CampusLocationCandidate) {
     const options = this.origins(candidate);
     const mapped = options.filter((option) => !option.unlinked);
-    return (mapped.length ? mapped : options).map((option) => option.stop);
+    return stopTiers(mapped.length ? mapped : options)[0].map((option) => option.stop);
   }
   private destinations(value: string) {
     const { building, floor, token } = queryParts(value);
@@ -299,9 +324,9 @@ export class CampusJourney {
       ?.places.find((p) => p.id === candidate.sourcePlaceId);
     const targetPlace = targetFloor.places.find((p) => p.id === goal.place.id);
     const restricted =
-      !request.originPoint && originPlace?.visitorAccess
+      !request.originPoint && originPlace && visitorExclusion(originPlace)
         ? originPlace
-        : targetPlace?.visitorAccess
+        : targetPlace && visitorExclusion(targetPlace)
           ? targetPlace
           : undefined;
     if (restricted)
@@ -312,8 +337,24 @@ export class CampusJourney {
           planLabel(floorGraphs().byId.get(restricted.planId)!.plan) +
           ' · ' +
           restricted.label +
-          ' is staff-only. Select a public location for visitor directions.',
+          (visitorExclusion(restricted)==='staff-only'?' is staff-only.':' is a non-walking feature on the floor plan.') + ' Select a public location for visitor directions.',
       };
+    const originGroups=stopTiers(starts), destinationGroups=stopTiers(goal.stops);
+    const pairs=originGroups.flatMap((origins,i)=>destinationGroups.map((ends,j)=>({origins,ends,rank:i+j})))
+      .sort((a,b)=>a.rank-b.rank);
+    let first:NavigationResult | undefined;
+    for(const {origins,ends} of pairs) {
+      if(request.originId && starts.some(s=>s.stop.id===request.originId) &&
+         !origins.some(s=>s.stop.id===request.originId))continue;
+      const result=this.between(candidate,request,originPlace,{...goal,stops:ends},
+        {...context,origins:origins.map(s=>s.stop)},origins, destinationName,corrected);
+      first??=result;
+      if(result.status==='route' || result.status==='choose-origin') return result;
+    }
+    return first!;
+  }
+  private between(candidate:CampusLocationCandidate,request:NavigationChoice,source:FloorPlace|undefined,
+    goal:BoundPlace,context:TripContext,starts:SearchStop[],destinationName:string,corrected:boolean):NavigationResult {
     if (!starts.length || !goal.stops.length) {
       const status =
         !starts.length && !goal.stops.length
@@ -338,7 +379,6 @@ export class CampusJourney {
         message: messages[status],
       };
     }
-    const source = originPlace;
     const selected = request.originId
       ? starts.find((s) => s.stop.id === request.originId)
       : starts.length === 1
@@ -356,7 +396,12 @@ export class CampusJourney {
         message:
           'The starting door is marked on the floor plan. Its connection to the public walking route is missing.',
       };
-    if (!selected || (source?.sharedEntry && !request.originId && !request.originPoint)) {
+    const sharedStart=source?.sharedEntry || starts.some(s=>s.stop.sharedEntrance);
+    const nearbyStart=starts.some(s=>s.stop.corridorVicinity);
+    const common = !selected && !request.originId && !request.originPoint && !candidate.corridorOrigin && source
+      ? commonDoorDeparture(floorGraphs().byId.get(source.planId)!,source,starts,goal.stops,this.search,request.preferElevators)
+      : undefined;
+    if (!common && (!selected || ((sharedStart || nearbyStart) && !request.originId && !request.originPoint))) {
       const reachable = this.search.reachable(goal.stops, this.plans, true);
       const options = starts.filter((s) => reachable.has(s.key));
       if (!options.length)
@@ -371,12 +416,13 @@ export class CampusJourney {
         ...context,
         origins: options.map((s) => s.stop),
         status: 'choose-origin',
-        message: source?.sharedEntry
+        message: nearbyStart ? 'Confirm that you are in the marked corridor alongside this room.'
+          : sharedStart
           ? 'Confirm that you are at this shared entrance to start walking.'
           : 'Which marked entrance are you beside?',
       };
     }
-    if (!goal.stops.some((g) => g.key === selected.key)) {
+    if (selected && !goal.stops.some((g) => g.key === selected.key)) {
       if (selected.unlinked)
         return {
           ...context,
@@ -394,13 +440,13 @@ export class CampusJourney {
             ' has a marked door. Its approach from the public walking route is missing.',
         };
     }
-    const result = this.search.route([selected], goal.stops, request.preferElevators);
+    const result = common ?? (selected && this.search.route([selected], goal.stops, request.preferElevators));
     if (!result)
       return {
         ...context,
         status: 'no-route',
         message:
-          targetFloor.plan.building !== candidate.building
+          floorGraphs().byId.get(goal.place.planId)!.plan.building !== candidate.building
             ? 'Both places have walking approaches. The saved passages do not provide a continuous route between these buildings.'
             : 'Both places have walking approaches. A continuous connection between them is missing.',
       };
@@ -409,6 +455,10 @@ export class CampusJourney {
       status: 'route',
       ...result,
       ...('arrivalNote' in goal && goal.arrivalNote ? { arrivalNote: goal.arrivalNote } : {}),
+      ...(result.destination.sharedEntrance ? {arrivalNote:'Directions to '+destinationName+' end at the shared entrance to '+result.destination.sharedEntrance+'.'}:{}),
+      ...(result.destination.corridorVicinity ? {
+        arrivalNote: 'Directions end in the public corridor alongside ' + destinationName + '. Check the room sign for the entrance.',
+      } : {}),
       ...(corrected
         ? {
             destinationMatch: {

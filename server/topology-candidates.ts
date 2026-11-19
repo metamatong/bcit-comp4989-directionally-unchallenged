@@ -5,6 +5,7 @@ import type { VisualPlan } from '../src/types';
 import { planDrawingSegments, visualPlans } from './visual-data';
 import {
   connectionCandidateSchema,
+  outdoorEndpointsAllowed,
   planLabel,
   type CandidateEndpoint,
   type CandidateView,
@@ -64,7 +65,7 @@ export function readConnectionCandidates() {
           : !['stairs', 'elevator', 'outdoor'].includes(kind)
       )
         throw new Error(`Invalid shared-endpoint connection: ${candidate.id}`);
-      if (kind === 'outdoor' && (from.kind !== 'outdoor-access' || to.kind !== 'outdoor-access'))
+      if (kind === 'outdoor' && !outdoorEndpointsAllowed(from,to))
         throw new Error('Shared outdoor routes need marked exterior doors.');
       for (const side of ['from', 'to'] as const) {
         const ref = candidate.endpointRefs[side];

@@ -201,6 +201,25 @@ def signed_door_cells(grid, words, sides, records):
     return cells
 
 
+def _on_room_front(record, grid, places, place, middle, target, along_wall, radius):
+    bounds = np.array(place["bounds"])
+    centre = grid.norm((bounds[:2] + bounds[2:]) / 2)
+    if "roomSide" not in record:
+        half_stamp = np.abs(along_wall) @ grid.norm((bounds[2:] - bounds[:2]) / 2)
+        return abs((centre - middle) @ along_wall) <= half_stamp + radius * SCALE / 2
+    # Tier lines can separate a lecture-room stamp from its door. The source-bound
+    # polygon identifies the room side only; none of it becomes a walking surface.
+    polygon = np.asarray([grid.norm(pair) for pair in record["roomSide"]], np.float32)
+    distance = lambda p: cv2.pointPolygonTest(polygon, tuple(map(float,p)), True)
+    inside = [p for p in places if distance(grid.norm(
+        (np.asarray(p["bounds"][:2]) + p["bounds"][2:]) / 2)) > 0]
+    return (
+        len(inside) == 1 and inside[0] is place and distance(target) < 0
+        and all(abs(distance(middle + t * along_wall * radius * SCALE)) < 1
+                for t in (-0.44, 0, 0.44))
+    )
+
+
 def bind_corridor_doorways(grid, words, places, symbols, records):
     """Bind the public stop at a drawn door when ink or interior steps split its sample regions."""
     for record in records:
@@ -230,15 +249,11 @@ def bind_corridor_doorways(grid, words, places, symbols, records):
         bounds = np.array(place["bounds"])
         room_centre = grid.norm((bounds[:2] + bounds[2:]) / 2)
         along_wall = (tip - hinge) / np.linalg.norm(tip - hinge)
-        half_label_span = np.abs(along_wall) @ grid.norm((bounds[2:] - bounds[:2]) / 2)
-        # For this type of transcription the label is behind the marked doorway
-        # and overlaps its width. Another room along the same hall cannot stand in.
         if (
             not 0 < abs(depth) <= 2 * radius * SCALE
             or np.linalg.norm(delta - depth * normal) > 0.48 * radius * SCALE
             or ((room_centre - middle) @ normal) * depth >= 0
-            or abs((room_centre - middle) @ along_wall)
-            > half_label_span + radius * SCALE / 2
+            or not _on_room_front(record, grid, places, place, middle, target, along_wall, radius)
         ):
             raise ValueError(
                 "The marked approach must face the room from the corridor: " + room

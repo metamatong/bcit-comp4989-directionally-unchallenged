@@ -3,7 +3,7 @@
 import cv2
 import numpy as np
 
-from doors import SCALE, arc_chains, score_ink
+from doors import SCALE, arc_chains, door_sweep, score_ink
 
 
 def _polyline(item, matrix):
@@ -142,7 +142,7 @@ class CadLayers:
             vectors = local - ctr
             sweep = np.diff(np.unwrap(np.arctan2(vectors[:, 1], vectors[:, 0])))
             if (
-                not 1.29 < abs(sweep.sum()) < 1.80
+                not door_sweep(abs(sweep.sum()))
                 or np.abs(sweep).sum() > abs(sweep.sum()) + 0.07
                 or max(abs(np.linalg.norm(vectors, axis=1) - radius))
                 > max(0.15, 0.055 * radius)
@@ -150,13 +150,14 @@ class CadLayers:
                 continue
             hinge = chain[0] + ctr
             tips = chain[[0, -1]]
-            fitted.append((hinge, radius, tips))
+            fitted.append((hinge, radius, tips, abs(sweep.sum())))
             for tip in tips:
                 ends.setdefault(tuple(np.rint(tip * 4).astype(int)), []).append(
                     (hinge, radius)
                 )
         result = {}
-        for hinge, radius, tips in fitted:
+        accepted = []
+        for hinge, radius, tips, angle in sorted(fitted,key=lambda entry:-entry[3]):
             choices = []
             for i, tip in enumerate(tips):
                 leaf = tips[1 - i]
@@ -172,6 +173,8 @@ class CadLayers:
                     (hinge - tip) @ (other - tip) < -0.96 * radius * other_radius
                     for other, other_radius in ends[tuple(np.rint(tip * 4).astype(int))]
                 )
+                if angle<1.29 and max(extension)<.66:
+                    continue
                 if support < 0.68 and not (paired and extension[0] > 0.65):
                     continue
                 choices.append((support + sum(extension) + (3 if paired else 0), i))
@@ -188,6 +191,12 @@ class CadLayers:
             normal = np.array([-tangent[1], tangent[0]])
             if np.dot(normal, tips[1 - i] - hinge) < 0:
                 normal = -normal
+            # A quarter turn is often exported as two 45-degree curves. A
+            # fragment on an already fitted hinge is not an additional door.
+            if any(long_angle > angle + 0.20 and np.linalg.norm(hinge-h)<0.40
+                   and abs(radius-r)<0.40 for h,r,long_angle in accepted):
+                continue
+            accepted.append((hinge,radius,angle))
             k = tuple(np.rint((hinge + tip) * 2).astype(int))
             result[k] = (hinge, tip, normal, radius)
         swings = list(result.values())

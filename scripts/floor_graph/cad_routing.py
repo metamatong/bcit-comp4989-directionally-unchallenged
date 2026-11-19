@@ -7,6 +7,7 @@ from cad_doorways import apertures, clear_segment, door_faces
 from cad_places import CadSheet, floor_entries
 from cad_spaces import cad_spaces
 from cad_layers import CadLayers, open_wall_gaps
+from corridor_vicinities import corridor_vicinities
 from cad_landings import landing_cells
 from labels import label_words
 from public_components import transfer_components
@@ -144,7 +145,7 @@ def compile_cad_floor(plan, page, geometry, extra, reviewed, grid_type):
     places, portals, bands, terminal, audit, stations = floor_entries(
         local, False, sheet
     )
-    preferred, _, _, _, pa, ps = floor_entries(primary, True, sheet)
+    preferred, _, _, primary_terminal, pa, ps = floor_entries(primary, True, sheet)
     for key in audit:
         audit[key] |= pa.get(key, False)
     for key in stations:
@@ -208,6 +209,8 @@ def compile_cad_floor(plan, page, geometry, extra, reviewed, grid_type):
         for label in suite["rooms"]:
             place = place_by_name[label]
             if place["cells"] or place.get("terminalPaths"):
+                place["sharedAccess"] = {"host":parent["label"],"cells":entrance_cells,
+                                         "terminalPaths":entrance_paths}
                 continue
             place["sharedEntry"] = True
             place["sharedHost"] = parent["label"]
@@ -226,9 +229,16 @@ def compile_cad_floor(plan, page, geometry, extra, reviewed, grid_type):
             raise ValueError("Stale surveyed room doorway: " + label)
         place_by_name[label]["reviewedDoor"] = binding
     for rule in restrictions:
-        place = place_by_name[rule["label"]]
-        place.update(visitorAccess=rule["access"], cells=[])
-        place.pop("terminalPaths", None)
-        place.pop("sharedEntry", None)
+        for label in (rule["label"],rule["via"]):
+            place = place_by_name[label]
+            place.update(visitorAccess=rule["access"], cells=[], doors=[])
+            place.pop("terminalPaths", None)
+            place.pop("sharedEntry", None)
+            place.pop("sharedAccess", None)
     landings = landing_cells(plan, places, reviewed, local, cad, symbols, extra)
+    protected = set(extra.get("cadReviewedDoors", {}))
+    for rule in restrictions:
+        protected.update((rule["label"],rule["via"]))
+    primary_terminal.attach_local_stations(places,protected)
+    corridor_vicinities(local,places,extra,radius,protected)
     return local, places, portals, bands, landings, len(symbols), terminal.export()

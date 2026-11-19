@@ -224,7 +224,8 @@ function JourneyResult({
       <section className="journey-panel" aria-label="Route location choices">
         <h2>
           {selectingOrigin
-            ? result.message.includes('shared entrance')
+            ? result.origins.some(o=>o.corridorVicinity) ? 'Start in the marked corridor alongside this room?'
+            : result.message.includes('shared entrance')
               ? 'Start at the marked shared entrance?'
               : 'Which doorway are you beside?'
             : 'Which destination do you mean?'}
@@ -246,7 +247,7 @@ function JourneyResult({
             <div key={id}>
               <h3>{planLabel(plan)}</h3>
               {(group.length > 1 ||
-                (selectingOrigin && result.message.includes('shared entrance'))) && (
+                (selectingOrigin && (result.message.includes('shared entrance') || options.some(o=>'corridorVicinity' in o && o.corridorVicinity)))) && (
                 <RouteMapImage
                   plan={plan}
                   paths={[]}

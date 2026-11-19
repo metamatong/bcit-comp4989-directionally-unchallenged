@@ -28,6 +28,8 @@ export type MapStop = {
   label: string;
   point: PagePoint;
   startRegion?: PlanBounds;
+  corridorVicinity?: boolean;
+  sharedEntrance?: string;
 };
 export type StartingPoints = { networkRevision: number; origins: MapStop[] };
 export type PlaceChoice = {

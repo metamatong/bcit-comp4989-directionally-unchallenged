@@ -7,6 +7,7 @@ from cad_doorways import apertures, bind_doors, clear_segment, door_faces, label
 from cad_frontages import marked_frontages, mapped_stations, threshold_stations
 from corridor_frontages import bind_frontages, corridor_bands, recorded_swings
 from doors import SCALE
+from door_stations import bind_stations
 from labels import MANUAL
 from open_fronts import bay_mouths
 from surfaces import at_label
@@ -61,6 +62,7 @@ def floor_entries(grid, regional, sheet):
     portals, terminal = bind_doors(
         grid, interior, rooms, by_region, [*symbols, *open_bays], barriers, len(symbols)
     )
+    bind_stations(grid, words, rooms, symbols, terminal)
     radius = float(np.median([s[3] for s in symbols])) * SCALE
     for word in words:
         place = rooms[id(word)]

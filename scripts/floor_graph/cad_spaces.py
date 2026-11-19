@@ -40,13 +40,12 @@ USES = {
 }
 
 
-def cad_spaces(page, plan, labels):
+def cad_spaces(page, plan, labels, fonts=("StylusBT",)):
     spans = []
     for block in page.get_text("dict")["blocks"]:
         for line in block.get("lines", []):
             for span in line["spans"]:
-                # These sheets use StylusBT for the schedule of room numbers and uses.
-                if span["font"] != "StylusBT" or not span["text"].strip():
+                if span["font"] not in fonts or not span["text"].strip():
                     continue
                 bounds = pymupdf.Rect(span["bbox"]) * page.rotation_matrix
                 spans.append((span["text"].strip().upper(), np.array(list(bounds))))

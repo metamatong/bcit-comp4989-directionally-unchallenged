@@ -145,8 +145,7 @@ export function validateNetworkExport(value: unknown, plans: VisualPlan[]) {
     if (
       (passage.kind === 'corridor' && a.id !== b.id) ||
       (passage.kind === 'building-link' && a.building === b.building) ||
-      (passage.kind === 'outdoor' &&
-        (from.kind !== 'outdoor-access' || to.kind !== 'outdoor-access')) ||
+      (passage.kind === 'outdoor' && !outdoorEndpointsAllowed(from,to)) ||
       (vertical &&
         (a.building !== b.building ||
           a.floor === b.floor ||
@@ -183,3 +182,4 @@ export function outgoingPassages(nodeId: string) {
   });
   return { status: 'reviewed-checkpoint' as const, revision: data.revision, point, passages };
 }
+import {outdoorEndpointsAllowed} from '../src/topology';

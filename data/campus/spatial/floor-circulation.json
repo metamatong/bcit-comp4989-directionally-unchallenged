@@ -2,10 +2,46 @@
   "schemaVersion": 1,
   "plans": [
     {
+      "planId": "SE12-F1-p1",
+      "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "areas": [
+        [[0.655, 0.365], [0.682, 0.365], [0.682, 0.504], [0.655, 0.504]],
+        [[0.62, 0.314], [0.681, 0.314], [0.681, 0.368], [0.62, 0.368]],
+        [[0.451, 0.501], [0.66, 0.501], [0.66, 0.53], [0.451, 0.53]],
+        [[0.657, 0.389], [0.68, 0.389], [0.68, 0.581], [0.657, 0.581]],
+        [[0.656, 0.575], [0.685, 0.575], [0.685, 0.724], [0.656, 0.724]],
+        [[0.657, 0.718], [0.679, 0.718], [0.679, 0.764], [0.657, 0.764]],
+        [[0.452, 0.506], [0.665, 0.506], [0.665, 0.526], [0.452, 0.526]],
+        [[0.596, 0.347], [0.651, 0.347], [0.651, 0.355], [0.596, 0.355]],
+        [[0.39, 0.638], [0.42, 0.638], [0.42, 0.662], [0.39, 0.662]],
+        [[0.394, 0.761], [0.682, 0.761], [0.682, 0.78], [0.394, 0.78]]
+      ],
+      "cadInteriorBounds": [
+        [[0.452, 0.168], [0.811, 0.168], [0.811, 0.501], [0.452, 0.501]],
+        [[0.45, 0.5], [0.809, 0.5], [0.809, 0.534], [0.45, 0.534]],
+        [[0.39, 0.534], [0.809, 0.534], [0.809, 0.664], [0.39, 0.664]],
+        [[0.347, 0.664], [0.809, 0.664], [0.809, 0.824], [0.347, 0.824]],
+        [[0.34, 0.821], [0.809, 0.821], [0.809, 0.912], [0.34, 0.912]],
+        [[0.257, 0.842], [0.341, 0.842], [0.341, 0.895], [0.257, 0.895]]
+      ],
+      "basis": "The occupied first-floor blocks follow the original sheet. Separate courtyard and perimeter stair approaches require independent passage evidence."
+    },
+    {
       "planId": "SE12-F3-p1",
+      "cadInteriorBounds": [
+        [[0.087, 0.331], [0.949, 0.331], [0.949, 0.604], [0.087, 0.604]]
+      ],
+      "frontageLayers": {
+        "partition": ["WALL", "GLAZE", "SILL", "JAMB"],
+        "doors": ["DOOR", "DSWING"],
+        "annotation": ["TEXT", "TITLE", "BORDER", "ROOF", "GROS$", "BLDG OUTLINE"]
+      },
       "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
       "basis": "Source-plan transcription of the window corridors, corridor 317C and the passage at 312A. Clip all areas to the original walls and door thresholds.",
       "areas": [
+        [[0.752, 0.332], [0.904, 0.332], [0.904, 0.348], [0.752, 0.348]],
+        [[0.799, 0.586], [0.904, 0.586], [0.904, 0.602], [0.799, 0.602]],
+        [[0.801, 0.468], [0.815, 0.468], [0.815, 0.586], [0.801, 0.586]],
         [
           [
             0.0875,
@@ -226,9 +262,19 @@
     },
     {
       "planId": "SE12-F4-p1",
+      "cadInteriorBounds": [
+        [[0.076, 0.329], [0.952, 0.329], [0.952, 0.61], [0.076, 0.61]]
+      ],
+      "frontageLayers": {
+        "partition": ["I-WALL", "E-WALL", "A-WINDOWS", "A-GLAZ-CURT", "A-FLOR-HRAL", "S-COLS"],
+        "doors": ["A-DOOR"],
+        "annotation": ["A-FLOR", "BORDER", "GROS$", "TEXT", "TITLE", "XREF", "S-STRS-IDEN"]
+      },
       "sourceSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
       "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
       "areas": [
+        [[0.775, 0.328], [0.952, 0.328], [0.952, 0.347], [0.775, 0.347]],
+        [[0.778, 0.588], [0.953, 0.588], [0.953, 0.608], [0.778, 0.608]],
         [
           [
             0.07625,
@@ -393,9 +439,25 @@
     },
     {
       "planId": "SW3-F2-p1",
+      "cadInteriorBounds": [
+        [[0.467, 0.093], [0.556, 0.093], [0.556, 0.31], [0.467, 0.31]],
+        [[0.487, 0.31], [0.52, 0.31], [0.52, 0.346], [0.487, 0.346]],
+        [[0.23, 0.346], [0.828, 0.346], [0.828, 0.44], [0.23, 0.44]],
+        [[0.19, 0.44], [0.485, 0.44], [0.485, 0.534], [0.19, 0.534]],
+        [[0.489, 0.439], [0.862, 0.439], [0.862, 0.562], [0.489, 0.562]],
+        [[0.138, 0.53], [0.252, 0.53], [0.252, 0.797], [0.138, 0.797]]
+      ],
+      "frontageLayers": {
+        "partition": ["WALL", "GLAZE", "JAMB", "SILL", "WINDOW"],
+        "doors": ["DOOR", "DSWING"],
+        "annotation": ["ROOF", "TEXT", "TITLE", "BORDER", "GROS"]
+      },
       "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
       "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
       "areas": [
+        [[0.228, 0.406], [0.254, 0.406], [0.254, 0.434], [0.228, 0.434]],
+        [[0.482, 0.413], [0.501, 0.413], [0.501, 0.454], [0.482, 0.454]],
+        [[0.506, 0.44], [0.527, 0.44], [0.527, 0.459], [0.506, 0.459]],
         [
           [
             0.231875,
@@ -538,9 +600,18 @@
     },
     {
       "planId": "SW3-F3-p1",
+      "cadInteriorBounds": [
+        [[0.452, 0.35], [0.523, 0.35], [0.523, 0.525], [0.452, 0.525]],
+        [[0.467, 0.524], [0.51, 0.524], [0.51, 0.551], [0.467, 0.551]],
+        [[0.26, 0.551], [0.735, 0.551], [0.735, 0.624], [0.26, 0.624]],
+        [[0.233, 0.625], [0.467, 0.625], [0.467, 0.698], [0.233, 0.698]],
+        [[0.469, 0.62], [0.762, 0.62], [0.762, 0.72], [0.469, 0.72]]
+      ],
       "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
       "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
       "areas": [
+        [[0.263, 0.601], [0.281, 0.601], [0.281, 0.62], [0.263, 0.62]],
+        [[0.469, 0.602], [0.494, 0.602], [0.494, 0.642], [0.469, 0.642]],
         [
           [
             0.273125,
@@ -647,9 +718,18 @@
     },
     {
       "planId": "SW3-F4-p1",
+      "cadInteriorBounds": [
+        [[0.452, 0.303], [0.523, 0.303], [0.523, 0.476], [0.452, 0.476]],
+        [[0.467, 0.475], [0.51, 0.475], [0.51, 0.504], [0.467, 0.504]],
+        [[0.262, 0.504], [0.735, 0.504], [0.735, 0.575], [0.262, 0.575]],
+        [[0.234, 0.575], [0.468, 0.575], [0.468, 0.65], [0.234, 0.65]],
+        [[0.47, 0.57], [0.764, 0.57], [0.764, 0.674], [0.47, 0.674]]
+      ],
       "sourceSha256": "ec9b5c3ae80da356b78dc7ea89e3228e6cd6b5e882d9c20a6b7e10bbd5ec034a",
       "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
       "areas": [
+        [[0.261, 0.553], [0.28, 0.553], [0.28, 0.5685], [0.261, 0.5685]],
+        [[0.469, 0.553], [0.494, 0.553], [0.494, 0.594], [0.469, 0.594]],
         [
           [
             0.274375,
@@ -742,9 +822,20 @@
     },
     {
       "planId": "SE12-F2-p1",
+      "cadInteriorBounds": [
+        [[0.108, 0.299], [0.298, 0.299], [0.298, 0.552], [0.108, 0.552]],
+        [[0.365, 0.3], [0.745, 0.3], [0.745, 0.533], [0.365, 0.533]],
+        [[0.745, 0.3], [0.954, 0.3], [0.954, 0.528], [0.745, 0.528]]
+      ],
       "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
       "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
       "areas": [
+        [[0.11, 0.455], [0.295, 0.455], [0.295, 0.525], [0.11, 0.525]],
+        [[0.244, 0.434], [0.296, 0.434], [0.296, 0.479], [0.244, 0.479]],
+        [[0.266, 0.401], [0.294, 0.401], [0.294, 0.443], [0.266, 0.443]],
+        [[0.508, 0.3], [0.532, 0.3], [0.532, 0.369], [0.508, 0.369]],
+        [[0.285, 0.427], [0.298, 0.427], [0.298, 0.444], [0.285, 0.444]],
+        [[0.738, 0.392], [0.76, 0.392], [0.76, 0.453], [0.738, 0.453]],
         [
           [
             0.5325,
@@ -2228,7 +2319,13 @@
         {"label": "4018", "feature": "room-area", "point": [0.3890931, 0.3586648]}
       ],
       "cadSharedSuites": [
-        {"entrance": "4052", "rooms": ["4059"], "basis": "The storage room 4059 opens into 4052. The route to this shared entrance ends outside the storage area.", "threshold": [0.6315033, 0.4339015]}
+        {"entrance": "4052", "rooms": ["4050", "4059"], "basis": "The doors of support room 4050 and store 4059 open into 4052. The shared public approach ends at the entrance to 4052.", "threshold": [0.6315033, 0.4339015]
+        },
+        {
+          "entrance": "4072",
+          "rooms": ["4068"],
+          "basis": "Corridor 4068 opens into lab 4072 between 4066 and 4070. The shared stop is the door of 4072 on corridor 4000, east of stair S407.",
+          "threshold": [0.8261142, 0.4298884]}
       ]
     },
     {
@@ -2278,9 +2375,21 @@
     },
     {
       "planId": "SW3-F1-p1",
+      "cadInteriorBounds": [
+        [[0.215, 0.496], [0.305, 0.496], [0.305, 0.779], [0.215, 0.779]],
+        [[0.302, 0.472], [0.482, 0.472], [0.482, 0.568], [0.302, 0.568]],
+        [[0.482, 0.439], [0.542, 0.439], [0.542, 0.566], [0.482, 0.566]],
+        [[0.543, 0.434], [0.744, 0.434], [0.744, 0.589], [0.543, 0.589]],
+        [[0.743, 0.496], [0.789, 0.496], [0.789, 0.57], [0.743, 0.57]]
+      ],
       "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
-      "basis": "Corridor 1700 runs along the north walls of the lecture rooms from the west vestibule to the reviewed lobby 1602 passage. Its southern wall contains the outward-swinging door to AV room 1730.",
+      "basis": "Corridor 1700 runs along the north walls of the lecture rooms from the west vestibule to lobby 1602. The drawn leaves along its southern wall serve AV room 1730 and lecture room 1750.",
       "areas": [
+        [[0.3, 0.474], [0.324, 0.474], [0.324, 0.49], [0.3, 0.49]],
+        [[0.477, 0.473], [0.503, 0.473], [0.503, 0.49], [0.477, 0.49]],
+        [[0.482, 0.441], [0.54, 0.441], [0.54, 0.515], [0.482, 0.515]],
+        [[0.482, 0.51], [0.507, 0.51], [0.507, 0.565], [0.482, 0.565]],
+        [[0.538, 0.5], [0.781, 0.5], [0.781, 0.516], [0.538, 0.516]],
         [[0.322, 0.472], [0.479, 0.472], [0.479, 0.4905], [0.322, 0.4905]]
       ],
       "corridorDoorways": [
@@ -2290,6 +2399,14 @@
           "threshold": [0.3948471, 0.4912007],
           "point": [0.3948529, 0.4804293],
           "basis": "The public approach is just beyond the door swing on corridor 1700. The printed corridor caption overlaps the normal sampling position and stair treads separate the room label from the threshold."
+        },
+        {
+          "room": "1750",
+          "corridor": "1700",
+          "threshold": [0.3306173, 0.4911782],
+          "point": [0.3305449, 0.4805298],
+          "roomSide": [[0.326, 0.4911782], [0.336, 0.4911782], [0.36, 0.539], [0.334, 0.539]],
+          "basis": "The single outward-swinging leaf just east of the S180 vestibule opens from lecture room 1750 into corridor 1700. The stamp lies among the curved seating rows. The marked strip inside the room links this stamp to the original north wall and excludes the shaft bay."
         }
       ],
       "corridorSeeds": [
