@@ -7,6 +7,7 @@ import { pilotCoverage } from '../server/spatial-retrieval';
 import { pilotEvidence } from '../server/pilot-evidence';
 import { reviewedNetwork } from '../server/pilot-network';
 import { TopologyStore } from '../server/topology';
+import { topologyContentHash } from '../server/topology-provenance';
 import { validateCorridorTraces } from '../server/visitor-paths';
 import { floorGraphs } from '../server/floor-graph';
 import { locationCatalogue } from '../server/geolocation';
@@ -106,6 +107,23 @@ console.log(
 
 const store = new TopologyStore();
 const topology = store.snapshot();
+for (const denial of network.visitorRestrictions ?? []) {
+  const candidate = store.candidates.find((c) => c.id === denial.candidateId);
+  const floor = graphs.byId.get(denial.planId);
+  if (
+    !candidate ||
+    topologyContentHash(candidate) !== denial.definitionHash ||
+    !floor?.places.some((p) => p.label === denial.label && p.visitorAccess === 'staff-only') ||
+    [candidate.from, candidate.to].some(
+      (mark) =>
+        !mark.point ||
+        floor.containingCell(mark.point) !== undefined ||
+        floor.interiorAt(mark.point),
+    )
+  )
+    throw Error('Staff-only source, marker or walking-mask mismatch: ' + denial.candidateId);
+}
+
 console.log(
   `Validated ${validateCorridorTraces(store.candidates, store.plans)} source-bound visitor corridor traces.`,
 );

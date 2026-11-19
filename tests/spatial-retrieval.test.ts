@@ -153,15 +153,17 @@ describe('twelve source pages', () => {
 describe('reviewed graph revision', () => {
   const data = reviewedNetwork();
   const plans = pilotEvidence().map((p) => p.plan);
-  it('keeps source co-location distinct from a verified door and reports SW01 network gaps', () => {
-    const region = getPilotContext({ planId: 'SW1-F2-p1', bounds: [0, 0, 1, 1] });
+  it('distinguishes an approved SW01 crossing from a nearby source door symbol', () => {
+    const region = getPilotContext({ planId: 'SW1-F2-p1', bounds: [0.79, 0.4, 0.82, 0.43] });
     if (region.status !== 'source-context') throw new Error('missing SW01 plan');
-    expect(region.passageReviewQuestions).toMatchObject([
-      { status: 'unreviewed', from: { planId: 'SW1-F2-p1' }, to: { planId: 'SW3-F2-p1' } },
+    expect(region.passageReviewQuestions).toEqual([]);
+    const crossing = region.checkpointsInRegion.find(
+      (n) => n.label === 'Passage to SW03 · S290 landing',
+    )!;
+    expect(region.checkpointsInRegion.some((n) => n.kind === 'stair-landing')).toBe(true);
+    expect(outgoingPassages(crossing.id).passages).toMatchObject([
+      { kind: 'building-link', direction: 'both', next: { planId: 'SW3-F2-p1' } },
     ]);
-    expect(outgoingPassages(region.passageReviewQuestions[0].id).status).toBe(
-      'unsupported-checkpoint',
-    );
     const room = find('SW03 2605').results[0].matches[0];
     expect(room.checkpointCandidates).toEqual([]);
     expect(room.doorHypotheses).toHaveLength(2);
@@ -179,7 +181,7 @@ describe('reviewed graph revision', () => {
     expect(
       pilotCoverage()
         .filter((p) => p.building === 'SW1')
-        .every((p) => p.reviewedCheckpoints === 0 && p.incidentReviewedPassages === 0),
+        .every((p) => p.reviewedCheckpoints >= 1 && p.incidentReviewedPassages >= 1),
     ).toBe(true);
     expect(() =>
       validateNetworkExport(

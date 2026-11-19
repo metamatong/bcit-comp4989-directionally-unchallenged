@@ -60,6 +60,22 @@ const schema = z
     sourceDocumentSha256: hash,
     nodes: z.array(node),
     edges: z.array(edge),
+    visitorRestrictions: z
+      .array(
+        z
+          .object({
+            candidateId: z.string().min(1),
+            definitionHash: hash,
+            presentedHash: hash,
+            planId: z.string(),
+            sourceSha256: hash,
+            label: z.string().min(1),
+            via: z.string().min(1),
+            access: z.literal('staff-only'),
+          })
+          .strict(),
+      )
+      .optional(),
     elevatorReports: z.array(
       z
         .object({
@@ -80,6 +96,13 @@ export function validateNetworkExport(value: unknown, plans: VisualPlan[]) {
   if (new Set(ids).size !== ids.length) throw new Error('Duplicate spatial graph ID');
   const planMap = new Map(plans.map((plan) => [plan.id, plan]));
   const nodes = new Map(data.nodes.map((item) => [item.id, item]));
+  for (const rule of data.visitorRestrictions ?? []) {
+    if (
+      planMap.get(rule.planId)?.sourceSha256 !== rule.sourceSha256 ||
+      data.edges.some((edge) => edge.sourceCandidateId === rule.candidateId)
+    )
+      throw Error('A visitor restriction conflicts with its source or routing edge.');
+  }
   for (const report of data.elevatorReports) {
     const from = planMap.get(report.from.planId),
       to = planMap.get(report.to.planId);

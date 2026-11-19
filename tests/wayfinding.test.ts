@@ -225,7 +225,9 @@ describe('visitor routes on the current three-building pilot', () => {
         fresh.candidates,
         fresh.plans,
       );
-      expect(passages.traces.size).toBe(9);
+      expect(passages.traces.size).toBe(
+        reviewedNetwork().edges.filter((e) => e.kind === 'corridor').length,
+      );
       expect(passages.doors.size).toBe(6);
       expect(journey(bound(lower), 'SW03 3615', {}, fresh).status).toBe('route');
       expect(JSON.stringify(snapshot)).not.toMatch(
@@ -391,7 +393,7 @@ describe('visitor routes on the current three-building pilot', () => {
     const options = journey(from, 'S300');
     expect(options.status).toBe('choose-destination');
     const sw1 = options.destinations.find((d) => d.planId.startsWith('SW1-'))!;
-    expect(journey(from, 'S300', { destinationId: sw1.id }).status).toBe('unmapped-destination');
+    expect(journey(from, 'S300', { destinationId: sw1.id }).status).toBe('no-route');
     expect(journey(from, 'SW03 elevator').status).toBe('choose-destination');
     expect(journey(from, 'SW03 floor 3 elevator')).toMatchObject({
       status: 'route',

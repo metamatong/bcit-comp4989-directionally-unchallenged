@@ -22,7 +22,8 @@ Photo interpretation occurs only in step 2. Source lookup, GPS narrowing and gra
 - `POST /api/sessions`: empty object creates a live-analysis session. Provider readiness controls the setup notice, not a fallback mode.
 - `POST /api/sessions/:id/photo/evidence`: consented photo label reading; returns structured evidence in session state.
 - `POST /api/sessions/:id/photo/location`: metadata-only exact lookup using the evidence receipt and optional GPS building candidates. The `/photo` alias accepts the same metadata-only contract.
-- `POST /api/sessions/:id/navigation/origins` returns the walking approaches associated with the current source occurrence.
+- `POST /api/sessions/:id/navigation/origins` returns mapped starting options for the current source occurrence when any exist. Unconnected physical door hypotheses remain available in the floor inventory.
+- `POST /api/sessions/:id/navigation/surface` returns selectable walking cells for an identified starting floor or an explicitly selected destination. Navigation rechecks each pin against the current sheet and graph.
 - `POST /api/sessions/:id/navigation`: current reviewed-graph route calculation, with source-bound start and destination checks.
 - `POST /api/sessions/:id/actions`: `reset` and explicit selection of a matching starting place.
 - `GET /api/sessions/:id`, `GET /api/health`: state and readiness. The removed `/api/search` endpoint returns HTTP 404.

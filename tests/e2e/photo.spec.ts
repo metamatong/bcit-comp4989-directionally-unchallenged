@@ -52,7 +52,7 @@ function navigation(): NavigationResult {
   };
 }
 
-async function setup(page: Page, hasCandidate = true) {
+async function setup(page: Page, hasCandidate = true, mapPicker = false) {
   let current!: Session;
   const uploads: {
     consent: boolean;
@@ -93,6 +93,7 @@ async function setup(page: Page, hasCandidate = true) {
     const body = route.request().postDataJSON();
     uploads.push(body);
     const result = analysis(body.requestId, current.photoEvidence!.id, hasCandidate);
+    if (mapPicker && result.candidates[0]) result.candidates[0].sourcePlaceId = 'mock-source-place';
     current = {
       ...current,
       revision: current.revision + 1,
@@ -271,4 +272,36 @@ test('privacy information keeps the photo local and ready for the next step', as
   await expect(page.getByRole('button', { name: 'Next', exact: true })).toBeEnabled();
   expect(evidenceUploads).toHaveLength(0);
   expect(uploads).toHaveLength(0);
+});
+
+test('picks a destination on the identified floor with one photo read', async ({ page }) => {
+  const { evidenceUploads } = await setup(page, true, true);
+  await page.route('**/api/sessions/*/navigation/surface', (route) =>
+    route.fulfill({
+      json: {
+        planId: route.request().postDataJSON().planId,
+        sourceSha256: 'a'.repeat(64),
+        graphVersion: 'b'.repeat(16),
+        step: 1,
+        runs: [[100, 90, 200]],
+      },
+    }),
+  );
+  await choosePhoto(page);
+  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await page.getByRole('button', { name: 'Choose a map point', exact: true }).click();
+  await page.getByRole('button', { name: 'GO', exact: true }).click();
+  const map = page.getByRole('group', { name: /Select a walking point/ });
+  await expect(map).toBeVisible();
+  await map.focus();
+  await map.press('ArrowRight');
+  const sent = page.waitForRequest(
+    (req) => req.url().endsWith('/navigation') && !!req.postDataJSON().destinationPoint,
+  );
+  await page.getByRole('button', { name: 'Use this point' }).click();
+  expect((await sent).postDataJSON().destinationPoint).toMatchObject({
+    planId: 'SE12-F3-p1',
+    graphVersion: 'b'.repeat(16),
+  });
+  expect(evidenceUploads).toHaveLength(1);
 });

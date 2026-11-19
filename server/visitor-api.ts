@@ -16,6 +16,7 @@ import {
 import { readPhotoEvidence, PhotoEvidenceError } from './photo-evidence';
 import { photoEvidenceRequestSchema, releasePhotoBytes } from './photo-media';
 import { TopologyError, type TopologyStore } from './topology';
+import { pointFloor } from './map-points';
 import {
   navigationSchema,
   planVisitorNavigation,
@@ -311,6 +312,52 @@ export function visitorRouter(
   router.post('/:id/photo', mutation(sessions, photoStage(options, 'location')));
   router.post('/:id/photo/location', mutation(sessions, photoStage(options, 'location')));
   router.post('/:id/navigation/origins', mutation(sessions, navigation(topology, true)));
+  router.post('/:id/navigation/surface', async (req, res) => {
+    const input = startingPointsSchema
+      .extend({
+        role: z.enum(['origin', 'destination']),
+        destination: z.string().max(150),
+        planId: z.string().max(100),
+      })
+      .safeParse(req.body);
+    if (!input.success) {
+      res.status(400).json({ error: 'Select a floor for this trip.' });
+      return;
+    }
+    const record = await sessions.read(req.params.id);
+    if (!record) {
+      res.status(404).json(expired);
+      return;
+    }
+    const candidate = record.session.campusLocation;
+    if (
+      !candidate ||
+      candidate.id !== input.data.candidateId ||
+      record.session.revision !== input.data.revision
+    ) {
+      res.status(409).json({ error: 'Locate your starting floor before choosing a map point.' });
+      return;
+    }
+    try {
+      const floor = pointFloor(
+        candidate,
+        input.data.role,
+        input.data.destination,
+        input.data.planId,
+      );
+      res.json({
+        planId: floor.plan.id,
+        sourceSha256: floor.plan.sourceSha256,
+        graphVersion: floor.version,
+        step: floor.step,
+        runs: floor.runs,
+        interiorRuns: floor.interior?.runs,
+      });
+    } catch (error) {
+      if (!(error instanceof TopologyError)) throw error;
+      res.status(error.httpStatus).json({ error: error.message });
+    }
+  });
   router.post('/:id/navigation', mutation(sessions, navigation(topology, false)));
   router.post(
     '/:id/actions',

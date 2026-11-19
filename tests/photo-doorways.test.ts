@@ -64,7 +64,7 @@ describe('visually supported doorway vicinities', () => {
   it.each([
     ['302', 'SE12-F3-p1', 'SW03 2082', 'route'],
     ['3615', 'SW3-F3-p1', 'SW03 2605', 'route'],
-    ['2004', 'SW1-F2-p1', 'SW03 3615', 'unsupported-building'],
+    ['2004', 'SW1-F2-p1', 'SW03 3615', 'unmapped-origin'],
   ])(
     'selects a supported starting vicinity for %s even without a camera rectangle',
     async (room, planId, destination, routeState) => {

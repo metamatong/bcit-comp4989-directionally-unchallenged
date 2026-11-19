@@ -86,6 +86,36 @@ it('takes a consented photo through both stages and uses its complete reviewed r
   const points: StartingPoints = await options.json();
   expect(points.origins.map((s) => s.id)).toEqual([room.id]);
   expect(Object.keys(points).sort()).toEqual(['networkRevision', 'origins']);
+  const surface = (planId: string, role: 'origin' | 'destination', revision = match.revision) =>
+    post(prefix + '/navigation/surface', {
+      ...identifying,
+      destination: 'SW01 3175',
+      planId,
+      role,
+      revision,
+    });
+  expect((await surface('SW1-F3-p1', 'origin')).status).toBe(400);
+  expect((await surface('SW1-F3-p1', 'destination', 0)).status).toBe(409);
+  const sheet = await surface('SW1-F3-p1', 'destination');
+  expect(sheet.status).toBe(200);
+  const mesh = await sheet.json();
+  expect(mesh.runs.length).toBeGreaterThan(0);
+  expect(mesh.interiorRuns.length).toBeGreaterThan(0);
+  expect(
+    (
+      await nav({
+        ...query,
+        destination: 'SW01 3175',
+        networkRevision: points.networkRevision,
+        destinationPoint: {
+          planId: mesh.planId,
+          sourceSha256: mesh.sourceSha256,
+          graphVersion: mesh.graphVersion,
+          point: { x: 0, y: 0 },
+        },
+      })
+    ).status,
+  ).toBe(400);
   const route = await nav(query);
   expect(route.status).toBe(200);
   expect(route.headers.get('cache-control')).toBe('no-store');

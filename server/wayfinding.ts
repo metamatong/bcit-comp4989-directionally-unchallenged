@@ -23,6 +23,7 @@ import { planImagePart } from './visual-data';
 import type { Provider } from './provider';
 import { stageDeadline } from './provider-timing';
 import { NAVIGATION_TIMEOUT_MS } from '../src/photo-views';
+import { pinSchema } from './map-points';
 import {
   generatedRouteSchema,
   generatedRouteIssue,
@@ -41,10 +42,17 @@ export const navigationSchema = startingPointsSchema
     destination: z.string().trim().min(1).max(150),
     originId: z.string().min(1).max(180).optional(),
     destinationId: z.string().min(1).max(180).optional(),
+    originPoint: pinSchema.optional(),
+    destinationPoint: pinSchema.optional(),
     networkRevision: z.number().int().nonnegative().optional(),
   })
   .strict()
-  .refine((r) => !(r.originId || r.destinationId) || r.networkRevision !== undefined);
+  .refine(
+    (r) =>
+      !(r.originId || r.destinationId || r.originPoint || r.destinationPoint) ||
+      r.networkRevision !== undefined,
+  )
+  .refine((r) => !(r.originId && r.originPoint) && !(r.destinationId && r.destinationPoint));
 
 function stop(node: TopologyNode): MapStop {
   return {
@@ -257,7 +265,7 @@ export function startingPoints(
 ): StartingPoints {
   const map = readVisitorMap(candidate, store);
   const origins = candidate.sourcePlaceId
-    ? new CampusJourney(map).origins(candidate).map((entry) => entry.stop)
+    ? new CampusJourney(map).selectableOrigins(candidate)
     : map.origins;
   return { networkRevision: map.doc.revision, origins };
 }
@@ -296,6 +304,11 @@ export function planVisitorJourney(
     throw new TopologyError('Analyze the current photo before requesting directions.', 409);
   const map = readVisitorMap(candidate, store, request.networkRevision);
   if (candidate.sourcePlaceId) return new CampusJourney(map).route(candidate, request);
+  if (request.originPoint || request.destinationPoint)
+    throw new TopologyError(
+      'Locate a place on the current floor map before selecting a point.',
+      409,
+    );
   const { plans, doc, network, nodes, origins } = map;
   const candidateBuildingPrefix = candidate.planId.split('-')[0] + '-';
   const hasBuildingCheckpoints = nodes.some((node) =>

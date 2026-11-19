@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 45,
-  "sourceDocumentSha256": "4e8511d1bcbc82f1e7cb504d3705db65b59d23f4c412e76c2bdcfb8a0cafa6e8",
+  "revision": 82,
+  "sourceDocumentSha256": "7aee181a83ea815f86390db5f8cc90ac5d651b0409df85e6b067042c3e76dd9d",
   "nodes": [
     {
       "version": 2,
@@ -616,6 +616,1002 @@
       "point": {
         "x": 0.77375,
         "y": 0.6067633
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "faf91b81552ac38a01644fd1a1c25aee17b5c26cba676320ab3ad1c0bdfb60df",
+      "reviewBasis": "user-confirmation",
+      "id": "984afed3-954f-483d-a5e8-9ec3239665cc",
+      "planId": "SW3-F1-p1",
+      "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "label": "Door toward SW01 · lobby 1602",
+      "aliases": [
+        "Door toward SW01 · lobby 1602"
+      ],
+      "kind": "outdoor-access",
+      "point": {
+        "x": 0.5109375,
+        "y": 0.4405797
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "b00f1670ece426d6277547f23d30717c377944c0c69df2716c86f2e28cbf2727",
+      "reviewBasis": "user-confirmation",
+      "id": "c389c584-97d1-474d-9cc5-f725b43030a5",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "Door toward SW03 · vestibule 1098",
+      "aliases": [
+        "Door toward SW03 · vestibule 1098"
+      ],
+      "kind": "outdoor-access",
+      "point": {
+        "x": 0.8025,
+        "y": 0.4019324
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "a7f185d5e7c96f081a422411ad212a32d61f58a60f48b66bef000a79ea39ace3",
+      "reviewBasis": "user-confirmation",
+      "id": "94d79ed7-ea1e-4ea7-8e33-4edd00b55592",
+      "planId": "SW3-F2-p1",
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "label": "Passage to SW01 · corridor 2000",
+      "aliases": [
+        "Passage to SW01 · corridor 2000"
+      ],
+      "kind": "door",
+      "point": {
+        "x": 0.5122549,
+        "y": 0.0954545
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "eabaac7ead9a09f9028310a6c21241c9546b4a4ee5922461e2c01255f1fcffcc",
+      "reviewBasis": "user-confirmation",
+      "id": "17f0f223-5e7e-4209-b52e-3da6a62a7a6e",
+      "planId": "SW1-F2-p1",
+      "sourceSha256": "37ab5548156a14f390b7d51010172c3ba7975744fb47ee441eee3586f5ce639b",
+      "label": "Passage to SW03 · S290 landing",
+      "aliases": [
+        "Passage to SW03 · S290 landing"
+      ],
+      "kind": "door",
+      "point": {
+        "x": 0.8014706,
+        "y": 0.4128788
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "1b4d85de625f85864354b08a5b0988ca05e91b09259c59d3acffc2f0edc3fe3c",
+      "reviewBasis": "user-confirmation",
+      "id": "5058221b-167c-424e-9965-c1fc501a817f",
+      "planId": "SW3-F3-p1",
+      "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+      "label": "Passage to SW01 · corridor 3000",
+      "aliases": [
+        "Passage to SW01 · corridor 3000"
+      ],
+      "kind": "door",
+      "point": {
+        "x": 0.4872549,
+        "y": 0.3515152
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "b3c2379302df9dd251514d990148f92c9e8c09eb2dc986ca52f0fc5518f1942b",
+      "reviewBasis": "user-confirmation",
+      "id": "bcf95222-1be7-4d97-afa0-e0a50f4b1333",
+      "planId": "SW1-F3-p1",
+      "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
+      "label": "Passage to SW03 · S390 landing",
+      "aliases": [
+        "Passage to SW03 · S390 landing"
+      ],
+      "kind": "door",
+      "point": {
+        "x": 0.9323529,
+        "y": 0.2363636
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "f9cc2a0eb381ddf44439b40016f8e07c35d1217a774100193320fc7c9ddd9591",
+      "reviewBasis": "user-confirmation",
+      "id": "9b2ee327-9632-4ff1-b156-35fdbc66ebe3",
+      "planId": "SW3-F4-p1",
+      "sourceSha256": "ec9b5c3ae80da356b78dc7ea89e3228e6cd6b5e882d9c20a6b7e10bbd5ec034a",
+      "label": "Passage to SW01 · corridor 4000",
+      "aliases": [
+        "Passage to SW01 · corridor 4000"
+      ],
+      "kind": "door",
+      "point": {
+        "x": 0.4872549,
+        "y": 0.2977273
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "dd00fac20a25322ac86d049dc9b13dd63089979f144d7485796848ef8ea83e47",
+      "reviewBasis": "user-confirmation",
+      "id": "2c334330-f6e1-404a-8347-9aaa57e56fdd",
+      "planId": "SW1-F4-p1",
+      "sourceSha256": "ed111bbfb9b7423af5a9369253f7820ed4e7eddbe6bf3a3421cda77bf3f53e30",
+      "label": "Passage to SW03 · S490 landing",
+      "aliases": [
+        "Passage to SW03 · S490 landing"
+      ],
+      "kind": "door",
+      "point": {
+        "x": 0.9745098,
+        "y": 0.45
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "25a70966311cc6c667c7941c53ad75088b7ed2e2392be15252da677367e9924a",
+      "reviewBasis": "user-confirmation",
+      "id": "63d32fdd-34d9-4350-9091-3692f425d636",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "S190 · east end stair landing",
+      "aliases": [
+        "S190 · east end stair landing",
+        "S190"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.780625,
+        "y": 0.3971014
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "59a34589eb9d8d7427bcf622e6eb9dc3fadbe294b14ae31bbd70828e17aca10e",
+      "reviewBasis": "user-confirmation",
+      "id": "5d1c1720-fa8c-40b0-b5d6-b9880058898d",
+      "planId": "SW1-F2-p1",
+      "sourceSha256": "37ab5548156a14f390b7d51010172c3ba7975744fb47ee441eee3586f5ce639b",
+      "label": "S290 · east end stair landing",
+      "aliases": [
+        "S290 · east end stair landing",
+        "S290"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.809375,
+        "y": 0.4125604
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "6b951c20183636231e11fbada41d4e0f8f982762bafe6cf5d08e449edfe122ec",
+      "reviewBasis": "user-confirmation",
+      "id": "1ec1da5c-88e9-4533-86b5-e09e909aeb28",
+      "planId": "SW1-F3-p1",
+      "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
+      "label": "S390 · east end stair landing",
+      "aliases": [
+        "S390 · east end stair landing",
+        "S390"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.909375,
+        "y": 0.2425121
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "f0ac18227dc243bf55802a2df55f51386f1f6b0519d33676c260838f7244bab3",
+      "reviewBasis": "user-confirmation",
+      "id": "6807c428-409e-4b44-9c27-1a3367e8f11f",
+      "planId": "SW1-F4-p1",
+      "sourceSha256": "ed111bbfb9b7423af5a9369253f7820ed4e7eddbe6bf3a3421cda77bf3f53e30",
+      "label": "S490 · east end stair landing",
+      "aliases": [
+        "S490 · east end stair landing",
+        "S490"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.9625,
+        "y": 0.4531401
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "9914e13de8dd70d23c57b430c2da170dfaebbcd0de3d2903dacc7a86aa817e95",
+      "reviewBasis": "user-confirmation",
+      "id": "bc04ffa8-8998-4c4d-91df-64af52bbc630",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "S100 · west end stair landing",
+      "aliases": [
+        "S100 · west end stair landing",
+        "S100"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.2213235,
+        "y": 0.4116162
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "2d41c23db6cbb6d2077813feea03989d86e6b17cf92610a03bab3ca3a0442001",
+      "reviewBasis": "user-confirmation",
+      "id": "a78492d7-ffa2-4e0e-8a9d-32710349777c",
+      "planId": "SW1-F2-p1",
+      "sourceSha256": "37ab5548156a14f390b7d51010172c3ba7975744fb47ee441eee3586f5ce639b",
+      "label": "S200 · west end stair landing",
+      "aliases": [
+        "S200 · west end stair landing",
+        "S200"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.3001634,
+        "y": 0.4125
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "72ce8df2e5a860fb613198b457cc13723420b97f037927516330b8e7e44c333e",
+      "reviewBasis": "user-confirmation",
+      "id": "3bd394c0-a955-4376-a440-7a8a7a1a4c8e",
+      "planId": "SW1-F3-p1",
+      "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
+      "label": "S300 · west end stair landing",
+      "aliases": [
+        "S300 · west end stair landing",
+        "S300"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.1960784,
+        "y": 0.2335859
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "b2f11e0bbfa197bea56ae1168398862b1e3358def6a4292aa8d15aa412e1c33c",
+      "reviewBasis": "user-confirmation",
+      "id": "03b67ae9-46e9-479b-b628-c9c246b18838",
+      "planId": "SW1-F4-p1",
+      "sourceSha256": "ed111bbfb9b7423af5a9369253f7820ed4e7eddbe6bf3a3421cda77bf3f53e30",
+      "label": "S400 · west end stair landing",
+      "aliases": [
+        "S400 · west end stair landing",
+        "S400"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.0710784,
+        "y": 0.4406566
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "76170cbb8058ece37679e6512106b331e3a1d4290e2b6ed9edd487a7bedaff7c",
+      "reviewBasis": "user-confirmation",
+      "id": "d69175b9-1719-4f63-a85c-c123aaaf51eb",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "S120 · west interior stair landing",
+      "aliases": [
+        "S120 · west interior stair landing",
+        "S120"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.3627451,
+        "y": 0.4602273
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "899d3b8f94a2d79a176c2c218075c6c8f7a6ce147d63305ba14efcab194d39f4",
+      "reviewBasis": "user-confirmation",
+      "id": "1be8f2af-f022-40c4-9c05-c89376505623",
+      "planId": "SW1-F2-p1",
+      "sourceSha256": "37ab5548156a14f390b7d51010172c3ba7975744fb47ee441eee3586f5ce639b",
+      "label": "S220 · west interior stair landing",
+      "aliases": [
+        "S220 · west interior stair landing",
+        "S220"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.4387255,
+        "y": 0.4217172
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "163bdf654f3a28b72e691d70e4c0a2c2c135f22102bd52e7827173a705c89cce",
+      "reviewBasis": "user-confirmation",
+      "id": "428940ae-c2d4-47ef-8559-9918cdcbd42a",
+      "planId": "SW1-F3-p1",
+      "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
+      "label": "S320 · west interior stair landing",
+      "aliases": [
+        "S320 · west interior stair landing",
+        "S320"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.3897059,
+        "y": 0.2512626
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "c079423cdcd45956068296b6995bc8d99d0edffb287e4b1149238bcab945f49b",
+      "reviewBasis": "user-confirmation",
+      "id": "dfd67fdd-b9be-413b-8802-8bbeb168f44d",
+      "planId": "SW1-F4-p1",
+      "sourceSha256": "ed111bbfb9b7423af5a9369253f7820ed4e7eddbe6bf3a3421cda77bf3f53e30",
+      "label": "S420 · west interior stair landing",
+      "aliases": [
+        "S420 · west interior stair landing",
+        "S420"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.3153595,
+        "y": 0.4709596
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "f7ecb0385afa4cda3a56eb776faa701dc8a90f5d6be8e118ebe8667dba87c218",
+      "reviewBasis": "user-confirmation",
+      "id": "1dc74e07-c838-4f12-b2b3-26054420868c",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "S140 · east interior stair landing",
+      "aliases": [
+        "S140 · east interior stair landing",
+        "S140"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.6202614,
+        "y": 0.4179293
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "de259aeb650314300ad57091f39f89cc5340a8ee09599a9976c871a464d40f6f",
+      "reviewBasis": "user-confirmation",
+      "id": "5f6924f8-c614-488f-97a2-33170aafbfc1",
+      "planId": "SW1-F2-p1",
+      "sourceSha256": "37ab5548156a14f390b7d51010172c3ba7975744fb47ee441eee3586f5ce639b",
+      "label": "S250 · east interior stair landing",
+      "aliases": [
+        "S250 · east interior stair landing",
+        "S250"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.6642157,
+        "y": 0.4229798
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "af99cb425a44b81e8bb44c7740ccd2d0729102d1b96d424dca1621f20ba499d3",
+      "reviewBasis": "user-confirmation",
+      "id": "3fbed8ad-fa55-493a-9ef4-af9fcb0fe49b",
+      "planId": "SW1-F3-p1",
+      "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
+      "label": "S350 · east interior stair landing",
+      "aliases": [
+        "S350 · east interior stair landing",
+        "S350"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.7035948,
+        "y": 0.2550505
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "73962e0d9f73c0f97ceea9bd3ffc267a58a9bfb0154f9cfaec9006987c27728c",
+      "reviewBasis": "user-confirmation",
+      "id": "040d25f3-dbde-45f6-9467-45d515893a33",
+      "planId": "SW1-F4-p1",
+      "sourceSha256": "ed111bbfb9b7423af5a9369253f7820ed4e7eddbe6bf3a3421cda77bf3f53e30",
+      "label": "S450 · east interior stair landing",
+      "aliases": [
+        "S450 · east interior stair landing",
+        "S450"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.708415,
+        "y": 0.4709596
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "b2c5fcf8d1867fe098d529a5af17bff97932d708086f5fe9f5e8d3898f189bfb",
+      "reviewBasis": "user-confirmation",
+      "id": "c60121e2-c0fd-4a13-a7ec-e5b79f0b47f1",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "S119 · west annex stair landing",
+      "aliases": [
+        "S119 · west annex stair landing",
+        "S119"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.3496732,
+        "y": 0.7992424
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "232b49190ab11eba1fbecdd5fa8e147fdf21d0b2ba707adc94fa5d0538335ae1",
+      "reviewBasis": "user-confirmation",
+      "id": "826df55b-3f8c-4ebe-a358-498328cd4eaf",
+      "planId": "SW1-F2-p1",
+      "sourceSha256": "37ab5548156a14f390b7d51010172c3ba7975744fb47ee441eee3586f5ce639b",
+      "label": "S219 · west annex stair landing",
+      "aliases": [
+        "S219 · west annex stair landing",
+        "S219"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.4076797,
+        "y": 0.7765152
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "8942240b63aae5dd93b0204c5e84bf1deb44437864a8e435eff81623cc6a2c06",
+      "reviewBasis": "user-confirmation",
+      "id": "27a98b59-ca1f-4647-bc5b-7f1571e9ee4c",
+      "planId": "SW1-F3-p1",
+      "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
+      "label": "S319 · west annex stair landing",
+      "aliases": [
+        "S319 · west annex stair landing",
+        "S319"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.3504902,
+        "y": 0.7386364
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "4ecb1e24ca231064c9b827ba75e3238fb733ed3d31f224d174501ef2a5b02ef4",
+      "reviewBasis": "user-confirmation",
+      "id": "c168ce38-8c1c-4ada-bc8e-f7abccfc6358",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "S130 · south annex stair landing",
+      "aliases": [
+        "S130 · south annex stair landing",
+        "S130"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.4377451,
+        "y": 0.907197
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "b8c84fb2f9dc985673d5e7accd94abd888242e6b01f30adca09fdd56d3fed796",
+      "reviewBasis": "user-confirmation",
+      "id": "e1e87206-9a51-4da9-aacb-ac99d14b3d73",
+      "planId": "SW1-F2-p1",
+      "sourceSha256": "37ab5548156a14f390b7d51010172c3ba7975744fb47ee441eee3586f5ce639b",
+      "label": "S230 · south annex stair landing",
+      "aliases": [
+        "S230 · south annex stair landing",
+        "S230"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.503268,
+        "y": 0.8194444
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "13e2c78fecf4f7352933fd8bd10dc3a92cde68b86b86114d0e099bcb94435ba2",
+      "reviewBasis": "user-confirmation",
+      "id": "785ee698-3d8f-410a-a7a2-134f0db9abbc",
+      "planId": "SW1-F3-p1",
+      "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
+      "label": "S330 · south annex stair landing",
+      "aliases": [
+        "S330 · south annex stair landing",
+        "S330"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.4779412,
+        "y": 0.7929293
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "1efbafe20bd3d7e8b0203c8148ad9caab0bc755b2e46736cc9368ced5b3dd54e",
+      "reviewBasis": "user-confirmation",
+      "id": "aa34c191-a3b6-494f-8e9a-c7e323bf509a",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "S160 · east annex stair landing",
+      "aliases": [
+        "S160 · east annex stair landing",
+        "S160"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.6552288,
+        "y": 0.7954545
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "b19c2018f715af8122a61bda7c72242927e36e9bb26434c0bba6742e654d556b",
+      "reviewBasis": "user-confirmation",
+      "id": "18df4672-7439-446b-8c30-603b1b92cef0",
+      "planId": "SW1-F2-p1",
+      "sourceSha256": "37ab5548156a14f390b7d51010172c3ba7975744fb47ee441eee3586f5ce639b",
+      "label": "S260 · east annex stair landing",
+      "aliases": [
+        "S260 · east annex stair landing",
+        "S260"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.6936275,
+        "y": 0.7752525
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "f03e7802d537b7e9182bedd495adec80d0a3a151b315e3ba8170991f4f57182b",
+      "reviewBasis": "user-confirmation",
+      "id": "98144a8a-bf4a-4632-bbc1-2e2c7b39de3e",
+      "planId": "SW1-F3-p1",
+      "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
+      "label": "S360 · east annex stair landing",
+      "aliases": [
+        "S360 · east annex stair landing",
+        "S360"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.7434641,
+        "y": 0.7436869
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "e0c7d295572a74ca158604340b7adb7ebf6f4fe112412f04ff6f587b074832ea",
+      "reviewBasis": "user-confirmation",
+      "id": "c48b2038-0364-42ee-bbcc-31f475b31fa7",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "S131 · atrium stair landing",
+      "aliases": [
+        "S131 · atrium stair landing",
+        "S131"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.438317,
+        "y": 0.739899
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "f2004ca89440eadfdd4e5b6dddc56b5553144b50428bb91ee3a8c062db01a2de",
+      "reviewBasis": "user-confirmation",
+      "id": "9655a2f6-78d9-4a33-b7b5-c61eac65e0fa",
+      "planId": "SW1-F2-p1",
+      "sourceSha256": "37ab5548156a14f390b7d51010172c3ba7975744fb47ee441eee3586f5ce639b",
+      "label": "S231 · atrium stair landing",
+      "aliases": [
+        "S231 · atrium stair landing",
+        "S231"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.4962418,
+        "y": 0.6944444
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "e06c3c97a4a6a643746949cd90f61923587e677d16c1cf233bc26ac82570d0c4",
+      "reviewBasis": "user-confirmation",
+      "id": "136bed24-bed4-4c5c-b06f-6e0b6dc6e5fb",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "Main elevator at 1040",
+      "aliases": [
+        "Main elevator at 1040"
+      ],
+      "kind": "elevator-stop",
+      "point": {
+        "x": 0.5080065,
+        "y": 0.3857323
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "930787c03341621deb88f9b7e4882aa1111a9210af3d63fce4ce4b985e35d843",
+      "reviewBasis": "user-confirmation",
+      "id": "381dd976-6da9-47a1-a788-119ac66056a1",
+      "planId": "SW1-F2-p1",
+      "sourceSha256": "37ab5548156a14f390b7d51010172c3ba7975744fb47ee441eee3586f5ce639b",
+      "label": "Main elevator at 2036",
+      "aliases": [
+        "Main elevator at 2036"
+      ],
+      "kind": "elevator-stop",
+      "point": {
+        "x": 0.5584967,
+        "y": 0.3987374
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "1dad2ce017464c7ff3a917bc017611e4bc39cd8679c386628de4b78e6cb9bf67",
+      "reviewBasis": "user-confirmation",
+      "id": "b2dd686e-3fc2-4384-a728-2ca5aa4f4f3c",
+      "planId": "SW1-F3-p1",
+      "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
+      "label": "Main elevator at 3042",
+      "aliases": [
+        "Main elevator at 3042"
+      ],
+      "kind": "elevator-stop",
+      "point": {
+        "x": 0.5574346,
+        "y": 0.2175505
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "f54c6b9d29868d11522dc204189c0f1e7d7a5951293094bb51a3245be3b8e7c6",
+      "reviewBasis": "user-confirmation",
+      "id": "6ddd90a5-6784-4b65-aeca-59950a4abeb2",
+      "planId": "SW1-F4-p1",
+      "sourceSha256": "ed111bbfb9b7423af5a9369253f7820ed4e7eddbe6bf3a3421cda77bf3f53e30",
+      "label": "Main elevator at 4038",
+      "aliases": [
+        "Main elevator at 4038"
+      ],
+      "kind": "elevator-stop",
+      "point": {
+        "x": 0.5251634,
+        "y": 0.4233586
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "6c47514c25aa4b0bf197e5ce266a7a06906708da53350cf76d26018c510e926e",
+      "reviewBasis": "user-confirmation",
+      "id": "f7666847-4a76-44da-8569-22e6be1af6e2",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "Gateway elevator at 1301",
+      "aliases": [
+        "Gateway elevator at 1301"
+      ],
+      "kind": "elevator-stop",
+      "point": {
+        "x": 0.4353758,
+        "y": 0.8166667
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "20447c40858dea61c37fc1f5b481751c808ab50e33171c9eafafad24a66ca7ac",
+      "reviewBasis": "user-confirmation",
+      "id": "e8e77d6f-9848-4f44-9dc3-2802dc40a36f",
+      "planId": "SW1-F2-p1",
+      "sourceSha256": "37ab5548156a14f390b7d51010172c3ba7975744fb47ee441eee3586f5ce639b",
+      "label": "Gateway elevator at 2325",
+      "aliases": [
+        "Gateway elevator at 2325"
+      ],
+      "kind": "elevator-stop",
+      "point": {
+        "x": 0.4933007,
+        "y": 0.7960859
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "da2d704b7ac48492a122da7a4256d0d6e75f49c3f38338a9aa70c8cad4666db6",
+      "reviewBasis": "user-confirmation",
+      "id": "1b757405-30ee-4012-9d22-7de19f4953a2",
+      "planId": "SW1-F3-p1",
+      "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
+      "label": "Gateway elevator at 2500LB",
+      "aliases": [
+        "Gateway elevator at 2500LB"
+      ],
+      "kind": "elevator-stop",
+      "point": {
+        "x": 0.4636438,
+        "y": 0.772096
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "26aec4c73fb2e2996a382e77e0c99a82e00f5e7423550bc6f32eae3117967a07",
+      "reviewBasis": "user-confirmation",
+      "id": "0e148358-6460-4fcb-839d-07f014a9bc87",
+      "planId": "SW1-F3-p1",
+      "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
+      "label": "Corridor 3100 · office 3130 entrance",
+      "aliases": [
+        "Corridor 3100 · office 3130 entrance"
+      ],
+      "kind": "door",
+      "point": {
+        "x": 0.3621732,
+        "y": 0.4030303
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "035617d044d1238be7e1277534eed20f94ab72a5cc708c7a33bb2644ccb002dd",
+      "reviewBasis": "user-confirmation",
+      "id": "616f12c3-e03f-4ab1-bb58-f8b59139a8dd",
+      "planId": "SW1-F3-p1",
+      "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
+      "label": "3130 · shared office entrance",
+      "aliases": [
+        "3130 · shared office entrance"
+      ],
+      "kind": "door",
+      "point": {
+        "x": 0.3773693,
+        "y": 0.4030303
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "6f57d27d7b60d94b39a5cfe75f43262c40cfbb30bfa1682b3ee5c31bc40311da",
+      "reviewBasis": "user-confirmation",
+      "id": "e128c483-216b-48fd-acec-3fadc6609952",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "Atrium 1302 · door to 1120",
+      "aliases": [
+        "Atrium 1302 · door to 1120"
+      ],
+      "kind": "junction",
+      "point": {
+        "x": 0.404902,
+        "y": 0.6187753
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "4022ceeef7cc0e55653b876b6c8a154e3d12f6259165dd3761dc5b31d7619b36",
+      "reviewBasis": "user-confirmation",
+      "id": "c71e49df-82e7-4a33-ab70-e8a553101fd3",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "1120 · atrium-side entrance",
+      "aliases": [
+        "1120 · atrium-side entrance"
+      ],
+      "kind": "door",
+      "point": {
+        "x": 0.389134,
+        "y": 0.6187753
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "b49612921a4de5c3eb7ef84813a4222f831b98a4834017d051af3f1d5b8676d3",
+      "reviewBasis": "user-confirmation",
+      "id": "3f5ac437-a376-409e-82c8-aa3d3bcc1792",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "Atrium 1302 · door to 1130",
+      "aliases": [
+        "Atrium 1302 · door to 1130"
+      ],
+      "kind": "junction",
+      "point": {
+        "x": 0.404902,
+        "y": 0.6709975
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "cf1aef62632ae7023486e8dedb701a18697b809b31c43ec1be1476d2f4127b65",
+      "reviewBasis": "user-confirmation",
+      "id": "fbff3c89-b839-441f-a3e0-b251eb80852c",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "1130 · atrium-side entrance",
+      "aliases": [
+        "1130 · atrium-side entrance"
+      ],
+      "kind": "door",
+      "point": {
+        "x": 0.389134,
+        "y": 0.6709975
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "e64679d13626d946261aba2f38ca15ef30df37a906d7b480e1065fba80f11d36",
+      "reviewBasis": "user-confirmation",
+      "id": "556dca7b-59e5-49d1-bfa2-fa1f8ccee315",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "Atrium 1302 · door to 1160",
+      "aliases": [
+        "Atrium 1302 · door to 1160"
+      ],
+      "kind": "junction",
+      "point": {
+        "x": 0.404902,
+        "y": 0.6896086
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "0826ec8dc3888530ea8df37ca0796d8de3751b515439d70afd8cfe7cb8eda662",
+      "reviewBasis": "user-confirmation",
+      "id": "40b4e0d2-6786-4e82-a444-d034ddb26178",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "1160 · atrium-side entrance",
+      "aliases": [
+        "1160 · atrium-side entrance"
+      ],
+      "kind": "door",
+      "point": {
+        "x": 0.389134,
+        "y": 0.6896086
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "697a66ac8abe204fb2ef19b6ac437349ec6e9396519239b46271ae04ef2c3b41",
+      "reviewBasis": "user-confirmation",
+      "id": "34a837ae-d566-46f4-a563-031bd1b17af9",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "Atrium 1302 · door to 1170",
+      "aliases": [
+        "Atrium 1302 · door to 1170"
+      ],
+      "kind": "junction",
+      "point": {
+        "x": 0.404902,
+        "y": 0.7419823
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "8f113986da8270cad5add53cc1cd3b47fd9aa5fcffd6d5d86fbe50df74193d19",
+      "reviewBasis": "user-confirmation",
+      "id": "03b8f40f-5003-4b70-bc65-b417b5e8739d",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "1170 · atrium-side entrance",
+      "aliases": [
+        "1170 · atrium-side entrance"
+      ],
+      "kind": "door",
+      "point": {
+        "x": 0.389134,
+        "y": 0.7419823
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "2b48259b06a0955809b8a9a8f8d2ae4d760b76f702fb9c829c6a0f6819c3343e",
+      "reviewBasis": "user-confirmation",
+      "id": "9790d897-df28-4dce-9624-3e46c029122b",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "Atrium 1302 · lobby 1300 boundary",
+      "aliases": [
+        "Atrium 1302 · lobby 1300 boundary"
+      ],
+      "kind": "junction",
+      "point": {
+        "x": 0.4146242,
+        "y": 0.7755051
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "e683b48c1dd45b0532155510988865888293c8a4904c4f45546e410e718495ae",
+      "reviewBasis": "user-confirmation",
+      "id": "21d9b6ea-9815-49d8-b6dd-88608438846e",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "Lobby 1300 · atrium boundary",
+      "aliases": [
+        "Lobby 1300 · atrium boundary"
+      ],
+      "kind": "junction",
+      "point": {
+        "x": 0.4146242,
+        "y": 0.7929293
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "a3dd0a7e24da0875cdbca467eea661411dabbaba6c765a5dffe9c8c53d5ef207",
+      "reviewBasis": "user-confirmation",
+      "id": "671647cd-56d1-4b4f-99c5-26a5fe0e1105",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "Vestibule 1020 · west exterior door",
+      "aliases": [
+        "Vestibule 1020 · west exterior door"
+      ],
+      "kind": "outdoor-access",
+      "point": {
+        "x": 0.3232843,
+        "y": 0.4015152
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "43f2de8c88dfc01559d7fb6c9670c4203efa1ff23845ef8a82935730fb5b7e8a",
+      "reviewBasis": "user-confirmation",
+      "id": "c13b1c15-25e2-4396-a7be-0927d9d719d3",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "Lobby 1000 · exterior door",
+      "aliases": [
+        "Lobby 1000 · exterior door"
+      ],
+      "kind": "outdoor-access",
+      "point": {
+        "x": 0.2921569,
+        "y": 0.4270202
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "728ad285400df447f12613a4416785558b13cf5acff3d5d641ae1e77dd602ae2",
+      "reviewBasis": "user-confirmation",
+      "id": "93b4f8b0-a376-46fe-b37f-b6f7f9610daf",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "Lobby 1101 · exterior door",
+      "aliases": [
+        "Lobby 1101 · exterior door"
+      ],
+      "kind": "outdoor-access",
+      "point": {
+        "x": 0.3336601,
+        "y": 0.5012626
       }
     }
   ],
@@ -1232,6 +2228,846 @@
         "toNodeId": "08198569-8a08-421b-889b-20c1889ecfe0",
         "reviewedEdgeHash": "12db4065c2b02805a7325bd4767fcaafdaa9721757e4f6902c62b790498bc5ea"
       }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "1eef31508ffca66c61f023019866fd6144aced742f7f92f501b254f573c3c86a",
+      "reviewBasis": "user-confirmation",
+      "id": "491e3838-5328-4268-a1f7-354ffe79faf7",
+      "fromNodeId": "984afed3-954f-483d-a5e8-9ec3239665cc",
+      "toNodeId": "c389c584-97d1-474d-9cc5-f725b43030a5",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "outdoor",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw03-sw01-f1-lobby-vestibule",
+      "candidateBinding": {
+        "definitionHash": "c383fcd99a599eb372d93714aab9cf68cad8bc072fd19a7e6d0955f145224188",
+        "presentedHash": "e68a9a654e9ed6c7d23a7ef979cc66f5cab222bd8c72815c320051faa8a8717b",
+        "fromNodeId": "984afed3-954f-483d-a5e8-9ec3239665cc",
+        "toNodeId": "c389c584-97d1-474d-9cc5-f725b43030a5",
+        "reviewedEdgeHash": "1eef31508ffca66c61f023019866fd6144aced742f7f92f501b254f573c3c86a"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "687410daad45a39b04920d769f3073c94502f0cfd66d51e5a6403bff32df9b3d",
+      "reviewBasis": "user-confirmation",
+      "id": "f0298fdc-d3d0-4ba8-90a1-0127150b0f49",
+      "fromNodeId": "94d79ed7-ea1e-4ea7-8e33-4edd00b55592",
+      "toNodeId": "17f0f223-5e7e-4209-b52e-3da6a62a7a6e",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "building-link",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-sw3-f2-passage-inquiry",
+      "candidateBinding": {
+        "definitionHash": "68e2c9b38e0c9bbbe6853ec996401c9d70a492c67ff1effd3fe51b90f15b6072",
+        "presentedHash": "87e218d9cf00fa178dd421a32c450c796334f44394d76ab6feab9c22143f27b1",
+        "fromNodeId": "94d79ed7-ea1e-4ea7-8e33-4edd00b55592",
+        "toNodeId": "17f0f223-5e7e-4209-b52e-3da6a62a7a6e",
+        "reviewedEdgeHash": "687410daad45a39b04920d769f3073c94502f0cfd66d51e5a6403bff32df9b3d"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "3ce5774de13c325572b954cd9728617543e31f613866ad127a240ce36f3903e0",
+      "reviewBasis": "user-confirmation",
+      "id": "386e6288-fb33-4b7f-9ad8-82d5f585bbce",
+      "fromNodeId": "5058221b-167c-424e-9965-c1fc501a817f",
+      "toNodeId": "bcf95222-1be7-4d97-afa0-e0a50f4b1333",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "building-link",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-sw3-f3-passage-inquiry",
+      "candidateBinding": {
+        "definitionHash": "a456098a655d7a9901e4ded3e883de021055b3f27cf12945931ea4e17231e2c9",
+        "presentedHash": "1c2d50ae6d7b9b7266da2d36600974d5c4e9b4adfcf4cb57d0270d25900abe26",
+        "fromNodeId": "5058221b-167c-424e-9965-c1fc501a817f",
+        "toNodeId": "bcf95222-1be7-4d97-afa0-e0a50f4b1333",
+        "reviewedEdgeHash": "3ce5774de13c325572b954cd9728617543e31f613866ad127a240ce36f3903e0"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "08a78d9b690cef023abc5a8a6eafabf07600f95dfb8a983d15eb2c3444f2e759",
+      "reviewBasis": "user-confirmation",
+      "id": "395fa914-3037-425b-9e05-6bd3d38b18e1",
+      "fromNodeId": "9b2ee327-9632-4ff1-b156-35fdbc66ebe3",
+      "toNodeId": "2c334330-f6e1-404a-8347-9aaa57e56fdd",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "building-link",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-sw3-f4-passage-inquiry",
+      "candidateBinding": {
+        "definitionHash": "2f9ed9ea832823ea37d4bb5c0a99c73766ea13a4af6dffda7c9e10bee3317338",
+        "presentedHash": "d0222f9097fdb693cd6663397b229ad8ca2c05c7081a238894ad4672f0a09b2d",
+        "fromNodeId": "9b2ee327-9632-4ff1-b156-35fdbc66ebe3",
+        "toNodeId": "2c334330-f6e1-404a-8347-9aaa57e56fdd",
+        "reviewedEdgeHash": "08a78d9b690cef023abc5a8a6eafabf07600f95dfb8a983d15eb2c3444f2e759"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "ca771edafbe6084f59472016b2825be64c3163aff6f97d5c3166d30b104c3c01",
+      "reviewBasis": "user-confirmation",
+      "id": "080ded60-3e73-4051-90d5-c6638978ecb4",
+      "fromNodeId": "63d32fdd-34d9-4350-9091-3692f425d636",
+      "toNodeId": "5d1c1720-fa8c-40b0-b5d6-b9880058898d",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f1-f2-east-end-stairs",
+      "candidateBinding": {
+        "definitionHash": "0ab6aa94a88f9ddece0ac6edb8abece65343179bbef6d1634f0e8bc5e66f8356",
+        "presentedHash": "acb81add20203591cb2a6c9198502676a50a83470261fcf7105976a24a8e48c7",
+        "fromNodeId": "63d32fdd-34d9-4350-9091-3692f425d636",
+        "toNodeId": "5d1c1720-fa8c-40b0-b5d6-b9880058898d",
+        "reviewedEdgeHash": "ca771edafbe6084f59472016b2825be64c3163aff6f97d5c3166d30b104c3c01"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "306d7d588195f4ffa6021de85f46f67afe701a3922801c9d107422cd59ee32e9",
+      "reviewBasis": "user-confirmation",
+      "id": "1ca7a936-8ae9-4c60-960e-304772b57147",
+      "fromNodeId": "5d1c1720-fa8c-40b0-b5d6-b9880058898d",
+      "toNodeId": "1ec1da5c-88e9-4533-86b5-e09e909aeb28",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f2-f3-east-end-stairs",
+      "candidateBinding": {
+        "definitionHash": "f9a3017f523455331194cabf29a57632cf1dd8bf8d7961c818dea64cc12e3f31",
+        "presentedHash": "15ab484cd97a0a50e8bbe09f1973f153aded7b4749953892a44415ba8e6751ef",
+        "fromNodeId": "5d1c1720-fa8c-40b0-b5d6-b9880058898d",
+        "toNodeId": "1ec1da5c-88e9-4533-86b5-e09e909aeb28",
+        "reviewedEdgeHash": "306d7d588195f4ffa6021de85f46f67afe701a3922801c9d107422cd59ee32e9"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "d4a9eff9876f66c6ebf9118659566929cc25358cbceab39b3bdf1fc5c266b826",
+      "reviewBasis": "user-confirmation",
+      "id": "f6b6c2f2-fc43-4db9-9aa8-6fafc5eb8127",
+      "fromNodeId": "1ec1da5c-88e9-4533-86b5-e09e909aeb28",
+      "toNodeId": "6807c428-409e-4b44-9c27-1a3367e8f11f",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f3-f4-east-end-stairs",
+      "candidateBinding": {
+        "definitionHash": "d751c75503fd5f3f352da9de882b630dfe1f430e801c32ae3338fcc922bd305a",
+        "presentedHash": "9817d1861e21102ef1d39e5af89f0ba66055cae4c3d5ef0f96345e14db426052",
+        "fromNodeId": "1ec1da5c-88e9-4533-86b5-e09e909aeb28",
+        "toNodeId": "6807c428-409e-4b44-9c27-1a3367e8f11f",
+        "reviewedEdgeHash": "d4a9eff9876f66c6ebf9118659566929cc25358cbceab39b3bdf1fc5c266b826"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "d21b1d6a3d2eb1e10fb4774ef0b72a1c271b67e3d86566c3ab53676301cf1cbe",
+      "reviewBasis": "user-confirmation",
+      "id": "0893ed60-b461-4787-a2de-2248a733852e",
+      "fromNodeId": "bc04ffa8-8998-4c4d-91df-64af52bbc630",
+      "toNodeId": "a78492d7-ffa2-4e0e-8a9d-32710349777c",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f1-f2-west-end-stairs",
+      "candidateBinding": {
+        "definitionHash": "c02b921a28dbb5ba26251834a48c6a23f146f17484443eee832be1e6af36e271",
+        "presentedHash": "442b7c5aff1d8a7006803569e9c662203403a837d0d4891c51dab78c05f2dc2c",
+        "fromNodeId": "bc04ffa8-8998-4c4d-91df-64af52bbc630",
+        "toNodeId": "a78492d7-ffa2-4e0e-8a9d-32710349777c",
+        "reviewedEdgeHash": "d21b1d6a3d2eb1e10fb4774ef0b72a1c271b67e3d86566c3ab53676301cf1cbe"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "b79f92361489f9740ba6e9535fd0a1517fca4dfee9fb1e73711680e2d14cb3a6",
+      "reviewBasis": "user-confirmation",
+      "id": "365a9591-b2fe-4ef6-b9d0-8a226224a67c",
+      "fromNodeId": "a78492d7-ffa2-4e0e-8a9d-32710349777c",
+      "toNodeId": "3bd394c0-a955-4376-a440-7a8a7a1a4c8e",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f2-f3-west-end-stairs",
+      "candidateBinding": {
+        "definitionHash": "8cb985959445c39c72609eb86272202b017f066d50460f230ec70b8a398a9852",
+        "presentedHash": "7909f994760f159bd2737661e2ae0f536562b86a891ee41353dd4ad39b38b9df",
+        "fromNodeId": "a78492d7-ffa2-4e0e-8a9d-32710349777c",
+        "toNodeId": "3bd394c0-a955-4376-a440-7a8a7a1a4c8e",
+        "reviewedEdgeHash": "b79f92361489f9740ba6e9535fd0a1517fca4dfee9fb1e73711680e2d14cb3a6"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "8a8af6ffbd0322e032d69869a183194a0229f4e86173a3db12c1b6a2005f9b54",
+      "reviewBasis": "user-confirmation",
+      "id": "619eb6b4-ca0a-4833-8e32-a2b5a498a7ee",
+      "fromNodeId": "3bd394c0-a955-4376-a440-7a8a7a1a4c8e",
+      "toNodeId": "03b67ae9-46e9-479b-b628-c9c246b18838",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f3-f4-west-end-stairs",
+      "candidateBinding": {
+        "definitionHash": "258caaf384bb3f04e08d17ad7a545aa675aa9da49023f93db0e2cfffad6f4a82",
+        "presentedHash": "79cc658c0a7ff0695639f7eb4d4f3390917f1a709b73ef960da84368b6cc1e18",
+        "fromNodeId": "3bd394c0-a955-4376-a440-7a8a7a1a4c8e",
+        "toNodeId": "03b67ae9-46e9-479b-b628-c9c246b18838",
+        "reviewedEdgeHash": "8a8af6ffbd0322e032d69869a183194a0229f4e86173a3db12c1b6a2005f9b54"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "1944ad40cb9ee63c7319a00d12c3da3deb3df10207611e52e9cc464a86f823ae",
+      "reviewBasis": "user-confirmation",
+      "id": "be9163a4-4e46-4ac1-9127-1d3dfcdae96c",
+      "fromNodeId": "d69175b9-1719-4f63-a85c-c123aaaf51eb",
+      "toNodeId": "1be8f2af-f022-40c4-9c05-c89376505623",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f1-f2-west-interior-stairs",
+      "candidateBinding": {
+        "definitionHash": "c7a3ee3b3180a732f702182b15aa7c3da93c6a116096c8e5e6d54c3e3f466eeb",
+        "presentedHash": "8af1655b75fc56e1224fd9e0a978907c50d27a1c485cec75abcb84025c75a35f",
+        "fromNodeId": "d69175b9-1719-4f63-a85c-c123aaaf51eb",
+        "toNodeId": "1be8f2af-f022-40c4-9c05-c89376505623",
+        "reviewedEdgeHash": "1944ad40cb9ee63c7319a00d12c3da3deb3df10207611e52e9cc464a86f823ae"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "0683b3c944cf227b5fa0282feaa8158d32b7eeacde0e369ad960d582f56a1a82",
+      "reviewBasis": "user-confirmation",
+      "id": "ac23c69a-dae5-4120-8f96-c131e9ef674d",
+      "fromNodeId": "1be8f2af-f022-40c4-9c05-c89376505623",
+      "toNodeId": "428940ae-c2d4-47ef-8559-9918cdcbd42a",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f2-f3-west-interior-stairs",
+      "candidateBinding": {
+        "definitionHash": "780ac1e610204b4d18375f610527a5d02106202c687375bcecfb35b628333eee",
+        "presentedHash": "caf94b77278865d2d8163fdaacc43f40654b2901e173a0b7717acd0394805294",
+        "fromNodeId": "1be8f2af-f022-40c4-9c05-c89376505623",
+        "toNodeId": "428940ae-c2d4-47ef-8559-9918cdcbd42a",
+        "reviewedEdgeHash": "0683b3c944cf227b5fa0282feaa8158d32b7eeacde0e369ad960d582f56a1a82"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "b6a7e411e62b42dd04e282c5b0984bb6d320a53cee6d78e9b5dca4cefd0ca732",
+      "reviewBasis": "user-confirmation",
+      "id": "ecae8a00-ca10-4a02-8bb5-14d4d75d2516",
+      "fromNodeId": "428940ae-c2d4-47ef-8559-9918cdcbd42a",
+      "toNodeId": "dfd67fdd-b9be-413b-8802-8bbeb168f44d",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f3-f4-west-interior-stairs",
+      "candidateBinding": {
+        "definitionHash": "e0386407b300f9671a95cbdefb1c1741997820d4a1fee6c7bb89e14685004b74",
+        "presentedHash": "f898a54af75fdd99420b85aee85b1cb38097555a5a5ea7ce549c9727bccaf4c6",
+        "fromNodeId": "428940ae-c2d4-47ef-8559-9918cdcbd42a",
+        "toNodeId": "dfd67fdd-b9be-413b-8802-8bbeb168f44d",
+        "reviewedEdgeHash": "b6a7e411e62b42dd04e282c5b0984bb6d320a53cee6d78e9b5dca4cefd0ca732"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "7715e344880fb605d59f350d6f77876533127732455c68f70635d4a1f1ef2a40",
+      "reviewBasis": "user-confirmation",
+      "id": "4b0b5c6e-cd14-4ad4-b57e-01cc8b9bad39",
+      "fromNodeId": "1dc74e07-c838-4f12-b2b3-26054420868c",
+      "toNodeId": "5f6924f8-c614-488f-97a2-33170aafbfc1",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f1-f2-east-interior-stairs",
+      "candidateBinding": {
+        "definitionHash": "195fbbfcb6c195bb0acbada13287e8739f0acef49952d8835c32f1f19ea42143",
+        "presentedHash": "378cbb999a936ff1fa02fae8ab5f59f775bdf1bbb6d8a0ba232094da057b0c50",
+        "fromNodeId": "1dc74e07-c838-4f12-b2b3-26054420868c",
+        "toNodeId": "5f6924f8-c614-488f-97a2-33170aafbfc1",
+        "reviewedEdgeHash": "7715e344880fb605d59f350d6f77876533127732455c68f70635d4a1f1ef2a40"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "f12e31c1c79f6108a569e22602bdb1246b3a57f67c9ae868717da613ab637c6d",
+      "reviewBasis": "user-confirmation",
+      "id": "048736b4-160a-43ca-9df6-4edce5e0ca0b",
+      "fromNodeId": "5f6924f8-c614-488f-97a2-33170aafbfc1",
+      "toNodeId": "3fbed8ad-fa55-493a-9ef4-af9fcb0fe49b",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f2-f3-east-interior-stairs",
+      "candidateBinding": {
+        "definitionHash": "0ed5f9a976d0337b0527701873dbc98017c57442d775616416720c24d04be2f4",
+        "presentedHash": "d69ef70425ea855fdb1b83f35bdf9faeeacde15c72d49d9d15020313658e84ec",
+        "fromNodeId": "5f6924f8-c614-488f-97a2-33170aafbfc1",
+        "toNodeId": "3fbed8ad-fa55-493a-9ef4-af9fcb0fe49b",
+        "reviewedEdgeHash": "f12e31c1c79f6108a569e22602bdb1246b3a57f67c9ae868717da613ab637c6d"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "9c5000bdc4908ec38aaa6b2f31e3450e4cf9f06ad48ddeae66a8d712ad2b3d41",
+      "reviewBasis": "user-confirmation",
+      "id": "35f9aea0-7cd6-4dd1-8215-e0faef939e5f",
+      "fromNodeId": "3fbed8ad-fa55-493a-9ef4-af9fcb0fe49b",
+      "toNodeId": "040d25f3-dbde-45f6-9467-45d515893a33",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f3-f4-east-interior-stairs",
+      "candidateBinding": {
+        "definitionHash": "eab7d981dd8846d2fdc704a54a421c90dcbaf95bba38aebd057d8af6cbeb77c5",
+        "presentedHash": "2998e1d4babd0fd2a84fb1c61208a7dce3c1224bb60fb7f5ae6faa5b02de6ec2",
+        "fromNodeId": "3fbed8ad-fa55-493a-9ef4-af9fcb0fe49b",
+        "toNodeId": "040d25f3-dbde-45f6-9467-45d515893a33",
+        "reviewedEdgeHash": "9c5000bdc4908ec38aaa6b2f31e3450e4cf9f06ad48ddeae66a8d712ad2b3d41"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "8f6854548523c824326a076d40dfd7f2947cc86a81abf1965cbec28c3afe46c7",
+      "reviewBasis": "user-confirmation",
+      "id": "ba65d9c3-062f-46a7-87c1-2732ac841ff0",
+      "fromNodeId": "c60121e2-c0fd-4a13-a7ec-e5b79f0b47f1",
+      "toNodeId": "826df55b-3f8c-4ebe-a358-498328cd4eaf",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f1-f2-west-annex-stairs",
+      "candidateBinding": {
+        "definitionHash": "1e29cc91b65bf13e6d3a90406455d65abb57f6258335d6bd1738fe83e39b8f83",
+        "presentedHash": "f5fc9dd2b45329950e2c8adfb4c94a46152ab9753489b4d3d84a6829eae7812b",
+        "fromNodeId": "c60121e2-c0fd-4a13-a7ec-e5b79f0b47f1",
+        "toNodeId": "826df55b-3f8c-4ebe-a358-498328cd4eaf",
+        "reviewedEdgeHash": "8f6854548523c824326a076d40dfd7f2947cc86a81abf1965cbec28c3afe46c7"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "9bd1c91e7251cc0238b00e281a66e49d6f3bcef3eb1b6ee0472f29ec14ade136",
+      "reviewBasis": "user-confirmation",
+      "id": "a6515c11-bdb4-49c4-8247-7f28af908605",
+      "fromNodeId": "826df55b-3f8c-4ebe-a358-498328cd4eaf",
+      "toNodeId": "27a98b59-ca1f-4647-bc5b-7f1571e9ee4c",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f2-f3-west-annex-stairs",
+      "candidateBinding": {
+        "definitionHash": "7a3e78762818431c07f588ebf50d9762a8d12726efccca6a03e46f8c85c229fa",
+        "presentedHash": "09ab2603ea32d5ff0c735101b8c51f8003cae6b46fc7695d8b38196d0c740639",
+        "fromNodeId": "826df55b-3f8c-4ebe-a358-498328cd4eaf",
+        "toNodeId": "27a98b59-ca1f-4647-bc5b-7f1571e9ee4c",
+        "reviewedEdgeHash": "9bd1c91e7251cc0238b00e281a66e49d6f3bcef3eb1b6ee0472f29ec14ade136"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "62d7d75a6e0b34cefd546c3593cd8dc1c4045fe9953910fa0d2d09d3d96a60e3",
+      "reviewBasis": "user-confirmation",
+      "id": "4719967f-478c-420f-9d72-ffe37b77aa9c",
+      "fromNodeId": "c168ce38-8c1c-4ada-bc8e-f7abccfc6358",
+      "toNodeId": "e1e87206-9a51-4da9-aacb-ac99d14b3d73",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f1-f2-south-annex-stairs",
+      "candidateBinding": {
+        "definitionHash": "68dfe1a0a34a2f38be0b793f294e820409713f0f6d1b6d9fe337e2342c65da4a",
+        "presentedHash": "b54ec7bd20ade4551e1a348765889416ab8e1f3efaac1bb00ff2483bb70b8235",
+        "fromNodeId": "c168ce38-8c1c-4ada-bc8e-f7abccfc6358",
+        "toNodeId": "e1e87206-9a51-4da9-aacb-ac99d14b3d73",
+        "reviewedEdgeHash": "62d7d75a6e0b34cefd546c3593cd8dc1c4045fe9953910fa0d2d09d3d96a60e3"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "2f93c4dd9a361c716fac3b41d3a6dc4aba74eeeba252e95d448cd66aafafb881",
+      "reviewBasis": "user-confirmation",
+      "id": "97a934dc-0ec6-4254-814e-14907d2a494a",
+      "fromNodeId": "e1e87206-9a51-4da9-aacb-ac99d14b3d73",
+      "toNodeId": "785ee698-3d8f-410a-a7a2-134f0db9abbc",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f2-f3-south-annex-stairs",
+      "candidateBinding": {
+        "definitionHash": "2f19711928487e424552a70d113faf2bb5b9314604a2b77b03b8c9c6d5585282",
+        "presentedHash": "b0a742046cc130a3e0b679739fd3ff77aadacad19caf809e2847281a174229d6",
+        "fromNodeId": "e1e87206-9a51-4da9-aacb-ac99d14b3d73",
+        "toNodeId": "785ee698-3d8f-410a-a7a2-134f0db9abbc",
+        "reviewedEdgeHash": "2f93c4dd9a361c716fac3b41d3a6dc4aba74eeeba252e95d448cd66aafafb881"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "4ba4eb9ff38a23fe4d077e24e0bfc8ef3063951038391ff2b611e789a12c10fb",
+      "reviewBasis": "user-confirmation",
+      "id": "3e2a0201-298c-4853-89db-5cb5c8ecf428",
+      "fromNodeId": "aa34c191-a3b6-494f-8e9a-c7e323bf509a",
+      "toNodeId": "18df4672-7439-446b-8c30-603b1b92cef0",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f1-f2-east-annex-stairs",
+      "candidateBinding": {
+        "definitionHash": "13379ed1a9eac888afd11b6c51af9e3a59f9161f598b98e012ef4408f513d6a9",
+        "presentedHash": "e53316c37c38ca42370df6864b6c5f4cc2ad1c9627aeedc31e2f365c137dca58",
+        "fromNodeId": "aa34c191-a3b6-494f-8e9a-c7e323bf509a",
+        "toNodeId": "18df4672-7439-446b-8c30-603b1b92cef0",
+        "reviewedEdgeHash": "4ba4eb9ff38a23fe4d077e24e0bfc8ef3063951038391ff2b611e789a12c10fb"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "b22e5a7a2ddcbffecc50c7337e1706a88cd579ff1cdbc910f9fe5b84ac51a4ce",
+      "reviewBasis": "user-confirmation",
+      "id": "aae92be2-3059-49d4-b6bb-9f8541a7cb87",
+      "fromNodeId": "18df4672-7439-446b-8c30-603b1b92cef0",
+      "toNodeId": "98144a8a-bf4a-4632-bbc1-2e2c7b39de3e",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f2-f3-east-annex-stairs",
+      "candidateBinding": {
+        "definitionHash": "796273f254748259ee1b8accc220659215a06427d72fc45fb91cf26ca0edb3a1",
+        "presentedHash": "479f764ac61b6d699258fed1da591ba4a727006aa2db7d28aa39215ac84b545a",
+        "fromNodeId": "18df4672-7439-446b-8c30-603b1b92cef0",
+        "toNodeId": "98144a8a-bf4a-4632-bbc1-2e2c7b39de3e",
+        "reviewedEdgeHash": "b22e5a7a2ddcbffecc50c7337e1706a88cd579ff1cdbc910f9fe5b84ac51a4ce"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "de2813c0823434e73c939d056618a784cc55eeac7f99d69d7bdbd23102f51566",
+      "reviewBasis": "user-confirmation",
+      "id": "37f6f140-07db-4045-878c-744bd8eb93b5",
+      "fromNodeId": "c48b2038-0364-42ee-bbcc-31f475b31fa7",
+      "toNodeId": "9655a2f6-78d9-4a33-b7b5-c61eac65e0fa",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f1-f2-atrium-stairs",
+      "candidateBinding": {
+        "definitionHash": "f427770e7936c715f6ced5f2cf5ded132f150830e2ff57f0e4c8064cc28b99a7",
+        "presentedHash": "4e008b1ff6c65dd14bc86176166ff97b2ef62854ff00b5d61943833767dbd1b6",
+        "fromNodeId": "c48b2038-0364-42ee-bbcc-31f475b31fa7",
+        "toNodeId": "9655a2f6-78d9-4a33-b7b5-c61eac65e0fa",
+        "reviewedEdgeHash": "de2813c0823434e73c939d056618a784cc55eeac7f99d69d7bdbd23102f51566"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "37220cbeec340cc62974999b6bbd04d273f3d30adbd37dac7095340c4c198305",
+      "reviewBasis": "user-confirmation",
+      "id": "9a8b62c9-cfc7-4b3b-8d8c-e383e42ca853",
+      "fromNodeId": "136bed24-bed4-4c5c-b06f-6e0b6dc6e5fb",
+      "toNodeId": "381dd976-6da9-47a1-a788-119ac66056a1",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "elevator",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f1-f2-main-elevator",
+      "candidateBinding": {
+        "definitionHash": "962283210cca56f35f07ad885b0d05cde218f248933fc27f52d49e9b06b31cca",
+        "presentedHash": "56f995e5014e5670a97d7c613940a5bf47da226cc776c0a17ca63d3abb1e29b8",
+        "fromNodeId": "136bed24-bed4-4c5c-b06f-6e0b6dc6e5fb",
+        "toNodeId": "381dd976-6da9-47a1-a788-119ac66056a1",
+        "reviewedEdgeHash": "37220cbeec340cc62974999b6bbd04d273f3d30adbd37dac7095340c4c198305"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "0756211047c88dd2a233d7290f519eac1105d74a0c8588f8135dd92bc3f85b9b",
+      "reviewBasis": "user-confirmation",
+      "id": "9089e8cb-1f03-4a8b-9f11-cb325a43ca03",
+      "fromNodeId": "381dd976-6da9-47a1-a788-119ac66056a1",
+      "toNodeId": "b2dd686e-3fc2-4384-a728-2ca5aa4f4f3c",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "elevator",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f2-f3-main-elevator",
+      "candidateBinding": {
+        "definitionHash": "fca9246de16f754ea4ace158497ee500737bf07bed5fb537d24890c3dd3ca5b2",
+        "presentedHash": "c5152d82fdc2065842f1c5cedee5e3d1e1348a437db3eafaad959daa94da25c1",
+        "fromNodeId": "381dd976-6da9-47a1-a788-119ac66056a1",
+        "toNodeId": "b2dd686e-3fc2-4384-a728-2ca5aa4f4f3c",
+        "reviewedEdgeHash": "0756211047c88dd2a233d7290f519eac1105d74a0c8588f8135dd92bc3f85b9b"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "5ccd051475b8b4e4ae8de0f0f5bcd2131a794089dc6ddc9c6f6ccebdfb75a9df",
+      "reviewBasis": "user-confirmation",
+      "id": "a3796c9a-3b45-4aaf-9cbf-707cd041e5f8",
+      "fromNodeId": "b2dd686e-3fc2-4384-a728-2ca5aa4f4f3c",
+      "toNodeId": "6ddd90a5-6784-4b65-aeca-59950a4abeb2",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "elevator",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f3-f4-main-elevator",
+      "candidateBinding": {
+        "definitionHash": "2d022f06ca647fa3be76e0e8d549c45e000cd097452c36df7f838db3d004725c",
+        "presentedHash": "116ce2d9145c91f2c1fcdc677ee8d257ca3353dcedb5ef211d456cf2ccd46a96",
+        "fromNodeId": "b2dd686e-3fc2-4384-a728-2ca5aa4f4f3c",
+        "toNodeId": "6ddd90a5-6784-4b65-aeca-59950a4abeb2",
+        "reviewedEdgeHash": "5ccd051475b8b4e4ae8de0f0f5bcd2131a794089dc6ddc9c6f6ccebdfb75a9df"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "d6095861d5687b14fc0966a6e44fce591f2d5afccbdf8934c448fc5e2cc5b5c2",
+      "reviewBasis": "user-confirmation",
+      "id": "f13077cc-b669-4bc7-82b3-958d4f361b6f",
+      "fromNodeId": "f7666847-4a76-44da-8569-22e6be1af6e2",
+      "toNodeId": "e8e77d6f-9848-4f44-9dc3-2802dc40a36f",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "elevator",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f1-f2-gateway-elevator",
+      "candidateBinding": {
+        "definitionHash": "2ca98ae4b196ceedf869a9e3d038ef047f5464f18bc72627c7de359e3b9f6a53",
+        "presentedHash": "20abbe5013dde59f75adc46b80a4a698b46a081bb13b9f280056fb4ff8eff852",
+        "fromNodeId": "f7666847-4a76-44da-8569-22e6be1af6e2",
+        "toNodeId": "e8e77d6f-9848-4f44-9dc3-2802dc40a36f",
+        "reviewedEdgeHash": "d6095861d5687b14fc0966a6e44fce591f2d5afccbdf8934c448fc5e2cc5b5c2"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "605da97da3204def2d97fc54201b2b120c0b99b89af54f129aff9b65bcddb1f5",
+      "reviewBasis": "user-confirmation",
+      "id": "a6e5b2ba-b698-45f0-b894-65a8aed3122f",
+      "fromNodeId": "e8e77d6f-9848-4f44-9dc3-2802dc40a36f",
+      "toNodeId": "1b757405-30ee-4012-9d22-7de19f4953a2",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "elevator",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f2-f3-gateway-elevator",
+      "candidateBinding": {
+        "definitionHash": "81b3c70310f5795de1bb5eb1d0f421d4bde48fdcec3e92d83acb44e957134663",
+        "presentedHash": "be65d6aad17b2f529ea5dee74a73a91a8f685178b87a39cc4b327b9b621c2475",
+        "fromNodeId": "e8e77d6f-9848-4f44-9dc3-2802dc40a36f",
+        "toNodeId": "1b757405-30ee-4012-9d22-7de19f4953a2",
+        "reviewedEdgeHash": "605da97da3204def2d97fc54201b2b120c0b99b89af54f129aff9b65bcddb1f5"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "589d2e0d4044ff7842d2cd51fa7c3cb026060adddba176beda837caa773aab5c",
+      "reviewBasis": "user-confirmation",
+      "id": "40490d45-9245-4789-b1a2-61d3c3ad9d4e",
+      "fromNodeId": "0e148358-6460-4fcb-839d-07f014a9bc87",
+      "toNodeId": "616f12c3-e03f-4ab1-bb58-f8b59139a8dd",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "corridor",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f3-3100-to-3130",
+      "candidateBinding": {
+        "definitionHash": "e4d851d8da1545beea3907b7ed89b42e4be4250fd684508ef32930fdb71fa457",
+        "presentedHash": "c64d778521967fedb9c375b08f749f55e5aa40ff00767b1c83daacda02c2b101",
+        "fromNodeId": "0e148358-6460-4fcb-839d-07f014a9bc87",
+        "toNodeId": "616f12c3-e03f-4ab1-bb58-f8b59139a8dd",
+        "reviewedEdgeHash": "589d2e0d4044ff7842d2cd51fa7c3cb026060adddba176beda837caa773aab5c"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "85245c04fc04641aa8e191dbbb3c4dd43d7733e1ccbf21d02bbc4c7e9694bcd0",
+      "reviewBasis": "user-confirmation",
+      "id": "5ab94d63-fde3-4cda-8af7-54b98f7ebe30",
+      "fromNodeId": "e128c483-216b-48fd-acec-3fadc6609952",
+      "toNodeId": "c71e49df-82e7-4a33-ab70-e8a553101fd3",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "corridor",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f1-atrium-to-1120",
+      "candidateBinding": {
+        "definitionHash": "4c164db9b8c55b4decdd2c24295960183ca592efc303952f96b3ca77ed35f555",
+        "presentedHash": "6c1adc47883b206fa0d1477cc23df13168258af47ca16bfa734075845657a745",
+        "fromNodeId": "e128c483-216b-48fd-acec-3fadc6609952",
+        "toNodeId": "c71e49df-82e7-4a33-ab70-e8a553101fd3",
+        "reviewedEdgeHash": "85245c04fc04641aa8e191dbbb3c4dd43d7733e1ccbf21d02bbc4c7e9694bcd0"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "ced256024371c244efe8a49b1141ddaa3d301f2216a4a35dbfe448a2c5960bf8",
+      "reviewBasis": "user-confirmation",
+      "id": "66c9d5f8-a7eb-457e-a6b9-a4453caabf95",
+      "fromNodeId": "3f5ac437-a376-409e-82c8-aa3d3bcc1792",
+      "toNodeId": "fbff3c89-b839-441f-a3e0-b251eb80852c",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "corridor",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f1-atrium-to-1130",
+      "candidateBinding": {
+        "definitionHash": "d88bcbd03bffdfccd94e25ca8d0a8443b63f4bf19a4ff565ca8dc56c8e760686",
+        "presentedHash": "02adc4d8c2f6bb07334c5de385b65f0e9a4c51e05197fa03aaf852c2eb7c9b92",
+        "fromNodeId": "3f5ac437-a376-409e-82c8-aa3d3bcc1792",
+        "toNodeId": "fbff3c89-b839-441f-a3e0-b251eb80852c",
+        "reviewedEdgeHash": "ced256024371c244efe8a49b1141ddaa3d301f2216a4a35dbfe448a2c5960bf8"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "76f975f098a26ac9e05ebe3e3e17f24830dbac0f633ffd9f47a8df54c442e96d",
+      "reviewBasis": "user-confirmation",
+      "id": "6275de1f-f9e3-4080-96d5-f1ff174b33f6",
+      "fromNodeId": "556dca7b-59e5-49d1-bfa2-fa1f8ccee315",
+      "toNodeId": "40b4e0d2-6786-4e82-a444-d034ddb26178",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "corridor",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f1-atrium-to-1160",
+      "candidateBinding": {
+        "definitionHash": "8ca689953c3954377084838bdb82372b777812f26263b424b61a7c5eb5bf00d3",
+        "presentedHash": "10a0aed8d70ab7913c755c0ec7fe73052bb4dc34c8d09ef53287871c47e34cde",
+        "fromNodeId": "556dca7b-59e5-49d1-bfa2-fa1f8ccee315",
+        "toNodeId": "40b4e0d2-6786-4e82-a444-d034ddb26178",
+        "reviewedEdgeHash": "76f975f098a26ac9e05ebe3e3e17f24830dbac0f633ffd9f47a8df54c442e96d"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "f641617363d9f81d708a4d46554a246c21f31e484e2928002a089ccf9d2c86c6",
+      "reviewBasis": "user-confirmation",
+      "id": "634c02bd-a49a-48a9-9e57-078fa6763e1d",
+      "fromNodeId": "34a837ae-d566-46f4-a563-031bd1b17af9",
+      "toNodeId": "03b8f40f-5003-4b70-bc65-b417b5e8739d",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "corridor",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f1-atrium-to-1170",
+      "candidateBinding": {
+        "definitionHash": "f85908f1b1169aef306a0668d742f927b6f97b2fa187d6667124f9455d1040de",
+        "presentedHash": "228422a748a79aa96d4d76b1143b1e00c515e64fd856f534939c047713057fc9",
+        "fromNodeId": "34a837ae-d566-46f4-a563-031bd1b17af9",
+        "toNodeId": "03b8f40f-5003-4b70-bc65-b417b5e8739d",
+        "reviewedEdgeHash": "f641617363d9f81d708a4d46554a246c21f31e484e2928002a089ccf9d2c86c6"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "d945acc54e20089e707d2bb7da70fa5324bdf0578392af0ce70a8ac55d1c3077",
+      "reviewBasis": "user-confirmation",
+      "id": "6f114134-b185-4d48-9596-d97d0159e4dd",
+      "fromNodeId": "9790d897-df28-4dce-9624-3e46c029122b",
+      "toNodeId": "21d9b6ea-9815-49d8-b6dd-88608438846e",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "corridor",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f1-atrium-to-1300",
+      "candidateBinding": {
+        "definitionHash": "9ce02b27d6f9acaa2662678cb94b9dcf0791ed824dab37e834a1f67e6bcdb53e",
+        "presentedHash": "fe6da35702fe98408bff7cbccbe6c3cf0acbb8003df807c49e74c88f80aed43e",
+        "fromNodeId": "9790d897-df28-4dce-9624-3e46c029122b",
+        "toNodeId": "21d9b6ea-9815-49d8-b6dd-88608438846e",
+        "reviewedEdgeHash": "d945acc54e20089e707d2bb7da70fa5324bdf0578392af0ce70a8ac55d1c3077"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "15cb7f1eca4526a8941dd8aff848a39e963d673ba0e9d71c3377ced05f12d2bc",
+      "reviewBasis": "user-confirmation",
+      "id": "9ad47614-8e51-4be6-a5e5-96a5cff4a952",
+      "fromNodeId": "671647cd-56d1-4b4f-99c5-26a5fe0e1105",
+      "toNodeId": "c13b1c15-25e2-4396-a7be-0927d9d719d3",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "outdoor",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f1-west-1020-to-1000",
+      "candidateBinding": {
+        "definitionHash": "8c0c77fb415d4cc08df8865e6160d4c6b25f203cb60c352f176fb5360ab5087f",
+        "presentedHash": "7f80fdedbf8b62beae6cd5528c5a9cc8178b78dd1af744b352d4cf728e6a12d9",
+        "fromNodeId": "671647cd-56d1-4b4f-99c5-26a5fe0e1105",
+        "toNodeId": "c13b1c15-25e2-4396-a7be-0927d9d719d3",
+        "reviewedEdgeHash": "15cb7f1eca4526a8941dd8aff848a39e963d673ba0e9d71c3377ced05f12d2bc"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "8ecb26d02854a6171752fcf70c88ab024502b46904f60f0d95912b5eda189399",
+      "reviewBasis": "user-confirmation",
+      "id": "988eff1b-044c-4d7d-ba9d-ef58ffc08859",
+      "fromNodeId": "671647cd-56d1-4b4f-99c5-26a5fe0e1105",
+      "toNodeId": "93b4f8b0-a376-46fe-b37f-b6f7f9610daf",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "outdoor",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw1-f1-west-1020-to-1101",
+      "candidateBinding": {
+        "definitionHash": "db4fb85ca455afb629761d7fe81acfe62ec482cb0aeb5997e5a1012de197cc32",
+        "presentedHash": "0262ab37d60bdfbaeac3bd024221cedc099ad2371b646a1b61cc16ab48c02f8b",
+        "fromNodeId": "671647cd-56d1-4b4f-99c5-26a5fe0e1105",
+        "toNodeId": "93b4f8b0-a376-46fe-b37f-b6f7f9610daf",
+        "reviewedEdgeHash": "8ecb26d02854a6171752fcf70c88ab024502b46904f60f0d95912b5eda189399"
+      }
+    }
+  ],
+  "visitorRestrictions": [
+    {
+      "candidateId": "sw1-f1-visitor-access-1494-via-1498",
+      "definitionHash": "e8e0380929c696cb7efe86c4eb416569b3ac098ef261c4c5662f65126fe267cd",
+      "presentedHash": "ddd8d991ac71790857970cc37a402efa3c1a470edea8a4eac50cb05519ad1389",
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "label": "1494",
+      "via": "1498",
+      "access": "staff-only"
     }
   ],
   "elevatorReports": [

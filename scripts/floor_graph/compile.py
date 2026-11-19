@@ -11,10 +11,12 @@ import cv2
 import numpy as np
 import pymupdf
 
+from cad_routing import compile_cad_floor
 from corridor_frontages import bind_frontages, corridor_bands, recorded_swings
 from doors import SCALE
 from labels import CAMPUS, IDENTIFIER, MANUAL, ROOT, USES, inventory, label_words
 from landing_access import landing_approaches
+from passage_openings import signed_door_cells
 from surfaces import near_caption, surfaces
 
 SPATIAL = CAMPUS / "spatial"
@@ -129,7 +131,8 @@ def connectivity(grid, places, portals, ties):
     for a, b, *_ in portals:
         group[component(a)] = component(b)
     for place in places:
-        place["components"] = sorted({component(cell) for cell in place["cells"]})
+        access = [*place["cells"], *[p["cell"] for p in place.get("terminalPaths", [])]]
+        place["components"] = sorted({component(cell) for cell in access})
     return {
         "withPlaces": len({c for p in places for c in p["components"]}),
         "ties": [[x, y, component(cell)] for x, y, cell in ties],
@@ -156,6 +159,33 @@ def compile_floor(item):
         ):
             raise ValueError("Coordinate frame changed: " + plan["id"])
         geometry = json.loads(geometry_bytes)
+        if "cadLayers" in extra:
+            for rule in extra.get("visitorRestrictions", []):
+                keys = (
+                    "candidateId",
+                    "definitionHash",
+                    "presentedHash",
+                    "label",
+                    "via",
+                    "access",
+                )
+                if not any(
+                    r["planId"] == plan["id"]
+                    and r["sourceSha256"] == plan["sourceSha256"]
+                    and all(rule[k] == r[k] for k in keys)
+                    for r in REVIEWED.get("visitorRestrictions", [])
+                ):
+                    raise ValueError(
+                        "Missing reviewed visitor-access receipt: "
+                        + rule["candidateId"]
+                    )
+            grid, places, portals, bands, landings, count, interior = compile_cad_floor(
+                plan, page, geometry, extra, REVIEWED["nodes"], FloorGrid
+            )
+            return {
+                **floor_record(plan, grid, places, portals, bands, landings, count),
+                "interiorAccess": interior,
+            }
         marked_doors, structural_ink = recorded_swings(
             page, geometry, extra.get("doorFrontages", [])
         )
@@ -169,6 +199,7 @@ def compile_floor(item):
         regions,
         2 if sides and np.median([d[4] for d in sides]) < 12 else CELL,
     )
+    door_cells = signed_door_cells(grid, words, sides, extra.get("doorApproaches", []))
     entries = defaultdict(list)
     physical_doors = defaultdict(list)
     portals = []
@@ -176,9 +207,8 @@ def compile_floor(item):
         cells = [grid.cell_near(face, r * 0.50) for face in faces]
         threshold = np.round(midpoint / [grid.w, grid.h], 7).tolist()
         for i, room in enumerate((a, b)):
-            physical_doors[room].append([*threshold, cells[1 - i]])
-        for index, room in enumerate((a, b)):
-            access = cells[1 - index]
+            access = door_cells.get((room, tuple(midpoint)), cells[1 - i])
+            physical_doors[room].append([*threshold, access])
             if access is not None:
                 entries[room].append(access)
         if cells[0] is not None and cells[1] is not None and cells[0] != cells[1]:
@@ -290,6 +320,12 @@ def compile_floor(item):
     door_approaches = landing_approaches(
         plan, extra, REVIEWED["nodes"], grid, sides, door_symbols, places
     )
+    return floor_record(
+        plan, grid, places, portals, bands, door_approaches, len(door_symbols)
+    )
+
+
+def floor_record(plan, grid, places, portals, bands, door_approaches, symbol_count):
     ties = ties_for(plan, grid)
     parts = connectivity(grid, places, portals, ties)
     return {
@@ -304,7 +340,7 @@ def compile_floor(item):
         "ties": ties,
         "components": parts,
         "places": places,
-        "doorSymbols": len(door_symbols),
+        "doorSymbols": symbol_count,
         **({"corridorBands": bands} if bands else {}),
         **({"landingApproaches": door_approaches} if door_approaches else {}),
     }

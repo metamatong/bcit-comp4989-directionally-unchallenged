@@ -1,5 +1,28 @@
 # Verification record
 
+## SW01 room approaches, confirmed transfers and visitor restrictions
+
+The revision 82 audit covered all 780 SW01 place occurrences. The visitor graph returned a round trip to a building passage for 630 places, including 28 at shared entrances. The original 2016 and 3175 failures now return routes through the visitor planner. The same-floor walk from vestibule 1037 to 1586 and the 3130 door to office 3124 are covered by separate regressions. SW01 S290 to S390 uses the confirmed SW01 stair. The two west entrance walks use separate, bidirectional outdoor edges. Revoking the 3100–3130 door in an isolated editor copy removes the route to the inner office.
+
+The first unfiltered HTTP sample returned two routes out of five. Replaying seed `444e5ee8` after fixing the 1037 double door and the selectable entrances for 1225 returned four routes. The other start, 1494, returned the user's explicit staff-only determination. The source places were retained for both runs. These were post-extraction API checks with no external provider request or independent campus walk. The full suite passed 459 unit and HTTP tests, 26 desktop and mobile browser tests and five offline geometry tests. The build, source validation and Vercel packaging passed. [Per-floor results, marks and unresolved places](sw01-routing.md)
+
+## SW03 and SW01 same-floor transfers, November 18, 2026
+
+After the user confirmed the marked doors, the visitor router returned a route in both directions for each pair below. Each trip started from simulated structured sign readings on the actual floor data. For rooms with multiple entrances, the return trip used the door reached on the outbound trip.
+
+| Floor | SW03 start or destination | SW01 start or destination | Transfer |
+|---|---|---|---|
+| 1 | Lobby 1602 | Corridor 1290, through vestibule 1098 | Outdoors |
+| 2 | Room 2063 | Room 2070 | Indoors |
+| 3 | Room 3086 | Room 3080 | Indoors |
+| 4 | Room 4075 | Room 4076 | Indoors |
+
+A separate trip from SE12 302 to SW01 3080 traversed the two confirmed third-floor passages and SW03 corridor 3600. Withdrawing the SW03–SW01 floor 3 approval in an isolated copy disconnected that trip segment. Both entrances to SW03 1710 retained their incoming-only approvals when the public lobby became traversable both ways.
+
+An additional first-floor check reached SW01 S190 from SW03 S160. In the opposite direction the visitor can enter SW03 lobby 1602, but reaching S160 from the lobby remains a coverage gap. The S160 marker has no independent walking-grid approach and the existing reviewed traces lead away from that landing.
+
+The full suite passed 433 unit and API tests and 24 browser tests. Three offline compiler tests checked paired door leaves, a protected wall crossing the opening, and rejection of unrelated leaves. The build and source-data validation passed for 89 floor graphs and the revision 49 export. These checks cover routing from sign readings. The crossing directions come from user confirmation. No provider request or independent campus walk was part of this check.
+
 ## SW03 locker corridor to SE12 302, November 18, 2026
 
 **Hosted reproduction.** One authorized submission of the original locker-hall photo to the production Gemini extraction stage returned both room numbers, 2695 and 2680, as clear. It classified both as `directional-sign` and reported a straight corridor and two visible doorways. The service recorded four provider attempts including fallback and returned the extraction in 17.6 seconds. With GPS off, the hosted locator returned zero candidates. Its reference list showed both numbers on SW03 floor 2 and only 2695 on SW05 floor 2. The production frontend matched the release for main commit `829e89c` at reproduction time.

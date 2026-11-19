@@ -58,8 +58,14 @@ export function readConnectionCandidates() {
         `A proposed corridor line must join two marked points on one floor: ${candidate.id}`,
       );
     if (candidate.endpointRefs) {
-      if (kind === 'corridor' ? from.planId !== to.planId : !['stairs', 'elevator'].includes(kind))
+      if (
+        kind === 'corridor'
+          ? from.planId !== to.planId
+          : !['stairs', 'elevator', 'outdoor'].includes(kind)
+      )
         throw new Error(`Invalid shared-endpoint connection: ${candidate.id}`);
+      if (kind === 'outdoor' && (from.kind !== 'outdoor-access' || to.kind !== 'outdoor-access'))
+        throw new Error('Shared outdoor routes need marked exterior doors.');
       for (const side of ['from', 'to'] as const) {
         const ref = candidate.endpointRefs[side];
         if (!ref) continue;

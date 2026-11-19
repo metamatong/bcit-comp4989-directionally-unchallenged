@@ -575,7 +575,7 @@ describe('second-to-third-floor reviews', () => {
   it('pairs the seven distinct stair cores on their own plans and places the SW03 lift on the corridor side of its shaft', () => {
     const candidates = store.snapshot().candidates;
     const stairs = candidates.filter(
-      (candidate) => candidate.kind === 'stairs' && candidate.from.planId.includes('-F2-'),
+      (candidate) => candidate.kind === 'stairs' && /^(SE12|SW3)-F2-/.test(candidate.from.planId),
     );
     expect(
       stairs.map(({ from, to }) => [

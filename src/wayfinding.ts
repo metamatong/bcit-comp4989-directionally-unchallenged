@@ -1,6 +1,17 @@
 import type { PlanBounds } from './types';
 
 export type PagePoint = { x: number; y: number };
+export type FloorPin = {
+  planId: string;
+  sourceSha256: string;
+  graphVersion: string;
+  point: PagePoint;
+};
+export type WalkingSurface = Omit<FloorPin, 'point'> & {
+  step: number;
+  runs: [number, number, number][];
+  interiorRuns?: [number, number, number][];
+};
 export type MapStop = {
   id: string;
   planId: string;
@@ -34,18 +45,22 @@ export type NavigationChoice = {
   networkRevision?: number;
   originId?: string;
   destinationId?: string;
+  originPoint?: FloorPin;
+  destinationPoint?: FloorPin;
 };
 export type NavigationResult = {
   networkRevision: number;
   origins: MapStop[];
   destinations: PlaceChoice[];
   destinationMatch?: DestinationMatch;
+  arrivalNote?: string;
 } & (
   | {
       status:
         | 'choose-origin'
         | 'choose-destination'
         | 'unknown-destination'
+        | 'restricted-place'
         | 'unmapped-origin'
         | 'unsupported-building'
         | 'unmapped-destination'

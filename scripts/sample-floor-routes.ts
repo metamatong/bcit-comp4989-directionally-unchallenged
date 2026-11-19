@@ -2,21 +2,32 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import { once } from 'node:events';
 import type { AddressInfo } from 'node:net';
+import { parseArgs } from 'node:util';
 import { createApp } from '../server/app';
-import { floorGraphs, type FloorPlace } from '../server/floor-graph';
+import { floorGraphs, sourceBuilding, type FloorPlace } from '../server/floor-graph';
 import { newSession } from '../server/session';
 import { MemoryVisitorSessions } from '../server/visitor-sessions';
 import type { PhotoEvidence, Session } from '../src/types';
 import type { NavigationResult, StartingPoints } from '../src/wayfinding';
 
-const seed = process.argv[2] ?? randomBytes(4).toString('hex');
+const { values, positionals } = parseArgs({
+  options: { building: { type: 'string' } },
+  allowPositionals: true,
+});
+if (positionals.length > 1) throw Error('Supply at most one random seed.');
+const building = values.building && sourceBuilding(values.building);
+if (values.building && !building) throw Error('Select a supplied Burnaby building.');
+const seed = positionals[0] ?? randomBytes(4).toString('hex');
 if (!/^[0-9a-f]{8}$/i.test(seed)) throw Error('Supply an eight-digit hexadecimal random seed.');
 let state = parseInt(seed, 16);
 function draw(limit: number) {
   state = (Math.imul(state, 1664525) + 1013904223) >>> 0;
   return Math.floor((state / 2 ** 32) * limit);
 }
-const places = [...floorGraphs().places];
+const places = floorGraphs()
+  .ordered.filter((f) => !building || f.plan.building === building)
+  .flatMap((f) => f.places);
+if (places.length < 10) throw Error('Ten distinct source occurrences are needed for five pairs.');
 for (let i = 0; i < 10; i++) {
   const j = i + draw(places.length - i);
   [places[i], places[j]] = [places[j], places[i]];
@@ -123,6 +134,7 @@ try {
   console.log(
     JSON.stringify({
       seed,
+      ...(building ? { building } : {}),
       population: places.length,
       selection:
         'First five origins and next five destinations drawn without replacement before routing.',

@@ -205,6 +205,16 @@ export function PhotoLocationInput({
               </div>
               <small>Include the building and room, for example SW03 2605.</small>
             </div>
+            {!destination.trim() && (
+              <button
+                type="button"
+                className="text-button"
+                disabled={busy}
+                onClick={() => onDestinationChange('Map point')}
+              >
+                Choose a map point
+              </button>
+            )}
             {!canUsePhotoResult && deviceOption}
             {error ? (
               <p className="photo-failure" role="alert">

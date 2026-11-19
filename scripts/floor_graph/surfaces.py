@@ -7,6 +7,7 @@ import numpy as np
 
 from doors import SCALE, doors_on_page
 from labels import IDENTIFIER
+from passage_openings import open_passage_doors
 
 
 def ink_mask(page, words):
@@ -248,5 +249,8 @@ def surfaces(page, geometry, words, annotation):
         for points in envelopes:
             poly = np.rint(np.array(points) * [w, h]).astype(np.int32)
             cv2.fillPoly(extra, [poly], 255)
+        open_passage_doors(
+            page, geometry, annotation.get("passageOpenings", []), sealed, extra
+        )
         walk |= (extra > 0) & (sealed == 0)
     return walk, sealed, regions, sides, uses, doors

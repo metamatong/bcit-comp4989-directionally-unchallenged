@@ -79,7 +79,10 @@ export function runPilotTool(name: string, args: unknown) {
               ...p,
               sourceSha256: f.plan.sourceSha256,
               sourceUrl: f.plan.sourceUrl,
-              approaches: p.cells.map((id) => f.point(id)),
+              approaches: [
+                ...p.cells.map((id) => f.point(id)),
+                ...(p.terminalPaths ?? []).map(({ via }) => ({ x: via[0][0], y: via[0][1] })),
+              ],
             })),
         );
     }

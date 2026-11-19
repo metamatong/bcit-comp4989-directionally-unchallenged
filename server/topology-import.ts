@@ -127,6 +127,25 @@ export function importReviewedNetwork(
       },
     });
   }
+  for (const restriction of network.visitorRestrictions ?? []) {
+    const c = definitions.get(restriction.candidateId);
+    if (!c || topologyContentHash(c) !== restriction.definitionHash || !c.from.point || !c.to.point)
+      continue;
+    receipts.push({
+      id: randomUUID(),
+      candidateId: c.id,
+      definitionHash: restriction.definitionHash,
+      presentedHash: restriction.presentedHash,
+      answer: 'false',
+      direction: null,
+      bindings: null,
+      from: { ...c.from, point: c.from.point },
+      to: { ...c.to, point: c.to.point },
+      answeredAt: importedAt,
+      reviewer: attribution,
+      note: 'Imported the explicit staff-only visitor restriction.',
+    });
+  }
   const reports: TopologyDocument['floorObservations'] = [];
   for (const report of network.elevatorReports) {
     const candidate = definitions.get(report.candidateId);
