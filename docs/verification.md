@@ -1,5 +1,13 @@
 # Verification record
 
+## SW03 locker corridor to SE12 302, November 18, 2026
+
+**Hosted reproduction.** One authorized submission of the original locker-hall photo to the production Gemini extraction stage returned both room numbers, 2695 and 2680, as clear. It classified both as `directional-sign` and reported a straight corridor and two visible doorways. The service recorded four provider attempts including fallback and returned the extraction in 17.6 seconds. With GPS off, the hosted locator returned zero candidates. Its reference list showed both numbers on SW03 floor 2 and only 2695 on SW05 floor 2. The production frontend matched the release for main commit `829e89c` at reproduction time.
+
+**Local recovery.** Replaying those structured readings selects one possible shared corridor and leaves the session location unconfirmed. The visitor API accepts the selection, then returns a walk along SW03 corridor 2600, the east elevator from floor 2 to floor 3, the passage to SE12 and the door to room 302. The first map shades the starting area. Automated checks cover confirmation before navigation, rejection of explicit arrows, duplicate signs, disjoint entrances and stale source bindings. The original photo was submitted once. This check used the floor plans and saved transfers without an independent campus walk.
+
+The local HTTP replay used GPS off. Navigation returned HTTP 409 before confirmation and HTTP 200 with the route after confirmation, with zero additional provider calls. Validation passed with 426 unit and API tests, 24 desktop and mobile browser tests, source-data validation and the Vercel production build.
+
 ## Reported sign conflict and SE12 floor transfers, November 18, 2026
 
 The foreground plaque in the supplied photo reads **323**. The screenshot marks **306** on four buildings’ floor plans, including SE12. The additional clear **98** was reported by the teammate. The screenshot does not contain the complete provider response or establish whether a fresh GPS hint arrived.

@@ -74,7 +74,7 @@ function FloorMap({
     {
       point: visit.start.point,
       symbol: samePoint && last ? 'B' : 'A',
-      label: `${samePoint && last ? 'Destination' : first ? 'Start' : 'Enter'} · ${visit.start.label}`,
+      label: `${samePoint && last ? 'Destination' : first ? (visit.start.startRegion ? 'Start area' : 'Start') : 'Enter'} · ${visit.start.label}`,
       end: samePoint && last,
     },
   ];
@@ -92,6 +92,7 @@ function FloorMap({
         plan={plan}
         paths={visit.walks.map((step) => step.path)}
         markers={markers}
+        bounds={first ? visit.start.startRegion : undefined}
         whole={whole}
         device={device}
         label={`${heading}, walking directions from ${visit.start.label} to ${visit.end.label}`}

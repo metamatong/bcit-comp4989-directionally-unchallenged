@@ -189,3 +189,62 @@ it('requires a visitor choice before routing a partial GPS match using the origi
     modelReading = labelReading('302');
   }
 });
+
+it('starts from a shared locker corridor only after confirmation of the replayed Gemini classifications', async () => {
+  const calls = provider.calls;
+  modelReading = [
+    {
+      functionCall: {
+        name: 'read_photo_labels',
+        args: {
+          labels: ['2695', '2680'].map((text) => ({
+            text,
+            kind: 'room',
+            clarity: 'clear',
+            placement: 'directional-sign',
+            viewId: 'full',
+          })),
+          features: { visibleDoorCount: 2, windowsSide: 'not-visible', corridorShape: 'straight' },
+          observations: ['Lockers on both sides of the hallway.'],
+        },
+      },
+    },
+  ];
+  try {
+    const visitor: Session = await (await post('', {})).json();
+    const path = '/' + visitor.id;
+    const read: Session = await (await post(path + '/photo/evidence', photoInput())).json();
+    const located: Session = await (
+      await post(path + '/photo/location', locationInput(read.photoEvidence!.id, read.revision))
+    ).json();
+    expect(located.campusLocation).toBeNull();
+    const [candidate] = located.campusAnalysis!.candidates;
+    expect(candidate.corridorOrigin?.needsConfirmation).toBe(true);
+    const request = {
+      revision: located.revision,
+      candidateId: candidate.id,
+      destination: 'SE12 302',
+    };
+    expect((await post(path + '/navigation', request)).status).toBe(409);
+    const confirmed: Session = await (
+      await post(path + '/actions', {
+        requestId: randomUUID(),
+        revision: located.revision,
+        action: {
+          type: 'confirm-campus-region',
+          candidateId: candidate.id,
+        },
+      })
+    ).json();
+    const response = await post(path + '/navigation', { ...request, revision: confirmed.revision });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      status: 'route',
+      origin: { planId: 'SW3-F2-p1', label: 'Corridor 2600 between 2680 and 2695' },
+      destination: { planId: 'SE12-F3-p1', label: '302 · window-side corridor door' },
+    });
+    expect(provider.calls - calls).toBe(1);
+  } finally {
+    modelReading = labelReading('302');
+  }
+});

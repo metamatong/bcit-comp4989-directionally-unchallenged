@@ -234,3 +234,55 @@ it('shows a mismatched reading before a visitor confirms the remaining sign or c
   await act(async () => panel.querySelector<HTMLButtonElement>('.secondary')!.click());
   expect(select).toHaveBeenCalledWith(analysis.candidates[0].id);
 });
+
+it('lets the visitor explicitly accept or reject the proposed corridor, without treating a direction sign as a position', async () => {
+  const s = newSession(),
+    stamp = new Date();
+  const evidence: PhotoEvidence = {
+    id: randomUUID(),
+    requestId: randomUUID(),
+    labels: ['2695', '2680'].map((text) => ({
+      text,
+      kind: 'room',
+      clarity: 'clear',
+      placement: 'directional-sign',
+      viewId: 'full',
+    })),
+    observations: ['Two doors.'],
+    features: { visibleDoorCount: 2, windowsSide: 'not-visible', corridorShape: 'straight' },
+    readAt: stamp.toISOString(),
+    expiresAt: new Date(+stamp + 300000).toISOString(),
+    usedFallbackModel: true,
+  };
+  s.photoEvidence = evidence;
+  const analysis = locateFromLabels(
+    s,
+    { requestId: randomUUID(), revision: 0, evidenceId: evidence.id },
+    { sessionId: s.id, evidence, fingerprint: 'two-plaques' },
+  );
+  const select = vi.fn(),
+    retake = vi.fn();
+  await act(async () =>
+    root.render(
+      createElement(StartingPlaceChoices, {
+        candidates: analysis.candidates,
+        plans: store.plans,
+        onSelect: select,
+        onRetake: retake,
+        busy: false,
+      }),
+    ),
+  );
+  const panel = host.querySelector('[aria-label="Confirm starting corridor"]')!;
+  expect(panel.textContent).toContain('SW03 · Floor 2 · Corridor 2600 between 2680 and 2695');
+  const displayedSigns = [...panel.querySelectorAll('svg.walking-map g text')].map(
+    (el) => el.textContent,
+  );
+  expect(displayedSigns.sort()).toEqual(['2680', '2695']);
+  expect(select).not.toHaveBeenCalled();
+  await act(async () => panel.querySelector<HTMLButtonElement>('.text-button')!.click());
+  expect(retake).toHaveBeenCalledOnce();
+  expect(select).not.toHaveBeenCalled();
+  await act(async () => panel.querySelector<HTMLButtonElement>('button.primary')!.click());
+  expect(select).toHaveBeenCalledWith(analysis.candidates[0].id);
+});

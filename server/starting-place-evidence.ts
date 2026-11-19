@@ -1,5 +1,10 @@
 /** Match sign readings to source places without treating one uncorroborated reading as a veto. */
-import type { CampusPhotoAnalysis, PhotoLabelReading, PlanLabelReference } from '../src/types';
+import type {
+  CampusPhotoAnalysis,
+  PhotoFeatures,
+  PhotoLabelReading,
+  PlanLabelReference,
+} from '../src/types';
 import {
   floorGraphs,
   landmarkKind,
@@ -8,6 +13,7 @@ import {
   type FloorPlace,
 } from './floor-graph';
 import { labelKey } from './pilot-evidence';
+import type { SharedCorridor } from './shared-corridor';
 
 type Sign = PhotoLabelReading;
 type FloorReadings = { floor: FloorGraph; hits: Map<Sign, FloorPlace[]> };
@@ -20,7 +26,9 @@ export type StartMatch = {
 };
 export type DeviceScope = { buildings: string[]; footprints: Set<string> };
 const distinct = <T>(values: T[]) => [...new Set(values)];
-const isLocalSign = (sign: Sign) => sign.placement !== 'directional-sign';
+const hasDirectionCue = (s: Sign) =>
+  s.directionCue === 'arrow' || s.directionCue === 'directional-words';
+const isLocalSign = (sign: Sign) => sign.placement !== 'directional-sign' && !hasDirectionCue(sign);
 const keys = (signs: Sign[]) => distinct(signs.map((s) => labelKey(s.text)));
 
 function matchesSign(place: FloorPlace, sign: Sign) {
@@ -68,10 +76,64 @@ function matchesOnFloor(
   }));
 }
 
+type CorridorMatch = {
+  page: FloorReadings;
+  area: SharedCorridor;
+  needsConfirmation: boolean;
+  unmatched: string[];
+  matched: StartMatch['matched'];
+};
+
+function commonCorridor(
+  pages: FloorReadings[],
+  scope: FloorReadings[],
+  readings: Sign[],
+  features?: PhotoFeatures,
+): CorridorMatch | undefined {
+  if (
+    features?.visibleDoorCount === 0 ||
+    features?.corridorShape === 'junction' ||
+    features?.corridorShape === 'turn'
+  )
+    return;
+  // A projecting room plaque can be classified as a direction sign even when
+  // the provider supplied no evidence of an arrow. This can pose a question only.
+  const hallway = features?.corridorShape === 'straight' && (features.visibleDoorCount ?? 0) > 0;
+  const usable = readings.filter((s) => !hasDirectionCue(s) && (isLocalSign(s) || hallway));
+  const allRoomSigns = usable.filter((s) => !s.kind || s.kind === 'room');
+  if (keys(allRoomSigns).length < 2) return;
+  const supported = usable.filter((s) => pages.some((p) => p.hits.has(s)));
+  const possible = matchingFloors(scope, supported);
+  if (possible.length !== 1) return;
+  const page = possible[0],
+    rooms: FloorPlace[] = [];
+  const roomSigns = supported.filter((s) => !s.kind || s.kind === 'room');
+  for (const key of keys(roomSigns)) {
+    const occurrences = page.floor.places.filter((p) => p.label === key);
+    if (occurrences.length !== 1) return;
+    rooms.push(occurrences[0]);
+  }
+  const area = page.floor.frontages.match(rooms);
+  if (!area) return;
+  const unmatched = keys(usable.filter((s) => !page.hits.has(s)));
+  const needsConfirmation =
+    unmatched.length > 0 ||
+    roomSigns.some((s) => s.placement !== 'door' || s.directionCue === 'unclear');
+  const matched = supported.flatMap((sign) => {
+    const places = page.hits.get(sign) ?? [];
+    const p =
+      places.find((p) => p.label === labelKey(sign.text)) ??
+      (places.length === 1 ? places[0] : undefined);
+    return p ? [{ observedLabel: sign.text, planLabel: p.label }] : [];
+  });
+  return { page, area, needsConfirmation, unmatched, matched };
+}
+
 export function resolveStartingSigns(
   labels: Sign[],
   buildingHint?: string | null,
   device?: DeviceScope,
+  features?: PhotoFeatures,
 ) {
   const graphs = floorGraphs();
   const clear = labels.filter((s) => s.clarity === 'clear');
@@ -112,8 +174,12 @@ export function resolveStartingSigns(
   const contradictedDoor =
     !doors.length && local.some((s) => s.placement === 'door' && pages.some((p) => p.hits.has(s)));
   if (contradictedDoor) possible = [];
-  const matches = possible.flatMap((page) => matchesOnFloor(page, anchors, local));
-  const partial = matches.some((m) => m.unmatched.length > 0);
+  const corridor = contradictedDoor ? undefined : commonCorridor(pages, scope, readings, features);
+  if (corridor) possible = [corridor.page];
+  const matches = corridor ? [] : possible.flatMap((page) => matchesOnFloor(page, anchors, local));
+  const partial = corridor
+    ? corridor.unmatched.length > 0
+    : matches.some((m) => m.unmatched.length > 0);
   const references = findReferences(possible.length ? possible : scope);
   const gpsConflict =
     !!device?.buildings.length &&
@@ -124,10 +190,12 @@ export function resolveStartingSigns(
   if (device) {
     if (!device.buildings.length) gpsStatus = inScope.length ? 'not-used' : 'outside-pilot';
     else if (gpsConflict) gpsStatus = 'conflict';
-    else gpsStatus = matches.length ? 'used' : 'building-only';
+    else gpsStatus = corridor || matches.length ? 'used' : 'building-only';
   }
   return {
     matches,
+    corridor,
+    directionalOnly: readings.length > 0 && !local.length,
     partial,
     references,
     gpsStatus,

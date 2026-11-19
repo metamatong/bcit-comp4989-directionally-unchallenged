@@ -41,7 +41,9 @@ Tests cover a single provider stage, metadata-only lookup, exact identifier boun
 
 ## Door plaques and direction signs
 
-The evidence prompt distinguishes room-identification plaques beside or above a visible doorway, including projecting plaques, from signs whose visible arrows or wording direct travel to another location. Mounting orientation alone is not a direction. Unclear placement remains unknown. Directional-only evidence still cannot establish the starting doorway.
+The extraction stage records sign placement and the visible travel cue separately. An explicit arrow or instruction to travel excludes that sign from the starting location. Two complete room numbers can identify an approximate shared corridor when their entrances face each other on one floor plan.
+
+The app can select that corridor automatically when the room signs are clearly associated with doorways and the other evidence agrees. A straight hall with visible doors lets the app offer a corridor for confirmation when the provider marks the signs as directional but reports no explicit arrow or instruction, including older receipts without a cue field. The visitor can inspect the marked plan and select **Yes, I’m in this corridor** or **I’m somewhere else**. Navigation accepts an ambiguous corridor only after the visitor selects it. Lockers and the number of doors alone cannot locate a floor. [Shared corridor geometry](floor-routing.md#starting-between-two-rooms)
 
 ## Label recognition and starting-route coverage
 

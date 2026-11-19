@@ -103,6 +103,31 @@ export class CampusJourney {
   origins(candidate: CampusLocationCandidate): SearchStop[] {
     const floor = floorGraphs().byId.get(candidate.planId);
     if (!floor || !this.plans.has(candidate.planId)) return [];
+    if (candidate.corridorOrigin) {
+      const { bandId, roomPlaceIds } = candidate.corridorOrigin;
+      const rooms = floor.places.filter((p) => roomPlaceIds.includes(p.id));
+      if (
+        rooms.length !== roomPlaceIds.length ||
+        !rooms.every((p) =>
+          candidate.sourceLabels?.some(
+            (ref) =>
+              ref.id === p.id &&
+              ref.label === p.label &&
+              ref.planId === floor.plan.id &&
+              ref.sourceSha256 === floor.plan.sourceSha256,
+          ),
+        )
+      )
+        return [];
+      const area = floor.frontages.match(rooms);
+      if (!area || area.id !== bandId || candidate.sourcePlaceId !== area.corridor.id) return [];
+      return [
+        {
+          key: area.cell,
+          stop: { ...floor.stop(area.cell, area.label), startRegion: area.bounds },
+        },
+      ];
+    }
     const place = floor.places.find((p) => p.id === candidate.sourcePlaceId);
     if (
       !place ||

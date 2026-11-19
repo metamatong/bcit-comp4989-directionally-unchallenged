@@ -328,7 +328,9 @@ export default function App() {
     directionsMode &&
     analysis?.method === 'photo-label-retrieval' &&
     !routeCandidate &&
-    (!analysis.candidates.length || analysis.labelRetrieval.partial === true);
+    (!analysis.candidates.length ||
+      analysis.labelRetrieval.partial === true ||
+      analysis.candidates.some((c) => c.corridorOrigin?.needsConfirmation));
   const photoResults = analysis && (
     <>
       <CampusLocationResults
@@ -430,7 +432,11 @@ export default function App() {
             <>
               {routeCandidate && analysis?.candidates.length ? (
                 <StartingPositionNotice
-                  labelOnly={!!routeCandidate.anchorLabel && !routeCandidate.doorwayVicinity}
+                  labelOnly={
+                    !!routeCandidate.anchorLabel &&
+                    !routeCandidate.doorwayVicinity &&
+                    !routeCandidate.corridorOrigin
+                  }
                 />
               ) : null}
               {routeCandidate ? (

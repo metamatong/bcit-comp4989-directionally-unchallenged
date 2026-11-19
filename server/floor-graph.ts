@@ -8,6 +8,7 @@ import { boundsSchema, visualPlans } from './visual-data';
 import type { VisualPlan } from '../src/types';
 import type { TopologyNode } from '../src/topology';
 import type { MapStop, PagePoint } from '../src/wayfinding';
+import { CorridorFrontages, corridorBandSchema } from './shared-corridor';
 
 const index = z.number().int().nonnegative();
 const unit = z.number().min(0).max(1);
@@ -45,6 +46,7 @@ const floorSchema = z.object({
     )
     .optional(),
   places: z.array(placeSchema),
+  corridorBands: z.array(corridorBandSchema).optional(),
 });
 export type FloorPlace = z.infer<typeof placeSchema> & { id: string; planId: string };
 /** Only generic landmark names use aliases. Numbered place identifiers always match in full. */
@@ -66,6 +68,7 @@ export const floorStride = 2 ** 22;
 export const pointKey = (p: PagePoint) => p.x + ',' + p.y;
 export class FloorGraph {
   readonly places: FloorPlace[];
+  readonly frontages: CorridorFrontages;
   readonly ties = new Map<string, number>();
   readonly portals = new Map<number, { cell: number; opening: PagePoint[] }[]>();
   readonly offset: number;
@@ -112,6 +115,16 @@ export class FloorGraph {
       id: plan.id + ':' + version + ':place:' + i,
       cells: place.cells.map(valid),
     }));
+    this.frontages = new CorridorFrontages(
+      data.corridorBands ?? [],
+      this.places,
+      plan,
+      width,
+      step,
+      this.offset,
+      version,
+      valid,
+    );
     for (const entry of data.landingApproaches ?? []) {
       if (this.stairDoors.has(entry.nodeId)) throw Error('Duplicate stair approach on ' + plan.id);
       const [x, y] = entry.landing;

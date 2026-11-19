@@ -11,6 +11,7 @@ import cv2
 import numpy as np
 import pymupdf
 
+from corridor_frontages import bind_frontages, corridor_bands, recorded_swings
 from doors import SCALE
 from labels import CAMPUS, IDENTIFIER, MANUAL, ROOT, USES, inventory, label_words
 from landing_access import landing_approaches
@@ -154,9 +155,13 @@ def compile_floor(item):
             or abs(page.rect.height - plan["height"]) > 0.01
         ):
             raise ValueError("Coordinate frame changed: " + plan["id"])
+        geometry = json.loads(geometry_bytes)
+        marked_doors, structural_ink = recorded_swings(
+            page, geometry, extra.get("doorFrontages", [])
+        )
         words = label_words(plan, page, extra.get("labels"))
         walk, sealed, regions, sides, uses, door_symbols = surfaces(
-            page, json.loads(geometry_bytes), words, extra
+            page, geometry, words, extra
         )
     grid = FloorGrid(
         walk,
@@ -275,6 +280,13 @@ def compile_floor(item):
                 "cells": sorted(set(access)),
             }
         )
+    bind_frontages(grid, places, words, marked_doors, structural_ink)
+    bands = corridor_bands(
+        grid,
+        places,
+        extra.get("areas", []),
+        [*review.get("labels", []), *extra.get("labels", [])],
+    )
     door_approaches = landing_approaches(
         plan, extra, REVIEWED["nodes"], grid, sides, door_symbols, places
     )
@@ -293,6 +305,7 @@ def compile_floor(item):
         "components": parts,
         "places": places,
         "doorSymbols": len(door_symbols),
+        **({"corridorBands": bands} if bands else {}),
         **({"landingApproaches": door_approaches} if door_approaches else {}),
     }
 

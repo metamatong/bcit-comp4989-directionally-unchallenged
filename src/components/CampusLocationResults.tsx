@@ -20,6 +20,7 @@ export function PlanRegion({
 }) {
   const vicinity = candidate?.doorwayVicinity;
   const box = candidate?.bounds;
+  const corridor = !!candidate?.corridorOrigin;
   return (
     <div
       className="plan-region"
@@ -40,7 +41,7 @@ export function PlanRegion({
             height: `${(box[3] - box[1]) * 100}%`,
           }}
         >
-          <span>{vicinity ? 'Possible starting corridor' : 'Possible region'}</span>
+          <span>{vicinity || corridor ? 'Possible starting corridor' : 'Possible region'}</span>
         </div>
       )}
       {vicinity && !box && (
@@ -120,6 +121,11 @@ export function CampusLocationResults({
                     ? 'direction sign'
                     : (reading.kind ?? 'sign')}{' '}
                 · read as {reading.clarity}
+                {reading.directionCue === 'arrow'
+                  ? ' · visible arrow'
+                  : reading.directionCue === 'directional-words'
+                    ? ' · direction wording'
+                    : ''}
                 {analysis.labelRetrieval.unmatchedLabels?.includes(
                   reading.text.normalize('NFKC').trim().toUpperCase(),
                 )
@@ -162,19 +168,23 @@ export function CampusLocationResults({
                 {buildingLabel(candidate.building)} · Floor {candidate.floor}
               </h3>
               <span className="pill">
-                {candidate.doorwayVicinity ? 'Approximate vicinity' : 'Unverified estimate'}
+                {candidate.doorwayVicinity || candidate.corridorOrigin
+                  ? 'Approximate vicinity'
+                  : 'Unverified estimate'}
               </span>
             </div>
             <PlanRegion plan={plan} candidate={candidate} />
             {!!candidate.sourceLabels?.length && (
               <p className="plan-label-legend">
-                {candidate.doorwayVicinity
-                  ? candidate.bounds
-                    ? 'The shaded strip follows the corridor outside the room. The blue mark shows the printed room number.'
-                    : 'The orange marker shows the doorway on the plan. The blue mark shows the printed room number.'
-                  : labelBased
-                    ? 'Blue marks show the matching source labels.'
-                    : 'Blue marks show the printed labels. The orange box shows the estimated camera area.'}
+                {candidate.corridorOrigin
+                  ? 'The shaded strip marks the shared corridor. Blue marks identify the printed room numbers.'
+                  : candidate.doorwayVicinity
+                    ? candidate.bounds
+                      ? 'The shaded strip follows the corridor outside the room. The blue mark shows the printed room number.'
+                      : 'The orange marker shows the doorway on the plan. The blue mark shows the printed room number.'
+                    : labelBased
+                      ? 'Blue marks show the matching source labels.'
+                      : 'Blue marks show the printed labels. The orange box shows the estimated camera area.'}
               </p>
             )}
             <details>
@@ -230,6 +240,50 @@ export function StartingPlaceChoices({
   onRetake?: () => void;
   busy: boolean;
 }) {
+  const candidate = candidates.length === 1 ? candidates[0] : undefined;
+  if (candidate?.corridorOrigin?.needsConfirmation) {
+    const plan = plans.find((p) => p.id === candidate.planId);
+    if (plan && candidate.bounds) {
+      const marks =
+        candidate.sourceLabels
+          ?.filter((ref) => candidate.corridorOrigin!.roomPlaceIds.includes(ref.id))
+          .map((ref) => ({
+            point: {
+              x: (ref.bounds[0] + ref.bounds[2]) / 2,
+              y: (ref.bounds[1] + ref.bounds[3]) / 2,
+            },
+            symbol: ref.label,
+            label: 'Printed room ' + ref.label,
+          })) ?? [];
+      return (
+        <section className="journey-panel" aria-label="Confirm starting corridor">
+          <h2>Are these room signs beside you?</h2>
+          <p>
+            {planLabel(plan)} · {candidate.anchorLabel}
+          </p>
+          <RouteMapImage
+            plan={plan}
+            bounds={candidate.bounds}
+            markers={marks}
+            label={`Possible starting area: ${candidate.anchorLabel}`}
+          />
+          {partialMessage && <p>{partialMessage}</p>}
+          <button
+            className="primary full-width"
+            disabled={busy}
+            onClick={() => onSelect(candidate.id)}
+          >
+            Yes, I’m in this corridor
+          </button>
+          {onRetake && (
+            <button className="text-button" disabled={busy} onClick={onRetake}>
+              I’m somewhere else
+            </button>
+          )}
+        </section>
+      );
+    }
+  }
   return (
     <section className="journey-panel" aria-label="Starting location choices">
       <h2>{partialMessage ? 'Which sign are you beside?' : 'Which place are you at?'}</h2>

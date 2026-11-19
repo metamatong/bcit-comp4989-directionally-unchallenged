@@ -132,8 +132,73 @@ function candidateFor(
     ],
   };
 }
+function corridorCandidate(
+  match: NonNullable<Resolution['corridor']>,
+  references: Resolution['references'],
+): CampusLocationCandidate {
+  const {
+    area,
+    page: {
+      floor: { plan },
+    },
+  } = match;
+  return {
+    id: randomUUID(),
+    planId: plan.id,
+    building: plan.building,
+    floor: plan.floor,
+    page: plan.page,
+    sourceRef: plan.sourceRef,
+    sourcePlaceId: area.corridor.id,
+    anchorLabel: area.label,
+    confidence: 'low',
+    verification: 'unverified-ai-hypothesis',
+    bounds: area.bounds,
+    sourceLabels: references.filter((r) => r.planId === plan.id),
+    labelMatches: match.matched,
+    corridorOrigin: {
+      bandId: area.id,
+      roomPlaceIds: area.rooms.map((p) => p.id),
+      roomLabels: area.rooms.map((p) => p.label),
+      needsConfirmation: match.needsConfirmation,
+    },
+    matches: [
+      {
+        kind: 'printed-label',
+        photoFeature: 'Visible room signs ' + area.rooms.map((p) => p.label).join(', ') + '.',
+        planFeature:
+          'The marked entrances face the same stretch of corridor ' + area.corridor.label + '.',
+      },
+    ],
+    limitations: [
+      'The map marks a walking reference within this corridor. Exact camera position and heading are unknown.',
+      ...(match.unmatched.length
+        ? ['Additional readings without a floor-plan match: ' + match.unmatched.join(', ') + '.']
+        : []),
+    ],
+  };
+}
+
 function describe(result: Resolution, candidates: CampusLocationCandidate[], device?: DeviceScope) {
   const names = device?.buildings.join(', ');
+  if (result.corridor && candidates.length) {
+    const { area, needsConfirmation, unmatched } = result.corridor;
+    const summary =
+      'The marked rooms face corridor ' +
+      area.corridor.label +
+      ' on floor ' +
+      result.corridor.page.floor.plan.floor +
+      '.';
+    return {
+      summary:
+        summary +
+        (unmatched.length
+          ? ' Additional readings without a match: ' + unmatched.join(', ') + '.'
+          : '') +
+        (needsConfirmation ? ' Confirm that you are beside these rooms.' : ''),
+      clarification: '',
+    };
+  }
   if (candidates.length && result.partial) {
     const gaps = result.unmappedLabels.length
       ? `No floor-plan match for ${result.unmappedLabels.map((l) => '“' + l + '”').join(', ')}.`
@@ -162,6 +227,12 @@ function describe(result: Resolution, candidates: CampusLocationCandidate[], dev
       summary: 'The device reading does not agree with the photo matches.',
       clarification: 'Check that you are at the photographed location or use a clearer sign.',
     };
+  if (result.directionalOnly && result.references.length)
+    return {
+      summary:
+        'The room numbers match the plans, but direction signs can point to rooms elsewhere.',
+      clarification: 'Use an identifying sign on or beside a nearby doorway.',
+    };
   return {
     summary: 'The extracted labels do not identify a starting place on the supplied floor plans.',
     clarification:
@@ -186,7 +257,12 @@ export function locateFromLabels(
   const started = performance.now(),
     evidence = record.evidence,
     device = deviceScope(input.gps);
-  const result = resolveStartingSigns(evidence.labels, record.buildingHint, device);
+  const result = resolveStartingSigns(
+    evidence.labels,
+    record.buildingHint,
+    device,
+    evidence.features,
+  );
   const contradictoryDoorCount =
     evidence.features?.visibleDoorCount === 0 &&
     evidence.labels.some(
@@ -197,9 +273,14 @@ export function locateFromLabels(
     );
   const candidates = contradictoryDoorCount
     ? []
-    : result.matches.map((m) => candidateFor(m, result.references));
+    : result.corridor
+      ? [corridorCandidate(result.corridor, result.references)]
+      : result.matches.map((m) => candidateFor(m, result.references));
   if (!candidates.length && result.gpsStatus === 'used') result.gpsStatus = 'building-only';
-  const candidate = !result.partial && candidates.length === 1 ? candidates[0] : undefined;
+  const candidate =
+    !result.partial && !result.corridor?.needsConfirmation && candidates.length === 1
+      ? candidates[0]
+      : undefined;
   const { summary, clarification } = describe(result, candidates, device);
   const analysis: CampusPhotoAnalysis = {
     requestId: input.requestId,

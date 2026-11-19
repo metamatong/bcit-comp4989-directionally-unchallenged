@@ -468,6 +468,32 @@
             0.4396135
           ]
         ]
+      ],
+      "doorFrontages": [
+        {
+          "room": "2695",
+          "swing": "curve-784",
+          "closedTip": "last",
+          "basis": "West entrance of lab 2695 on corridor 2600, leaf on the 2695 side of the division from 2675."
+        },
+        {
+          "room": "2695",
+          "swing": "curve-794",
+          "closedTip": "first",
+          "basis": "East corridor entrance of 2695 beside the M260 shaft callout."
+        },
+        {
+          "room": "2680",
+          "swing": "curve-787",
+          "closedTip": "last",
+          "basis": "West corridor entrance of lab 2680 on the 2680 side of the partition with 2660."
+        },
+        {
+          "room": "2680",
+          "swing": "curve-798",
+          "closedTip": "first",
+          "basis": "East paired doorway from 2680 to corridor 2600 by the M261 shaft callout."
+        }
       ]
     },
     {
