@@ -1,5 +1,56 @@
 # Verification record
 
+## Hallway change withdrawn, November 18, 2026
+
+At the user’s request, the added camera-space/proximity fields, extraction instructions, localization gates, UI copy and six related tests were removed. The earlier extraction and localization behavior is restored. Accessibility preferences and manual step-by-step directions remain. The live failure below is historical evidence from before this rollback; the rollback does not establish its cause or prove Gemini now succeeds.
+
+## Authorized live hallway-photo check, November 18, 2026
+
+The user authorized submitting the uploaded hallway/1730 photograph to Gemini. A temporary API client prepared a full view and four crops from the original image with the app’s crop bounds and size/quality limits, using Sharp rather than browser canvas encoding. Only the extraction endpoint received media; no image files or bytes were saved by the test client. The configured primary `gemini-3.5-flash-lite` returned HTTP 400, and `gemini-3.8-flash` timed out within the 45-second extraction budget. The visitor API returned HTTP 504 with no extracted evidence, so localization and navigation were not run. This attempt does **not** verify live hallway recognition. Metadata requests for both configured model IDs returned HTTP 200 and advertised `generateContent`; metadata access does not prove that this generation request is accepted. Provider settings were left unchanged. The 415 passing mocked tests remain separate from this failed live check.
+
+
+## Stair preference and guided directions, November 18, 2026
+
+The destination step offers **Accessibility: prefer elevators**; unchecked routes prefer stairs. Both planners first exclude the other transfer type, then use the complete permitted network if necessary. The overview flags required stairs when elevators were requested. **Get Directions** submits the photo; **GO** starts manual single-step guidance without another provider call or location watch. Tests cover both preferences, missing transfers, same-place routes, API validation, preference changes without re-extraction, and manual progress through transfers and completion.
+
+**Passed:** `npm run format`, all 409 tests in `npm run test:unit` (42 files), `npm run build`, and `npm run data:validate`. Validation uses mocked providers, isolated local API servers, and DOM tests. No live provider, physical-campus, browser, or screenshot checks were performed for this change. The full `npm test` command includes Playwright, so the no-screen-check instruction is honored with `npm run test:unit` instead. Type checking/build and source-data validation are separate checks. Existing fixtures were updated for campus-wide label ambiguity and isolated from private topology edits.
+
+Coverage is unchanged: 3,383 source occurrences across 89 supplied plans; 871 have compiled floor-grid approaches across 87 plans. NE18 floor 1 and SE30 floor 1 have zero compiled approach coverage. The following counts exclude reviewed bindings added at runtime, so zero compiled elevator approaches does not mean there are no reviewed elevator landings. Endpoint coverage does not establish a complete journey or verified accessibility.
+
+| Source place type | Occurrences | Compiled approaches |
+|---|---:|---:|
+| atrium | 1 | 0 |
+| av | 2 | 1 |
+| bedroom | 2 | 0 |
+| classroom | 30 | 7 |
+| communications | 7 | 1 |
+| corridor | 454 | 322 |
+| electrical | 10 | 0 |
+| elevator | 6 | 0 |
+| food-service | 4 | 0 |
+| instructional-support | 11 | 0 |
+| janitor | 5 | 2 |
+| kitchen | 2 | 0 |
+| lab | 57 | 16 |
+| lecture | 5 | 0 |
+| lounge | 3 | 1 |
+| mechanical | 5 | 0 |
+| meeting | 11 | 3 |
+| office | 114 | 24 |
+| projects | 4 | 2 |
+| resource | 3 | 0 |
+| retail | 2 | 0 |
+| room | 2417 | 472 |
+| shaft | 30 | 0 |
+| staff | 3 | 0 |
+| stairs | 150 | 13 |
+| storage | 30 | 4 |
+| study | 1 | 0 |
+| warehouse | 1 | 0 |
+| washroom | 9 | 0 |
+| workshop | 4 | 3 |
+
+
 ## Campus-wide source sample, November 18, 2026
 
 The visitor API returned complete routes for **0 of 5** randomly paired journeys. Sampling used all 3,428 indexed place occurrences in graph `3b4497fbb23af67363a67fc5151ac607f2a0287186c10680299fbb7543babe36` and seed `5872ff95`. All ten occurrences were selected without replacement before any route lookup. All five starts localized with simulated exact sign, building and floor readings. The check used no visitor images or provider calls. These results measure post-extraction routing on real source data.

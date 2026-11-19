@@ -36,7 +36,7 @@ const provider: Provider = {
     if (options?.forceTool !== 'read_photo_labels')
       throw Error('Only the first stage may call AI.');
     labelReads++;
-    return labelReading('302');
+    return labelReading('302', 'clear', 'SE12');
   },
 };
 let server: Server;
@@ -126,7 +126,7 @@ it.each([false, true, 'denied'] as const)(
     const wait = async (assertion: () => void) => {
       let lastFailure: unknown;
       // Keep network-driven React updates inside act during every polling interval.
-      for (let attempt = 0; attempt < 500; attempt++) {
+      for (let attempt = 0; attempt < 150; attempt++) {
         await act(async () => {
           await new Promise((resolve) => setTimeout(resolve, 20));
         });
@@ -166,11 +166,16 @@ it.each([false, true, 'denied'] as const)(
       await click(button('Next'));
       await setDestination('SW03 2082');
       if (useGps) await click(host.querySelector<HTMLInputElement>('input[type=checkbox]')!);
+      const elevatorOption = [...host.querySelectorAll('label')]
+        .find((label) => label.textContent?.includes('Accessibility: prefer elevators'))!
+        .querySelector<HTMLInputElement>('input')!;
+      expect(elevatorOption.checked).toBe(false);
+      await click(elevatorOption);
       expect(getCurrentPosition).not.toHaveBeenCalled();
       expect(provider.calls).toBe(0);
       rejectLocationOnce = true;
       labelReads = 0;
-      await click(button('GO'));
+      await click(button('Get Directions'));
       await wait(() => expect(button('Try again')).toBeDefined());
       expect(host.textContent).toContain('Finding your starting place stopped');
       expect(labelReads).toBe(1);
@@ -185,23 +190,27 @@ it.each([false, true, 'denied'] as const)(
         .filter((body) => body.evidenceId);
       expect(locationRequests.every((body) => Boolean(body.gps) === (useGps === true))).toBe(true);
       expect(provider.calls).toBe(1);
-      const transferEdge = store.read().edges.find((edge) => edge.kind === 'elevator')!;
+      const transferEdges = store
+        .read()
+        .edges.filter((edge) => edge.kind === 'elevator' || edge.kind === 'stairs');
       const reviewTransfer = (status: 'verified' | 'rejected') =>
-        store.mutate({
-          revision: store.read().revision,
-          command: {
-            type: 'review',
-            target: 'edge',
-            id: transferEdge.id,
-            status,
-            reviewer: 'DOM regression',
-            note: 'Isolated route recovery check.',
-          },
-        });
+        transferEdges.forEach((edge) =>
+          store.mutate({
+            revision: store.read().revision,
+            command: {
+              type: 'review',
+              target: 'edge',
+              id: edge.id,
+              status,
+              reviewer: 'DOM regression',
+              note: 'Isolated route recovery check.',
+            },
+          }),
+        );
       reviewTransfer('rejected');
       await click(button('Recheck current route'));
       await wait(() => expect(button('Retry route')).toBeDefined());
-      expect(host.textContent).toContain('continuous reviewed walking route');
+      expect(host.textContent).toContain('continuous route');
       reviewTransfer('verified');
       await click(button('Retry route'));
       await wait(() => expect(host.querySelector('.route-directions')).not.toBeNull());
@@ -279,12 +288,28 @@ it.each([false, true, 'denied'] as const)(
       );
       expect(result.querySelectorAll('.route-map-visit')).toHaveLength(3);
       await click(host.querySelector<HTMLElement>('.journey-inputs > summary')!);
+      const preference = [...host.querySelectorAll('label')]
+        .find((label) => label.textContent?.includes('Accessibility: prefer elevators'))!
+        .querySelector<HTMLInputElement>('input')!;
+      expect(preference.checked).toBe(true);
+      await click(preference);
+      expect(host.querySelector('.route-directions')).toBeNull();
+      await click(button('Get Directions to SW03 2082'));
+      await wait(() =>
+        expect(host.querySelector('.route-overview')?.textContent).toContain('S370'),
+      );
+      const navigationRequests = requestBodies
+        .map((body) => JSON.parse(body))
+        .filter((body) => body.candidateId && body.destination);
+      expect(navigationRequests[0].preferElevators).toBe(true);
+      expect(navigationRequests.at(-1).preferElevators).toBe(false);
+      expect(provider.calls).toBe(1);
       await setDestination('SW03 2458');
       expect(host.querySelector('.route-directions')).toBeNull();
-      await click(button('GO to SW03 2458'));
+      await click(button('Get Directions to SW03 2458'));
       await wait(() =>
         expect(host.querySelector('.journey-panel [role=status]')?.textContent).toContain(
-          'No matching destination',
+          'No matching place',
         ),
       );
       expect(provider.calls).toBe(1);

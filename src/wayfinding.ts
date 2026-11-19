@@ -22,6 +22,7 @@ export type WalkingStep = {
   path: PagePoint[];
 };
 export type NavigationChoice = {
+  preferElevators?: boolean;
   revision: number;
   candidateId: string;
   destination: string;

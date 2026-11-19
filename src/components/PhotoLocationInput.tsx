@@ -21,6 +21,8 @@ type PhotoLocationInputProps = {
   status: string;
   error?: string;
   destination: string;
+  preferElevators?: boolean;
+  onPreferElevatorsChange?: (value: boolean) => void;
   canUsePhotoResult?: boolean;
   deviceOption?: ReactNode;
   onDestinationChange: (value: string) => void;
@@ -57,6 +59,8 @@ export function PhotoLocationInput({
   status,
   error,
   destination,
+  preferElevators = false,
+  onPreferElevatorsChange,
   canUsePhotoResult = false,
   deviceOption,
   onDestinationChange,
@@ -161,7 +165,7 @@ export function PhotoLocationInput({
           </button>
           <p className="helper">
             <ShieldCheck size={14} /> Include a nearby room sign or doorway if you can. Your photo
-            stays on this device until you tap Go.
+            stays on this device until you tap Get Directions.
           </p>
         </>
       ) : (
@@ -206,6 +210,21 @@ export function PhotoLocationInput({
               <small>Include the building and room, for example SW03 2605.</small>
             </div>
             {!canUsePhotoResult && deviceOption}
+            <div className="device-location-option">
+              <label>
+                <input
+                  type="checkbox"
+                  checked={preferElevators}
+                  disabled={busy}
+                  onChange={(event) => onPreferElevatorsChange?.(event.target.checked)}
+                />{' '}
+                Accessibility: prefer elevators
+              </label>
+              <p className="helper">
+                Stairs are preferred by default. Accessibility and elevator availability are
+                unverified. A route may still include stairs if no complete alternative is mapped.
+              </p>
+            </div>
             {error ? (
               <p className="photo-failure" role="alert">
                 {error}
@@ -226,7 +245,7 @@ export function PhotoLocationInput({
                 disabled={!canSubmitPhoto}
               >
                 {busy ? <LoaderCircle className="spin" size={17} /> : <Search size={17} />}
-                {busy ? 'Finding your route…' : error ? 'Try again' : 'GO'}
+                {busy ? 'Finding your route…' : error ? 'Try again' : 'Get Directions'}
               </button>
             )}
           </form>

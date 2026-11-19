@@ -47,8 +47,8 @@ describe('inline photo input (Node rendering, no browser)', () => {
     expect(markup).not.toContain('Tapping Go sends');
     expect(markup).not.toContain('API data handling applies');
     expect(markup).not.toContain('photo-submission-note');
-    expect(button(markup, 'GO')).not.toContain('aria-describedby');
-    expect(button(markup, 'GO')).not.toContain('disabled');
+    expect(button(markup, 'Get Directions')).not.toContain('aria-describedby');
+    expect(button(markup, 'Get Directions')).not.toContain('disabled');
     expect(props.onAnalyze).not.toHaveBeenCalled();
   });
   it('exposes upload and native capture before the destination step', () => {
@@ -59,7 +59,7 @@ describe('inline photo input (Node rendering, no browser)', () => {
     expect(markup).toContain('capture="environment"');
     expect(markup).not.toContain('id="trip-destination"');
     expect(button(markup, 'Next')).toContain('disabled');
-    expect(markup).toContain('Your photo stays on this device until you tap Go.');
+    expect(markup).toContain('Your photo stays on this device until you tap Get Directions.');
     expect(markup).not.toContain('<dialog');
     expect(markup).not.toContain('Analyze a photo');
     expect(markup).not.toContain('aria-label="Photo analysis"');
@@ -73,7 +73,7 @@ describe('inline photo input (Node rendering, no browser)', () => {
     const submission = renderInput({ photo, step: 'destination', destination: 'SE12 302' }).markup;
     expect(markup).not.toContain('type="checkbox"');
     expect(submission).not.toContain('photo-submission-note');
-    expect(button(submission, 'GO')).not.toContain('disabled');
+    expect(button(submission, 'Get Directions')).not.toContain('disabled');
     expect(props.onAnalyze).not.toHaveBeenCalled();
   });
   it('shows the failed stage and cause beside the retained photo and offers an explicit retry', () => {
@@ -94,10 +94,16 @@ describe('inline photo input (Node rendering, no browser)', () => {
   });
   it('offers route finding as soon as the photo and destination are ready', () => {
     expect(
-      button(renderInput({ photo, step: 'destination', destination: 'SW03 3615' }).markup, 'GO'),
+      button(
+        renderInput({ photo, step: 'destination', destination: 'SW03 3615' }).markup,
+        'Get Directions',
+      ),
     ).not.toContain('disabled');
     expect(
-      button(renderInput({ photo, step: 'destination', destination: '  ' }).markup, 'GO'),
+      button(
+        renderInput({ photo, step: 'destination', destination: '  ' }).markup,
+        'Get Directions',
+      ),
     ).toContain('disabled');
   });
   it('keeps submission disabled while preparing a replacement photo', () => {
@@ -107,7 +113,7 @@ describe('inline photo input (Node rendering, no browser)', () => {
       reading: true,
       destination: 'SW03 2082',
     });
-    expect(button(markup, 'GO')).toContain('disabled');
+    expect(button(markup, 'Get Directions')).toContain('disabled');
     expect(props.onAnalyze).not.toHaveBeenCalled();
   });
   it('can edit a destination using the accepted photo result without offering a second submission', () => {
@@ -132,7 +138,7 @@ describe('inline photo input (Node rendering, no browser)', () => {
       destination: 'SE12 302',
       ready: false,
     }).markup;
-    expect(button(destinationStep, 'GO')).toContain('disabled');
+    expect(button(destinationStep, 'Get Directions')).toContain('disabled');
   });
   it('keeps cancellation available while analysis locks submission and replacement', () => {
     const { markup } = renderInput({

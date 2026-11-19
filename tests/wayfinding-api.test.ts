@@ -94,10 +94,18 @@ it('takes a consented photo through both stages and uses its complete reviewed r
     'corridor',
     'building-link',
     'corridor',
-    'elevator',
+    'stairs',
     'corridor',
   ]);
   expect(JSON.stringify(directions)).not.toMatch(/reviewer|reviewHistory|data:image|answeredAt/);
+  const elevatorResponse = await nav({ ...query, preferElevators: true });
+  expect(elevatorResponse.status).toBe(200);
+  const elevatorRoute: NavigationResult = await elevatorResponse.json();
+  if (elevatorRoute.status !== 'route') throw Error('Expected an elevator alternative');
+  expect(elevatorRoute.steps.some((s) => s.kind === 'elevator')).toBe(true);
+  expect(elevatorRoute.steps.some((s) => s.kind === 'stairs')).toBe(false);
+  expect(provider.calls).toBe(1);
+  expect((await nav({ ...query, preferElevators: 'true' })).status).toBe(400);
   expect((await nav({ ...query, networkRevision: points.networkRevision - 1 })).status).toBe(409);
   expect((await nav({ ...query, path: [{ x: 0, y: 0 }] })).status).toBe(400);
   const other: Session = await (await post('', {})).json();

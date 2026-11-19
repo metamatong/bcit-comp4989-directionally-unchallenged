@@ -259,7 +259,7 @@ export class CampusJourney {
             'The destination door is marked on the floor plan. Its approach from the public walking route is missing.',
         };
     }
-    const result = this.search.route([selected], goal.stops);
+    const result = this.search.route([selected], goal.stops, request.preferElevators);
     if (!result)
       return {
         ...context,

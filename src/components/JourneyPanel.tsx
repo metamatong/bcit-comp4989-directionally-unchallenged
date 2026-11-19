@@ -39,6 +39,7 @@ export function JourneyPanel({
   revision,
   candidate,
   destination,
+  preferElevators = false,
   plans,
   busy,
   onTryAnotherPhoto,
@@ -48,6 +49,7 @@ export function JourneyPanel({
   revision: number;
   candidate: CampusLocationCandidate;
   destination: string;
+  preferElevators?: boolean;
   plans: VisualPlan[];
   busy: boolean;
   onTryAnotherPhoto: () => void;
@@ -69,7 +71,7 @@ export function JourneyPanel({
     setError('');
     request<NavigationResult>(
       `/api/sessions/${sessionId}/navigation`,
-      { revision, candidateId: candidate.id, destination, ...choice },
+      { revision, candidateId: candidate.id, destination, preferElevators, ...choice },
       { signal: controller.signal },
     )
       .then((value) => {
@@ -79,7 +81,7 @@ export function JourneyPanel({
         if (!controller.signal.aborted) setError(failure.message);
       });
     return () => controller.abort();
-  }, [sessionId, revision, candidate.id, destination, refresh, choice]);
+  }, [sessionId, revision, candidate.id, destination, preferElevators, refresh, choice]);
 
   useEffect(() => {
     if (result && result.status !== 'route') {
@@ -121,6 +123,7 @@ export function JourneyPanel({
         )}
         <RouteDirections
           route={result}
+          preferElevators={preferElevators}
           plans={plans}
           onRecheck={() => {
             setChoice({});

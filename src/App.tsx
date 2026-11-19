@@ -43,6 +43,7 @@ export default function App() {
   const [showPhotoResults, setShowPhotoResults] = useState(false);
   const [flowStep, setFlowStep] = useState<'photo' | 'destination'>('photo');
   const [destination, setDestination] = useState('');
+  const [preferElevators, setPreferElevators] = useState(false);
   const [activeDestination, setActiveDestination] = useState('');
   const photoAbort = useRef<AbortController | null>(null);
   const evidenceForPhoto = useRef<{ photo: PreparedPhoto; id: string } | null>(null);
@@ -291,6 +292,11 @@ export default function App() {
       <PhotoLocationInput
         step={analysis ? 'destination' : preparedPhoto ? flowStep : 'photo'}
         destination={destination}
+        preferElevators={preferElevators}
+        onPreferElevatorsChange={(value) => {
+          setPreferElevators(value);
+          setActiveDestination('');
+        }}
         canUsePhotoResult={!!analysis?.candidates.length}
         deviceOption={
           <>
@@ -337,7 +343,7 @@ export default function App() {
         disabled={busy}
         onClick={() => setActiveDestination(destination.trim())}
       >
-        GO to {destination.trim()}
+        Get Directions to {destination.trim()}
       </button>
     );
   return (
@@ -421,11 +427,17 @@ export default function App() {
               ) : null}
               {routeCandidate ? (
                 <JourneyPanel
-                  key={JSON.stringify([session.id, routeCandidate.id, activeDestination])}
+                  key={JSON.stringify([
+                    session.id,
+                    routeCandidate.id,
+                    activeDestination,
+                    preferElevators,
+                  ])}
                   sessionId={session.id}
                   revision={session.revision}
                   candidate={routeCandidate}
                   destination={activeDestination}
+                  preferElevators={preferElevators}
                   plans={data.visualPlans}
                   locationCatalogue={data.locationCatalogue}
                   busy={busy}
@@ -484,6 +496,7 @@ export default function App() {
                 onClick={() => {
                   removePhoto();
                   setDestination('');
+                  setPreferElevators(false);
                   void send({ type: 'reset' });
                 }}
               >
@@ -537,8 +550,9 @@ export default function App() {
               <div className="about-section">
                 <h3>What you can do</h3>
                 <p>
-                  Add a photo, enter a destination, and tap Go. The app reads the photo once, finds
-                  the starting place from its labels and calculates a route over saved connections.
+                  Add a photo, enter a destination, and tap Get Directions. The app reads the photo
+                  once, finds the starting place from its labels and calculates a route over saved
+                  connections.
                 </p>
               </div>
               <div className="about-section">
@@ -552,11 +566,11 @@ export default function App() {
               <div className="about-section">
                 <h3>Your data stays transient</h3>
                 <p>
-                  Go sends the photo and detail views to {provider.recipient} for label and feature
-                  extraction. The app uses source records for location and routing. Photo bytes are
-                  discarded after processing. Optional GPS shares building candidates with the app
-                  while coordinates stay in this tab. Hosted session results are encrypted and
-                  expire after 30 minutes. {provider.dataUse}
+                  Get Directions sends the photo and detail views to {provider.recipient} for label
+                  and feature extraction. The app uses source records for location and routing.
+                  Photo bytes are discarded after processing. Optional GPS shares building
+                  candidates with the app while coordinates stay in this tab. Hosted session results
+                  are encrypted and expire after 30 minutes. {provider.dataUse}
                 </p>
               </div>
             </>

@@ -4,7 +4,7 @@ The visitor workflow uses the photograph in one vision stage. Every later reques
 
 ## Extraction
 
-The browser prepares one full view and four overlapping detail crops directly from the original image. Selection stays local. **Go** sends the consented bundle to `POST /api/sessions/:id/photo/evidence`. The configured provider receives these views without map hints or the destination.
+The browser prepares one full view and four overlapping detail crops directly from the original image. Selection stays local. **Get Directions** sends the consented bundle to `POST /api/sessions/:id/photo/evidence`. The configured provider receives these views without map hints or the destination.
 
 The bounded result contains exact labels, clarity, source view, label kind and sign placement. Kinds distinguish room and landmark signs, explicitly printed building identifiers and explicitly printed floor numbers. Placement distinguishes door signs, directional signs and other/unknown contexts. Structured features record visible door count, window side relative to the photo and corridor shape. Unclear fields remain null or unknown.
 
