@@ -292,7 +292,7 @@ test('picks an explicit destination floor in another building with one photo rea
   await choosePhoto(page);
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('button', { name: 'Choose a map point', exact: true }).click();
-  await page.getByRole('button', { name: 'GO', exact: true }).click();
+  await page.getByRole('button', { name: 'Get Directions', exact: true }).click();
   const map = page.getByRole('group', { name: /Select a walking point/ });
   await expect(map).toBeVisible();
   await expect(page.getByLabel('Use point as')).toHaveCount(0);
