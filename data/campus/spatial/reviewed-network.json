@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 41,
-  "sourceDocumentSha256": "3a2f8f01e77cae0f87741ad755a5f33547a210a2af4d6f55e7624a979f2f29c7",
+  "revision": 45,
+  "sourceDocumentSha256": "4e8511d1bcbc82f1e7cb504d3705db65b59d23f4c412e76c2bdcfb8a0cafa6e8",
   "nodes": [
     {
       "version": 2,
@@ -545,6 +545,78 @@
         "x": 0.474183,
         "y": 0.489899
       }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "3d809bc7cfd43c26bc41c2e6c4f29f60bca956a0547735bae0b7d915c15fae49",
+      "reviewBasis": "user-confirmation",
+      "id": "412713ef-f9a9-4533-b450-193d80302812",
+      "planId": "SE12-F4-p1",
+      "sourceSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
+      "label": "S400 · stair landing",
+      "aliases": [
+        "S400 · stair landing",
+        "S400"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.079375,
+        "y": 0.4937198
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "7907af2d5ffe3bdb5e51b78daa12d05537efc03c200997302d35d9592e419028",
+      "reviewBasis": "user-confirmation",
+      "id": "bad1f2b0-bab4-4db0-8f56-99541e66b71d",
+      "planId": "SE12-F4-p1",
+      "sourceSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
+      "label": "S413 · stair landing",
+      "aliases": [
+        "S413 · stair landing",
+        "S413"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.381875,
+        "y": 0.3323671
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "607f1f483a3b2c66f4508059d9b39db68d92c57093389e937b003e80e933215c",
+      "reviewBasis": "user-confirmation",
+      "id": "60d424fa-a873-428e-812f-22910bd93ae5",
+      "planId": "SE12-F4-p1",
+      "sourceSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
+      "label": "S418 · stair landing",
+      "aliases": [
+        "S418 · stair landing",
+        "S418"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.73875,
+        "y": 0.3623188
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "54b1cac79e7ec78982566fb852e9a7d2368fdd9b400d1c4fc4ea4fd301451b74",
+      "reviewBasis": "user-confirmation",
+      "id": "08198569-8a08-421b-889b-20c1889ecfe0",
+      "planId": "SE12-F4-p1",
+      "sourceSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
+      "label": "S428 · stair landing",
+      "aliases": [
+        "S428 · stair landing",
+        "S428"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.77375,
+        "y": 0.6067633
+      }
     }
   ],
   "edges": [
@@ -1067,6 +1139,98 @@
         "fromNodeId": "97fdec6c-5dab-48b8-a116-6968dae55b3c",
         "toNodeId": "8fe98872-4af9-4d66-824b-faf9341aa6c1",
         "reviewedEdgeHash": "90db9b5c30a89690d47b8673d9c25614023a2df2f7245c9c9df0212ed8518c72"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "9e35fb11a6ab79f39517cb2d8920912c70731823b963c9724f4fbb6b34cd7c39",
+      "reviewBasis": "user-confirmation",
+      "id": "2772ebe7-aa6f-4af3-907c-718c140b4f44",
+      "fromNodeId": "9e4d3f61-332e-4d27-8838-65a7596cb304",
+      "toNodeId": "412713ef-f9a9-4533-b450-193d80302812",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "se12-f3-f4-s300-s400",
+      "candidateBinding": {
+        "definitionHash": "acd314636ea692daf27add722ac32329de12741949637242b417fa36aca63be0",
+        "presentedHash": "adae82190d580850f299e39db7768ab46a792700f614037464f20dc1b31b6ff3",
+        "fromNodeId": "9e4d3f61-332e-4d27-8838-65a7596cb304",
+        "toNodeId": "412713ef-f9a9-4533-b450-193d80302812",
+        "reviewedEdgeHash": "9e35fb11a6ab79f39517cb2d8920912c70731823b963c9724f4fbb6b34cd7c39"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "e481b2c066b7efa4b78dbd8c6ede03411fcb2abea97134fff077238496382d8d",
+      "reviewBasis": "user-confirmation",
+      "id": "ee699bd2-daa1-4b10-a731-c5751310e938",
+      "fromNodeId": "92a95623-7e31-42e9-8228-2b6a77874045",
+      "toNodeId": "bad1f2b0-bab4-4db0-8f56-99541e66b71d",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "se12-f3-f4-s313-s413",
+      "candidateBinding": {
+        "definitionHash": "61172f799611f6093ee45bf0affdeca1e19344ee28624990eb51f7cb12c9697e",
+        "presentedHash": "b3afd8edad40ca4730387a61d5b5058212386e37bef1761731094afef281c1f5",
+        "fromNodeId": "92a95623-7e31-42e9-8228-2b6a77874045",
+        "toNodeId": "bad1f2b0-bab4-4db0-8f56-99541e66b71d",
+        "reviewedEdgeHash": "e481b2c066b7efa4b78dbd8c6ede03411fcb2abea97134fff077238496382d8d"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "10eaf10d95d794d7c1c1ab62420e0dc398131765a88090a9ae86a8d2d935b601",
+      "reviewBasis": "user-confirmation",
+      "id": "4449a740-b213-431f-8d6f-6b2d82efecbd",
+      "fromNodeId": "7a8b0223-e542-45a2-970a-f6be66765db4",
+      "toNodeId": "60d424fa-a873-428e-812f-22910bd93ae5",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "se12-f3-f4-s327-s418",
+      "candidateBinding": {
+        "definitionHash": "e8c92ff57793c05f92fc1f7573513857f42895246245e5e4c2608a8353fdc5ad",
+        "presentedHash": "2d7b4251ad2308abbb472f840c01efeee6a28f6b4f7945b3383ac140bb121619",
+        "fromNodeId": "7a8b0223-e542-45a2-970a-f6be66765db4",
+        "toNodeId": "60d424fa-a873-428e-812f-22910bd93ae5",
+        "reviewedEdgeHash": "10eaf10d95d794d7c1c1ab62420e0dc398131765a88090a9ae86a8d2d935b601"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "12db4065c2b02805a7325bd4767fcaafdaa9721757e4f6902c62b790498bc5ea",
+      "reviewBasis": "user-confirmation",
+      "id": "2763941b-cfeb-4e94-a280-dac63bc608b2",
+      "fromNodeId": "f9d700f2-9e8b-4bcb-93a0-055cf1c585cb",
+      "toNodeId": "08198569-8a08-421b-889b-20c1889ecfe0",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "se12-f3-f4-s328-s428",
+      "candidateBinding": {
+        "definitionHash": "a16ec3059a208c5552eb10d279c8d692ceff6411cfdbc27db0277d1a87105c4c",
+        "presentedHash": "1502fafb25e624cc186ea67f014776ebf0f73ad7fe5ba62a37a95a1b7e337e3d",
+        "fromNodeId": "f9d700f2-9e8b-4bcb-93a0-055cf1c585cb",
+        "toNodeId": "08198569-8a08-421b-889b-20c1889ecfe0",
+        "reviewedEdgeHash": "12db4065c2b02805a7325bd4767fcaafdaa9721757e4f6902c62b790498bc5ea"
       }
     }
   ],

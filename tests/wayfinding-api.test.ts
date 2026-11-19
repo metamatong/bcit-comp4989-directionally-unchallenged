@@ -6,7 +6,8 @@ import { join } from 'node:path';
 import type { Server } from 'node:http';
 import { afterAll, beforeAll, expect, it } from 'vitest';
 import { createApp } from '../server/app';
-import type { Provider } from '../server/provider';
+import type { Provider, ModelPart } from '../server/provider';
+import { locationCatalogue } from '../server/geolocation';
 import { TopologyStore } from '../server/topology';
 import { reviewedNetwork } from '../server/pilot-network';
 import type { Session } from '../src/types';
@@ -22,13 +23,14 @@ const store = new TopologyStore(
 );
 const room = store.read().nodes.find((n) => n.label === '302 · window-side corridor door')!;
 const captions: string[][] = [];
+let modelReading: ModelPart[] = labelReading('302');
 const provider: Provider = {
   calls: 0,
   async generate(contents, _tools, _signal, attempt, options) {
     this.calls++;
     attempt?.();
     captions.push(contents.flatMap((c) => c.parts.flatMap((p) => (p.text ? [p.text] : []))));
-    if (options?.forceTool === 'read_photo_labels') return labelReading('302');
+    if (options?.forceTool === 'read_photo_labels') return modelReading;
     throw Error('Unexpected provider tool');
   },
 };
@@ -94,9 +96,24 @@ it('takes a consented photo through both stages and uses its complete reviewed r
     'corridor',
     'building-link',
     'corridor',
-    'elevator',
+    expect.stringMatching(/^(stairs|elevator)$/),
     'corridor',
   ]);
+  const transfer = directions.steps[3];
+  expect([transfer.from.planId, transfer.to.planId]).toEqual(['SW3-F3-p1', 'SW3-F2-p1']);
+  expect(
+    store
+      .snapshot()
+      .document.edges.some(
+        (e) =>
+          e.review?.status === 'verified' &&
+          e.kind === transfer.kind &&
+          ((e.fromNodeId === transfer.from.id && e.toNodeId === transfer.to.id) ||
+            (e.direction === 'both' &&
+              e.toNodeId === transfer.from.id &&
+              e.fromNodeId === transfer.to.id)),
+      ),
+  ).toBe(true);
   expect(JSON.stringify(directions)).not.toMatch(/reviewer|reviewHistory|data:image|answeredAt/);
   expect((await nav({ ...query, networkRevision: points.networkRevision - 1 })).status).toBe(409);
   expect((await nav({ ...query, path: [{ x: 0, y: 0 }] })).status).toBe(400);
@@ -113,4 +130,62 @@ it('takes a consented photo through both stages and uses its complete reviewed r
   expect(newPhoto.campusLocation).toBeNull();
   expect((await nav({ ...query, revision: newPhoto.revision })).status).toBe(409);
   expect(provider.calls).toBe(2);
+});
+
+it('requires a visitor choice before routing a partial GPS match using the original receipt', async () => {
+  const calls = provider.calls;
+  modelReading = [
+    {
+      functionCall: {
+        name: 'read_photo_labels',
+        args: {
+          labels: ['323', '98'].map((text) => ({
+            text,
+            kind: 'room',
+            clarity: 'clear',
+            placement: 'door',
+            viewId: 'nw',
+          })),
+          observations: ['Two sign readings were reported.'],
+        },
+      },
+    },
+  ];
+  try {
+    const s: Session = await (await post('', {})).json();
+    const path = '/' + s.id;
+    const evidence: Session = await (await post(path + '/photo/evidence', photoInput())).json();
+    const gps = {
+      buildings: ['SE12'],
+      accuracy: 6,
+      capturedAt: Date.now(),
+      sourceSha256: locationCatalogue().geographicSource.sha256,
+    };
+    const located: Session = await (
+      await post(path + '/photo/location', {
+        ...locationInput(evidence.photoEvidence!.id, evidence.revision),
+        gps,
+      })
+    ).json();
+    expect(located.campusLocation).toBeNull();
+    const [candidate] = located.campusAnalysis!.candidates;
+    expect(candidate).toMatchObject({ anchorLabel: '323', planId: 'SE12-F3-p1' });
+    const q = { candidateId: candidate.id, destination: 'SW03 1710', revision: located.revision };
+    expect((await post(path + '/navigation', q)).status).toBe(409);
+    const selected: Session = await (
+      await post(path + '/actions', {
+        requestId: randomUUID(),
+        revision: located.revision,
+        action: { type: 'confirm-campus-region', candidateId: candidate.id },
+      })
+    ).json();
+    const result = await (
+      await post(path + '/navigation', { ...q, revision: selected.revision })
+    ).json();
+    expect(result.status).toBe('choose-origin');
+    expect(result.origins).toHaveLength(2);
+    expect(provider.calls - calls).toBe(1);
+  } finally {
+    modelReading = labelReading('302');
+  }
 });

@@ -131,9 +131,16 @@ export type CampusPhotoAnalysis = {
     | 'openai-photo-floorplan'
     | 'groq-photo-floorplan'
     | 'photo-label-retrieval';
-  gpsStatus?: 'used' | 'conflict' | 'outside-pilot' | 'not-used';
+  gpsStatus?: 'used' | 'conflict' | 'outside-pilot' | 'not-used' | 'building-only';
+  deviceBuildings?: string[];
   evidenceId: string;
-  labelRetrieval: { indexedLabels: number; exactMatchPlanIds: string[]; clearLabels: string[] };
+  labelRetrieval: {
+    indexedLabels: number;
+    exactMatchPlanIds: string[];
+    clearLabels: string[];
+    unmatchedLabels?: string[];
+    partial?: boolean;
+  };
   usedFallbackModel: boolean;
   generatedAt: string;
 };

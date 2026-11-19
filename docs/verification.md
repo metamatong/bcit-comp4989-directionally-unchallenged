@@ -1,5 +1,13 @@
 # Verification record
 
+## Reported sign conflict and SE12 floor transfers, November 18, 2026
+
+The foreground plaque in the supplied photo reads **323**. The screenshot marks **306** on four buildings’ floor plans, including SE12. The additional clear **98** was reported by the teammate. The screenshot does not contain the complete provider response or establish whether a fresh GPS hint arrived.
+
+A deterministic replay against the released resolver produced zero starting candidates for both `323 + 98` and `306 + 98`, even with a fresh SE12 building hint. The old resolver demanded all clear readings on the same page before it applied GPS. The current catalogue has no entry for `98`. The updated resolver offers the supported SE12 floor 3 sign for confirmation, retains the unmatched reading, and prevents routing until selection. An isolated HTTP regression checks this confirmation with a mocked first-stage provider, the original receipt and no second image submission. GPS plus `98` alone identifies only the building.
+
+The released graph had four floor 2–3 stair transfers in SE12. None of their second-floor landing pins had a compiled corridor tie, and the graph had zero internal floor 3–4 transfers. After the user's four A/B confirmations, a clean import of the public revision-45 snapshot routes each three-floor stair chain in both directions. An end-to-end post-extraction check walks from corridor 208Z on floor 2 to corridor 410C on floor 4 via S209, S327 and S418, and returns by the same stairs. The three other floor 2 perimeter approaches remain separate from the indoor corridor network. The stair records have user-confirmation provenance. No live Gemini reproduction or independent campus walk was conducted for this report. Validation passed with 418 unit and API tests, 24 automated desktop and mobile browser tests, the production build and campus data validation.
+
 ## Campus-wide source sample, November 18, 2026
 
 The visitor API returned complete routes for **0 of 5** randomly paired journeys. Sampling used all 3,428 indexed place occurrences in graph `3b4497fbb23af67363a67fc5151ac607f2a0287186c10680299fbb7543babe36` and seed `5872ff95`. All ten occurrences were selected without replacement before any route lookup. All five starts localized with simulated exact sign, building and floor readings. The check used no visitor images or provider calls. These results measure post-extraction routing on real source data.

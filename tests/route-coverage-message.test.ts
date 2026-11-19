@@ -12,6 +12,10 @@ import { locateFromLabels } from '../server/label-localization';
 import { TopologyStore } from '../server/topology';
 import { reviewedNetwork } from '../server/pilot-network';
 import { planVisitorNavigation } from '../server/wayfinding';
+import {
+  StartingPlaceChoices,
+  CampusLocationResults,
+} from '../src/components/CampusLocationResults';
 import { JourneyPanel, StartingPositionNotice } from '../src/components/JourneyPanel';
 import type { CampusLocationCandidate, PhotoEvidence } from '../src/types';
 import type { NavigationResult } from '../src/wayfinding';
@@ -169,4 +173,64 @@ it('retains the photo action for an estimated region containing several reviewed
   await show(candidate, result);
   expect(host.textContent).toContain('Starting point needs a closer match');
   expect(host.textContent).toContain('Try another photo');
+});
+
+it('shows a mismatched reading before a visitor confirms the remaining sign or chooses another photo', async () => {
+  const s = newSession(),
+    stamp = new Date();
+  const evidence: PhotoEvidence = {
+    id: randomUUID(),
+    requestId: randomUUID(),
+    labels: ['323', '98'].map((text) => ({
+      text,
+      kind: 'room',
+      clarity: 'clear',
+      placement: 'door',
+      viewId: 'full',
+    })),
+    observations: ['Three doors are visible.'],
+    readAt: stamp.toISOString(),
+    expiresAt: new Date(+stamp + 300000).toISOString(),
+    usedFallbackModel: false,
+  };
+  s.photoEvidence = evidence;
+  const analysis = locateFromLabels(
+    s,
+    { requestId: randomUUID(), revision: 0, evidenceId: evidence.id },
+    { sessionId: s.id, evidence, fingerprint: 'signs', buildingHint: 'SE12' },
+  );
+  const select = vi.fn(),
+    retake = vi.fn();
+  await act(async () =>
+    root.render(
+      createElement(
+        Fragment,
+        null,
+        createElement(StartingPlaceChoices, {
+          candidates: analysis.candidates,
+          plans: store.plans,
+          partialMessage: analysis.summary,
+          onSelect: select,
+          onRetake: retake,
+          busy: false,
+        }),
+        createElement(CampusLocationResults, {
+          analysis,
+          plans: store.plans,
+          readings: evidence.labels,
+        }),
+      ),
+    ),
+  );
+  const panel = host.querySelector('[aria-label="Starting location choices"]')!;
+  expect(panel.textContent).toContain('98');
+  expect(panel.textContent).toContain('SE12 · Floor 3 · 323');
+  expect(select).not.toHaveBeenCalled();
+  expect(host.querySelector('.campus-results details')?.textContent).toContain(
+    'no floor-plan match',
+  );
+  await act(async () => panel.querySelector<HTMLButtonElement>('.text-button')!.click());
+  expect(retake).toHaveBeenCalledOnce();
+  await act(async () => panel.querySelector<HTMLButtonElement>('.secondary')!.click());
+  expect(select).toHaveBeenCalledWith(analysis.candidates[0].id);
 });

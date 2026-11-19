@@ -324,9 +324,23 @@ export default function App() {
       />
     </>
   );
+  const summaryInRoutePanel =
+    directionsMode &&
+    analysis?.method === 'photo-label-retrieval' &&
+    !routeCandidate &&
+    (!analysis.candidates.length || analysis.labelRetrieval.partial === true);
   const photoResults = analysis && (
     <>
-      <CampusLocationResults analysis={analysis} plans={plans} />
+      <CampusLocationResults
+        analysis={analysis}
+        showSummary={!summaryInRoutePanel}
+        plans={plans}
+        readings={
+          session.photoEvidence?.id === analysis.evidenceId
+            ? session.photoEvidence?.labels
+            : undefined
+        }
+      />
     </>
   );
   const updateDestination = analysis &&
@@ -437,14 +451,24 @@ export default function App() {
               ) : analysis?.candidates.length ? (
                 <StartingPlaceChoices
                   candidates={analysis.candidates}
+                  partialMessage={analysis.labelRetrieval.partial ? analysis.summary : undefined}
+                  onRetake={removePhoto}
                   plans={plans}
                   busy={busy}
                   onSelect={(id) => void send({ type: 'confirm-campus-region', candidateId: id })}
                 />
               ) : (
                 <section className="journey-panel">
-                  <h2>Couldn’t find your starting point</h2>
-                  <p>Try another photo showing a nearby room sign, doorway, or hallway junction.</p>
+                  <h2>
+                    {analysis?.gpsStatus === 'building-only'
+                      ? 'Starting building only'
+                      : 'Couldn’t find your starting point'}
+                  </h2>
+                  <p>
+                    {analysis?.method === 'photo-label-retrieval'
+                      ? analysis.summary
+                      : 'Try another photo showing a nearby room sign, doorway, or hallway junction.'}
+                  </p>
                   <button
                     className="primary full-width"
                     onClick={() => {

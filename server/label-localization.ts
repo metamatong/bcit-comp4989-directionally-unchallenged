@@ -1,13 +1,19 @@
-/** Resolve first-stage structured evidence against exact source records, without images or model calls. */
+/** Resolve the current image-free receipt to source occurrences and optional visitor choices. */
 import { randomUUID } from 'node:crypto';
 import { z } from 'zod';
-import type { CampusLocationCandidate, CampusPhotoAnalysis, Session } from '../src/types';
+import type {
+  CampusLocationCandidate,
+  CampusPhotoAnalysis,
+  PhotoEvidence,
+  Session,
+} from '../src/types';
 import { labelKey, pilotEvidence } from './pilot-evidence';
-import { floorGraphs, sourceBuilding, landmarkKind } from './floor-graph';
+import { floorGraphs, sourceBuilding } from './floor-graph';
 import { PhotoEvidenceError, type PhotoEvidenceRecord } from './photo-evidence';
 import { visualPlans } from './visual-data';
 import { locationCatalogue } from './geolocation';
 import { logActivity } from './session';
+import { resolveStartingSigns, type StartMatch, type DeviceScope } from './starting-place-evidence';
 
 export const labelLocationRequestSchema = z
   .object({
@@ -38,6 +44,131 @@ export function selectLocatedCandidate(session: Session, candidateId: string) {
   session.notice = `Selected the estimated area on ${candidate.building}, floor ${candidate.floor}.`;
 }
 
+function deviceScope(gps: LabelLocationRequest['gps']): DeviceScope | undefined {
+  if (!gps) return;
+  const age = Date.now() - gps.capturedAt;
+  if (age < -5000 || age > 30000)
+    throw new PhotoEvidenceError('The device reading expired. Request a fresh location reading.');
+  const catalogue = locationCatalogue();
+  if (gps.sourceSha256 !== catalogue.geographicSource.sha256)
+    throw new PhotoEvidenceError(
+      'The device-location map changed. Reload before requesting location.',
+    );
+  return {
+    buildings: gps.buildings,
+    footprints: new Set(catalogue.buildings.map((b) => b.building)),
+  };
+}
+
+function observations(evidence: PhotoEvidence) {
+  const values = [...evidence.observations],
+    f = evidence.features;
+  if (f?.visibleDoorCount != null)
+    values.push(`${f.visibleDoorCount} visible doorway(s) reported in the photo.`);
+  if (f?.windowsSide && f.windowsSide !== 'unknown')
+    values.push(`Window observation relative to the photo is ${f.windowsSide}.`);
+  if (f?.corridorShape && f.corridorShape !== 'unknown')
+    values.push(`The observed corridor shape is ${f.corridorShape}.`);
+  return values;
+}
+
+type Resolution = ReturnType<typeof resolveStartingSigns>;
+function candidateFor(
+  match: StartMatch,
+  references: Resolution['references'],
+): CampusLocationCandidate {
+  const { floor, place } = match,
+    plan = floor.plan;
+  const doors =
+    pilotEvidence()
+      .find((p) => p.plan.id === plan.id)
+      ?.drawnDoors.filter((d) => labelKey(d.room) === place.label) ?? [];
+  const door =
+    doors.length === 1 && floor.places.filter((p) => p.label === place.label).length === 1
+      ? doors[0]
+      : undefined;
+  return {
+    id: randomUUID(),
+    planId: plan.id,
+    sourcePlaceId: place.id,
+    sourceRef: plan.sourceRef,
+    building: plan.building,
+    floor: plan.floor,
+    page: plan.page,
+    confidence: 'low',
+    verification: 'unverified-ai-hypothesis',
+    anchorLabel: place.label,
+    bounds: door?.corridorBounds ?? null,
+    ...(door
+      ? {
+          doorwayVicinity: {
+            doorId: door.id,
+            room: door.room,
+            point: door.point,
+            sourceSha256: plan.sourceSha256,
+          },
+        }
+      : {}),
+    sourceLabels: references.filter(
+      (ref) => ref.planId === plan.id && (ref.label !== place.label || ref.id === place.id),
+    ),
+    labelMatches: match.matched,
+    matches: [
+      {
+        kind: 'printed-label',
+        photoFeature: 'Read ' + match.observed.text + ' in the photo.',
+        planFeature: 'Matching sign on ' + plan.building + ', floor ' + plan.floor + '.',
+      },
+    ],
+    limitations: [
+      'The exact camera position and heading are unknown.',
+      ...(match.unmatched.length
+        ? [
+            'Other photo readings without a match on this floor: ' +
+              match.unmatched.join(', ') +
+              '.',
+          ]
+        : []),
+    ],
+  };
+}
+function describe(result: Resolution, candidates: CampusLocationCandidate[], device?: DeviceScope) {
+  const names = device?.buildings.join(', ');
+  if (candidates.length && result.partial) {
+    const gaps = result.unmappedLabels.length
+      ? `No floor-plan match for ${result.unmappedLabels.map((l) => '“' + l + '”').join(', ')}.`
+      : 'The signs do not all match the same floor plan.';
+    return { summary: gaps + ' Confirm the sign beside you to start.', clarification: '' };
+  }
+  if (candidates.length === 1) {
+    const c = candidates[0];
+    return {
+      summary: `The extracted label ${c.anchorLabel} matches ${c.building}, floor ${c.floor}.`,
+      clarification: '',
+    };
+  }
+  if (candidates.length)
+    return {
+      summary: 'Several places match the signs in this photo. Select your starting location.',
+      clarification: '',
+    };
+  if (result.gpsStatus === 'building-only')
+    return {
+      summary: `Device location points to ${names}. A floor and starting place could not be established from the signs.`,
+      clarification: 'Use a closer photo of the room or stair sign beside you.',
+    };
+  if (result.gpsStatus === 'conflict' || result.gpsStatus === 'outside-pilot')
+    return {
+      summary: 'The device reading does not agree with the photo matches.',
+      clarification: 'Check that you are at the photographed location or use a clearer sign.',
+    };
+  return {
+    summary: 'The extracted labels do not identify a starting place on the supplied floor plans.',
+    clarification:
+      'Use a photo showing the room sign beside you. Enable device location only while standing where the photo was taken.',
+  };
+}
+
 export function locateFromLabels(
   session: Session,
   input: LabelLocationRequest,
@@ -52,208 +183,45 @@ export function locateFromLabels(
     throw new PhotoEvidenceError('Read the current photo before locating its labels.');
   if (Date.parse(record.evidence.expiresAt) <= Date.now())
     throw new PhotoEvidenceError('Photo evidence expired. Read the photo again.');
-  const started = performance.now();
-  const evidence = record.evidence;
-  const roomReadings = evidence.labels.filter(
-    (label) => !label.kind || label.kind === 'room' || label.kind === 'landmark',
-  );
-  const clearRooms = roomReadings.filter(
-    (label) => label.clarity === 'clear' && label.placement !== 'directional-sign',
-  );
-  const buildingLabels = evidence.labels.filter(
-    (label) =>
-      label.kind === 'building' &&
-      label.clarity === 'clear' &&
-      label.placement !== 'directional-sign',
-  );
-  const buildings = new Set<string>(
-    buildingLabels.flatMap((label) => {
-      const building = sourceBuilding(label.text);
-      return building ? [building] : [];
-    }),
-  );
-  const floors = new Set(
-    evidence.labels
-      .filter(
-        (label) =>
-          label.kind === 'floor' &&
-          label.clarity === 'clear' &&
-          label.placement !== 'directional-sign',
-      )
-      .map((label) => labelKey(label.text)),
-  );
-  const eligible = visualPlans.filter(
-    (plan) => !record.buildingHint || plan.building === sourceBuilding(record.buildingHint),
-  );
-  const exact = new Set(
-    roomReadings.filter((r) => r.clarity === 'clear').map((r) => labelKey(r.text)),
-  );
-  const landmarkLabels = new Set(
-    roomReadings
-      .filter((r) => r.kind === 'landmark' && r.clarity === 'clear')
-      .map((r) => labelKey(r.text)),
-  );
-  const signMatches = (place: { label: string; kind: string }, sign: string) =>
-    place.label === sign || (landmarkLabels.has(sign) && landmarkKind(sign) === place.kind);
-  const floorMatches = (planId: string, sign: string) =>
-    floorGraphs()
-      .byId.get(planId)!
-      .places.some((p) => signMatches(p, sign));
-  const references = eligible.flatMap((plan) =>
-    floorGraphs()
-      .byId.get(plan.id)!
-      .places.filter((place) => [...exact].some((sign) => signMatches(place, sign)))
-      .map((place) => ({
-        id: place.id,
-        label: place.label,
-        planId: plan.id,
-        sourceSha256: plan.sourceSha256,
-        bounds: place.bounds,
-      })),
-  );
-  let planIds = eligible
-    .filter(
-      (plan) =>
-        clearRooms.length > 0 &&
-        clearRooms.every((reading) => floorMatches(plan.id, labelKey(reading.text))) &&
-        (!buildingLabels.length || (buildings.size === 1 && buildings.has(plan.building))) &&
-        (!floors.size || (floors.size === 1 && floors.has(plan.floor))),
-    )
-    .map((plan) => plan.id);
-  let gpsStatus: NonNullable<CampusPhotoAnalysis['gpsStatus']> = 'not-used';
-  if (input.gps) {
-    const age = Date.now() - input.gps.capturedAt;
-    if (age < -5000 || age > 30000)
-      throw new PhotoEvidenceError('The device reading expired. Request a fresh location reading.');
-    const geographic = locationCatalogue();
-    if (input.gps.sourceSha256 !== geographic.geographicSource.sha256)
-      throw new PhotoEvidenceError(
-        'The device-location map changed. Reload before requesting location.',
-      );
-    const known = new Set(geographic.buildings.map((b) => b.building));
-    const reported = new Set(input.gps.buildings);
-    const narrowed = planIds.filter((id) => {
-      const building = floorGraphs().byId.get(id)!.plan.building;
-      return reported.has(building) || !known.has(building);
-    });
-    gpsStatus =
-      !input.gps.buildings.length && narrowed.length
-        ? 'not-used'
-        : !input.gps.buildings.length
-          ? 'outside-pilot'
-          : planIds.length && !narrowed.length
-            ? 'conflict'
-            : 'used';
-    planIds = narrowed;
-  }
-  const atDoor = clearRooms.filter((label) => label.placement === 'door');
-  const anchorLabels = new Set(
-    (atDoor.length
-      ? atDoor
-      : clearRooms.filter((label) => label.placement !== 'directional-sign')
-    ).map((label) => labelKey(label.text)),
-  );
-
-  const candidates: CampusLocationCandidate[] = [];
-  if (anchorLabels.size && !(atDoor.length && evidence.features?.visibleDoorCount === 0)) {
-    for (const plan of eligible.filter((p) => planIds.includes(p.id))) {
-      const floor = floorGraphs().byId.get(plan.id)!;
-      const matches = floor.places.filter((place) =>
-        [...anchorLabels].some((sign) => signMatches(place, sign)),
-      );
-      for (const match of matches) {
-        // A hand-transcribed doorway must also identify this particular occurrence.
-        const anchor = match.label;
-        const doors =
-          pilotEvidence()
-            .find((p) => p.plan.id === plan.id)
-            ?.drawnDoors.filter((d) => labelKey(d.room) === anchor) ?? [];
-        const door =
-          matches.filter((p) => p.label === anchor).length === 1 && doors.length === 1
-            ? doors[0]
-            : undefined;
-        candidates.push({
-          id: randomUUID(),
-          planId: plan.id,
-          sourcePlaceId: match.id,
-          sourceRef: plan.sourceRef,
-          building: plan.building,
-          floor: plan.floor,
-          page: plan.page,
-          confidence: 'low',
-          verification: 'unverified-ai-hypothesis',
-          anchorLabel: anchor,
-          bounds: door?.corridorBounds ?? null,
-          ...(door
-            ? {
-                doorwayVicinity: {
-                  doorId: door.id,
-                  room: door.room,
-                  point: door.point,
-                  sourceSha256: plan.sourceSha256,
-                },
-              }
-            : {}),
-          sourceLabels: references.filter(
-            (ref) => ref.planId === plan.id && (ref.label !== anchor || ref.id === match.id),
-          ),
-          labelMatches: clearRooms.map((r) => ({
-            observedLabel: r.text,
-            planLabel: signMatches(match, labelKey(r.text)) ? match.label : r.text,
-          })),
-          matches: [
-            {
-              kind: 'printed-label',
-              photoFeature: 'Read ' + anchor + ' in the photo.',
-              planFeature: 'Matching label on ' + plan.building + ', floor ' + plan.floor + '.',
-            },
-          ],
-          limitations: [
-            'The photograph identifies a signed place. Exact camera position and heading are unknown.',
-          ],
-        });
-      }
-    }
-  }
-  const candidate = candidates.length === 1 ? candidates[0] : undefined;
-  const summary = candidate
-    ? `The extracted label ${candidate.anchorLabel} matches ${candidate.building}, floor ${candidate.floor}.`
-    : candidates.length
-      ? 'Several places match the signs in this photo. Select your starting location.'
-      : gpsStatus === 'conflict' || gpsStatus === 'outside-pilot'
-        ? 'The device reading does not agree with the photo matches.'
-        : 'The extracted labels do not identify a starting place on the supplied floor plans.';
-  const observations = [...evidence.observations];
-  if (evidence.features?.visibleDoorCount != null)
-    observations.push(
-      `${evidence.features.visibleDoorCount} visible doorway(s) reported in the photo.`,
+  const started = performance.now(),
+    evidence = record.evidence,
+    device = deviceScope(input.gps);
+  const result = resolveStartingSigns(evidence.labels, record.buildingHint, device);
+  const contradictoryDoorCount =
+    evidence.features?.visibleDoorCount === 0 &&
+    evidence.labels.some(
+      (s) =>
+        (!s.kind || s.kind === 'room' || s.kind === 'landmark') &&
+        s.clarity === 'clear' &&
+        s.placement === 'door',
     );
-  if (evidence.features?.windowsSide && evidence.features.windowsSide !== 'unknown')
-    observations.push(
-      `Window observation relative to the photo is ${evidence.features.windowsSide}.`,
-    );
-  if (evidence.features?.corridorShape && evidence.features.corridorShape !== 'unknown')
-    observations.push(`The observed corridor shape is ${evidence.features.corridorShape}.`);
+  const candidates = contradictoryDoorCount
+    ? []
+    : result.matches.map((m) => candidateFor(m, result.references));
+  if (!candidates.length && result.gpsStatus === 'used') result.gpsStatus = 'building-only';
+  const candidate = !result.partial && candidates.length === 1 ? candidates[0] : undefined;
+  const { summary, clarification } = describe(result, candidates, device);
   const analysis: CampusPhotoAnalysis = {
     requestId: input.requestId,
     outcome: candidates.length ? 'candidates' : 'insufficient_evidence',
-    observations,
+    observations: observations(evidence),
     summary,
-    clarification: candidates.length
-      ? ''
-      : 'Use a photo showing the room sign beside you. Enable device location only while standing where the photo was taken.',
+    clarification,
     candidates,
-    referenceLabels: references,
+    referenceLabels: result.references,
     atlasPlanCount: 0,
-    detailedPlanIds: planIds,
+    detailedPlanIds: result.planIds,
     buildingHint: record.buildingHint ?? null,
     method: 'photo-label-retrieval',
-    gpsStatus,
+    gpsStatus: result.gpsStatus,
+    deviceBuildings: device?.buildings,
     evidenceId: evidence.id,
     labelRetrieval: {
       indexedLabels: floorGraphs().places.length,
-      exactMatchPlanIds: [...new Set(references.map((r) => r.planId))],
-      clearLabels: [...exact],
+      clearLabels: result.clearLabels,
+      exactMatchPlanIds: result.exactMatchPlanIds,
+      unmatchedLabels: result.unmappedLabels,
+      partial: result.partial && candidates.length > 0,
     },
     usedFallbackModel: evidence.usedFallbackModel,
     generatedAt: new Date().toISOString(),
@@ -267,7 +235,9 @@ export function locateFromLabels(
     'locate_from_labels',
     candidate
       ? 'Resolved extracted evidence to a source-linked starting estimate.'
-      : 'Extracted evidence did not identify a unique starting place.',
+      : candidates.length
+        ? 'Offered source matches for visitor confirmation.'
+        : 'The evidence did not establish a starting place.',
     candidate ? [candidate.sourceRef] : [],
     performance.now() - started,
   );

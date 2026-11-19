@@ -3,6 +3,7 @@ import type {
   CampusLocationCandidate,
   CampusPhotoAnalysis,
   PlanLabelReference,
+  PhotoLabelReading,
   VisualPlan,
 } from '../types';
 import { buildingLabel, planLabel } from '../topology';
@@ -73,10 +74,14 @@ export function PlanRegion({
 export function CampusLocationResults({
   analysis,
   plans,
+  readings = [],
+  showSummary = true,
 }: {
   analysis: CampusPhotoAnalysis;
+  readings?: PhotoLabelReading[];
+  showSummary?: boolean;
   plans: VisualPlan[];
-  /** Legacy props accepted for old render fixtures; location confirmation is no longer shown. */
+  /** Older evidence panel callers may still pass selection props. Current choices live beside the route. */
   selectedId?: string;
   onConfirm?: (id: string) => void;
   busy?: boolean;
@@ -98,14 +103,30 @@ export function CampusLocationResults({
               ? 'Camera position unresolved'
               : 'No clear match'}
       </h3>
-      <p>{analysis.summary}</p>
+      {showSummary && <p>{analysis.summary}</p>}
       {analysis.gpsStatus === 'used' && (
         <p className="helper">Device building matches were checked against the extracted labels.</p>
       )}
-      {labelBased && analysis.observations.length > 0 && (
+      {labelBased && (readings.length > 0 || analysis.observations.length > 0) && (
         <details>
           <summary>Extracted photo features</summary>
           <ul>
+            {readings.map((reading, index) => (
+              <li key={'reading-' + index}>
+                <strong>{reading.text}</strong> ·{' '}
+                {reading.placement === 'door'
+                  ? 'door sign'
+                  : reading.placement === 'directional-sign'
+                    ? 'direction sign'
+                    : (reading.kind ?? 'sign')}{' '}
+                · read as {reading.clarity}
+                {analysis.labelRetrieval.unmatchedLabels?.includes(
+                  reading.text.normalize('NFKC').trim().toUpperCase(),
+                )
+                  ? ' · no floor-plan match'
+                  : ''}
+              </li>
+            ))}
             {analysis.observations.map((observation, index) => (
               <li key={index}>{observation}</li>
             ))}
@@ -199,15 +220,20 @@ export function StartingPlaceChoices({
   plans,
   onSelect,
   busy,
+  partialMessage,
+  onRetake,
 }: {
   candidates: CampusLocationCandidate[];
   plans: VisualPlan[];
   onSelect: (id: string) => void;
+  partialMessage?: string;
+  onRetake?: () => void;
   busy: boolean;
 }) {
   return (
     <section className="journey-panel" aria-label="Starting location choices">
-      <h2>Which place are you at?</h2>
+      <h2>{partialMessage ? 'Which sign are you beside?' : 'Which place are you at?'}</h2>
+      {partialMessage && <p>{partialMessage}</p>}
       {plans.flatMap((plan) => {
         const choices = candidates.filter((c) => c.planId === plan.id);
         if (!choices.length) return [];
@@ -246,6 +272,11 @@ export function StartingPlaceChoices({
           </div>
         );
       })}
+      {partialMessage && onRetake && (
+        <button className="text-button" disabled={busy} onClick={onRetake}>
+          My sign shows a different number
+        </button>
+      )}
     </section>
   );
 }

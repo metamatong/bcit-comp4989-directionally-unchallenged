@@ -175,6 +175,20 @@ it.each([false, true, 'denied'] as const)(
       expect(host.textContent).toContain('Finding your starting place stopped');
       expect(labelReads).toBe(1);
       await click(button('Try again'));
+      if (useGps !== true) {
+        // This sign is printed in multiple buildings. The visitor chooses the SE12 occurrence.
+        const choice = () =>
+          host.querySelector<HTMLButtonElement>(
+            '[aria-label="Starting location choices"] button',
+          ) &&
+          [
+            ...host.querySelectorAll<HTMLButtonElement>(
+              '[aria-label="Starting location choices"] button',
+            ),
+          ].find((b) => b.textContent?.includes('SE12 · Floor 3 · 302'));
+        await wait(() => expect(choice()).toBeTruthy());
+        await click(choice()!);
+      }
       await wait(() => expect(host.querySelector('.route-directions')).not.toBeNull());
       expect(labelReads).toBe(1);
       expect(host.textContent).toContain('Starting area estimated');
@@ -185,24 +199,29 @@ it.each([false, true, 'denied'] as const)(
         .filter((body) => body.evidenceId);
       expect(locationRequests.every((body) => Boolean(body.gps) === (useGps === true))).toBe(true);
       expect(provider.calls).toBe(1);
-      const transferEdge = store.read().edges.find((edge) => edge.kind === 'elevator')!;
-      const reviewTransfer = (status: 'verified' | 'rejected') =>
-        store.mutate({
-          revision: store.read().revision,
-          command: {
-            type: 'review',
-            target: 'edge',
-            id: transferEdge.id,
-            status,
-            reviewer: 'DOM regression',
-            note: 'Isolated route recovery check.',
-          },
-        });
-      reviewTransfer('rejected');
+      // Withdraw all interbuilding passages in this fixture; the real map has alternate stairs.
+      const crossings = store
+        .read()
+        .edges.filter((e) => e.kind === 'building-link' || e.kind === 'outdoor');
+      const reviewCrossings = (status: 'verified' | 'rejected') => {
+        for (const crossing of crossings)
+          store.mutate({
+            revision: store.read().revision,
+            command: {
+              type: 'review',
+              target: 'edge',
+              id: crossing.id,
+              status,
+              reviewer: 'DOM regression',
+              note: 'Isolated route recovery check.',
+            },
+          });
+      };
+      reviewCrossings('rejected');
       await click(button('Recheck current route'));
       await wait(() => expect(button('Retry route')).toBeDefined());
-      expect(host.textContent).toContain('continuous reviewed walking route');
-      reviewTransfer('verified');
+      expect(host.textContent).toContain('continuous route between these buildings');
+      reviewCrossings('verified');
       await click(button('Retry route'));
       await wait(() => expect(host.querySelector('.route-directions')).not.toBeNull());
       expect(requestBodies.filter((body) => body.includes('"image":'))).toHaveLength(1);
@@ -211,8 +230,8 @@ it.each([false, true, 'denied'] as const)(
       for (const label of [
         'Passage to SW03',
         'Passage to SE12',
-        'East elevator at 3696',
-        'East elevator at 2696',
+        'S370 · beside lounge 3704',
+        'S270 · beside lounge 2704',
       ])
         expect(result.textContent).toContain(label);
       expect(result.textContent).not.toMatch(/\p{Script=Hangul}/u);
@@ -221,7 +240,7 @@ it.each([false, true, 'denied'] as const)(
       ).toEqual(['SE12 · Floor 3', 'SW03 · Floor 3', 'SW03 · Floor 2']);
       const overview = result.querySelector('.route-overview')!;
       expect(overview.textContent).toBe(
-        '302 · window-side corridor door → Connecting passage to SW03 · Floor 3 → East elevator at 3696 · corridor 3600 (Floor 3 → 2) → 2082 · 2000 corridor door',
+        '302 · window-side corridor door → Connecting passage to SW03 · Floor 3 → S370 · beside lounge 3704 (Floor 3 → 2) → 2082 · 2000 corridor door',
       );
       const stack = result.querySelector('.route-map-stack')!;
       expect(result.querySelectorAll('.route-overview, .route-map-stack')).toHaveLength(2);
@@ -232,8 +251,8 @@ it.each([false, true, 'denied'] as const)(
         [...stack.querySelectorAll('.pin-legend')].map((legend) => legend.textContent),
       ).toEqual([
         'AStart · 302 · window-side corridor doorBContinue at · Passage to SW03',
-        'AEnter · Passage to SE12BContinue at · East elevator at 3696 · corridor 3600',
-        'AEnter · East elevator at 2696 · corridor 2600BDestination · 2082 · 2000 corridor door',
+        'AEnter · Passage to SE12BContinue at · S370 · beside lounge 3704',
+        'AEnter · S270 · beside lounge 2704BDestination · 2082 · 2000 corridor door',
       ]);
       expect(result.querySelectorAll('[data-walking-line=true]')).toHaveLength(3);
       const mapViewBoxes = () =>
@@ -283,12 +302,12 @@ it.each([false, true, 'denied'] as const)(
       expect(host.querySelector('.route-directions')).toBeNull();
       await click(button('GO to SW03 2458'));
       await wait(() =>
-        expect(host.querySelector('.journey-panel [role=status]')?.textContent).toContain(
-          'No matching destination',
-        ),
+        expect(host.querySelector('.journey-panel h2')?.textContent).toBe('Destination not found'),
       );
       expect(provider.calls).toBe(1);
-      expect(requestBodies.join('\n')).not.toContain('confirm-campus-region');
+      expect(requestBodies.filter((body) => body.includes('confirm-campus-region'))).toHaveLength(
+        useGps === true ? 0 : 1,
+      );
       expect(requestBodies.join('\n')).not.toMatch(
         /"(?:latitude|longitude|receivedAt|deviceReading|locationCatalogue)"/,
       );

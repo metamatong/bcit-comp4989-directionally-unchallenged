@@ -55,6 +55,19 @@ For the SE12 elevator inquiry, T records a report that the elevator serves both 
 
 The short steps between the SW03 lounge and hall, SE12 S203 marked “down” on floor 2, and SW03 S299 in the annex lack a matching full floor 2–3 connection on these sheets. Operational status, accessibility and travel distance need their own evidence.
 
+## SE12 stairs across floors 2, 3 and 4
+
+Revision 45 records the user’s November 18 confirmation of all four marked floor 3–4 pairs in both directions. Each new transfer uses the existing approved floor 3 node from the floor 2–3 review. Its floor 4 point was marked on the fourth-floor drawing. The records preserve the two source hashes, the marks, the direction and the review history.
+
+| Floor 2 | Shared floor 3 landing | Floor 4 | Floor 4 A/B review |
+|---|---|---|---|
+| S200 | S300 | S400 | [By corridor 402C](http://127.0.0.1:3000/internal/topology?candidate=se12-f3-f4-s300-s400) |
+| S202 | S313 | S413 | [By corridor 407C](http://127.0.0.1:3000/internal/topology?candidate=se12-f3-f4-s313-s413) |
+| S209 | S327 | S418 | [Beside office 419](http://127.0.0.1:3000/internal/topology?candidate=se12-f3-f4-s327-s418) |
+| S228 | S328 | S428 | [Beside electrical room 418G](http://127.0.0.1:3000/internal/topology?candidate=se12-f3-f4-s328-s428) |
+
+A walk starting in corridor 208Z can enter S209 and reach the corridor network on floors 3 and 4. On the second-floor sheet, S200, S202 and S228 sit in separate perimeter stair enclosures. Their vertical transfers are approved. A route from another room to one of those landings still requires a continuous mapped approach on that floor.
+
 ## Confirmed route to SW03 1710
 
 The user clarified the two-floor descent, identified first-floor S160 as A, and confirmed that both marked 1710 doors B (lobby 1602) and C (corridor 1700) are usable. Revision 41 adds the third-floor passage-to-S360 approach, S260-to-S160 descent, and separate approaches to both room doors. The S360/S260 transfer was already reviewed. These new records authorize the described travel toward 1710; reverse travel was not inferred.

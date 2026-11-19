@@ -66,7 +66,7 @@ export class CampusJourney {
         .sort((a, b) => a.d - b.d);
       if (candidates.length && candidates[0].d <= 18) usedCells.add(candidates[0].cell);
     }
-    if (place.kind === 'stairs' || place.kind === 'elevator') {
+    if (uniqueOccurrence && (place.kind === 'stairs' || place.kind === 'elevator')) {
       for (const node of this.map.nodes) {
         const prefix = node.label.split(' · ')[0];
         if (
@@ -76,7 +76,12 @@ export class CampusJourney {
         )
           continue;
         const landing = this.search.reviewed(node.id);
-        if (landing) choices.push(landing);
+        if (landing) {
+          choices.push(landing);
+          // The gridded corridor approach and its live landing describe the same sign.
+          const cell = floor.approachAt(node.point, node)?.cell;
+          if (cell !== undefined) usedCells.add(cell);
+        }
       }
     }
     for (const cell of place.cells)

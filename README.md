@@ -40,8 +40,10 @@ The Git-connected Vercel project builds the frontend and the visitor API with `n
 1. Upload or capture a photo containing a nearby room sign, then tap **Next**.
 2. Enter a destination such as `SW03 2605`. Optionally check **Use device location with this photo** while standing where it was taken. The checkbox starts no request until submission.
 3. Tap **Go**. The configured provider extracts exact labels, sign placement, visible door count, window side and corridor shape in the first stage. The following location request sends only the evidence ID and optional GPS-derived building candidates. Raw device coordinates stay in the browser.
-4. Source lookup selects a unique starting estimate or offers matching places. Conflicting labels, directional-only signs or a GPS contradiction produce an explanation. Scene features are retained as observations, and doorway placement helps choose the relevant label. Unavailable window/count annotations do not imply a spatial match.
+4. Source lookup selects a unique, fully supported starting estimate or offers matching signs to confirm. An extra reading missing from the plan keeps the supported sign available for confirmation. GPS alone can identify a building. A starting floor and place still require source evidence. Scene features are retained as observations, and doorway placement helps choose the relevant label. Unavailable window/count annotations do not imply a spatial match.
 5. The app resolves the destination and calculates a route over the floor walking grids and current reviewed connections. **Walking directions** shows one arrow-separated route overview, followed by a continuous stack of maps with A/B descriptions. Floor changes appear in the overview; one zoom control applies to all maps. Photo bytes, floor-plan images and destinations are sent to no later AI stage.
+
+In SE12, four confirmed stairways connect floors 2, 3 and 4 in both directions. Corridor 208Z on floor 2 connects through S209, S327 and S418 to the fourth-floor corridor network. [SE12 stair pairs and approach coverage](docs/topology-editor.md#se12-stairs-across-floors-2-3-and-4)
 
 SE12 302 to SW03 2605 enters SW03 through the east third-floor passage beside S360 and shaft 3696, follows the short approach to the east elevator, and continues on floor 2. Reviewed network revision 41 also places the floor-2 outdoor entrance beside 2696/S260, with short access to the elevator and corridor 2600; it no longer uses the doorway between 2063 and 2080. The corrected fourth-floor east passage is confirmed for both directions between SE12 and SW03. The east elevator and S360/S460 stair transfer between SW03 floors 3 and 4 are also confirmed in both directions. The visitor planner can join these records to the public corridor surfaces on the same sheet. `SE12 302 → SW03 1710` now follows the east stairs from floor 3 through floor 2 to S160 on floor 1. Both the lobby-1602 doorway and corridor-1700 doorway have reviewed arrival approaches in the confirmed travel direction toward 1710. `SW03 2604` is a distinct vestibule whose source label exists but has no reviewed arrival approach. The planner also checks drawing-derived approaches. Its costs express travel on the floor grid and transfers. Physical distance and accessibility remain unmeasured.
 
@@ -107,7 +109,7 @@ mvp/
 │   ├── provider.ts, provider-config.ts, provider-budget.ts, provider-timing.ts, provider-metrics.ts
 │   ├── openai-provider.ts, openai-input.ts, openai-schema.ts, openai-response.ts, openai-stream.ts
 │   ├── floor-graph.ts, floor-search.ts, floor-coverage.ts, campus-journey.ts
-│   ├── label-localization.ts, session.ts
+│   ├── label-localization.ts, starting-place-evidence.ts, session.ts
 │   ├── photo-localization.ts, photo-plan-context.ts  Legacy source-comparison utilities
 │   ├── photo-evidence.ts, photo-media.ts, photo-grounding.ts, photo-doorways.ts, room-labels.ts
 │   ├── topology.ts, topology-api.ts, routing.ts, visitor-paths.ts
@@ -131,7 +133,7 @@ mvp/
 ├── scripts/
 │   ├── prepare_maps.py, prepare_visual_maps.py, prepare_pilot_labels.py
 │   ├── export-pilot-network.ts, query-spatial.ts
-│   ├── floor_graph/              Offline PDF label, doorway and walking-surface compiler
+│   ├── floor_graph/              Offline PDF labels, walking surfaces and landing_access.py for stair doors
 │   ├── sample-floor-routes.ts, prepare-geolocation.ts
 │   ├── validate-data.ts, build-vercel.ts, summarize-ai-metrics.ts
 │   └── render_proposal.py
@@ -148,6 +150,7 @@ mvp/
 │   ├── topology-candidates.test.ts, topology-english.test.ts, wayfinding.test.ts, wayfinding-api.test.ts
 │   ├── ai-wayfinding.test.ts, wayfinding-fixtures.ts, route-geometry.test.ts, route-recovery.test.ts
 │   ├── reviewed-navigation.test.ts, label-localization.test.ts, floor-four-passage.test.ts
+│   ├── se12-floor-transfers.test.ts
 │   ├── sw03-1710-route.test.ts, route-coverage-message.test.ts
 │   └── e2e/journey.spec.ts, photo.spec.ts
 ├── docs/

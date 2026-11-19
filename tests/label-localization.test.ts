@@ -88,7 +88,7 @@ it.each(['3021', '0302', '302A'])('preserves the complete identifier %s', (text)
 it('abstains on conflicting, unknown, uncertain and directional-only readings', () => {
   for (const labels of [
     [label('302'), label('2605')],
-    [label('302'), label('99999')],
+    [label('99999')],
     [{ ...label('302'), clarity: 'uncertain' as const }],
     [label('302', 'directional-sign')],
   ])
@@ -166,4 +166,60 @@ it('derives a building hint on-device without transmitting latitude or longitude
   expect(() => gpsBuildingHint({ ...reading, timestamp: Date.now() - 60000 }, catalogue)).toThrow(
     'fresh',
   );
+});
+
+it.each(['323', '306'])(
+  'preserves a grounded %s beside a misread sign, with or without GPS',
+  (room) => {
+    for (const buildings of [undefined, hint(['SE12'])]) {
+      const { result, session } = locate([label(room), label('98')], buildings);
+      expect(session.campusLocation).toBeNull();
+      expect(session.providerCalls).toBe(0);
+      const match = result.candidates.find((c) => c.planId === 'SE12-F3-p1');
+      expect(match?.labelMatches).toEqual([{ observedLabel: room, planLabel: room }]);
+      expect(result.labelRetrieval).toMatchObject({
+        clearLabels: [room, '98'],
+        unmatchedLabels: ['98'],
+        partial: true,
+      });
+      expect(result.summary).toContain('98');
+      if (buildings) {
+        expect(result.candidates).toHaveLength(1);
+        expect(result.referenceLabels?.every((r) => r.planId === 'SE12-F3-p1')).toBe(true);
+      } else expect(result.candidates.length).toBeGreaterThan(1);
+    }
+  },
+);
+
+it('offers a supported contextual sign for confirmation when the only door reading is absent from the catalogue', () => {
+  const { result, session } = locate([label('306', 'other'), label('98', 'door')], hint(['SE12']));
+  expect(session.campusLocation).toBeNull();
+  expect(result.candidates.map((c) => c.anchorLabel)).toEqual(['306']);
+  expect(result.labelRetrieval.partial).toBe(true);
+});
+
+it('keeps a device building when the only sign is unsupported, without selecting a floor', () => {
+  const { result, session } = locate([label('98')], hint(['SE12']));
+  expect(result).toMatchObject({
+    outcome: 'insufficient_evidence',
+    gpsStatus: 'building-only',
+    deviceBuildings: ['SE12'],
+    candidates: [],
+    referenceLabels: [],
+  });
+  expect(result.summary).toContain('SE12');
+  expect(session.campusLocation).toBeNull();
+});
+
+it('does not choose a background sign when a grounded doorway or explicit building contradicts the GPS hint', () => {
+  const building: PhotoLabelReading = { ...label('SW03'), kind: 'building' };
+  for (const signs of [
+    [label('2605'), label('323', 'other')],
+    [label('323'), building],
+  ]) {
+    const { result, session } = locate(signs, hint(['SE12']));
+    expect(result.candidates).toEqual([]);
+    expect(result.gpsStatus).toBe('conflict');
+    expect(session.campusLocation).toBeNull();
+  }
 });

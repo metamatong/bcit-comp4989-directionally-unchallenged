@@ -374,7 +374,7 @@ describe('visitor routes on the current three-building pilot', () => {
         { revision: 1, candidateId: c.id, destination: 'SW03 3615' },
         store,
       ),
-    ).toThrow('Analyze a current photo');
+    ).toThrow('current Burnaby floor plan');
   });
   it('keeps missing labels, unreviewed doors, disconnected stairs and arrival distinct', () => {
     for (const text of ['SW03 2458', 'SW03 03615', 'NE01 3615', 'SW03 3615 and 2605'])

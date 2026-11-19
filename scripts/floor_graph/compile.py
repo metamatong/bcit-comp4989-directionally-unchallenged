@@ -13,6 +13,7 @@ import pymupdf
 
 from doors import SCALE
 from labels import CAMPUS, IDENTIFIER, MANUAL, ROOT, USES, inventory, label_words
+from landing_access import landing_approaches
 from surfaces import near_caption, surfaces
 
 SPATIAL = CAMPUS / "spatial"
@@ -154,7 +155,7 @@ def compile_floor(item):
         ):
             raise ValueError("Coordinate frame changed: " + plan["id"])
         words = label_words(plan, page, extra.get("labels"))
-        walk, sealed, regions, sides, uses, door_count = surfaces(
+        walk, sealed, regions, sides, uses, door_symbols = surfaces(
             page, json.loads(geometry_bytes), words, extra
         )
     grid = FloorGrid(
@@ -274,6 +275,9 @@ def compile_floor(item):
                 "cells": sorted(set(access)),
             }
         )
+    door_approaches = landing_approaches(
+        plan, extra, REVIEWED["nodes"], grid, sides, door_symbols, places
+    )
     ties = ties_for(plan, grid)
     parts = connectivity(grid, places, portals, ties)
     return {
@@ -288,7 +292,8 @@ def compile_floor(item):
         "ties": ties,
         "components": parts,
         "places": places,
-        "doorSymbols": door_count,
+        "doorSymbols": len(door_symbols),
+        **({"landingApproaches": door_approaches} if door_approaches else {}),
     }
 
 

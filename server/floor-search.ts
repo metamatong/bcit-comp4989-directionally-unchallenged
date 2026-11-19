@@ -1,5 +1,5 @@
 /** Dijkstra over drawing cells, source doors and live, directed transfer records. */
-import { floorGraphs, floorStride, pointKey } from './floor-graph';
+import { floorGraphs, floorStride } from './floor-graph';
 import { stepText, visitorPassages } from './visitor-paths';
 import type { TopologyDocument, TopologyNode } from '../src/topology';
 import type { MapStop, WalkingStep } from '../src/wayfinding';
@@ -72,6 +72,7 @@ export class FloorSearch {
   constructor(map: VisitorMap) {
     this.allowedFloors = new Set(map.plans.map((p) => p.id));
     const protectedDoors = new Set(map.network.doors.values());
+    const liveNodes = new Map(map.nodes.map((node) => [node.id, node]));
     for (const trace of map.network.withdrawn) this.restrict(trace.planId, trace.path, true);
     for (const node of map.nodes) {
       const stop = asStop(node),
@@ -120,7 +121,7 @@ export class FloorSearch {
       }
       for (const entry of nodes)
         if (!protectedDoors.has(entry.stop.id) && this.allowedFloors.has(entry.stop.planId))
-          this.attach(entry);
+          this.attach(entry, liveNodes.get(entry.stop.id));
     }
   }
   private restrict(planId: string, path: MapStop['point'][], closed: boolean) {
@@ -186,21 +187,21 @@ export class FloorSearch {
     add(from, to, step);
     if (both) add(to, from, reversed(step));
   }
-  private attach(entry: SearchStop) {
-    const floor = floorGraphs().byId.get(entry.stop.planId)!,
-      cell = floor.containingCell(entry.stop.point) ?? floor.ties.get(pointKey(entry.stop.point));
-    if (cell === undefined) return;
-    const from = floor.stop(cell, 'Corridor'),
-      to = entry.stop;
+  private attach(entry: SearchStop, node?: TopologyNode) {
+    const floor = floorGraphs().byId.get(entry.stop.planId)!;
+    const access = floor.approachAt(entry.stop.point, node);
+    if (!access) return;
+    const from = entry.stop,
+      to = floor.stop(access.cell, 'Corridor');
     this.link(
-      cell,
       entry.key,
+      access.cell,
       {
         kind: 'corridor',
         from,
         to,
         instruction: 'Follow the marked passage.',
-        path: [from.point, to.point],
+        path: [from.point, ...access.via, to.point],
       },
       true,
     );

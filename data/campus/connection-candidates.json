@@ -963,6 +963,154 @@
           }
         ]
       }
+    },
+    {
+      "id": "se12-f3-f4-s300-s400",
+      "version": 1,
+      "title": "SE12 floors 3 and 4 · stairs S300 and S400",
+      "kind": "stairs",
+      "from": {
+        "planId": "SE12-F3-p1",
+        "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+        "point": {
+          "x": 0.085294,
+          "y": 0.491667
+        },
+        "label": "S300 · corridor 303C",
+        "kind": "stair-landing",
+        "description": "Existing third-floor landing from the reviewed lower stair connection."
+      },
+      "to": {
+        "planId": "SE12-F4-p1",
+        "sourceSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
+        "point": {
+          "x": 0.079375,
+          "y": 0.4937198
+        },
+        "label": "S400 · stair landing",
+        "kind": "stair-landing",
+        "description": "Corridor 402C beside the entrance to S400, opposite classroom 402."
+      },
+      "endpointRefs": {
+        "from": {
+          "candidateId": "se12-f2-f3-s200-s300",
+          "side": "to"
+        }
+      },
+      "rationale": "The enclosed stair projecting off corridor 303C and the similar enclosure off corridor 402C each have a doorway beside a classroom. Confirm whether the marked landings are linked by the same stairway and select its permitted direction.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-18"
+    },
+    {
+      "id": "se12-f3-f4-s313-s413",
+      "version": 1,
+      "title": "SE12 floors 3 and 4 · stairs S313 and S413",
+      "kind": "stairs",
+      "from": {
+        "planId": "SE12-F3-p1",
+        "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+        "point": {
+          "x": 0.388725,
+          "y": 0.325
+        },
+        "label": "S313 · corridor 313C",
+        "kind": "stair-landing",
+        "description": "Existing third-floor landing from the reviewed lower stair connection."
+      },
+      "to": {
+        "planId": "SE12-F4-p1",
+        "sourceSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
+        "point": {
+          "x": 0.381875,
+          "y": 0.3323671
+        },
+        "label": "S413 · stair landing",
+        "kind": "stair-landing",
+        "description": "Corridor 407C at the stair door beside shaft 413Z, across from washroom 409."
+      },
+      "endpointRefs": {
+        "from": {
+          "candidateId": "se12-f2-f3-s202-s313",
+          "side": "to"
+        }
+      },
+      "rationale": "The projecting stair enclosures beside shafts 313Z and 413Z each open into the window corridor. Confirm whether the marked landings are linked by the same stairway and select its permitted direction.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-18"
+    },
+    {
+      "id": "se12-f3-f4-s327-s418",
+      "version": 1,
+      "title": "SE12 floors 3 and 4 · stairs S327 and S418",
+      "kind": "stairs",
+      "from": {
+        "planId": "SE12-F3-p1",
+        "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+        "point": {
+          "x": 0.735294,
+          "y": 0.369697
+        },
+        "label": "S327 · beside room 327",
+        "kind": "stair-landing",
+        "description": "Existing third-floor landing from the reviewed lower stair connection."
+      },
+      "to": {
+        "planId": "SE12-F4-p1",
+        "sourceSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
+        "point": {
+          "x": 0.73875,
+          "y": 0.3623188
+        },
+        "label": "S418 · stair landing",
+        "kind": "stair-landing",
+        "description": "Open landing just before the end tread of S418 beside office 419, toward corridor 418A on the drawing."
+      },
+      "endpointRefs": {
+        "from": {
+          "candidateId": "se12-f2-f3-s209-s327",
+          "side": "to"
+        }
+      },
+      "rationale": "Each drawing shows a long internal flight between the lab wing and the offices. The two stair identifiers differ. Confirm whether the marked landings are linked by the same stairway and select its permitted direction.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-18"
+    },
+    {
+      "id": "se12-f3-f4-s328-s428",
+      "version": 1,
+      "title": "SE12 floors 3 and 4 · stairs S328 and S428",
+      "kind": "stairs",
+      "from": {
+        "planId": "SE12-F3-p1",
+        "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+        "point": {
+          "x": 0.773529,
+          "y": 0.607576
+        },
+        "label": "S328 · near room 336",
+        "kind": "stair-landing",
+        "description": "Existing third-floor landing from the reviewed lower stair connection."
+      },
+      "to": {
+        "planId": "SE12-F4-p1",
+        "sourceSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
+        "point": {
+          "x": 0.77375,
+          "y": 0.6067633
+        },
+        "label": "S428 · stair landing",
+        "kind": "stair-landing",
+        "description": "Corridor-side landing at the entrance to S428 beside the small electrical room marked 418G."
+      },
+      "endpointRefs": {
+        "from": {
+          "candidateId": "se12-f2-f3-s228-s328",
+          "side": "to"
+        }
+      },
+      "rationale": "The projecting flights each sit beside an electrical room and open toward the corridor at the corner of the office wing. Confirm whether the marked landings are linked by the same stairway and select its permitted direction.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-18"
     }
   ]
 }

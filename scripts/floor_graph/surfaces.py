@@ -249,4 +249,4 @@ def surfaces(page, geometry, words, annotation):
             poly = np.rint(np.array(points) * [w, h]).astype(np.int32)
             cv2.fillPoly(extra, [poly], 255)
         walk |= (extra > 0) & (sealed == 0)
-    return walk, sealed, regions, sides, uses, len(doors)
+    return walk, sealed, regions, sides, uses, doors
