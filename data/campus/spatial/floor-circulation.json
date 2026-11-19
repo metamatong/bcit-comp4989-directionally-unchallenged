@@ -2279,7 +2279,19 @@
     {
       "planId": "SW3-F1-p1",
       "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
-      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "basis": "Corridor 1700 runs along the north walls of the lecture rooms from the west vestibule to the reviewed lobby 1602 passage. Its southern wall contains the outward-swinging door to AV room 1730.",
+      "areas": [
+        [[0.322, 0.472], [0.479, 0.472], [0.479, 0.4905], [0.322, 0.4905]]
+      ],
+      "corridorDoorways": [
+        {
+          "room": "1730",
+          "corridor": "1700",
+          "threshold": [0.3948471, 0.4912007],
+          "point": [0.3948529, 0.4804293],
+          "basis": "The public approach is just beyond the door swing on corridor 1700. The printed corridor caption overlaps the normal sampling position and stair treads separate the room label from the threshold."
+        }
+      ],
       "corridorSeeds": [
         [
           0.251634,

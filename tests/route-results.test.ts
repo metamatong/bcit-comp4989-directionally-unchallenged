@@ -191,6 +191,15 @@ it.each([false, true, 'denied'] as const)(
       }
       await wait(() => expect(host.querySelector('.route-directions')).not.toBeNull());
       expect(labelReads).toBe(1);
+      if (useGps !== true) {
+        const evidence = host.querySelector('.journey-evidence')!;
+        expect(evidence.querySelectorAll('.campus-candidate')).toHaveLength(1);
+        expect(evidence.querySelector('.campus-candidate h3')?.textContent).toContain(
+          'SE12 · Floor 3 · 302',
+        );
+        expect(evidence.textContent).not.toContain('Select your starting location.');
+        expect(evidence.textContent).toContain('Change starting location');
+      }
       expect(host.textContent).toContain('Starting area estimated');
       expect(button('Start at')).toBeUndefined();
       expect(getCurrentPosition).toHaveBeenCalledTimes(useGps ? 2 : 0);

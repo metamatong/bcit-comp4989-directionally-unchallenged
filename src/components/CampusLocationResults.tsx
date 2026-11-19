@@ -77,34 +77,47 @@ export function CampusLocationResults({
   plans,
   readings = [],
   showSummary = true,
+  selectedId,
+  onConfirm,
+  busy = false,
 }: {
   analysis: CampusPhotoAnalysis;
   readings?: PhotoLabelReading[];
   showSummary?: boolean;
   plans: VisualPlan[];
-  /** Older evidence panel callers may still pass selection props. Current choices live beside the route. */
   selectedId?: string;
   onConfirm?: (id: string) => void;
   busy?: boolean;
 }) {
   const references = analysis.referenceLabels ?? [];
   const labelBased = analysis.method === 'photo-label-retrieval';
+  const requiredChoice =
+    labelBased &&
+    (analysis.candidates.length > 1 ||
+      analysis.labelRetrieval?.partial ||
+      analysis.candidates.some((c) => c.corridorOrigin?.needsConfirmation));
+  const selected = requiredChoice
+    ? analysis.candidates.find((c) => c.id === selectedId)
+    : undefined;
+  const visibleCandidates = selected ? [selected] : analysis.candidates;
   return (
     <section className="campus-results" aria-label="Photo comparison results">
       <h3>
-        {labelBased
-          ? analysis.candidates.length
-            ? 'Estimated starting place'
-            : 'Location needs more evidence'
-          : analysis.candidates.length
-            ? analysis.candidates[0].doorwayVicinity
-              ? 'Possible starting corridor'
-              : 'Best match'
-            : references.length
-              ? 'Camera position unresolved'
-              : 'No clear match'}
+        {selected
+          ? 'Selected starting place'
+          : labelBased
+            ? analysis.candidates.length
+              ? 'Estimated starting place'
+              : 'Location needs more evidence'
+            : analysis.candidates.length
+              ? analysis.candidates[0].doorwayVicinity
+                ? 'Possible starting corridor'
+                : 'Best match'
+              : references.length
+                ? 'Camera position unresolved'
+                : 'No clear match'}
       </h3>
-      {showSummary && <p>{analysis.summary}</p>}
+      {showSummary && !selected && <p>{analysis.summary}</p>}
       {analysis.gpsStatus === 'used' && (
         <p className="helper">Device building matches were checked against the extracted labels.</p>
       )}
@@ -157,7 +170,7 @@ export function CampusLocationResults({
               </a>
             </article>
           ))}
-      {analysis.candidates.map((candidate) => {
+      {visibleCandidates.map((candidate) => {
         const plan = plans.find((plan) => plan.id === candidate.planId);
         if (!plan) return null;
         return (
@@ -166,6 +179,7 @@ export function CampusLocationResults({
               <h3>
                 <MapPin size={18} />
                 {buildingLabel(candidate.building)} · Floor {candidate.floor}
+                {selected?.anchorLabel && ' · ' + selected.anchorLabel}
               </h3>
               <span className="pill">
                 {candidate.doorwayVicinity || candidate.corridorOrigin
@@ -219,7 +233,20 @@ export function CampusLocationResults({
           </article>
         );
       })}
-      {analysis.clarification && <p className="clarification-note">{analysis.clarification}</p>}
+      {selected && onConfirm && analysis.candidates.length > 1 && (
+        <details key={selected.id}>
+          <summary>Change starting location</summary>
+          <StartingPlaceChoices
+            candidates={analysis.candidates.filter((c) => c.id !== selected.id)}
+            plans={plans}
+            onSelect={onConfirm}
+            busy={busy}
+          />
+        </details>
+      )}
+      {!selected && analysis.clarification && (
+        <p className="clarification-note">{analysis.clarification}</p>
+      )}
     </section>
   );
 }

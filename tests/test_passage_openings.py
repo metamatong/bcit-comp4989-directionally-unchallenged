@@ -1,4 +1,4 @@
-"""Check the source-door aperture at the SW03 end of the second-floor passage."""
+"""Check source-bound passage openings and the corridor side of a signed door."""
 
 import json
 import sys
@@ -9,7 +9,8 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts/floor_graph"))
-from passage_openings import SCALE, open_passage_doors
+from compile import FloorGrid
+from passage_openings import SCALE, bind_corridor_doorways, open_passage_doors
 
 
 class PassageOpeningTests(unittest.TestCase):
@@ -49,3 +50,41 @@ class PassageOpeningTests(unittest.TestCase):
         record = {"swings": ["curve-730", "curve-829"]}
         with self.assertRaisesRegex(ValueError, "do not share a doorway"):
             open_passage_doors(None, self.drawing, [record], self.sealed, self.public)
+
+
+class CorridorDoorwayTests(unittest.TestCase):
+    def test_requires_the_exact_leaf_and_a_walkable_cell_on_its_public_side(self):
+        public = np.zeros((40, 40), dtype=bool)
+        public[8:20] = True
+        regions = np.where(public, 1, 2)
+        grid = FloorGrid(public, np.zeros_like(public), regions, 2)
+        words = [{"text": "1700", "kind": "corridor", "region": 1}]
+        places = [
+            {
+                "label": "1730",
+                "bounds": [0.45, 0.7, 0.55, 0.8],
+                "doors": [],
+                "cells": [],
+            }
+        ]
+        leaf = (np.array([8, 10]), np.array([12, 10]), np.array([0, -1]), 4)
+        record = {
+            "room": "1730",
+            "corridor": "1700",
+            "threshold": [0.5, 0.5],
+            "point": [0.5, 0.3],
+        }
+        for change in (
+            {"threshold": [0.6, 0.5]},
+            {"point": [0.5, 0.7]},
+            {"point": [0.5, 0.15]},
+            {"corridor": "1600"},
+        ):
+            with self.subTest(change=change), self.assertRaises(ValueError):
+                bind_corridor_doorways(
+                    grid, words, places, [leaf], [{**record, **change}]
+                )
+        self.assertEqual(places[0]["cells"], [])
+        bind_corridor_doorways(grid, words, places, [leaf], [record])
+        self.assertEqual(places[0]["doors"], [[0.5, 0.5, 130]])
+        self.assertEqual(places[0]["cells"], [130])

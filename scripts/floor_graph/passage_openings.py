@@ -199,3 +199,65 @@ def signed_door_cells(grid, words, sides, records):
             raise ValueError("The marked door needs a public walking cell.")
         cells[(room, tuple(middle))] = cell
     return cells
+
+
+def bind_corridor_doorways(grid, words, places, symbols, records):
+    """Bind the public stop at a drawn door when ink or interior steps split its sample regions."""
+    for record in records:
+        room = record["room"]
+        matches = [p for p in places if p["label"] == room]
+        halls = [
+            w
+            for w in words
+            if w["text"] == record["corridor"] and w["kind"] == "corridor"
+        ]
+        threshold = grid.norm(record["threshold"])
+        leaves = [
+            (hinge, tip, normal, radius)
+            for hinge, tip, normal, radius in symbols
+            if np.linalg.norm((hinge + tip) * (SCALE / 2) - threshold) < 0.3
+        ]
+        if len(matches) != 1 or len(halls) != 1 or len(leaves) != 1:
+            raise ValueError(
+                "Cannot identify the source room, corridor and door: " + room
+            )
+        place, hall = matches[0], halls[0]
+        hinge, tip, normal, radius = leaves[0]
+        middle = (hinge + tip) * (SCALE / 2)
+        target = grid.norm(record["point"])
+        delta = target - middle
+        depth = delta @ normal
+        bounds = np.array(place["bounds"])
+        room_centre = grid.norm((bounds[:2] + bounds[2:]) / 2)
+        along_wall = (tip - hinge) / np.linalg.norm(tip - hinge)
+        half_label_span = np.abs(along_wall) @ grid.norm((bounds[2:] - bounds[:2]) / 2)
+        # For this type of transcription the label is behind the marked doorway
+        # and overlaps its width. Another room along the same hall cannot stand in.
+        if (
+            not 0 < abs(depth) <= 2 * radius * SCALE
+            or np.linalg.norm(delta - depth * normal) > 0.48 * radius * SCALE
+            or ((room_centre - middle) @ normal) * depth >= 0
+            or abs((room_centre - middle) @ along_wall)
+            > half_label_span + radius * SCALE / 2
+        ):
+            raise ValueError(
+                "The marked approach must face the room from the corridor: " + room
+            )
+        x, y = np.floor(target / grid.cell_size).astype(int)
+        pixel_x, pixel_y = np.floor(target).astype(int)
+        if (
+            not (0 <= x < grid.gw and 0 <= y < grid.gh)
+            or not grid.grid[y, x]
+            or not hall["region"]
+            or grid.regions[pixel_y, pixel_x] != hall["region"]
+        ):
+            raise ValueError(
+                "The marked approach needs a walking cell in the named corridor: "
+                + room
+            )
+        cell = int(y * grid.gw + x)
+        doorway = np.round(middle / [grid.w, grid.h], 7).tolist()
+        place["doors"] = [d for d in place["doors"] if d[:2] != doorway] + [
+            [*doorway, cell]
+        ]
+        place["cells"] = sorted(set([*place["cells"], cell]))

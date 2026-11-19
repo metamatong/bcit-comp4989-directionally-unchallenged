@@ -16,7 +16,7 @@ from corridor_frontages import bind_frontages, corridor_bands, recorded_swings
 from doors import SCALE
 from labels import CAMPUS, IDENTIFIER, MANUAL, ROOT, USES, inventory, label_words
 from landing_access import landing_approaches
-from passage_openings import signed_door_cells
+from passage_openings import bind_corridor_doorways, signed_door_cells
 from surfaces import near_caption, surfaces
 
 SPATIAL = CAMPUS / "spatial"
@@ -310,6 +310,9 @@ def compile_floor(item):
                 "cells": sorted(set(access)),
             }
         )
+    bind_corridor_doorways(
+        grid, words, places, door_symbols, extra.get("corridorDoorways", [])
+    )
     bind_frontages(grid, places, words, marked_doors, structural_ink)
     bands = corridor_bands(
         grid,

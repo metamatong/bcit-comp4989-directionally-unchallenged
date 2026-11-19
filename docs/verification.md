@@ -1,5 +1,11 @@
 # Verification record
 
+## SE12 302 to SW03 1730
+
+With GPS off, an exact door sign reading of 302 produced candidates on NE1, SE2 and SE12 floor 3. Selecting SE12 reproduced the reported missing-destination-approach result. The same starting point already reached SW03 1710. The source catalogue contained 1730, while the published SW03 floor 1 entry had zero walking cells and zero bound doors.
+
+Replaying the sign through the visitor API now reaches the corridor-side entrance to 1730. The itinerary crosses to SW03 on floor 3, descends via S360, S260 and S160, and follows lobby 1602 and corridor 1700. The regression switches from NE1 to SE12 using the same extraction. The evidence panel shows the chosen starting place and offers the other matches on request. The photo extraction in this regression is mocked. The walking route uses the checked-in original floor data and approved transfers.
+
 ## SW01 room approaches, confirmed transfers and visitor restrictions
 
 The revision 82 audit covered all 780 SW01 place occurrences. The visitor graph returned a round trip to a building passage for 630 places, including 28 at shared entrances. The original 2016 and 3175 failures now return routes through the visitor planner. The same-floor walk from vestibule 1037 to 1586 and the 3130 door to office 3124 are covered by separate regressions. SW01 S290 to S390 uses the confirmed SW01 stair. The two west entrance walks use separate, bidirectional outdoor edges. Revoking the 3100–3130 door in an isolated editor copy removes the route to the inner office.
