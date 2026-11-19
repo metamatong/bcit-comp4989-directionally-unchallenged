@@ -3,7 +3,21 @@
   "plans": [
     {
       "planId": "SE12-F1-p1",
+      "sharedSuites": [
+        {"entrance": "101", "rooms": ["101C"], "threshold": [0.7361702, 0.29607], "basis": "Office 101C opens into open office 101. This public stop is the shared 101 entry from the lobby."}
+      ],
+      "accessPoints": [
+        {"label": "101", "point": [0.7361702, 0.29607], "basis": "Lobby 101L side of the door into open office 101, below the 100Z vestibule."},
+        {"label": "100E", "point": [0.7945252, 0.2881309], "basis": "Public side of the inward-opening communications room door on the west wall of the 100Z vestibule."},
+        {"label": "100A", "point": [0.8014081, 0.3055582], "basis": "Public side of the men’s washroom door opposite 100E."},
+        {"label": "100F", "point": [0.7702855, 0.2869691], "basis": "Vestibule side of the electrical-room door directly below 100E on the drawing."},
+        {"label": "100Z", "point": [0.7972185, 0.2983936], "basis": "Open vestibule between the two banks of doors."},
+        {"label": "101Y", "point": [0.7427539, 0.2954891], "basis": "Open corridor where 101Y meets lobby 101L."}
+      ],
       "labels": [
+        {"text": "101Y", "kind": "corridor", "bounds": [0.7568189, 0.2894864, 0.7640011, 0.3009109]},
+        {"text": "100Z", "kind": "vestibule", "coPrintedWith": "101Y", "bounds": [0.7526293, 0.29607, 0.759213, 0.3090436]},
+        {"text": "100F", "kind": "electrical", "bounds": [0.7672929, 0.2645073, 0.7747743, 0.2778682]},
         {"text": "101C", "kind": "office", "bounds": [0.7752525, 0.2406895, 0.7891414, 0.2539788]},
         {"text": "100C", "kind": "washroom", "bounds": [0.7405303, 0.338116, 0.7462121, 0.3567157]},
         {"text": "S102", "kind": "stairs", "bounds": [0.4744318, 0.2849265, 0.479798, 0.2975899]},
@@ -15,6 +29,8 @@
       ],
       "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
       "areas": [
+        [[0.808291, 0.2852264], [0.808291, 0.3076882], [0.7337762, 0.3076882], [0.7337762, 0.2852264]],
+        [[0.7415569, 0.2863882], [0.7415569, 0.3073009], [0.7035513, 0.3073009], [0.7035513, 0.2863882]],
         [[0.672, 0.65], [0.708, 0.65], [0.708, 0.675], [0.672, 0.675]],
         [[0.655, 0.365], [0.682, 0.365], [0.682, 0.504], [0.655, 0.504]],
         [[0.62, 0.314], [0.681, 0.314], [0.681, 0.368], [0.62, 0.368]],
@@ -39,6 +55,9 @@
     },
     {
       "planId": "SE12-F3-p1",
+      "sharedSuites": [
+        {"entrance": "317", "rooms": ["317A"], "threshold": [0.4351716, 0.4536174], "basis": "Storage 317A opens directly into 317. Stop at the 317 entrance on corridor 317C."}
+      ],
       "cadInteriorBounds": [
         [[0.087, 0.331], [0.949, 0.331], [0.949, 0.604], [0.087, 0.604]]
       ],
@@ -50,6 +69,7 @@
       "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
       "basis": "Source-plan transcription of the window corridors, corridor 317C and the passage at 312A. Clip all areas to the original walls and door thresholds.",
       "areas": [
+        [[0.7959768, 0.3871342], [0.8106087, 0.3871342], [0.8106087, 0.4341692], [0.7959768, 0.4341692]],
         [[0.777, 0.332], [0.93, 0.332], [0.93, 0.348], [0.777, 0.348]],
         [[0.806, 0.344], [0.814, 0.344], [0.814, 0.596], [0.806, 0.596]],
         [[0.897, 0.343], [0.906, 0.343], [0.906, 0.595], [0.897, 0.595]],
@@ -222,6 +242,9 @@
         ]
       ],
       "accessPoints": [
+        {"label": "332", "point": [0.8018296, 0.412913], "basis": "East side of the open office 332 where it opens directly onto the aisle beside 328B.", "openFront": true},
+        {"label": "315A", "point": [0.4117377, 0.35825], "basis": "Inside the small signed vestibule immediately beside its door on corridor 313C."},
+        {"label": "314A", "point": [0.4096154, 0.5882151], "basis": "Corridor 312A side of the signed 314A vestibule entrance."},
         {"label": "328B", "point": [0.805, 0.35], "openFront": true, "basis": "Open office frontage immediately south of the signed upper corridor, in the same space as the 328D aisle."},
         {"label": "328A", "point": [0.808, 0.581], "openFront": true, "basis": "Open office frontage where the 328D aisle meets corridor 328E."},
         {"label": "328F", "point": [0.9008, 0.478], "openFront": true, "basis": "The signed east-side aisle beside resource room 342, between its wall and the eastern offices."},
@@ -284,6 +307,10 @@
     },
     {
       "planId": "SE12-F4-p1",
+      "sharedSuites": [
+        {"entrance": "429", "rooms": ["430", "431"], "threshold": [0.94363, 0.59217], "basis": "The doors of 430 and 431 open onto the narrow arm of resource room 429. The signed public-side reference for 429 is on the south corridor."},
+        {"entrance": "412", "rooms": ["412C"], "threshold": [0.499375, 0.5867803], "basis": "The door of 412C opens into lab 412. The shared stop is a source doorway of lab 412 on the south corridor."}
+      ],
       "cadInteriorBounds": [
         [[0.076, 0.329], [0.952, 0.329], [0.952, 0.61], [0.076, 0.61]]
       ],
@@ -473,6 +500,10 @@
     },
     {
       "planId": "SW3-F2-p1",
+      "sharedSuites": [
+        {"entrance": "2620", "rooms": ["2630"], "threshold": [0.6040809, 0.4707955], "basis": "2620 and 2630 form a shared projects space with an open route around the freestanding partition. Stop at the public entrance serving 2620."},
+        {"entrance": "2083", "rooms": ["2085"], "threshold": [0.521103, 0.1805114], "basis": "Office 2085 opens directly to meeting room 2083. Its public shared entrance is on corridor 2000."}
+      ],
       "cadInteriorBounds": [
         [[0.467, 0.093], [0.556, 0.093], [0.556, 0.31], [0.467, 0.31]],
         [[0.487, 0.31], [0.52, 0.31], [0.52, 0.346], [0.487, 0.346]],
@@ -608,6 +639,8 @@
         }
       ],
       "accessPoints": [
+        {"label": "2760", "point": [0.3032355, 0.4200109], "basis": "Public corridor side of the drawn electrical alcove entrance, clear of its swing."},
+        {"label": "2650", "point": [0.692811, 0.4480022], "basis": "Public corridor side of the drawn electrical alcove entrance, clear of its swing."},
         {
           "label": "2000",
           "point": [
@@ -725,6 +758,7 @@
         }
       ],
       "accessPoints": [
+        {"label": "3741", "point": [0.3550858, 0.6119003], "basis": "Open walking strip on corridor 3700 at the vestibule marked 3741 opposite the paired entrances."},
         {
           "label": "3000",
           "point": [
@@ -759,7 +793,13 @@
     },
     {
       "planId": "SW3-F4-p1",
+      "sharedSuites": [
+        {"entrance": "4650", "rooms": ["4670"], "threshold": [0.6466352, 0.6025222], "basis": "The open entrance of store 4670 is on corridor 4668, which has a drawn door to lab 4650. The shared visit ends at the public 4650 entrance on corridor 4600."},
+        {"entrance": "4602", "rooms": ["4604", "4605", "4608"], "threshold": [0.5263368, 0.5830527], "basis": "Office 4604 and open office 4605 open onto vestibule 4602. The door of 4608 opens into 4605. The shared stop is the entrance from corridor 4600."}
+      ],
       "labels": [
+        {"text": "S480", "kind": "stairs", "bounds": [0.2606209, 0.5561869, 0.2696078, 0.5599747]},
+        {"text": "4602", "kind": "vestibule", "bounds": [0.5102338, 0.5629066, 0.5223494, 0.5685949]},
         {"text": "M483", "kind": "shaft", "bounds": [0.4806601, 0.5061444, 0.4909918, 0.5110167]},
         {"text": "M463", "kind": "shaft", "bounds": [0.59375, 0.6051136, 0.6027369, 0.6089015]},
         {"text": "M484", "kind": "shaft", "bounds": [0.6631944, 0.6057449, 0.6723856, 0.6095328]},
@@ -851,6 +891,7 @@
         }
       ],
       "accessPoints": [
+        {"label": "4602", "point": [0.5263368, 0.5830527], "basis": "Corridor 4600 side of the door to the signed office-suite vestibule."},
         {
           "label": "4600",
           "point": [
@@ -871,6 +912,9 @@
     },
     {
       "planId": "SE12-F2-p1",
+      "sharedSuites": [
+        {"entrance": "203", "rooms": ["203C"], "threshold": [0.5107794, 0.3471591], "basis": "Office 203C opens into open office 203B. The two open offices share an unobstructed aisle to the drawn door of 203 on corridor 203Z."}
+      ],
       "nonPlaceReadings": [
         {"text": "0000", "bounds": [0.810866, 0.3996212, 0.8200572, 0.4021465], "basis": "Four circular drawing symbols beside the doors at 213A. They have no room-number stamp."}
       ],
@@ -882,6 +926,9 @@
       "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
       "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
       "areas": [
+        [[0.6985793, 0.3609506], [0.7082237, 0.3609506], [0.7082237, 0.4210677], [0.6985793, 0.4210677]],
+        [[0.6995437, 0.4113794], [0.7128852, 0.4113794], [0.7128852, 0.4411895], [0.6995437, 0.4411895]],
+        [[0.6444096, 0.3676579], [0.6535719, 0.3676579], [0.6535719, 0.5052812], [0.6444096, 0.5052812]],
         [[0.11, 0.455], [0.295, 0.455], [0.295, 0.525], [0.11, 0.525]],
         [[0.244, 0.434], [0.296, 0.434], [0.296, 0.479], [0.244, 0.479]],
         [[0.266, 0.401], [0.294, 0.401], [0.294, 0.443], [0.266, 0.443]],
@@ -962,6 +1009,11 @@
         ]
       ],
       "accessPoints": [
+        {"label": "207W", "point": [0.6490711, 0.4464063], "basis": "Open walking strip outside 205H and 205J, on the 207W side of corridor 206Z."},
+        {"label": "206Y", "point": [0.7088667, 0.3639316], "basis": "At the open meeting of the branch marked 206Y and the long cross corridor."},
+        {"label": "208F", "point": [0.7032407, 0.4185835], "basis": "Public side of the open passage between 206D and 206H."},
+        {"label": "206G", "point": [0.708063, 0.4374632], "basis": "Open office side of the unenclosed front between office 206G and corridor 208F.", "openFront": true},
+        {"label": "203", "point": [0.5107794, 0.3471591], "basis": "Corridor 203Z side of the drawn entrance to open office 203."},
         {"label": "201", "point": [0.231, 0.485], "openFront": true, "basis": "Unobstructed dining-floor aisle southeast of the public servery counter."},
         {"label": "201B", "point": [0.289, 0.405], "openFront": true, "basis": "Dining-side aisle from 201V beside the eastern seating area."},
         {"label": "201Y", "point": [0.267, 0.439], "openFront": true, "basis": "Public aisle at the visitor side of the servery, west of vestibule 201V."},
@@ -977,6 +1029,8 @@
         }
       ],
       "labels": [
+        {"text": "207W", "kind": "corridor", "bounds": [0.6445704, 0.4235519, 0.6538933, 0.4297623]},
+        {"text": "206Y", "kind": "corridor", "bounds": [0.7066163, 0.3448035, 0.7125637, 0.3559823]},
         {"text": "M202", "kind": "shaft", "bounds": [0.4285131, 0.4065657, 0.4379085, 0.4109848]},
         {"text": "M208", "kind": "shaft", "bounds": [0.683415, 0.4946338, 0.6928105, 0.4984217]},
         {"text": "201", "kind": "dining", "bounds": [0.19902, 0.47485, 0.20451, 0.47849]},
@@ -2439,6 +2493,9 @@
     },
     {
       "planId": "SW3-F1-p1",
+      "accessPoints": [
+        {"label": "1652", "point": [0.6543882, 0.5038792], "basis": "Public corridor side of the drawn electrical alcove entrance, clear of its swing."}
+      ],
       "labels": [
         {"text": "S170", "kind": "stairs", "bounds": [0.5275735, 0.5549242, 0.5365605, 0.5612374]},
         {"text": "M160", "kind": "shaft", "bounds": [0.7737971, 0.4715566, 0.7872971, 0.4803066]},
@@ -2447,6 +2504,8 @@
         {"text": "M164", "kind": "shaft", "bounds": [0.6249, 0.5056475, 0.6384, 0.5143975]}
       ],
       "sharedSuites": [
+        {"entrance": "1955", "rooms": ["1945"], "threshold": [0.2536928, 0.6026984], "basis": "One of the two doors of 1945 opens into office 1955. The shared approach ends at the door of 1955 on corridor 1900."},
+        {"entrance": "1985", "rooms": ["1965"], "threshold": [0.2594, 0.6471], "basis": "The southern door of 1965 opens into lab 1985. Stop at the entrance to 1985 on corridor 1900."},
         {"entrance": "1605", "rooms": ["1615"], "threshold": [0.55889, 0.49284], "basis": "The interior door for office 1615 opens into 1605. Stop at the public door of 1605 on corridor 1600."},
         {"entrance": "1660", "rooms": ["1650", "1654", "1656"], "threshold": [0.70636, 0.52195], "basis": "The double doors on corridor 1600 open into 1660 and then lab 1650. Support rooms 1654 and 1656 open to that lab. Stop at the corridor entrance to 1660."}
       ],
@@ -3497,6 +3556,9 @@
         ]
       },
       "cadPublicAreas": [
+        {"near": "1521", "bounds": [0.6492616, 0.6145544, 0.6570003, 0.6216077]},
+        {"near": "1521", "bounds": [0.6548176, 0.6142478, 0.6716841, 0.621301]},
+        {"near": "1521", "bounds": [0.6671202, 0.6151677, 0.6718825, 0.6498208]},
         {"near": "1290", "bounds": [0.323125, 0.3913043, 0.77125, 0.4144928]},
         {"near": "1290", "bounds": [0.77, 0.3903382, 0.80375, 0.4144928]},
         {"near": "1020", "bounds": [0.319375, 0.3922705, 0.38625, 0.4144928]},
@@ -3658,6 +3720,8 @@
         {"label": "1507", "threshold": [0.6382353, 0.4409091], "side": "swing"}
       ],
       "cadSharedSuites": [
+        {"entrance": "1521", "rooms": ["1528", "1523", "1524", "1525"], "threshold": [0.6493377, 0.615746], "basis": "Corridor 1528 opens to study 1522 and lounge 1521. All three office doors face 1528. The shared stop is the public lounge entrance on corridor 1500, clear of staff room 1527."},
+        {"entrance": "1080", "rooms": ["1070", "1068"], "threshold": [0.6664583, 0.3914773], "basis": "Classroom 1080 has a drawn interior door to 1070, which also has a door to 1068. Directions stop at the public corridor entrance to classroom 1080."},
         {"entrance": "1220", "rooms": ["1224"], "basis": "The inner storage door opens from 1220 on the original plan.", "threshold": [0.4559069, 0.3367298]},
         {"entrance": "1303B", "rooms": ["1303A", "1303C"], "basis": "Two interior doors in office 1303B serve these offices. Use the exterior suite entrance when the individual approach does not resolve.", "threshold": [0.5629902, 0.5767677]}
       ],

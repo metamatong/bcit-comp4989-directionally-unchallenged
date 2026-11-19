@@ -55,5 +55,11 @@ async function checkRoomTrip(store: TopologyStore, sign: string, target: string)
 
 export async function checkPublishedRoute(store = new TopologyStore()) {
   const original = await checkRoomTrip(store, '302', '1730');
-  return { ...original, alsoVerified: [await checkRoomTrip(store, '323', '1750')] };
+  return {
+    ...original,
+    alsoVerified: [
+      await checkRoomTrip(store, '323', '1750'),
+      await checkRoomTrip(store, '323', '1920'),
+    ],
+  };
 }

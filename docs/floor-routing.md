@@ -3,17 +3,17 @@
 Visitors can search the 89 supplied floor plans. A sign identifies a place on a sheet. Its walking approaches identify the doors or parts of a public corridor from which a journey can start or end. Each occurrence has its own ID, printed bounds, source PDF hash and graph version. When a sign or doorway is ambiguous, the visitor can pick the matching occurrence or numbered marker using the original session.
 
 
-The current compiler catalogues **3,458 source occurrences**. It identifies a door or corridor approach for **2,357**. **1,708** have a walking-grid approach, across **87 sheets**. These are local floor counts before the live reviewed records are joined. They do not establish that two arbitrary places share a continuous route. NE18 floor 1 and SE30 floor 1 identify places in shop or warehouse drawings without a compiled public corridor approach.
+The current compiler catalogues **3,463 source occurrences**. It identifies a door or corridor approach for **2,381**. **1,739** have a walking-grid approach, across **87 sheets**. These are local floor counts before the live reviewed records are joined. They do not establish that two arbitrary places share a continuous route. NE18 floor 1 and SE30 floor 1 identify places in shop or warehouse drawings without a compiled public corridor approach.
 
 The counts below group source-use labels into room types and circulation. The walking-grid column includes signed room areas, mapped thresholds, shared entrances and separately marked corridor-side stops. Visitor totals exclude staff-only spaces, shafts and voids. Reviewed stair and elevator transfers are counted separately in the network.
 
 | Place type | Source occurrences | Identified door or approach | Walking-grid approach |
 |---|---:|---:|---:|
-| Corridor | 471 | 389 | 389 |
+| Corridor | 475 | 398 | 398 |
 | Stairs | 166 | 77 | 62 |
 | Elevator | 13 | 8 | 7 |
-| Unspecified room | 1,697 | 997 | 399 |
-| Classified rooms and other spaces | 1,111 | 886 | 851 |
+| Unspecified room | 1,697 | 999 | 402 |
+| Classified rooms and other spaces | 1,112 | 899 | 870 |
 
 The three-building inventory checks directional reachability through a common public passage. It publishes the result for every source occurrence across all twelve sheets. [SE12, SW03 and SW01 coverage](three-building-routing.md)
 

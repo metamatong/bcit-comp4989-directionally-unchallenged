@@ -1,5 +1,11 @@
 # Verification record
 
+## SW03 west wing and outstanding visitor approaches · November 19, 2026
+
+Revision 89 records two user-confirmed bidirectional connections. The walk from SE12 323 to SW03 1920 uses the outdoor 1700–1900 connection on floor 1 and reaches the 1920 doorway. The return trip follows the same exterior entrances in reverse. A route to SW03 2910 continues up the west stairs from S190 to S299. Both directions of the staircase were checked independently. The original 166 incomplete visit records fell to 114. The new total also includes five additional signed source occurrences. [Room-level coverage](three-building-routing.md)
+
+Replaying the five place pairs from the previous random sample produced walking routes for all five. Four ended at a mapped room, landing or doorway. SW01 1023A ended at its labelled shared entrance. The two earlier partial results now reach SE12 100E and SW03 1920. These checks exercised the normal visitor planner after sign extraction, selecting a source door when the origin had multiple possibilities. They used no new photos, live model calls or physical campus measurements.
+
 ## Three-building visitor routing · November 19, 2026
 
 The compiled visitor router takes SE12 323 through the floor-3 passage, down through SW03 floors 2 and 1 and to the doorway of 1750 on corridor 1700. Both of the 323 doors lead to the same first turn. The packaged readiness check also covers SE12 302 to SW03 1730. These checks replay exact sign evidence after extraction. They use no visitor media or provider calls.

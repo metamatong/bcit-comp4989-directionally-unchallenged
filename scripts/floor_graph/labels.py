@@ -133,18 +133,29 @@ def label_words(plan, page, supplemental=None):
     bounds = annotation.get("drawingRegion", [0.025, 0.035, 0.98, 0.94])
     words = []
 
-    def add(text, box, method, kind=None):
+    def add(text, box, method, kind=None, co_printed_with=None):
         key = text.strip().upper()
         if not (IDENTIFIER.fullmatch(key) or space_use(key)):
             return
         x, y = (box[0] + box[2]) / 2, (box[1] + box[3]) / 2
         if not (bounds[0] < x < bounds[2] and bounds[1] < y < bounds[3]):
             return
+        # CAD labels can physically overlap. Keep both only when two exact
+        # source transcriptions explicitly identify that pair on this sheet.
+        if co_printed_with is not None and not any(
+            w["method"] == "transcription"
+            and w["text"] == co_printed_with
+            and intersects(w["box"], box)
+            for w in words
+        ):
+            raise ValueError(
+                "Missing overlapping source transcription: " + co_printed_with
+            )
         if any(
             intersects(w["box"], box)
             and (
                 w["text"] == key
-                or w["method"] == "transcription"
+                or (w["method"] == "transcription" and w["text"] != co_printed_with)
                 or (method == "repeated-ocr" and w["method"] == "pdf-text")
             )
             for w in words
@@ -166,6 +177,7 @@ def label_words(plan, page, supplemental=None):
             label["bounds"],
             "transcription",
             "corridor" if kind in {"vestibule", "corridor", "lobby"} else kind,
+            label.get("coPrintedWith"),
         )
     for x0, y0, x1, y1, text, *_ in page.get_text("words"):
         box = pymupdf.Rect(x0, y0, x1, y1) * page.rotation_matrix
