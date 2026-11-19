@@ -16,6 +16,19 @@ Answers are append-only within the graph document. Changing a prior T to F/unkno
 
 To extend the question set, inspect the original plans and add versioned definitions to `data/campus/connection-candidates.json`. Each definition references the source hash for each endpoint and explains how to identify it on the page. Restart the server after changing the catalogue and run data validation.
 
+## SW03 and SW01
+
+Revision 49 records the user's confirmation of all four same-floor passages in both directions. A marks the SW03 door and B marks the SW01 door on its own official sheet.
+
+| Floor | A · SW03 | B · SW01 | Crossing |
+|---|---|---|---|
+| 1 | Lobby 1602, double doors facing the columns | Outer doors of vestibule 1098, beside S190 | Outdoors between the two doors |
+| 2 | Corridor 2000 between offices 2063 and 2080 | S290 landing beside 2070 and 2059 | Direct indoor passage |
+| 3 | Corridor 3000 between offices 3081 and 3086 | S390 landing beside 3080 | Direct indoor passage |
+| 4 | Corridor 4000 between offices 4075 and 4080 | S490 landing beside 4076 and 4067 | Direct indoor passage |
+
+Each receipt binds the two marked coordinates to their original floor-plan hashes. The visitor maps show the indoor approach on each sheet. The floor 1 directions identify the two outdoor doors. The path and distance between them are unmeasured. The S190, S290, S390 and S490 references locate the SW01 end of each passage. SW01 vertical transfers have separate user confirmations with floor-specific landing coordinates. The same middle landing node is reused on adjacent floors. [SW01 stair chains, elevators and room coverage](sw01-routing.md)
+
 ## Corrected SE12–SW03 third-floor passage
 
 Revision 31 applies the user's November 17 correction. On `SW3-F3-p1`, `sw3-se12-floor3-passage` now uses the east passage junction at `(0.77, 0.6325758)` instead of the upper corridor point `(0.4875, 0.352)`. The SE12 endpoint remains `(0.4435, 0.631)`. The elevator at `(0.740196, 0.640909)` remains a separate point. The approach reuses the corridor vertex `(0.7401961, 0.6325758)` shared with the classroom approach, so a route continuing along corridor 3600 does not double back into the elevator landing.

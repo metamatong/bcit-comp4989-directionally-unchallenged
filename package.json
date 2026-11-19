@@ -18,6 +18,7 @@
     "ai:metrics": "node --import tsx scripts/summarize-ai-metrics.ts",
     "spatial:query": "node --import tsx scripts/query-spatial.ts",
     "format": "prettier --write src server tests scripts/*.ts *.ts",
+    "routes:coverage": "node --import tsx scripts/report-building-coverage.ts",
     "routes:sample": "node --import tsx scripts/sample-floor-routes.ts"
   },
   "dependencies": {

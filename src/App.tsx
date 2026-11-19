@@ -335,6 +335,9 @@ export default function App() {
     <>
       <CampusLocationResults
         analysis={analysis}
+        selectedId={routeCandidate?.id}
+        onConfirm={(candidateId) => void send({ type: 'confirm-campus-region', candidateId })}
+        busy={busy}
         showSummary={!summaryInRoutePanel}
         plans={plans}
         readings={

@@ -416,19 +416,19 @@
         ],
         [
           [
-            0.504375,
-            0.0975845
+            0.503125,
+            0.0927536
           ],
           [
-            0.51875,
-            0.0975845
+            0.52,
+            0.0927536
           ],
           [
-            0.51875,
+            0.52,
             0.4521739
           ],
           [
-            0.504375,
+            0.503125,
             0.4521739
           ]
         ],
@@ -494,6 +494,46 @@
           "closedTip": "first",
           "basis": "East paired doorway from 2680 to corridor 2600 by the M261 shaft callout."
         }
+      ],
+      "passageOpenings": [
+        {
+          "swings": [
+            "curve-730",
+            "curve-733"
+          ],
+          "basis": "Office-wing double doors between 2063 and 2080."
+        },
+        {
+          "swings": [
+            "curve-829",
+            "curve-832"
+          ],
+          "basis": "Double doors at the foot of the office wing into the main circulation by 2093."
+        }
+      ],
+      "accessPoints": [
+        {
+          "label": "2000",
+          "point": [
+            0.5125,
+            0.2309179
+          ],
+          "basis": "Clear walking strip in corridor 2000 between the two office rows."
+        }
+      ],
+      "doorApproaches": [
+        {
+          "room": "2063",
+          "threshold": [
+            0.5031618,
+            0.0999811
+          ],
+          "point": [
+            0.5076826,
+            0.1026114
+          ],
+          "basis": "Clear public side of the office door on corridor 2000, below the adjacent passage-door swing."
+        }
       ]
     },
     {
@@ -521,19 +561,19 @@
         ],
         [
           [
-            0.48125,
-            0.3545894
+            0.480625,
+            0.3487923
           ],
           [
-            0.4925,
-            0.3545894
+            0.494375,
+            0.3487923
           ],
           [
-            0.4925,
+            0.494375,
             0.6386473
           ],
           [
-            0.48125,
+            0.480625,
             0.6386473
           ]
         ],
@@ -555,6 +595,54 @@
             0.6425121
           ]
         ]
+      ],
+      "passageOpenings": [
+        {
+          "swings": [
+            "curve-1287",
+            "curve-1290"
+          ],
+          "basis": "Office-wing double doors between 3081 and 3086."
+        },
+        {
+          "swings": [
+            "curve-1425",
+            "curve-1428"
+          ],
+          "basis": "Double doors at the junction of the office wing and the main hallway."
+        }
+      ],
+      "accessPoints": [
+        {
+          "label": "3000",
+          "point": [
+            0.488125,
+            0.4444444
+          ],
+          "basis": "Clear section of the signed corridor 3000 in the office wing."
+        },
+        {
+          "label": "3081",
+          "point": [
+            0.48375,
+            0.3545894
+          ],
+          "basis": "Corridor-side approach to the drawn door of office 3081 on the left of the connecting passage."
+        }
+      ],
+      "doorApproaches": [
+        {
+          "room": "3086",
+          "threshold": [
+            0.4945228,
+            0.3558456
+          ],
+          "point": [
+            0.4909446,
+            0.3578885
+          ],
+          "basis": "The corridor side of the 3086 office door is clear below the adjacent double-door leaf."
+        }
       ]
     },
     {
@@ -582,19 +670,19 @@
         ],
         [
           [
-            0.48125,
-            0.305314
+            0.480625,
+            0.2956522
           ],
           [
-            0.493125,
-            0.305314
+            0.494375,
+            0.2956522
           ],
           [
-            0.493125,
+            0.494375,
             0.5932367
           ],
           [
-            0.48125,
+            0.480625,
             0.5932367
           ]
         ],
@@ -616,6 +704,40 @@
             0.5942029
           ]
         ]
+      ],
+      "passageOpenings": [
+        {
+          "swings": [
+            "curve-1044",
+            "curve-1047"
+          ],
+          "basis": "Office-wing double doors between 4075 and 4080."
+        },
+        {
+          "swings": [
+            "curve-1223",
+            "curve-1226"
+          ],
+          "basis": "Double doors from the office wing toward corridor 4600."
+        }
+      ],
+      "accessPoints": [
+        {
+          "label": "4600",
+          "point": [
+            0.6125,
+            0.5855072
+          ],
+          "basis": "Public walking strip in corridor 4600, just beyond its printed caption."
+        },
+        {
+          "label": "4075",
+          "point": [
+            0.48375,
+            0.3072464
+          ],
+          "basis": "Corridor-side approach to the drawn office 4075 door beside the connecting passage."
+        }
       ]
     },
     {
@@ -1781,18 +1903,201 @@
     {
       "planId": "SW1-F3-p1",
       "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
-      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "basis": "Named circulation, suite extents and approaches were read on this official Burnaby sheet. The compiler clips through routes to public circulation and uses the floor slab only for individual terminal approaches.",
       "corridorSeeds": [
         [
           0.7336601,
           0.2436869
         ]
+      ],
+      "areas": [
+        [
+          [
+            0.200625,
+            0.2280193
+          ],
+          [
+            0.933125,
+            0.2280193
+          ],
+          [
+            0.933125,
+            0.2512077
+          ],
+          [
+            0.200625,
+            0.2512077
+          ]
+        ]
+      ],
+      "passageOpenings": [
+        {
+          "swings": [
+            "curve-282",
+            "curve-283"
+          ],
+          "basis": "The inner pair between corridor 3000 and the S390 landing."
+        },
+        {
+          "swings": [
+            "curve-280",
+            "curve-281"
+          ],
+          "basis": "The outer pair at the S390 passage towards SW03."
+        }
+      ],
+      "accessPoints": [
+        {
+          "label": "S390",
+          "point": [
+            0.909375,
+            0.2425121
+          ],
+          "basis": "Public landing at the foot of S390, between the two pairs of swinging doors."
+        }
+      ],
+      "doorFrontages": [
+        {
+          "room": "3080",
+          "swing": "curve-277",
+          "closedTip": "last",
+          "basis": "Main leaf of the lower paired entrance of 3080 on corridor 3000."
+        }
+      ],
+      "cadLayers": {
+        "partition": [
+          "A-EXISTING-COLUMN",
+          "A-STEEL",
+          "GLAZE",
+          "I-NEW WALL",
+          "JAMB",
+          "SILL",
+          "WALL"
+        ],
+        "doors": [
+          "A-DOOR",
+          "DOOR",
+          "DSWING"
+        ],
+        "annotation": [
+          "BORDER",
+          "TEXT",
+          "TITLE",
+          "XREF"
+        ]
+      },
+      "cadPublicAreas": [
+        {"near": "3000", "bounds": [0.181875, 0.226087, 0.930625, 0.2531401]},
+        {"near": "3100", "bounds": [0.349375, 0.2415459, 0.366875, 0.7371981]},
+        {"near": "3500", "bounds": [0.725, 0.2415459, 0.74375, 0.7381643]},
+        {"near": "3180", "bounds": [0.344375, 0.7294686, 0.489375, 0.752657]},
+        {"near": "3300", "bounds": [0.41625, 0.7285024, 0.490625, 0.7729469]},
+        {"near": "3303", "bounds": [0.489375, 0.7217391, 0.514375, 0.7768116]},
+        {"near": "3303", "bounds": [0.500625, 0.7748792, 0.51625, 0.8512077]},
+        {"near": "3305", "bounds": [0.515, 0.8376812, 0.71875, 0.8512077]},
+        {"near": "3591", "bounds": [0.736875, 0.7111111, 0.798125, 0.72657]},
+        {"near": "3398", "bounds": [0.565, 0.7294686, 0.728125, 0.7458937]},
+        {"near": "3360", "bounds": [0.5575, 0.6782609, 0.611875, 0.6966184]},
+        {"near": "3360", "bounds": [0.556875, 0.6917874, 0.564375, 0.7294686]},
+        {"near": "3200", "bounds": [0.518125, 0.1304348, 0.526875, 0.2386473]},
+        {"near": "3400", "bounds": [0.56625, 0.131401, 0.574375, 0.2376812]},
+        {"near": "3059", "bounds": [0.60625, 0.2975845, 0.68875, 0.3120773]},
+        {"near": "3059", "bounds": [0.625, 0.257971, 0.63375, 0.3024155]},
+        {"near": "3082", "bounds": [0.806875, 0.1603865, 0.8325, 0.1748792]},
+        {"near": "3382", "bounds": [0.5, 0.6202899, 0.559375, 0.6376812]},
+        {"near": "3382", "bounds": [0.554375, 0.5082126, 0.5675, 0.6821256]},
+        {"near": "S390", "bounds": [0.9040645, 0.234305, 0.9146855, 0.2507192]},
+        {"near": "S300", "bounds": [0.1907679, 0.2253788, 0.2013889, 0.241793]},
+        {"near": "S320", "bounds": [0.3843954, 0.2430555, 0.3950164, 0.2594697]},
+        {"near": "S350", "bounds": [0.6982843, 0.2468434, 0.7089053, 0.2632576]},
+        {"near": "S319", "bounds": [0.3451797, 0.7304293, 0.3558007, 0.7468435]},
+        {"near": "S330", "bounds": [0.4742647, 0.7872475, 0.4816177, 0.7986111]},
+        {"near": "S360", "bounds": [0.7381536, 0.7354798, 0.7487746, 0.751894]},
+        {"near": "3042", "bounds": [0.5521241, 0.2093434, 0.5627451, 0.2257576]},
+        {"near": "2500LB", "bounds": [0.4583333, 0.7638889, 0.4689543, 0.7803031]},
+        {"near": "3398", "bounds": [0.56, 0.7256039, 0.725, 0.7603865]},
+        {"near": "3584", "bounds": [0.72, 0.752657, 0.79875, 0.7777778]},
+        {"near": "3305", "bounds": [0.5, 0.7681159, 0.5175, 0.8512077]},
+        {"near": "3303", "bounds": [0.486875, 0.7256039, 0.5175, 0.7777778]},
+        {"near": "3360", "bounds": [0.511875, 0.6714976, 0.6125, 0.6975845]},
+        {"near": "3100", "bounds": [0.34875, 0.236715, 0.3675, 0.7400966]},
+        {"near": "3208", "bounds": [0.518125, 0.1091787, 0.529375, 0.1458937]},
+        {"near": "3408", "bounds": [0.563125, 0.1101449, 0.57375, 0.1458937]},
+        {"near": "3082", "bounds": [0.805, 0.1574879, 0.83375, 0.1710145]},
+        {"near": "3100", "bounds": [0.345, 0.236715, 0.366875, 0.7381643]},
+        {"near": "3398", "bounds": [0.563125, 0.7256039, 0.726875, 0.7613527]},
+        {"near": "3584", "bounds": [0.71625, 0.7536232, 0.796875, 0.7797101]},
+        {"near": "3305", "bounds": [0.495625, 0.7700483, 0.5175, 0.8550725]},
+        {"near": "3360", "bounds": [0.505, 0.6763285, 0.610625, 0.6956522]},
+        {"near": "3121", "bounds": [0.3425, 0.3623188, 0.349375, 0.4541063]},
+        {"near": "3130", "bounds": [0.3746732, 0.3993687, 0.3800654, 0.4070707], "basis": "The marked office-side landing of the reviewed 3100–3130 door. This patch stays inside the suite."}
+      ],
+      "cadInteriorBounds": [
+        [[0.2, 0.1294686], [0.891875, 0.1294686], [0.891875, 0.3507246], [0.2, 0.3507246]],
+        [[0.17875, 0.1758454], [0.20125, 0.1758454], [0.20125, 0.2550725], [0.17875, 0.2550725]],
+        [[0.891875, 0.1768116], [0.913125, 0.1768116], [0.913125, 0.2550725], [0.891875, 0.2550725]],
+        [[0.5175, 0.0405797], [0.57375, 0.0405797], [0.57375, 0.1294686], [0.5175, 0.1294686]],
+        [[0.296875, 0.4628019], [0.416875, 0.4628019], [0.416875, 0.7285024], [0.296875, 0.7285024]],
+        [[0.31625, 0.3507246], [0.404375, 0.3507246], [0.404375, 0.4628019], [0.31625, 0.4628019]],
+        [[0.69, 0.3497585], [0.776875, 0.3497585], [0.776875, 0.4608696], [0.69, 0.4608696]],
+        [[0.67625, 0.4608696], [0.794375, 0.4608696], [0.794375, 0.7294686], [0.67625, 0.7294686]],
+        [[0.295, 0.7294686], [0.414375, 0.7294686], [0.414375, 0.8125604], [0.295, 0.8125604]],
+        [[0.415625, 0.7294686], [0.48875, 0.7294686], [0.48875, 0.7690821], [0.415625, 0.7690821]],
+        [[0.459375, 0.7710145], [0.800625, 0.7710145], [0.800625, 0.905314], [0.459375, 0.905314]],
+        [[0.489375, 0.7285024], [0.799375, 0.7285024], [0.799375, 0.7729469], [0.489375, 0.7729469]],
+        [[0.49125, 0.72657], [0.49125, 0.6550725], [0.51, 0.5062802], [0.6325, 0.5062802], [0.6325, 0.7285024]]
+      ],
+      "cadFacilityLabels": {
+        "2500LB": [
+          0.4611928,
+          0.7848485,
+          0.474183,
+          0.7909091
+        ]
+      },
+      "cadFrontages": [
+        {"label": "3130", "feature": "door", "point": [0.365625, 0.4067633]},
+        {"label": "3124", "feature": "door", "point": [0.380625, 0.3980676]},
+        {"label": "3341", "feature": "open-front", "point": [0.734375, 0.8483092]},
+        {"label": "3335", "feature": "open-front", "point": [0.693125, 0.8386473]},
+        {"label": "3391", "feature": "open-front", "point": [0.605, 0.7806763]},
+        {"label": "3367", "feature": "open-front", "point": [0.60625, 0.6618357]},
+        {"label": "3381", "feature": "open-front", "point": [0.548125, 0.5391304]},
+        {"label": "3378", "feature": "open-front", "point": [0.545, 0.5826087]},
+        {"label": "3382A", "feature": "open-front", "point": [0.55625, 0.626087]},
+        {"label": "3382B", "feature": "open-front", "point": [0.53125, 0.6280193]},
+        {"label": "3392", "feature": "open-front", "point": [0.640625, 0.7449275]},
+        {"label": "3049", "feature": "corridor", "point": [0.485, 0.2608696]},
+        {"label": "3121", "feature": "corridor", "point": [0.34375, 0.3961353]},
+        {"label": "3382", "feature": "corridor", "point": [0.5425, 0.6154589]}
+      ],
+      "cadSuiteAreas": [
+        [0.36875, 0.352657, 0.403125, 0.4570048],
+        [0.60625, 0.5362319, 0.63375, 0.7217391],
+        [0.51, 0.5082126, 0.630625, 0.7246377],
+        [0.501875, 0.7487923, 0.794375, 0.8985507]
+      ],
+      "cadAreaArrivals": [
+        {"label": "3102", "feature": "door-side", "point": [0.3666258, 0.2758049]},
+        {"label": "3306", "feature": "room-area", "point": [0.4891748, 0.8412247]},
+        {"label": "3362", "feature": "room-area", "point": [0.5241524, 0.7149621]},
+        {"label": "3383", "feature": "room-area", "point": [0.5078125, 0.6403883]},
+        {"label": "3394", "feature": "room-area", "point": [0.6709559, 0.7603378]},
+        {"label": "3310A", "feature": "room-area", "point": [0.5167484, 0.7544192]}
+      ],
+      "cadThresholdStations": [
+        {"label": "3120", "threshold": [0.3859314, 0.3794697], "side": "opposite"},
+        {"label": "3124", "threshold": [0.3859314, 0.3896212], "side": "opposite"},
+        {"label": "3126", "threshold": [0.3859314, 0.4237121], "side": "opposite"},
+        {"label": "3140", "threshold": [0.3859314, 0.4339394], "side": "opposite"},
+        {"label": "3420", "threshold": [0.570576, 0.1163258], "side": "opposite"},
+        {"label": "3581", "threshold": [0.7380719, 0.7808712], "side": "opposite"}
       ]
     },
     {
       "planId": "SW1-F4-p1",
       "sourceSha256": "ed111bbfb9b7423af5a9369253f7820ed4e7eddbe6bf3a3421cda77bf3f53e30",
-      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "basis": "Named circulation, suite extents and approaches were read on this official Burnaby sheet. The compiler clips through routes to public circulation and uses the floor slab only for individual terminal approaches.",
       "corridorSeeds": [
         [
           0.8521242,
@@ -1802,6 +2107,128 @@
           0.1981209,
           0.4494949
         ]
+      ],
+      "areas": [
+        [
+          [
+            0.07875,
+            0.4396135
+          ],
+          [
+            0.976875,
+            0.4396135
+          ],
+          [
+            0.976875,
+            0.4637681
+          ],
+          [
+            0.07875,
+            0.4637681
+          ]
+        ]
+      ],
+      "passageOpenings": [
+        {
+          "swings": [
+            "curve-246",
+            "curve-247"
+          ],
+          "basis": "The inner pair at the junction of corridor 4000 and the S490 landing."
+        }
+      ],
+      "accessPoints": [
+        {
+          "label": "S490",
+          "point": [
+            0.9625,
+            0.4531401
+          ],
+          "basis": "Corridor-side landing at the open end of S490 on this sheet."
+        },
+        {
+          "label": "4076",
+          "point": [
+            0.9275,
+            0.447343
+          ],
+          "basis": "Corridor 4000 directly outside the paired lab 4076 doors opposite lab 4067. The room and hall merge in the automatic space segmentation."
+        }
+      ],
+      "doorFrontages": [
+        {
+          "room": "4067",
+          "swing": "curve-226",
+          "closedTip": "first",
+          "basis": "Main leaf of the entrance to lab 4067 on the opposite side of corridor 4000."
+        }
+      ],
+      "cadLayers": {
+        "partition": [
+          "A-DR-FR",
+          "GLAZE",
+          "JAMB",
+          "SILL",
+          "WALL"
+        ],
+        "doors": [
+          "DOOR",
+          "DSWING"
+        ],
+        "annotation": [
+          "BORDER",
+          "ROOF",
+          "TEXT",
+          "TITLE"
+        ]
+      },
+      "cadPublicAreas": [
+        {"near": "4000", "bounds": [0.069375, 0.436715, 0.970625, 0.4657005]},
+        {"near": "4200", "bounds": [0.47625, 0.3082126, 0.486875, 0.4483092]},
+        {"near": "4200", "bounds": [0.47625, 0.2811594, 0.489375, 0.3169082]},
+        {"near": "4400", "bounds": [0.536875, 0.3082126, 0.548125, 0.4483092]},
+        {"near": "4400", "bounds": [0.535625, 0.2811594, 0.5475, 0.3169082]},
+        {"near": "4010", "bounds": [0.23375, 0.3826087, 0.295, 0.4009662]},
+        {"near": "4010", "bounds": [0.280625, 0.3855072, 0.29375, 0.436715]},
+        {"near": "4055", "bounds": [0.766875, 0.4743961, 0.798125, 0.5256039]},
+        {"near": "4068", "bounds": [0.80875, 0.3478261, 0.836875, 0.3623188]},
+        {"near": "S490", "bounds": [0.9571895, 0.444933, 0.9678105, 0.4613472]},
+        {"near": "S400", "bounds": [0.0657679, 0.4324495, 0.0763889, 0.4488637]},
+        {"near": "S420", "bounds": [0.310049, 0.4627525, 0.32067, 0.4791667]},
+        {"near": "S450", "bounds": [0.7031045, 0.4627525, 0.7137255, 0.4791667]},
+        {"near": "4038", "bounds": [0.5198529, 0.4151515, 0.5304739, 0.4315657]},
+        {"near": "4200", "bounds": [0.47625, 0.3033816, 0.490625, 0.4357488]},
+        {"near": "4400", "bounds": [0.533125, 0.3033816, 0.54875, 0.4376812]},
+        {"near": "4208", "bounds": [0.47625, 0.2811594, 0.49, 0.3169082]},
+        {"near": "4408", "bounds": [0.533125, 0.2811594, 0.54875, 0.3169082]},
+        {"near": "4018X", "bounds": [0.2975, 0.3806763, 0.38125, 0.3942029]},
+        {"near": "4018X", "bounds": [0.29375, 0.3797101, 0.37375, 0.3961353]},
+        {"near": "4055", "bounds": [0.765625, 0.468599, 0.8, 0.5294686]}
+      ],
+      "cadInteriorBounds": [
+        [[0.076875, 0.3140097], [0.944375, 0.3140097], [0.944375, 0.589372], [0.076875, 0.589372]],
+        [[0.05, 0.3710145], [0.0775, 0.3710145], [0.0775, 0.47343], [0.05, 0.47343]],
+        [[0.94375, 0.3729469], [0.97125, 0.3729469], [0.97125, 0.47343], [0.94375, 0.47343]],
+        [[0.475, 0.2019324], [0.5475, 0.2019324], [0.5475, 0.3140097], [0.475, 0.3140097]]
+      ],
+      "cadFrontages": [
+        {"label": "4208", "feature": "corridor", "point": [0.483125, 0.2898551]},
+        {"label": "4408", "feature": "corridor", "point": [0.543125, 0.2917874]},
+        {"label": "4400", "feature": "corridor", "point": [0.541875, 0.3748792]},
+        {"label": "4018X", "feature": "corridor", "point": [0.333125, 0.389372]},
+        {"label": "4061", "feature": "door", "point": [0.804375, 0.5140097]},
+        {"label": "4002", "feature": "door", "point": [0.08875, 0.4454106]}
+      ],
+      "cadSuiteAreas": [
+        [0.19625, 0.3140097, 0.473125, 0.4270531],
+        [0.62, 0.3149758, 0.6725, 0.4338164],
+        [0.73, 0.47343, 0.943125, 0.5864734]
+      ],
+      "cadAreaArrivals": [
+        {"label": "4018", "feature": "room-area", "point": [0.3890931, 0.3586648]}
+      ],
+      "cadSharedSuites": [
+        {"entrance": "4052", "rooms": ["4059"], "basis": "The storage room 4059 opens into 4052. The route to this shared entrance ends outside the storage area.", "threshold": [0.6315033, 0.4339015]}
       ]
     },
     {
@@ -1852,7 +2279,19 @@
     {
       "planId": "SW3-F1-p1",
       "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
-      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
+      "basis": "Corridor 1700 runs along the north walls of the lecture rooms from the west vestibule to the reviewed lobby 1602 passage. Its southern wall contains the outward-swinging door to AV room 1730.",
+      "areas": [
+        [[0.322, 0.472], [0.479, 0.472], [0.479, 0.4905], [0.322, 0.4905]]
+      ],
+      "corridorDoorways": [
+        {
+          "room": "1730",
+          "corridor": "1700",
+          "threshold": [0.3948471, 0.4912007],
+          "point": [0.3948529, 0.4804293],
+          "basis": "The public approach is just beyond the door swing on corridor 1700. The printed corridor caption overlaps the normal sampling position and stair treads separate the room label from the threshold."
+        }
+      ],
       "corridorSeeds": [
         [
           0.251634,
@@ -2759,6 +3198,567 @@
             0.1285024
           ]
         }
+      ]
+    },
+    {
+      "planId": "SW1-F1-p1",
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "basis": "Named circulation, suite extents and approaches were read on this official Burnaby sheet. The compiler clips through routes to public circulation and uses the floor slab only for individual terminal approaches.",
+      "areas": [
+        [
+          [
+            0.39,
+            0.3922705
+          ],
+          [
+            0.803125,
+            0.3922705
+          ],
+          [
+            0.803125,
+            0.4144928
+          ],
+          [
+            0.39,
+            0.4144928
+          ]
+        ]
+      ],
+      "passageOpenings": [
+        {
+          "swings": [
+            "curve-1109",
+            "curve-1112"
+          ],
+          "basis": "The inner pair between corridor 1290 and vestibule 1098."
+        },
+        {
+          "swings": [
+            "curve-1146",
+            "curve-1149"
+          ],
+          "basis": "The outer pair at the reviewed vestibule 1098 doorway."
+        }
+      ],
+      "accessPoints": [
+        {
+          "label": "S190",
+          "point": [
+            0.780625,
+            0.3971014
+          ],
+          "basis": "Vestibule landing at the corridor foot of S190 on the first-floor drawing."
+        }
+      ],
+      "cadLayers": {
+        "partition": [
+          "1710-XSW01 BASE PLAN$0$EX-BUILDING",
+          "1710-XSW01 BASE PLAN$0$EX-WALL",
+          "1710-XSW01 BASE PLAN$0$EX-WINDOW",
+          "A-GLAZ-CWMG",
+          "A-SILL",
+          "A-STEEL",
+          "A-WALL",
+          "A-WALL HATCH",
+          "A-WINDOW",
+          "EX-BUILDING",
+          "EX-WALL",
+          "EXISTING-BUILDING",
+          "GLAZE",
+          "I-NEW WALL",
+          "I-NEW WINDOW",
+          "JAMB",
+          "PLAN CONCRETE",
+          "PLAN CONCRETE BLOCK",
+          "SILL",
+          "STRUCT-COL",
+          "WALL",
+          "X-PLAN$0$A-DOOR-JAMB",
+          "X-PLAN$0$A-DRYWALL-CUT",
+          "X-PLAN$0$A-GLAZ-INT",
+          "X-PLAN$0$A-GLZEXTR",
+          "X-PLAN$0$A-MILL-WALL",
+          "X-PLAN$0$A-STUD-COMPONENT",
+          "X-PLAN$0$A-WALL",
+          "X-PLAN$0$A-WALL-INTR-RENO"
+        ],
+        "doors": [
+          "1710-XSW01 BASE PLAN$0$EX-DOOR",
+          "A-DOOR",
+          "DOOR",
+          "I-NEW DOOR",
+          "PLAN DOORS & WINDOWS",
+          "X-PLAN$0$DOOR"
+        ],
+        "annotation": [
+          "0",
+          "A-DEMO",
+          "GROUNDS",
+          "GUIDES",
+          "NOTES-ALWAYS VISIBLE",
+          "RM",
+          "TEXT",
+          "TITLE",
+          "X-PLAN$0$A-HATCH",
+          "X-PLAN$0$SECTION-OBJECT",
+          "XREF"
+        ]
+      },
+      "cadPublicAreas": [
+        {"near": "1290", "bounds": [0.323125, 0.3913043, 0.77125, 0.4144928]},
+        {"near": "1290", "bounds": [0.77, 0.3903382, 0.80375, 0.4144928]},
+        {"near": "1020", "bounds": [0.319375, 0.3922705, 0.38625, 0.4144928]},
+        {"near": "1020", "bounds": [0.339375, 0.4144928, 0.35, 0.4705314]},
+        {"near": "1200", "bounds": [0.434375, 0.1101449, 0.455, 0.4019324]},
+        {"near": "1400", "bounds": [0.54375, 0.1004831, 0.55875, 0.3942029]},
+        {"near": "1400", "bounds": [0.441875, 0.1111111, 0.54875, 0.1333333]},
+        {"near": "1101", "bounds": [0.32875, 0.4898551, 0.390625, 0.5748792]},
+        {"near": "1131", "bounds": [0.325625, 0.5884058, 0.3325, 0.778744]},
+        {"near": "1180", "bounds": [0.345, 0.7855072, 0.39875, 0.8154589]},
+        {"near": "1300", "bounds": [0.395625, 0.7855072, 0.449375, 0.821256]},
+        {"near": "1300", "bounds": [0.39875, 0.7690821, 0.435, 0.7932367]},
+        {"near": "1500", "bounds": [0.63875, 0.4009662, 0.6525, 0.8057971]},
+        {"near": "1500", "bounds": [0.65, 0.5333333, 0.679375, 0.5758454]},
+        {"near": "1345", "bounds": [0.446875, 0.7855072, 0.611875, 0.821256]},
+        {"near": "1345", "bounds": [0.610625, 0.7864734, 0.650625, 0.8038647]},
+        {"near": "1213", "bounds": [0.3725, 0.1149758, 0.386875, 0.178744]},
+        {"near": "1452", "bounds": [0.695625, 0.1487923, 0.709375, 0.2869565]},
+        {"near": "1452", "bounds": [0.685, 0.2850242, 0.71, 0.3169082]},
+        {"near": "1015", "bounds": [0.24625, 0.4357488, 0.284375, 0.4570048]},
+        {"near": "1178", "bounds": [0.3375, 0.7478261, 0.3925, 0.7574879]},
+        {"near": "S190", "bounds": [0.7753145, 0.3888943, 0.7859355, 0.4053085]},
+        {"near": "S100", "bounds": [0.216013, 0.4034091, 0.226634, 0.4198233]},
+        {"near": "S120", "bounds": [0.3574346, 0.4520202, 0.3680556, 0.4684344]},
+        {"near": "S140", "bounds": [0.6149509, 0.4097222, 0.6255719, 0.4261364]},
+        {"near": "S119", "bounds": [0.3443627, 0.7910353, 0.3549837, 0.8074495]},
+        {"near": "S130", "bounds": [0.4340686, 0.9015152, 0.4414216, 0.9128788]},
+        {"near": "S160", "bounds": [0.6499183, 0.7872474, 0.6605393, 0.8036616]},
+        {"near": "S131", "bounds": [0.4346405, 0.7342172, 0.4419935, 0.7455808]},
+        {"near": "1040", "bounds": [0.502696, 0.3775252, 0.513317, 0.3939394]},
+        {"near": "1301", "bounds": [0.4300653, 0.8084596, 0.4406863, 0.8248738]},
+        {"near": "1131", "bounds": [0.324375, 0.5748792, 0.3325, 0.7864734]},
+        {"near": "1020", "bounds": [0.320625, 0.3922705, 0.3875, 0.4144928]},
+        {"near": "1020", "bounds": [0.33625, 0.410628, 0.354375, 0.4676329]},
+        {"near": "1000", "bounds": [0.285, 0.4144928, 0.29625, 0.4483092]},
+        {"near": "1213", "bounds": [0.36125, 0.1797101, 0.383125, 0.1990338]},
+        {"near": "1341", "bounds": [0.50375, 0.8241546, 0.559375, 0.8396135]},
+        {"near": "1331", "bounds": [0.46875, 0.8676329, 0.510625, 0.8821256]},
+        {"near": "1047", "bounds": [0.603125, 0.4173913, 0.610625, 0.4657005]},
+        {"near": "1500", "bounds": [0.63875, 0.4830918, 0.654375, 0.8086957]},
+        {"near": "1180", "bounds": [0.344375, 0.7835749, 0.3975, 0.810628]},
+        {"near": "1300", "bounds": [0.391875, 0.7826087, 0.4475, 0.8193237]},
+        {"near": "1302", "bounds": [0.39875, 0.5768116, 0.423125, 0.7961353]},
+        {"near": "1302", "bounds": [0.42, 0.7362319, 0.43375, 0.7932367]},
+        {"near": "1303", "bounds": [0.4, 0.494686, 0.595625, 0.505314]},
+        {"near": "1303", "bounds": [0.401875, 0.5642512, 0.596875, 0.5777778]},
+        {"near": "1303", "bounds": [0.400625, 0.4985507, 0.41125, 0.5806763]},
+        {"near": "1303", "bounds": [0.58875, 0.5014493, 0.5975, 0.5758454]},
+        {"near": "1042", "bounds": [0.506875, 0.3806763, 0.52125, 0.3961353]},
+        {"near": "1403", "bounds": [0.538125, 0.3748792, 0.555625, 0.3971014]},
+        {"near": "1208", "bounds": [0.44625, 0.342029, 0.456875, 0.3845411]},
+        {"near": "1000", "bounds": [0.28, 0.4086957, 0.29625, 0.4512077]},
+        {"near": "1000", "bounds": [0.259375, 0.4135266, 0.2825, 0.4425121]},
+        {"near": "1341", "bounds": [0.506875, 0.8222222, 0.559375, 0.8425121]},
+        {"near": "1331", "bounds": [0.466875, 0.8695652, 0.51, 0.8850242]},
+        {"near": "1378", "bounds": [0.61125, 0.573913, 0.625625, 0.6096618]},
+        {"near": "1500", "bounds": [0.6375, 0.4821256, 0.65375, 0.8086957]},
+        {"near": "1213", "bounds": [0.364375, 0.1806763, 0.38875, 0.1980676]},
+        {"near": "1501", "bounds": [0.610625, 0.5342995, 0.67875, 0.5758454]},
+        {"near": "1302", "bounds": [0.3975, 0.5826087, 0.420625, 0.7913043]},
+        {"near": "1042", "bounds": [0.51125, 0.3777778, 0.529375, 0.3922705]},
+        {"near": "1290", "bounds": [0.38625, 0.389372, 0.770625, 0.4164251]},
+        {"near": "1452", "bounds": [0.634375, 0.1797101, 0.64, 0.2724638]},
+        {"near": "1500", "bounds": [0.638125, 0.7797101, 0.65625, 0.8222222]},
+        {"near": "1331", "bounds": [0.466875, 0.8676329, 0.508125, 0.884058]},
+        {"near": "1047", "bounds": [0.604375, 0.4183575, 0.6125, 0.468599]},
+        {"near": "1180", "bounds": [0.336875, 0.7507246, 0.35, 0.8038647]},
+        {"near": "1180", "bounds": [0.336875, 0.7816425, 0.398125, 0.8125604]},
+        {"near": "1178", "bounds": [0.324375, 0.7371981, 0.360625, 0.7574879]},
+        {"near": "1300", "bounds": [0.428125, 0.7826087, 0.46125, 0.8125604]},
+        {"near": "1320", "bounds": [0.44625, 0.7835749, 0.483125, 0.8115942]},
+        {"near": "1528", "bounds": [0.6525, 0.6879227, 0.670625, 0.7111111]},
+        {"near": "1302", "bounds": [0.4019608, 0.6142298, 0.4078432, 0.6233208], "basis": "Floor-side approach to the marked first-floor passage."},
+        {"near": "1120", "bounds": [0.3861928, 0.6142298, 0.3920752, 0.6233208], "basis": "Floor-side approach to the marked first-floor passage."},
+        {"near": "1302", "bounds": [0.4019608, 0.666452, 0.4078432, 0.675543], "basis": "Floor-side approach to the marked first-floor passage."},
+        {"near": "1130", "bounds": [0.3861928, 0.666452, 0.3920752, 0.675543], "basis": "Floor-side approach to the marked first-floor passage."},
+        {"near": "1302", "bounds": [0.4019608, 0.6850631, 0.4078432, 0.6941541], "basis": "Floor-side approach to the marked first-floor passage."},
+        {"near": "1160", "bounds": [0.3861928, 0.6850631, 0.3920752, 0.6941541], "basis": "Floor-side approach to the marked first-floor passage."},
+        {"near": "1302", "bounds": [0.4019608, 0.7374368, 0.4078432, 0.7465278], "basis": "Floor-side approach to the marked first-floor passage."},
+        {"near": "1170", "bounds": [0.3861928, 0.7374368, 0.3920752, 0.7465278], "basis": "Floor-side approach to the marked first-floor passage."},
+        {"near": "1302", "bounds": [0.411683, 0.7709596, 0.4175654, 0.7800506], "basis": "Floor-side approach to the marked first-floor passage."},
+        {"near": "1300", "bounds": [0.411683, 0.7883838, 0.4175654, 0.7974748], "basis": "Floor-side approach to the marked first-floor passage."},
+        {"near": "1020", "bounds": [0.3203431, 0.3969697, 0.3262255, 0.4060607], "basis": "Floor-side approach to the marked first-floor passage."},
+        {"near": "1000", "bounds": [0.2892157, 0.4224747, 0.2950981, 0.4315657], "basis": "Floor-side approach to the marked first-floor passage."},
+        {"near": "1101", "bounds": [0.3307189, 0.4967171, 0.3366013, 0.5058081], "basis": "Floor-side approach to the marked first-floor passage."}
+      ],
+      "cadInteriorBounds": [
+        [[0.211875, 0.3439614], [0.77, 0.3439614], [0.77, 0.4879227], [0.211875, 0.4879227]],
+        [[0.324375, 0.315942], [0.769375, 0.315942], [0.769375, 0.3429952], [0.324375, 0.3429952]],
+        [[0.77, 0.3536232], [0.785, 0.3536232], [0.785, 0.4154589], [0.77, 0.4154589]],
+        [[0.785, 0.389372], [0.805, 0.389372], [0.805, 0.4154589], [0.785, 0.4154589]],
+        [[0.34125, 0.0405797], [0.63375, 0.0405797], [0.63375, 0.1777778], [0.34125, 0.1777778]],
+        [[0.365, 0.1768116], [0.63375, 0.1768116], [0.63375, 0.3371981], [0.365, 0.3371981]],
+        [[0.634375, 0.1797101], [0.693125, 0.1797101], [0.693125, 0.3140097], [0.634375, 0.3140097]],
+        [[0.695, 0.1478261], [0.739375, 0.1478261], [0.739375, 0.3169082], [0.695, 0.3169082]],
+        [[0.710625, 0.0376812], [0.73875, 0.0376812], [0.73875, 0.1487923], [0.710625, 0.1487923]],
+        [[0.31875, 0.4898551], [0.39625, 0.4898551], [0.39625, 0.573913], [0.31875, 0.573913]],
+        [[0.3075, 0.5777778], [0.3975, 0.5777778], [0.3975, 0.8550725], [0.3075, 0.8550725]],
+        [[0.63875, 0.4879227], [0.678125, 0.4879227], [0.678125, 0.7797101], [0.63875, 0.7797101]],
+        [[0.655, 0.5777778], [0.691875, 0.5777778], [0.691875, 0.7835749], [0.655, 0.7835749]],
+        [[0.39875, 0.7835749], [0.6775, 0.7835749], [0.6775, 0.8251208], [0.39875, 0.8251208]],
+        [[0.428125, 0.8251208], [0.7025, 0.8251208], [0.7025, 0.9188406], [0.428125, 0.9188406]],
+        [[0.46625, 0.6144928], [0.6375, 0.6144928], [0.6375, 0.7864734], [0.46625, 0.7864734]],
+        [[0.395, 0.5777778], [0.4675, 0.5777778], [0.4675, 0.7874396], [0.395, 0.7874396]],
+        [[0.466875, 0.578744], [0.639375, 0.578744], [0.639375, 0.6144928], [0.466875, 0.6144928]]
+      ],
+      "cadFrontages": [
+        {"label": "1213", "feature": "corridor", "point": [0.379375, 0.1884058]},
+        {"label": "1047", "feature": "corridor", "point": [0.606875, 0.4463768]},
+        {"label": "1341", "feature": "corridor", "point": [0.51875, 0.8309179]},
+        {"label": "1016", "feature": "door", "point": [0.26875, 0.3835749]},
+        {"label": "1010", "feature": "door", "point": [0.2825, 0.4164251]},
+        {"label": "1106", "feature": "door", "point": [0.39125, 0.5797101]},
+        {"label": "1050", "feature": "door", "point": [0.585625, 0.389372]},
+        {"label": "1329", "feature": "door", "point": [0.4925, 0.8763285]},
+        {"label": "1330", "feature": "door", "point": [0.490625, 0.8714976]},
+        {"label": "1314", "feature": "door", "point": [0.486875, 0.7304348]},
+        {"label": "1315", "feature": "door", "point": [0.49125, 0.7149758]},
+        {"label": "1550D", "feature": "door", "point": [0.616875, 0.7169082]},
+        {"label": "1002", "feature": "open-front", "point": [0.2675, 0.4338164]},
+        {"label": "1592", "feature": "open-front", "point": [0.644375, 0.87343]},
+        {"label": "1375", "feature": "open-front", "point": [0.61, 0.6231884]},
+        {"label": "1310", "feature": "open-front", "point": [0.486875, 0.6647343]},
+        {"label": "1360", "feature": "open-front", "point": [0.594375, 0.6637681]},
+        {"label": "1374", "feature": "open-front", "point": [0.609375, 0.67343]},
+        {"label": "S146", "feature": "landing", "point": [0.6325, 0.2550725]},
+        {"label": "S145", "feature": "landing", "point": [0.6025, 0.2512077]}
+      ],
+      "cadSuiteAreas": [
+        [0.296875, 0.3429952, 0.3225, 0.4705314],
+        [0.396875, 0.5777778, 0.46875, 0.7932367],
+        [0.46375, 0.6135266, 0.635, 0.7826087],
+        [0.4675, 0.8202899, 0.698125, 0.9178744],
+        [0.61125, 0.5719807, 0.691875, 0.7826087],
+        [0.39625, 0.4985507, 0.6, 0.5797101],
+        [0.693125, 0.1439614, 0.71, 0.3178744],
+        [0.46875, 0.8405797, 0.506875, 0.8521739],
+        [0.59, 0.6115942, 0.6, 0.7768116],
+        [0.500625, 0.6164251, 0.50875, 0.7797101],
+        [0.495625, 0.6164251, 0.565625, 0.6318841]
+      ],
+      "cadAreaArrivals": [
+        {"label": "1260", "feature": "room-area", "point": [0.4930045, 0.1542771]},
+        {"label": "S148", "feature": "stair-foot", "point": [0.5892565, 0.1538826]},
+        {"label": "S128", "feature": "stair-foot", "point": [0.416156, 0.0978535]},
+        {"label": "S129", "feature": "stair-foot", "point": [0.5481516, 0.0903567]},
+        {"label": "1507", "feature": "door-side", "point": [0.6451695, 0.4332386]},
+        {"label": "1350", "feature": "room-area", "point": [0.5272161, 0.7082544]},
+        {"label": "1305", "feature": "door-side", "point": [0.4973448, 0.4995265]},
+        {"label": "1303D", "feature": "door-side", "point": [0.5836397, 0.5725221]}
+      ],
+      "cadThresholdStations": [
+        {"label": "1305", "threshold": [0.4994935, 0.5060985], "side": "swing"},
+        {"label": "1306", "threshold": [0.5102124, 0.5060985], "side": "swing"},
+        {"label": "1307", "threshold": [0.5286928, 0.5060985], "side": "swing"},
+        {"label": "1308", "threshold": [0.5440033, 0.5060985], "side": "swing"},
+        {"label": "1303B", "threshold": [0.5629902, 0.5767677], "side": "opposite"},
+        {"label": "1505", "threshold": [0.6382353, 0.4258838], "side": "swing"},
+        {"label": "1507", "threshold": [0.6382353, 0.4409091], "side": "swing"}
+      ],
+      "cadSharedSuites": [
+        {"entrance": "1220", "rooms": ["1224"], "basis": "The inner storage door opens from 1220 on the original plan.", "threshold": [0.4559069, 0.3367298]},
+        {"entrance": "1303B", "rooms": ["1303A", "1303C"], "basis": "Two interior doors in office 1303B serve these offices. Use the exterior suite entrance when the individual approach does not resolve.", "threshold": [0.5629902, 0.5767677]}
+      ],
+      "cadReviewedDoors": {
+        "1120": {
+          "nodeId": "c71e49df-82e7-4a33-ab70-e8a553101fd3",
+          "version": 1,
+          "point": [
+            0.389134,
+            0.6187753
+          ]
+        },
+        "1130": {
+          "nodeId": "fbff3c89-b839-441f-a3e0-b251eb80852c",
+          "version": 1,
+          "point": [
+            0.389134,
+            0.6709975
+          ]
+        },
+        "1160": {
+          "nodeId": "40b4e0d2-6786-4e82-a444-d034ddb26178",
+          "version": 1,
+          "point": [
+            0.389134,
+            0.6896086
+          ]
+        },
+        "1170": {
+          "nodeId": "03b8f40f-5003-4b70-bc65-b417b5e8739d",
+          "version": 1,
+          "point": [
+            0.389134,
+            0.7419823
+          ]
+        }
+      },
+      "cadDoorSills": [
+        {"between": ["1300", "1320"], "threshold": [0.4549755, 0.7907071], "layer": "PLAN CONCRETE", "line": [[556.2, 622.44], [556.2, 628.38]], "occurrences": 2, "basis": "Two coincident fine sill strokes span only the leaf at the door between lobby 1300 and lobby 1320. Structural wall returns terminate on each side of the aperture."}
+      ],
+      "visitorRestrictions": [
+        {
+          "candidateId": "sw1-f1-visitor-access-1494-via-1498",
+          "definitionHash": "e8e0380929c696cb7efe86c4eb416569b3ac098ef261c4c5662f65126fe267cd",
+          "presentedHash": "ddd8d991ac71790857970cc37a402efa3c1a470edea8a4eac50cb05519ad1389",
+          "previousAnswerId": null,
+          "label": "1494",
+          "via": "1498",
+          "access": "staff-only",
+          "basis": "user-confirmation",
+          "areas": [
+            [
+              [
+                0.593125,
+                0.0657005
+              ],
+              [
+                0.6125,
+                0.0657005
+              ],
+              [
+                0.6125,
+                0.0985507
+              ],
+              [
+                0.605625,
+                0.0985507
+              ],
+              [
+                0.605625,
+                0.1082126
+              ],
+              [
+                0.593125,
+                0.1082126
+              ]
+            ],
+            [
+              [
+                0.611875,
+                0.0376812
+              ],
+              [
+                0.635,
+                0.0376812
+              ],
+              [
+                0.635,
+                0.1091787
+              ],
+              [
+                0.605625,
+                0.1091787
+              ],
+              [
+                0.605625,
+                0.0975845
+              ],
+              [
+                0.611875,
+                0.0975845
+              ]
+            ]
+          ]
+        }
+      ]
+    },
+    {
+      "planId": "SW1-F2-p1",
+      "sourceSha256": "37ab5548156a14f390b7d51010172c3ba7975744fb47ee441eee3586f5ce639b",
+      "basis": "Named circulation, suite extents and approaches were read on this official Burnaby sheet. The compiler clips through routes to public circulation and uses the floor slab only for individual terminal approaches.",
+      "areas": [
+        [
+          [
+            0.3025,
+            0.4067633
+          ],
+          [
+            0.815,
+            0.4067633
+          ],
+          [
+            0.815,
+            0.4231884
+          ],
+          [
+            0.3025,
+            0.4231884
+          ]
+        ]
+      ],
+      "passageOpenings": [
+        {
+          "swings": [
+            "curve-194",
+            "curve-195"
+          ],
+          "basis": "The pair between corridor 2000 and S290. Two lines on A-FLOR mark floor finishes through the doorway.",
+          "floorFinishLines": [
+            "line-11798",
+            "line-11800"
+          ]
+        }
+      ],
+      "accessPoints": [
+        {
+          "label": "S290",
+          "point": [
+            0.809375,
+            0.4125604
+          ],
+          "basis": "The corridor-side landing at the foot of S290."
+        }
+      ],
+      "cadLayers": {
+        "partition": [
+          "A-FLOR-HRAL",
+          "A-GLAZ-CURT",
+          "A-WINDOWS",
+          "E-WALL",
+          "I-WALL",
+          "S-COLS",
+          "WALL"
+        ],
+        "doors": [
+          "A-DOOR"
+        ],
+        "annotation": [
+          "0",
+          "A-FLOR",
+          "A-ROOF",
+          "A-ROOF-PATT",
+          "RM",
+          "S-BEAM",
+          "S-STRS-IDEN",
+          "TEXT",
+          "TITLE"
+        ]
+      },
+      "cadPublicAreas": [
+        {"near": "2000", "bounds": [0.299375, 0.4038647, 0.813125, 0.4270531]},
+        {"near": "2100", "bounds": [0.409375, 0.4115942, 0.423125, 0.5990338]},
+        {"near": "2100", "bounds": [0.41, 0.5758454, 0.45625, 0.6067633]},
+        {"near": "2500", "bounds": [0.679375, 0.4115942, 0.6925, 0.778744]},
+        {"near": "2500", "bounds": [0.645625, 0.573913, 0.689375, 0.6086957]},
+        {"near": "2300", "bounds": [0.45, 0.5758454, 0.645625, 0.6086957]},
+        {"near": "2180", "bounds": [0.404375, 0.763285, 0.495, 0.7864734]},
+        {"near": "2302", "bounds": [0.506875, 0.5990338, 0.525, 0.6927536]},
+        {"near": "2301", "bounds": [0.5025, 0.763285, 0.68625, 0.7816425]},
+        {"near": "2314", "bounds": [0.618125, 0.7816425, 0.625625, 0.8637681]},
+        {"near": "2314", "bounds": [0.50875, 0.8028986, 0.625625, 0.8135266]},
+        {"near": "2314", "bounds": [0.510625, 0.8541063, 0.730625, 0.8637681]},
+        {"near": "2593", "bounds": [0.691875, 0.7555556, 0.7275, 0.7690821]},
+        {"near": "2200", "bounds": [0.53125, 0.3352657, 0.5375, 0.4096618]},
+        {"near": "2200", "bounds": [0.531875, 0.2937198, 0.546875, 0.3333333]},
+        {"near": "2400", "bounds": [0.5625, 0.3352657, 0.5725, 0.410628]},
+        {"near": "2400", "bounds": [0.55625, 0.294686, 0.5725, 0.3371981]},
+        {"near": "2131", "bounds": [0.39875, 0.5990338, 0.411875, 0.7671498]},
+        {"near": "2131", "bounds": [0.408125, 0.7362319, 0.44375, 0.7642512]},
+        {"near": "S290", "bounds": [0.8040645, 0.4043533, 0.8146855, 0.4207675]},
+        {"near": "S200", "bounds": [0.2948529, 0.4042929, 0.3054739, 0.4207071]},
+        {"near": "S220", "bounds": [0.433415, 0.4135101, 0.444036, 0.4299243]},
+        {"near": "S250", "bounds": [0.6589052, 0.4147727, 0.6695262, 0.4311869]},
+        {"near": "S219", "bounds": [0.4023692, 0.7683081, 0.4129902, 0.7847223]},
+        {"near": "S230", "bounds": [0.4995915, 0.8137626, 0.5069445, 0.8251262]},
+        {"near": "S260", "bounds": [0.688317, 0.7670454, 0.698938, 0.7834596]},
+        {"near": "S231", "bounds": [0.4925653, 0.6887626, 0.4999183, 0.7001262]},
+        {"near": "2036", "bounds": [0.5531862, 0.3905303, 0.5638072, 0.4069445]},
+        {"near": "2325", "bounds": [0.4879902, 0.7878788, 0.4986112, 0.804293]},
+        {"near": "2000", "bounds": [0.29, 0.4, 0.814375, 0.4241546]},
+        {"near": "2180", "bounds": [0.388125, 0.7681159, 0.50125, 0.7864734]},
+        {"near": "2301", "bounds": [0.500625, 0.7623188, 0.689375, 0.7835749]},
+        {"near": "2318", "bounds": [0.51, 0.7980676, 0.64125, 0.8115942]},
+        {"near": "2314", "bounds": [0.505, 0.8521739, 0.735625, 0.868599]},
+        {"near": "2314", "bounds": [0.509375, 0.7990338, 0.518125, 0.868599]},
+        {"near": "2314", "bounds": [0.54875, 0.8, 0.5575, 0.8657005]},
+        {"near": "2314", "bounds": [0.586875, 0.8038647, 0.594375, 0.868599]},
+        {"near": "2300", "bounds": [0.459375, 0.7623188, 0.51, 0.7990338]},
+        {"near": "2208", "bounds": [0.531875, 0.2927536, 0.54, 0.3352657]},
+        {"near": "2408", "bounds": [0.563125, 0.2937198, 0.571875, 0.3352657]},
+        {"near": "2446", "bounds": [0.593125, 0.0801932, 0.6, 0.1410628]},
+        {"near": "2446", "bounds": [0.594375, 0.1285024, 0.631875, 0.142029]},
+        {"near": "2582", "bounds": [0.6825, 0.7758454, 0.69625, 0.8144928]},
+        {"near": "2500", "bounds": [0.67875, 0.4125604, 0.69375, 0.7826087]},
+        {"near": "2532", "bounds": [0.68375, 0.4985507, 0.695625, 0.5797101]},
+        {"near": "2391", "bounds": [0.5875, 0.6115942, 0.5975, 0.7690821]},
+        {"near": "2462", "bounds": [0.594375, 0.1304348, 0.675625, 0.1439614]},
+        {"near": "2462", "bounds": [0.59375, 0.0850242, 0.603125, 0.1400966]},
+        {"near": "2301", "bounds": [0.505, 0.7642512, 0.6875, 0.7816425]},
+        {"near": "2391", "bounds": [0.58875, 0.610628, 0.5975, 0.7700483]},
+        {"near": "2391", "bounds": [0.52625, 0.6521739, 0.59375, 0.6647343]},
+        {"near": "2318", "bounds": [0.51, 0.7990338, 0.6125, 0.8115942]},
+        {"near": "2570", "bounds": [0.64625, 0.7391304, 0.68875, 0.7642512]},
+        {"near": "2302", "bounds": [0.493125, 0.694686, 0.509375, 0.7062802]},
+        {"near": "2302", "bounds": [0.501875, 0.6811594, 0.510625, 0.7652174]},
+        {"near": "2310", "bounds": [0.624375, 0.7768116, 0.67125, 0.8096618]},
+        {"near": "2318", "bounds": [0.509375, 0.7980676, 0.64125, 0.8125604]},
+        {"near": "2408", "bounds": [0.56, 0.3178744, 0.5725, 0.3468599]},
+        {"near": "2208", "bounds": [0.530625, 0.3178744, 0.54375, 0.3468599]}
+      ],
+      "cadInteriorBounds": [
+        [[0.30125, 0.3342995], [0.801875, 0.3342995], [0.801875, 0.4927536], [0.30125, 0.4927536]],
+        [[0.286875, 0.3719807], [0.3025, 0.3719807], [0.3025, 0.4270531], [0.286875, 0.4270531]],
+        [[0.801875, 0.3690821], [0.816875, 0.3690821], [0.816875, 0.426087], [0.801875, 0.426087]],
+        [[0.53125, 0.2714976], [0.5725, 0.2714976], [0.5725, 0.3342995], [0.53125, 0.3342995]],
+        [[0.385, 0.494686], [0.458125, 0.494686], [0.458125, 0.7661836], [0.385, 0.7661836]],
+        [[0.375625, 0.5748792], [0.385625, 0.5748792], [0.385625, 0.7661836], [0.375625, 0.7661836]],
+        [[0.645625, 0.4937198], [0.71875, 0.4937198], [0.71875, 0.5729469], [0.645625, 0.5729469]],
+        [[0.645625, 0.5719807], [0.72875, 0.5719807], [0.72875, 0.7671498], [0.645625, 0.7671498]],
+        [[0.4575, 0.5758454], [0.64625, 0.5758454], [0.64625, 0.6096618], [0.4575, 0.6096618]],
+        [[0.510625, 0.610628], [0.61375, 0.610628], [0.61375, 0.7642512], [0.49875, 0.7642512]],
+        [[0.371875, 0.7652174], [0.73, 0.7652174], [0.73, 0.8231884], [0.371875, 0.8231884]],
+        [[0.48875, 0.821256], [0.73625, 0.821256], [0.73625, 0.8937198], [0.48875, 0.8937198]],
+        [[0.46875, 0.0792271], [0.550625, 0.0792271], [0.550625, 0.2057971], [0.46875, 0.2057971]],
+        [[0.5925, 0.0792271], [0.675625, 0.0792271], [0.675625, 0.2048309], [0.5925, 0.2048309]],
+        [[0.614375, 0.2067633], [0.67625, 0.2067633], [0.67625, 0.2705314], [0.614375, 0.2705314]]
+      ],
+      "cadFrontages": [
+        {"label": "2208", "feature": "corridor", "point": [0.535, 0.3207729]},
+        {"label": "2408", "feature": "corridor", "point": [0.5675, 0.3207729]},
+        {"label": "2462", "feature": "corridor", "point": [0.609375, 0.1381643]},
+        {"label": "2310", "feature": "corridor", "point": [0.640625, 0.7874396]},
+        {"label": "2582", "feature": "corridor", "point": [0.689375, 0.7990338]},
+        {"label": "2532", "feature": "corridor", "point": [0.695625, 0.5584541]},
+        {"label": "2314", "feature": "corridor", "point": [0.588125, 0.8570048]},
+        {"label": "2055", "feature": "door", "point": [0.70375, 0.4164251]},
+        {"label": "2056", "feature": "door", "point": [0.615, 0.4096618]},
+        {"label": "2381", "feature": "door", "point": [0.5925, 0.6183575]},
+        {"label": "2378", "feature": "door", "point": [0.575, 0.6570048]},
+        {"label": "2332", "feature": "open-front", "point": [0.561875, 0.8135266]},
+        {"label": "2337", "feature": "open-front", "point": [0.519375, 0.8454106]},
+        {"label": "2302", "feature": "open-front", "point": [0.51125, 0.6792271]},
+        {"label": "2303", "feature": "open-front", "point": [0.575625, 0.5932367]},
+        {"label": "2306", "feature": "open-front", "point": [0.49125, 0.5922705]},
+        {"label": "2307", "feature": "open-front", "point": [0.451875, 0.5410628]},
+        {"label": "2518", "feature": "open-front", "point": [0.65, 0.5555556]}
+      ],
+      "cadSuiteAreas": [
+        [0.525625, 0.6096618, 0.615625, 0.763285],
+        [0.51, 0.7835749, 0.730625, 0.8908213],
+        [0.39625, 0.5729469, 0.455, 0.763285],
+        [0.59625, 0.0801932, 0.674375, 0.2048309],
+        [0.47, 0.1120773, 0.550625, 0.2038647],
+        [0.61125, 0.3951691, 0.661875, 0.4028986]
+      ],
+      "cadLandingFrontages": [
+        {"nodeId": "9655a2f6-78d9-4a33-b7b5-c61eac65e0fa", "version": 1, "mark": [0.4962418, 0.6944444], "point": [0.496732, 0.6994949], "basis": "Inside the marked landing, south of its north guard and above the first tread. The east side opens to study area 2302."}
+      ],
+      "cadAreaArrivals": [
+        {"label": "2510", "feature": "room-area", "point": [0.7023591, 0.5011048]},
+        {"label": "2119", "feature": "room-area", "point": [0.3967525, 0.5942235]},
+        {"label": "2304", "feature": "room-area", "point": [0.5261949, 0.6159249]},
+        {"label": "2369", "feature": "room-area", "point": [0.5180249, 0.6912879]}
       ]
     }
   ]

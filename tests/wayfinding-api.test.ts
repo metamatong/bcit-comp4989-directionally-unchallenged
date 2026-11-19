@@ -10,6 +10,7 @@ import type { Provider, ModelPart } from '../server/provider';
 import { locationCatalogue } from '../server/geolocation';
 import { TopologyStore } from '../server/topology';
 import { reviewedNetwork } from '../server/pilot-network';
+import { floorGraphs } from '../server/floor-graph';
 import type { Session } from '../src/types';
 import type { NavigationResult, StartingPoints } from '../src/wayfinding';
 import { locationInput, labelReading, photoInput } from './photo-fixtures';
@@ -86,6 +87,36 @@ it('takes a consented photo through both stages and uses its complete reviewed r
   const points: StartingPoints = await options.json();
   expect(points.origins.map((s) => s.id)).toEqual([room.id]);
   expect(Object.keys(points).sort()).toEqual(['networkRevision', 'origins']);
+  const surface = (planId: string, role: 'origin' | 'destination', revision = match.revision) =>
+    post(prefix + '/navigation/surface', {
+      ...identifying,
+      destination: 'SW01 3175',
+      planId,
+      role,
+      revision,
+    });
+  expect((await surface('SW1-F3-p1', 'origin')).status).toBe(400);
+  expect((await surface('SW1-F3-p1', 'destination', 0)).status).toBe(409);
+  const sheet = await surface('SW1-F3-p1', 'destination');
+  expect(sheet.status).toBe(200);
+  const mesh = await sheet.json();
+  expect(mesh.runs.length).toBeGreaterThan(0);
+  expect(mesh.interiorRuns.length).toBeGreaterThan(0);
+  expect(
+    (
+      await nav({
+        ...query,
+        destination: 'SW01 3175',
+        networkRevision: points.networkRevision,
+        destinationPoint: {
+          planId: mesh.planId,
+          sourceSha256: mesh.sourceSha256,
+          graphVersion: mesh.graphVersion,
+          point: { x: 0, y: 0 },
+        },
+      })
+    ).status,
+  ).toBe(400);
   const route = await nav(query);
   expect(route.status).toBe(200);
   expect(route.headers.get('cache-control')).toBe('no-store');
@@ -247,4 +278,61 @@ it('starts from a shared locker corridor only after confirmation of the replayed
   } finally {
     modelReading = labelReading('302');
   }
+});
+
+it('uses the selected 302 sign to reach the SW03 1730 door on corridor 1700', async () => {
+  const initialCalls = provider.calls;
+  const session: Session = await (await post('', {})).json();
+  const prefix = '/' + session.id;
+  const extracted: Session = await (await post(prefix + '/photo/evidence', photoInput())).json();
+  const located: Session = await (
+    await post(
+      prefix + '/photo/location',
+      locationInput(extracted.photoEvidence!.id, extracted.revision),
+    )
+  ).json();
+  expect(located.campusLocation).toBeNull();
+  const choose = async (planId: string, revision: number) => {
+    const candidate = located.campusAnalysis!.candidates.find(
+      (c) => c.planId === planId && c.anchorLabel === '302',
+    )!;
+    const response = await post(prefix + '/actions', {
+      requestId: randomUUID(),
+      revision,
+      action: { type: 'confirm-campus-region', candidateId: candidate.id },
+    });
+    expect(response.status).toBe(200);
+    return response.json() as Promise<Session>;
+  };
+  const first = await choose('NE1-F3-p1', located.revision);
+  const chosen = await choose('SE12-F3-p1', first.revision);
+  const response = await post(prefix + '/navigation', {
+    candidateId: chosen.campusLocation!.id,
+    revision: chosen.revision,
+    destination: 'SW03 1730',
+  });
+  expect(response.status).toBe(200);
+  const journey: NavigationResult = await response.json();
+  if (journey.status !== 'route') throw Error(journey.message);
+  expect(journey.origin.planId).toBe('SE12-F3-p1');
+  expect(
+    journey.steps.filter((s) => s.kind !== 'corridor').map((s) => [s.kind, s.to.planId]),
+  ).toEqual([
+    ['building-link', 'SW3-F3-p1'],
+    ['stairs', 'SW3-F2-p1'],
+    ['stairs', 'SW3-F1-p1'],
+  ]);
+  const floor = floorGraphs().byId.get('SW3-F1-p1')!;
+  const room = floor.places.find((p) => p.label === '1730')!;
+  expect(room.doors).toHaveLength(1);
+  const [doorX, doorY] = room.doors[0];
+  const { point } = journey.destination;
+  expect(journey.destination).toMatchObject({ planId: floor.plan.id, label: '1730' });
+  expect(floor.containingCell(point)).toBe(room.cells[0]);
+  expect(Math.abs(point.x - doorX) * floor.plan.width).toBeLessThan(2);
+  expect(point.y).toBeLessThan(doorY);
+  const approach = journey.steps.at(-1)!.path.filter((p) => p.x < 0.474);
+  expect(approach.at(-1)).toEqual(point);
+  expect(approach.every((p) => p.y >= 0.472 && p.y <= 0.4905)).toBe(true);
+  expect(provider.calls - initialCalls).toBe(1);
 });

@@ -408,3 +408,28 @@
   border: 2px solid white;
   outline: 1px solid #914716;
 }
+
+.floor-point-picker {
+  margin-top: 1rem;
+}
+.floor-point-picker summary {
+  cursor: pointer;
+}
+.floor-point-picker label,
+.floor-point-picker strong {
+  display: block;
+  margin: 0.75rem 0;
+}
+.floor-point-picker select {
+  margin-left: 0.4rem;
+}
+.floor-point-scroll {
+  max-height: 65vh;
+  overflow: auto;
+  border: 1px solid #bdcfc6;
+  background: white;
+}
+.floor-point-scroll svg {
+  display: block;
+  cursor: crosshair;
+}

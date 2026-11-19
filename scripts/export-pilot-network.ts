@@ -4,6 +4,7 @@ import { mkdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { z } from 'zod';
+import { readJson } from '../server/data';
 import { validateNetworkExport } from '../server/pilot-network';
 import { checkedSpatialJson, pilotEvidence } from '../server/pilot-evidence';
 import { englishDefinitionHash, translateTopologyText } from '../server/topology-english';
@@ -248,6 +249,47 @@ export function exportPilotNetwork(bytes: Buffer) {
         ...(candidateBinding ? { candidateBinding } : {}),
       };
     });
+  const rules = readJson<{
+    plans: {
+      planId: string;
+      sourceSha256: string;
+      visitorRestrictions?: {
+        candidateId: string;
+        definitionHash: string;
+        presentedHash: string;
+        label: string;
+        via: string;
+        access: 'staff-only';
+      }[];
+    }[];
+  }>('data/campus/spatial/floor-circulation.json');
+  const latest = new Map(document.candidateAnswers.map((answer) => [answer.candidateId, answer]));
+  const visitorRestrictions = rules.plans.flatMap((plan) =>
+    (plan.visitorRestrictions ?? []).flatMap((rule) => {
+      const answer = latest.get(rule.candidateId);
+      if (
+        !answer ||
+        answer.answer !== 'false' ||
+        answer.direction !== null ||
+        answer.bindings ||
+        answer.definitionHash !== rule.definitionHash ||
+        answer.presentedHash !== rule.presentedHash
+      )
+        return [];
+      return [
+        {
+          planId: plan.planId,
+          sourceSha256: plan.sourceSha256,
+          candidateId: rule.candidateId,
+          definitionHash: rule.definitionHash,
+          presentedHash: rule.presentedHash,
+          label: rule.label,
+          via: rule.via,
+          access: rule.access,
+        },
+      ];
+    }),
+  );
   return validateNetworkExport(
     {
       schemaVersion: 1,
@@ -256,6 +298,7 @@ export function exportPilotNetwork(bytes: Buffer) {
       nodes,
       edges,
       elevatorReports,
+      ...(visitorRestrictions.length ? { visitorRestrictions } : {}),
     },
     plans,
   );

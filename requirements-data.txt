@@ -5,3 +5,4 @@ pypdf>=5,<7
 PyMuPDF==2.1
 opencv-python-headless==5.1.0.95
 numpy>=2,<3
+scipy>=1.12,<2

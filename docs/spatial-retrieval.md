@@ -33,23 +33,23 @@ Import `pilotToolDeclarations` and `runPilotTool(name, args)` from `server/pilot
 
 Photo-label retrieval remains exact and source-bound. The visitor planner resolves destination text to source labels, selects among matching occurrences automatically, and asks the configured provider to generate a route from the photo-derived starting area. Room doors and corridor segments do not need manual route bindings. Only inter-building transfers are constrained to mapped connections. Tool output, including extracted text and generated route points, is treated as untrusted until it passes source and route validation.
 
-## Coverage on November 14, 2026
+## Coverage at network revision 82
 
 The twelve pages contain 4,641 original geometry labels, 16,659 additional OCR observations and 378 source-read labels. OCR includes fragments, annotations, repeated readings and recognition errors. Grouping room-shaped identifiers by page gives 1,388 candidates after occurrence-specific source corrections. Counts include service spaces. The total number of actual rooms on campus remains unmeasured.
 
 | Building | Floors | Identifier candidates by floor 1 / 2 / 3 / 4 | Source-read labels | Drawn door symbols | Approved checkpoints |
 |---|---|---|---:|---:|---:|
-| SE12 | 1–4 | 45 / 74 / 72 / 75 | 125 | 9 | 11 |
-| SW03 | 1–4 | 48 / 118 / 76 / 81 | 126 | 6 | 15 |
-| SW01 | 1–4 | 249 / 235 / 206 / 109 | 127 | 5 | 0 |
+| SE12 | 1–4 | 45 / 74 / 72 / 75 | 125 | 9 | 16 |
+| SW03 | 1–4 | 48 / 118 / 76 / 81 | 126 | 8 | 23 |
+| SW01 | 1–4 | 249 / 235 / 206 / 109 | 127 | 5 | 53 |
 
 The SE12 floor 3 annotations include one drawn doorway for room 302 and two for room 320. They are bound to the original sheet and supply page positions for comparing photo regions. Room 302 also has a source-traced corridor frontage between its doorway and the exterior boundary. Doorway details for photo comparison are generated from each eligible door throughout the pilot. The individual room annotations do not grant route access.
 
 SW03 floor 2 includes the office label 2082 and its drawing door on corridor 2000. Separate review questions bind this door and the 302 door on SE12 floor 3 to their respective existing checkpoints. Both room approaches have current bidirectional approvals in revision 41. The 2082 approach now begins at the corrected east entrance beside 2696/S260 and follows corridors 2600 and 2000.
 
-The approved network is an export of editor revision 41. Its second-floor outdoor connection retains the SE12 endpoint and uses the SW03 east doorway beside 2696/S260, replacing the former 2063/2080 endpoint. The SE12 third-floor passage joins the east end of SW03 corridor 3600 beside S360 and shaft 3696; the upper-corridor endpoint was superseded by the user correction. Its approach to the elevator is a short local trace. It contains 31 approved points and 23 passages, including four newly confirmed directions toward 1710. Nine corridors have original-page traces, including the approaches to SE12 room 302, SW03 rooms 2082/2605/3615 and both 1710 doorways. Doorway apertures in the first-floor traces are limited to identified source primitives and current approved bounds. Five passages form the continuous SE12 floor 2 → outdoor → SW03 floor 2 corridor → elevator → SW03 floor 3 corridor → SE12 floor 3 journey. The latest SE12 floor 2–3 elevator report is F and is stored as floor evidence. The user reconfirmed the fourth-floor building passage with its corrected SW03 east endpoint, unchanged SE12 endpoint and bidirectional permission. A separate user confirmation now enables the SW03 east elevator and S360/S460 transfers between floors 3 and 4. Fourth-floor entrance-to-landing corridors, stair approaches and room approaches remain unmapped. No distance has been measured for the five-step journey.
+The revision 82 export contains 92 approved points and 63 passages. Fifteen corridors have original-page traces, including the approaches to SE12 room 302, SW03 rooms 2082, 2605 and 3615, and both doors to 1710. The second-, third- and fourth-floor SE12 crossings meet the east side of SW03. The SW03 east elevator and S360/S460 stair connect floors 3 and 4. In SE12, four approved stair chains serve floors 2–4. The SE12 floor 2–3 elevator inquiry remains a floor-service report.
 
-The SW01–SW03 questions on floors 2, 3 and 4 pair visible openings on the official plans for future review. The SW01 markers are near S290, S390 and S490 respectively. The SW03 markers are at the end of the office wing. These questions carry a supporting campus-map URL and hash. They appear in region context with `status: unreviewed` and have no graph edges. Within-building routes still require complete reviewed approaches; a cross-building route involving SW01 remains unavailable until a building connection is mapped.
+SW03 and SW01 share four confirmed bidirectional passages. Floor 1 joins the lobby 1602 doors to vestibule 1098 via outdoors. The office corridors on floors 2–4 lead to the SW01 landings by S290, S390 and S490. Querying any of the eight entrance marks now returns the same-floor crossing from the reviewed graph. The original upper-floor inquiry IDs are preserved in the confirmation records. [Marked endpoints and directions](topology-editor.md#sw03-and-sw01)
 
 ## Rebuild and maintain
 

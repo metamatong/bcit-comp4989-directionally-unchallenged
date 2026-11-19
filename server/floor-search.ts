@@ -1,4 +1,5 @@
 /** Dijkstra over drawing cells, source doors and live, directed transfer records. */
+import { RouteQueue, compareCosts, type RouteCost } from './route-queue';
 import { floorGraphs, floorStride } from './floor-graph';
 import { stepText, visitorPassages } from './visitor-paths';
 import type { TopologyDocument, TopologyNode } from '../src/topology';
@@ -29,38 +30,6 @@ function reversed(step: WalkingStep) {
     instruction: stepText(step.kind, step.from, [target]),
     path: [...step.path].reverse(),
   };
-}
-class Queue {
-  private items: { id: number; cost: number }[] = [];
-  push(id: number, cost: number) {
-    const a = this.items;
-    let i = a.length;
-    a.push({ id, cost });
-    while (i > 0) {
-      const parent = (i - 1) >> 1;
-      if (a[parent].cost <= cost) break;
-      a[i] = a[parent];
-      i = parent;
-    }
-    a[i] = { id, cost };
-  }
-  pop() {
-    const a = this.items,
-      first = a[0],
-      last = a.pop();
-    if (last && a.length) {
-      let i = 0;
-      while (i * 2 + 1 < a.length) {
-        let n = i * 2 + 1;
-        if (n + 1 < a.length && a[n + 1].cost < a[n].cost) n++;
-        if (a[n].cost >= last.cost) break;
-        a[i] = a[n];
-        i = n;
-      }
-      a[i] = last;
-    }
-    return first;
-  }
 }
 export class FloorSearch {
   private readonly links = new Map<number, Link[]>();
@@ -99,7 +68,14 @@ export class FloorSearch {
           this.restrict(from.stop.planId, step.path, true);
           continue;
         }
-        if (edge.direction === 'forward') this.restrict(from.stop.planId, step.path, false);
+        // A reviewed room door attaches only through its directed trace. Applying that
+        // entry/exit rule across the public grid would also make the shared lobby one-way.
+        if (
+          edge.direction === 'forward' &&
+          !protectedDoors.has(from.stop.id) &&
+          !protectedDoors.has(to.stop.id)
+        )
+          this.restrict(from.stop.planId, step.path, false);
       }
       // Cross floors only at a currently approved transfer, in its permitted direction.
       const nodes = [from];
@@ -157,6 +133,78 @@ export class FloorSearch {
   reviewed(id: string) {
     return this.nodeKeys.get(id);
   }
+  /** Inspect the same directed connections as a visitor, confined to selected sheets. */
+  reachable(starts: SearchStop[], plans: Set<string>, reverse = false) {
+    const links = new Map<number, number[]>();
+    for (const [from, edges] of this.links) {
+      for (const edge of edges) {
+        if (!plans.has(edge.step.from.planId) || !plans.has(edge.step.to.planId)) continue;
+        const [a, b] = reverse ? [edge.to, from] : [from, edge.to];
+        const group = links.get(a) ?? [];
+        group.push(b);
+        links.set(a, group);
+      }
+    }
+    const reached = new Set(starts.filter((s) => plans.has(s.stop.planId)).map((s) => s.key));
+    const pending = [...reached];
+    const add = (id: number) => {
+      if (!reached.has(id)) {
+        reached.add(id);
+        pending.push(id);
+      }
+    };
+    for (let i = 0; i < pending.length; i++) {
+      const from = pending[i];
+      for (const to of links.get(from) ?? []) add(to);
+      if (from < 0) continue;
+      const floor = floorGraphs().ordered[Math.floor(from / floorStride)];
+      const move = (to: number) => {
+        if (reverse ? this.permits(to, from) : this.permits(from, to)) add(to);
+      };
+      floor.neighbours(from, move);
+      for (const p of floor.portals.get(from) ?? []) move(p.cell);
+    }
+    return reached;
+  }
+  terminal(planId: string, label: string, cell: number, path: MapStop['point'][]): SearchStop {
+    const floor = floorGraphs().byId.get(planId)!;
+    const point = path[0];
+    // Each physical door and exit combination is a dead end. Interior walks can
+    // serve the requested room without creating shortcuts between public corridors.
+    const id = floor.thresholdId(point) + ':via:' + cell;
+    let key = this.thresholds.get(id);
+    const stop = { id, planId, label, point };
+    if (key === undefined) {
+      key = this.nextKey--;
+      this.thresholds.set(id, key);
+      const length = path
+        .slice(1)
+        .reduce(
+          (sum, next, i) =>
+            sum +
+            Math.hypot(
+              (next.x - path[i].x) * floor.plan.width,
+              (next.y - path[i].y) * floor.plan.height,
+            ) /
+              2,
+          0,
+        );
+      this.link(
+        key,
+        cell,
+        {
+          kind: 'corridor',
+          from: stop,
+          to: floor.stop(cell, 'Corridor'),
+          path,
+          instruction: 'Follow the marked approach to the public corridor.',
+        },
+        true,
+        length,
+      );
+    }
+    return { stop, key };
+  }
   threshold(planId: string, point: MapStop['point'], label: string): SearchStop {
     const id = floorGraphs().byId.get(planId)!.thresholdId(point);
     let key = this.thresholds.get(id);
@@ -166,11 +214,12 @@ export class FloorSearch {
     }
     return { key, unlinked: true, stop: { id, label, point, planId } };
   }
-  private link(from: number, to: number, step: WalkingStep, both: boolean) {
+  private link(from: number, to: number, step: WalkingStep, both: boolean, pathCost?: number) {
     const floor = floorGraphs().byId.get(step.from.planId)!;
     // Weights express drawing-grid travel on a floor and one transfer penalty, never metres or time.
     const cost =
-      step.kind === 'corridor'
+      pathCost ??
+      (step.kind === 'corridor'
         ? Math.max(
             0.01,
             Math.hypot(
@@ -178,7 +227,7 @@ export class FloorSearch {
               ((step.to.point.y - step.from.point.y) * floor.plan.height) / 2,
             ),
           )
-        : 1;
+        : 1);
     const add = (a: number, b: number, s: WalkingStep) => {
       const list = this.links.get(a) ?? [];
       if (!list.some((l) => l.to === b)) list.push({ to: b, cost, step: s });
@@ -210,12 +259,13 @@ export class FloorSearch {
     const floors = floorGraphs().ordered;
     const end = new Map(goals.map((goal) => [goal.key, goal]));
     const starts = new Map(origins.map((item) => [item.key, item]));
-    const queue = new Queue(),
-      costs = new Map<number, number>(),
+    const queue = new RouteQueue(),
+      costs = new Map<number, RouteCost>(),
       parents = new Map<number, { id: number; step?: WalkingStep }>();
     for (const origin of origins) {
-      queue.push(origin.key, 0);
-      costs.set(origin.key, 0);
+      const zero = { transfers: 0, buildingChanges: 0, outdoor: 0, length: 0 };
+      queue.push(origin.key, zero);
+      costs.set(origin.key, zero);
     }
     for (let next = queue.pop(); next; next = queue.pop()) {
       const { id, cost } = next;
@@ -236,8 +286,21 @@ export class FloorSearch {
         };
       }
       function visit(to: number, weight: number, step?: WalkingStep) {
-        const c = cost + weight;
-        if (c >= (costs.get(to) ?? Infinity)) return;
+        const transfer = step !== undefined && step.kind !== 'corridor';
+        const c: RouteCost = {
+          transfers: cost.transfers + Number(transfer),
+          buildingChanges:
+            cost.buildingChanges +
+            Number(
+              transfer &&
+                floorGraphs().byId.get(step.from.planId)!.plan.building !==
+                  floorGraphs().byId.get(step.to.planId)!.plan.building,
+            ),
+          outdoor: cost.outdoor + Number(step?.kind === 'outdoor'),
+          length: cost.length + weight,
+        };
+        const old = costs.get(to);
+        if (old && compareCosts(c, old) >= 0) return;
         costs.set(to, c);
         parents.set(to, { id, step });
         queue.push(to, c);

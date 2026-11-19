@@ -8,10 +8,17 @@ import { boundsSchema, visualPlans } from './visual-data';
 import type { VisualPlan } from '../src/types';
 import type { TopologyNode } from '../src/topology';
 import type { MapStop, PagePoint } from '../src/wayfinding';
+import { FloorInterior, interiorSchema } from './floor-interior';
 import { CorridorFrontages, corridorBandSchema } from './shared-corridor';
 
 const index = z.number().int().nonnegative();
 const unit = z.number().min(0).max(1);
+const pagePair = z.tuple([unit, unit]);
+const reviewedPointSchema = z.object({
+  nodeId: z.string().uuid(),
+  version: index.positive(),
+  point: pagePair,
+});
 const placeSchema = z.object({
   label: z.string().min(1),
   kind: z.string().min(1),
@@ -20,8 +27,14 @@ const placeSchema = z.object({
   bounds: boundsSchema,
   doors: z.array(z.tuple([unit, unit, index.nullable()])),
   cells: z.array(index),
+  reviewedLanding: reviewedPointSchema.optional(),
+  reviewedDoor: reviewedPointSchema.optional(),
+  sharedEntry: z.boolean().optional(),
+  sharedHost: z.string().min(1).optional(),
+  visitorAccess: z.literal('staff-only').optional(),
+  roomArea: z.boolean().optional(),
+  terminalPaths: z.array(z.object({ cell: index, via: z.array(pagePair).min(2) })).optional(),
 });
-const pagePair = z.tuple([unit, unit]);
 const floorSchema = z.object({
   id: z.string(),
   sourceSha256: z.string(),
@@ -41,10 +54,11 @@ const floorSchema = z.object({
         version: index.positive(),
         landing: pagePair,
         cell: index,
-        via: z.tuple([pagePair, pagePair]),
+        via: z.array(pagePair).max(2),
       }),
     )
     .optional(),
+  interiorAccess: interiorSchema.optional(),
   places: z.array(placeSchema),
   corridorBands: z.array(corridorBandSchema).optional(),
 });
@@ -69,11 +83,13 @@ export const pointKey = (p: PagePoint) => p.x + ',' + p.y;
 export class FloorGraph {
   readonly places: FloorPlace[];
   readonly frontages: CorridorFrontages;
+  readonly interior?: FloorInterior;
   readonly ties = new Map<string, number>();
   readonly portals = new Map<number, { cell: number; opening: PagePoint[] }[]>();
   readonly offset: number;
   readonly width: number;
   readonly step: number;
+  readonly runs: [number, number, number][];
   private readonly cells: Uint8Array;
   private readonly stairDoors = new Map<
     string,
@@ -84,11 +100,12 @@ export class FloorGraph {
     public readonly plan: VisualPlan,
     data: z.infer<typeof floorSchema>,
     position: number,
-    private readonly version: string,
+    readonly version: string,
   ) {
     const { width, height, step } = data;
     this.width = width;
     this.step = step;
+    this.runs = data.runs;
     this.offset = position * floorStride;
     if (
       data.sourceSha256 !== plan.sourceSha256 ||
@@ -105,6 +122,8 @@ export class FloorGraph {
         throw Error('Invalid floor span on ' + plan.id);
       this.cells.fill(1, y * width + left, y * width + right + 1);
     }
+    if (data.interiorAccess)
+      this.interior = new FloorInterior(data.interiorAccess, width, this.cells);
     const valid = (cell: number) => {
       if (!this.cells[cell]) throw Error('Unwalkable access on ' + plan.id);
       return cell + this.offset;
@@ -114,6 +133,14 @@ export class FloorGraph {
       planId: plan.id,
       id: plan.id + ':' + version + ':place:' + i,
       cells: place.cells.map(valid),
+      terminalPaths: place.terminalPaths?.map((path) => {
+        const cell = valid(path.cell);
+        const end = this.point(cell);
+        const last = path.via.at(-1)!;
+        if (Math.abs(end.x - last[0]) > 1e-6 || Math.abs(end.y - last[1]) > 1e-6)
+          throw Error('Suite access must end at its public walking cell on ' + plan.id);
+        return { ...path, cell };
+      }),
     }));
     this.frontages = new CorridorFrontages(
       data.corridorBands ?? [],
@@ -151,7 +178,7 @@ export class FloorGraph {
   stairApproach(node: TopologyNode) {
     const entry = this.stairDoors.get(node.id);
     if (
-      node.kind === 'stair-landing' &&
+      (node.kind === 'stair-landing' || node.kind === 'elevator-stop') &&
       node.planId === this.plan.id &&
       node.sourceSha256 === this.plan.sourceSha256 &&
       entry?.version === node.version &&
@@ -182,6 +209,14 @@ export class FloorGraph {
     if (x < 0 || x >= this.width || y < 0) return undefined;
     const cell = y * this.width + x;
     return this.cells[cell] ? this.offset + cell : undefined;
+  }
+  interiorAt(point: PagePoint) {
+    if (!this.interior) return;
+    const x = Math.floor((point.x * this.plan.width) / this.step),
+      y = Math.floor((point.y * this.plan.height) / this.step);
+    if (x < 0 || x >= this.width || y < 0 || y * this.width + x >= this.cells.length) return;
+    const path = this.interior.walk(y * this.width + x, (c) => this.point(this.offset + c));
+    return path && { ...path, cell: this.offset + path.cell };
   }
   /** Find the free cells across this corridor, stopping at the first wall on each side. */
   crossSection(a: PagePoint, b: PagePoint) {

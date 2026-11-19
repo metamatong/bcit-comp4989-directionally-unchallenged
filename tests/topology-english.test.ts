@@ -99,7 +99,9 @@ it('upgrades a saved journal once and retains the exact directions, history and 
   expect(eligibility.nodeIds).toHaveLength(reviewedNetwork().nodes.length);
   expect(eligibility.edgeIds).toHaveLength(reviewedNetwork().edges.length);
   const network = visitorPassages(document, eligibility, candidates, store.plans);
-  expect(network.traces.size).toBe(9);
+  expect(network.traces.size).toBe(
+    reviewedNetwork().edges.filter((e) => e.kind === 'corridor').length,
+  );
   expect(network.doors.size).toBe(6);
   const page = pilotEvidence().find((p) => p.plan.id === savedNode.planId)!;
   const door = page.drawnDoors.find((d) => d.room === '302')!;

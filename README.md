@@ -43,7 +43,13 @@ The Git-connected Vercel project builds the frontend and the visitor API with `n
 4. Source lookup selects a unique, fully supported starting estimate or offers matching signs to confirm. An extra reading missing from the plan keeps the supported sign available for confirmation. GPS alone can identify a building. A starting floor and place still require source evidence. Scene features are retained as observations, and doorway placement helps choose the relevant label. Unavailable window/count annotations do not imply a spatial match.
 5. The app resolves the destination and calculates a route over the floor walking grids and current reviewed connections. **Walking directions** shows one arrow-separated route overview, followed by a continuous stack of maps with A/B descriptions. Floor changes appear in the overview; one zoom control applies to all maps. Photo bytes, floor-plan images and destinations are sent to no later AI stage.
 
+A 302 sign can match more than one building. After choosing a location, use **Location evidence → Change starting location** to switch matches with the same photo. From SE12 302, directions to `SW03 1730` end in corridor 1700 at the first-floor AV room door.
+
 For example, the signs for SW03 rooms 2680 and 2695 face the same stretch of corridor 2600. If their placement in a photo is unclear, the app highlights the corridor and asks **Are these room signs beside you?** Confirming lets you start there. The first route map shows the estimated starting area.
+
+Within SW01, the app uses the four original CAD sheets for room entrances, shared suites and walking areas. Eight stair chains and two elevators connect the confirmed levels. After the photo identifies your floor, **Choose a point on the map** lets you select a shaded starting or destination point. Shared entrances are labelled explicitly. [SW01 coverage by floor](docs/sw01-routing.md)
+
+SW03 and SW01 connect in both directions on floors 1–4. On floor 1, walk outdoors between SW03 lobby 1602 and SW01 vestibule 1098. On floors 2–4, the SW03 office corridor leads directly indoors to the same floor of SW01. [Doors and nearby room numbers](docs/topology-editor.md#sw03-and-sw01)
 
 In SE12, four confirmed stairways connect floors 2, 3 and 4 in both directions. Corridor 208Z on floor 2 connects through S209, S327 and S418 to the fourth-floor corridor network. [SE12 stair pairs and approach coverage](docs/topology-editor.md#se12-stairs-across-floors-2-3-and-4)
 
@@ -88,7 +94,7 @@ Extraction has a 45-second server budget and uses strict OpenAI output schemas w
 - [Project walkthrough](docs/walkthrough.md) and [mobile landing screen](outputs/screenshots/landing-mobile-390x844.png)
 - [Proposal source](docs/proposal.md) and [two-page proposal](output/pdf/proposal_groupnumber.pdf)
 
-The latest user direction removes the synthetic fallback described in the original brief. Visitor routes combine drawing-derived walking areas with current reviewed records. Photo-label estimates and route records have not been independently field-verified. The published transfer network currently connects SE12 and SW03. Other buildings have local coverage. Closures, ETAs and accessibility remain unverified. The separately referenced assignment PDF was not supplied. Verify assignment requirements and dates against it before submission. The supplied brief lists October 21, 2026, 23:59 (timezone unspecified) for the proposal and October 22 for the presentation. Group/member placeholders remain. Coursework submission is separate from hosting the visitor app.
+The latest user direction removes the synthetic fallback described in the original brief. Visitor routes combine drawing-derived walking areas with current reviewed records. Photo-label estimates and route records have not been independently field-verified. The reviewed transfers connect SE12, SW03 and SW01. Other buildings have local coverage. Closures, ETAs and accessibility remain unverified. The separately referenced assignment PDF was not supplied. Verify assignment requirements and dates against it before submission. The supplied brief lists October 21, 2026, 23:59 (timezone unspecified) for the proposal and October 22 for the presentation. Group/member placeholders remain. Coursework submission is separate from hosting the visitor app.
 
 ## Project hierarchy
 
@@ -104,13 +110,14 @@ mvp/
 │   ├── TopologyEditor.tsx, topology.ts, topology.css
 │   ├── api.ts, ai-provider.ts, photo.ts, photo-views.ts, types.ts
 │   ├── location/  Device acquisition, building hints, page projection and foreground lifecycle
-│   └── components/  Photo/result inputs, walking directions, DevicePosition, PhotoDeviceLocation, WalkingDeviceLocation and topology review
+│   └── components/  Photo inputs/results, walking directions, FloorPointPicker, device position and topology review
 ├── server/
 │   ├── index.ts, app.ts, runtime.ts, configured-app.ts, vercel.ts
 │   ├── visitor-api.ts, visitor-sessions.ts, redis-visitor-sessions.ts
 │   ├── provider.ts, provider-config.ts, provider-budget.ts, provider-timing.ts, provider-metrics.ts
 │   ├── openai-provider.ts, openai-input.ts, openai-schema.ts, openai-response.ts, openai-stream.ts
-│   ├── floor-graph.ts, floor-search.ts, floor-coverage.ts, shared-corridor.ts, campus-journey.ts
+│   ├── floor-graph.ts, floor-interior.ts, floor-search.ts, route-queue.ts, map-points.ts
+│   ├── floor-coverage.ts, shared-corridor.ts, campus-journey.ts
 │   ├── label-localization.ts, starting-place-evidence.ts, session.ts
 │   ├── photo-localization.ts, photo-plan-context.ts  Legacy source-comparison utilities
 │   ├── photo-evidence.ts, photo-media.ts, photo-grounding.ts, photo-doorways.ts, room-labels.ts
@@ -135,8 +142,11 @@ mvp/
 ├── scripts/
 │   ├── prepare_maps.py, prepare_visual_maps.py, prepare_pilot_labels.py
 │   ├── export-pilot-network.ts, query-spatial.ts
-│   ├── floor_graph/              PDF labels, walking surfaces, landing_access.py and corridor_frontages.py
-│   ├── sample-floor-routes.ts, prepare-geolocation.ts
+│   ├── floor_graph/              Floor compiler, source labels, doors, walking surfaces and landing access
+│   │   ├── cad_layers.py, cad_spaces.py, cad_routing.py, cad_places.py, cad_doorways.py
+│   │   ├── cad_frontages.py, cad_landings.py, open_fronts.py, public_components.py, terminal_paths.py
+│   │   └── corridor_frontages.py, landing_access.py, passage_openings.py
+│   ├── sample-floor-routes.ts, report-building-coverage.ts, prepare-geolocation.ts
 │   ├── validate-data.ts, build-vercel.ts, summarize-ai-metrics.ts
 │   └── render_proposal.py
 ├── tests/
@@ -153,12 +163,13 @@ mvp/
 │   ├── ai-wayfinding.test.ts, wayfinding-fixtures.ts, route-geometry.test.ts, route-recovery.test.ts
 │   ├── reviewed-navigation.test.ts, label-localization.test.ts, floor-four-passage.test.ts
 │   ├── se12-floor-transfers.test.ts, shared-corridor.test.ts
+│   ├── sw03-sw01-passages.test.ts, sw01-spaces.test.ts, test_passage_openings.py, test_sw01_cad.py
 │   ├── sw03-1710-route.test.ts, route-coverage-message.test.ts
 │   └── e2e/journey.spec.ts, photo.spec.ts
 ├── docs/
 │   ├── project-brief.txt, requirements.md, architecture.md, data.md
 │   ├── provider.md, operations.md, photo-localization.md, walkthrough.md
-│   ├── device-location.md, floor-routing.md
+│   ├── device-location.md, floor-routing.md, sw01-routing.md
 │   ├── verification.md, proposal.md, topology-editor.md, spatial-retrieval.md
 │   └── screenshots/  Automated test artifacts; mocked results are labeled
 ├── output/pdf/proposal_groupnumber.pdf

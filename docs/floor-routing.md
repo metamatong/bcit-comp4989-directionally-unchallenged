@@ -3,7 +3,17 @@
 Visitors can search the 89 supplied floor plans. A sign identifies a place on a sheet. Its walking approaches identify the doors or parts of a public corridor from which a journey can start or end. Each occurrence has its own ID, printed bounds, source PDF hash and graph version. When a sign or doorway is ambiguous, the visitor can pick the matching occurrence or numbered marker using the original session.
 
 
-The current compiler catalogues **3,385 source occurrences**. It identifies a door or corridor approach for **1,814**. **879** have a walking-grid approach, across **87 sheets**. These are local floor counts before the live reviewed records are joined. They do not establish that two arbitrary places share a continuous route. NE18 floor 1 and SE30 floor 1 identify places in shop or warehouse drawings without a compiled public corridor approach.
+The current compiler catalogues **3,439 source occurrences**. It identifies a door or corridor approach for **2,215**. **1,495** have a walking-grid approach, across **87 sheets**. These are local floor counts before the live reviewed records are joined. They do not establish that two arbitrary places share a continuous route. NE18 floor 1 and SE30 floor 1 identify places in shop or warehouse drawings without a compiled public corridor approach.
+
+The counts below group source-use labels into room types and circulation. A place appears in the walking-grid column when at least one of its approaches joins a public walking cell directly or through an individually traced terminal path. Reviewed stair and elevator transfers are counted separately in the network.
+
+| Place type | Source occurrences | Identified door or approach | Walking-grid approach |
+|---|---:|---:|---:|
+| Corridor | 469 | 378 | 378 |
+| Stairs | 162 | 69 | 53 |
+| Elevator | 13 | 8 | 7 |
+| Unspecified room | 1,895 | 1,081 | 437 |
+| Classified rooms and other spaces | 900 | 679 | 620 |
 
 ## Source preparation
 
@@ -11,11 +21,17 @@ The offline compiler reads every floor-plan PDF in the Burnaby manifest and chec
 
 A fitted door swing needs evidence of a leaf and adjoining jamb. The compiler separates adjacent spaces at the threshold. It identifies public circulation from printed space uses, bounded narrow halls that serve distinct signed rooms, and source-bound corridor transcriptions. All accepted grid cells must fit entirely within the walking surface. Adjacent diagonal cells need both orthogonal neighbours. A door can be identified even when its adjoining public path is missing. The source data preserves that distinction.
 
-The visitor searches these grids and the live, directed topology together. The search joins a reviewed trace to a floor only at a contained cell or a source-checked connection to that trace. Route lines use the traversed cells, drawn doorway openings and approved trace vertices. Costs use drawing-grid units and a fixed transfer cost. Physical distance, travel time and access rights require separate evidence.
+The visitor searches these grids and the live, directed topology together. The search joins a reviewed trace to a floor only at a contained cell or a source-checked connection to that trace. Route lines use the traversed cells, drawn doorway openings and approved trace vertices. Route comparison first counts transfers, then building changes and outdoor legs. Drawing-grid cost breaks remaining ties. Physical distance, travel time and access rights require separate evidence.
 
 In SE12, the four stair chains for floors 2–4 reuse each approved floor 3 node. Within each sheet, a landing joins its containing or source-checked corridor cell. Where an existing stair marker sits inside a drawn door swing, the compiler checks its node version, source point, fitted opening and unobstructed public-side approach, then saves the short path through the threshold. This applies at S300, S313 and S328. On floor 2, S209 joins the labelled 208Z corridor. The three separate perimeter landings do not imply public paths across the exterior areas on that sheet.
 
-The published interbuilding connections serve SE12 and SW03. Other floor plans can support local routes independently. The GPS catalogue covers 43 of the 45 building footprints. The official main-entrance GIS features identify buildings and approach directions. They lack floor-plan doorway IDs. Connecting those features to a particular indoor approach requires a correspondence on the source sheet. [BCIT entrance layer](https://services2.arcgis.com/IgcrRjRW95F0HKSw/arcgis/rest/services/CentralBuildingEntrances/FeatureServer/0) · [BCIT pedestrian route layer](https://services2.arcgis.com/IgcrRjRW95F0HKSw/arcgis/rest/services/AccessibleRoutes_BSite_20241113/FeatureServer/0)
+SW03 connects to SW01 in both directions on floors 1–4. The compiler checks the paired door swings along each approach and opens only the middle of their aperture inside the transcribed walking area. Overlapping walls, jambs and columns still block travel. A floor marking can be cleared only when its source stroke matches the CAD floor-finish layer. An arrival-only room door keeps its direction at the doorway, allowing visitors to cross the shared public lobby both ways. [SW03–SW01 doors by floor](topology-editor.md#sw03-and-sw01)
+
+The published interbuilding connections link SE12, SW03 and SW01. Other floor plans can support local routes independently. The GPS catalogue covers 43 of the 45 building footprints. The official main-entrance GIS features identify buildings and approach directions. They lack floor-plan doorway IDs. Connecting those features to a particular indoor approach requires a correspondence on the source sheet. [BCIT entrance layer](https://services2.arcgis.com/IgcrRjRW95F0HKSw/arcgis/rest/services/CentralBuildingEntrances/FeatureServer/0) · [BCIT pedestrian route layer](https://services2.arcgis.com/IgcrRjRW95F0HKSw/arcgis/rest/services/AccessibleRoutes_BSite_20241113/FeatureServer/0)
+
+The layered SW01 compiler also resolves signed enclosures, open bays, suite entries and independently marked room areas. Interior pins follow their own source-checked path to a circulation cell. The declared staff-only area is excluded from both surfaces. [SW01 walking coverage and exact gaps](sw01-routing.md)
+
+On SW03 floor 1, corridor 1700 connects the reviewed lobby 1602 approach to the corridor side of AV room 1730. The corridor caption overlaps the door swing, and the steps inside the room partition its label from the threshold in the raster. The compiler checks the fitted leaf, the room label and a walking cell in the named corridor before binding the arrival point. The marker sits outside the door. [Official SW03 first-floor plan](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0301.pdf)
 
 ## Starting between two rooms
 
@@ -42,4 +58,4 @@ python scripts/floor_graph/compile.py
 
 ## Sample five journeys
 
-`npm run routes:sample` starts an isolated loopback visitor API, samples ten distinct source occurrences without checking connectivity, and pairs the first five with the last five. Each case supplies a simulated exact sign, building and floor to the normal post-extraction API. It selects the sampled occurrence and, when needed, one of its doors. It sends a single navigation request per pair. The printed random seed reproduces the selection against the same version of the catalogue. For the observed results, see the [verification record](verification.md).
+`npm run routes:sample` starts an isolated loopback visitor API, samples ten distinct source occurrences without checking connectivity, and pairs the first five with the last five. Each case supplies a simulated exact sign, building and floor to the normal post-extraction API. It selects the sampled occurrence and, when needed, one of its doors. It sends a single navigation request per pair. The printed random seed reproduces the selection against the same version of the catalogue. An optional `--building SW01` selects from all places on the requested building’s sheets. For the observed results, see the [verification record](verification.md).

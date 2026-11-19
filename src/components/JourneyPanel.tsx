@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Check, MapPin, Route } from 'lucide-react';
 import { request } from '../api';
 import type { CampusLocationCandidate, VisualPlan } from '../types';
-import type { NavigationResult } from '../wayfinding';
+import type { NavigationChoice, NavigationResult } from '../wayfinding';
+import { FloorPointPicker } from './FloorPointPicker';
 import { RouteDirections } from './RouteDirections';
 import { RouteMapImage } from './RouteMap';
 import { planLabel } from '../topology';
@@ -56,11 +57,9 @@ export function JourneyPanel({
   const [result, setResult] = useState<NavigationResult>();
   const [error, setError] = useState('');
   const [refresh, setRefresh] = useState(0);
-  const [choice, setChoice] = useState<{
-    originId?: string;
-    destinationId?: string;
-    networkRevision?: number;
-  }>({});
+  const [choice, setChoice] = useState<
+    Omit<NavigationChoice, 'candidateId' | 'destination' | 'revision'>
+  >({});
   const headingRef = useRef<HTMLHeadingElement>(null);
 
   useEffect(() => {
@@ -111,6 +110,29 @@ export function JourneyPanel({
         </p>
       </section>
     );
+  const requestMap =
+    destination === 'Map point' ||
+    /^(?:NE|NW|SE|SW)\s*-?\s*\d+(?:\s+floor\s+\d+)?$/i.test(destination.trim());
+  const chooseMap = candidate.sourcePlaceId && (
+    <FloorPointPicker
+      sessionId={sessionId}
+      revision={revision}
+      candidate={candidate}
+      destination={destination}
+      plans={plans}
+      initialDestination={requestMap && !choice.destinationPoint}
+      onPick={(role, pin) =>
+        setChoice((c) => ({
+          ...c,
+          [role === 'origin' ? 'originId' : 'destinationId']: undefined,
+          [role === 'origin' ? 'originPoint' : 'destinationPoint']: pin,
+          networkRevision: result.networkRevision,
+        }))
+      }
+    />
+  );
+  if (requestMap && !choice.destinationPoint && chooseMap)
+    return <section className="journey-panel">{chooseMap}</section>;
   if (result.status === 'route')
     return (
       <section className="journey-panel" aria-label="Your walking route">
@@ -123,11 +145,12 @@ export function JourneyPanel({
           route={result}
           plans={plans}
           onRecheck={() => {
-            setChoice({});
             setRefresh((value) => value + 1);
           }}
           locationCatalogue={locationCatalogue}
         />
+        {result.arrivalNote && <p role="note">{result.arrivalNote}</p>}
+        {chooseMap}
       </section>
     );
 
@@ -140,7 +163,11 @@ export function JourneyPanel({
     return (
       <section className="journey-panel" aria-label="Route location choices">
         <h2>
-          {selectingOrigin ? 'Which doorway are you beside?' : 'Which destination do you mean?'}
+          {selectingOrigin
+            ? result.message.includes('shared entrance')
+              ? 'Start at the marked shared entrance?'
+              : 'Which doorway are you beside?'
+            : 'Which destination do you mean?'}
         </h2>
         {planIds.map((id) => {
           const plan = plans.find((p) => p.id === id);
@@ -158,7 +185,8 @@ export function JourneyPanel({
           return (
             <div key={id}>
               <h3>{planLabel(plan)}</h3>
-              {group.length > 1 && (
+              {(group.length > 1 ||
+                (selectingOrigin && result.message.includes('shared entrance'))) && (
                 <RouteMapImage
                   plan={plan}
                   paths={[]}
@@ -186,6 +214,7 @@ export function JourneyPanel({
             </div>
           );
         })}
+        {chooseMap}
       </section>
     );
   }
@@ -194,6 +223,7 @@ export function JourneyPanel({
     'choose-destination': 'Destination match is unclear',
     'unknown-destination': 'Destination not found',
     'unmapped-destination': 'Destination found on the plan',
+    'restricted-place': 'Staff-only area',
     'unsupported-building': 'Routes are not mapped here yet',
     'unmapped-origin-and-destination': 'Route coverage is incomplete',
     'unmapped-origin':
@@ -220,6 +250,7 @@ export function JourneyPanel({
         </h2>
       </div>
       <p role="status">{result.message}</p>
+      {chooseMap}
       {result.status === 'no-route' && (
         <button
           className="secondary"

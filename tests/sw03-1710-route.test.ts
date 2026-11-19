@@ -95,7 +95,11 @@ it('withdraws both room bindings when the source doorway-aperture definitions ch
   }
   const data = store.snapshot();
   const network = visitorPassages(data.document, data.eligibility, store.candidates, store.plans);
-  expect([...network.traces.values()].flatMap((trace) => trace.doorwayOpenings)).toEqual([]);
+  expect(
+    [...network.traces.values()]
+      .flatMap((trace) => trace.doorwayOpenings)
+      .filter((o) => o.planId === 'SW3-F1-p1'),
+  ).toEqual([]);
   expect((await navigate()).status).toBe('unmapped-destination');
 });
 
