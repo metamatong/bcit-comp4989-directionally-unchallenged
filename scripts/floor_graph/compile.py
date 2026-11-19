@@ -1,22 +1,33 @@
 """Compile all official pages into exact place occurrences and conservative floor walking grids."""
 
 import argparse
-from collections import defaultdict
-from concurrent.futures import ProcessPoolExecutor
 import hashlib
 import json
 import math
+from collections import defaultdict
+from concurrent.futures import ProcessPoolExecutor
 
 import cv2
 import numpy as np
 import pymupdf
-
 from cad_routing import compile_cad_floor
 from corridor_frontages import bind_frontages, corridor_bands, recorded_swings
 from doors import SCALE
-from labels import CAMPUS, IDENTIFIER, MANUAL, ROOT, USES, inventory, label_words
+from drawing_frontages import DrawingFrontages, identify_stamps
+from labels import (
+    CAMPUS,
+    IDENTIFIER,
+    MANUAL,
+    ROOT,
+    USES,
+    intersects,
+    inventory,
+    label_words,
+)
 from landing_access import landing_approaches
 from passage_openings import bind_corridor_doorways, signed_door_cells
+from public_components import subcell_passages
+from suite_entries import bind_shared_suites
 from surfaces import near_caption, surfaces
 
 SPATIAL = CAMPUS / "spatial"
@@ -190,9 +201,27 @@ def compile_floor(item):
             page, geometry, extra.get("doorFrontages", [])
         )
         words = label_words(plan, page, extra.get("labels"))
+        for reading in extra.get("nonPlaceReadings", []):
+            words = [
+                w
+                for w in words
+                if not (
+                    w["method"] == "repeated-ocr"
+                    and w["text"] == reading["text"]
+                    and intersects(w["box"], reading["bounds"])
+                )
+            ]
+        if extra.get("cadInteriorBounds"):
+            identify_stamps(page, plan, words, extra)
         walk, sealed, regions, sides, uses, door_symbols = surfaces(
             page, geometry, words, extra
         )
+        frontages = None
+        if extra.get("cadInteriorBounds"):
+            frontages = DrawingFrontages(
+                page, geometry, extra, door_symbols, sealed, words
+            )
+            walk, sealed = frontages.extend_surface(walk, sealed, words, extra)
     grid = FloorGrid(
         walk,
         sealed,
@@ -237,7 +266,9 @@ def compile_floor(item):
             )
             if IDENTIFIER.fullmatch(label) and short and not captioned:
                 continue
-            if not area or region_sizes[area] > grid.w * grid.h * 0.44:
+            if (
+                not area or region_sizes[area] > grid.w * grid.h * 0.44
+            ) and not word.get("signedUse"):
                 continue
             if (
                 IDENTIFIER.fullmatch(label)
@@ -290,6 +321,7 @@ def compile_floor(item):
             ]
             if other_rooms:
                 access, doors = [], []
+        open_front = False
         for landing in extra.get("accessPoints", []):
             if (
                 label == landing["label"]
@@ -300,6 +332,7 @@ def compile_floor(item):
                 )
                 if cell is not None:
                     access.append(cell)
+                    open_front |= landing.get("openFront", False)
         places.append(
             {
                 "label": label,
@@ -308,12 +341,54 @@ def compile_floor(item):
                 "method": word["method"],
                 "doors": doors,
                 "cells": sorted(set(access)),
+                **(
+                    {"roomArea": True}
+                    if open_front and not doors and kind != "corridor"
+                    else {}
+                ),
             }
         )
     bind_corridor_doorways(
         grid, words, places, door_symbols, extra.get("corridorDoorways", [])
     )
     bind_frontages(grid, places, words, marked_doors, structural_ink)
+    terminal = None
+    if frontages:
+        approved_doors = {
+            (n["point"]["x"], n["point"]["y"])
+            for n in REVIEWED["nodes"]
+            if n["planId"] == plan["id"] and n["kind"] == "door"
+        }
+        protected = {
+            door["room"]
+            for door in review.get("doors", [])
+            if (door["point"]["x"], door["point"]["y"]) in approved_doors
+        }
+        # An explicitly traced frontage already represents the entrance. A
+        # nearby automated grid sample must not become an extra doorway.
+        protected.update(room for room, *_ in marked_doors)
+        protected.update(item["room"] for item in extra.get("corridorDoorways", []))
+        protected.update(
+            item["label"]
+            for item in extra.get("accessPoints", [])
+            if not item.get("openFront")
+        )
+        transfer_ids = {
+            edge[key]
+            for edge in REVIEWED["edges"]
+            if edge["kind"] != "corridor"
+            for key in ("fromNodeId", "toNodeId")
+        }
+        nodes = [
+            n
+            for n in REVIEWED["nodes"]
+            if n["planId"] == plan["id"] and n["id"] in transfer_ids
+        ]
+        more_portals, terminal = frontages.bind(grid, places, extra, protected, nodes)
+        bind_shared_suites(grid, places, extra.get("sharedSuites", []))
+        for portal in more_portals:
+            if portal not in portals:
+                portals.append(portal)
     bands = corridor_bands(
         grid,
         places,
@@ -323,12 +398,17 @@ def compile_floor(item):
     door_approaches = landing_approaches(
         plan, extra, REVIEWED["nodes"], grid, sides, door_symbols, places
     )
-    return floor_record(
+    record = floor_record(
         plan, grid, places, portals, bands, door_approaches, len(door_symbols)
     )
+    if terminal:
+        record["interiorAccess"] = terminal.export()
+    return record
 
 
 def floor_record(plan, grid, places, portals, bands, door_approaches, symbol_count):
+    if AREAS.get(plan["id"], {}).get("cadInteriorBounds"):
+        subcell_passages(grid, portals)
     ties = ties_for(plan, grid)
     parts = connectivity(grid, places, portals, ties)
     return {

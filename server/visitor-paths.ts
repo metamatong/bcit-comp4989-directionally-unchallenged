@@ -232,7 +232,7 @@ export function stepText(kind: TopologyEdge['kind'], to: MapStop, plans: VisualP
     case 'building-link':
       return `Use the connecting passage to ${target}.`;
     case 'outdoor':
-      return `Go outside and enter through the marked door on ${target}. The outdoor walking line has not been mapped.`;
+      return `Walk outdoors to ${to.label} on ${target}. The outdoor walking line has not been mapped.`;
     case 'corridor':
       return `Follow the marked corridor to ${to.label}.`;
   }

@@ -72,20 +72,31 @@ export class BrowserLocation {
         15000,
       );
       this.cancelOnce = () => finish(undefined, Error('Device location request cancelled.'));
-      try {
-        this.available().getCurrentPosition(
-          (position) => {
-            const reading = toReading(position);
-            if (eligibleReading(reading)) finish(reading);
-            else
-              finish(undefined, Error('The device returned an old or invalid reading. Try again.'));
-          },
-          (error) => finish(undefined, Error(errorMessage(error))),
-          LOCATION_OPTIONS,
-        );
-      } catch (error) {
-        finish(undefined, error as Error);
-      }
+      const deadline = Date.now() + LOCATION_OPTIONS.timeout;
+      const request = (retryInvalid: boolean) => {
+        if (settled) return;
+        try {
+          this.available().getCurrentPosition(
+            (position) => {
+              if (settled) return;
+              const reading = toReading(position);
+              if (eligibleReading(reading)) finish(reading);
+              else if (retryInvalid && Date.now() < deadline) request(false);
+              else
+                finish(
+                  undefined,
+                  Error('The device returned an old or invalid reading. Try again.'),
+                );
+            },
+            (error) => finish(undefined, Error(errorMessage(error))),
+            { ...LOCATION_OPTIONS, timeout: Math.max(0, deadline - Date.now()) },
+          );
+        } catch (error) {
+          finish(undefined, error as Error);
+        }
+      };
+      // Some devices deliver a cached fix even for maximumAge: 0. Use the remaining one-shot budget.
+      request(true);
     });
   }
   start(

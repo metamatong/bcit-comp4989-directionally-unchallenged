@@ -1,5 +1,17 @@
 /** Inventory of the actual compiled assets, including sheets with no usable approaches. */
-import { floorGraphs } from './floor-graph';
+import { floorGraphs, visitorExclusion, type FloorPlace } from './floor-graph';
+function hasWalkingApproach(place: FloorPlace) {
+  return (
+    !visitorExclusion(place) &&
+    !!(
+      place.cells.length ||
+      place.terminalPaths?.length ||
+      place.sharedAccess?.cells.length ||
+      place.sharedAccess?.terminalPaths.length ||
+      place.corridorVicinities?.length
+    )
+  );
+}
 export function floorCoverage() {
   return floorGraphs().ordered.map((floor) => {
     const places = floor.places;
@@ -10,13 +22,14 @@ export function floorCoverage() {
       placeOccurrences: places.length,
       floorComponentsWithPlaces: new Set(places.flatMap((p) => p.components)).size,
       withIdentifiedEndpoint: places.filter(
-        (p) => p.cells.length || p.doors.length || p.terminalPaths?.length,
+        (p) => hasWalkingApproach(p) || (!visitorExclusion(p) && p.doors.length),
       ).length,
-      visitorRestricted: places.filter((p) => p.visitorAccess).length,
+      visitorRestricted: places.filter((p) => visitorExclusion(p) === 'staff-only').length,
+      nonWalking: places.filter((p) => visitorExclusion(p) === 'non-walking').length,
       withDoorSymbols: places.filter((p) => p.doors.length > 0).length,
-      withFloorApproach: places.filter((p) => p.cells.length > 0 || p.terminalPaths?.length).length,
+      withFloorApproach: places.filter(hasWalkingApproach).length,
       missingFloorApproach: places
-        .filter((p) => !p.cells.length && !p.terminalPaths?.length)
+        .filter((p) => !visitorExclusion(p) && !hasWalkingApproach(p))
         .map((p) => ({
           label: p.label,
           kind: p.kind,

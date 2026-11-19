@@ -10,7 +10,13 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts/floor_graph"))
 from compile import FloorGrid
-from passage_openings import SCALE, bind_corridor_doorways, open_passage_doors
+from passage_openings import (
+    SCALE,
+    bind_corridor_doorways,
+    open_passage_doors,
+    open_ramp_markings,
+)
+from public_components import subcell_passages
 
 
 class PassageOpeningTests(unittest.TestCase):
@@ -88,3 +94,49 @@ class CorridorDoorwayTests(unittest.TestCase):
         bind_corridor_doorways(grid, words, places, [leaf], [record])
         self.assertEqual(places[0]["doors"], [[0.5, 0.5, 130]])
         self.assertEqual(places[0]["cells"], [130])
+
+
+class PublicWalkingGeometryTests(unittest.TestCase):
+    def test_ramp_ticks_open_only_in_the_signed_lane_and_preserve_a_wall(self):
+        sealed = np.full((64, 64), 255, dtype=np.uint8)
+        outline = {
+            "id": "ramp",
+            "kind": "rectangle",
+            "filled": False,
+            "bbox": [5, 5, 15, 25],
+        }
+        wall = {
+            "id": "wall",
+            "kind": "line",
+            "bbox": [6, 25, 14, 25],
+            "path": [["m", [6, 25]], ["l", [14, 25]]],
+            "filled": False,
+            "strokeWidth": 1,
+        }
+        drawing = {"primitives": [outline, wall]}
+        record = {"outline": "ramp", "corridor": "101Z", "laneX": 20 / 64}
+        public = sealed.copy()
+        with self.assertRaisesRegex(ValueError, "corridor stamp"):
+            open_ramp_markings(drawing, [record], sealed, public, [])
+        open_ramp_markings(
+            drawing, [record], sealed, public, [{"text": "101Z", "kind": "corridor"}]
+        )
+        self.assertEqual(sealed[10, 20], 0)
+        self.assertEqual(sealed[10, 10], 255)
+        self.assertEqual(sealed[50, 20], 255)
+
+    def test_narrow_public_lane_keeps_its_connection_and_a_solid_wall_blocks_it(self):
+        surface = np.zeros((20, 32), bool)
+        surface[2:16, :12] = True
+        surface[2:16, 16:] = True
+        surface[5:10, 12:16] = True
+
+        def ports(walk):
+            grid = FloorGrid(walk, ~walk, np.ones_like(walk, int), 4)
+            result = []
+            subcell_passages(grid, result)
+            return result
+
+        self.assertEqual(len(ports(surface)), 1)
+        surface[:, 14] = False
+        self.assertEqual(ports(surface), [])

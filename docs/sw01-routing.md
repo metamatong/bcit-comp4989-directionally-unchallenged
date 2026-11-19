@@ -2,7 +2,9 @@
 
 The visitor planner uses four official Burnaby drawings and the user's marked passage reviews. It reads room numbers together with their space-use captions. It distinguishes a room-side door, a shared suite entrance and a selectable interior area. The room number identifies the space. The route coordinates come from its traversable geometry.
 
-## Current coverage
+The current visitor inventory covers all three interconnected buildings and reports each direction independently. [Coverage by room and floor](three-building-routing.md)
+
+## Revision 82 baseline
 
 Revision 82 contains the following SW01 results. The audit checked all source occurrences in both directions on the visitor graph. The same-floor column requires a path to a SW03 passage on that sheet. The last column also permits the reviewed level changes inside SW01.
 

@@ -281,11 +281,24 @@ it('excludes 1494 and the staff passage through 1498 from visitor endpoints and 
   }
 });
 it('joins the two leaves of the 1037 vestibule to corridor 1290', async () => {
-  const trip = route(await walk('1037', 'SW01 1586'));
+  const trip = route(await walk('1037', 'SW01 1290'));
   expect(trip.origin.planId).toBe('SW1-F1-p1');
-  expect(trip.destination.label).toContain('1586');
+  expect(trip.destination.label).toContain('1290');
   expect(trip.steps.every((s) => s.kind === 'corridor')).toBe(true);
 });
+it.each([
+  ['1586', 'staff-only'],
+  ['1498', 'staff-only'],
+  ['R240', 'non-walking'],
+  ['M222', 'non-walking'],
+])(
+  'keeps the excluded feature %s out of complete and partial visitor directions',
+  async (label, restriction) => {
+    const result = await walk('S190', 'SW01 ' + label);
+    expect(result).toMatchObject({ status: 'restricted-place', restriction });
+    expect(result.mappedPortion).toBeUndefined();
+  },
+);
 it('offers only entrances of a multi-door room that can reach the selected destination', async () => {
   const choice = await walk('1225', 'SW01 1139');
   expect(choice.status).toBe('choose-origin');

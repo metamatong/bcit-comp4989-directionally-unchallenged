@@ -14,6 +14,7 @@ import { CorridorFrontages, corridorBandSchema } from './shared-corridor';
 const index = z.number().int().nonnegative();
 const unit = z.number().min(0).max(1);
 const pagePair = z.tuple([unit, unit]);
+const terminalPathSchema = z.object({ cell: index, via: z.array(pagePair).min(2) });
 const reviewedPointSchema = z.object({
   nodeId: z.string().uuid(),
   version: index.positive(),
@@ -27,13 +28,21 @@ const placeSchema = z.object({
   bounds: boundsSchema,
   doors: z.array(z.tuple([unit, unit, index.nullable()])),
   cells: z.array(index),
+  corridorVicinities: z.array(z.object({ cell: index, bounds: boundsSchema })).optional(),
   reviewedLanding: reviewedPointSchema.optional(),
   reviewedDoor: reviewedPointSchema.optional(),
   sharedEntry: z.boolean().optional(),
   sharedHost: z.string().min(1).optional(),
   visitorAccess: z.literal('staff-only').optional(),
   roomArea: z.boolean().optional(),
-  terminalPaths: z.array(z.object({ cell: index, via: z.array(pagePair).min(2) })).optional(),
+  terminalPaths: z.array(terminalPathSchema).optional(),
+  sharedAccess: z
+    .object({
+      host: z.string().min(1),
+      cells: z.array(index),
+      terminalPaths: z.array(terminalPathSchema),
+    })
+    .optional(),
 });
 const floorSchema = z.object({
   id: z.string(),
@@ -63,6 +72,13 @@ const floorSchema = z.object({
   corridorBands: z.array(corridorBandSchema).optional(),
 });
 export type FloorPlace = z.infer<typeof placeSchema> & { id: string; planId: string };
+/** Preserve the plan record as evidence while excluding non-visitor endpoints. */
+export function visitorExclusion(place: FloorPlace) {
+  if (place.visitorAccess === 'staff-only' || place.kind === 'staff') return 'staff-only';
+  if ((place.kind === 'shaft' || place.kind === 'void') && !place.reviewedLanding)
+    return 'non-walking';
+  return undefined;
+}
 /** Only generic landmark names use aliases. Numbered place identifiers always match in full. */
 const landmarkNames = new Map([
   ['STAIR', 'stairs'],
@@ -128,19 +144,26 @@ export class FloorGraph {
       if (!this.cells[cell]) throw Error('Unwalkable access on ' + plan.id);
       return cell + this.offset;
     };
+    const validPath = (path: z.infer<typeof terminalPathSchema>) => {
+      const cell = valid(path.cell);
+      const end = this.point(cell);
+      const last = path.via.at(-1)!;
+      if (Math.abs(end.x - last[0]) > 1e-6 || Math.abs(end.y - last[1]) > 1e-6)
+        throw Error('Suite access must end at its public walking cell on ' + plan.id);
+      return { ...path, cell };
+    };
     this.places = data.places.map((place, i) => ({
       ...place,
       planId: plan.id,
       id: plan.id + ':' + version + ':place:' + i,
       cells: place.cells.map(valid),
-      terminalPaths: place.terminalPaths?.map((path) => {
-        const cell = valid(path.cell);
-        const end = this.point(cell);
-        const last = path.via.at(-1)!;
-        if (Math.abs(end.x - last[0]) > 1e-6 || Math.abs(end.y - last[1]) > 1e-6)
-          throw Error('Suite access must end at its public walking cell on ' + plan.id);
-        return { ...path, cell };
-      }),
+      corridorVicinities: place.corridorVicinities?.map((v) => ({ ...v, cell: valid(v.cell) })),
+      terminalPaths: place.terminalPaths?.map(validPath),
+      sharedAccess: place.sharedAccess && {
+        ...place.sharedAccess,
+        cells: place.sharedAccess.cells.map(valid),
+        terminalPaths: place.sharedAccess.terminalPaths.map(validPath),
+      },
     }));
     this.frontages = new CorridorFrontages(
       data.corridorBands ?? [],

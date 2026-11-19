@@ -1,5 +1,6 @@
 /** Read-only export of the currently approved pilot checkpoints and passage directions. */
 import { z } from 'zod';
+import { outdoorEndpointsAllowed } from '../src/topology';
 import type { VisualPlan } from '../src/types';
 import { checkedSpatialJson, labelKey, pilotEvidence } from './pilot-evidence';
 
@@ -145,8 +146,7 @@ export function validateNetworkExport(value: unknown, plans: VisualPlan[]) {
     if (
       (passage.kind === 'corridor' && a.id !== b.id) ||
       (passage.kind === 'building-link' && a.building === b.building) ||
-      (passage.kind === 'outdoor' &&
-        (from.kind !== 'outdoor-access' || to.kind !== 'outdoor-access')) ||
+      (passage.kind === 'outdoor' && !outdoorEndpointsAllowed(from, to)) ||
       (vertical &&
         (a.building !== b.building ||
           a.floor === b.floor ||

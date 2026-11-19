@@ -46,6 +46,8 @@ The Git-connected Vercel project builds the frontend and the visitor API with `n
 
 With elevators preferred, SE12 302 to SW03 2605 enters SW03 through the east third-floor passage beside S360 and shaft 3696, follows the short approach to the east elevator, and continues on floor 2. Reviewed network revision 41 also places the floor-2 outdoor entrance beside 2696/S260, with short access to the elevator and corridor 2600; it no longer uses the doorway between 2063 and 2080. The corrected fourth-floor east passage is confirmed for both directions between SE12 and SW03. The east elevator and S360/S460 stair transfer between SW03 floors 3 and 4 are also confirmed in both directions. The visitor planner can join these records to the public corridor surfaces on the same sheet. `SE12 302 → SW03 1710` now follows the east stairs from floor 3 through floor 2 to S160 on floor 1. Both the lobby-1602 doorway and corridor-1700 doorway have reviewed arrival approaches in the confirmed travel direction toward 1710. `SW03 2604` is a distinct vestibule whose source label exists but has no reviewed arrival approach. The planner also checks drawing-derived approaches. Its costs express travel on the floor grid and transfers. Physical distance and accessibility remain unmeasured.
 
+SE12 323 to SW03 1750 follows the common corridor outside 323 to the corridor-side lecture-room door. Where an entrance is missing, the overview can show the connected portion to a named stop on the correct floor and identify the unverified stretch. Shafts, voids and staff-only spaces are excluded from visitor routes. [Coverage for all twelve floors of SE12, SW03 and SW01](docs/three-building-routing.md)
+
 The full photo and four detail crops are prepared locally from the original image. The footer’s **Coverage & privacy** dialog identifies the extraction provider and data handling. The server keeps image-free evidence receipts, and the browser discards its prepared photo after locating the result, removal or navigation away. Explicit retries can reuse unexpired extraction evidence.
 
 Expand **Device position** below the maps for optional **Show my position** tracking and manual floor selection. The initial GPS checkbox is a one-shot reading used for building candidates. GPS cannot determine a floor. Position overlay calibration currently covers SE12 floor 3. [Device-location coverage](docs/device-location.md)
@@ -108,7 +110,7 @@ mvp/
 │   ├── provider.ts, provider-config.ts, provider-budget.ts, provider-timing.ts, provider-metrics.ts
 │   ├── openai-provider.ts, openai-input.ts, openai-schema.ts, openai-response.ts, openai-stream.ts
 │   ├── floor-graph.ts, floor-interior.ts, floor-search.ts, route-queue.ts, map-points.ts
-│   ├── floor-coverage.ts, shared-corridor.ts, campus-journey.ts, routing-readiness.ts
+│   ├── floor-coverage.ts, shared-corridor.ts, campus-journey.ts, floor-checkpoints.ts, routing-readiness.ts
 │   ├── label-localization.ts, starting-place-evidence.ts, session.ts
 │   ├── photo-localization.ts, photo-plan-context.ts  Legacy source-comparison utilities
 │   ├── photo-evidence.ts, photo-media.ts, photo-grounding.ts, photo-doorways.ts, room-labels.ts
@@ -136,7 +138,8 @@ mvp/
 │   ├── floor_graph/              Floor compiler, source labels, doors, walking surfaces and landing access
 │   │   ├── cad_layers.py, cad_spaces.py, cad_routing.py, cad_places.py, cad_doorways.py
 │   │   ├── cad_frontages.py, cad_landings.py, open_fronts.py, public_components.py, terminal_paths.py
-│   │   └── corridor_frontages.py, landing_access.py, passage_openings.py
+│   │   ├── corridor_frontages.py, landing_access.py, passage_openings.py
+│   │   └── drawing_frontages.py, door_stations.py, corridor_vicinities.py, suite_entries.py
 │   ├── sample-floor-routes.ts, report-building-coverage.ts, prepare-geolocation.ts
 │   ├── validate-data.ts, build-vercel.ts, summarize-ai-metrics.ts
 │   └── render_proposal.py
@@ -155,7 +158,7 @@ mvp/
 │   ├── reviewed-navigation.test.ts, label-localization.test.ts, floor-four-passage.test.ts
 │   ├── se12-floor-transfers.test.ts, shared-corridor.test.ts
 │   ├── sw03-sw01-passages.test.ts, sw01-spaces.test.ts, test_passage_openings.py, test_sw01_cad.py
-│   ├── sw03-1710-route.test.ts, route-coverage-message.test.ts
+│   ├── sw03-1710-route.test.ts, route-coverage-message.test.ts, three-building-coverage.test.ts
 │   ├── route-preference.test.ts, guided-directions.test.ts
 │   ├── route-preference.test.ts, guided-directions.test.ts
 │   └── e2e/journey.spec.ts, photo.spec.ts
@@ -163,6 +166,7 @@ mvp/
 │   ├── project-brief.txt, requirements.md, architecture.md, data.md
 │   ├── provider.md, operations.md, photo-localization.md, walkthrough.md
 │   ├── device-location.md, floor-routing.md, sw01-routing.md
+│   ├── three-building-routing.md, three-building-coverage.csv
 │   ├── verification.md, proposal.md, topology-editor.md, spatial-retrieval.md
 │   └── screenshots/  Automated test artifacts; mocked results are labeled
 ├── output/pdf/proposal_groupnumber.pdf

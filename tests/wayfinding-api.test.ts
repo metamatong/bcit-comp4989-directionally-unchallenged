@@ -222,7 +222,8 @@ it('requires a visitor choice before routing a partial GPS match using the origi
     const result = await (
       await post(path + '/navigation', { ...q, revision: selected.revision })
     ).json();
-    expect(result.status).toBe('choose-origin');
+    expect(result.status).toBe('route');
+    expect(result.origin.startRegion).toBeDefined();
     expect(result.origins).toHaveLength(2);
     expect(provider.calls - calls).toBe(1);
   } finally {

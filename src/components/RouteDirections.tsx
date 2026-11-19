@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Route } from 'lucide-react';
 import { planLabel } from '../topology';
 import type { VisualPlan } from '../types';
-import type { MapStop, NavigationResult, WalkingStep } from '../wayfinding';
+import type { MapStop, NavigationResult, PlaceChoice, WalkingStep } from '../wayfinding';
 import { RouteMapImage, type MapMarker } from './RouteMap';
 import type { DeviceOverlay, LocationCatalogue } from '../location/types';
 import { deviceOverlay, overlapsFootprint } from '../location/geometry';
@@ -62,6 +62,8 @@ function FloorMap({
   last,
   whole,
   device,
+  requestedRoom,
+  requestedOrigin,
 }: {
   visit: FloorVisit;
   plan: VisualPlan;
@@ -69,13 +71,16 @@ function FloorMap({
   last: boolean;
   whole: boolean;
   device?: DeviceOverlay | null;
+  requestedRoom?: PlaceChoice;
+  requestedOrigin?: PlaceChoice;
 }) {
   const samePoint = visit.start.id === visit.end.id && !visit.walks.length;
+  const finalLabel = requestedRoom ? 'Last mapped stop' : 'Destination';
   const markers: MapMarker[] = [
     {
       point: visit.start.point,
       symbol: samePoint && last ? 'B' : 'A',
-      label: `${samePoint && last ? 'Destination' : first ? (visit.start.startRegion ? 'Start area' : 'Start') : 'Enter'} · ${visit.start.label}`,
+      label: `${samePoint && last ? finalLabel : first ? (visit.start.startRegion ? 'Start area' : 'Start') : 'Enter'} · ${visit.start.label}`,
       end: samePoint && last,
     },
   ];
@@ -83,9 +88,25 @@ function FloorMap({
     markers.push({
       point: visit.end.point,
       symbol: 'B',
-      label: `${last ? 'Destination' : 'Continue at'} · ${visit.end.label}`,
+      label: `${last ? finalLabel : 'Continue at'} · ${visit.end.label}`,
       end: true,
     });
+  if (last && requestedRoom?.bounds && requestedRoom.planId === plan.id) {
+    const [l, t, r, b] = requestedRoom.bounds;
+    markers.push({
+      point: { x: (l + r) / 2, y: (t + b) / 2 },
+      symbol: 'R',
+      label: 'Requested place · ' + requestedRoom.label + ' (plan label)',
+    });
+  }
+  if (first && requestedOrigin?.bounds && requestedOrigin.planId === plan.id) {
+    const [l, t, r, b] = requestedOrigin.bounds;
+    markers.push({
+      point: { x: (l + r) / 2, y: (t + b) / 2 },
+      symbol: 'S',
+      label: 'Matched sign · ' + requestedOrigin.label + ' (plan label)',
+    });
+  }
   const heading = planLabel(plan);
   return (
     <figure className="route-map-visit" aria-label={heading}>
@@ -119,8 +140,12 @@ export function RouteDirections({
   onRecheck,
   locationCatalogue,
   preferElevators = false,
+  requestedRoom,
+  requestedOrigin,
 }: {
   route: FoundRoute;
+  requestedRoom?: PlaceChoice;
+  requestedOrigin?: PlaceChoice;
   plans: VisualPlan[];
   onRecheck: () => void;
   locationCatalogue?: LocationCatalogue;
@@ -162,12 +187,31 @@ export function RouteDirections({
       <div className="way-heading">
         <Route size={22} />
         <h2 tabIndex={-1} ref={headingRef}>
-          Walking directions
+          {requestedRoom
+            ? 'Directions to the last mapped stop'
+            : requestedOrigin
+              ? 'Directions from the first mapped stop'
+              : 'Walking directions'}
         </h2>
       </div>
       <p className="route-overview" aria-label="Route overview">
-        {routeOverview(route, planById)}
+        {(requestedRoom || requestedOrigin) && !route.steps.length
+          ? 'Mapped stop · ' + route.destination.label
+          : routeOverview(route, planById)}
       </p>
+      {requestedRoom && (
+        <p role="note">
+          The walking line ends at {route.destination.label}. The final walk to{' '}
+          {requestedRoom.label} is unverified. R marks the requested place on its floor plan.
+        </p>
+      )}
+      {requestedOrigin && (
+        <p role="note">
+          S marks the sign for {requestedOrigin.label}. The walk from that sign to{' '}
+          {route.origin.label} is unverified. Follow the walking line once you reach{' '}
+          {route.origin.label}.
+        </p>
+      )}
       <p className="helper" role="note">
         {preferElevators
           ? route.steps.some((step) => step.kind === 'stairs')
@@ -177,7 +221,7 @@ export function RouteDirections({
             ? 'This route uses an elevator because no complete route without elevators is mapped.'
             : 'Stairs preferred.'}
       </p>
-      {route.steps.length > 0 && (
+      {!requestedRoom && !requestedOrigin && route.steps.length > 0 && (
         <button
           type="button"
           className="primary full-width"
@@ -202,6 +246,8 @@ export function RouteDirections({
             plan={planById.get(visit.start.planId)!}
             first={index === 0}
             last={index === visits.length - 1}
+            requestedRoom={index === visits.length - 1 ? requestedRoom : undefined}
+            requestedOrigin={index === 0 ? requestedOrigin : undefined}
             whole={whole}
             device={index === activeVisit ? overlay : null}
           />

@@ -13,6 +13,7 @@ import type { VisualPlan } from '../src/types';
 import {
   topologyDocumentSchema,
   topologyMutationSchema,
+  outdoorEndpointsAllowed,
   type TopologyDocument,
   type TopologyNode,
   type TopologyEdge,
@@ -101,7 +102,7 @@ function edgeProblem(
   }
   if (edge.kind === 'building-link' && fromPlan.building === toPlan.building)
     return 'A building link must join different buildings.';
-  if (edge.kind === 'outdoor' && (from.kind !== 'outdoor-access' || to.kind !== 'outdoor-access'))
+  if (edge.kind === 'outdoor' && !outdoorEndpointsAllowed(from, to))
     return 'An outdoor passage must join exterior doorway points.';
   return null;
 }
