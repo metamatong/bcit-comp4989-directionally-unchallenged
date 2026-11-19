@@ -3,7 +3,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { request } from '../api';
 import { buildingLabel, planLabel } from '../topology';
 import type { CampusLocationCandidate, VisualPlan } from '../types';
-import type { FloorPin, PagePoint, WalkingSurface } from '../wayfinding';
+import {
+  mapDestinationScope,
+  type FloorPin,
+  type PagePoint,
+  type WalkingSurface,
+} from '../wayfinding';
 
 type Props = {
   sessionId: string;
@@ -11,8 +16,9 @@ type Props = {
   candidate: CampusLocationCandidate;
   destination: string;
   plans: VisualPlan[];
-  initialDestination?: boolean;
-  onPick: (role: 'origin' | 'destination', pin: FloorPin) => void;
+  role: 'origin' | 'destination';
+  initiallyOpen?: boolean;
+  onPick: (pin: FloorPin) => void;
 };
 
 function MapSelection({
@@ -139,31 +145,26 @@ export function FloorPointPicker({
   sessionId,
   revision,
   onPick,
-  initialDestination = false,
+  role,
+  initiallyOpen = false,
 }: Props) {
-  const [open, setOpen] = useState(initialDestination);
-  const [role, setRole] = useState<'origin' | 'destination'>(
-    initialDestination ? 'destination' : 'origin',
-  );
+  const [open, setOpen] = useState(initiallyOpen);
   const [floorId, setFloorId] = useState('');
   const [selectedBuilding, setSelectedBuilding] = useState(candidate.building);
   const [surface, setSurface] = useState<WalkingSurface>();
   const [error, setError] = useState('');
-  const prefix = destination.trim().match(/^(NE|NW|SE|SW)\s*-?\s*0*(\d+)\b/i);
-  const chooseBuilding = role === 'destination' && destination === 'Map point';
-  const building = prefix
-    ? prefix[1].toUpperCase() + Number(prefix[2])
-    : chooseBuilding
-      ? selectedBuilding
-      : candidate.building;
+  const scope = mapDestinationScope(destination);
+  const chooseBuilding = role === 'destination' && scope !== undefined && !scope.building;
+  const building = scope?.building ?? selectedBuilding;
   const floors = plans.filter((p) =>
-    role === 'origin' ? p.id === candidate.planId : p.building === building,
+    role === 'origin'
+      ? p.id === candidate.planId
+      : scope !== undefined && p.building === building && (!scope.floor || p.floor === scope.floor),
   );
-  const typedFloor = destination.match(/\bfloor\s+(\d+)\b/i)?.[1];
   const plan =
     floors.find((p) => p.id === floorId) ??
-    floors.find((p) => p.floor === (typedFloor ?? candidate.floor)) ??
-    floors[0];
+    floors.find((p) => p.id === candidate.planId) ??
+    (floors.length === 1 ? floors[0] : undefined);
   useEffect(() => {
     setSurface(undefined);
     setError('');
@@ -188,22 +189,11 @@ export function FloorPointPicker({
       open={open}
       onToggle={(e) => setOpen(e.currentTarget.open)}
     >
-      <summary>Choose a point on the map</summary>
+      <summary>
+        {role === 'origin' ? 'Adjust starting point on the map' : 'Choose a destination on the map'}
+      </summary>
       {open && (
         <>
-          <label>
-            Use point as{' '}
-            <select
-              value={role}
-              onChange={(e) => {
-                setFloorId('');
-                setRole(e.target.value as typeof role);
-              }}
-            >
-              <option value="origin">Starting point</option>
-              <option value="destination">Destination</option>
-            </select>
-          </label>
           {chooseBuilding && (
             <label>
               Building{' '}
@@ -226,6 +216,7 @@ export function FloorPointPicker({
             <label>
               Floor{' '}
               <select value={plan?.id ?? ''} onChange={(e) => setFloorId(e.target.value)}>
+                {!plan && <option value="">Choose a floor</option>}
                 {floors.map((p) => (
                   <option key={p.id} value={p.id}>
                     {planLabel(p)}
@@ -236,18 +227,13 @@ export function FloorPointPicker({
           )}
           {plan && floors.length === 1 && <strong>{planLabel(plan)}</strong>}
           {error && <p role="alert">{error}</p>}
-          {!plan && <p>Select a Burnaby building as your destination.</p>}
+          {!floors.length && <p>No floor plan matches this selection.</p>}
           {plan &&
             !error &&
             (!surface || surface.planId !== plan.id ? (
               <p role="status">Loading walking areas…</p>
             ) : (
-              <MapSelection
-                key={plan.id + role}
-                plan={plan}
-                surface={surface}
-                onPick={(pin) => onPick(role, pin)}
-              />
+              <MapSelection key={plan.id + role} plan={plan} surface={surface} onPick={onPick} />
             ))}
         </>
       )}

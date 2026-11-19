@@ -1,8 +1,8 @@
 /** Emit Vercel Build Output v3 from verified official assets and the existing Express app. */
 import { createHash } from 'node:crypto';
-import { cp, copyFile, mkdir, rm, writeFile } from 'node:fs/promises';
+import { cp, copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import { isBuiltin } from 'node:module';
 import { build } from 'esbuild';
 import { nodeFileTrace } from '@vercel/nft';
@@ -110,6 +110,15 @@ await rm(staticDir, { recursive: true, force: true });
 await mkdir(functionDir, { recursive: true });
 await cp(join(root, 'dist'), staticDir, { recursive: true });
 await packageServer(await packageCampusData());
+// Import the distributed function so the check reads its own graphs and published topology.
+const handler = (await import(
+  pathToFileURL(join(functionDir, 'server/entry.mjs')).href
+)) as typeof import('../server/vercel');
+const routing = await handler.checkPublishedRoute();
+const graphDigest = await readFile(join(root, 'data/campus/spatial/floor-graphs.sha256'), 'utf8');
+if (routing.graphVersion !== graphDigest.trim().slice(0, 16))
+  throw Error('Packaged route used a different floor graph from this build.');
+console.log('Verified packaged SE12 302 to SW03 1730 route on graph ' + routing.graphVersion + '.');
 const manifest = readJson<{ sources: { file: string; url: string }[] }>(
   'data/campus/manifest.json',
 );

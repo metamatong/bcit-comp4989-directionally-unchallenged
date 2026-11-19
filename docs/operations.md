@@ -18,7 +18,9 @@ Connect the GitHub repository to Vercel and track `main` for Production. The rep
 
 Configure `AI_PROVIDER` and its server-side key/model settings for each target environment. Gemini requires verified free-tier confirmation; OpenAI requires paid API access. Connect Upstash for Redis to Preview and Production with its free plan and automatic upgrades disabled. The integration supplies `KV_REST_API_URL` and `KV_REST_API_TOKEN`. Hosted workers use encrypted session records with a 30-minute expiry. Photo label evidence has its own five-minute expiry. The database receives neither photo bytes nor device coordinates. A per-session lease protects revisions and retries across workers. All workers using the same provider key share its rolling request budget.
 
-On a PR Preview, check that `GET /api/health` and `GET /api/bootstrap` return JSON, then use a consented test photo and destination to complete evidence extraction, metadata-only location lookup and reviewed-graph routing under the same session. Check the returned plan image URLs and that `/internal/topology` denies access. A merge into the tracked production branch starts a new deployment. [Vercel Git deployments](https://vercel.com/docs/git#production-branch)
+Each Vercel build loads its packaged function and checks the route from SE12 302 to the SW03 1730 door. `GET /api/health?check=routing` runs the same check on Preview or Production and reports the loaded floor graph version, topology revision and floors visited. It uses fixed sign evidence, the visitor router and the published plans, and returns HTTP 503 if the journey is unavailable. A hosted worker caches the check against its immutable map. The ordinary `GET /api/health` remains a lightweight liveness check.
+
+To verify photo extraction as well, use a consented test photo and destination through the visitor flow. Check the returned plan image URLs and that `/internal/topology` denies access. A merge into the tracked production branch starts a new deployment. [Vercel Git deployments](https://vercel.com/docs/git#production-branch)
 
 ## Media and state
 

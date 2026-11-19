@@ -13,6 +13,7 @@ import {
   type VisitorSessions,
 } from './visitor-sessions';
 import { visitorRouter } from './visitor-api';
+import { checkPublishedRoute } from './routing-readiness';
 export { actionSchema } from './visitor-api';
 
 export function createApp(options: {
@@ -110,13 +111,28 @@ export function createApp(options: {
       setHeaders: (res) => res.set('X-Content-Type-Options', 'nosniff'),
     }),
   );
-  app.get('/api/health', (_req, res) =>
-    res.json({
-      ok: true,
+  let hostedRouteCheck: ReturnType<typeof checkPublishedRoute> | undefined;
+  app.get('/api/health', async (req, res) => {
+    const health = {
       mode: options.hosted ? 'hosted-prototype' : 'local-prototype',
       requestId: randomUUID(),
-    }),
-  );
+    };
+    if (req.query.check !== 'routing') {
+      res.json({ ...health, ok: true });
+      return;
+    }
+    try {
+      // The packaged topology is immutable for the lifetime of a hosted worker.
+      const routing = options.hosted
+        ? await (hostedRouteCheck ??= checkPublishedRoute(topologyStore))
+        : await checkPublishedRoute(topologyStore);
+      res.json({ ...health, ok: true, routing });
+    } catch {
+      res
+        .status(503)
+        .json({ ...health, ok: false, error: 'Published reference route unavailable.' });
+    }
+  });
   app.use('/api', (_req, res) => res.status(404).json({ error: 'Unknown API endpoint.' }));
   app.use(
     (error: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {

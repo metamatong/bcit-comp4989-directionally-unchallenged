@@ -90,12 +90,13 @@ it('takes a consented photo through both stages and uses its complete reviewed r
   const surface = (planId: string, role: 'origin' | 'destination', revision = match.revision) =>
     post(prefix + '/navigation/surface', {
       ...identifying,
-      destination: 'SW01 3175',
+      destination: 'SW01 floor 3',
       planId,
       role,
       revision,
     });
   expect((await surface('SW1-F3-p1', 'origin')).status).toBe(400);
+  expect((await surface('SW1-F2-p1', 'destination')).status).toBe(400);
   expect((await surface('SW1-F3-p1', 'destination', 0)).status).toBe(409);
   const sheet = await surface('SW1-F3-p1', 'destination');
   expect(sheet.status).toBe(200);
@@ -334,5 +335,31 @@ it('uses the selected 302 sign to reach the SW03 1730 door on corridor 1700', as
   const approach = journey.steps.at(-1)!.path.filter((p) => p.x < 0.474);
   expect(approach.at(-1)).toEqual(point);
   expect(approach.every((p) => p.y >= 0.472 && p.y <= 0.4905)).toBe(true);
+  // Even a valid public cell on a different SW03 floor cannot take the place of the named room.
+  const wrongFloor = floorGraphs().byId.get('SW3-F3-p1')!;
+  const otherStop = wrongFloor.places.find((place) => place.cells.length)!.cells[0];
+  const query = {
+    candidateId: chosen.campusLocation!.id,
+    revision: chosen.revision,
+    destination: 'SW03 1730',
+  };
+  const surface = await post(prefix + '/navigation/surface', {
+    ...query,
+    role: 'destination',
+    planId: wrongFloor.plan.id,
+  });
+  expect(surface.status).toBe(400);
+  const misplaced = await post(prefix + '/navigation', {
+    ...query,
+    networkRevision: journey.networkRevision,
+    destinationPoint: {
+      planId: wrongFloor.plan.id,
+      graphVersion: wrongFloor.version,
+      sourceSha256: wrongFloor.plan.sourceSha256,
+      point: wrongFloor.point(otherStop),
+    },
+  });
+  expect(misplaced.status).toBe(400);
+  expect((await misplaced.json()).error).toContain('Named destinations use their mapped entrances');
   expect(provider.calls - initialCalls).toBe(1);
 });

@@ -307,6 +307,23 @@ it.each([false, true, 'denied'] as const)(
       );
       expect(result.querySelectorAll('.route-map-visit')).toHaveLength(3);
       await click(host.querySelector<HTMLElement>('.journey-inputs > summary')!);
+      await setDestination('SW03 1730');
+      await click(button('GO to SW03 1730'));
+      await wait(() =>
+        expect(
+          host.querySelector('.route-map-visit:last-of-type .pin-legend')?.textContent,
+        ).toContain('Destination · 1730'),
+      );
+      const arrival = host.querySelector('.route-map-visit:last-of-type')!;
+      expect(arrival.querySelector('.route-floor-label')?.textContent).toBe('SW03 · Floor 1');
+      expect(arrival.querySelector('[data-walking-line=true]')).toBeTruthy();
+      expect(host.querySelector('.journey-panel .floor-point-picker')).toBeNull();
+      const requestsTo1730 = requestBodies
+        .map((body) => JSON.parse(body))
+        .filter((body) => body.destination === 'SW03 1730');
+      expect(requestsTo1730).toHaveLength(1);
+      expect(requestsTo1730[0]).not.toHaveProperty('destinationPoint');
+      await click(host.querySelector<HTMLElement>('.journey-inputs > summary')!);
       await setDestination('SW03 2458');
       expect(host.querySelector('.route-directions')).toBeNull();
       await click(button('GO to SW03 2458'));

@@ -292,12 +292,12 @@ export class CampusJourney {
         status: 'choose-destination',
         message: 'Select the destination shown on your floor plan.',
       };
+    const targetFloor = floorGraphs().byId.get(goal.place.planId)!;
+    const destinationName = planLabel(targetFloor.plan) + ' · ' + goal.place.label;
     const originPlace = floorGraphs()
       .byId.get(candidate.planId)
       ?.places.find((p) => p.id === candidate.sourcePlaceId);
-    const targetPlace = floorGraphs()
-      .byId.get(goal.place.planId)
-      ?.places.find((p) => p.id === goal.place.id);
+    const targetPlace = targetFloor.places.find((p) => p.id === goal.place.id);
     const restricted =
       !request.originPoint && originPlace?.visitorAccess
         ? originPlace
@@ -321,22 +321,21 @@ export class CampusJourney {
           : !starts.length
             ? 'unmapped-origin'
             : 'unmapped-destination';
-      const where =
-        status === 'unmapped-origin'
-          ? 'The starting place'
-          : status === 'unmapped-destination'
-            ? 'The destination'
-            : 'Both places';
+      const messages = {
+        'unmapped-origin':
+          'The starting place needs a mapped approach to the public walking network.',
+        'unmapped-destination':
+          'The floor plan shows ' +
+          destinationName +
+          '. Its entrance has no mapped connection to a public corridor.',
+        'unmapped-origin-and-destination':
+          'The starting place and ' + destinationName + ' both need mapped walking approaches.',
+      };
       return {
         ...context,
         status,
         originIssue: !starts.length ? 'unmapped-connection' : undefined,
-        message:
-          where +
-          (status === 'unmapped-origin-and-destination'
-            ? ' need mapped approaches'
-            : ' needs a mapped approach') +
-          ' to the public walking network.',
+        message: messages[status],
       };
     }
     const source = originPlace;
@@ -365,7 +364,8 @@ export class CampusJourney {
           ...context,
           origins: [],
           status: goal.stops.every((s) => s.unlinked) ? 'unmapped-destination' : 'no-route',
-          message: 'The mapped entrances do not have a continuous approach to this destination.',
+          message:
+            'The mapped entrances do not have a continuous approach to ' + destinationName + '.',
         };
       return {
         ...context,
@@ -390,7 +390,8 @@ export class CampusJourney {
           ...context,
           status: 'unmapped-destination',
           message:
-            'The destination door is marked on the floor plan. Its approach from the public walking route is missing.',
+            destinationName +
+            ' has a marked door. Its approach from the public walking route is missing.',
         };
     }
     const result = this.search.route([selected], goal.stops);
@@ -399,7 +400,7 @@ export class CampusJourney {
         ...context,
         status: 'no-route',
         message:
-          floorGraphs().byId.get(goal.place.planId)!.plan.building !== candidate.building
+          targetFloor.plan.building !== candidate.building
             ? 'Both places have walking approaches. The saved passages do not provide a continuous route between these buildings.'
             : 'Both places have walking approaches. A continuous connection between them is missing.',
       };
@@ -412,10 +413,7 @@ export class CampusJourney {
         ? {
             destinationMatch: {
               requested: request.destination,
-              matched:
-                planLabel(floorGraphs().byId.get(goal.place.planId)!.plan) +
-                ' · ' +
-                goal.place.label,
+              matched: destinationName,
             },
           }
         : {}),

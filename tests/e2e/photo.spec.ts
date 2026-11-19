@@ -274,7 +274,9 @@ test('privacy information keeps the photo local and ready for the next step', as
   expect(uploads).toHaveLength(0);
 });
 
-test('picks a destination on the identified floor with one photo read', async ({ page }) => {
+test('picks an explicit destination floor in another building with one photo read', async ({
+  page,
+}) => {
   const { evidenceUploads } = await setup(page, true, true);
   await page.route('**/api/sessions/*/navigation/surface', (route) =>
     route.fulfill({
@@ -293,6 +295,13 @@ test('picks a destination on the identified floor with one photo read', async ({
   await page.getByRole('button', { name: 'GO', exact: true }).click();
   const map = page.getByRole('group', { name: /Select a walking point/ });
   await expect(map).toBeVisible();
+  await expect(page.getByLabel('Use point as')).toHaveCount(0);
+  await page.getByRole('combobox', { name: 'Building', exact: true }).selectOption('SW3');
+  const floor = page.getByRole('combobox', { name: 'Floor', exact: true });
+  await expect(floor).toHaveValue('');
+  await expect(map).toHaveCount(0);
+  await floor.selectOption('SW3-F1-p1');
+  await expect(map).toHaveAccessibleName('Select a walking point on SW03 · Floor 1');
   await map.focus();
   await map.press('ArrowRight');
   const sent = page.waitForRequest(
@@ -300,7 +309,7 @@ test('picks a destination on the identified floor with one photo read', async ({
   );
   await page.getByRole('button', { name: 'Use this point' }).click();
   expect((await sent).postDataJSON().destinationPoint).toMatchObject({
-    planId: 'SE12-F3-p1',
+    planId: 'SW3-F1-p1',
     graphVersion: 'b'.repeat(16),
   });
   expect(evidenceUploads).toHaveLength(1);

@@ -37,6 +37,20 @@ const action = (
 ) => post(`${base}/api/sessions/${session.id}/actions`, { action: value, requestId, revision });
 
 describe('real-campus-only HTTP contract', () => {
+  it('checks the published drawing route without a visitor session or provider call', async () => {
+    const response = await fetch(base + '/api/health?check=routing');
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      ok: true,
+      routing: {
+        status: 'route',
+        origin: { planId: 'SE12-F3-p1', label: '302' },
+        destination: { planId: 'SW3-F1-p1', label: '1730' },
+        floors: ['SE12-F3-p1', 'SW3-F3-p1', 'SW3-F2-p1', 'SW3-F1-p1'],
+        graphVersion: expect.stringMatching(/^[a-f0-9]{16}$/),
+      },
+    });
+  });
   it('creates a Gemini session with no synthetic state even when credentials are unavailable', async () => {
     const session = await start();
     expect(session.mode).toBe('live');

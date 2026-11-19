@@ -12,6 +12,7 @@ import { locateFromLabels } from '../server/label-localization';
 import { TopologyStore } from '../server/topology';
 import { reviewedNetwork } from '../server/pilot-network';
 import { planVisitorNavigation } from '../server/wayfinding';
+import { checkPublishedRoute } from '../server/routing-readiness';
 import {
   StartingPlaceChoices,
   CampusLocationResults,
@@ -69,14 +70,18 @@ function matchedPlace(label: string, usedFallbackModel = false) {
   return { candidate: session.campusLocation, analysis };
 }
 
-function navigate(candidate: CampusLocationCandidate) {
+function navigate(candidate: CampusLocationCandidate, destination = 'SW03 1710') {
   return planVisitorNavigation(
     candidate,
-    { revision: 1, candidateId: candidate.id, destination: 'SW03 1710' },
+    { revision: 1, candidateId: candidate.id, destination },
     store,
   );
 }
-async function show(candidate: CampusLocationCandidate, result: NavigationResult) {
+async function show(
+  candidate: CampusLocationCandidate,
+  result: NavigationResult,
+  destination = 'SW03 1710',
+) {
   vi.stubGlobal(
     'fetch',
     vi.fn(async () => Response.json(result)),
@@ -93,7 +98,8 @@ async function show(candidate: CampusLocationCandidate, result: NavigationResult
           sessionId: randomUUID(),
           revision: 1,
           candidate,
-          destination: 'SW03 1710',
+          destination,
+          locationEvidence: 'Matched photo sign',
           plans: store.plans,
           busy: false,
           onTryAnotherPhoto: vi.fn(),
@@ -102,6 +108,37 @@ async function show(candidate: CampusLocationCandidate, result: NavigationResult
     ),
   );
 }
+
+it('draws directions from SE12 302 to the SW03 1730 entrance without asking for a map point', async () => {
+  const { candidate } = matchedPlace('302');
+  const destination = 'SW03 1730';
+  const route = await navigate(candidate, destination);
+  expect(route.status).toBe('route');
+  await show(candidate, route, destination);
+  const directions = host.querySelector('[aria-label="Your walking route"]')!;
+  expect(directions.querySelector('.route-overview')?.textContent).toContain('1730');
+  const arrival = [...directions.querySelectorAll('.route-map-stack figure')].at(-1)!;
+  expect(arrival.querySelector('.route-floor-label')?.textContent).toBe('SW03 · Floor 1');
+  expect(arrival.querySelector('.pin-legend')?.textContent).toContain('Destination · 1730');
+  expect(arrival.querySelector('[data-walking-line=true]')).toBeTruthy();
+  expect(directions.querySelector('.floor-point-picker')).toBeNull();
+  expect(
+    host.querySelector('.journey-evidence:not([open]) .floor-point-picker summary')?.textContent,
+  ).toBe('Adjust starting point on the map');
+  expect(vi.mocked(fetch)).toHaveBeenCalledOnce();
+});
+
+it('identifies a genuine destination gap with its room and floor and keeps the named destination', async () => {
+  const { candidate } = matchedPlace('302');
+  const destination = 'SW03 1750';
+  const result = await navigate(candidate, destination);
+  expect(result.status).toBe('unmapped-destination');
+  await show(candidate, result, destination);
+  const panel = host.querySelector('[aria-label="Route to destination"]')!;
+  expect(panel.textContent).toContain('SW03 · Floor 1 · 1750');
+  expect(panel.querySelector('.floor-point-picker, select')).toBeNull();
+  expect(vi.mocked(fetch)).toHaveBeenCalledOnce();
+});
 
 it.each([false, true])('offers the two 323 corridor doors with fallback=%s', async (fallback) => {
   const { candidate } = matchedPlace('323', fallback);
@@ -155,6 +192,7 @@ it('identifies missing connections even when a unique source doorway exists', as
   });
   const result = await navigate(candidate);
   expect(result).toMatchObject({ status: 'unmapped-origin', originIssue: 'unmapped-connection' });
+  await expect(checkPublishedRoute(store)).rejects.toThrow('unmapped-origin');
   await show(candidate, result);
   expect(host.textContent).toContain('Starting route not mapped');
   expect(host.textContent).not.toContain('Try another photo');
