@@ -1,5 +1,13 @@
 # Verification record
 
+## Three-building visitor routing · November 19, 2026
+
+The compiled visitor router takes SE12 323 through the floor-3 passage, down through SW03 floors 2 and 1 and to the doorway of 1750 on corridor 1700. Both of the 323 doors lead to the same first turn. The packaged readiness check also covers SE12 302 to SW03 1730. These checks replay exact sign evidence after extraction. They use no visitor media or provider calls.
+
+A directional search over all 12 target sheets found 999 of 1,165 visitor occurrences usable in both directions through the common network. Coverage by floor, arrival quality and restriction is published in the inventory. The other 77 compiled floor records retained their previous contents. The three outdoor links and two stair directions recorded in this release came from the project user's marked-point confirmations. No physical-campus walk was performed for this release. [Per-place inventory](three-building-routing.md)
+
+Five local visitor API pairs were sampled before checking reachability, using seed `89f36d66`. Three reached their destination. SW03 2690 to SE12 100E ended at SE12 corridor 101L. SW01 3382B to SW03 1920 ended at SW03 corridor 1700. Both results identified the last mapped stop and kept the connection to the room unresolved. The three complete pairs were SW03 3675 to SW01 3042, SW01 2355 to SW01 1023A and SW01 3010 to SW01 2386.
+
 ## Stair preference and guided directions · November 19, 2026
 
 The destination step offers **Accessibility: prefer elevators**; unchecked routes prefer stairs. The planner first looks for a complete route without the non-preferred transfer type, then falls back to all currently permitted connections. Route results retain the ordered floor-map overview. **GO** opens manual single-step directions with one instruction and map at a time; previous/next/finish controls update progress without inferring position, starting a location watch, or making another provider request. Transfer steps let visitors view the departure and arrival floors. Accessibility and elevator availability remain unverified.

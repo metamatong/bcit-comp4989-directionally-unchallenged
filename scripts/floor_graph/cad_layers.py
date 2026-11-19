@@ -2,7 +2,6 @@
 
 import cv2
 import numpy as np
-
 from doors import SCALE, arc_chains, door_sweep, score_ink
 
 
@@ -157,7 +156,7 @@ class CadLayers:
                 )
         result = {}
         accepted = []
-        for hinge, radius, tips, angle in sorted(fitted,key=lambda entry:-entry[3]):
+        for hinge, radius, tips, angle in sorted(fitted, key=lambda entry: -entry[3]):
             choices = []
             for i, tip in enumerate(tips):
                 leaf = tips[1 - i]
@@ -173,7 +172,7 @@ class CadLayers:
                     (hinge - tip) @ (other - tip) < -0.96 * radius * other_radius
                     for other, other_radius in ends[tuple(np.rint(tip * 4).astype(int))]
                 )
-                if angle<1.29 and max(extension)<.66:
+                if angle < 1.29 and max(extension) < 0.66:
                     continue
                 if support < 0.68 and not (paired and extension[0] > 0.65):
                     continue
@@ -193,10 +192,14 @@ class CadLayers:
                 normal = -normal
             # A quarter turn is often exported as two 45-degree curves. A
             # fragment on an already fitted hinge is not an additional door.
-            if any(long_angle > angle + 0.20 and np.linalg.norm(hinge-h)<0.40
-                   and abs(radius-r)<0.40 for h,r,long_angle in accepted):
+            if any(
+                long_angle > angle + 0.20
+                and np.linalg.norm(hinge - h) < 0.40
+                and abs(radius - r) < 0.40
+                for h, r, long_angle in accepted
+            ):
                 continue
-            accepted.append((hinge,radius,angle))
+            accepted.append((hinge, radius, angle))
             k = tuple(np.rint((hinge + tip) * 2).astype(int))
             result[k] = (hinge, tip, normal, radius)
         swings = list(result.values())

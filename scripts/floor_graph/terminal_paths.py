@@ -122,26 +122,42 @@ class TerminalPaths:
         mesh. These paths stay terminal and do not turn a suite into a through route.
         """
         from surfaces import at_label
-        size = np.array([self.grid.w,self.grid.h])
+
         for place in places:
-            if (place["label"] in protected or place.get("visitorAccess") or
-                place["kind"] in {"shaft","void","stairs","elevator"}):
+            if (
+                place["label"] in protected
+                or place.get("visitorAccess")
+                or place["kind"] in {"shaft", "void", "stairs", "elevator"}
+            ):
                 continue
-            avoid = None if place.get("roomArea") or place["kind"] in {"corridor","atrium"} else at_label(self.grid.regions,place["bounds"])
-            paths=list(place.get("terminalPaths",[]))
-            for cell, prefix in [*((c,[]) for c in place["cells"]),*((p["cell"],p["via"]) for p in paths)]:
-                i=self.index[cell]
-                if i < 0 or not np.isfinite(self.dist[i]) or self.prev[i]<0:
+            avoid = (
+                None
+                if place.get("roomArea") or place["kind"] in {"corridor", "atrium"}
+                else at_label(self.grid.regions, place["bounds"])
+            )
+            paths = list(place.get("terminalPaths", []))
+            for cell, prefix in [
+                *((c, []) for c in place["cells"]),
+                *((p["cell"], p["via"]) for p in paths),
+            ]:
+                i = self.index[cell]
+                if i < 0 or not np.isfinite(self.dist[i]) or self.prev[i] < 0:
                     continue
-                point=_point(self.grid,cell)
-                extension=self.path(cell,point,point,avoid)
-                if not extension or len(extension["via"])<2:continue
+                point = _point(self.grid, cell)
+                extension = self.path(cell, point, point, avoid)
+                if not extension or len(extension["via"]) < 2:
+                    continue
                 if prefix:
-                    extension["via"]=[p.tolist() for p in _segments(
-                        [np.array(v) for v in prefix+extension["via"][1:]]
-                    )]
-                if extension not in paths:paths.append(extension)
-            if paths:place["terminalPaths"]=paths
+                    extension["via"] = [
+                        p.tolist()
+                        for p in _segments(
+                            [np.array(v) for v in prefix + extension["via"][1:]]
+                        )
+                    ]
+                if extension not in paths:
+                    paths.append(extension)
+            if paths:
+                place["terminalPaths"] = paths
 
     def export(self):
         """Compress paths from selectable interior cells to the public grid.

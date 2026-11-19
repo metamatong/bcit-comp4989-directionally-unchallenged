@@ -3,17 +3,19 @@
 Visitors can search the 89 supplied floor plans. A sign identifies a place on a sheet. Its walking approaches identify the doors or parts of a public corridor from which a journey can start or end. Each occurrence has its own ID, printed bounds, source PDF hash and graph version. When a sign or doorway is ambiguous, the visitor can pick the matching occurrence or numbered marker using the original session.
 
 
-The current compiler catalogues **3,439 source occurrences**. It identifies a door or corridor approach for **2,215**. **1,495** have a walking-grid approach, across **87 sheets**. These are local floor counts before the live reviewed records are joined. They do not establish that two arbitrary places share a continuous route. NE18 floor 1 and SE30 floor 1 identify places in shop or warehouse drawings without a compiled public corridor approach.
+The current compiler catalogues **3,458 source occurrences**. It identifies a door or corridor approach for **2,357**. **1,708** have a walking-grid approach, across **87 sheets**. These are local floor counts before the live reviewed records are joined. They do not establish that two arbitrary places share a continuous route. NE18 floor 1 and SE30 floor 1 identify places in shop or warehouse drawings without a compiled public corridor approach.
 
-The counts below group source-use labels into room types and circulation. A place appears in the walking-grid column when at least one of its approaches joins a public walking cell directly or through an individually traced terminal path. Reviewed stair and elevator transfers are counted separately in the network.
+The counts below group source-use labels into room types and circulation. The walking-grid column includes signed room areas, mapped thresholds, shared entrances and separately marked corridor-side stops. Visitor totals exclude staff-only spaces, shafts and voids. Reviewed stair and elevator transfers are counted separately in the network.
 
 | Place type | Source occurrences | Identified door or approach | Walking-grid approach |
 |---|---:|---:|---:|
-| Corridor | 469 | 378 | 378 |
-| Stairs | 162 | 69 | 53 |
+| Corridor | 471 | 389 | 389 |
+| Stairs | 166 | 77 | 62 |
 | Elevator | 13 | 8 | 7 |
-| Unspecified room | 1,895 | 1,081 | 437 |
-| Classified rooms and other spaces | 900 | 679 | 620 |
+| Unspecified room | 1,697 | 997 | 399 |
+| Classified rooms and other spaces | 1,111 | 886 | 851 |
+
+The three-building inventory checks directional reachability through a common public passage. It publishes the result for every source occurrence across all twelve sheets. [SE12, SW03 and SW01 coverage](three-building-routing.md)
 
 ## Source preparation
 
@@ -58,4 +60,4 @@ python scripts/floor_graph/compile.py
 
 ## Sample five journeys
 
-`npm run routes:sample` starts an isolated loopback visitor API, samples ten distinct source occurrences without checking connectivity, and pairs the first five with the last five. Each case supplies a simulated exact sign, building and floor to the normal post-extraction API. It selects the sampled occurrence and, when needed, one of its doors. It sends a single navigation request per pair. The printed random seed reproduces the selection against the same version of the catalogue. An optional `--building SW01` selects from all places on the requested building’s sheets. For the observed results, see the [verification record](verification.md).
+`npm run routes:sample` starts an isolated loopback visitor API, samples ten distinct source occurrences without checking connectivity, and pairs the first five with the last five. Each case supplies a simulated exact sign, building and floor to the normal post-extraction API. It selects the sampled occurrence and, when needed, one of its doors. It sends a single navigation request per pair. The printed random seed reproduces the selection against the same version of the catalogue. The `--network` option samples visitor places in SE12, SW03 and SW01 before checking connectivity. An optional `--building SW01` selects from all places on the requested building’s sheets. For the observed results, see the [verification record](verification.md).

@@ -82,7 +82,11 @@ export class BrowserLocation {
               const reading = toReading(position);
               if (eligibleReading(reading)) finish(reading);
               else if (retryInvalid && Date.now() < deadline) request(false);
-              else finish(undefined, Error('The device returned an old or invalid reading. Try again.'));
+              else
+                finish(
+                  undefined,
+                  Error('The device returned an old or invalid reading. Try again.'),
+                );
             },
             (error) => finish(undefined, Error(errorMessage(error))),
             { ...LOCATION_OPTIONS, timeout: Math.max(0, deadline - Date.now()) },

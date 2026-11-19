@@ -18,12 +18,14 @@ export const connectionKinds = [
 ] as const;
 /** A reviewed on-sheet outdoor walk can also start or finish at an exterior stair landing. */
 export function outdoorEndpointsAllowed(
-  from: {kind: string; planId: string}, to: {kind: string; planId: string},
+  from: { kind: string; planId: string },
+  to: { kind: string; planId: string },
 ) {
   if (from.kind === 'outdoor-access' && to.kind === 'outdoor-access') return true;
-  return from.planId === to.planId && (
-    (from.kind === 'stair-landing' && to.kind === 'outdoor-access') ||
-    (to.kind === 'stair-landing' && from.kind === 'outdoor-access')
+  return (
+    from.planId === to.planId &&
+    ((from.kind === 'stair-landing' && to.kind === 'outdoor-access') ||
+      (to.kind === 'stair-landing' && from.kind === 'outdoor-access'))
   );
 }
 export const pointKindLabels: Record<(typeof pointKinds)[number], string> = {

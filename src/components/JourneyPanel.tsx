@@ -224,12 +224,14 @@ function JourneyResult({
       <section className="journey-panel" aria-label="Route location choices">
         <h2>
           {selectingOrigin
-            ? result.origins.some(o=>o.corridorVicinity) ? 'Start in the marked corridor alongside this room?'
-            : result.message.includes('shared entrance')
-              ? 'Start at the marked shared entrance?'
-              : 'Which doorway are you beside?'
+            ? result.origins.some((o) => o.corridorVicinity)
+              ? 'Start in the marked corridor alongside this room?'
+              : result.message.includes('shared entrance')
+                ? 'Start at the marked shared entrance?'
+                : 'Which doorway are you beside?'
             : 'Which destination do you mean?'}
         </h2>
+        {result.arrivalNote && <p role="note">{result.arrivalNote}</p>}
         {planIds.map((id) => {
           const plan = plans.find((p) => p.id === id);
           if (!plan) return null;
@@ -247,7 +249,9 @@ function JourneyResult({
             <div key={id}>
               <h3>{planLabel(plan)}</h3>
               {(group.length > 1 ||
-                (selectingOrigin && (result.message.includes('shared entrance') || options.some(o=>'corridorVicinity' in o && o.corridorVicinity)))) && (
+                (selectingOrigin &&
+                  (result.message.includes('shared entrance') ||
+                    options.some((o) => 'corridorVicinity' in o && o.corridorVicinity)))) && (
                 <RouteMapImage
                   plan={plan}
                   paths={[]}
@@ -277,7 +281,8 @@ function JourneyResult({
     'choose-destination': 'Destination match is unclear',
     'unknown-destination': 'Destination not found',
     'unmapped-destination': 'Destination entrance not connected',
-    'restricted-place': 'Staff-only area',
+    'restricted-place':
+      result.restriction === 'non-walking' ? 'Non-walking map feature' : 'Staff-only area',
     'unsupported-building': 'Routes are not mapped here yet',
     'unmapped-origin-and-destination': 'Route coverage is incomplete',
     'unmapped-origin':
@@ -297,14 +302,28 @@ function JourneyResult({
 
   return (
     <section className="journey-panel" aria-label="Route to destination">
-      <div className="way-heading">
-        <MapPin size={21} />
-        <h2 tabIndex={-1} ref={headingRef}>
-          {headings[result.status]}
-        </h2>
-      </div>
-      <p role="status">{result.message}</p>
-      {result.status === 'no-route' && (
+      {result.mappedPortion ? (
+        <RouteDirections
+          route={{ ...result, ...result.mappedPortion, status: 'route' }}
+          requestedRoom={result.mappedPortion.requested}
+          requestedOrigin={result.mappedPortion.requestedOrigin}
+          plans={plans}
+          locationCatalogue={locationCatalogue}
+          preferElevators={preferElevators}
+          onRecheck={onRecheck}
+        />
+      ) : (
+        <>
+          <div className="way-heading">
+            <MapPin size={21} />
+            <h2 tabIndex={-1} ref={headingRef}>
+              {headings[result.status]}
+            </h2>
+          </div>
+          <p role="status">{result.message}</p>
+        </>
+      )}
+      {!result.mappedPortion && result.status === 'no-route' && (
         <button className="secondary" disabled={busy} onClick={onRecheck}>
           Retry route
         </button>

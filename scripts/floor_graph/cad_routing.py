@@ -1,19 +1,21 @@
 """Compile source-bound CAD walking surfaces, physical approaches and reviewed landing ties."""
 
 from collections import defaultdict
+
 import cv2
 import numpy as np
 from cad_doorways import apertures, clear_segment, door_faces
+from cad_landings import landing_cells
+from cad_layers import CadLayers, open_wall_gaps
 from cad_places import CadSheet, floor_entries
 from cad_spaces import cad_spaces
-from cad_layers import CadLayers, open_wall_gaps
 from corridor_vicinities import corridor_vicinities
-from cad_landings import landing_cells
-from labels import label_words
-from public_components import transfer_components
-from surfaces import at_label, labelled_corridor_strips
-from passage_openings import open_passage_doors
 from doors import SCALE
+from labels import label_words
+from passage_openings import open_passage_doors
+from public_components import transfer_components
+from suite_entries import bind_shared_suites, shared_suite_entries
+from surfaces import at_label, labelled_corridor_strips
 
 
 def _corridors(config, words, regions, stats, by_region):
@@ -183,39 +185,7 @@ def compile_cad_floor(plan, page, geometry, extra, reviewed, grid_type):
             f"{plan['id']} source frontages need review: {', '.join(missing)}"
         )
     place_by_name = {p["label"]: p for p in places}
-    for suite in extra.get("cadSharedSuites", []):
-        parent = place_by_name[suite["entrance"]]
-        source_point = np.array(suite["threshold"]) * [local.w, local.h]
-
-        def near(cell):
-            centre = (
-                np.array([cell % local.gw, cell // local.gw]) + 0.5
-            ) * local.cell_size
-            return np.linalg.norm(centre - source_point) <= 24
-
-        entrance_cells = [c for c in parent["cells"] if near(c)]
-        entrance_paths = [
-            path
-            for path in parent.get("terminalPaths", [])
-            if np.linalg.norm(
-                np.array(path["via"][0]) * [local.w, local.h] - source_point
-            )
-            <= 24
-        ]
-        if not entrance_cells and not entrance_paths:
-            raise ValueError(
-                "The shared suite needs its marked entrance: " + parent["label"]
-            )
-        for label in suite["rooms"]:
-            place = place_by_name[label]
-            if place["cells"] or place.get("terminalPaths"):
-                place["sharedAccess"] = {"host":parent["label"],"cells":entrance_cells,
-                                         "terminalPaths":entrance_paths}
-                continue
-            place["sharedEntry"] = True
-            place["sharedHost"] = parent["label"]
-            place["cells"] = list(entrance_cells)
-            place["terminalPaths"] = list(entrance_paths)
+    bind_shared_suites(local, places, extra.get("cadSharedSuites", []))
     published = {n["id"]: n for n in nodes}
     for label, binding in extra.get("cadReviewedDoors", {}).items():
         node = published.get(binding["nodeId"])
@@ -229,7 +199,7 @@ def compile_cad_floor(plan, page, geometry, extra, reviewed, grid_type):
             raise ValueError("Stale surveyed room doorway: " + label)
         place_by_name[label]["reviewedDoor"] = binding
     for rule in restrictions:
-        for label in (rule["label"],rule["via"]):
+        for label in (rule["label"], rule["via"]):
             place = place_by_name[label]
             place.update(visitorAccess=rule["access"], cells=[], doors=[])
             place.pop("terminalPaths", None)
@@ -238,7 +208,8 @@ def compile_cad_floor(plan, page, geometry, extra, reviewed, grid_type):
     landings = landing_cells(plan, places, reviewed, local, cad, symbols, extra)
     protected = set(extra.get("cadReviewedDoors", {}))
     for rule in restrictions:
-        protected.update((rule["label"],rule["via"]))
-    primary_terminal.attach_local_stations(places,protected)
-    corridor_vicinities(local,places,extra,radius,protected)
+        protected.update((rule["label"], rule["via"]))
+    primary_terminal.attach_local_stations(places, protected)
+    corridor_vicinities(local, places, extra, radius, protected)
+    shared_suite_entries(local, places, symbols, protected)
     return local, places, portals, bands, landings, len(symbols), terminal.export()

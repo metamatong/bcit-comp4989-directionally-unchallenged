@@ -2,7 +2,6 @@
 
 import cv2
 import numpy as np
-
 from doors import SCALE, curve_points
 
 
@@ -154,6 +153,38 @@ def open_passage_doors(page, geometry, records, sealed, public):
         _open_gate(page, geometry, by_id, record, sealed, public)
 
 
+def open_ramp_markings(geometry, records, sealed, public, words):
+    """Open the transverse drawing ticks of a signed ramp, keeping its side walls."""
+    by_id = {p["id"]: p for p in geometry["primitives"]}
+    for record in records:
+        rectangle = by_id[record["outline"]]
+        if (
+            rectangle["kind"] != "rectangle"
+            or rectangle["filled"]
+            or not any(
+                w["text"] == record["corridor"] and w["kind"] == "corridor"
+                for w in words
+            )
+        ):
+            raise ValueError("Expected the registered ramp and its corridor stamp.")
+        a, b, c, d = np.array(rectangle["bbox"]) * SCALE
+        x = record["laneX"] * sealed.shape[1]
+        if d - b <= c - a or not a + 5 < x < c - 5:
+            raise ValueError("Ramp lane must stay between the two side rails.")
+        for y in (b, d):
+            l, t, r, bt = np.rint([x - 5, y - 4, x + 5, y + 4]).astype(int)
+            preserve = np.zeros((bt - t + 1, r - l + 1), np.uint8)
+            for item in geometry["primitives"]:
+                if item["id"] == rectangle["id"]:
+                    continue
+                x0, y0, x1, y1 = np.array(item["bbox"]) * SCALE
+                if x0 <= r + 2 and l - 2 <= x1 and y0 <= bt + 2 and t - 2 <= y1:
+                    _paint(item, preserve, np.array([l, t]))
+            protect = cv2.dilate(preserve, np.ones((3, 3), np.uint8))
+            patch = sealed[t : bt + 1, l : r + 1]
+            patch[(protect == 0) & (public[t : bt + 1, l : r + 1] > 0)] = 0
+
+
 def signed_door_cells(grid, words, sides, records):
     """Resolve a marked public-side approach beside another door's overlapping swing."""
     cells = {}
@@ -210,13 +241,20 @@ def _on_room_front(record, grid, places, place, middle, target, along_wall, radi
     # Tier lines can separate a lecture-room stamp from its door. The source-bound
     # polygon identifies the room side only; none of it becomes a walking surface.
     polygon = np.asarray([grid.norm(pair) for pair in record["roomSide"]], np.float32)
-    distance = lambda p: cv2.pointPolygonTest(polygon, tuple(map(float,p)), True)
-    inside = [p for p in places if distance(grid.norm(
-        (np.asarray(p["bounds"][:2]) + p["bounds"][2:]) / 2)) > 0]
+    distance = lambda p: cv2.pointPolygonTest(polygon, tuple(map(float, p)), True)
+    inside = [
+        p
+        for p in places
+        if distance(grid.norm((np.asarray(p["bounds"][:2]) + p["bounds"][2:]) / 2)) > 0
+    ]
     return (
-        len(inside) == 1 and inside[0] is place and distance(target) < 0
-        and all(abs(distance(middle + t * along_wall * radius * SCALE)) < 1
-                for t in (-0.44, 0, 0.44))
+        len(inside) == 1
+        and inside[0] is place
+        and distance(target) < 0
+        and all(
+            abs(distance(middle + t * along_wall * radius * SCALE)) < 1
+            for t in (-0.44, 0, 0.44)
+        )
     )
 
 
@@ -253,7 +291,9 @@ def bind_corridor_doorways(grid, words, places, symbols, records):
             not 0 < abs(depth) <= 2 * radius * SCALE
             or np.linalg.norm(delta - depth * normal) > 0.48 * radius * SCALE
             or ((room_centre - middle) @ normal) * depth >= 0
-            or not _on_room_front(record, grid, places, place, middle, target, along_wall, radius)
+            or not _on_room_front(
+                record, grid, places, place, middle, target, along_wall, radius
+            )
         ):
             raise ValueError(
                 "The marked approach must face the room from the corridor: " + room

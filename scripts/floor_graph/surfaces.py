@@ -4,10 +4,9 @@ from collections import defaultdict
 
 import cv2
 import numpy as np
-
 from doors import SCALE, doors_on_page
 from labels import IDENTIFIER
-from passage_openings import open_passage_doors
+from passage_openings import open_passage_doors, open_ramp_markings
 
 
 def ink_mask(page, words):
@@ -195,7 +194,9 @@ def labelled_corridor_strips(sealed, regions, words, seeds, radius):
 
 def surfaces(page, geometry, words, annotation):
     ink = ink_mask(page, words)
-    doors = doors_on_page(geometry, ink, angled_leaves=bool(annotation.get("cadInteriorBounds")))
+    doors = doors_on_page(
+        geometry, ink, angled_leaves=bool(annotation.get("cadInteriorBounds"))
+    )
     sealed = ink.copy()
     for hinge, tip, *_ in doors:
         cv2.line(
@@ -251,6 +252,9 @@ def surfaces(page, geometry, words, annotation):
             cv2.fillPoly(extra, [poly], 255)
         open_passage_doors(
             page, geometry, annotation.get("passageOpenings", []), sealed, extra
+        )
+        open_ramp_markings(
+            geometry, annotation.get("rampMarkings", []), sealed, extra, words
         )
         walk |= (extra > 0) & (sealed == 0)
     return walk, sealed, regions, sides, uses, doors

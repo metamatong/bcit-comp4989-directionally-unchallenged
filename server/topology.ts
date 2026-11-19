@@ -102,7 +102,7 @@ function edgeProblem(
   }
   if (edge.kind === 'building-link' && fromPlan.building === toPlan.building)
     return 'A building link must join different buildings.';
-  if (edge.kind === 'outdoor' && !outdoorEndpointsAllowed(from,to))
+  if (edge.kind === 'outdoor' && !outdoorEndpointsAllowed(from, to))
     return 'An outdoor passage must join exterior doorway points.';
   return null;
 }

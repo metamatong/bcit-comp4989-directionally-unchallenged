@@ -6,45 +6,86 @@ import numpy as np
 
 def subcell_passages(grid, portals):
     """Restore short, clear walks lost when an entire coarse cell must fit inside the corridor."""
-    count,coarse=cv2.connectedComponents(grid.grid.astype(np.uint8),connectivity=4)
-    if count<3:return
-    parents=list(range(count))
+    count, coarse = cv2.connectedComponents(grid.grid.astype(np.uint8), connectivity=4)
+    if count < 3:
+        return
+    parents = list(range(count))
+
     def root(i):
-        while parents[i]!=i:
-            parents[i]=parents[parents[i]]
-            i=parents[i]
+        while parents[i] != i:
+            parents[i] = parents[parents[i]]
+            i = parents[i]
         return i
-    for a,b,*_ in portals:
-        parents[root(coarse.flat[a])]=root(coarse.flat[b])
-    pitch=grid.cell_size
-    safe=cv2.distanceTransform(grid.walk.astype(np.uint8),cv2.DIST_L2,5)>=max(1.5,pitch*.48)
-    _,fine=cv2.connectedComponents(safe.astype(np.uint8),connectivity=4)
-    yp=np.rint((np.arange(grid.gh)+.5)*pitch).astype(int)
-    xp=np.rint((np.arange(grid.gw)+.5)*pitch).astype(int)
-    islands=fine[np.ix_(yp,xp)]
-    size=np.array([grid.w,grid.h])
-    def clear(a,b):
-        pts=np.rint(np.linspace(a,b,max(2,int(np.ceil(np.linalg.norm(b-a)*2))+1))).astype(int)
-        return safe[pts[:,1],pts[:,0]].all()
+
+    for a, b, *_ in portals:
+        parents[root(coarse.flat[a])] = root(coarse.flat[b])
+    pitch = grid.cell_size
+    safe = cv2.distanceTransform(grid.walk.astype(np.uint8), cv2.DIST_L2, 5) >= max(
+        1.5, pitch * 0.48
+    )
+    _, fine = cv2.connectedComponents(safe.astype(np.uint8), connectivity=4)
+    yp = np.rint((np.arange(grid.gh) + 0.5) * pitch).astype(int)
+    xp = np.rint((np.arange(grid.gw) + 0.5) * pitch).astype(int)
+    islands = fine[np.ix_(yp, xp)]
+    size = np.array([grid.w, grid.h])
+
+    def clear(a, b):
+        pts = np.rint(
+            np.linspace(a, b, max(2, int(np.ceil(np.linalg.norm(b - a) * 2)) + 1))
+        ).astype(int)
+        return safe[pts[:, 1], pts[:, 0]].all()
+
     # Only join nearby grid cells in one independently connected fine-resolution
     # free area. Test the actual polyline too: a wall with a distant opening
     # must never be crossed locally just because both sides share a component.
-    offsets=sorted(((x,y) for y in range(6) for x in range(-5,6)
-                    if (y or x>0) and 1<x*x+y*y<=25),key=lambda d:d[0]**2+d[1]**2)
-    for dx,dy in offsets:
-        x=max(0,-dx);xx=min(grid.gw,grid.gw-dx);yy=grid.gh-dy
-        left=coarse[:yy,x:xx];right=coarse[dy:,x+dx:xx+dx]
-        fin=islands[:yy,x:xx]
-        ys,xs=np.nonzero((left!=right)&(left>0)&(right>0)&(fin>0)&(fin==islands[dy:,x+dx:xx+dx]))
-        for j,i in zip(ys,xs):
-            first,second=root(left[j,i]),root(right[j,i])
-            if first==second:continue
-            start=np.array([xp[i+x],yp[j]]);end=np.array([xp[i+x+dx],yp[j+dy]])
-            for bend in ((start+end)/2,np.array([start[0],end[1]]),np.array([end[0],start[1]])):
-                if clear(start,bend) and clear(bend,end):
-                    a=int(j*grid.gw+i+x);b=int(a+dy*grid.gw+dx)
-                    portals.append([a,b,*[np.round(point/size,7).tolist() for point in (start,bend,end)]])
-                    parents[first]=second
+    offsets = sorted(
+        (
+            (x, y)
+            for y in range(6)
+            for x in range(-5, 6)
+            if (y or x > 0) and 1 < x * x + y * y <= 25
+        ),
+        key=lambda d: d[0] ** 2 + d[1] ** 2,
+    )
+    for dx, dy in offsets:
+        x = max(0, -dx)
+        xx = min(grid.gw, grid.gw - dx)
+        yy = grid.gh - dy
+        left = coarse[:yy, x:xx]
+        right = coarse[dy:, x + dx : xx + dx]
+        fin = islands[:yy, x:xx]
+        ys, xs = np.nonzero(
+            (left != right)
+            & (left > 0)
+            & (right > 0)
+            & (fin > 0)
+            & (fin == islands[dy:, x + dx : xx + dx])
+        )
+        for j, i in zip(ys, xs):
+            first, second = root(left[j, i]), root(right[j, i])
+            if first == second:
+                continue
+            start = np.array([xp[i + x], yp[j]])
+            end = np.array([xp[i + x + dx], yp[j + dy]])
+            for bend in (
+                (start + end) / 2,
+                np.array([start[0], end[1]]),
+                np.array([end[0], start[1]]),
+            ):
+                if clear(start, bend) and clear(bend, end):
+                    a = int(j * grid.gw + i + x)
+                    b = int(a + dy * grid.gw + dx)
+                    portals.append(
+                        [
+                            a,
+                            b,
+                            *[
+                                np.round(point / size, 7).tolist()
+                                for point in (start, bend, end)
+                            ],
+                        ]
+                    )
+                    parents[first] = second
                     break
 
 

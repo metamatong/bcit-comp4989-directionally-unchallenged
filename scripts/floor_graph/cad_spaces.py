@@ -2,7 +2,6 @@
 
 import numpy as np
 import pymupdf
-
 from labels import IDENTIFIER, TRANSIT, intersects
 
 USES = {

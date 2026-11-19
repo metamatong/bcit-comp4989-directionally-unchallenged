@@ -2,19 +2,29 @@
 import type { CampusLocationCandidate } from '../src/types';
 import type { NavigationChoice, NavigationResult, PlaceChoice } from '../src/wayfinding';
 import { planLabel } from '../src/topology';
-import { floorGraphs, sourceBuilding, landmarkKind, visitorExclusion, type FloorPlace } from './floor-graph';
+import {
+  floorGraphs,
+  sourceBuilding,
+  landmarkKind,
+  visitorExclusion,
+  type FloorPlace,
+} from './floor-graph';
 import { FloorSearch, type SearchStop, type VisitorMap } from './floor-search';
 import { labelKey, pilotEvidence } from './pilot-evidence';
 import { reviewedNetwork } from './pilot-network';
 import { pinnedStop } from './map-points';
-import {commonDoorDeparture} from './shared-corridor';
+import { commonDoorDeparture } from './shared-corridor';
+import { reachableFloorCheckpoint } from './floor-checkpoints';
 
 type BoundPlace = { place: PlaceChoice; stops: SearchStop[]; arrivalNote?: string };
-type TripContext = Pick<NavigationResult,'origins'|'destinations'|'networkRevision'>;
-function stopTiers(stops:SearchStop[]):SearchStop[][] {
-  const groups=[stops.filter(s=>!s.stop.sharedEntrance && !s.stop.corridorVicinity),
-    stops.filter(s=>s.stop.sharedEntrance),stops.filter(s=>s.stop.corridorVicinity)].filter(group=>group.length);
-  return groups.length?groups:[[]];
+type TripContext = Pick<NavigationResult, 'origins' | 'destinations' | 'networkRevision'>;
+function stopTiers(stops: SearchStop[]): SearchStop[][] {
+  const groups = [
+    stops.filter((s) => !s.stop.sharedEntrance && !s.stop.corridorVicinity),
+    stops.filter((s) => s.stop.sharedEntrance),
+    stops.filter((s) => s.stop.corridorVicinity),
+  ].filter((group) => group.length);
+  return groups.length ? groups : [[]];
 }
 function closeToken(a: string, b: string) {
   return a.length >= 4 && a.length === b.length && [...a].filter((c, i) => c !== b[i]).length === 1;
@@ -94,6 +104,7 @@ export class CampusJourney {
       if (candidates.length && candidates[0].d <= 18) usedCells.add(candidates[0].cell);
     }
     if (uniqueOccurrence && (place.kind === 'stairs' || place.kind === 'elevator')) {
+      const landings: SearchStop[] = [];
       for (const node of this.map.nodes) {
         const prefix = node.label.split(' · ')[0];
         if (
@@ -104,12 +115,12 @@ export class CampusJourney {
           continue;
         const landing = this.search.reviewed(node.id);
         if (landing) {
-          choices.push(landing);
-          // The gridded corridor approach and its live landing describe the same sign.
-          const cell = floor.approachAt(node.point, node)?.cell;
-          if (cell !== undefined) usedCells.add(cell);
+          landings.push(landing);
         }
       }
+      // A marked landing already has its own approach. Its nearby grid cells
+      // and door swings are different representations of the same stair sign.
+      if (landings.length) return landings;
     }
     const stopLabel = place.sharedEntry
       ? place.label +
@@ -150,23 +161,36 @@ export class CampusJourney {
     }
     const precise = [...new Map(choices.map((c) => [c.key, c])).values()];
     if (binding || reviewedCoordinates.length) return precise;
-    const keys = new Set(precise.map(s=>s.key));
-    return [...precise,...this.alternativeStops(place).filter(s=>!keys.has(s.key))];
+    const keys = new Set(precise.map((s) => s.key));
+    return [...precise, ...this.alternativeStops(place).filter((s) => !keys.has(s.key))];
   }
   private alternativeStops(place: FloorPlace): SearchStop[] {
     if (visitorExclusion(place) || place.reviewedDoor || place.reviewedLanding) return [];
     const floor = floorGraphs().byId.get(place.planId)!;
-    const access=place.sharedAccess;
-    const label=place.label + ' · entrance to ' + access?.host;
-    const shared=access?[...access.cells.map(cell=>({key:cell,stop:floor.stop(cell,label)})),
-      ...access.terminalPaths.map(p=>this.search.terminal(place.planId,label,p.cell,p.via.map(([x,y])=>({x,y}))))]
-      .map(s=>({...s,stop:{...s.stop,sharedEntrance:access.host}})):[];
-    const vicinity = (place.corridorVicinities ?? []).map(v => ({
-      key:v.cell,
-      stop:{ ...floor.stop(v.cell, 'Corridor alongside ' + place.label), startRegion:v.bounds,
-             corridorVicinity:true },
+    const access = place.sharedAccess;
+    const label = place.label + ' · entrance to ' + access?.host;
+    const shared = access
+      ? [
+          ...access.cells.map((cell) => ({ key: cell, stop: floor.stop(cell, label) })),
+          ...access.terminalPaths.map((p) =>
+            this.search.terminal(
+              place.planId,
+              label,
+              p.cell,
+              p.via.map(([x, y]) => ({ x, y })),
+            ),
+          ),
+        ].map((s) => ({ ...s, stop: { ...s.stop, sharedEntrance: access.host } }))
+      : [];
+    const vicinity = (place.corridorVicinities ?? []).map((v) => ({
+      key: v.cell,
+      stop: {
+        ...floor.stop(v.cell, 'Corridor alongside ' + place.label),
+        startRegion: v.bounds,
+        corridorVicinity: true,
+      },
     }));
-    return [...shared,...vicinity];
+    return [...shared, ...vicinity];
   }
   origins(candidate: CampusLocationCandidate): SearchStop[] {
     const floor = floorGraphs().byId.get(candidate.planId);
@@ -306,7 +330,7 @@ export class CampusJourney {
         status: 'unknown-destination',
         message: 'No matching place was found on the supplied Burnaby floor plans.',
       };
-    const goal = request.destinationId
+    const goal: BoundPlace | undefined = request.destinationId
       ? choices.find((c) => c.place.id === request.destinationId)
       : choices.length === 1
         ? choices[0]
@@ -333,28 +357,143 @@ export class CampusJourney {
       return {
         ...context,
         status: 'restricted-place',
+        restriction: visitorExclusion(restricted),
         message:
           planLabel(floorGraphs().byId.get(restricted.planId)!.plan) +
           ' · ' +
           restricted.label +
-          (visitorExclusion(restricted)==='staff-only'?' is staff-only.':' is a non-walking feature on the floor plan.') + ' Select a public location for visitor directions.',
+          (visitorExclusion(restricted) === 'staff-only'
+            ? ' is staff-only.'
+            : ' is a non-walking feature on the floor plan.') +
+          ' Select a public location for visitor directions.',
       };
-    const originGroups=stopTiers(starts), destinationGroups=stopTiers(goal.stops);
-    const pairs=originGroups.flatMap((origins,i)=>destinationGroups.map((ends,j)=>({origins,ends,rank:i+j})))
-      .sort((a,b)=>a.rank-b.rank);
-    let first:NavigationResult | undefined;
-    for(const {origins,ends} of pairs) {
-      if(request.originId && starts.some(s=>s.stop.id===request.originId) &&
-         !origins.some(s=>s.stop.id===request.originId))continue;
-      const result=this.between(candidate,request,originPlace,{...goal,stops:ends},
-        {...context,origins:origins.map(s=>s.stop)},origins, destinationName,corrected);
-      first??=result;
-      if(result.status==='route' || result.status==='choose-origin') return result;
+    const originGroups = stopTiers(starts),
+      destinationGroups = stopTiers(goal.stops);
+    const pairs = originGroups
+      .flatMap((origins, i) => destinationGroups.map((ends, j) => ({ origins, ends, rank: i + j })))
+      .sort((a, b) => a.rank - b.rank);
+    let first: NavigationResult | undefined;
+    for (const { origins, ends } of pairs) {
+      if (
+        request.originId &&
+        starts.some((s) => s.stop.id === request.originId) &&
+        !origins.some((s) => s.stop.id === request.originId)
+      )
+        continue;
+      const result = this.between(
+        candidate,
+        request,
+        originPlace,
+        { ...goal, stops: ends },
+        { ...context, origins: origins.map((s) => s.stop) },
+        origins,
+        destinationName,
+        corrected,
+      );
+      first ??= result;
+      if (result.status === 'route' || result.status === 'choose-origin') return result;
+    }
+    if (
+      targetPlace &&
+      first &&
+      (first.status === 'unmapped-destination' || first.status === 'no-route')
+    ) {
+      for (const origins of originGroups) {
+        const eligible = origins.filter(
+          (s) => !s.unlinked && (!request.originId || s.stop.id === request.originId),
+        );
+        if (!eligible.length) continue;
+        const reachable = this.search.reachable(eligible, this.plans);
+        const checkpoint = reachableFloorCheckpoint(
+          targetFloor,
+          targetPlace,
+          reachable,
+          this.map,
+          this.search,
+        );
+        if (!checkpoint) continue;
+        const portion = this.between(
+          candidate,
+          request,
+          originPlace,
+          { place: checkpoint.stop, stops: [checkpoint] },
+          { ...context, origins: eligible.map((s) => s.stop) },
+          eligible,
+          checkpoint.stop.label,
+          false,
+        );
+        if (portion.status === 'choose-origin')
+          return {
+            ...portion,
+            arrivalNote:
+              'The mapped route ends at ' +
+              checkpoint.stop.label +
+              ' on ' +
+              planLabel(targetFloor.plan) +
+              '. The final walk to ' +
+              targetPlace.label +
+              ' is unverified.',
+          };
+        if (portion.status === 'route')
+          return {
+            ...first,
+            mappedPortion: {
+              origin: portion.origin,
+              destination: portion.destination,
+              steps: portion.steps,
+              requested: goal.place,
+            },
+          };
+      }
+    }
+    if (
+      originPlace &&
+      !request.originId &&
+      !request.originPoint &&
+      first &&
+      (first.status === 'unmapped-origin' || first.status === 'no-route')
+    ) {
+      const floor = floorGraphs().byId.get(originPlace.planId)!;
+      for (const ends of destinationGroups) {
+        const targets = ends.filter((s) => !s.unlinked);
+        if (!targets.length) continue;
+        const checkpoint = reachableFloorCheckpoint(
+          floor,
+          originPlace,
+          this.search.reachable(targets, this.plans, true),
+          this.map,
+          this.search,
+        );
+        if (!checkpoint) continue;
+        const path = this.search.route([checkpoint], targets, request.preferElevators);
+        if (path)
+          return {
+            ...first,
+            mappedPortion: {
+              ...path,
+              requestedOrigin: {
+                id: originPlace.id,
+                planId: originPlace.planId,
+                label: originPlace.label,
+                bounds: originPlace.bounds,
+              },
+            },
+            arrivalNote: goal.arrivalNote,
+          };
+      }
     }
     return first!;
   }
-  private between(candidate:CampusLocationCandidate,request:NavigationChoice,source:FloorPlace|undefined,
-    goal:BoundPlace,context:TripContext,starts:SearchStop[],destinationName:string,corrected:boolean):NavigationResult {
+  private between(
+    candidate: CampusLocationCandidate,
+    request: NavigationChoice,
+    source: FloorPlace | undefined,
+    goal: BoundPlace,
+    context: TripContext,
+    starts: SearchStop[],
+    destinationName: string,
+    corrected: boolean,
+  ): NavigationResult {
     if (!starts.length || !goal.stops.length) {
       const status =
         !starts.length && !goal.stops.length
@@ -396,12 +535,23 @@ export class CampusJourney {
         message:
           'The starting door is marked on the floor plan. Its connection to the public walking route is missing.',
       };
-    const sharedStart=source?.sharedEntry || starts.some(s=>s.stop.sharedEntrance);
-    const nearbyStart=starts.some(s=>s.stop.corridorVicinity);
-    const common = !selected && !request.originId && !request.originPoint && !candidate.corridorOrigin && source
-      ? commonDoorDeparture(floorGraphs().byId.get(source.planId)!,source,starts,goal.stops,this.search,request.preferElevators)
-      : undefined;
-    if (!common && (!selected || ((sharedStart || nearbyStart) && !request.originId && !request.originPoint))) {
+    const sharedStart = source?.sharedEntry || starts.some((s) => s.stop.sharedEntrance);
+    const nearbyStart = starts.some((s) => s.stop.corridorVicinity);
+    const common =
+      !selected && !request.originId && !request.originPoint && !candidate.corridorOrigin && source
+        ? commonDoorDeparture(
+            floorGraphs().byId.get(source.planId)!,
+            source,
+            starts,
+            goal.stops,
+            this.search,
+            request.preferElevators,
+          )
+        : undefined;
+    if (
+      !common &&
+      (!selected || ((sharedStart || nearbyStart) && !request.originId && !request.originPoint))
+    ) {
       const reachable = this.search.reachable(goal.stops, this.plans, true);
       const options = starts.filter((s) => reachable.has(s.key));
       if (!options.length)
@@ -416,10 +566,11 @@ export class CampusJourney {
         ...context,
         origins: options.map((s) => s.stop),
         status: 'choose-origin',
-        message: nearbyStart ? 'Confirm that you are in the marked corridor alongside this room.'
+        message: nearbyStart
+          ? 'Confirm that you are in the marked corridor alongside this room.'
           : sharedStart
-          ? 'Confirm that you are at this shared entrance to start walking.'
-          : 'Which marked entrance are you beside?',
+            ? 'Confirm that you are at this shared entrance to start walking.'
+            : 'Which marked entrance are you beside?',
       };
     }
     if (selected && !goal.stops.some((g) => g.key === selected.key)) {
@@ -440,7 +591,8 @@ export class CampusJourney {
             ' has a marked door. Its approach from the public walking route is missing.',
         };
     }
-    const result = common ?? (selected && this.search.route([selected], goal.stops, request.preferElevators));
+    const result =
+      common ?? (selected && this.search.route([selected], goal.stops, request.preferElevators));
     if (!result)
       return {
         ...context,
@@ -455,10 +607,24 @@ export class CampusJourney {
       status: 'route',
       ...result,
       ...('arrivalNote' in goal && goal.arrivalNote ? { arrivalNote: goal.arrivalNote } : {}),
-      ...(result.destination.sharedEntrance ? {arrivalNote:'Directions to '+destinationName+' end at the shared entrance to '+result.destination.sharedEntrance+'.'}:{}),
-      ...(result.destination.corridorVicinity ? {
-        arrivalNote: 'Directions end in the public corridor alongside ' + destinationName + '. Check the room sign for the entrance.',
-      } : {}),
+      ...(result.destination.sharedEntrance
+        ? {
+            arrivalNote:
+              'Directions to ' +
+              destinationName +
+              ' end at the shared entrance to ' +
+              result.destination.sharedEntrance +
+              '.',
+          }
+        : {}),
+      ...(result.destination.corridorVicinity
+        ? {
+            arrivalNote:
+              'Directions end in the public corridor alongside ' +
+              destinationName +
+              '. Check the room sign for the entrance.',
+          }
+        : {}),
       ...(corrected
         ? {
             destinationMatch: {

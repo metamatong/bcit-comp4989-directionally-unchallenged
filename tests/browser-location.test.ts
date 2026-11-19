@@ -53,16 +53,19 @@ describe('foreground browser location adapter', () => {
   it('recovers a fresh building reading after a stale first fix without extending the deadline', async () => {
     const requests: { success: PositionCallback; options?: PositionOptions }[] = [];
     const source = new BrowserLocation({
-      getCurrentPosition: (success: PositionCallback, _failure: PositionErrorCallback, options: PositionOptions) =>
-        requests.push({ success, options }),
+      getCurrentPosition: (
+        success: PositionCallback,
+        _failure: PositionErrorCallback,
+        options: PositionOptions,
+      ) => requests.push({ success, options }),
     } as unknown as Geolocation);
     const result = source.once();
     await vi.advanceTimersByTimeAsync(9000);
     requests[0].success(position(5000));
     expect(requests).toHaveLength(2);
-    expect(requests[1].options).toMatchObject({maximumAge: 0, timeout: 6000});
+    expect(requests[1].options).toMatchObject({ maximumAge: 0, timeout: 6000 });
     requests[1].success(position(Date.now()));
-    await expect(result).resolves.toMatchObject({timestamp: 19000});
+    await expect(result).resolves.toMatchObject({ timestamp: 19000 });
   });
   it('retains the latest eligible reading and ignores queued callbacks after stop or revocation', () => {
     let success: PositionCallback = () => {},

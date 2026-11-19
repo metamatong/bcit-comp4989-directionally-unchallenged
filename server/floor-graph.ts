@@ -28,7 +28,7 @@ const placeSchema = z.object({
   bounds: boundsSchema,
   doors: z.array(z.tuple([unit, unit, index.nullable()])),
   cells: z.array(index),
-  corridorVicinities: z.array(z.object({cell:index, bounds:boundsSchema})).optional(),
+  corridorVicinities: z.array(z.object({ cell: index, bounds: boundsSchema })).optional(),
   reviewedLanding: reviewedPointSchema.optional(),
   reviewedDoor: reviewedPointSchema.optional(),
   sharedEntry: z.boolean().optional(),
@@ -36,7 +36,13 @@ const placeSchema = z.object({
   visitorAccess: z.literal('staff-only').optional(),
   roomArea: z.boolean().optional(),
   terminalPaths: z.array(terminalPathSchema).optional(),
-  sharedAccess: z.object({host:z.string().min(1),cells:z.array(index),terminalPaths:z.array(terminalPathSchema)}).optional(),
+  sharedAccess: z
+    .object({
+      host: z.string().min(1),
+      cells: z.array(index),
+      terminalPaths: z.array(terminalPathSchema),
+    })
+    .optional(),
 });
 const floorSchema = z.object({
   id: z.string(),
@@ -68,8 +74,9 @@ const floorSchema = z.object({
 export type FloorPlace = z.infer<typeof placeSchema> & { id: string; planId: string };
 /** Preserve the plan record as evidence while excluding non-visitor endpoints. */
 export function visitorExclusion(place: FloorPlace) {
-  if(place.visitorAccess==='staff-only' || place.kind==='staff')return 'staff-only';
-  if((place.kind==='shaft' || place.kind==='void') && !place.reviewedLanding)return 'non-walking';
+  if (place.visitorAccess === 'staff-only' || place.kind === 'staff') return 'staff-only';
+  if ((place.kind === 'shaft' || place.kind === 'void') && !place.reviewedLanding)
+    return 'non-walking';
   return undefined;
 }
 /** Only generic landmark names use aliases. Numbered place identifiers always match in full. */
@@ -150,10 +157,13 @@ export class FloorGraph {
       planId: plan.id,
       id: plan.id + ':' + version + ':place:' + i,
       cells: place.cells.map(valid),
-      corridorVicinities: place.corridorVicinities?.map(v => ({ ...v, cell:valid(v.cell) })),
+      corridorVicinities: place.corridorVicinities?.map((v) => ({ ...v, cell: valid(v.cell) })),
       terminalPaths: place.terminalPaths?.map(validPath),
-      sharedAccess:place.sharedAccess && {...place.sharedAccess,cells:place.sharedAccess.cells.map(valid),
-          terminalPaths:place.sharedAccess.terminalPaths.map(validPath)},
+      sharedAccess: place.sharedAccess && {
+        ...place.sharedAccess,
+        cells: place.sharedAccess.cells.map(valid),
+        terminalPaths: place.sharedAccess.terminalPaths.map(validPath),
+      },
     }));
     this.frontages = new CorridorFrontages(
       data.corridorBands ?? [],

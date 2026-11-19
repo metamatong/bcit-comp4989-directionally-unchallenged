@@ -1,18 +1,19 @@
 """Attach exact source place occurrences to usable cells, doorways and open bays."""
 
 from dataclasses import dataclass
+
 import numpy as np
 import pymupdf
 from cad_doorways import apertures, bind_doors, clear_segment, door_faces, label_centre
-from cad_frontages import marked_frontages, mapped_stations, threshold_stations
+from cad_frontages import mapped_stations, marked_frontages, threshold_stations
+from cad_layers import CadLayers
 from corridor_frontages import bind_frontages, corridor_bands, recorded_swings
-from doors import SCALE
 from door_stations import bind_stations
+from doors import SCALE
 from labels import MANUAL
 from open_fronts import bay_mouths
 from surfaces import at_label
 from terminal_paths import interior_grid
-from cad_layers import CadLayers
 
 
 @dataclass
