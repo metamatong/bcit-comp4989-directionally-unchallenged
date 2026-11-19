@@ -255,7 +255,13 @@ export class FloorSearch {
       true,
     );
   }
-  route(origins: SearchStop[], goals: SearchStop[]) {
+  route(origins: SearchStop[], goals: SearchStop[], preferElevators = false) {
+    return (
+      this.search(origins, goals, preferElevators ? 'stairs' : 'elevator') ??
+      this.search(origins, goals)
+    );
+  }
+  private search(origins: SearchStop[], goals: SearchStop[], excluded?: WalkingStep['kind']) {
     const floors = floorGraphs().ordered;
     const end = new Map(goals.map((goal) => [goal.key, goal]));
     const starts = new Map(origins.map((item) => [item.key, item]));
@@ -305,7 +311,9 @@ export class FloorSearch {
         parents.set(to, { id, step });
         queue.push(to, c);
       }
-      for (const link of this.links.get(id) ?? []) visit(link.to, link.cost, link.step);
+      for (const link of this.links.get(id) ?? []) {
+        if (link.step.kind !== excluded) visit(link.to, link.cost, link.step);
+      }
       if (id < 0) continue;
       const floor = floors[Math.floor(id / floorStride)];
       if (!this.allowedFloors.has(floor.plan.id)) continue;

@@ -10,7 +10,7 @@ For paid OpenAI, set `AI_PROVIDER=openai`, fill `OPENAI_API_KEY`, keep `OPENAI_M
 
 For Groq, set `AI_PROVIDER=groq`, fill `GROQ_API_KEY`, and keep `GROQ_MODEL=qwen/qwen3.8-27b` unless the adapter is updated for another Groq vision model. The Groq adapter uses the OpenAI-compatible Responses API and combines photo/plan views into one labeled contact sheet to fit the model's image limit. Groq rate limits and any account billing apply; check the Groq console before relying on free quota. Groq may retain request data for up to 30 days for reliability and abuse monitoring. [Groq data controls](https://console.groq.com/docs/your-data)
 
-Without provider configuration, users see setup guidance. Photo submission is disabled in the client and rejected by the server. With configuration, tapping **Go** authorizes one photo evidence extraction stage. Exact-label location lookup and reviewed-graph routing run locally using the structured result.
+Without provider configuration, users see setup guidance. Photo submission is disabled in the client and rejected by the server. With configuration, tapping **Get Directions** authorizes one photo evidence extraction stage. Exact-label location lookup and reviewed-graph routing run locally using the structured result.
 
 ## Vercel
 
@@ -28,7 +28,7 @@ The browser accepts JPEG/PNG/WebP up to 8 MB and 50 million pixels, creates a fu
 
 Mobile photo capture uses the browser/device photo picker. Optional device location is available as a one-shot initial building hint and as an explicitly started foreground walking overlay. Phone geolocation requires HTTPS and permission. Physical-device capture and geolocation behavior remain unverified. [Controls and coverage](device-location.md)
 
-The visitor flow is **photo → Next → destination → Go**. The notice identifies the extraction provider. The first request carries the photo and original-image detail views. The next request carries only the evidence ID and optional GPS building candidates. The app displays **Starting area estimated** for a unique source match and requests the route from the reviewed graph. A missing source match or connection produces a coverage explanation. A newly selected photo clears the previous route.
+The visitor flow is **photo → Next → destination → Get Directions → overview → GO → steps**. The notice identifies the extraction provider. The first request carries the photo and original-image detail views. The next request carries only the evidence ID and optional GPS building candidates. The app displays **Starting area estimated** for a unique source match and requests the route from the reviewed graph. A missing source match or connection produces a coverage explanation. A newly selected photo clears the previous route.
 
 Routes exist only in the active browser view. Editing the destination or replacing the photo clears directions. Recheck recalculates from the saved starting estimate and the current approved graph, without a provider request.
 

@@ -272,6 +272,7 @@ describe('persistent human-reviewed topology', () => {
   });
   it('rejects unsupported plans, out-of-page coordinates and injected review fields', () => {
     expect(() => point('fixture A', { planId: 'NE999-F1-p1' })).toThrow('official');
+    expect(() => point('fixture A', { planId: 'nonexistent-plan' })).toThrow('official');
     expect(() => point('fixture A', { point: { x: 1.1, y: 0.5 } })).toThrow('Invalid edit');
     expect(() =>
       store.mutate({

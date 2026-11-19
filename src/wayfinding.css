@@ -433,3 +433,35 @@
   display: block;
   cursor: crosshair;
 }
+
+.guided-instruction {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 16px 0;
+  padding: 18px;
+  border-radius: 14px;
+  background: #124f40;
+  color: white;
+}
+.guided-instruction > svg {
+  flex-shrink: 0;
+}
+.guided-instruction h2 {
+  margin: 6px 0;
+  color: inherit;
+}
+.guided-instruction p {
+  margin: 0;
+  color: inherit;
+}
+.guided-controls {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+}
+.guided-controls button {
+  flex: 1;
+  min-height: 48px;
+  white-space: normal;
+}

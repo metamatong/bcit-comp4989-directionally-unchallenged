@@ -1,5 +1,9 @@
 # Verification record
 
+## Stair preference and guided directions · November 19, 2026
+
+The destination step offers **Accessibility: prefer elevators**; unchecked routes prefer stairs. The planner first looks for a complete route without the non-preferred transfer type, then falls back to all currently permitted connections. Route results retain the ordered floor-map overview. **GO** opens manual single-step directions with one instruction and map at a time; previous/next/finish controls update progress without inferring position, starting a location watch, or making another provider request. Transfer steps let visitors view the departure and arrival floors. Accessibility and elevator availability remain unverified.
+
 ## SE12 302 to SW03 1730
 
 With GPS off, an exact door sign reading of 302 produced candidates on NE1, SE2 and SE12 floor 3. Selecting SE12 reproduced the reported missing-destination-approach result. The same starting point already reached SW03 1710. The source catalogue contained 1730, while the published SW03 floor 1 entry had zero walking cells and zero bound doors.

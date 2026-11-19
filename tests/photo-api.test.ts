@@ -16,7 +16,7 @@ const provider: Provider = {
   async generate(_contents, _tools, _signal, onAttempt, options) {
     this.calls++;
     onAttempt?.();
-    if (options?.forceTool === 'read_photo_labels') return labelReading();
+    if (options?.forceTool === 'read_photo_labels') return labelReading('302', 'clear', 'SE12');
     throw new Error('Exact 302 lookup must bypass visual shortlisting.');
   },
 };
@@ -68,11 +68,13 @@ it('performs two separate API calls before any location result, with idempotency
   expect(result.providerCalls).toBe(1);
   const se12 = result.campusAnalysis!.candidates.find((c) => c.planId === 'SE12-F3-p1')!;
   expect(se12.anchorLabel).toBe('302');
-  expect(result.campusLocation).toBeNull();
+  expect(result.campusLocation).toMatchObject({ id: se12.id, planId: 'SE12-F3-p1' });
   expect(result.photoEvidence?.id).toBe(observed.photoEvidence!.id);
-  expect(result.campusAnalysis?.labelRetrieval.exactMatchPlanIds).toEqual(
-    expect.arrayContaining(['NE1-F3-p1', 'SE12-F3-p1']),
-  );
+  expect(result.campusAnalysis?.labelRetrieval.exactMatchPlanIds).toEqual([
+    'NE1-F3-p1',
+    'SE2-F3-p1',
+    'SE12-F3-p1',
+  ]);
   expect(JSON.stringify(result)).not.toContain(input.image.data);
   const repeated = await post(`/api/sessions/${initial.id}/photo`, request);
   expect(repeated.status).toBe(200);

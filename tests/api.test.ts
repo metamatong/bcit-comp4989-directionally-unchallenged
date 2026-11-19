@@ -1,11 +1,23 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import type { Server } from 'node:http';
 import { randomUUID } from 'node:crypto';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { photoInput } from './photo-fixtures';
 import { createApp } from '../server/app';
 import { ProviderError } from '../server/provider';
+import { TopologyStore } from '../server/topology';
+import { reviewedNetwork } from '../server/pilot-network';
 import type { Session } from '../src/types';
 let server: Server, base: string;
+const topologyDirectory = mkdtempSync(join(tmpdir(), 'api-contract-'));
+const topologyStore = new TopologyStore(
+  join(topologyDirectory, 'topology.json'),
+  undefined,
+  undefined,
+  reviewedNetwork,
+);
 const unavailableProvider = {
   calls: 0,
   generate: async () => {
@@ -23,11 +35,15 @@ beforeAll(async () => {
     provider: unavailableProvider,
     liveAvailable: false,
     model: 'gemini-3.8-flash',
+    topologyStore,
   }).listen(0, '127.0.0.1');
   await new Promise<void>((resolve) => server.once('listening', resolve));
   base = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
 });
-afterAll(() => new Promise<void>((resolve) => server.close(() => resolve())));
+afterAll(async () => {
+  await new Promise<void>((resolve) => server.close(() => resolve()));
+  rmSync(topologyDirectory, { recursive: true, force: true });
+});
 const start = async (): Promise<Session> => (await post(`${base}/api/sessions`, {})).json();
 const action = (
   session: Session,

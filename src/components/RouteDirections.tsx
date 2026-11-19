@@ -9,6 +9,7 @@ import type { DeviceOverlay, LocationCatalogue } from '../location/types';
 import { deviceOverlay, overlapsFootprint } from '../location/geometry';
 import { useWalkingLocation } from '../location/use-device-location';
 import { WalkingDeviceLocation } from './WalkingDeviceLocation';
+import { GuidedDirections } from './GuidedDirections';
 
 type FoundRoute = Extract<NavigationResult, { status: 'route' }>;
 type FloorVisit = { start: MapStop; end: MapStop; walks: WalkingStep[] };
@@ -117,12 +118,15 @@ export function RouteDirections({
   plans,
   onRecheck,
   locationCatalogue,
+  preferElevators = false,
 }: {
   route: FoundRoute;
   plans: VisualPlan[];
   onRecheck: () => void;
   locationCatalogue?: LocationCatalogue;
+  preferElevators?: boolean;
 }) {
+  const [guided, setGuided] = useState(false);
   const [whole, setWhole] = useState(false);
   const [activeVisit, setActiveVisit] = useState(0);
   const tracking = useWalkingLocation();
@@ -130,7 +134,7 @@ export function RouteDirections({
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true });
     headingRef.current?.scrollIntoView?.({ block: 'start' });
-  }, [route.origin.id, route.destination.id]);
+  }, [route.origin.id, route.destination.id, guided]);
   const visits = floorItinerary(route);
   const planById = new Map(plans.map((plan) => [plan.id, plan]));
   const activePlan = planById.get(visits[activeVisit].start.planId)!;
@@ -151,6 +155,8 @@ export function RouteDirections({
   const routePlans = [...new Set(visits.map((visit) => visit.start.planId))].map((id) =>
     planById.get(id)!,
   );
+  if (guided)
+    return <GuidedDirections route={route} plans={plans} onOverview={() => setGuided(false)} />;
   return (
     <div className="route-directions">
       <div className="way-heading">
@@ -162,6 +168,27 @@ export function RouteDirections({
       <p className="route-overview" aria-label="Route overview">
         {routeOverview(route, planById)}
       </p>
+      <p className="helper" role="note">
+        {preferElevators
+          ? route.steps.some((step) => step.kind === 'stairs')
+            ? 'This route includes stairs. No complete stair-free alternative is mapped. Accessibility is unverified.'
+            : 'Elevators preferred. Accessibility and elevator availability are unverified.'
+          : route.steps.some((step) => step.kind === 'elevator')
+            ? 'This route uses an elevator because no complete route without elevators is mapped.'
+            : 'Stairs preferred.'}
+      </p>
+      {route.steps.length > 0 && (
+        <button
+          type="button"
+          className="primary full-width"
+          onClick={() => {
+            tracking.stop();
+            setGuided(true);
+          }}
+        >
+          GO
+        </button>
+      )}
       <div className="route-map-stack" role="group" aria-label="Route maps in travel order">
         <div className="map-bar">
           <button type="button" aria-pressed={whole} onClick={() => setWhole(!whole)}>

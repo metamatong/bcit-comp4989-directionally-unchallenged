@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { createElement } from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it } from 'vitest';
+import { afterAll, describe, expect, it } from 'vitest';
 import { TopologyStore } from '../server/topology';
 import { pilotEvidence } from '../server/pilot-evidence';
 import TopologyEditor from '../src/TopologyEditor';
@@ -17,7 +17,14 @@ import type { CampusLocationCandidate } from '../src/types';
 import type { CandidateAnswer, TopologyNode } from '../src/topology';
 import type { NavigationChoice } from '../src/wayfinding';
 
-const store = new TopologyStore();
+const fixtureDirectory = mkdtempSync(join(tmpdir(), 'visitor-wayfinding-'));
+const store = new TopologyStore(
+  join(fixtureDirectory, 'topology.json'),
+  undefined,
+  undefined,
+  reviewedNetwork,
+);
+afterAll(() => rmSync(fixtureDirectory, { recursive: true, force: true }));
 const graph = store.read(),
   revision = graph.revision;
 const lower = 'sw3-f2-east-lift-to-2605',
@@ -376,7 +383,7 @@ describe('visitor routes on the current three-building pilot', () => {
         { revision: 1, candidateId: c.id, destination: 'SW03 3615' },
         store,
       ),
-    ).toThrow('current Burnaby floor plan');
+    ).toThrow('Select a place on a current Burnaby floor plan');
   });
   it('keeps missing labels, unreviewed doors, disconnected stairs and arrival distinct', () => {
     for (const text of ['SW03 2458', 'SW03 03615', 'NE01 3615', 'SW03 3615 and 2605'])

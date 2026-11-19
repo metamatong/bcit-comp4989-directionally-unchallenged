@@ -6,7 +6,7 @@ The local listener and Vercel function share the visitor API. Vercel serves a st
 
 ## Request flow
 
-1. The browser prepares a full photo view and four detail crops from the original bitmap. Selection is local until **Go**.
+1. The browser prepares a full photo view and four detail crops from the original bitmap. Selection is local until **Get Directions**.
 2. `POST /api/sessions/:id/photo/evidence` is the only vision stage. The configured provider reads labels, label kind/placement, visible door count, window side and corridor shape without map hints.
 3. A session-bound evidence receipt retains structured fields and the image fingerprint for five minutes. Server media bytes are released after extraction.
 4. If the GPS checkbox is selected, the browser requests one fresh reading after extraction and intersects its accuracy area with the official building footprints. Raw coordinates stay in the browser. Only matching building IDs, timestamp, accuracy and the footprint source hash enter the next request.

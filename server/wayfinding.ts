@@ -40,6 +40,7 @@ export const startingPointsSchema = z
 export const navigationSchema = startingPointsSchema
   .extend({
     destination: z.string().trim().min(1).max(150),
+    preferElevators: z.boolean().optional(),
     originId: z.string().min(1).max(180).optional(),
     destinationId: z.string().min(1).max(180).optional(),
     originPoint: pinSchema.optional(),
@@ -402,23 +403,31 @@ export function planVisitorJourney(
           ? 'The photo covers more than one reviewed starting point. Take a closer photo of the doorway or sign beside you.'
           : 'The exact starting point could not be identified. Try a closer photo of a mapped doorway, stair landing, or elevator.',
     };
-  const routes = choice.nodes
-    .map((n) =>
-      computeTopologyRoute(
-        doc,
-        {
-          revision: doc.revision,
-          fromNodeId: origin.id,
-          toNodeId: n.id,
-          mode: 'fewest-connections',
-        },
-        plans,
-        network.allowed,
-      ),
-    )
-    .filter((r) => r.outcome === 'route')
-    .sort((a, b) => a.edgeIds.length - b.edgeIds.length);
-  const route = routes[0];
+  const preferredEdges = new Set(
+    doc.edges
+      .filter((edge) => edge.kind !== (request.preferElevators ? 'stairs' : 'elevator'))
+      .map((edge) => edge.id)
+      .filter((id) => network.allowed.has(id)),
+  );
+  const routesUsing = (allowed: ReadonlySet<string>) =>
+    choice.nodes
+      .map((n) =>
+        computeTopologyRoute(
+          doc,
+          {
+            revision: doc.revision,
+            fromNodeId: origin.id,
+            toNodeId: n.id,
+            mode: 'fewest-connections',
+          },
+          plans,
+          allowed,
+        ),
+      )
+      .filter((r) => r.outcome === 'route')
+      .sort((a, b) => a.edgeIds.length - b.edgeIds.length);
+  // Prefer a complete path without the other transfer type; preserve coverage when none exists.
+  const route = routesUsing(preferredEdges)[0] ?? routesUsing(network.allowed)[0];
   if (!route)
     return {
       ...context,

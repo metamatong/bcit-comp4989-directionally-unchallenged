@@ -134,7 +134,7 @@ async function choosePhoto(page: Page) {
 async function submitPhoto(page: Page) {
   await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByLabel('Destination', { exact: true }).fill('SW03 2082');
-  await page.getByRole('button', { name: 'GO', exact: true }).click();
+  await page.getByRole('button', { name: 'Get Directions', exact: true }).click();
 }
 
 test('submits photo and destination and displays directions without route confirmations', async ({

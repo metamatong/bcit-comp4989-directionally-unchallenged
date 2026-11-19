@@ -40,6 +40,7 @@ type JourneyProps = {
   revision: number;
   candidate: CampusLocationCandidate;
   destination: string;
+  preferElevators?: boolean;
   plans: VisualPlan[];
   busy: boolean;
   onTryAnotherPhoto: () => void;
@@ -48,7 +49,15 @@ type JourneyProps = {
 };
 
 export function JourneyPanel(props: JourneyProps) {
-  const { sessionId, revision, candidate, destination, plans, locationEvidence } = props;
+  const {
+    sessionId,
+    revision,
+    candidate,
+    destination,
+    preferElevators = false,
+    plans,
+    locationEvidence,
+  } = props;
   const [result, setResult] = useState<NavigationResult>();
   const [error, setError] = useState('');
   const [refresh, setRefresh] = useState(0);
@@ -62,7 +71,7 @@ export function JourneyPanel(props: JourneyProps) {
     setError('');
     request<NavigationResult>(
       `/api/sessions/${sessionId}/navigation`,
-      { revision, candidateId: candidate.id, destination, ...choice },
+      { revision, candidateId: candidate.id, destination, preferElevators, ...choice },
       { signal: controller.signal },
     )
       .then((value) => {
@@ -72,7 +81,7 @@ export function JourneyPanel(props: JourneyProps) {
         if (!controller.signal.aborted) setError(failure.message);
       });
     return () => controller.abort();
-  }, [sessionId, revision, candidate.id, destination, refresh, choice]);
+  }, [sessionId, revision, candidate.id, destination, preferElevators, refresh, choice]);
 
   const useMapDestination =
     !!candidate.sourcePlaceId && mapDestinationScope(destination) !== undefined;
@@ -130,6 +139,7 @@ export function JourneyPanel(props: JourneyProps) {
     panel = (
       <JourneyResult
         busy={props.busy}
+        preferElevators={preferElevators}
         plans={plans}
         locationCatalogue={props.locationCatalogue}
         onTryAnotherPhoto={props.onTryAnotherPhoto}
@@ -168,7 +178,11 @@ function JourneyResult({
   busy,
   onRecheck,
   onChoose,
-}: Pick<JourneyProps, 'plans' | 'locationCatalogue' | 'onTryAnotherPhoto' | 'busy'> & {
+  preferElevators,
+}: Pick<
+  JourneyProps,
+  'plans' | 'locationCatalogue' | 'onTryAnotherPhoto' | 'busy' | 'preferElevators'
+> & {
   result: NavigationResult;
   onRecheck: () => void;
   onChoose: (field: 'originId' | 'destinationId', id: string) => void;
@@ -191,6 +205,7 @@ function JourneyResult({
         )}
         <RouteDirections
           route={result}
+          preferElevators={preferElevators}
           plans={plans}
           onRecheck={onRecheck}
           locationCatalogue={locationCatalogue}

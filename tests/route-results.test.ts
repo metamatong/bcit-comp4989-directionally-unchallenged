@@ -36,7 +36,7 @@ const provider: Provider = {
     if (options?.forceTool !== 'read_photo_labels')
       throw Error('Only the first stage may call AI.');
     labelReads++;
-    return labelReading('302');
+    return labelReading('302', 'clear', 'SE12');
   },
 };
 let server: Server;
@@ -126,7 +126,7 @@ it.each([false, true, 'denied'] as const)(
     const wait = async (assertion: () => void) => {
       let lastFailure: unknown;
       // Keep network-driven React updates inside act during every polling interval.
-      for (let attempt = 0; attempt < 500; attempt++) {
+      for (let attempt = 0; attempt < 150; attempt++) {
         await act(async () => {
           await new Promise((resolve) => setTimeout(resolve, 20));
         });
@@ -166,39 +166,29 @@ it.each([false, true, 'denied'] as const)(
       await click(button('Next'));
       await setDestination('SW03 2082');
       if (useGps) await click(host.querySelector<HTMLInputElement>('input[type=checkbox]')!);
+      const elevatorOption = [...host.querySelectorAll('label')]
+        .find((label) => label.textContent?.includes('Accessibility: prefer elevators'))!
+        .querySelector<HTMLInputElement>('input')!;
+      expect(elevatorOption.checked).toBe(false);
       expect(getCurrentPosition).not.toHaveBeenCalled();
       expect(provider.calls).toBe(0);
       rejectLocationOnce = true;
       labelReads = 0;
-      await click(button('GO'));
+      await click(button('Get Directions'));
       await wait(() => expect(button('Try again')).toBeDefined());
       expect(host.textContent).toContain('Finding your starting place stopped');
       expect(labelReads).toBe(1);
       await click(button('Try again'));
-      if (useGps !== true) {
-        // This sign is printed in multiple buildings. The visitor chooses the SE12 occurrence.
-        const choice = () =>
-          host.querySelector<HTMLButtonElement>(
-            '[aria-label="Starting location choices"] button',
-          ) &&
-          [
-            ...host.querySelectorAll<HTMLButtonElement>(
-              '[aria-label="Starting location choices"] button',
-            ),
-          ].find((b) => b.textContent?.includes('SE12 · Floor 3 · 302'));
-        await wait(() => expect(choice()).toBeTruthy());
-        await click(choice()!);
-      }
       await wait(() => expect(host.querySelector('.route-directions')).not.toBeNull());
       expect(labelReads).toBe(1);
       if (useGps !== true) {
         const evidence = host.querySelector('.journey-evidence')!;
         expect(evidence.querySelectorAll('.campus-candidate')).toHaveLength(1);
         expect(evidence.querySelector('.campus-candidate h3')?.textContent).toContain(
-          'SE12 · Floor 3 · 302',
+          'SE12 · Floor 3',
         );
         expect(evidence.textContent).not.toContain('Select your starting location.');
-        expect(evidence.textContent).toContain('Change starting location');
+        expect(evidence.textContent).toContain('Adjust starting point on the map');
       }
       expect(host.textContent).toContain('Starting area estimated');
       expect(button('Start at')).toBeUndefined();
@@ -307,8 +297,28 @@ it.each([false, true, 'denied'] as const)(
       );
       expect(result.querySelectorAll('.route-map-visit')).toHaveLength(3);
       await click(host.querySelector<HTMLElement>('.journey-inputs > summary')!);
+      const preference = [...host.querySelectorAll('label')]
+        .find((label) => label.textContent?.includes('Accessibility: prefer elevators'))!
+        .querySelector<HTMLInputElement>('input')!;
+      expect(preference.checked).toBe(false);
+      await click(preference);
+      expect(host.querySelector('.route-directions')).toBeNull();
+      await click(button('Get Directions to SW03 2082'));
+      await wait(() =>
+        expect(host.querySelector('.route-directions .helper')?.textContent).toContain(
+          'Elevators preferred',
+        ),
+      );
+      const navigationRequests = requestBodies
+        .map((body) => JSON.parse(body))
+        .filter((body) => body.candidateId && body.destination);
+      expect(navigationRequests[0].preferElevators).toBe(false);
+      expect(navigationRequests.at(-1).preferElevators).toBe(true);
+      expect(provider.calls).toBe(1);
+
+      await click(host.querySelector<HTMLElement>('.journey-inputs > summary')!);
       await setDestination('SW03 1730');
-      await click(button('GO to SW03 1730'));
+      await click(button('Get Directions to SW03 1730'));
       await wait(() =>
         expect(
           host.querySelector('.route-map-visit:last-of-type .pin-legend')?.textContent,
@@ -326,13 +336,13 @@ it.each([false, true, 'denied'] as const)(
       await click(host.querySelector<HTMLElement>('.journey-inputs > summary')!);
       await setDestination('SW03 2458');
       expect(host.querySelector('.route-directions')).toBeNull();
-      await click(button('GO to SW03 2458'));
+      await click(button('Get Directions to SW03 2458'));
       await wait(() =>
         expect(host.querySelector('.journey-panel h2')?.textContent).toBe('Destination not found'),
       );
       expect(provider.calls).toBe(1);
       expect(requestBodies.filter((body) => body.includes('confirm-campus-region'))).toHaveLength(
-        useGps === true ? 0 : 1,
+        0,
       );
       expect(requestBodies.join('\n')).not.toMatch(
         /"(?:latitude|longitude|receivedAt|deviceReading|locationCatalogue)"/,

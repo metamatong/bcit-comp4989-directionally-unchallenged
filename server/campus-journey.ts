@@ -394,7 +394,7 @@ export class CampusJourney {
             ' has a marked door. Its approach from the public walking route is missing.',
         };
     }
-    const result = this.search.route([selected], goal.stops);
+    const result = this.search.route([selected], goal.stops, request.preferElevators);
     if (!result)
       return {
         ...context,

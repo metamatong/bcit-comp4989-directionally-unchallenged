@@ -1,6 +1,6 @@
 # DirectionallyUnchallenged
 
-Add a photo, enter a destination and tap **Go** for walking directions on the supplied BCIT Burnaby plans. The app reads the photo once, matches the signs to its catalogue and uses the saved walking network.
+Add a photo, enter a destination and tap **Get Directions** for walking directions on the supplied BCIT Burnaby plans. The app reads the photo once, matches the signs to its catalogue and uses the saved walking network.
 
 The catalogue covers **89 official floor plans in 45 buildings**. A place can have several entrances. When signs or entrances are ambiguous, select the building, floor or marked door. Continuous travel depends on the mapped approaches on each floor and the confirmed passages between them. [Floor graph coverage and regeneration](docs/floor-routing.md)
 
@@ -38,22 +38,13 @@ The Git-connected Vercel project builds the frontend and the visitor API with `n
 ## Use
 
 1. Upload or capture a photo containing a nearby room sign, then tap **Next**.
-2. Enter a destination such as `SW03 2605`. Optionally check **Use device location with this photo** while standing where it was taken. The checkbox starts no request until submission.
-3. Tap **Go**. The configured provider extracts exact labels, sign placement, visible door count, window side and corridor shape in the first stage. The following location request sends only the evidence ID and optional GPS-derived building candidates. Raw device coordinates stay in the browser.
-4. Source lookup selects a unique, fully supported starting estimate or offers matching signs to confirm. An extra reading missing from the plan keeps the supported sign available for confirmation. GPS alone can identify a building. A starting floor and place still require source evidence. Scene features are retained as observations, and doorway placement helps choose the relevant label. Unavailable window/count annotations do not imply a spatial match.
-5. The app resolves the destination and calculates a route over the floor walking grids and current reviewed connections. **Walking directions** shows one arrow-separated route overview, followed by a continuous stack of maps with A/B descriptions. Floor changes appear in the overview; one zoom control applies to all maps. Photo bytes, floor-plan images and destinations are sent to no later AI stage.
+2. Enter a destination such as `SW03 2605`. Stairs are preferred by default; check **Accessibility: prefer elevators** to prefer an elevator route. This preference does not verify accessibility or elevator availability. Optionally check **Use device location with this photo** while standing where it was taken. The checkbox starts no request until submission.
+3. Tap **Get Directions**. The configured provider extracts exact labels, sign placement, visible door count, window side and corridor shape in the first stage. The following location request sends only the evidence ID and optional GPS-derived building candidates. Raw device coordinates stay in the browser.
+4. Source lookup selects a unique starting estimate or offers matching places. Conflicting labels, directional-only signs or a GPS contradiction produce an explanation. Scene features are retained as observations, and doorway placement helps choose the relevant label. Unavailable window/count annotations do not imply a spatial match.
+5. The app resolves the destination and calculates a route over the floor walking grids and current reviewed connections. **Walking directions** shows one arrow-separated route overview, followed by a continuous stack of maps with A/B descriptions in travel order. Floor changes appear in the overview; one zoom control applies to all maps. Photo bytes, floor-plan images and destinations are sent to no later AI stage.
+6. Tap **GO** on the overview to see one instruction and its map at a time. Use **Previous**, **Next step**, and **Finish route** to mark progress manually, or **Route overview** to return to all maps. Transfers offer departure and arrival maps. GO stops any optional position watch and makes no provider request.
 
-A 302 sign can match more than one building. Once SE12 302 is identified, typing `SW03 1730` gives directions through the floor 3 passage and down to the AV room door on floor 1. A named room uses its mapped entrance automatically. If an entrance lacks a walking connection, the result identifies the room and floor. **Location evidence** lets you change the starting match or adjust your starting point.
-
-For example, the signs for SW03 rooms 2680 and 2695 face the same stretch of corridor 2600. If their placement in a photo is unclear, the app highlights the corridor and asks **Are these room signs beside you?** Confirming lets you start there. The first route map shows the estimated starting area.
-
-Within SW01, the app uses the four original CAD sheets for room entrances, shared suites and walking areas. Eight stair chains and two elevators connect the confirmed levels. To walk to an unnamed point, select **Choose a map point** in the destination form. Shared entrances are labelled explicitly. [SW01 coverage by floor](docs/sw01-routing.md)
-
-SW03 and SW01 connect in both directions on floors 1–4. On floor 1, walk outdoors between SW03 lobby 1602 and SW01 vestibule 1098. On floors 2–4, the SW03 office corridor leads directly indoors to the same floor of SW01. [Doors and nearby room numbers](docs/topology-editor.md#sw03-and-sw01)
-
-In SE12, four confirmed stairways connect floors 2, 3 and 4 in both directions. Corridor 208Z on floor 2 connects through S209, S327 and S418 to the fourth-floor corridor network. [SE12 stair pairs and approach coverage](docs/topology-editor.md#se12-stairs-across-floors-2-3-and-4)
-
-SE12 302 to SW03 2605 enters SW03 through the east third-floor passage beside S360 and shaft 3696, follows the short approach to the east elevator, and continues on floor 2. Reviewed network revision 41 also places the floor-2 outdoor entrance beside 2696/S260, with short access to the elevator and corridor 2600; it no longer uses the doorway between 2063 and 2080. The corrected fourth-floor east passage is confirmed for both directions between SE12 and SW03. The east elevator and S360/S460 stair transfer between SW03 floors 3 and 4 are also confirmed in both directions. The visitor planner can join these records to the public corridor surfaces on the same sheet. `SE12 302 → SW03 1710` now follows the east stairs from floor 3 through floor 2 to S160 on floor 1. Both the lobby-1602 doorway and corridor-1700 doorway have reviewed arrival approaches in the confirmed travel direction toward 1710. `SW03 2604` is a distinct vestibule whose source label exists but has no reviewed arrival approach. The planner also checks drawing-derived approaches. Its costs express travel on the floor grid and transfers. Physical distance and accessibility remain unmeasured.
+With elevators preferred, SE12 302 to SW03 2605 enters SW03 through the east third-floor passage beside S360 and shaft 3696, follows the short approach to the east elevator, and continues on floor 2. Reviewed network revision 41 also places the floor-2 outdoor entrance beside 2696/S260, with short access to the elevator and corridor 2600; it no longer uses the doorway between 2063 and 2080. The corrected fourth-floor east passage is confirmed for both directions between SE12 and SW03. The east elevator and S360/S460 stair transfer between SW03 floors 3 and 4 are also confirmed in both directions. The visitor planner can join these records to the public corridor surfaces on the same sheet. `SE12 302 → SW03 1710` now follows the east stairs from floor 3 through floor 2 to S160 on floor 1. Both the lobby-1602 doorway and corridor-1700 doorway have reviewed arrival approaches in the confirmed travel direction toward 1710. `SW03 2604` is a distinct vestibule whose source label exists but has no reviewed arrival approach. The planner also checks drawing-derived approaches. Its costs express travel on the floor grid and transfers. Physical distance and accessibility remain unmeasured.
 
 The full photo and four detail crops are prepared locally from the original image. The footer’s **Coverage & privacy** dialog identifies the extraction provider and data handling. The server keeps image-free evidence receipts, and the browser discards its prepared photo after locating the result, removal or navigation away. Explicit retries can reuse unexpired extraction evidence.
 
@@ -110,7 +101,7 @@ mvp/
 │   ├── TopologyEditor.tsx, topology.ts, topology.css
 │   ├── api.ts, ai-provider.ts, photo.ts, photo-views.ts, types.ts
 │   ├── location/  Device acquisition, building hints, page projection and foreground lifecycle
-│   └── components/  Photo inputs/results, walking directions, FloorPointPicker, device position and topology review
+│   └── components/  Photo/result inputs, RouteDirections, GuidedDirections, FloorPointPicker, device position and topology review
 ├── server/
 │   ├── index.ts, app.ts, runtime.ts, configured-app.ts, vercel.ts
 │   ├── visitor-api.ts, visitor-sessions.ts, redis-visitor-sessions.ts
@@ -165,6 +156,8 @@ mvp/
 │   ├── se12-floor-transfers.test.ts, shared-corridor.test.ts
 │   ├── sw03-sw01-passages.test.ts, sw01-spaces.test.ts, test_passage_openings.py, test_sw01_cad.py
 │   ├── sw03-1710-route.test.ts, route-coverage-message.test.ts
+│   ├── route-preference.test.ts, guided-directions.test.ts
+│   ├── route-preference.test.ts, guided-directions.test.ts
 │   └── e2e/journey.spec.ts, photo.spec.ts
 ├── docs/
 │   ├── project-brief.txt, requirements.md, architecture.md, data.md

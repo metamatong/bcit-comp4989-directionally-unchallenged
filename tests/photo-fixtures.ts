@@ -35,13 +35,19 @@ export function comparisonInput(
 export function labelReading(
   text: string | null = '302',
   clarity: 'clear' | 'uncertain' = 'clear',
+  building?: string,
 ): ModelPart[] {
   return [
     {
       functionCall: {
         name: 'read_photo_labels',
         args: {
-          labels: text ? [{ text, clarity, viewId: 'ne' }] : [],
+          labels: [
+            ...(text ? [{ text, clarity, viewId: 'ne' }] : []),
+            ...(building
+              ? [{ text: building, clarity: 'clear', kind: 'building', viewId: 'ne' }]
+              : []),
+          ],
           observations: ['A corridor with exterior glazing is visible.'],
         },
       },

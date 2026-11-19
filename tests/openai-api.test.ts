@@ -90,7 +90,10 @@ it('uses OpenAI only for evidence extraction and resolves the start from source 
   const fetcher = vi.fn<typeof fetch>().mockImplementation(async (_url, init) => {
     const body = JSON.parse(String(init?.body));
     bodies.push(body);
-    const parts = body.tool_choice.name === 'read_photo_labels' ? labelReading() : comparison();
+    const parts =
+      body.tool_choice.name === 'read_photo_labels'
+        ? labelReading('302', 'clear', 'SE12')
+        : comparison();
     return Response.json({
       status: 'completed',
       output: parts.map((part) => ({
@@ -134,13 +137,13 @@ it('uses OpenAI only for evidence extraction and resolves the start from source 
   const result: Session = await response.json();
   expect(result.campusAnalysis).toMatchObject({
     method: 'photo-label-retrieval',
-    labelRetrieval: { exactMatchPlanIds: expect.arrayContaining(['NE1-F3-p1', 'SE12-F3-p1']) },
+    labelRetrieval: { exactMatchPlanIds: ['NE1-F3-p1', 'SE2-F3-p1', 'SE12-F3-p1'] },
   });
   expect(result.campusAnalysis?.candidates.find((c) => c.planId === 'SE12-F3-p1')).toMatchObject({
     planId: 'SE12-F3-p1',
     verification: 'unverified-ai-hypothesis',
   });
-  expect(result.campusLocation).toBeNull();
+  expect(result.campusLocation).toMatchObject({ planId: 'SE12-F3-p1' });
   expect(result.providerCalls).toBe(1);
   expect(result.photoEvidence?.id).toBe(observed.photoEvidence!.id);
   expect(fetcher).toHaveBeenCalledTimes(1);

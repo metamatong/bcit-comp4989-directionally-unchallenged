@@ -86,7 +86,9 @@ it.each(
 )('preserves each confirmed direction and shared landing for $labels', async ({ labels }) => {
   const type = labels[0].startsWith('S') ? 'stairs' : 'elevator';
   for (const order of [labels, [...labels].reverse()]) {
-    const trip = route(await walk(order[0], 'SW01 ' + order.at(-1)));
+    const trip = route(
+      await walk(order[0], 'SW01 ' + order.at(-1), 'SW1', { preferElevators: type === 'elevator' }),
+    );
     const transfers = trip.steps.filter((s) => s.kind !== 'corridor');
     expect(transfers).toHaveLength(labels.length - 1);
     expect(

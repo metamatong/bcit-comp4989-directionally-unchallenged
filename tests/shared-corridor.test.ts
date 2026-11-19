@@ -71,7 +71,7 @@ it('keeps two uncertain placement classifications as a corridor question and rou
   selectLocatedCandidate(session, candidate.id);
   const route = await planVisitorNavigation(
     session.campusLocation!,
-    { candidateId: candidate.id, revision: 0, destination: 'SE12 302' },
+    { candidateId: candidate.id, revision: 0, destination: 'SE12 302', preferElevators: true },
     store,
   );
   if (route.status !== 'route') throw Error(route.status + ' ' + route.message);
