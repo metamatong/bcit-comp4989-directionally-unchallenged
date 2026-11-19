@@ -1,5 +1,31 @@
 # Verification record
 
+## GPS building context during extraction · November 19, 2026
+
+Implemented in the main-comparison worktree based on `f845b414e5ddcc7e1588a2941391d67e7b717d69`. Optional GPS is now captured before extraction. The API accepts validated building IDs, timestamp, accuracy and source hash; only building IDs enter the provider prompt as uncertain context. No raw coordinates, floor plans, room list or inferred floor is forwarded. Instructions still require exact visible characters and forbid filling obscured text from the hint. The later location/routing stages remain model-free. Evidence fingerprints and browser retry caching include building/source context; stale GPS is reacquired before location. The optional checkbox and main's ambiguity/confirmation behavior remain in place.
+
+Ran `node --import tsx tmp/gps-context-photo-batch.ts` using the same ten originals, image preparation, Gemini 3.5 Flash-Lite configuration, simulated SE12/SW3 building candidates, revision-89 isolated topology and destinations SE12 302 / SW03 1730 as the earlier main comparison. All **10 extractions succeeded on the primary model**, with no fallback or retries. Four photos automatically located and returned both routes (eight route responses); three offered source candidates for confirmation and three remained unresolved.
+
+| Photo | Labels and result with building context |
+| --- | --- |
+| `IMG20261116141702.jpg` | Read 319 but incorrectly assigned it an arrow cue; no starting candidate. Previously located as 319. |
+| `IMG20261116141611.jpg` | Read 313 and 311; offers both source candidates. |
+| `discord-temp-38A5926D-4B16-483E-90D4-37761CC35000.jpg` | Read and located SW03 floor-1 room 1730; both routes returned. Earlier revised evidence contradicted its door count; fresh main had timed out. |
+| `photoooo.jpg` | Read 302 and CLASSROOM; main's existing partial-match confirmation remains. |
+| `IMG_8200.jpg` | Read 2695 and 2680; located SW03 floor-2 corridor 2600 between them; both routes returned. |
+| `IMG20261116141532.jpg` | Locker identifiers and EXIT; no starting candidate. |
+| `IMG20261116141547.jpg` | No labels; no starting candidate. |
+| `IMG20261116141555.jpg` | Read only 309A, without the earlier questionable 301; located SE12 floor-3 309A and returned both routes. |
+| `IMG20261116141524.jpg` | Read 306 and 308; offers both source candidates. |
+| `IMG_8205.jpg` | Read and located SE12 floor-3 323; both routes returned. |
+
+The earlier main run had eight successful extractions and two timeouts. The new 309A and 1730 outcomes are encouraging, but the 319 arrow error is a counterexample. This single, non-randomized batch cannot attribute differences to building context or establish improved general accuracy. The building hints were simulated, not measured GPS; no camera position, floor accuracy or field routing accuracy was verified. JPEG preparation used Sharp with browser-equivalent dimensions/regions/limits, not a browser encoder. Image-free results are in ignored `tmp/gps-context-photo-batch-2026-11-19/results.json`; no media was saved to sessions or reports.
+
+Validation: `npm run format`, `npm run test:unit` (**491 tests, 49 files passed**), `npm run build`, and `npm run data:validate` passed. The unit/API suite includes provider-context forwarding, coordinate/injection rejection, stale/wrong-source context rejection, fingerprint binding and the optional/denied GPS flow. Its first run found a pre-existing CRLF-versus-LF CSV equality failure; comparison now normalizes checkout line endings, with generated CSV content independently confirmed identical. Initial sandbox runs could not access the shared dependency cache or create a topology hard link; approved reruns passed. Vite emitted its existing non-fatal Zod annotation warnings. Data validation covered all 89 floor graphs (3,463 source occurrences), 90 original PDF hashes, 631 derived assets, 5,463 labels, 89 calibration records, revision-89 topology and 71 connection questions. Coverage gaps remain as documented in the floor-routing and three-building coverage reports.
+
+`npm test` was not used because it also launches Playwright; browser/screenshot checks remain skipped per the user's instructions. Mocked provider/device tests, the live Gemini batch and unperformed physical-campus checks are distinct. No Git actions or deployment occurred during this change.
+
+
 ## SW03 west wing and outstanding visitor approaches · November 19, 2026
 
 Revision 89 records two user-confirmed bidirectional connections. The walk from SE12 323 to SW03 1920 uses the outdoor 1700–1900 connection on floor 1 and reaches the 1920 doorway. The return trip follows the same exterior entrances in reverse. A route to SW03 2910 continues up the west stairs from S190 to S299. Both directions of the staircase were checked independently. The original 166 incomplete visit records fell to 114. The new total also includes five additional signed source occurrences. [Room-level coverage](three-building-routing.md)

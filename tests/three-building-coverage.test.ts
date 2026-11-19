@@ -13,7 +13,8 @@ it('reproduces the directional inventory and keeps excluded spaces out of both e
     new URL('../docs/three-building-coverage.csv', import.meta.url),
     'utf8',
   );
-  expect(coverageCsv(report, true)).toBe(published);
+  // Git checkouts on Windows may use CRLF; compare the CSV content, not checkout endings.
+  expect(coverageCsv(report, true)).toBe(published.replace(/\r\n/g, '\n'));
   expect(Object.keys(report.floors)).toHaveLength(12);
   for (const floor of Object.values(report.floors)) {
     expect(floor.roundTrip).toBeGreaterThan(0);

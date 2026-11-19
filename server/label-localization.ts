@@ -8,9 +8,9 @@ import type {
   Session,
 } from '../src/types';
 import { labelKey, pilotEvidence } from './pilot-evidence';
-import { floorGraphs, sourceBuilding } from './floor-graph';
+import { floorGraphs } from './floor-graph';
 import { PhotoEvidenceError, type PhotoEvidenceRecord } from './photo-evidence';
-import { visualPlans } from './visual-data';
+import { gpsContextSchema } from './gps-context';
 import { locationCatalogue } from './geolocation';
 import { logActivity } from './session';
 import { resolveStartingSigns, type StartMatch, type DeviceScope } from './starting-place-evidence';
@@ -20,18 +20,7 @@ export const labelLocationRequestSchema = z
     requestId: z.string().uuid(),
     revision: z.number().int().nonnegative(),
     evidenceId: z.string().uuid(),
-    gps: z
-      .object({
-        buildings: z
-          .array(z.string().refine((value) => sourceBuilding(value) === value))
-          .max(visualPlans.length)
-          .refine((items) => new Set(items).size === items.length),
-        sourceSha256: z.string().regex(/^[a-f0-9]{64}$/),
-        capturedAt: z.number().finite(),
-        accuracy: z.number().finite().nonnegative(),
-      })
-      .strict()
-      .optional(),
+    gps: gpsContextSchema.optional(),
   })
   .strict();
 export type LabelLocationRequest = z.infer<typeof labelLocationRequestSchema>;

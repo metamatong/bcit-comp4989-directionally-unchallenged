@@ -52,7 +52,7 @@ Missing configuration displays setup guidance and disables/rejects photo submiss
 
 ## Transport, budgets and privacy
 
-The Gemini adapter sends keys in the server-side `x-goog-api-key` header and uses `generateContent` with forced typed functions. See [function calling](https://ai.google.dev/gemini-api/docs/function-calling). The first app API request calls Gemini to read photo labels from the context image and four original-image crops, without source-plan hints. The next app API request resolves the extracted labels against source records without calling Gemini. A normal successful submission makes one provider request. Retries and configured failovers remain bounded by the extraction budget. Ambiguous label matches produce an unresolved starting place.
+The Gemini adapter sends keys in the server-side `x-goog-api-key` header and uses `generateContent` with forced typed functions. See [function calling](https://ai.google.dev/gemini-api/docs/function-calling). The first app API request calls Gemini to read photo labels from the context image and four original-image crops, with optional GPS-derived building candidates but without source-plan or room-list hints. The server validates the building IDs, source hash and reading freshness, then forwards only building IDs as uncertain context. The model must not use context to complete an obscured identifier or invent a building/floor label. The next app API request resolves the extracted labels against source records without calling Gemini. A normal successful submission makes one provider request. Retries and configured failovers remain bounded by the extraction budget. Ambiguous label matches produce an unresolved starting place.
 
 Photo analysis bounds attempts by the time remaining in the current stage. When a healthy configured alternative is available, the primary attempt uses the server's shorter `AI_TIMEOUT_MS` threshold (15 seconds by default). An upstream timeout, overload or quota response moves that model behind the other configured choices for 60 seconds or the reported retry interval, whichever is longer. A successful backup can handle the next photo stage immediately. The configured primary regains priority after recovery. All choices share the free-tier request budget.
 
@@ -64,7 +64,7 @@ Authentication/model-access errors, quota exhaustion, overload, blocked content 
 
 ## Source lookup after extraction
 
-The provider receives only the full photograph and its original-image detail crops. Source labels, doorway positions and connection records are searched locally after extraction. All original labels and source hashes remain available to exact retrieval. No plan image or destination is included in a later provider request in the visitor workflow.
+The provider receives the full photograph, its original-image detail crops and optional validated GPS-derived building IDs. Raw coordinates remain in the browser. Source labels, doorway positions and connection records are searched locally after extraction. All original labels and source hashes remain available to exact retrieval. No plan image or destination is included in a later provider request in the visitor workflow.
 
 ## Live verification history
 

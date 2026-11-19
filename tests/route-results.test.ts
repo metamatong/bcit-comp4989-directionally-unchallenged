@@ -197,6 +197,13 @@ it.each([false, true, 'denied'] as const)(
         .map((body) => JSON.parse(body))
         .filter((body) => body.evidenceId);
       expect(locationRequests.every((body) => Boolean(body.gps) === (useGps === true))).toBe(true);
+      const extractionRequests = requestBodies
+        .map((body) => JSON.parse(body))
+        .filter((body) => body.image);
+      expect(extractionRequests).toHaveLength(1);
+      expect(Boolean(extractionRequests[0].gps)).toBe(useGps === true);
+      if (useGps === true) expect(extractionRequests[0].gps.buildings).toContain('SE12');
+      expect(requestBodies.join('')).not.toMatch(/"(latitude|longitude)"/);
       expect(provider.calls).toBe(1);
       // Withdraw all interbuilding passages in this fixture; the real map has alternate stairs.
       const crossings = store

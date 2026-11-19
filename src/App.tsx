@@ -47,7 +47,9 @@ export default function App() {
   const [preferElevators, setPreferElevators] = useState(false);
   const [activeDestination, setActiveDestination] = useState('');
   const photoAbort = useRef<AbortController | null>(null);
-  const evidenceForPhoto = useRef<{ photo: PreparedPhoto; id: string } | null>(null);
+  const evidenceForPhoto = useRef<{ photo: PreparedPhoto; id: string; contextKey: string } | null>(
+    null,
+  );
   const sessionRef = useRef<Session | undefined>(undefined);
   const busyRef = useRef(false);
   const evidenceGate = useRef(new RequestGate());
@@ -186,9 +188,17 @@ export default function App() {
           let latest = active;
           stage = 'evidence';
           setReadStatus('Finding your starting point and route…');
+          const device = await photoDevice.capture();
+          controller.signal.throwIfAborted();
+          let gps =
+            device && data.locationCatalogue
+              ? gpsBuildingHint(device.reading, data.locationCatalogue)
+              : undefined;
+          const contextKey = JSON.stringify([gps?.buildings ?? null, gps?.sourceSha256 ?? null]);
           const cached = evidenceForPhoto.current;
           if (!(
             cached?.photo === preparedPhoto &&
+            cached.contextKey === contextKey &&
             latest.photoEvidence?.id === cached.id &&
             Date.parse(latest.photoEvidence.expiresAt) > Date.now()
           )) {
@@ -196,6 +206,7 @@ export default function App() {
               `/api/sessions/${active.id}/photo/evidence`,
               {
                 ...media,
+                ...(gps ? { gps } : {}),
                 requestId: crypto.randomUUID(),
                 revision: active.revision,
               },
@@ -208,18 +219,25 @@ export default function App() {
             updateSession(latest);
             if (!latest.photoEvidence)
               throw new Error('Photo reading did not return evidence. Try again.');
-            evidenceForPhoto.current = { photo: preparedPhoto, id: latest.photoEvidence.id };
+            evidenceForPhoto.current = {
+              photo: preparedPhoto,
+              id: latest.photoEvidence.id,
+              contextKey,
+            };
           }
           const evidence = latest.photoEvidence;
           if (!evidence) throw new Error('Read this photo again before comparing plans.');
           stage = 'location';
           setReadStatus('Finding your starting place from the extracted evidence…');
-          const device = await photoDevice.capture();
-          controller.signal.throwIfAborted();
-          const gps =
-            device && data.locationCatalogue
-              ? gpsBuildingHint(device.reading, data.locationCatalogue)
-              : undefined;
+          // Extraction may consume most of the 30-second GPS validity window.
+          if (gps && Date.now() - gps.capturedAt > 25000) {
+            const refreshed = await photoDevice.capture();
+            controller.signal.throwIfAborted();
+            gps =
+              refreshed && data.locationCatalogue
+                ? gpsBuildingHint(refreshed.reading, data.locationCatalogue)
+                : undefined;
+          }
           return request<Session>(
             `/api/sessions/${active.id}/photo/location`,
             {
@@ -609,8 +627,9 @@ export default function App() {
                   Get Directions sends the photo and detail views to {provider.recipient} for label
                   and feature extraction. The app uses source records for location and routing.
                   Photo bytes are discarded after processing. Optional GPS shares building
-                  candidates with the app while coordinates stay in this tab. Hosted session results
-                  are encrypted and expire after 30 minutes. {provider.dataUse}
+                  candidates with the extraction provider and the app while coordinates stay in this
+                  tab. Hosted session results are encrypted and expire after 30 minutes.{' '}
+                  {provider.dataUse}
                 </p>
               </div>
             </>

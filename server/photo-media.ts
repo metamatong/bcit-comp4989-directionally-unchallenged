@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { MAX_PHOTO_BUNDLE_BYTES, PHOTO_CROP_REGIONS } from '../src/photo-views';
 import type { ModelPart } from './provider';
 import { boundsSchema } from './visual-data';
+import { gpsContextSchema } from './gps-context';
 
 const imageSchema = z
   .object({
@@ -36,6 +37,7 @@ export const photoEvidenceRequestSchema = z
     consent: z.literal(true),
     description: z.string().max(1000).default(''),
     buildingHint: z.string().max(8).nullable().optional(),
+    gps: gpsContextSchema.optional(),
     scope: z.literal('wayfinding-pilot').optional(),
     image: imageSchema,
     detailCrops: z
@@ -88,6 +90,8 @@ export function photoFingerprint(input: PhotoEvidenceRequest): string {
     JSON.stringify({
       description: input.description,
       buildingHint: input.buildingHint ?? null,
+      gpsBuildings: input.gps?.buildings ?? null,
+      gpsSource: input.gps?.sourceSha256 ?? null,
       scope: input.scope,
     }),
   );
