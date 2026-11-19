@@ -1,5 +1,21 @@
 # Verification record
 
+## SW03 locker corridor to SE12 302, November 18, 2026
+
+**Hosted reproduction.** One authorized submission of the original locker-hall photo to the production Gemini extraction stage returned both room numbers, 2695 and 2680, as clear. It classified both as `directional-sign` and reported a straight corridor and two visible doorways. The service recorded four provider attempts including fallback and returned the extraction in 17.6 seconds. With GPS off, the hosted locator returned zero candidates. Its reference list showed both numbers on SW03 floor 2 and only 2695 on SW05 floor 2. The production frontend matched the release for main commit `829e89c` at reproduction time.
+
+**Local recovery.** Replaying those structured readings selects one possible shared corridor and leaves the session location unconfirmed. The visitor API accepts the selection, then returns a walk along SW03 corridor 2600, the east elevator from floor 2 to floor 3, the passage to SE12 and the door to room 302. The first map shades the starting area. Automated checks cover confirmation before navigation, rejection of explicit arrows, duplicate signs, disjoint entrances and stale source bindings. The original photo was submitted once. This check used the floor plans and saved transfers without an independent campus walk.
+
+The local HTTP replay used GPS off. Navigation returned HTTP 409 before confirmation and HTTP 200 with the route after confirmation, with zero additional provider calls. Validation passed with 426 unit and API tests, 24 desktop and mobile browser tests, source-data validation and the Vercel production build.
+
+## Reported sign conflict and SE12 floor transfers, November 18, 2026
+
+The foreground plaque in the supplied photo reads **323**. The screenshot marks **306** on four buildings’ floor plans, including SE12. The additional clear **98** was reported by the teammate. The screenshot does not contain the complete provider response or establish whether a fresh GPS hint arrived.
+
+A deterministic replay against the released resolver produced zero starting candidates for both `323 + 98` and `306 + 98`, even with a fresh SE12 building hint. The old resolver demanded all clear readings on the same page before it applied GPS. The current catalogue has no entry for `98`. The updated resolver offers the supported SE12 floor 3 sign for confirmation, retains the unmatched reading, and prevents routing until selection. An isolated HTTP regression checks this confirmation with a mocked first-stage provider, the original receipt and no second image submission. GPS plus `98` alone identifies only the building.
+
+The released graph had four floor 2–3 stair transfers in SE12. None of their second-floor landing pins had a compiled corridor tie, and the graph had zero internal floor 3–4 transfers. After the user's four A/B confirmations, a clean import of the public revision-45 snapshot routes each three-floor stair chain in both directions. An end-to-end post-extraction check walks from corridor 208Z on floor 2 to corridor 410C on floor 4 via S209, S327 and S418, and returns by the same stairs. The three other floor 2 perimeter approaches remain separate from the indoor corridor network. The stair records have user-confirmation provenance. No live Gemini reproduction or independent campus walk was conducted for this report. Validation passed with 418 unit and API tests, 24 automated desktop and mobile browser tests, the production build and campus data validation.
+
 ## Campus-wide source sample, November 18, 2026
 
 The visitor API returned complete routes for **0 of 5** randomly paired journeys. Sampling used all 3,428 indexed place occurrences in graph `3b4497fbb23af67363a67fc5151ac607f2a0287186c10680299fbb7543babe36` and seed `5872ff95`. All ten occurrences were selected without replacement before any route lookup. All five starts localized with simulated exact sign, building and floor readings. The check used no visitor images or provider calls. These results measure post-extraction routing on real source data.

@@ -66,7 +66,7 @@ export class CampusJourney {
         .sort((a, b) => a.d - b.d);
       if (candidates.length && candidates[0].d <= 18) usedCells.add(candidates[0].cell);
     }
-    if (place.kind === 'stairs' || place.kind === 'elevator') {
+    if (uniqueOccurrence && (place.kind === 'stairs' || place.kind === 'elevator')) {
       for (const node of this.map.nodes) {
         const prefix = node.label.split(' · ')[0];
         if (
@@ -76,7 +76,12 @@ export class CampusJourney {
         )
           continue;
         const landing = this.search.reviewed(node.id);
-        if (landing) choices.push(landing);
+        if (landing) {
+          choices.push(landing);
+          // The gridded corridor approach and its live landing describe the same sign.
+          const cell = floor.approachAt(node.point, node)?.cell;
+          if (cell !== undefined) usedCells.add(cell);
+        }
       }
     }
     for (const cell of place.cells)
@@ -98,6 +103,31 @@ export class CampusJourney {
   origins(candidate: CampusLocationCandidate): SearchStop[] {
     const floor = floorGraphs().byId.get(candidate.planId);
     if (!floor || !this.plans.has(candidate.planId)) return [];
+    if (candidate.corridorOrigin) {
+      const { bandId, roomPlaceIds } = candidate.corridorOrigin;
+      const rooms = floor.places.filter((p) => roomPlaceIds.includes(p.id));
+      if (
+        rooms.length !== roomPlaceIds.length ||
+        !rooms.every((p) =>
+          candidate.sourceLabels?.some(
+            (ref) =>
+              ref.id === p.id &&
+              ref.label === p.label &&
+              ref.planId === floor.plan.id &&
+              ref.sourceSha256 === floor.plan.sourceSha256,
+          ),
+        )
+      )
+        return [];
+      const area = floor.frontages.match(rooms);
+      if (!area || area.id !== bandId || candidate.sourcePlaceId !== area.corridor.id) return [];
+      return [
+        {
+          key: area.cell,
+          stop: { ...floor.stop(area.cell, area.label), startRegion: area.bounds },
+        },
+      ];
+    }
     const place = floor.places.find((p) => p.id === candidate.sourcePlaceId);
     if (
       !place ||

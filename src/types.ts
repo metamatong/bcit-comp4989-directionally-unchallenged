@@ -45,6 +45,7 @@ export type PhotoLabelReading = {
   viewId: 'full' | PhotoDetailCrop['id'];
   kind?: 'room' | 'building' | 'floor' | 'landmark';
   placement?: 'door' | 'directional-sign' | 'other' | 'unknown';
+  directionCue?: 'arrow' | 'directional-words' | 'none' | 'unclear';
 };
 export type PhotoFeatures = {
   visibleDoorCount: number | null;
@@ -96,6 +97,13 @@ export type CampusLocationCandidate = {
   /** Exact source label used to identify this place; it is not a doorway or camera position. */
   anchorLabel?: string;
   sourcePlaceId?: string;
+  /** Public corridor reference derived from these exact source occurrences. The reference is not a camera pose. */
+  corridorOrigin?: {
+    bandId: string;
+    roomPlaceIds: string[];
+    roomLabels: string[];
+    needsConfirmation: boolean;
+  };
   verification: 'unverified-ai-hypothesis';
 } & (
   | { bounds: PlanBounds | null; doorwayVicinity?: undefined }
@@ -131,9 +139,16 @@ export type CampusPhotoAnalysis = {
     | 'openai-photo-floorplan'
     | 'groq-photo-floorplan'
     | 'photo-label-retrieval';
-  gpsStatus?: 'used' | 'conflict' | 'outside-pilot' | 'not-used';
+  gpsStatus?: 'used' | 'conflict' | 'outside-pilot' | 'not-used' | 'building-only';
+  deviceBuildings?: string[];
   evidenceId: string;
-  labelRetrieval: { indexedLabels: number; exactMatchPlanIds: string[]; clearLabels: string[] };
+  labelRetrieval: {
+    indexedLabels: number;
+    exactMatchPlanIds: string[];
+    clearLabels: string[];
+    unmatchedLabels?: string[];
+    partial?: boolean;
+  };
   usedFallbackModel: boolean;
   generatedAt: string;
 };

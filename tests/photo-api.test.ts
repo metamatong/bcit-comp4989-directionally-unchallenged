@@ -66,10 +66,13 @@ it('performs two separate API calls before any location result, with idempotency
   expect(response.status).toBe(200);
   const result: Session = await response.json();
   expect(result.providerCalls).toBe(1);
-  expect(result.campusAnalysis?.candidates[0].planId).toBe('SE12-F3-p1');
-  expect(result.campusLocation).toEqual(result.campusAnalysis?.candidates[0]);
+  const se12 = result.campusAnalysis!.candidates.find((c) => c.planId === 'SE12-F3-p1')!;
+  expect(se12.anchorLabel).toBe('302');
+  expect(result.campusLocation).toBeNull();
   expect(result.photoEvidence?.id).toBe(observed.photoEvidence!.id);
-  expect(result.campusAnalysis?.labelRetrieval.exactMatchPlanIds).toEqual(['SE12-F3-p1']);
+  expect(result.campusAnalysis?.labelRetrieval.exactMatchPlanIds).toEqual(
+    expect.arrayContaining(['NE1-F3-p1', 'SE12-F3-p1']),
+  );
   expect(JSON.stringify(result)).not.toContain(input.image.data);
   const repeated = await post(`/api/sessions/${initial.id}/photo`, request);
   expect(repeated.status).toBe(200);
@@ -81,11 +84,11 @@ it('performs two separate API calls before any location result, with idempotency
       revision: result.revision,
       action: {
         type: 'confirm-campus-region',
-        candidateId: result.campusAnalysis!.candidates[0].id,
+        candidateId: se12.id,
       },
     })
   ).json();
-  expect(confirmed.campusLocation?.floor).toBe('3');
+  expect(confirmed.campusLocation).toMatchObject({ id: se12.id, planId: 'SE12-F3-p1' });
   expect(confirmed).not.toHaveProperty('route');
   const stored = await (await fetch(`${base}/api/sessions/${initial.id}`)).json();
   expect(JSON.stringify(stored)).not.toContain(input.detailCrops[0].image.data);
@@ -281,6 +284,12 @@ it('reuses extracted evidence after a stale GPS hint without another provider re
   const retry = await post(`/api/sessions/${initial.id}/photo/location`, {
     ...request,
     revision: failure.session.revision,
+    gps: {
+      buildings: ['SE12'],
+      capturedAt: Date.now(),
+      accuracy: 5,
+      sourceSha256: locationCatalogue().geographicSource.sha256,
+    },
   });
   expect(retry.status).toBe(200);
   expect((await retry.json()).campusLocation.planId).toBe('SE12-F3-p1');

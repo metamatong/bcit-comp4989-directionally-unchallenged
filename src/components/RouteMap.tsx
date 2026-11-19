@@ -117,12 +117,25 @@ export function RouteMapImage({
       {markers.map((m, i) => (
         <g key={i} transform={`translate(${m.point.x * width} ${m.point.y * height})`}>
           <title>{m.label}</title>
-          <circle
-            r={10 * scale}
-            fill={m.end ? '#a84b29' : '#124f40'}
-            stroke="white"
-            strokeWidth={2 * scale}
-          />
+          {m.symbol.length === 1 ? (
+            <circle
+              r={10 * scale}
+              fill={m.end ? '#a84b29' : '#124f40'}
+              stroke="white"
+              strokeWidth={2 * scale}
+            />
+          ) : (
+            <rect
+              x={-(m.symbol.length * 3.7 + 4) * scale}
+              y={-10 * scale}
+              width={(m.symbol.length * 7.4 + 8) * scale}
+              height={20 * scale}
+              rx={5 * scale}
+              fill="#175678"
+              stroke="white"
+              strokeWidth={2 * scale}
+            />
+          )}
           <text
             textAnchor="middle"
             dominantBaseline="central"

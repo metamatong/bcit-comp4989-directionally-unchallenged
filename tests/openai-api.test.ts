@@ -134,13 +134,13 @@ it('uses OpenAI only for evidence extraction and resolves the start from source 
   const result: Session = await response.json();
   expect(result.campusAnalysis).toMatchObject({
     method: 'photo-label-retrieval',
-    labelRetrieval: { exactMatchPlanIds: ['SE12-F3-p1'] },
+    labelRetrieval: { exactMatchPlanIds: expect.arrayContaining(['NE1-F3-p1', 'SE12-F3-p1']) },
   });
-  expect(result.campusAnalysis?.candidates[0]).toMatchObject({
+  expect(result.campusAnalysis?.candidates.find((c) => c.planId === 'SE12-F3-p1')).toMatchObject({
     planId: 'SE12-F3-p1',
     verification: 'unverified-ai-hypothesis',
   });
-  expect(result.campusLocation).toEqual(result.campusAnalysis?.candidates[0]);
+  expect(result.campusLocation).toBeNull();
   expect(result.providerCalls).toBe(1);
   expect(result.photoEvidence?.id).toBe(observed.photoEvidence!.id);
   expect(fetcher).toHaveBeenCalledTimes(1);

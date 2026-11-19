@@ -1,7 +1,13 @@
 import type { PlanBounds } from './types';
 
 export type PagePoint = { x: number; y: number };
-export type MapStop = { id: string; planId: string; label: string; point: PagePoint };
+export type MapStop = {
+  id: string;
+  planId: string;
+  label: string;
+  point: PagePoint;
+  startRegion?: PlanBounds;
+};
 export type StartingPoints = { networkRevision: number; origins: MapStop[] };
 export type PlaceChoice = {
   id: string;

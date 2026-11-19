@@ -7,7 +7,7 @@ The supplied original [brief](project-brief.txt) remains unchanged. The user's l
 | Burnaby-only official sources | 89 floor plans / 45 buildings plus campus map; manifest, hashes and source links |
 | PDF conversion | Full PNGs, overviews, overlapping crops, atlas and geometry JSON for every floor plan |
 | Actual-photo interpretation | One provider stage extracts labels and structured visible features. Subsequent metadata-only lookup uses those fields and opted-in GPS building candidates. |
-| LLM agent and tools | One extraction call followed by exact source retrieval and reviewed-graph route calculation. Matching places are offered for selection. |
+| LLM agent and tools | One extraction call followed by exact source retrieval and reviewed-graph route calculation. Repeated and partial sign matches are offered for selection. A building-only GPS result asks for a readable sign. |
 | Free-tier provider and server-side key | `server/provider.ts`, `.env.example`, [provider record](provider.md) |
 | Photo start and uncertainty | Automatically selects a unique place or offers individual source occurrences and numbered doorway choices. |
 | Mobile photo/camera input | Local resizing, photo picker and native camera capture |

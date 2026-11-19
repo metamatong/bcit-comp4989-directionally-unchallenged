@@ -173,10 +173,54 @@
         {
           "label": "S327",
           "point": [
-            0.735625,
-            0.3690821
+            0.735294,
+            0.369697
           ],
           "basis": "North end of the drawn third-floor stair flight, beside corridor 328T."
+        }
+      ],
+      "landingDoors": [
+        {
+          "nodeId": "9e4d3f61-332e-4d27-8838-65a7596cb304",
+          "version": 1,
+          "label": "S300",
+          "landing": [
+            0.085294,
+            0.491667
+          ],
+          "threshold": [
+            0.088848,
+            0.4916478
+          ],
+          "basis": "Single swinging door from the S300 stair enclosure into corridor 303C."
+        },
+        {
+          "nodeId": "92a95623-7e31-42e9-8228-2b6a77874045",
+          "version": 1,
+          "label": "S313",
+          "landing": [
+            0.388725,
+            0.325
+          ],
+          "threshold": [
+            0.3883701,
+            0.3314772
+          ],
+          "basis": "S313 stair door beside the shaft, opening to corridor 313C."
+        },
+        {
+          "nodeId": "f9d700f2-9e8b-4bcb-93a0-055cf1c585cb",
+          "version": 1,
+          "label": "S328",
+          "landing": [
+            0.773529,
+            0.607576
+          ],
+          "threshold": [
+            0.7708701,
+            0.603144
+          ],
+          "basis": "S328 stair door to the left of electrical room 341A on the drawing."
         }
       ]
     },
@@ -292,7 +336,59 @@
             0.716875,
             0.5980676
           ]
+        ],
+        [
+          [
+            0.7225,
+            0.3400966
+          ],
+          [
+            0.7475,
+            0.3400966
+          ],
+          [
+            0.7475,
+            0.3671498
+          ],
+          [
+            0.7225,
+            0.3671498
+          ]
         ]
+      ],
+      "accessPoints": [
+        {
+          "label": "S400",
+          "point": [
+            0.079375,
+            0.4937198
+          ],
+          "basis": "Corridor 402C outside the S400 stair door."
+        },
+        {
+          "label": "S413",
+          "point": [
+            0.381875,
+            0.3323671
+          ],
+          "basis": "Corridor 407C outside the S413 door by shaft 413Z."
+        },
+        {
+          "label": "S418",
+          "point": [
+            0.73875,
+            0.3623188
+          ],
+          "basis": "Public-side landing beside office 419 before the first tread."
+        },
+        {
+          "label": "S428",
+          "point": [
+            0.77375,
+            0.6067633
+          ],
+          "basis": "Public-side landing outside S428 beside electrical room 418G."
+        }
       ]
     },
     {
@@ -372,6 +468,32 @@
             0.4396135
           ]
         ]
+      ],
+      "doorFrontages": [
+        {
+          "room": "2695",
+          "swing": "curve-784",
+          "closedTip": "last",
+          "basis": "West entrance of lab 2695 on corridor 2600, leaf on the 2695 side of the division from 2675."
+        },
+        {
+          "room": "2695",
+          "swing": "curve-794",
+          "closedTip": "first",
+          "basis": "East corridor entrance of 2695 beside the M260 shaft callout."
+        },
+        {
+          "room": "2680",
+          "swing": "curve-787",
+          "closedTip": "last",
+          "basis": "West corridor entrance of lab 2680 on the 2680 side of the partition with 2660."
+        },
+        {
+          "room": "2680",
+          "swing": "curve-798",
+          "closedTip": "first",
+          "basis": "East paired doorway from 2680 to corridor 2600 by the M261 shaft callout."
+        }
       ]
     },
     {
@@ -554,7 +676,57 @@
             0.706875,
             0.410628
           ]
+        ],
+        [
+          [
+            0.744375,
+            0.4154589
+          ],
+          [
+            0.76125,
+            0.4154589
+          ],
+          [
+            0.76125,
+            0.4917874
+          ],
+          [
+            0.744375,
+            0.4917874
+          ]
         ]
+      ],
+      "accessPoints": [
+        {
+          "label": "S209",
+          "point": [
+            0.752451,
+            0.418182
+          ],
+          "basis": "Foot of the drawn S209 flight within the walls of corridor 208Z."
+        }
+      ],
+      "labels": [
+        {
+          "text": "S202",
+          "kind": "stairs",
+          "bounds": [
+            0.41,
+            0.1990338,
+            0.42,
+            0.2048309
+          ]
+        },
+        {
+          "text": "S228",
+          "kind": "stairs",
+          "bounds": [
+            0.80125,
+            0.6202899,
+            0.811875,
+            0.626087
+          ]
+        }
       ]
     },
     {

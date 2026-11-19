@@ -16,7 +16,10 @@ The server retains an image-free, session-bound receipt containing the image/cro
 
 `POST /api/sessions/:id/photo/location` accepts a request UUID, current session revision, evidence ID and optional GPS-derived building hint. It rejects photos, crops and client-supplied extracted labels. The `/photo` alias accepts the same metadata-only request. Requests are serialized by the existing session lease and remain idempotent by stage/request ID.
 
-`label-localization.ts` searches complete source identifiers, using every clear nondirectional room label to constrain the source floor. Explicit building and floor labels constrain that search. Door-sign placement identifies the relevant label when several observations are present. Directional labels remain evidence without establishing the current doorway. A unique matching source doorway supplies an estimated vicinity. The resolver creates separate choices for duplicate occurrences. Navigation offers individually marked doors for a place with multiple approaches. Conflicting, uncertain and unsupported evidence produces an unresolved result.
+The resolver narrows the candidate buildings using explicit building/floor signage and any fresh device building matches. It compares every clear nondirectional room or landmark reading against the supplied records, preserving the full identifier. It automatically selects a single place only when all those readings agree. Direction signs remain visible as context.
+
+When a second reading is missing from the catalogue or disagrees with the location, a supported doorway can be offered for explicit confirmation. Competing supported doorway signs on disjoint floors cannot silently select either floor. For example, a reported `323` and `98` with a device match for SE12 offers SE12 floor 3 room 323 and explains the unmatched reading. The navigation endpoint requires the visitor to select the candidate first. The visitor can also reject it and take another photo. The evidence panel shows the actual readings and the provider’s reported clarity.
+
 
 Window and corridor features remain visible observations because most source records lack equivalent semantic annotations. The resolver rejects an internally contradictory zero-visible-door result paired with a door-attached sign. It does not infer a camera heading, scale, distance or exact physical position from the photo features.
 
@@ -24,7 +27,7 @@ Window and corridor features remain visible observations because most source rec
 
 The unchecked-by-default photo option confirms the visitor is currently at the photographed location. After extraction, the browser requests a fresh reading and compares its accuracy area with official building footprints. Raw latitude/longitude stay in browser memory. The location request sends only matching building IDs, accuracy, capture time and the footprint hash.
 
-The server validates freshness and map provenance before intersecting the building candidates with source label matches. GPS narrows buildings and cannot identify floors or route points. Contradictory readings produce an explicit unresolved result. GPS failure is displayed, while unique label evidence can still resolve a place. [Device lifecycle](device-location.md)
+The server validates freshness and map provenance before applying building scope to the source evidence. A valid matched footprint with no usable sign returns a building-only result with no floor, doorway or route. Contradictory building evidence remains unresolved. GPS failure is displayed, while unique label evidence can still resolve a place. [Device lifecycle](device-location.md)
 
 ## Navigation and rendering
 
@@ -38,7 +41,9 @@ Tests cover a single provider stage, metadata-only lookup, exact identifier boun
 
 ## Door plaques and direction signs
 
-The evidence prompt distinguishes room-identification plaques beside or above a visible doorway, including projecting plaques, from signs whose visible arrows or wording direct travel to another location. Mounting orientation alone is not a direction. Unclear placement remains unknown. Directional-only evidence still cannot establish the starting doorway.
+The extraction stage records sign placement and the visible travel cue separately. An explicit arrow or instruction to travel excludes that sign from the starting location. Two complete room numbers can identify an approximate shared corridor when their entrances face each other on one floor plan.
+
+The app can select that corridor automatically when the room signs are clearly associated with doorways and the other evidence agrees. A straight hall with visible doors lets the app offer a corridor for confirmation when the provider marks the signs as directional but reports no explicit arrow or instruction, including older receipts without a cue field. The visitor can inspect the marked plan and select **Yes, I’m in this corridor** or **I’m somewhere else**. Navigation accepts an ambiguous corridor only after the visitor selects it. Lockers and the number of doors alone cannot locate a floor. [Shared corridor geometry](floor-routing.md#starting-between-two-rooms)
 
 ## Label recognition and starting-route coverage
 

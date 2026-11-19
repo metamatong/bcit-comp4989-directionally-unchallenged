@@ -6,7 +6,9 @@ import { resolve } from 'node:path';
 import { root } from './data';
 import { boundsSchema, visualPlans } from './visual-data';
 import type { VisualPlan } from '../src/types';
+import type { TopologyNode } from '../src/topology';
 import type { MapStop, PagePoint } from '../src/wayfinding';
+import { CorridorFrontages, corridorBandSchema } from './shared-corridor';
 
 const index = z.number().int().nonnegative();
 const unit = z.number().min(0).max(1);
@@ -19,6 +21,7 @@ const placeSchema = z.object({
   doors: z.array(z.tuple([unit, unit, index.nullable()])),
   cells: z.array(index),
 });
+const pagePair = z.tuple([unit, unit]);
 const floorSchema = z.object({
   id: z.string(),
   sourceSha256: z.string(),
@@ -31,7 +34,19 @@ const floorSchema = z.object({
     z.tuple([index, index, z.tuple([unit, unit]), z.tuple([unit, unit]), z.tuple([unit, unit])]),
   ),
   ties: z.array(z.tuple([unit, unit, index])),
+  landingApproaches: z
+    .array(
+      z.object({
+        nodeId: z.string().uuid(),
+        version: index.positive(),
+        landing: pagePair,
+        cell: index,
+        via: z.tuple([pagePair, pagePair]),
+      }),
+    )
+    .optional(),
   places: z.array(placeSchema),
+  corridorBands: z.array(corridorBandSchema).optional(),
 });
 export type FloorPlace = z.infer<typeof placeSchema> & { id: string; planId: string };
 /** Only generic landmark names use aliases. Numbered place identifiers always match in full. */
@@ -53,12 +68,17 @@ export const floorStride = 2 ** 22;
 export const pointKey = (p: PagePoint) => p.x + ',' + p.y;
 export class FloorGraph {
   readonly places: FloorPlace[];
+  readonly frontages: CorridorFrontages;
   readonly ties = new Map<string, number>();
   readonly portals = new Map<number, { cell: number; opening: PagePoint[] }[]>();
   readonly offset: number;
   readonly width: number;
   readonly step: number;
   private readonly cells: Uint8Array;
+  private readonly stairDoors = new Map<
+    string,
+    { version: number; point: PagePoint; cell: number; via: PagePoint[] }
+  >();
 
   constructor(
     public readonly plan: VisualPlan,
@@ -95,6 +115,26 @@ export class FloorGraph {
       id: plan.id + ':' + version + ':place:' + i,
       cells: place.cells.map(valid),
     }));
+    this.frontages = new CorridorFrontages(
+      data.corridorBands ?? [],
+      this.places,
+      plan,
+      width,
+      step,
+      this.offset,
+      version,
+      valid,
+    );
+    for (const entry of data.landingApproaches ?? []) {
+      if (this.stairDoors.has(entry.nodeId)) throw Error('Duplicate stair approach on ' + plan.id);
+      const [x, y] = entry.landing;
+      this.stairDoors.set(entry.nodeId, {
+        version: entry.version,
+        point: { x, y },
+        cell: valid(entry.cell),
+        via: entry.via.map(([x, y]) => ({ x, y })),
+      });
+    }
     for (const [x, y, cell] of data.ties) this.ties.set(pointKey({ x, y }), valid(cell));
     for (const [a, b, first, threshold, last] of data.portals) {
       const points = [first, threshold, last].map(([x, y]) => ({ x, y }));
@@ -107,6 +147,24 @@ export class FloorGraph {
         this.portals.set(from, list);
       }
     }
+  }
+  stairApproach(node: TopologyNode) {
+    const entry = this.stairDoors.get(node.id);
+    if (
+      node.kind === 'stair-landing' &&
+      node.planId === this.plan.id &&
+      node.sourceSha256 === this.plan.sourceSha256 &&
+      entry?.version === node.version &&
+      entry.point.x === node.point.x &&
+      entry.point.y === node.point.y
+    )
+      return entry;
+  }
+  approachAt(point: PagePoint, node?: TopologyNode) {
+    const door = node && this.stairApproach(node);
+    if (door) return door;
+    const cell = this.ties.get(pointKey(point)) ?? this.containingCell(point);
+    return cell === undefined ? undefined : { cell, via: [] as PagePoint[] };
   }
   point(id: number): PagePoint {
     const cell = id - this.offset;

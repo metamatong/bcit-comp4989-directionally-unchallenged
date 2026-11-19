@@ -3,6 +3,7 @@ import type {
   CampusLocationCandidate,
   CampusPhotoAnalysis,
   PlanLabelReference,
+  PhotoLabelReading,
   VisualPlan,
 } from '../types';
 import { buildingLabel, planLabel } from '../topology';
@@ -19,6 +20,7 @@ export function PlanRegion({
 }) {
   const vicinity = candidate?.doorwayVicinity;
   const box = candidate?.bounds;
+  const corridor = !!candidate?.corridorOrigin;
   return (
     <div
       className="plan-region"
@@ -39,7 +41,7 @@ export function PlanRegion({
             height: `${(box[3] - box[1]) * 100}%`,
           }}
         >
-          <span>{vicinity ? 'Possible starting corridor' : 'Possible region'}</span>
+          <span>{vicinity || corridor ? 'Possible starting corridor' : 'Possible region'}</span>
         </div>
       )}
       {vicinity && !box && (
@@ -73,10 +75,14 @@ export function PlanRegion({
 export function CampusLocationResults({
   analysis,
   plans,
+  readings = [],
+  showSummary = true,
 }: {
   analysis: CampusPhotoAnalysis;
+  readings?: PhotoLabelReading[];
+  showSummary?: boolean;
   plans: VisualPlan[];
-  /** Legacy props accepted for old render fixtures; location confirmation is no longer shown. */
+  /** Older evidence panel callers may still pass selection props. Current choices live beside the route. */
   selectedId?: string;
   onConfirm?: (id: string) => void;
   busy?: boolean;
@@ -98,14 +104,35 @@ export function CampusLocationResults({
               ? 'Camera position unresolved'
               : 'No clear match'}
       </h3>
-      <p>{analysis.summary}</p>
+      {showSummary && <p>{analysis.summary}</p>}
       {analysis.gpsStatus === 'used' && (
         <p className="helper">Device building matches were checked against the extracted labels.</p>
       )}
-      {labelBased && analysis.observations.length > 0 && (
+      {labelBased && (readings.length > 0 || analysis.observations.length > 0) && (
         <details>
           <summary>Extracted photo features</summary>
           <ul>
+            {readings.map((reading, index) => (
+              <li key={'reading-' + index}>
+                <strong>{reading.text}</strong> ·{' '}
+                {reading.placement === 'door'
+                  ? 'door sign'
+                  : reading.placement === 'directional-sign'
+                    ? 'direction sign'
+                    : (reading.kind ?? 'sign')}{' '}
+                · read as {reading.clarity}
+                {reading.directionCue === 'arrow'
+                  ? ' · visible arrow'
+                  : reading.directionCue === 'directional-words'
+                    ? ' · direction wording'
+                    : ''}
+                {analysis.labelRetrieval.unmatchedLabels?.includes(
+                  reading.text.normalize('NFKC').trim().toUpperCase(),
+                )
+                  ? ' · no floor-plan match'
+                  : ''}
+              </li>
+            ))}
             {analysis.observations.map((observation, index) => (
               <li key={index}>{observation}</li>
             ))}
@@ -141,19 +168,23 @@ export function CampusLocationResults({
                 {buildingLabel(candidate.building)} · Floor {candidate.floor}
               </h3>
               <span className="pill">
-                {candidate.doorwayVicinity ? 'Approximate vicinity' : 'Unverified estimate'}
+                {candidate.doorwayVicinity || candidate.corridorOrigin
+                  ? 'Approximate vicinity'
+                  : 'Unverified estimate'}
               </span>
             </div>
             <PlanRegion plan={plan} candidate={candidate} />
             {!!candidate.sourceLabels?.length && (
               <p className="plan-label-legend">
-                {candidate.doorwayVicinity
-                  ? candidate.bounds
-                    ? 'The shaded strip follows the corridor outside the room. The blue mark shows the printed room number.'
-                    : 'The orange marker shows the doorway on the plan. The blue mark shows the printed room number.'
-                  : labelBased
-                    ? 'Blue marks show the matching source labels.'
-                    : 'Blue marks show the printed labels. The orange box shows the estimated camera area.'}
+                {candidate.corridorOrigin
+                  ? 'The shaded strip marks the shared corridor. Blue marks identify the printed room numbers.'
+                  : candidate.doorwayVicinity
+                    ? candidate.bounds
+                      ? 'The shaded strip follows the corridor outside the room. The blue mark shows the printed room number.'
+                      : 'The orange marker shows the doorway on the plan. The blue mark shows the printed room number.'
+                    : labelBased
+                      ? 'Blue marks show the matching source labels.'
+                      : 'Blue marks show the printed labels. The orange box shows the estimated camera area.'}
               </p>
             )}
             <details>
@@ -199,15 +230,64 @@ export function StartingPlaceChoices({
   plans,
   onSelect,
   busy,
+  partialMessage,
+  onRetake,
 }: {
   candidates: CampusLocationCandidate[];
   plans: VisualPlan[];
   onSelect: (id: string) => void;
+  partialMessage?: string;
+  onRetake?: () => void;
   busy: boolean;
 }) {
+  const candidate = candidates.length === 1 ? candidates[0] : undefined;
+  if (candidate?.corridorOrigin?.needsConfirmation) {
+    const plan = plans.find((p) => p.id === candidate.planId);
+    if (plan && candidate.bounds) {
+      const marks =
+        candidate.sourceLabels
+          ?.filter((ref) => candidate.corridorOrigin!.roomPlaceIds.includes(ref.id))
+          .map((ref) => ({
+            point: {
+              x: (ref.bounds[0] + ref.bounds[2]) / 2,
+              y: (ref.bounds[1] + ref.bounds[3]) / 2,
+            },
+            symbol: ref.label,
+            label: 'Printed room ' + ref.label,
+          })) ?? [];
+      return (
+        <section className="journey-panel" aria-label="Confirm starting corridor">
+          <h2>Are these room signs beside you?</h2>
+          <p>
+            {planLabel(plan)} · {candidate.anchorLabel}
+          </p>
+          <RouteMapImage
+            plan={plan}
+            bounds={candidate.bounds}
+            markers={marks}
+            label={`Possible starting area: ${candidate.anchorLabel}`}
+          />
+          {partialMessage && <p>{partialMessage}</p>}
+          <button
+            className="primary full-width"
+            disabled={busy}
+            onClick={() => onSelect(candidate.id)}
+          >
+            Yes, I’m in this corridor
+          </button>
+          {onRetake && (
+            <button className="text-button" disabled={busy} onClick={onRetake}>
+              I’m somewhere else
+            </button>
+          )}
+        </section>
+      );
+    }
+  }
   return (
     <section className="journey-panel" aria-label="Starting location choices">
-      <h2>Which place are you at?</h2>
+      <h2>{partialMessage ? 'Which sign are you beside?' : 'Which place are you at?'}</h2>
+      {partialMessage && <p>{partialMessage}</p>}
       {plans.flatMap((plan) => {
         const choices = candidates.filter((c) => c.planId === plan.id);
         if (!choices.length) return [];
@@ -246,6 +326,11 @@ export function StartingPlaceChoices({
           </div>
         );
       })}
+      {partialMessage && onRetake && (
+        <button className="text-button" disabled={busy} onClick={onRetake}>
+          My sign shows a different number
+        </button>
+      )}
     </section>
   );
 }

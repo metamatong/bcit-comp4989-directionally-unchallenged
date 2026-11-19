@@ -3,7 +3,7 @@
 Visitors can search the 89 supplied floor plans. A sign identifies a place on a sheet. Its walking approaches identify the doors or parts of a public corridor from which a journey can start or end. Each occurrence has its own ID, printed bounds, source PDF hash and graph version. When a sign or doorway is ambiguous, the visitor can pick the matching occurrence or numbered marker using the original session.
 
 
-The current compiler catalogues **3,383 source occurrences**. It identifies a door or corridor approach for **1,806**. **871** have a walking-grid approach, across **87 sheets**. These are local floor counts before the live reviewed records are joined. They do not establish that two arbitrary places share a continuous route. NE18 floor 1 and SE30 floor 1 identify places in shop or warehouse drawings without a compiled public corridor approach.
+The current compiler catalogues **3,385 source occurrences**. It identifies a door or corridor approach for **1,814**. **879** have a walking-grid approach, across **87 sheets**. These are local floor counts before the live reviewed records are joined. They do not establish that two arbitrary places share a continuous route. NE18 floor 1 and SE30 floor 1 identify places in shop or warehouse drawings without a compiled public corridor approach.
 
 ## Source preparation
 
@@ -13,7 +13,15 @@ A fitted door swing needs evidence of a leaf and adjoining jamb. The compiler se
 
 The visitor searches these grids and the live, directed topology together. The search joins a reviewed trace to a floor only at a contained cell or a source-checked connection to that trace. Route lines use the traversed cells, drawn doorway openings and approved trace vertices. Costs use drawing-grid units and a fixed transfer cost. Physical distance, travel time and access rights require separate evidence.
 
+In SE12, the four stair chains for floors 2–4 reuse each approved floor 3 node. Within each sheet, a landing joins its containing or source-checked corridor cell. Where an existing stair marker sits inside a drawn door swing, the compiler checks its node version, source point, fitted opening and unobstructed public-side approach, then saves the short path through the threshold. This applies at S300, S313 and S328. On floor 2, S209 joins the labelled 208Z corridor. The three separate perimeter landings do not imply public paths across the exterior areas on that sheet.
+
 The published interbuilding connections serve SE12 and SW03. Other floor plans can support local routes independently. The GPS catalogue covers 43 of the 45 building footprints. The official main-entrance GIS features identify buildings and approach directions. They lack floor-plan doorway IDs. Connecting those features to a particular indoor approach requires a correspondence on the source sheet. [BCIT entrance layer](https://services2.arcgis.com/IgcrRjRW95F0HKSw/arcgis/rest/services/CentralBuildingEntrances/FeatureServer/0) · [BCIT pedestrian route layer](https://services2.arcgis.com/IgcrRjRW95F0HKSw/arcgis/rest/services/AccessibleRoutes_BSite_20241113/FeatureServer/0)
+
+## Starting between two rooms
+
+Rooms 2680 and 2695 on SW03 floor 2 each have two entrances on corridor 2600. The shaft labels M261 and M260 are printed inside those labs, which made the general room detector withhold their approaches. Four entries in `floor-circulation.json` bind the exact room identifiers to the door-swing curves on this sheet. The compiler checks the CAD layer, the room side of each swing and a clear path on the public side before accepting the walking cell. [Official SW03 floor 2 plan](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0302.pdf)
+
+The compiler uses named corridor rectangles to identify rooms with entrances on opposite sides of the same connected strip. Their entrance spans must overlap along the corridor, allowing for a stagger up to the drawn corridor width. The visitor API matches full room numbers and requires a single matching floor and strip. The first map shades the resulting area. Walking starts at a public grid cell within it. This currently supports qualifying pairs on SW03 floors 2 and 4, including 2680/2695 and 4710/4725 respectively.
 
 ## Use and regeneration
 
