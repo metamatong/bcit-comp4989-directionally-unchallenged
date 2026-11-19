@@ -38,6 +38,30 @@ class NativeFloorTests(unittest.TestCase):
         self.assertEqual(named["M222"]["kind"], "shaft")
         self.assertNotIn("21", named)
 
+    def test_overprinted_identifiers_require_the_named_source_partner(self):
+        plan = {"id": "label-fixture", "sourceSha256": "unused"}
+        labels = [
+            {"text": "101Y", "kind": "corridor", "bounds": [0.25, 0.25, 0.35, 0.31]},
+            {
+                "text": "100Z",
+                "kind": "vestibule",
+                "bounds": [0.31, 0.28, 0.40, 0.34],
+                "coPrintedWith": "101Y",
+            },
+        ]
+        with pymupdf.open() as document:
+            page = document.new_page(width=500, height=500)
+            # Native identifiers suppress OCR and keep this a source-parsing unit test.
+            for i in range(12):
+                page.insert_text((350, 30 + i * 25), str(200 + i))
+            words = label_words(plan, page, labels)
+            self.assertEqual(
+                [w["text"] for w in words if w["method"] == "transcription"],
+                ["101Y", "100Z"],
+            )
+            with self.assertRaisesRegex(ValueError, "overlapping source transcription"):
+                label_words(plan, page, [{**labels[1], "coPrintedWith": "103Y"}])
+
     def test_lobby_sill_exception_requires_the_exact_leaf_and_source_strokes(self):
         plan, path = self.floors["1"]
         config = self.config[plan["id"]]

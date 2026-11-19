@@ -55,6 +55,8 @@ it('keeps each newly confirmed crossing bidirectional and tied to the marked she
     'se12-f1-s100-to-102z-exterior',
     'se12-f2-s200-to-201v-exterior',
     'se12-f2-court-to-203y-exterior',
+    'sw3-f1-1700-to-1900-west-exterior',
+    'sw3-f1-f2-west-s190-s299',
   ];
   for (const id of ids) {
     const definition = candidates.find((c) => c.id === id)!;

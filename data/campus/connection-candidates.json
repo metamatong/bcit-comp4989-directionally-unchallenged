@@ -2605,6 +2605,68 @@
       "rationale": "The original floor plan locates both exterior points. Confirm whether visitors can walk outdoors between these marks, and in which direction. The outdoor path geometry and distance have not been measured.",
       "preparedBy": "assistant-source-review",
       "preparedOn": "2026-11-19"
+    },
+    {
+      "id": "sw3-f1-1700-to-1900-west-exterior",
+      "version": 1,
+      "title": "SW03 floor 1 · exterior vestibule at S180 to west wing 1900",
+      "kind": "outdoor",
+      "from": {
+        "planId": "SW3-F1-p1",
+        "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+        "point": {
+          "x": 0.310866,
+          "y": 0.475379
+        },
+        "label": "1700 · exterior vestibule by S180",
+        "kind": "outdoor-access",
+        "description": "Inside the vestibule at the exterior double doors on the north side of the plan, beside the east end of S180."
+      },
+      "to": {
+        "planId": "SW3-F1-p1",
+        "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+        "point": {
+          "x": 0.24469,
+          "y": 0.471591
+        },
+        "label": "1900 · west exterior entrance",
+        "kind": "outdoor-access",
+        "description": "Public corridor side of the west-facing exterior double doors beside S180 and the 1910 marking, north of 1915."
+      },
+      "rationale": "Both doors open onto the exterior. The drawing does not establish a continuous outdoor public path, direction or entry permissions. Confirm the marked route before enabling it.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-19"
+    },
+    {
+      "id": "sw3-f1-f2-west-s190-s299",
+      "version": 1,
+      "title": "SW03 west wing · S190 and S299",
+      "kind": "stairs",
+      "from": {
+        "planId": "SW3-F1-p1",
+        "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+        "point": {
+          "x": 0.27982,
+          "y": 0.695076
+        },
+        "label": "S190 · corridor 1900 approach",
+        "kind": "stair-landing",
+        "description": "Hallway side of the double doors at the bottom of S190, beside office 1950 on the first-floor drawing."
+      },
+      "to": {
+        "planId": "SW3-F2-p1",
+        "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+        "point": {
+          "x": 0.2165033,
+          "y": 0.6957071
+        },
+        "label": "S299 · corridor 2900 approach",
+        "kind": "stair-landing",
+        "description": "Hallway side of the S299 doors at the end of corridor 2900 beside office 2930 on the second-floor drawing."
+      },
+      "rationale": "The two drawings show stairs at the end of the west-wing corridor near 1950 and 2930. Confirm which landings that staircase serves and the permitted directions.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-19"
     }
   ]
 }

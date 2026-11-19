@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 87,
-  "sourceDocumentSha256": "99a18a8cee3fe37fee953a4ae4f8c3bf47bb704e7a8661d45468b23776399369",
+  "revision": 89,
+  "sourceDocumentSha256": "d9d0404fc5c294cb766719f21b37c6c8528de02e52723a49744b2bc9ffce6680",
   "nodes": [
     {
       "version": 2,
@@ -1682,6 +1682,76 @@
         "x": 0.517,
         "y": 0.303
       }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "40c8254f705e5a18f28a36944ded1c5f6538607c8c8ed428b94ad2ee6bee2355",
+      "reviewBasis": "user-confirmation",
+      "id": "a958cd07-5605-4564-a01f-9fa447790e16",
+      "planId": "SW3-F1-p1",
+      "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "label": "1700 · exterior vestibule by S180",
+      "aliases": [
+        "1700 · exterior vestibule by S180"
+      ],
+      "kind": "outdoor-access",
+      "point": {
+        "x": 0.310866,
+        "y": 0.475379
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "329348585e6f319d194cc7d7a5dd3a0073f72a7d73971093391b629dc256af13",
+      "reviewBasis": "user-confirmation",
+      "id": "e0ba05e1-09d0-48b9-b912-64b69dd8be7a",
+      "planId": "SW3-F1-p1",
+      "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "label": "1900 · west exterior entrance",
+      "aliases": [
+        "1900 · west exterior entrance"
+      ],
+      "kind": "outdoor-access",
+      "point": {
+        "x": 0.24469,
+        "y": 0.471591
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "bbe1802b9cdd83a474d81d1f7130c73762e413090d1912d540139eac77ff62a7",
+      "reviewBasis": "user-confirmation",
+      "id": "d24381b0-6858-4b4e-adb3-b0647c621ac5",
+      "planId": "SW3-F1-p1",
+      "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "label": "S190 · corridor 1900 approach",
+      "aliases": [
+        "S190 · corridor 1900 approach",
+        "S190"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.27982,
+        "y": 0.695076
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "30cdbd2e99afe442ff7f6ad773ab1ebb91f09c0d7da22c9329620ded1ccd4c4f",
+      "reviewBasis": "user-confirmation",
+      "id": "68677379-8c2a-4cb5-a3aa-0adfc43523bb",
+      "planId": "SW3-F2-p1",
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "label": "S299 · corridor 2900 approach",
+      "aliases": [
+        "S299 · corridor 2900 approach",
+        "S299"
+      ],
+      "kind": "stair-landing",
+      "point": {
+        "x": 0.2165033,
+        "y": 0.6957071
+      }
     }
   ],
   "edges": [
@@ -3216,6 +3286,52 @@
         "fromNodeId": "0e2e540d-5feb-473e-b60b-5ca6f6816225",
         "toNodeId": "d63ae1f7-6444-471d-865e-5dc2b88ac0bf",
         "reviewedEdgeHash": "4b687aa8bb17006ffcbc7f43b4dbb735d71ce6b137816cc93cd6655bdcfbb9ce"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "3d76f2eff6eae39d41337c9975d77c9601d7ba966c945cd377bf9b1bbb08fe79",
+      "reviewBasis": "user-confirmation",
+      "id": "59f7cc13-be6a-402d-9ec0-22d9aefb87f7",
+      "fromNodeId": "a958cd07-5605-4564-a01f-9fa447790e16",
+      "toNodeId": "e0ba05e1-09d0-48b9-b912-64b69dd8be7a",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "outdoor",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw3-f1-1700-to-1900-west-exterior",
+      "candidateBinding": {
+        "definitionHash": "4e997e1652b9a5d4839193572b1334d4510491091931617e80930d034dfc0491",
+        "presentedHash": "973f0d0a8fb33b7625a0482b4616cce7d200d4c429cb29db8f90c483a221f053",
+        "fromNodeId": "a958cd07-5605-4564-a01f-9fa447790e16",
+        "toNodeId": "e0ba05e1-09d0-48b9-b912-64b69dd8be7a",
+        "reviewedEdgeHash": "3d76f2eff6eae39d41337c9975d77c9601d7ba966c945cd377bf9b1bbb08fe79"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "bea1ba5f5f7b177643038c0829d834794c4f8d63e170374f5a8ddabfa40113bd",
+      "reviewBasis": "user-confirmation",
+      "id": "587ec3f3-d279-42f9-9d4d-53ceaaea5113",
+      "fromNodeId": "d24381b0-6858-4b4e-adb3-b0647c621ac5",
+      "toNodeId": "68677379-8c2a-4cb5-a3aa-0adfc43523bb",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "stairs",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw3-f1-f2-west-s190-s299",
+      "candidateBinding": {
+        "definitionHash": "3df543813a6743c58331c35f3de652a5b3824d1a5afa5b4915a12c24d46bc3b1",
+        "presentedHash": "54984e9b54e4c5f131c94ab3295161a25cee659465eeb6bba51d1159fcba8b49",
+        "fromNodeId": "d24381b0-6858-4b4e-adb3-b0647c621ac5",
+        "toNodeId": "68677379-8c2a-4cb5-a3aa-0adfc43523bb",
+        "reviewedEdgeHash": "bea1ba5f5f7b177643038c0829d834794c4f8d63e170374f5a8ddabfa40113bd"
       }
     }
   ],
