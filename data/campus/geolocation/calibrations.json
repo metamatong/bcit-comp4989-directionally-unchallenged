@@ -5336,49 +5336,185 @@
     {
       "planId": "NE1-F1-p1",
       "sourceSha256": "e1cd3e6fafda64dc760db39c8b7e7f1260f03bb45701ff7b198fccc403f25063",
-      "status": "unavailable",
-      "reason": "NE1 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.92689,
+          "y": 0.16373,
+          "longitude": -123.000369807181,
+          "latitude": 49.2537680709881,
+          "label": "Matched exterior corner, GIS vertex 30"
+        },
+        {
+          "x": 0.92326,
+          "y": 0.84681,
+          "longitude": -123.001594765888,
+          "latitude": 49.2537687802128,
+          "label": "Matched exterior corner, GIS vertex 39"
+        },
+        {
+          "x": 0.13841,
+          "y": 0.823968419707181,
+          "longitude": -123.001594414197,
+          "latitude": 49.2543700539423,
+          "label": "Matched exterior corner, GIS vertex 49"
+        },
+        {
+          "x": 0.39902,
+          "y": 0.13784,
+          "longitude": -123.000323902244,
+          "latitude": 49.2541656706091,
+          "label": "Matched exterior corner, GIS vertex 26"
+        }
+      ],
+      "residualsMetres": [
+        0.7011547748027138,
+        1.1668646705064671,
+        0.9323596590989234
+      ],
+      "heldOutMetres": 1.6528219373386166
     },
     {
       "planId": "NE1-F2-p1",
       "sourceSha256": "faa60aee96e54e113f2cd3db05318eb32807f81e0360425cdab335787e9f3569",
-      "status": "unavailable",
-      "reason": "NE1 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.88515,
+          "y": 0.14211,
+          "longitude": -123.000369807181,
+          "latitude": 49.2537680709881,
+          "label": "Matched exterior corner, GIS vertex 30"
+        },
+        {
+          "x": 0.88606,
+          "y": 0.81221,
+          "longitude": -123.001594765888,
+          "latitude": 49.2537687802128,
+          "label": "Matched exterior corner, GIS vertex 39"
+        },
+        {
+          "x": 0.21682,
+          "y": 0.10574,
+          "longitude": -123.000312718341,
+          "latitude": 49.2542786595834,
+          "label": "Matched exterior corner, GIS vertex 23"
+        },
+        {
+          "x": 0.21742,
+          "y": 0.85672,
+          "longitude": -123.001651993266,
+          "latitude": 49.2542834408725,
+          "label": "Matched exterior corner, GIS vertex 47"
+        }
+      ],
+      "residualsMetres": [
+        0.4105129313656586,
+        0.2144697606426777,
+        0.33495259026936325
+      ],
+      "heldOutMetres": 1.5873964285941078
     },
     {
       "planId": "NE1-F3-p1",
       "sourceSha256": "b2f9b412c8c35643f8b98ef2c777c4ecd698ecff16cc42faf0be864cbee11d98",
-      "status": "unavailable",
-      "reason": "NE1 floor 3 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.1022,
+          "y": 0.14966,
+          "longitude": -123.000368815322,
+          "latitude": 49.2543656926572,
+          "label": "Matched exterior corner, GIS vertex 5"
+        },
+        {
+          "x": 0.8855300000000002,
+          "y": 0.14877,
+          "longitude": -123.000369807181,
+          "latitude": 49.2537680709881,
+          "label": "Matched exterior corner, GIS vertex 30"
+        },
+        {
+          "x": 0.88333,
+          "y": 0.82926,
+          "longitude": -123.001594765888,
+          "latitude": 49.2537687802128,
+          "label": "Matched exterior corner, GIS vertex 39"
+        },
+        {
+          "x": 0.21386,
+          "y": 0.86417,
+          "longitude": -123.001651993266,
+          "latitude": 49.2542834408725,
+          "label": "Matched exterior corner, GIS vertex 47"
+        }
+      ],
+      "residualsMetres": [
+        0.11416304012867412,
+        0.14254365722242632,
+        0.08533270933497014
+      ],
+      "heldOutMetres": 0.6753429561160339
     },
     {
       "planId": "NE1-F4-p1",
       "sourceSha256": "7de553763ef82a28e8a5231299d9350e2ff724da092f0a81ff5935bc76fa613c",
-      "status": "unavailable",
-      "reason": "NE1 floor 4 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.22758,
+          "y": 0.10926,
+          "longitude": -123.000312718341,
+          "latitude": 49.2542786595834,
+          "label": "Matched exterior corner, GIS vertex 23"
+        },
+        {
+          "x": 0.89697,
+          "y": 0.14103,
+          "longitude": -123.000369807181,
+          "latitude": 49.2537680709881,
+          "label": "Matched exterior corner, GIS vertex 30"
+        },
+        {
+          "x": 0.89515,
+          "y": 0.82338,
+          "longitude": -123.001594765888,
+          "latitude": 49.2537687802128,
+          "label": "Matched exterior corner, GIS vertex 39"
+        },
+        {
+          "x": 0.22515,
+          "y": 0.85828,
+          "longitude": -123.001651993266,
+          "latitude": 49.2542834408725,
+          "label": "Matched exterior corner, GIS vertex 47"
+        }
+      ],
+      "residualsMetres": [
+        0.11757030073298283,
+        0.1440928219805412,
+        0.07528090371140347
+      ],
+      "heldOutMetres": 0.8711165715800592
     },
     {
       "planId": "NE2-F1-p1",
       "sourceSha256": "5b72c8327a3537d4f8ac653894c8296f5319218ebf600a303c254d03f53e748b",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "NE2 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The drawing shows two large adjoining volumes. The GIS outline matches only one and the drawing does not establish the shared outer corners.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5386,9 +5522,9 @@
     {
       "planId": "NE2-F2-p1",
       "sourceSha256": "c44395c2fcb996c0d7776e130fe980c08b8a8e4f4b631484eb7e0e7ace6f545d",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "NE2 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The GIS outline and the two volumes on this drawing do not yield four unambiguous exterior controls.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5396,9 +5532,9 @@
     {
       "planId": "NE3-F1-p1",
       "sourceSha256": "e81d833bcab3225443eb526ba18cbb95a702772b63ea998b94e4d05e5269e085",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "NE3 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "Irregular source wings and the GIS perimeter disagree. The shared exterior corners could not be distinguished from context linework.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5406,9 +5542,9 @@
     {
       "planId": "NE3-F2-p1",
       "sourceSha256": "deaff5a543a64a0f25ba23f4e6414ad5d9ec5f61d8dda7f1acc4be086f30d169",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "NE3 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The enclosed upper floor and the adjacent context outline do not provide four identified points on the GIS perimeter.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5416,29 +5552,97 @@
     {
       "planId": "NE4-F1-p1",
       "sourceSha256": "6bfa6bfcb7bfd9912adb21d067d0b9dbba5c4004464c19bb1308b0fa4b71ef8f",
-      "status": "unavailable",
-      "reason": "NE4 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.22569444444444445,
+          "y": 0.17045454545454544,
+          "longitude": -123.000444081404,
+          "latitude": 49.2535384398594,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.7873774509803921,
+          "y": 0.17045454545454544,
+          "longitude": -123.000445121856,
+          "latitude": 49.2530996404188,
+          "label": "Matched exterior corner, GIS vertex 7"
+        },
+        {
+          "x": 0.7873774509803921,
+          "y": 0.7559974747474747,
+          "longitude": -123.000901376587,
+          "latitude": 49.253100157692,
+          "label": "Matched exterior corner, GIS vertex 8"
+        },
+        {
+          "x": 0.22569444444444445,
+          "y": 0.7559974747474747,
+          "longitude": -123.000900653493,
+          "latitude": 49.2535389535361,
+          "label": "Matched exterior corner, GIS vertex 10"
+        }
+      ],
+      "residualsMetres": [
+        0.04695909176570711,
+        0.08361496029362715,
+        0.06919201817656194
+      ],
+      "heldOutMetres": 0.1873118591559668
     },
     {
       "planId": "NE4-F2-p1",
       "sourceSha256": "e65b057df2ebc63621261dc8f3b43f90b72ef98b70e4d591f4ccaba486d6ad70",
-      "status": "unavailable",
-      "reason": "NE4 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.22569444444444445,
+          "y": 0.14993686868686867,
+          "longitude": -123.000444081404,
+          "latitude": 49.2535384398594,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.7873774509803921,
+          "y": 0.14993686868686867,
+          "longitude": -123.000445121856,
+          "latitude": 49.2530996404188,
+          "label": "Matched exterior corner, GIS vertex 7"
+        },
+        {
+          "x": 0.7873774509803921,
+          "y": 0.735479797979798,
+          "longitude": -123.000901376587,
+          "latitude": 49.253100157692,
+          "label": "Matched exterior corner, GIS vertex 8"
+        },
+        {
+          "x": 0.22569444444444445,
+          "y": 0.735479797979798,
+          "longitude": -123.000900653493,
+          "latitude": 49.2535389535361,
+          "label": "Matched exterior corner, GIS vertex 10"
+        }
+      ],
+      "residualsMetres": [
+        0.04695909176570711,
+        0.08361496029362715,
+        0.0691920181765557
+      ],
+      "heldOutMetres": 0.1873118591559668
     },
     {
       "planId": "NE6-F1-p1",
       "sourceSha256": "3053320239229c6ea0c10e5515e0d910f21bed46dc76fffb3e93bb3a960a488f",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "NE6 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The footprint and drawn shop wings differ. The candidate match only covers part of the drawing.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5446,9 +5650,9 @@
     {
       "planId": "NE6-F2-p1",
       "sourceSha256": "df1c4f99febd8759739eca7cd42c8aa01e8d101bc5270085ff510e7a2f028d36",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "NE6 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The footprint and the upper floor have different exterior projections. The proposed controls do not establish the missing fourth corner.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5456,89 +5660,361 @@
     {
       "planId": "NE7-F1-p1",
       "sourceSha256": "4dc5e3b247f209f9ba5591abe5b82b71ea42a3a97f244aac190bb14da30fb3c3",
-      "status": "unavailable",
-      "reason": "NE7 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.56235,
+          "y": 0.07966,
+          "longitude": -122.998261438879,
+          "latitude": 49.2537301265201,
+          "label": "Matched exterior corner, GIS vertex 10"
+        },
+        {
+          "x": 0.78129,
+          "y": 0.08284,
+          "longitude": -122.99826188428,
+          "latitude": 49.2536472589652,
+          "label": "Matched exterior corner, GIS vertex 11"
+        },
+        {
+          "x": 0.78129,
+          "y": 0.84686,
+          "longitude": -122.998971928558,
+          "latitude": 49.2536493219862,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.57379,
+          "y": 0.84686,
+          "longitude": -122.998972064287,
+          "latitude": 49.2537304948496,
+          "label": "Matched exterior corner, GIS vertex 3"
+        }
+      ],
+      "residualsMetres": [
+        0.19690434500549034,
+        0.19999448772032588,
+        0.03520725847737979
+      ],
+      "heldOutMetres": 0.10315527580013917
     },
     {
       "planId": "NE8-F1-p1",
       "sourceSha256": "c6750e5a52b98f5f8da904f1205c537e522ec044531027d59787d44e48b42059",
-      "status": "unavailable",
-      "reason": "NE8 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.13088,
+          "y": 0.10348,
+          "longitude": -122.998994648889,
+          "latitude": 49.2535364015941,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.91667,
+          "y": 0.72705,
+          "longitude": -122.999408487437,
+          "latitude": 49.2530106464276,
+          "label": "Matched exterior corner, GIS vertex 4"
+        },
+        {
+          "x": 0.13088,
+          "y": 0.72705,
+          "longitude": -122.999408555332,
+          "latitude": 49.2535369315817,
+          "label": "Matched exterior corner, GIS vertex 13"
+        },
+        {
+          "x": 0.91392,
+          "y": 0.26227,
+          "longitude": -122.999098510934,
+          "latitude": 49.2530107685533,
+          "label": "Matched exterior corner, GIS vertex 3"
+        }
+      ],
+      "residualsMetres": [
+        0.02454849862962444,
+        0.012601698816340082,
+        0.02757110377323774
+      ],
+      "heldOutMetres": 0.2235925772447714
     },
     {
       "planId": "NE8-F2-p1",
       "sourceSha256": "6c5db12fde7c91871a442022a90df6612d466c349cbbad58fe5e4147e4c80a64",
-      "status": "unavailable",
-      "reason": "NE8 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.12131999999999998,
+          "y": 0.07348,
+          "longitude": -122.998994648889,
+          "latitude": 49.2535364015941,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.84975,
+          "y": 0.65326,
+          "longitude": -122.999408487437,
+          "latitude": 49.2530106464276,
+          "label": "Matched exterior corner, GIS vertex 4"
+        },
+        {
+          "x": 0.12132,
+          "y": 0.65333,
+          "longitude": -122.999408555332,
+          "latitude": 49.2535369315817,
+          "label": "Matched exterior corner, GIS vertex 13"
+        },
+        {
+          "x": 0.84975,
+          "y": 0.21628999999999998,
+          "longitude": -122.999098510934,
+          "latitude": 49.2530107685533,
+          "label": "Matched exterior corner, GIS vertex 3"
+        }
+      ],
+      "residualsMetres": [
+        0.04664450163766952,
+        0.023944436274687907,
+        0.05238774128334326
+      ],
+      "heldOutMetres": 0.18065770700282643
     },
     {
       "planId": "NE9-F1-p1",
       "sourceSha256": "12d494551733c7b053d0f05c6b844fea20976f41f03c242cb5655d2164fb0336",
-      "status": "unavailable",
-      "reason": "NE9 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.77402,
+          "y": 0.705,
+          "longitude": -122.998922577329,
+          "latitude": 49.2537803009285,
+          "label": "Matched exterior corner, GIS vertex 1"
+        },
+        {
+          "x": 0.21132,
+          "y": 0.70386,
+          "longitude": -122.998921694749,
+          "latitude": 49.2543631092589,
+          "label": "Matched exterior corner, GIS vertex 8"
+        },
+        {
+          "x": 0.3423,
+          "y": 0.14924,
+          "longitude": -122.998348029337,
+          "latitude": 49.2542193174973,
+          "label": "Matched exterior corner, GIS vertex 17"
+        },
+        {
+          "x": 0.58824,
+          "y": 0.32068,
+          "longitude": -122.998540749464,
+          "latitude": 49.25396040351,
+          "label": "Matched exterior corner, GIS vertex 19"
+        }
+      ],
+      "residualsMetres": [
+        0.2704357673903341,
+        0.38929402757596543,
+        0.39295263927911445
+      ],
+      "heldOutMetres": 1.2958224249116475
     },
     {
       "planId": "NE9-F2-p1",
       "sourceSha256": "27fc98b2577ce64466833fe236d2e3e9b717c11a47ac8b349802ce04c592d064",
-      "status": "unavailable",
-      "reason": "NE9 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "stacked-features",
+      "reason": "Approximate alignment from shared structural features on NE9-F1-p1. It inherits the source floor's geographic uncertainty.",
+      "controls": [
+        {
+          "x": 0.17258986928104575,
+          "y": 0.10101010101010101,
+          "latitude": 49.25436001876322,
+          "longitude": -122.99829362074803,
+          "label": "Northwest outside corner of the narrow west wing"
+        },
+        {
+          "x": 0.17258986928104575,
+          "y": 0.7875631313131313,
+          "latitude": 49.25436330098063,
+          "longitude": -122.99891879259532,
+          "label": "Southwest outside corner of the narrow west wing"
+        },
+        {
+          "x": 0.30330882352941174,
+          "y": 0.06470959595959595,
+          "latitude": 49.254241449098096,
+          "longitude": -122.99826268750046,
+          "label": "Outside corner at the head of the north staircase"
+        },
+        {
+          "x": 0.30126633986928103,
+          "y": 0.8222853535353535,
+          "latitude": 49.254245096951124,
+          "longitude": -122.9989575028437,
+          "label": "Outside southeast corner of the elevator enclosure"
+        }
+      ],
+      "residualsMetres": [
+        0.09179281689487884,
+        0.024796774867847805,
+        0.08412852898355834
+      ],
+      "heldOutMetres": 0.4614649886778094
     },
     {
       "planId": "NE10-F1-p1",
       "sourceSha256": "c73a86c17a1b1c72d69f0f48d4ac7934db9c5ba80a3fec0d3106cac51e4eedf0",
-      "status": "unavailable",
-      "reason": "NE10 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.19848,
+          "y": 0.08288,
+          "longitude": -122.998187138492,
+          "latitude": 49.2535272831713,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.79706,
+          "y": 0.08227,
+          "longitude": -122.99818968931,
+          "latitude": 49.2529925983196,
+          "label": "Matched exterior corner, GIS vertex 6"
+        },
+        {
+          "x": 0.19848,
+          "y": 0.73591,
+          "longitude": -122.998766342461,
+          "latitude": 49.2535277621677,
+          "label": "Matched exterior corner, GIS vertex 17"
+        },
+        {
+          "x": 0.6323,
+          "y": 0.85598,
+          "longitude": -122.998867169576,
+          "latitude": 49.2531405891345,
+          "label": "Matched exterior corner, GIS vertex 12"
+        }
+      ],
+      "residualsMetres": [
+        0.05108876047636486,
+        0.029520428190873967,
+        0.04175114809273821
+      ],
+      "heldOutMetres": 0.4865941418669933
     },
     {
       "planId": "NE12-F1-p1",
       "sourceSha256": "745bbe7055d35633d508e93d29193294a65defb111d82fd908e7da6a0c9b4753",
-      "status": "unavailable",
-      "reason": "NE12 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.24711,
+          "y": 0.08674,
+          "longitude": -122.998187587171,
+          "latitude": 49.2529084336035,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.72485,
+          "y": 0.08371,
+          "longitude": -122.998188493944,
+          "latitude": 49.2524631072002,
+          "label": "Matched exterior corner, GIS vertex 1"
+        },
+        {
+          "x": 0.24711,
+          "y": 0.69902,
+          "longitude": -122.998761790159,
+          "latitude": 49.2529099344012,
+          "label": "Matched exterior corner, GIS vertex 13"
+        },
+        {
+          "x": 0.72686,
+          "y": 0.69902,
+          "longitude": -122.998757709635,
+          "latitude": 49.2524429114654,
+          "label": "Matched exterior corner, GIS vertex 3"
+        }
+      ],
+      "residualsMetres": [
+        0.2363628744940347,
+        0.15199860427011883,
+        0.18060165099341072
+      ],
+      "heldOutMetres": 1.9433985500529583
     },
     {
       "planId": "NE12-F2-p1",
       "sourceSha256": "2d36756fde5e71f391e0510402f06e76e4e56fad9a47f7cb71b8b9b8ffaf9f3a",
-      "status": "unavailable",
-      "reason": "NE12 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "stacked-features",
+      "reason": "Approximate alignment from shared structural features on NE12-F1-p1. It inherits the source floor's geographic uncertainty.",
+      "controls": [
+        {
+          "x": 0.24509803921568626,
+          "y": 0.07417929292929293,
+          "latitude": 49.2529115224494,
+          "longitude": -122.99818739384482,
+          "label": "Outside northwest corner of the shared classroom wall"
+        },
+        {
+          "x": 0.24509803921568626,
+          "y": 0.6897095959595959,
+          "latitude": 49.25291197737693,
+          "longitude": -122.99876092461264,
+          "label": "Outside southwestern corner of the shared classroom wall"
+        },
+        {
+          "x": 0.5882352941176471,
+          "y": 0.21306818181818182,
+          "latitude": 49.25258992899112,
+          "longitude": -122.99831854070018,
+          "label": "Top of the stair wall on the east edge of the central bay"
+        },
+        {
+          "x": 0.34415849673202614,
+          "y": 0.5176767676767676,
+          "latitude": 49.252818978529326,
+          "longitude": -122.99859974615147,
+          "label": "Top west corner of the southwest interior stair enclosure"
+        }
+      ],
+      "residualsMetres": [
+        0.04552215626195428,
+        0.03502396877095501,
+        0.039398352832627576
+      ],
+      "heldOutMetres": 0.08356088824309202
     },
     {
       "planId": "NE16-F1-p1",
       "sourceSha256": "f559cb5f1ad52f7e94a6bab6e8557e2bc13b6e5d69d45689449ff060778a7e2a",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "NE16 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The exterior polygon and sloped and inset drawing walls disagree. The shared geographic points remain ambiguous.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5546,29 +6022,97 @@
     {
       "planId": "NE18-F1-p1",
       "sourceSha256": "df5defb058adc8faacca09567879cb412d91f78b84e4e23c3a97862fda29b71e",
-      "status": "unavailable",
-      "reason": "NE18 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.76706,
+          "y": 0.18629,
+          "longitude": -123.000453130097,
+          "latitude": 49.2518467229619,
+          "label": "Matched exterior corner, GIS vertex 3"
+        },
+        {
+          "x": 0.76534,
+          "y": 0.93803,
+          "longitude": -123.001032146834,
+          "latitude": 49.2518497452433,
+          "label": "Matched exterior corner, GIS vertex 5"
+        },
+        {
+          "x": 0.20578000000000002,
+          "y": 0.77008,
+          "longitude": -123.000890166611,
+          "latitude": 49.2522856395978,
+          "label": "Matched exterior corner, GIS vertex 10"
+        },
+        {
+          "x": 0.36618,
+          "y": 0.93803,
+          "longitude": -123.001028882787,
+          "latitude": 49.2521580906984,
+          "label": "Matched exterior corner, GIS vertex 7"
+        }
+      ],
+      "residualsMetres": [
+        0.19691143506005424,
+        0.23130525547662556,
+        0.16700577559208019
+      ],
+      "heldOutMetres": 0.52818488832925
     },
     {
       "planId": "NE20-F1-p1",
       "sourceSha256": "2ee9c26ee27dbace21fd00623c6c0e7f35c5cb77d6e49f11a896eb7fe2370784",
-      "status": "unavailable",
-      "reason": "NE20 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.32666,
+          "y": 0.29668,
+          "longitude": -123.001328573278,
+          "latitude": 49.2522858161999,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.70118,
+          "y": 0.29668,
+          "longitude": -123.001327690334,
+          "latitude": 49.2518475851758,
+          "label": "Matched exterior corner, GIS vertex 5"
+        },
+        {
+          "x": 0.7,
+          "y": 0.68275,
+          "longitude": -123.001783974735,
+          "latitude": 49.251847399135,
+          "label": "Matched exterior corner, GIS vertex 6"
+        },
+        {
+          "x": 0.54853,
+          "y": 0.82168,
+          "longitude": -123.001943790662,
+          "latitude": 49.2520189570394,
+          "label": "Matched exterior corner, GIS vertex 9"
+        }
+      ],
+      "residualsMetres": [
+        0.14701345188267798,
+        0.2614618314944605,
+        0.2163174742910254
+      ],
+      "heldOutMetres": 0.8342872857407001
     },
     {
       "planId": "NE20-F2-p1",
       "sourceSha256": "9370e3ebdb420bcd9533b483b43d55f16d105b998fd1c33890ff8e82a42d3b26",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "NE20 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The wide open upper-floor outline differs from the ground footprint. Shared structural points are needed.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5576,9 +6120,9 @@
     {
       "planId": "NE21-F1-p1",
       "sourceSha256": "2dc9851ab8cb94d85760211500788ac55b6bb19097240f5381c80f94f3dcb962",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "NE21 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "No matching current building footprint was found. BCIT maps the new NE21 pavilion as a future footprint; the archived drawing depicts the earlier one-floor layout.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5586,89 +6130,361 @@
     {
       "planId": "NE22-F1-p1",
       "sourceSha256": "0712f878d5cc01f9c015214bc9b1f978d287cbb42c82813ea4bd08c28af2d4e2",
-      "status": "unavailable",
-      "reason": "NE22 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.32492,
+          "y": 0.12917,
+          "longitude": -123.001851887706,
+          "latitude": 49.2524111286367,
+          "label": "Matched exterior corner, GIS vertex 9"
+        },
+        {
+          "x": 0.89439,
+          "y": 0.13039,
+          "longitude": -123.001851892722,
+          "latitude": 49.2525453589308,
+          "label": "Matched exterior corner, GIS vertex 10"
+        },
+        {
+          "x": 0.89439,
+          "y": 0.82956,
+          "longitude": -123.001450535134,
+          "latitude": 49.2525467184407,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.23932,
+          "y": 0.7301,
+          "longitude": -123.001498679229,
+          "latitude": 49.2523841300966,
+          "label": "Matched exterior corner, GIS vertex 3"
+        }
+      ],
+      "residualsMetres": [
+        0.16821833723032187,
+        0.18940910723495852,
+        0.08618950651463923
+      ],
+      "heldOutMetres": 0.8931847094912574
     },
     {
       "planId": "NE23-F1-p1",
       "sourceSha256": "2ef12ddaa7e25ea33b3ed2617da2156faee8fd032d31e6abc07ea3ac8b49b41c",
-      "status": "unavailable",
-      "reason": "NE23 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.4125816993464052,
+          "y": 0.06313131313131314,
+          "longitude": -123.000891354354,
+          "latitude": 49.2530008415383,
+          "label": "Matched exterior corner, GIS vertex 7"
+        },
+        {
+          "x": 0.7066993464052288,
+          "y": 0.06313131313131314,
+          "longitude": -123.000892027294,
+          "latitude": 49.2528256038362,
+          "label": "Matched exterior corner, GIS vertex 8"
+        },
+        {
+          "x": 0.7066993464052288,
+          "y": 0.8570075757575758,
+          "longitude": -123.001357625191,
+          "latitude": 49.2528263675034,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.4125816993464052,
+          "y": 0.8570075757575758,
+          "longitude": -123.001356953899,
+          "latitude": 49.2530016070071,
+          "label": "Matched exterior corner, GIS vertex 1"
+        }
+      ],
+      "residualsMetres": [
+        0.05151177783103911,
+        0.05946171091118396,
+        0.029702711846981686
+      ],
+      "heldOutMetres": 0.11903737302988354
     },
     {
       "planId": "NE24-F1-p1",
       "sourceSha256": "57f0cedf9eb458970ed0039d3edb97a10116aa4cf1db63e6b7df6d9e53d2e6d1",
-      "status": "unavailable",
-      "reason": "NE24 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.40863,
+          "y": 0.07833,
+          "longitude": -123.000892375648,
+          "latitude": 49.2525583432177,
+          "label": "Matched exterior corner, GIS vertex 4"
+        },
+        {
+          "x": 0.69397,
+          "y": 0.07832999999999998,
+          "longitude": -123.000892592383,
+          "latitude": 49.2523843648367,
+          "label": "Matched exterior corner, GIS vertex 5"
+        },
+        {
+          "x": 0.69397,
+          "y": 0.85598,
+          "longitude": -123.001355621952,
+          "latitude": 49.2523846095074,
+          "label": "Matched exterior corner, GIS vertex 10"
+        },
+        {
+          "x": 0.40863,
+          "y": 0.8570559780817992,
+          "longitude": -123.001356759012,
+          "latitude": 49.252558588773,
+          "label": "Matched exterior corner, GIS vertex 11"
+        }
+      ],
+      "residualsMetres": [
+        0.10867664027741458,
+        0.12539668005178797,
+        0.06255930303179869
+      ],
+      "heldOutMetres": 0.2297622223501173
     },
     {
       "planId": "NE25-F1-p1",
       "sourceSha256": "2cf4b481bb70c2afc1b8c97f7fcf739cab946a033019ddaec87b215bc1ee120f",
-      "status": "unavailable",
-      "reason": "NE25 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.27314,
+          "y": 0.31568,
+          "longitude": -123.000713562652,
+          "latitude": 49.2530115479937,
+          "label": "Matched exterior corner, GIS vertex 18"
+        },
+        {
+          "x": 0.69882,
+          "y": 0.28394,
+          "longitude": -123.000210899555,
+          "latitude": 49.2530083224916,
+          "label": "Matched exterior corner, GIS vertex 24"
+        },
+        {
+          "x": 0.69941,
+          "y": 0.69409,
+          "longitude": -123.000205882464,
+          "latitude": 49.2528013968004,
+          "label": "Matched exterior corner, GIS vertex 29"
+        },
+        {
+          "x": 0.31941,
+          "y": 0.69409,
+          "longitude": -123.000663063858,
+          "latitude": 49.252801884058,
+          "label": "Matched exterior corner, GIS vertex 31"
+        }
+      ],
+      "residualsMetres": [
+        0.3785931830385832,
+        0.7178344091942519,
+        0.6002454271879767
+      ],
+      "heldOutMetres": 1.5200514842106865
     },
     {
       "planId": "NE25-F2-p1",
       "sourceSha256": "b38116c8cf312f8898ecc577346f7c2a10e1c09f14d5c660412f9f0607c6d7f1",
-      "status": "unavailable",
-      "reason": "NE25 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.34672,
+          "y": 0.3,
+          "longitude": -123.000660239555,
+          "latitude": 49.2530087141723,
+          "label": "Matched exterior corner, GIS vertex 22"
+        },
+        {
+          "x": 0.72319,
+          "y": 0.29333,
+          "longitude": -123.000210899555,
+          "latitude": 49.2530083224916,
+          "label": "Matched exterior corner, GIS vertex 24"
+        },
+        {
+          "x": 0.72377,
+          "y": 0.70341,
+          "longitude": -123.000205882464,
+          "latitude": 49.2528013968004,
+          "label": "Matched exterior corner, GIS vertex 29"
+        },
+        {
+          "x": 0.34436,
+          "y": 0.7025,
+          "longitude": -123.000663063858,
+          "latitude": 49.252801884058,
+          "label": "Matched exterior corner, GIS vertex 31"
+        }
+      ],
+      "residualsMetres": [
+        0.14315098465284876,
+        0.25029384608038313,
+        0.20287471137979343
+      ],
+      "heldOutMetres": 0.17991242332245125
     },
     {
       "planId": "NE25-F3-p1",
       "sourceSha256": "7a5dfbeced7bc46f888b79f0d94712b438a74cabad5981447f0098faca03cd6e",
-      "status": "unavailable",
-      "reason": "NE25 floor 3 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.36015,
+          "y": 0.29985,
+          "longitude": -123.000660239555,
+          "latitude": 49.2530087141723,
+          "label": "Matched exterior corner, GIS vertex 22"
+        },
+        {
+          "x": 0.73662,
+          "y": 0.29318,
+          "longitude": -123.000210899555,
+          "latitude": 49.2530083224916,
+          "label": "Matched exterior corner, GIS vertex 24"
+        },
+        {
+          "x": 0.73721,
+          "y": 0.70326,
+          "longitude": -123.000205882464,
+          "latitude": 49.2528013968004,
+          "label": "Matched exterior corner, GIS vertex 29"
+        },
+        {
+          "x": 0.35779,
+          "y": 0.70235,
+          "longitude": -123.000663063858,
+          "latitude": 49.252801884058,
+          "label": "Matched exterior corner, GIS vertex 31"
+        }
+      ],
+      "residualsMetres": [
+        0.14294602641659,
+        0.24993548469458848,
+        0.20258424294098185
+      ],
+      "heldOutMetres": 0.18041194351154388
     },
     {
       "planId": "NE28-F1-p1",
       "sourceSha256": "426204fd07b3045101ad059536f7204d334d9a7e69c20e6068b7319c4115fbe6",
-      "status": "unavailable",
-      "reason": "NE28 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.32189,
+          "y": 0.15858,
+          "longitude": -122.999691961832,
+          "latitude": 49.2525571786522,
+          "label": "Matched exterior corner, GIS vertex 4"
+        },
+        {
+          "x": 0.88909,
+          "y": 0.15858,
+          "longitude": -122.999692306455,
+          "latitude": 49.2523837723699,
+          "label": "Matched exterior corner, GIS vertex 5"
+        },
+        {
+          "x": 0.88909,
+          "y": 0.8072999999999999,
+          "longitude": -123.00015492102,
+          "latitude": 49.2523841648757,
+          "label": "Matched exterior corner, GIS vertex 10"
+        },
+        {
+          "x": 0.3203,
+          "y": 0.8073,
+          "longitude": -123.000154578016,
+          "latitude": 49.2525575711594,
+          "label": "Matched exterior corner, GIS vertex 11"
+        }
+      ],
+      "residualsMetres": [
+        0.1079661952346609,
+        0.12450242695149642,
+        0.062001535898711935
+      ],
+      "heldOutMetres": 0.20432083216047484
     },
     {
       "planId": "NW1-F1-p1",
       "sourceSha256": "5fe97df581ec4b29147c9bbe7cf50154b5ce4b518f889b086930884e867e9e6f",
-      "status": "unavailable",
-      "reason": "NW1 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.21554,
+          "y": 0.19629,
+          "longitude": -123.003136990589,
+          "latitude": 49.2529903787671,
+          "label": "Matched exterior corner, GIS vertex 4"
+        },
+        {
+          "x": 0.79907,
+          "y": 0.19629,
+          "longitude": -123.003141916817,
+          "latitude": 49.2525328322138,
+          "label": "Matched exterior corner, GIS vertex 10"
+        },
+        {
+          "x": 0.79907,
+          "y": 0.76356,
+          "longitude": -123.003589454295,
+          "latitude": 49.2525344770036,
+          "label": "Matched exterior corner, GIS vertex 13"
+        },
+        {
+          "x": 0.21554,
+          "y": 0.76356,
+          "longitude": -123.003584949951,
+          "latitude": 49.2529920208643,
+          "label": "Matched exterior corner, GIS vertex 3"
+        }
+      ],
+      "residualsMetres": [
+        0.10945587603292671,
+        0.2035337507114498,
+        0.17144378149118047
+      ],
+      "heldOutMetres": 0.43197179223309273
     },
     {
       "planId": "NW3-F1-p1",
       "sourceSha256": "0848e964d48b7c7d24f17430ec2648b80d226bf45773b0c66a4bf7014ce1b119",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "NW3 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The drawing contains separate wings and a detached area. Its exterior corners could not be matched unambiguously to the footprint.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5676,9 +6492,9 @@
     {
       "planId": "NW3-F2-p1",
       "sourceSha256": "fe77a8d0661f8c8f5d2a749f0d795339c2cb46f00c2de8a3604e8fbe1f65feaf",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "NW3 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The geometry available in the ground footprint could not be placed on the visible upper-floor structure with independent controls.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5686,9 +6502,9 @@
     {
       "planId": "NW4-F1-p1",
       "sourceSha256": "6ee2285db8b205f1b637f2e375171ed09c1d328772fcf2a780c67164b36c4964",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "NW4 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The outline proposal followed the page border instead of the building. Independently matching the exterior walls is required.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5696,9 +6512,9 @@
     {
       "planId": "NW4-F2-p1",
       "sourceSha256": "a2cc781a104420e59321f9c7bc9e62dce9732d5339025d13a5dfedc6775d0e50",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "NW4 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The proposal matched the page border. The upper-floor plan needs identified exterior or stacked structural controls.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5706,29 +6522,97 @@
     {
       "planId": "NW4-F3-p1",
       "sourceSha256": "feb1cea012d8de5bdaf3b93648a3b61960d6384c3eb48b3ddbfd2289518c0b2c",
-      "status": "unavailable",
-      "reason": "NW4 floor 3 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.17318,
+          "y": 0.1976,
+          "longitude": -123.003618344753,
+          "latitude": 49.2524059973532,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.90947,
+          "y": 0.19745,
+          "longitude": -123.002940110569,
+          "latitude": 49.2524056360937,
+          "label": "Matched exterior corner, GIS vertex 1"
+        },
+        {
+          "x": 0.88689,
+          "y": 0.76897,
+          "longitude": -123.002955584434,
+          "latitude": 49.251868344787,
+          "label": "Matched exterior corner, GIS vertex 6"
+        },
+        {
+          "x": 0.08455,
+          "y": 0.55377,
+          "longitude": -123.003704329672,
+          "latitude": 49.2520775853739,
+          "label": "Matched exterior corner, GIS vertex 8"
+        }
+      ],
+      "residualsMetres": [
+        0.2069567335850591,
+        0.2657630058549094,
+        0.1704924093089945
+      ],
+      "heldOutMetres": 0.739269709910423
     },
     {
       "planId": "NW4-F4-p1",
       "sourceSha256": "b5d7da7227c43f1f63496715b2625fda999d3433295d7b68ae77cfce907ba41a",
-      "status": "unavailable",
-      "reason": "NW4 floor 4 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.18150252525252525,
+          "y": 0.21752450980392157,
+          "longitude": -123.003618344753,
+          "latitude": 49.2524059973532,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.9059343434343434,
+          "y": 0.21752450980392157,
+          "longitude": -123.002940110569,
+          "latitude": 49.2524056360937,
+          "label": "Matched exterior corner, GIS vertex 1"
+        },
+        {
+          "x": 0.9043560606060606,
+          "y": 0.7975898692810458,
+          "longitude": -123.002955584434,
+          "latitude": 49.251868344787,
+          "label": "Matched exterior corner, GIS vertex 6"
+        },
+        {
+          "x": 0.08996212121212122,
+          "y": 0.5667892156862745,
+          "longitude": -123.003704329672,
+          "latitude": 49.2520775853739,
+          "label": "Matched exterior corner, GIS vertex 8"
+        }
+      ],
+      "residualsMetres": [
+        0.37023311049790264,
+        0.4754339837533822,
+        0.3050006342934648
+      ],
+      "heldOutMetres": 0.7047059628233062
     },
     {
       "planId": "NW5-F1-p1",
       "sourceSha256": "1c5787cad49efdd8699606289c7daabf4eaac2b9b495f1a6710e85b72bf9256b",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "NW5 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "Several exterior steps and entrances differ from the footprint. The alignment lacks a check across the complete floor.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5736,9 +6620,9 @@
     {
       "planId": "NW5-F2-p1",
       "sourceSha256": "630a10d041db9a4b6a9bdfd413db0b9c4bf396a84b570f0994efc6c768d794da",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "NW5 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The top two outline orientations are ambiguous and the upper-floor shape differs from the ground footprint.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5746,29 +6630,97 @@
     {
       "planId": "NW6-F1-p1",
       "sourceSha256": "47ed7ca662fd42a730bf1c3912414e11c71207605ca698d3582b9642c901f38b",
-      "status": "unavailable",
-      "reason": "NW6 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.1752,
+          "y": 0.08235000000000003,
+          "longitude": -123.002716306194,
+          "latitude": 49.2518443352111,
+          "label": "Matched exterior corner, GIS vertex 9"
+        },
+        {
+          "x": 0.82466,
+          "y": 0.08235,
+          "longitude": -123.002716541139,
+          "latitude": 49.252370042973,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.82466,
+          "y": 0.77553,
+          "longitude": -123.002163533756,
+          "latitude": 49.2523702075612,
+          "label": "Matched exterior corner, GIS vertex 3"
+        },
+        {
+          "x": 0.1752,
+          "y": 0.77553,
+          "longitude": -123.002164335359,
+          "latitude": 49.2518461872826,
+          "label": "Matched exterior corner, GIS vertex 8"
+        }
+      ],
+      "residualsMetres": [
+        0.054278771334278574,
+        0.09589903187562832,
+        0.07905080508719173
+      ],
+      "heldOutMetres": 0.2504510393180061
     },
     {
       "planId": "NW6-F2-p1",
       "sourceSha256": "861b09c471e21d456ce6bf1e3c4975691755ebcd7c74cc18f0000f64d528db99",
-      "status": "unavailable",
-      "reason": "NW6 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.16578,
+          "y": 0.06340999999999997,
+          "longitude": -123.002716306194,
+          "latitude": 49.2518443352111,
+          "label": "Matched exterior corner, GIS vertex 9"
+        },
+        {
+          "x": 0.83407,
+          "y": 0.06682,
+          "longitude": -123.002716541139,
+          "latitude": 49.252370042973,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.83407,
+          "y": 0.78341,
+          "longitude": -123.002163533756,
+          "latitude": 49.2523702075612,
+          "label": "Matched exterior corner, GIS vertex 3"
+        },
+        {
+          "x": 0.16578,
+          "y": 0.78341,
+          "longitude": -123.002164335359,
+          "latitude": 49.2518461872826,
+          "label": "Matched exterior corner, GIS vertex 8"
+        }
+      ],
+      "residualsMetres": [
+        0.10197657390268222,
+        0.18017089316616755,
+        0.14851718395381372
+      ],
+      "heldOutMetres": 0.5011942903806995
     },
     {
       "planId": "NW7-F1-p1",
       "sourceSha256": "6e475b29d8e27bd3447a1bf91ecd3f47747fe573dda7efd2448066ad7cb0abc4",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "NW7 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "BCIT supplies this drawing and shows NW7 on historical maps. The current building layer has no identified NW7 polygon.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5776,29 +6728,97 @@
     {
       "planId": "SE1-F1-p1",
       "sourceSha256": "6d9d47c2ead6d127243ebcc52539e2d82fc7c587cf083e5cdeb6756c1b828b2f",
-      "status": "unavailable",
-      "reason": "SE1 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.88225,
+          "y": 0.22909,
+          "longitude": -122.998863621225,
+          "latitude": 49.2505217451876,
+          "label": "Matched exterior corner, GIS vertex 3"
+        },
+        {
+          "x": 0.11887,
+          "y": 0.4653,
+          "longitude": -122.999221382088,
+          "latitude": 49.2517067645356,
+          "label": "Matched exterior corner, GIS vertex 39"
+        },
+        {
+          "x": 0.44515,
+          "y": 0.67773,
+          "longitude": -122.999554226161,
+          "latitude": 49.2511881503116,
+          "label": "Matched exterior corner, GIS vertex 24"
+        },
+        {
+          "x": 0.81221,
+          "y": 0.50106,
+          "longitude": -122.999280073183,
+          "latitude": 49.2506315136676,
+          "label": "Matched exterior corner, GIS vertex 13"
+        }
+      ],
+      "residualsMetres": [
+        0.4147910547575331,
+        0.5935116613755308,
+        0.890987372484354
+      ],
+      "heldOutMetres": 0.5284155461537732
     },
     {
       "planId": "SE1-F2-p1",
       "sourceSha256": "bdc50f57a5a2577bf15b723ceb482cbddff79426587cbff4cd91d7f0af42ffc1",
-      "status": "unavailable",
-      "reason": "SE1 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "stacked-features",
+      "reason": "Approximate alignment from shared structural features on SE1-F1-p1. It inherits the source floor's geographic uncertainty.",
+      "controls": [
+        {
+          "x": 0.9344362745098039,
+          "y": 0.1720328282828283,
+          "latitude": 49.250519744513106,
+          "longitude": -122.99886099221517,
+          "label": "Outside north wall corner at the east end of the long wing"
+        },
+        {
+          "x": 0.05106209150326797,
+          "y": 0.44349747474747475,
+          "latitude": 49.251702943124236,
+          "longitude": -122.99922391767086,
+          "label": "Outside south wall corner at the west end of the long wing"
+        },
+        {
+          "x": 0.247140522875817,
+          "y": 0.46559343434343436,
+          "latitude": 49.25143995930077,
+          "longitude": -122.99925032066889,
+          "label": "West stair block outer turn beside the diagonal concrete wing"
+        },
+        {
+          "x": 0.8517156862745098,
+          "y": 0.4861111111111111,
+          "latitude": 49.25062885372393,
+          "longitude": -122.9992785401381,
+          "label": "Right-angle notch at the southeast end of the classroom wing"
+        }
+      ],
+      "residualsMetres": [
+        0.02312561143475295,
+        0.08376899789532322,
+        0.10588302072441519
+      ],
+      "heldOutMetres": 0.1695933810575863
     },
     {
       "planId": "SE2-F1-p1",
       "sourceSha256": "f29ad4fab4ad4d8248efcbe560cc9d636838f238905d70dca8740e0cffc79427",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "SE2 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The candidate outline is offset from the exterior walls and attached structures. A geographic anchor for this floor is still needed.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5806,89 +6826,361 @@
     {
       "planId": "SE2-F2-p1",
       "sourceSha256": "34522f932c9117f04bad7aab1dd1dabb60987acd55c003a4288b0369fcab2994",
-      "status": "unavailable",
-      "reason": "SE2 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "stacked-features",
+      "reason": "Approximate alignment from shared structural features on SE2-F3-p1. It inherits the source floor's geographic uncertainty.",
+      "controls": [
+        {
+          "x": 0.4360702614379085,
+          "y": 0.17676767676767677,
+          "latitude": 49.251621819992906,
+          "longitude": -123.00130681259185,
+          "label": "Upper north corner of the atrium along its east edge"
+        },
+        {
+          "x": 0.247140522875817,
+          "y": 0.4356060606060606,
+          "latitude": 49.25143190399293,
+          "longitude": -123.0016391489153,
+          "label": "West wing elevator shaft centre beside the north corridor"
+        },
+        {
+          "x": 0.2318218954248366,
+          "y": 0.5823863636363636,
+          "latitude": 49.25132702744007,
+          "longitude": -123.00165979813993,
+          "label": "Northwest turn of the grand stair structure"
+        },
+        {
+          "x": 0.16339869281045752,
+          "y": 0.827020202020202,
+          "latitude": 49.25114677576646,
+          "longitude": -123.00178657631746,
+          "label": "West wing southwest outside wall corner"
+        }
+      ],
+      "residualsMetres": [
+        0.08346460038779435,
+        0.29533526377413294,
+        0.22758067455401915
+      ],
+      "heldOutMetres": 0.3888446770984329
     },
     {
       "planId": "SE2-F3-p1",
       "sourceSha256": "295b20fa5d44325925363e6f1054647b2c5a87e27faf9e62d42d18657ea613f2",
-      "status": "unavailable",
-      "reason": "SE2 floor 3 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.16667,
+          "y": 0.07765,
+          "longitude": -123.001782711855,
+          "latitude": 49.251654991341,
+          "label": "Matched exterior corner, GIS vertex 41"
+        },
+        {
+          "x": 0.86167,
+          "y": 0.18023,
+          "longitude": -123.000569659021,
+          "latitude": 49.2515630437059,
+          "label": "Matched exterior corner, GIS vertex 13"
+        },
+        {
+          "x": 0.86892,
+          "y": 0.83242,
+          "longitude": -123.000548148741,
+          "latitude": 49.2510930577816,
+          "label": "Matched exterior corner, GIS vertex 16"
+        },
+        {
+          "x": 0.16745,
+          "y": 0.75932,
+          "longitude": -123.001801681208,
+          "latitude": 49.2511494541039,
+          "label": "Matched exterior corner, GIS vertex 34"
+        }
+      ],
+      "residualsMetres": [
+        0.4488581337954031,
+        0.9378417765815962,
+        0.7609527272496416
+      ],
+      "heldOutMetres": 1.3644996697229668
     },
     {
       "planId": "SE4-F1-p1",
       "sourceSha256": "ea46965300370a40cc2e0f4e6f3cfe1ef5904b0306342f339a7574bad372d214",
-      "status": "unavailable",
-      "reason": "SE4 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.16289,
+          "y": 0.16061,
+          "longitude": -122.999924739814,
+          "latitude": 49.2515287732747,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.55892,
+          "y": 0.08371,
+          "longitude": -122.999873444376,
+          "latitude": 49.2512570797067,
+          "label": "Matched exterior corner, GIS vertex 6"
+        },
+        {
+          "x": 0.69265,
+          "y": 0.82356,
+          "longitude": -123.000377797562,
+          "latitude": 49.2511639264314,
+          "label": "Matched exterior corner, GIS vertex 15"
+        },
+        {
+          "x": 0.7701,
+          "y": 0.34742,
+          "longitude": -123.000053749252,
+          "latitude": 49.251114143865,
+          "label": "Matched exterior corner, GIS vertex 11"
+        }
+      ],
+      "residualsMetres": [
+        0.05856830115258697,
+        0.08039605993176845,
+        0.0468614009064879
+      ],
+      "heldOutMetres": 0.3480925494671904
     },
     {
       "planId": "SE6-F1-p1",
       "sourceSha256": "fb9c9521bc97ed18738f43b9a0d2d55836c6cc5cf614ff0e5c22d3f2974b5649",
-      "status": "unavailable",
-      "reason": "SE6 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "stacked-features",
+      "reason": "Approximate alignment from shared structural features on SE6-F2-p1. It inherits the source floor's geographic uncertainty.",
+      "controls": [
+        {
+          "x": 0.28882575757575757,
+          "y": 0.09191176470588236,
+          "latitude": 49.25101035070943,
+          "longitude": -122.99987113518989,
+          "label": "Left outside corner at the head of the north classroom wing"
+        },
+        {
+          "x": 0.6376262626262627,
+          "y": 0.09191176470588236,
+          "latitude": 49.250790467364936,
+          "longitude": -122.99987889059288,
+          "label": "Right outside corner at the head of the north classroom wing"
+        },
+        {
+          "x": 0.28882575757575757,
+          "y": 0.5279820261437909,
+          "latitude": 49.25101926635968,
+          "longitude": -123.0005351261911,
+          "label": "Left end of the wall crossing the classroom wing before the stair area"
+        },
+        {
+          "x": 0.4640151515151515,
+          "y": 0.049019607843137254,
+          "latitude": 49.250898924149226,
+          "longitude": -122.99981156547747,
+          "label": "Pointed tip of the stair enclosure at the north end"
+        }
+      ],
+      "residualsMetres": [
+        0.2201531805791253,
+        0.19652473325901682,
+        0.09970709803276559
+      ],
+      "heldOutMetres": 0.06733836152594083
     },
     {
       "planId": "SE6-F2-p1",
       "sourceSha256": "a654145dd55e0d876a9af6f60bd7f6074ffebf5bb9791a6fbbdd6a10f927e4ba",
-      "status": "unavailable",
-      "reason": "SE6 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.34545,
+          "y": 0.08945999999999998,
+          "longitude": -122.999875330294,
+          "latitude": 49.2510122908883,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.67273,
+          "y": 0.08946,
+          "longitude": -122.999877441495,
+          "latitude": 49.2507878006827,
+          "label": "Matched exterior corner, GIS vertex 10"
+        },
+        {
+          "x": 0.71795,
+          "y": 0.82088,
+          "longitude": -123.001045666346,
+          "latitude": 49.2507779354717,
+          "label": "Matched exterior corner, GIS vertex 17"
+        },
+        {
+          "x": 0.76992,
+          "y": 0.66534,
+          "longitude": -123.000785715094,
+          "latitude": 49.250734860298,
+          "label": "Matched exterior corner, GIS vertex 12"
+        }
+      ],
+      "residualsMetres": [
+        0.3075959454254805,
+        0.32229909075477065,
+        0.09054801668588355
+      ],
+      "heldOutMetres": 1.1064961837407912
     },
     {
       "planId": "SE6-F3-p1",
       "sourceSha256": "dd4c18546aadceace40550bc7e13867899f8d0253e8dd2cbccb63aefde96c5ed",
-      "status": "unavailable",
-      "reason": "SE6 floor 3 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.36659,
+          "y": 0.08157000000000003,
+          "longitude": -122.999875330294,
+          "latitude": 49.2510122908883,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.68326,
+          "y": 0.08343,
+          "longitude": -122.999877441495,
+          "latitude": 49.2507878006827,
+          "label": "Matched exterior corner, GIS vertex 10"
+        },
+        {
+          "x": 0.36659,
+          "y": 0.81103,
+          "longitude": -123.001042570033,
+          "latitude": 49.2510179064882,
+          "label": "Matched exterior corner, GIS vertex 24"
+        },
+        {
+          "x": 0.79318,
+          "y": 0.65618,
+          "longitude": -123.000785715094,
+          "latitude": 49.250734860298,
+          "label": "Matched exterior corner, GIS vertex 12"
+        }
+      ],
+      "residualsMetres": [
+        0.5736113618808926,
+        0.5500417030372579,
+        0.16206337317156777
+      ],
+      "heldOutMetres": 1.526798444492114
     },
     {
       "planId": "SE8-F1-p1",
       "sourceSha256": "4d7beaa3994a10cc26a95f0824c7d3a331dcdeceefd5b574b3a71b7a4ff11ce9",
-      "status": "unavailable",
-      "reason": "SE8 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.21397,
+          "y": 0.09841,
+          "longitude": -123.001146406743,
+          "latitude": 49.250922158544,
+          "label": "Matched exterior corner, GIS vertex 4"
+        },
+        {
+          "x": 0.78863,
+          "y": 0.09682,
+          "longitude": -123.001150320268,
+          "latitude": 49.2505100414037,
+          "label": "Matched exterior corner, GIS vertex 12"
+        },
+        {
+          "x": 0.78863,
+          "y": 0.88083,
+          "longitude": -123.001709326894,
+          "latitude": 49.2505125810435,
+          "label": "Matched exterior corner, GIS vertex 15"
+        },
+        {
+          "x": 0.21397,
+          "y": 0.88083,
+          "longitude": -123.001705522567,
+          "latitude": 49.250927973362,
+          "label": "Matched exterior corner, GIS vertex 16"
+        }
+      ],
+      "residualsMetres": [
+        0.0316666458443407,
+        0.047751311842007926,
+        0.03576501030458249
+      ],
+      "heldOutMetres": 0.313748285610812
     },
     {
       "planId": "SE8-F2-p1",
       "sourceSha256": "308c5edc163b6f9bfea4b45caac9f84fc32904b833d4aab35507cbd0e4b813a1",
-      "status": "unavailable",
-      "reason": "SE8 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.32485,
+          "y": 0.12136,
+          "longitude": -123.001146406743,
+          "latitude": 49.250922158544,
+          "label": "Matched exterior corner, GIS vertex 4"
+        },
+        {
+          "x": 0.85897,
+          "y": 0.11992,
+          "longitude": -123.001150320268,
+          "latitude": 49.2505100414037,
+          "label": "Matched exterior corner, GIS vertex 12"
+        },
+        {
+          "x": 0.32485,
+          "y": 0.84864,
+          "longitude": -123.001705522567,
+          "latitude": 49.250927973362,
+          "label": "Matched exterior corner, GIS vertex 16"
+        },
+        {
+          "x": 0.16015,
+          "y": 0.31955,
+          "longitude": -123.001289040077,
+          "latitude": 49.2510565384918,
+          "label": "Matched exterior corner, GIS vertex 0"
+        }
+      ],
+      "residualsMetres": [
+        0.14521365099004782,
+        0.0958174678713028,
+        0.10818612211529761
+      ],
+      "heldOutMetres": 0.7259354407935881
     },
     {
       "planId": "SE9-F1-p1",
       "sourceSha256": "1e2502a1d017ba16c6232a432fe84bdda3777fcc06140e5d78f65df3d9252953",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "SE9 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The drawing and GIS correspondences disagreed by up to 0.62 m in the fit and 2.21 m at the withheld corner. Better source controls are needed.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5896,29 +7188,97 @@
     {
       "planId": "SE10-F1-p1",
       "sourceSha256": "c7e219c19a401f3c621a3af8b051246844516f97a7267cccf0729107be3fa7c8",
-      "status": "unavailable",
-      "reason": "SE10 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.28689,
+          "y": 0.05034,
+          "longitude": -123.000172984039,
+          "latitude": 49.2499420929694,
+          "label": "Matched exterior corner, GIS vertex 27"
+        },
+        {
+          "x": 0.65924,
+          "y": 0.21858,
+          "longitude": -123.000394718114,
+          "latitude": 49.2497378108533,
+          "label": "Matched exterior corner, GIS vertex 35"
+        },
+        {
+          "x": 0.72341,
+          "y": 0.76946,
+          "longitude": -123.001115506086,
+          "latitude": 49.2497144725392,
+          "label": "Matched exterior corner, GIS vertex 2"
+        },
+        {
+          "x": 0.29023,
+          "y": 0.51686,
+          "longitude": -123.00078426389,
+          "latitude": 49.2499425995777,
+          "label": "Matched exterior corner, GIS vertex 13"
+        }
+      ],
+      "residualsMetres": [
+        0.16243499590196384,
+        0.22619696636026862,
+        0.08632791559579428
+      ],
+      "heldOutMetres": 0.6820401649361769
     },
     {
       "planId": "SE10-F2-p1",
       "sourceSha256": "d2d25372a244ebca9d00fe5f55f9aa05e561a63723c90bd0c0be71c35d04c8b7",
-      "status": "unavailable",
-      "reason": "SE10 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.27303,
+          "y": 0.04108,
+          "longitude": -123.000172984039,
+          "latitude": 49.2499420929694,
+          "label": "Matched exterior corner, GIS vertex 27"
+        },
+        {
+          "x": 0.64,
+          "y": 0.21127,
+          "longitude": -123.000394718114,
+          "latitude": 49.2497378108533,
+          "label": "Matched exterior corner, GIS vertex 35"
+        },
+        {
+          "x": 0.71189,
+          "y": 0.76377,
+          "longitude": -123.001115506086,
+          "latitude": 49.2497144725392,
+          "label": "Matched exterior corner, GIS vertex 2"
+        },
+        {
+          "x": 0.27742,
+          "y": 0.51044,
+          "longitude": -123.00078426389,
+          "latitude": 49.2499425995777,
+          "label": "Matched exterior corner, GIS vertex 13"
+        }
+      ],
+      "residualsMetres": [
+        0.350103774504188,
+        0.48753294365160865,
+        0.186066610383687
+      ],
+      "heldOutMetres": 0.5538049712408486
     },
     {
       "planId": "SE12-F1-p1",
       "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "version": "bcit-pilot-2026-11-19-pending-evidence",
-      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
+      "reason": "The historic sheet shows a different extent and orientation from the published GIS outline. It needs verified shared features through another floor.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -5926,48 +7286,82 @@
     {
       "planId": "SE12-F2-p1",
       "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
-      "status": "unavailable",
-      "version": "bcit-pilot-2026-11-19-pending-evidence",
-      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.07328,
+          "y": 0.29667,
+          "longitude": -123.001413327502,
+          "latitude": 49.2504864233271,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.95221,
+          "y": 0.29727,
+          "longitude": -123.001426553242,
+          "latitude": 49.2494375079103,
+          "label": "Matched exterior corner, GIS vertex 17"
+        },
+        {
+          "x": 0.7952,
+          "y": 0.61591,
+          "longitude": -123.001819574747,
+          "latitude": 49.2496467709352,
+          "label": "Matched exterior corner, GIS vertex 23"
+        },
+        {
+          "x": 0.40074,
+          "y": 0.22053,
+          "longitude": -123.001357934037,
+          "latitude": 49.2501044615515,
+          "label": "Matched exterior corner, GIS vertex 8"
+        }
+      ],
+      "residualsMetres": [
+        0.45122286596769196,
+        1.2000992149571605,
+        1.4296420320850327
+      ],
+      "heldOutMetres": 1.9984953337609916
     },
     {
       "planId": "SE12-F3-p1",
       "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "approximate",
       "method": "manual-corners",
-      "reason": "Approximate four-corner alignment to the source-bound SE12 floor 3 drawing. Floor-specific indoor accuracy remains unmeasured.",
-      "version": "bcit-pilot-2026-11-19-v3",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
       "controls": [
         {
-          "label": "NW main corner, ring vertex 43",
-          "latitude": 49.2504715666189,
+          "x": 0.08696428571428572,
+          "y": 0.6045828635851184,
           "longitude": -123.001755908749,
-          "x": 0.08696428571428572,
-          "y": 0.6045828635851184
+          "latitude": 49.2504715666189,
+          "label": "Matched exterior corner, GIS vertex 43"
         },
         {
-          "label": "SE main corner, ring vertex 17",
-          "latitude": 49.2494375079103,
+          "x": 0.9483928571428571,
+          "y": 0.3284918520036897,
           "longitude": -123.001426553242,
-          "x": 0.9483928571428571,
-          "y": 0.3284918520036897
+          "latitude": 49.2494375079103,
+          "label": "Matched exterior corner, GIS vertex 17"
         },
         {
-          "label": "SW main corner, ring vertex 18",
-          "latitude": 49.2494387932512,
+          "x": 0.9483928571428571,
+          "y": 0.6045828635851184,
           "longitude": -123.001758816794,
-          "x": 0.9483928571428571,
-          "y": 0.6045828635851184
+          "latitude": 49.2494387932512,
+          "label": "Matched exterior corner, GIS vertex 18"
         },
         {
-          "label": "NE main corner, ring vertex 53, held out",
-          "latitude": 49.2504690666971,
-          "longitude": -123.001441208812,
           "x": 0.08696428571428572,
-          "y": 0.3284918520036897
+          "y": 0.3284918520036897,
+          "longitude": -123.001441208812,
+          "latitude": 49.2504690666971,
+          "label": "Matched exterior corner, GIS vertex 53"
         }
       ],
       "residualsMetres": [
@@ -5980,59 +7374,229 @@
     {
       "planId": "SE12-F4-p1",
       "sourceSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
-      "status": "unavailable",
-      "version": "bcit-pilot-2026-11-19-pending-evidence",
-      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.07647,
+          "y": 0.32712,
+          "longitude": -123.001413327502,
+          "latitude": 49.2504864233271,
+          "label": "Matched exterior corner, GIS vertex 0"
+        },
+        {
+          "x": 0.95338,
+          "y": 0.32712,
+          "longitude": -123.001426553242,
+          "latitude": 49.2494375079103,
+          "label": "Matched exterior corner, GIS vertex 17"
+        },
+        {
+          "x": 0.95363,
+          "y": 0.61,
+          "longitude": -123.001758816794,
+          "latitude": 49.2494387932512,
+          "label": "Matched exterior corner, GIS vertex 18"
+        },
+        {
+          "x": 0.07637,
+          "y": 0.61,
+          "longitude": -123.001755908749,
+          "latitude": 49.2504715666189,
+          "label": "Matched exterior corner, GIS vertex 43"
+        }
+      ],
+      "residualsMetres": [
+        0.02281434759750215,
+        0.11272309503100962,
+        0.11033767091686782
+      ],
+      "heldOutMetres": 1.8932773003607017
     },
     {
       "planId": "SE14-F1-p1",
       "sourceSha256": "a1abfb2b5a1f4b2edf29c113877ecb10bfdee1a15572db256f7dfa561486e115",
-      "status": "unavailable",
-      "reason": "SE14 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "stacked-features",
+      "reason": "Approximate alignment from shared structural features on SE14-F2-p1. It inherits the source floor's geographic uncertainty.",
+      "controls": [
+        {
+          "x": 0.16850490196078433,
+          "y": 0.19570707070707072,
+          "latitude": 49.2497124405524,
+          "longitude": -123.00142847744993,
+          "label": "West wing northwest exterior corner"
+        },
+        {
+          "x": 0.8190359477124183,
+          "y": 0.33775252525252525,
+          "latitude": 49.249592256318486,
+          "longitude": -123.00024140569796,
+          "label": "Northeast outer corner of the east wing at the stair turn"
+        },
+        {
+          "x": 0.8190359477124183,
+          "y": 0.6691919191919192,
+          "latitude": 49.24934143924875,
+          "longitude": -123.00024299974595,
+          "label": "Southeast corner of the east wing exterior outline"
+        },
+        {
+          "x": 0.8588643790849673,
+          "y": 0.4671717171717172,
+          "latitude": 49.249494372255135,
+          "longitude": -123.00016443977668,
+          "label": "Southeast outside corner of the east stair enclosure"
+        }
+      ],
+      "residualsMetres": [
+        0.08756546270152314,
+        0.29960434619151677,
+        0.27375799466742584
+      ],
+      "heldOutMetres": 0.37108707827961585
     },
     {
       "planId": "SE14-F2-p1",
       "sourceSha256": "9afccccf29c3678eb6818f01060293dc78964e9bc703880a78a60e50f09afaa8",
-      "status": "unavailable",
-      "reason": "SE14 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.15779,
+          "y": 0.21136,
+          "longitude": -123.001424043923,
+          "latitude": 49.2497151572885,
+          "label": "Matched exterior corner, GIS vertex 30"
+        },
+        {
+          "x": 0.81324,
+          "y": 0.36508,
+          "longitude": -123.000245267308,
+          "latitude": 49.2495929179639,
+          "label": "Matched exterior corner, GIS vertex 6"
+        },
+        {
+          "x": 0.24373,
+          "y": 0.73735,
+          "longitude": -123.001275520509,
+          "latitude": 49.2493065877514,
+          "label": "Matched exterior corner, GIS vertex 18"
+        },
+        {
+          "x": 0.85681,
+          "y": 0.49439,
+          "longitude": -123.000172682952,
+          "latitude": 49.2494962122166,
+          "label": "Matched exterior corner, GIS vertex 10"
+        }
+      ],
+      "residualsMetres": [
+        0.38628048320498604,
+        0.22191615378639531,
+        0.411744019247138
+      ],
+      "heldOutMetres": 0.7024087212754723
     },
     {
       "planId": "SE14-F3-p1",
       "sourceSha256": "be4301059beb977d467f1a9ddf1c31ecd3f79da90ab9ed0b22c473c14f47b0c3",
-      "status": "unavailable",
-      "reason": "SE14 floor 3 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.1577,
+          "y": 0.18295,
+          "longitude": -123.001424043923,
+          "latitude": 49.2497151572885,
+          "label": "Matched exterior corner, GIS vertex 30"
+        },
+        {
+          "x": 0.81343,
+          "y": 0.33848,
+          "longitude": -123.000245267308,
+          "latitude": 49.2495929179639,
+          "label": "Matched exterior corner, GIS vertex 6"
+        },
+        {
+          "x": 0.81544,
+          "y": 0.665,
+          "longitude": -123.000246120757,
+          "latitude": 49.249344563363,
+          "label": "Matched exterior corner, GIS vertex 12"
+        },
+        {
+          "x": 0.24,
+          "y": 0.72,
+          "longitude": -123.001275520509,
+          "latitude": 49.2493065877514,
+          "label": "Matched exterior corner, GIS vertex 18"
+        }
+      ],
+      "residualsMetres": [
+        0.025032984790152354,
+        0.08603408731809811,
+        0.07853060988902413
+      ],
+      "heldOutMetres": 0.3210654310913849
     },
     {
       "planId": "SE16-F1-p1",
       "sourceSha256": "bb906ef2e6970b57ab6c1da50c7a3bd06c2dc6cf769e707ed69e9ca3401f45a2",
-      "status": "unavailable",
-      "reason": "SE16 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.30962,
+          "y": 0.13461,
+          "longitude": -123.00012904375,
+          "latitude": 49.2489178767671,
+          "label": "Matched exterior corner, GIS vertex 33"
+        },
+        {
+          "x": 0.50326,
+          "y": 0.14245,
+          "longitude": -123.000147120274,
+          "latitude": 49.2487364663993,
+          "label": "Matched exterior corner, GIS vertex 36"
+        },
+        {
+          "x": 0.89144,
+          "y": 0.5098,
+          "longitude": -123.000933875005,
+          "latitude": 49.248389995347,
+          "label": "Matched exterior corner, GIS vertex 47"
+        },
+        {
+          "x": 0.13871,
+          "y": 0.7675,
+          "longitude": -123.001483384857,
+          "latitude": 49.2490748052667,
+          "label": "Matched exterior corner, GIS vertex 18"
+        }
+      ],
+      "residualsMetres": [
+        0.31148695093741585,
+        0.37446149446015176,
+        0.09140428319024034
+      ],
+      "heldOutMetres": 0.3595645827332227
     },
     {
       "planId": "SE30-F1-p1",
       "sourceSha256": "fcf21f8eebcec31d83c18749b6a6eb8e5ea923bcf7e126b4e6e9c907362e32d6",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "SE30 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The simple plan lacks a reliably matched fourth exterior corner. The GIS perimeter and the drawn outline differ along the upper edge.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -6040,29 +7604,97 @@
     {
       "planId": "SE40-F1-p1",
       "sourceSha256": "fa5531e5397aa83c3d49459ab38968d34e267bbb9fbe278f375064a08fb7097f",
-      "status": "unavailable",
-      "reason": "SE40 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "stacked-features",
+      "reason": "Approximate alignment from shared structural features on SE40-F2-p1. It inherits the source floor's geographic uncertainty.",
+      "controls": [
+        {
+          "x": 0.3257761437908497,
+          "y": 0.07891414141414141,
+          "latitude": 49.24355078970082,
+          "longitude": -122.99891194030398,
+          "label": "Outside northwest corner of the north office wing"
+        },
+        {
+          "x": 0.3257761437908497,
+          "y": 0.9122474747474747,
+          "latitude": 49.24331357412751,
+          "longitude": -122.9989277817386,
+          "label": "Outside southwest corner of the south office wing"
+        },
+        {
+          "x": 0.7751225490196079,
+          "y": 0.9122474747474747,
+          "latitude": 49.243304955791196,
+          "longitude": -122.9986249845934,
+          "label": "Outside southeast corner of the south office wing"
+        },
+        {
+          "x": 0.7751225490196079,
+          "y": 0.07891414141414141,
+          "latitude": 49.24354219095162,
+          "longitude": -122.99860983133412,
+          "label": "Outside northeast corner of the north office wing"
+        }
+      ],
+      "residualsMetres": [
+        9.899214111530746e-7,
+        0.0000015463068581786797,
+        0.0000011879059100187486
+      ],
+      "heldOutMetres": 0.050006811913611754
     },
     {
       "planId": "SE40-F2-p1",
       "sourceSha256": "61cdd12eaad71adb44350f0bb3b6a3aefa8b8bd1fdb66b1f253d00c16e475c11",
-      "status": "unavailable",
-      "reason": "SE40 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.33431,
+          "y": 0.09023,
+          "longitude": -122.998905051048,
+          "latitude": 49.2435417546827,
+          "label": "Matched exterior corner, GIS vertex 29"
+        },
+        {
+          "x": 0.13961,
+          "y": 0.24659,
+          "longitude": -122.99904436835,
+          "latitude": 49.2435109724265,
+          "label": "Matched exterior corner, GIS vertex 24"
+        },
+        {
+          "x": 0.925,
+          "y": 0.66364,
+          "longitude": -122.998518889863,
+          "latitude": 49.2433742159051,
+          "label": "Matched exterior corner, GIS vertex 9"
+        },
+        {
+          "x": 0.33431,
+          "y": 0.81023,
+          "longitude": -122.99890473946,
+          "latitude": 49.2433427170994,
+          "label": "Matched exterior corner, GIS vertex 15"
+        }
+      ],
+      "residualsMetres": [
+        0.6476416328256315,
+        0.5308254172328436,
+        0.16838659940443879
+      ],
+      "heldOutMetres": 1.164753934976519
     },
     {
       "planId": "SE41-F1-p1",
       "sourceSha256": "2685f7b4004ef2b6ce899a4225f8adab6932a948531379fb4c4b6217050ce7c8",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "SE41 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The drawing and GIS correspondences disagreed by up to 0.51 m in the fit and 2.28 m at the withheld corner. Better source controls are needed.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -6070,9 +7702,9 @@
     {
       "planId": "SE41-F2-p1",
       "sourceSha256": "beacac3caaf9b7c8f280a6c6447be242bd839adcae52aee450e10086f032809c",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "SE41 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The drawing and GIS correspondences disagreed by up to 0.56 m in the fit and 2.50 m at the withheld corner. Better source controls are needed.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -6080,169 +7712,713 @@
     {
       "planId": "SE42-F1-p1",
       "sourceSha256": "3ecce3687ca074b3ab877fae9e6fab37c2a6816931d3cc46336f679b708547a7",
-      "status": "unavailable",
-      "reason": "SE42 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "stacked-features",
+      "reason": "Approximate alignment from shared structural features on SE42-F2-p1. It inherits the source floor's geographic uncertainty.",
+      "controls": [
+        {
+          "x": 0.6147875816993464,
+          "y": 0.05997474747474747,
+          "latitude": 49.24331182821753,
+          "longitude": -122.9991420801046,
+          "label": "Outside corner at north arm head"
+        },
+        {
+          "x": 0.7649101307189542,
+          "y": 0.08049242424242424,
+          "latitude": 49.24319160495507,
+          "longitude": -122.99915682271343,
+          "label": "Outside corner at far end of the north stair wall"
+        },
+        {
+          "x": 0.5381944444444444,
+          "y": 0.8443813131313131,
+          "latitude": 49.243369681104014,
+          "longitude": -122.99977627882244,
+          "label": "Outside reentrant wall corner at the bottom of the diagonal run"
+        },
+        {
+          "x": 0.2757352941176471,
+          "y": 0.8506944444444444,
+          "latitude": 49.24358947895249,
+          "longitude": -122.99978659126721,
+          "label": "Bottom exterior corner of the south classroom wing"
+        }
+      ],
+      "residualsMetres": [
+        0.1151399417411871,
+        0.10893227919752049,
+        0.03142650112348516
+      ],
+      "heldOutMetres": 0.7284378300448742
     },
     {
       "planId": "SE42-F2-p1",
       "sourceSha256": "e8c802e70d4b6b60d4327e59aecf4017d71216a2ee592a129580e1c4de02e8a6",
-      "status": "unavailable",
-      "reason": "SE42 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.60471,
+          "y": 0.05598,
+          "longitude": -122.999148808983,
+          "latitude": 49.2433185255735,
+          "label": "Matched exterior corner, GIS vertex 1"
+        },
+        {
+          "x": 0.74539,
+          "y": 0.08773,
+          "longitude": -122.999165230573,
+          "latitude": 49.2431926877392,
+          "label": "Matched exterior corner, GIS vertex 2"
+        },
+        {
+          "x": 0.22775,
+          "y": 0.81758,
+          "longitude": -122.999749367481,
+          "latitude": 49.2436095818913,
+          "label": "Matched exterior corner, GIS vertex 14"
+        },
+        {
+          "x": 0.47,
+          "y": 0.59561,
+          "longitude": -122.999564504569,
+          "latitude": 49.2434122744444,
+          "label": "Matched exterior corner, GIS vertex 23"
+        }
+      ],
+      "residualsMetres": [
+        0.8368870640636281,
+        0.7232691792443561,
+        0.1870666023124054
+      ],
+      "heldOutMetres": 0.8401585073736731
     },
     {
       "planId": "SE50-F1-p1",
       "sourceSha256": "e15e88f03a45ab790b61644b5feb7e949bd68a1b9fee647d97f1ea1c0a22ba09",
-      "status": "unavailable",
-      "reason": "SE50 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.19652,
+          "y": 0.15485,
+          "longitude": -122.999277431791,
+          "latitude": 49.2423943675357,
+          "label": "Matched exterior corner, GIS vertex 21"
+        },
+        {
+          "x": 0.47873,
+          "y": 0.07735,
+          "longitude": -122.999366066453,
+          "latitude": 49.2426674949401,
+          "label": "Matched exterior corner, GIS vertex 25"
+        },
+        {
+          "x": 0.66397,
+          "y": 0.82432,
+          "longitude": -122.998625087569,
+          "latitude": 49.2428545318399,
+          "label": "Matched exterior corner, GIS vertex 4"
+        },
+        {
+          "x": 0.19652,
+          "y": 0.46992,
+          "longitude": -122.998973173942,
+          "latitude": 49.2423903146713,
+          "label": "Matched exterior corner, GIS vertex 19"
+        }
+      ],
+      "residualsMetres": [
+        0.4659053887042879,
+        0.5632348528198579,
+        0.25079538347275143
+      ],
+      "heldOutMetres": 0.19435599219075966
     },
     {
       "planId": "SW1-F1-p1",
       "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
-      "status": "unavailable",
-      "version": "bcit-pilot-2026-11-19-pending-evidence",
-      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.34083,
+          "y": 0.03773,
+          "longitude": -123.001961652625,
+          "latitude": 49.2512429487545,
+          "label": "Matched exterior corner, GIS vertex 7"
+        },
+        {
+          "x": 0.73917,
+          "y": 0.03621,
+          "longitude": -123.00196407101,
+          "latitude": 49.2505131742812,
+          "label": "Matched exterior corner, GIS vertex 22"
+        },
+        {
+          "x": 0.69132,
+          "y": 0.76205,
+          "longitude": -123.003319048169,
+          "latitude": 49.2506063914208,
+          "label": "Matched exterior corner, GIS vertex 44"
+        },
+        {
+          "x": 0.2426,
+          "y": 0.48712,
+          "longitude": -123.002773753369,
+          "latitude": 49.2514529534998,
+          "label": "Matched exterior corner, GIS vertex 74"
+        }
+      ],
+      "residualsMetres": [
+        0.7148718419132968,
+        0.8769506421031662,
+        0.58660350708841
+      ],
+      "heldOutMetres": 1.9534684161539848
     },
     {
       "planId": "SW1-F2-p1",
       "sourceSha256": "37ab5548156a14f390b7d51010172c3ba7975744fb47ee441eee3586f5ce639b",
-      "status": "unavailable",
-      "version": "bcit-pilot-2026-11-19-pending-evidence",
-      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.40696,
+          "y": 0.07924,
+          "longitude": -123.001961652625,
+          "latitude": 49.2512429487545,
+          "label": "Matched exterior corner, GIS vertex 7"
+        },
+        {
+          "x": 0.67706,
+          "y": 0.07727,
+          "longitude": -123.001963836827,
+          "latitude": 49.2507064600707,
+          "label": "Matched exterior corner, GIS vertex 8"
+        },
+        {
+          "x": 0.7376,
+          "y": 0.89462,
+          "longitude": -123.003558379503,
+          "latitude": 49.2505879602828,
+          "label": "Matched exterior corner, GIS vertex 51"
+        },
+        {
+          "x": 0.30299,
+          "y": 0.49303,
+          "longitude": -123.002773753369,
+          "latitude": 49.2514529534998,
+          "label": "Matched exterior corner, GIS vertex 74"
+        }
+      ],
+      "residualsMetres": [
+        0.2591263387081444,
+        0.30449894192503685,
+        0.13270841471310976
+      ],
+      "heldOutMetres": 0.7166678672246729
     },
     {
       "planId": "SW1-F3-p1",
       "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
-      "status": "unavailable",
-      "version": "bcit-pilot-2026-11-19-pending-evidence",
-      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.19882,
+          "y": 0.12712,
+          "longitude": -123.002460194572,
+          "latitude": 49.2514511705473,
+          "label": "Matched exterior corner, GIS vertex 2"
+        },
+        {
+          "x": 0.89225,
+          "y": 0.12985,
+          "longitude": -123.002470088427,
+          "latitude": 49.2504620357226,
+          "label": "Matched exterior corner, GIS vertex 24"
+        },
+        {
+          "x": 0.31211672463409257,
+          "y": 0.9566683554244413,
+          "longitude": -123.003634164723,
+          "latitude": 49.251311064189,
+          "label": "Matched exterior corner, GIS vertex 60"
+        },
+        {
+          "x": 0.80265,
+          "y": 0.76386,
+          "longitude": -123.003366945829,
+          "latitude": 49.2505953492971,
+          "label": "Matched exterior corner, GIS vertex 48"
+        }
+      ],
+      "residualsMetres": [
+        0.8058011355429119,
+        0.5509269522092954,
+        0.6995533438400009
+      ],
+      "heldOutMetres": 0.7609560677668261
     },
     {
       "planId": "SW1-F4-p1",
       "sourceSha256": "ed111bbfb9b7423af5a9369253f7820ed4e7eddbe6bf3a3421cda77bf3f53e30",
-      "status": "unavailable",
-      "version": "bcit-pilot-2026-11-19-pending-evidence",
-      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "stacked-features",
+      "reason": "Approximate alignment from shared structural features on SW1-F3-p1. It inherits the source floor's geographic uncertainty.",
+      "controls": [
+        {
+          "x": 0.06397058823529411,
+          "y": 0.43859848484848485,
+          "latitude": 49.25147025656295,
+          "longitude": -123.00259642298705,
+          "label": "Stair core S300 to S400"
+        },
+        {
+          "x": 0.3162377450980392,
+          "y": 0.491635101010101,
+          "latitude": 49.251184500825595,
+          "longitude": -123.00265160943145,
+          "label": "Stair core S320 to S420"
+        },
+        {
+          "x": 0.7083946078431373,
+          "y": 0.49148358585858587,
+          "latitude": 49.250735092177166,
+          "longitude": -123.00267007864365,
+          "label": "Stair core S350 to S450"
+        },
+        {
+          "x": 0.9609885620915033,
+          "y": 0.43732954545454544,
+          "latitude": 49.2504449464381,
+          "longitude": -123.00262132796243,
+          "label": "Stair core S390 to S490"
+        }
+      ],
+      "residualsMetres": [
+        0.30722710258792607,
+        0.5034694014307846,
+        0.19682508424282918
+      ],
+      "heldOutMetres": 0.688768001344796
     },
     {
       "planId": "SW2-F1-p1",
       "sourceSha256": "5e9a307920757c5cc581ab5b3d15b5abeee637bf5064f145bfd23b280136f0b2",
-      "status": "unavailable",
-      "reason": "SW2 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.50064,
+          "y": 0.06341,
+          "longitude": -123.003040594695,
+          "latitude": 49.2503798813322,
+          "label": "Matched exterior corner, GIS vertex 8"
+        },
+        {
+          "x": 0.75775,
+          "y": 0.49477,
+          "longitude": -123.00337473071,
+          "latitude": 49.2501805738561,
+          "label": "Matched exterior corner, GIS vertex 21"
+        },
+        {
+          "x": 0.24377,
+          "y": 0.49447,
+          "longitude": -123.003370042081,
+          "latitude": 49.2505810827809,
+          "label": "Matched exterior corner, GIS vertex 26"
+        },
+        {
+          "x": 0.40985,
+          "y": 0.13053,
+          "longitude": -123.003088535423,
+          "latitude": 49.2504450270774,
+          "label": "Matched exterior corner, GIS vertex 4"
+        }
+      ],
+      "residualsMetres": [
+        0.05326800126972925,
+        0.03916703685060173,
+        0.039294889827961706
+      ],
+      "heldOutMetres": 0.6370411586714634
     },
     {
       "planId": "SW2-F2-p1",
       "sourceSha256": "eca0df928f4fae9b954bebed2d13a9075b0e30193b38e435bd9242f733e5a9ae",
-      "status": "unavailable",
-      "reason": "SW2 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.54314,
+          "y": 0.06341,
+          "longitude": -123.003040594695,
+          "latitude": 49.2503798813322,
+          "label": "Matched exterior corner, GIS vertex 8"
+        },
+        {
+          "x": 0.8223,
+          "y": 0.52879,
+          "longitude": -123.00337473071,
+          "latitude": 49.2501805738561,
+          "label": "Matched exterior corner, GIS vertex 21"
+        },
+        {
+          "x": 0.27005,
+          "y": 0.53053,
+          "longitude": -123.003370042081,
+          "latitude": 49.2505810827809,
+          "label": "Matched exterior corner, GIS vertex 26"
+        },
+        {
+          "x": 0.58348,
+          "y": 0.81644,
+          "longitude": -123.00357573118,
+          "latitude": 49.2503530944304,
+          "label": "Matched exterior corner, GIS vertex 23"
+        }
+      ],
+      "residualsMetres": [
+        0.13084029782053985,
+        0.09620460021266972,
+        0.09651864093571176
+      ],
+      "heldOutMetres": 0.3367923651272403
     },
     {
       "planId": "SW2-F3-p1",
       "sourceSha256": "e4e37fcf1075c893df1edd0ddb595451e68070bd252a6376bca02636728137b7",
-      "status": "unavailable",
-      "reason": "SW2 floor 3 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.54294,
+          "y": 0.06341,
+          "longitude": -123.003040594695,
+          "latitude": 49.2503798813322,
+          "label": "Matched exterior corner, GIS vertex 8"
+        },
+        {
+          "x": 0.82211,
+          "y": 0.52879,
+          "longitude": -123.00337473071,
+          "latitude": 49.2501805738561,
+          "label": "Matched exterior corner, GIS vertex 21"
+        },
+        {
+          "x": 0.26853,
+          "y": 0.52856,
+          "longitude": -123.003370042081,
+          "latitude": 49.2505810827809,
+          "label": "Matched exterior corner, GIS vertex 26"
+        },
+        {
+          "x": 0.58539,
+          "y": 0.81288,
+          "longitude": -123.00357573118,
+          "latitude": 49.2503530944304,
+          "label": "Matched exterior corner, GIS vertex 23"
+        }
+      ],
+      "residualsMetres": [
+        0.0871185962891639,
+        0.06405679188061526,
+        0.06426589249735863
+      ],
+      "heldOutMetres": 0.07968346654397393
     },
     {
       "planId": "SW3-F1-p1",
       "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
-      "status": "unavailable",
-      "version": "bcit-pilot-2026-11-19-pending-evidence",
-      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.21191,
+          "y": 0.4903,
+          "longitude": -123.00352075005,
+          "latitude": 49.2500699696088,
+          "label": "Matched exterior corner, GIS vertex 25"
+        },
+        {
+          "x": 0.80627,
+          "y": 0.59394,
+          "longitude": -123.001807050759,
+          "latitude": 49.2499297870203,
+          "label": "Matched exterior corner, GIS vertex 5"
+        },
+        {
+          "x": 0.21294,
+          "y": 0.77841,
+          "longitude": -123.003522447147,
+          "latitude": 49.2497042056932,
+          "label": "Matched exterior corner, GIS vertex 21"
+        },
+        {
+          "x": 0.30755,
+          "y": 0.78,
+          "longitude": -123.003237252099,
+          "latitude": 49.2497027316181,
+          "label": "Matched exterior corner, GIS vertex 16"
+        }
+      ],
+      "residualsMetres": [
+        0.7652961449551409,
+        0.24506214364378587,
+        0.7553432531044414
+      ],
+      "heldOutMetres": 1.064559699049665
     },
     {
       "planId": "SW3-F2-p1",
       "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
-      "status": "unavailable",
-      "version": "bcit-pilot-2026-11-19-pending-evidence",
-      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.13681,
+          "y": 0.43212,
+          "longitude": -123.00352075005,
+          "latitude": 49.2500699696088,
+          "label": "Matched exterior corner, GIS vertex 25"
+        },
+        {
+          "x": 0.86039,
+          "y": 0.5628,
+          "longitude": -123.001807050759,
+          "latitude": 49.2499297870203,
+          "label": "Matched exterior corner, GIS vertex 5"
+        },
+        {
+          "x": 0.13696,
+          "y": 0.79348,
+          "longitude": -123.003522447147,
+          "latitude": 49.2497042056932,
+          "label": "Matched exterior corner, GIS vertex 21"
+        },
+        {
+          "x": 0.25436,
+          "y": 0.79348,
+          "longitude": -123.003237252099,
+          "latitude": 49.2497027316181,
+          "label": "Matched exterior corner, GIS vertex 16"
+        }
+      ],
+      "residualsMetres": [
+        0.22578201147798221,
+        0.07229962426146744,
+        0.22284565284495544
+      ],
+      "heldOutMetres": 0.63114455991771
     },
     {
       "planId": "SW3-F3-p1",
       "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
-      "status": "unavailable",
-      "version": "bcit-pilot-2026-11-19-pending-evidence",
-      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "stacked-features",
+      "reason": "Approximate alignment from shared structural features on SW3-F2-p1. It inherits the source floor's geographic uncertainty.",
+      "controls": [
+        {
+          "x": 0.45036764705882354,
+          "y": 0.348800505050505,
+          "latitude": 49.250405792996176,
+          "longitude": -123.0027349655702,
+          "label": "North wing end, west wall corner"
+        },
+        {
+          "x": 0.7363153594771242,
+          "y": 0.5492424242424242,
+          "latitude": 49.25015095453951,
+          "longitude": -123.00188747609988,
+          "label": "East wing, north wall end corner"
+        },
+        {
+          "x": 0.7638888888888888,
+          "y": 0.7228535353535354,
+          "latitude": 49.24992932587359,
+          "longitude": -123.00180729663808,
+          "label": "East stair enclosure outside southeast corner"
+        },
+        {
+          "x": 0.46875,
+          "y": 0.7339015151515151,
+          "latitude": 49.249921900496936,
+          "longitude": -123.00268639295767,
+          "label": "South wall projection at central stair, west corner"
+        }
+      ],
+      "residualsMetres": [
+        0.051837425102867055,
+        0.17539487535251697,
+        0.13864563884338507
+      ],
+      "heldOutMetres": 0.07552137985255916
     },
     {
       "planId": "SW3-F4-p1",
       "sourceSha256": "ec9b5c3ae80da356b78dc7ea89e3228e6cd6b5e882d9c20a6b7e10bbd5ec034a",
-      "status": "unavailable",
-      "version": "bcit-pilot-2026-11-19-pending-evidence",
-      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "stacked-features",
+      "reason": "Approximate alignment from shared structural features on SW3-F2-p1. It inherits the source floor's geographic uncertainty.",
+      "controls": [
+        {
+          "x": 0.45036764705882354,
+          "y": 0.3014520202020202,
+          "latitude": 49.250405792996176,
+          "longitude": -123.0027349655702,
+          "label": "North wing end, west wall corner"
+        },
+        {
+          "x": 0.7363153594771242,
+          "y": 0.5003156565656566,
+          "latitude": 49.25015095453951,
+          "longitude": -123.00188747609988,
+          "label": "East wing, north wall end corner"
+        },
+        {
+          "x": 0.7638888888888888,
+          "y": 0.6755050505050505,
+          "latitude": 49.24992932587359,
+          "longitude": -123.00180729663808,
+          "label": "East stair enclosure outside southeast corner"
+        },
+        {
+          "x": 0.46875,
+          "y": 0.6849747474747475,
+          "latitude": 49.249921900496936,
+          "longitude": -123.00268639295767,
+          "label": "South wall projection at central stair, west corner"
+        }
+      ],
+      "residualsMetres": [
+        0.018456803452576838,
+        0.062449643950191966,
+        0.04936501573157355
+      ],
+      "heldOutMetres": 0.12317639130766204
     },
     {
       "planId": "SW5-F1-p1",
       "sourceSha256": "37105ff14e81094e4e968500a70da3cea6cd2e13803dd2853909ee35bcd10790",
-      "status": "unavailable",
-      "version": "bcit-pilot-2026-11-19-pending-evidence",
-      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.28775,
+          "y": 0.13462,
+          "longitude": -123.002838666,
+          "latitude": 49.2498524424385,
+          "label": "Matched exterior corner, GIS vertex 56"
+        },
+        {
+          "x": 0.80431,
+          "y": 0.29076,
+          "longitude": -123.00237398236,
+          "latitude": 49.2497949824161,
+          "label": "Matched exterior corner, GIS vertex 9"
+        },
+        {
+          "x": 0.38284,
+          "y": 0.82061,
+          "longitude": -123.002758069895,
+          "latitude": 49.2495909549722,
+          "label": "Matched exterior corner, GIS vertex 34"
+        },
+        {
+          "x": 0.80431,
+          "y": 0.44068,
+          "longitude": -123.002375325987,
+          "latitude": 49.2497330160769,
+          "label": "Matched exterior corner, GIS vertex 12"
+        }
+      ],
+      "residualsMetres": [
+        0.203232789637297,
+        0.1676993107025356,
+        0.19410260014725114
+      ],
+      "heldOutMetres": 0.3665072773654383
     },
     {
       "planId": "SW5-F2-p1",
       "sourceSha256": "3157fabbf5eeaa7751c0d66c3baa88ba6bc1029bce0013b7b75fe5f8bdb007b1",
-      "status": "unavailable",
-      "version": "bcit-pilot-2026-11-19-pending-evidence",
-      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
-      "controls": [],
-      "residualsMetres": [],
-      "heldOutMetres": null
+      "version": "bcit-2026-11-19-source-correspondence",
+      "status": "approximate",
+      "method": "manual-corners",
+      "reason": "Approximate alignment from corresponding wall corners on the archived drawing and BCIT footprint.",
+      "controls": [
+        {
+          "x": 0.28495,
+          "y": 0.10697,
+          "longitude": -123.002838666,
+          "latitude": 49.2498524424385,
+          "label": "Matched exterior corner, GIS vertex 56"
+        },
+        {
+          "x": 0.83064,
+          "y": 0.26712,
+          "longitude": -123.00237398236,
+          "latitude": 49.2497949824161,
+          "label": "Matched exterior corner, GIS vertex 9"
+        },
+        {
+          "x": 0.38534,
+          "y": 0.83159,
+          "longitude": -123.002758069895,
+          "latitude": 49.2495909549722,
+          "label": "Matched exterior corner, GIS vertex 34"
+        },
+        {
+          "x": 0.83064,
+          "y": 0.43023,
+          "longitude": -123.002375325987,
+          "latitude": 49.2497330160769,
+          "label": "Matched exterior corner, GIS vertex 12"
+        }
+      ],
+      "residualsMetres": [
+        0.1409542489708039,
+        0.11630962914588731,
+        0.1346219095642186
+      ],
+      "heldOutMetres": 0.2323429748585648
     },
     {
       "planId": "SW9-F1-p1",
       "sourceSha256": "7e78bd140b8e62e6da91bb9b0d17f1b165c5637cd523903815642722b5ded28f",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "SW9 floor 1 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The drawing and GIS correspondences disagreed by up to 0.91 m in the fit and 3.82 m at the withheld corner. Better source controls are needed.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null
@@ -6250,9 +8426,9 @@
     {
       "planId": "SW9-F2-p1",
       "sourceSha256": "369a31fa5c234b90a0217f4eab70d602fb99117e180a38a6a68cfbb732b6dc02",
+      "version": "bcit-2026-11-19-source-correspondence",
       "status": "unavailable",
-      "reason": "SW9 floor 2 has no floor-specific geographic alignment.",
-      "version": "bcit-pilot-2026-11-16-v1",
+      "reason": "The drawing and GIS correspondences disagreed by up to 1.04 m in the fit and 3.71 m at the withheld corner. Better source controls are needed.",
       "controls": [],
       "residualsMetres": [],
       "heldOutMetres": null

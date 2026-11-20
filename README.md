@@ -43,13 +43,11 @@ The Git-connected Vercel project builds the frontend and the visitor API with `n
 4. The app ranks source matches using the photo evidence and GPS building match, then selects the strongest starting estimate automatically. It does not ask visitors to choose a starting room or doorway.
 5. A complete walking route opens directly on its first step. The current step selects the floor map. Live tracking starts automatically, and the position dot appears when a fresh reading can be shown on a geographically aligned floor. Use **Previous**, **Next step**, and **Finish route** to mark progress. **Route overview** opens the full itinerary, and **Back to steps** returns to the current step.
 
-GPS building footprints cover 43 of the 45 supplied buildings, including SE12, SW03, SW05 and SW01. Floor-plan position alignment is currently available only for SE12 floor 3; the dot stays hidden on other floors until a reliable alignment is available. [Device-location coverage](docs/device-location.md)
+GPS building footprints cover 43 of the 45 supplied buildings. Approximate drawing alignment is available on 65 of the 89 floor plans across 33 buildings. The dot also requires a fresh reading whose reported accuracy area overlaps the archived footprint. The remaining 24 plans have individual coverage notes. Indoor phone accuracy remains unmeasured. [Device-location coverage](docs/device-location.md)
 
 The current route dataset includes examples such as SE12 302 to SW03 2605 and SW03 1710. These journeys use source-derived floor walking areas and mapped transfers. The dataset still contains hand-authored same-building transfers; replacing those with automatic stair/elevator inference is not complete. Physical distance and accessibility remain unmeasured.
 
 SE12 323 to SW03 1750 retains the shared corridor departure and corridor-side arrival. The SW03 west wing remains connected through the outdoor 1700–1900 passage and S190–S299 stairs. Missing first or final connections can show a clearly labelled partial route in the overview. Shafts, voids and staff-only spaces remain excluded. [Three-building coverage](docs/three-building-routing.md)
-
-Thirteen proposed GPS alignments are retained as development candidates, pending independent source evidence. They do not enable visitor position dots. [Alignment limitations](docs/device-location.md)
 
 The full photo and four detail crops are prepared locally from the original image. The footer’s **Coverage & privacy** dialog identifies the extraction provider and data handling. The server keeps image-free evidence receipts, and the browser discards its prepared photo after locating the result, removal or navigation away. Explicit retries can reuse unexpired extraction evidence.
 

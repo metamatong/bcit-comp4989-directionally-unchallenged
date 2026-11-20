@@ -48,7 +48,10 @@ it('opens only the current instruction, advances manually, finishes, and returns
         createElement(RouteDirections, {
           route,
           plans: pilotEvidence().map((p) => p.plan),
-          locationCatalogue: catalogue,
+          locationCatalogue: {
+            ...catalogue,
+            floors: catalogue.floors.filter((floor) => floor.planId !== 'SW3-F3-p1'),
+          },
           onRecheck: recheck,
         }),
       ),

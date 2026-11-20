@@ -71,11 +71,22 @@ export function fitCalibration(controls: CalibrationControl[], width: number, he
       y: (b * (point.x - east) - a * (point.y - north) + imageY) / height,
     };
   };
+  const unproject = (point: { x: number; y: number }): GeoPoint => {
+    const dx = point.x * width - imageX;
+    const dy = point.y * height - imageY;
+    const localEast = east + (a * dx + b * dy) / scale ** 2;
+    const localNorth = north + (b * dx - a * dy) / scale ** 2;
+    return {
+      latitude: origin.latitude + localNorth / (6371008.8 * radians),
+      longitude:
+        origin.longitude + localEast / (6371008.8 * radians * Math.cos(origin.latitude * radians)),
+    };
+  };
   const residuals = controls.map((c) => {
     const p = project(c);
     return Math.hypot((p.x - c.x) * width, (p.y - c.y) * height) / scale;
   });
-  return { project, scale, residuals };
+  return { project, unproject, scale, residuals };
 }
 
 export function deviceOverlay(

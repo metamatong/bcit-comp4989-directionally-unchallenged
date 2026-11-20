@@ -2,6 +2,13 @@
 
 This file is a historical log. Older entries describe workflows and route data that have since changed. The current visitor app uses GPS-required automatic start matching and has no start-confirmation, connection-review or topology-editor screen/API; see [current architecture](architecture.md) and [device-location coverage](device-location.md).
 
+## Burnaby floor alignment review · November 19, 2026
+
+Reviewed all 89 supplied floor plans against the archived BCIT building layer. Compiled 65 approximate alignments across 33 buildings from measured wall corners and stacked structural features. Kept the original SE12 floor 3 control set. Documented 24 unavailable plans individually, including the missing matching footprints for NE21 and NW7. [Alignment evidence and limits](device-location.md)
+
+`node --import tsx scripts/prepare-geolocation.ts`, `npm run build`, and `npm run data:validate` passed. The data validator independently recompiled the catalogue and checked 90 original source hashes and 631 derived asset hashes. Vite reported non-fatal Rollup annotation warnings in Zod. No unit, browser, live provider or physical-phone checks were run. The drawing checks give no measurement of indoor phone accuracy.
+
+The follow-up review compared the active alignments and stacked controls with the source drawings. It consolidated GIS loading, moved the original SE12 floor 3 controls into the shared evidence format, and simplified guided overlay eligibility. The regeneration preserved every footprint, control coordinate, residual and coverage result. The production build and data validation passed again. The current coverage notes explain where a drawing extends beyond its archived footprint.
 
 ## PR #24 conflict resolution · November 19, 2026
 

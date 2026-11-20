@@ -7,4 +7,4 @@
 5. Cross-building travel uses only the mapped building connections. A missing photo match, destination approach or route connection is explained in the app.
 6. **Start over** clears the trip. Photo and route details remain available under the edit and evidence sections.
 
-The catalogue covers all 89 supplied Burnaby plans. Building-level GPS footprints cover SE12, SW03, SW05 and SW01. SE12 floor 3 has the only active approximate floor-plan alignment. See [device-location coverage](device-location.md). No deployment or coursework submission is performed by this walkthrough.
+The catalogue covers all 89 supplied Burnaby plans, with approximate GPS alignments available on 65. The walkthrough uses SE12, SW03, SW05 and SW01, which all have building footprints. See [device-location coverage](device-location.md).
