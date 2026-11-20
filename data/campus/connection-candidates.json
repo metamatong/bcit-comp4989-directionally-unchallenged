@@ -2667,6 +2667,43 @@
       "rationale": "The two drawings show stairs at the end of the west-wing corridor near 1950 and 2930. Confirm which landings that staircase serves and the permitted directions.",
       "preparedBy": "assistant-source-review",
       "preparedOn": "2026-11-19"
+    },
+    {
+      "id": "sw03-f1-1602-to-sw01-f1-1501-exterior",
+      "version": 1,
+      "title": "SW03 lobby 1602 to the SW01 lobby 1501 east entrance",
+      "kind": "outdoor",
+      "from": {
+        "planId": "SW3-F1-p1",
+        "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+        "point": {
+          "x": 0.5109375,
+          "y": 0.4405797
+        },
+        "label": "Door toward SW01 · lobby 1602",
+        "kind": "outdoor-access",
+        "description": "SW03 lobby 1602 at the double doors facing the columns, near room 1615."
+      },
+      "to": {
+        "planId": "SW1-F1-p1",
+        "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+        "point": {
+          "x": 0.6768791,
+          "y": 0.5536616
+        },
+        "kind": "outdoor-access",
+        "label": "Lobby 1501 · east exterior entrance",
+        "description": "Inside the east-facing double doors of lobby 1501, across the open lobby from the entrance to atrium 1303."
+      },
+      "endpointRefs": {
+        "from": {
+          "candidateId": "sw03-sw01-f1-lobby-vestibule",
+          "side": "from"
+        }
+      },
+      "rationale": "The source sheets show the marked exterior doors and the visitor described the east approach. Confirm whether the outdoor walk from the SW03 door reaches lobby 1501 directly, and the permitted direction.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-20"
     }
   ]
 }

@@ -217,14 +217,77 @@ it('walks through the confirmed 3130 door to each inner office, with the review 
   });
   expect((await planVisitorNavigation(c, query, temporary)).status).toBe('no-route');
 });
-it('crosses outdoors between the selected west entrance doors with no invented exterior line', async () => {
-  for (const room of ['1000', '1101']) {
-    const trip = route(await walk(room, 'SW01 1020'));
-    expect(trip.steps.filter((s) => s.kind !== 'corridor')).toMatchObject([
-      { kind: 'outdoor', from: { planId: 'SW1-F1-p1' }, to: { planId: 'SW1-F1-p1' }, path: [] },
-    ]);
-  }
+it('retains the approved outdoor passage between the west doors of 1000 and 1020', async () => {
+  const trip = route(await walk('1000', 'SW01 1020'));
+  expect(trip.steps.filter((s) => s.kind !== 'corridor')).toMatchObject([
+    { kind: 'outdoor', from: { planId: 'SW1-F1-p1' }, to: { planId: 'SW1-F1-p1' }, path: [] },
+  ]);
 });
+
+// Locate the intersection with a marked gate even when the walking polyline spans it in one segment.
+function crossesGate(
+  trip: ReturnType<typeof route>,
+  axis: 'x' | 'y',
+  cut: number,
+  low: number,
+  high: number,
+) {
+  const across = axis === 'x' ? 'y' : 'x';
+  return trip.steps.some(
+    (step) =>
+      step.kind === 'corridor' &&
+      step.from.planId === 'SW1-F1-p1' &&
+      step.path.slice(1).some((b, i) => {
+        const a = step.path[i];
+        const length = b[axis] - a[axis];
+        if (!length) return false;
+        const t = (cut - a[axis]) / length;
+        const point = a[across] + t * (b[across] - a[across]);
+        return t >= 0 && t <= 1 && point >= low && point <= high;
+      }),
+  );
+}
+
+it.each([
+  ['1020', '1106'],
+  ['1106', '1020'],
+])('uses the indoor south doors beside S120 from %s to %s', async (from, to) => {
+  const trip = route(await walk(from, 'SW01 ' + to));
+  expect(trip.steps.every((step) => step.kind === 'corridor')).toBe(true);
+  expect(crossesGate(trip, 'y', 0.4664773, 0.339, 0.349)).toBe(true);
+  expect(crossesGate(trip, 'y', 0.491, 0.346, 0.361)).toBe(true);
+});
+
+it.each([
+  ['1730', 'SW3', 'SW01 1106'],
+  ['1106', 'SW1', 'SW03 1730'],
+])(
+  'uses the 1602–1501 crossing once and walks through atrium 1303 from %s',
+  async (sign, building, goal) => {
+    const trip = route(await walk(sign, goal, building, { preferElevators: true }));
+    const transfers = trip.steps.filter((step) => step.kind !== 'corridor');
+    const crossing = store
+      .snapshot()
+      .candidates.find((item) => item.id === 'sw03-f1-1602-to-sw01-f1-1501-exterior')!;
+    const endpoints =
+      building === 'SW3' ? [crossing.from, crossing.to] : [crossing.to, crossing.from];
+    expect(transfers).toHaveLength(1);
+    expect(transfers[0]).toMatchObject({
+      kind: 'outdoor',
+      path: [],
+      from: { planId: endpoints[0].planId, point: endpoints[0].point },
+      to: { planId: endpoints[1].planId, point: endpoints[1].point },
+    });
+    expect(crossesGate(trip, 'x', 0.5, 0.5475, 0.5625)).toBe(true);
+    const floor = floorGraphs().byId.get('SW1-F1-p1')!;
+    const room = floor.places.find((p) => p.label === '1106')!;
+    const roomStop = building === 'SW3' ? trip.destination : trip.origin;
+    const cell = floor.containingCell(roomStop.point);
+    expect(roomStop.label).toBe('1106');
+    expect(room.doors.some(([, , d]) => d !== null && floor.offset + d === cell)).toBe(true);
+    expect(trip.steps.at(-1)?.path.at(-1)).toEqual(trip.destination.point);
+  },
+);
 it('routes to an interior destination cell through its public entrance using a room-only terminal leg', async () => {
   const floor = floorGraphs().byId.get('SW1-F2-p1')!;
   const room = floor.places.find((p) => p.label === '2016')!;
