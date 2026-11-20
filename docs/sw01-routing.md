@@ -4,6 +4,8 @@ The visitor planner uses four official Burnaby drawings and the published route 
 
 The current inventory covers all three interconnected buildings and reports each direction independently. [Coverage by room and floor](three-building-routing.md)
 
+On floor 1 the southern double doors at vestibule 1020 lead past S120 into lobby 1101. The 1501 east entrance serves the public aisle through atrium 1303. Both indoor approaches now reach the door of room 1106. The compiler keeps the short projected strokes and two diagonal mechanical diagram lines in the archived drawing and clears their registered spans in the public walking mask. Columns, other walls and door thresholds retain their own collision masks. [Official SW01 floor 1 plan](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0101.pdf)
+
 ## Revision 82 baseline
 
 Revision 82 contains the following SW01 results. The audit checked all source occurrences in both directions on the visitor graph. The same-floor column requires a path to a SW03 passage on that sheet. The last column also permits the reviewed level changes inside SW01.

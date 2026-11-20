@@ -12,6 +12,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts/floor_graph"))
 from cad_layers import CadLayers
 from cad_spaces import cad_spaces
+from cad_walkways import open_public_walkways
 from labels import inventory, label_words
 
 
@@ -81,6 +82,38 @@ class NativeFloorTests(unittest.TestCase):
                 CadLayers(
                     sheet, config["cadLayers"], [{**record, "layer": "WALL"}]
                 ).swings()
+
+    def test_projection_clearance_is_limited_to_registered_ink_in_a_public_crossing(
+        self,
+    ):
+        with pymupdf.open() as document:
+            page = document.new_page(width=40, height=40)
+            for start, end in [((4, 20), (36, 20)), ((20, 4), (20, 36))]:
+                drawing = page.new_shape()
+                drawing.draw_line(start, end)
+                drawing.finish(width=0.5, closePath=False)
+                drawing.commit()
+            record = {
+                "basis": "Marked public crossing",
+                "bounds": [0.20, 0.40, 0.80, 0.60],
+                "sourceLines": [{"layer": "", "segments": [[4, 20, 36, 20, 1]]}],
+            }
+            public = np.zeros((80, 80), dtype=np.uint8)
+            public[:, 22:62] = 255
+            sealed = np.full_like(public, 255)
+            barriers = sealed.copy()
+            door = (np.array([24, 18]), np.array([24, 22]))
+            open_public_walkways(page, [], [record], [door], public, sealed, barriers)
+            for mask in (sealed, barriers):
+                self.assertEqual(mask[40, 32], 0)
+                self.assertEqual(mask[40, 40], 255)  # Intersecting wall
+                self.assertEqual(mask[40, 48], 255)  # Door threshold
+                self.assertEqual(mask[40, 18], 255)  # Outside the public floor
+                self.assertEqual(mask[40, 66], 255)  # Outside the registered span
+                self.assertEqual(mask[36, 32], 255)  # Unrelated ink
+            record["sourceLines"][0]["segments"][0][-1] = 2
+            with self.assertRaisesRegex(ValueError, "source line|CAD strokes changed"):
+                open_public_walkways(page, [], [record], [], public, sealed, barriers)
 
 
 if __name__ == "__main__":

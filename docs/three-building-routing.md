@@ -1,6 +1,6 @@
 # Visitor routes in SE12, SW03 and SW01
 
-The graph connects 1,056 of 1,170 visitor place occurrences to the same public passage in both directions. The audit covers all twelve supplied sheets for these buildings. It keeps 139 shafts and voids and 14 staff-only records out of visitor counts. A reviewed passenger landing beside a shaft remains a separate, usable stop.
+The graph connects 1,062 of 1,170 visitor place occurrences to the same public passage in both directions. The audit covers all twelve supplied sheets for these buildings. It keeps 139 shafts and voids and 14 staff-only records out of visitor counts. A reviewed passenger landing beside a shaft remains a separate, usable stop.
 
 A **mapped stop** is a doorway, a public circulation point or a marked room area. A **shared entrance** serves the named space through a suite or vestibule. A **corridor-side stop** lies along a verified common wall and is labelled as an approximate arrival. The **remaining** column includes every occurrence without a continuous walk to the common network in both directions. A one-way destination can still accept arrivals. Counts describe stored drawing evidence and confirmations. They do not measure indoor positioning accuracy.
 
@@ -14,13 +14,13 @@ A **mapped stop** is a doorway, a public circulation point or a marked room area
 | [SW03 floor 2](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0302.pdf) | 82 | 66 | 9 | 1 | 6 |
 | [SW03 floor 3](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0303.pdf) | 45 | 37 | 7 | 1 | 0 |
 | [SW03 floor 4](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0304.pdf) | 52 | 41 | 8 | 3 | 0 |
-| [SW01 floor 1](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0101.pdf) | 254 | 203 | 18 | 2 | 31 |
+| [SW01 floor 1](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0101.pdf) | 254 | 207 | 20 | 2 | 25 |
 | [SW01 floor 2](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0102.pdf) | 221 | 179 | 14 | 0 | 28 |
 | [SW01 floor 3](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0103.pdf) | 164 | 152 | 1 | 5 | 6 |
 | [SW01 floor 4](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0104.pdf) | 69 | 64 | 3 | 0 | 2 |
-| **Total** | **1,170** | **962** | **76** | **18** | **114** |
+| **Total** | **1,170** | **966** | **78** | **18** | **108** |
 
-The audit traverses the directed graph outward and in reverse from the SE12 end of the confirmed third-floor SW03 passage. SW03 1710 accepts arrivals at two approved doors and remains outside the round-trip count. Across the three buildings, 114 visitor occurrences still lack a complete round trip. These include detached circulation in the north annex and upper service areas of SW01 and unsigned or unconnected approaches elsewhere. All visitor records on SW03 floors 3 and 4 now have a round trip. [Complete origin and destination inventory](three-building-coverage.csv)
+The audit traverses the directed graph outward and in reverse from the SE12 end of the confirmed third-floor SW03 passage. SW03 1710 accepts arrivals at two approved doors and remains outside the round-trip count. Across the three buildings, 108 visitor occurrences still lack a complete round trip. These include detached circulation in the north annex and upper service areas of SW01 and unsigned or unconnected approaches elsewhere. All visitor records on SW03 floors 3 and 4 now have a round trip. [Complete origin and destination inventory](three-building-coverage.csv)
 
 ## How the visitor sees a route
 
@@ -35,6 +35,8 @@ Revision 87 introduced user confirmation of bidirectional stairs between SE12 S1
 Revision 89 adds two confirmed, bidirectional SW03 west-wing connections. On floor 1 visitors can walk outside between the corridor 1700 vestibule by S180 and the corridor 1900 exterior entrance. In the west wing, the S190 and S299 stair landings connect floors 1 and 2. SE12 323 can now reach SW03 1920 through the outdoor link and SE12 302 can reach SW03 2910 via the same link and the west staircase. The outdoor map deliberately ends at each doorway.
 
 The SE12 first-floor source prints corridor 101Y and vestibule 100Z over each other. The compiler preserves both explicitly transcribed identities. A designated public walking strip joins lobby 101L to the corridor side of the 100E communications-room door and the 100A washroom. At SW03, the source identifies S480 on the west and S460 on the east of floor 4. Their two distinct landings can now be resolved by their own identifiers.
+
+Revision 90 adds a bidirectional outdoor crossing between the SW03 lobby 1602 exit and the east doors of SW01 lobby 1501. For SW03 1730 to SW01 1106 the visitor enters SW01 once, walks west through atrium 1303 and finishes at the lobby side of the 1106 doorway. The separate 1098 entrance remains available for destinations along corridor 1290. From vestibule 1020 the south double doors beside S120 lead indoors through lobby 1101. [Official SW01 floor 1 plan](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0101.pdf)
 
 ## Reproduce the inventory
 

@@ -9,6 +9,7 @@ from cad_landings import landing_cells
 from cad_layers import CadLayers, open_wall_gaps
 from cad_places import CadSheet, floor_entries
 from cad_spaces import cad_spaces
+from cad_walkways import open_public_walkways
 from corridor_vicinities import corridor_vicinities
 from doors import SCALE
 from labels import label_words
@@ -97,6 +98,15 @@ def compile_cad_floor(plan, page, geometry, extra, reviewed, grid_type):
     public[strips & (drawing_bounds > 0)] = 255
     barriers = cad.walls | cad.objects
     sealed = partition | cv2.dilate(cad.objects, kernel)
+    open_public_walkways(
+        page,
+        extra["cadLayers"]["annotation"],
+        extra.get("cadWalkwayMarkings", []),
+        symbols,
+        public,
+        sealed,
+        barriers,
+    )
     open_passage_doors(page, geometry, extra.get("passageOpenings", []), sealed, public)
     # A reported staff-only interior is closed in both the public and terminal
     # graphs. Its label remains evidence and its mark cannot become a map pin.

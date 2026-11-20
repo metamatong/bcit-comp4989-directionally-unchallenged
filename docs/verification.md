@@ -2,6 +2,15 @@
 
 This file is a historical log. Older entries describe workflows and route data that have since changed. The current visitor app uses GPS-required automatic start matching and has no start-confirmation, connection-review or topology-editor screen/API; see [current architecture](architecture.md) and [device-location coverage](device-location.md).
 
+## SW01 first-floor lobby approaches · November 20, 2026
+
+Replaying the SW03 1730 sign with elevators preferred previously returned a partial walk ending at lobby 1101 after two outdoor transfers. The updated visitor router returns a complete walk to the drawn door of 1106. It uses one outdoor transfer from SW03 lobby 1602 to SW01 lobby 1501, followed by the indoor aisle through atrium 1303. Starting at SW01 1020 uses the paired south doors beside S120 and reaches 1106 entirely indoors. The 1602–1501 outdoor connection was confirmed in both directions on the marked floor plans. The outdoor distance and intermediate path remain unmeasured.
+
+The full campus graph was rebuilt. Only the SW01 first-floor sheet changed. Six additional source places reach the common network in both directions, including 1106 and atrium 1303. These checks used the extracted room identifier and the visitor router. [Updated room-level coverage](three-building-routing.md)
+
+The local checkout passed 489 unit and API tests, 26 browser checks and 10 offline compiler tests. On the November 20 main code at `5bc047b`, the Vercel package build, source validation and 37 targeted route and inventory tests passed. Ten assertions about earlier location copy and directions screens also failed on an unmodified checkout of that same commit. The HTTP journey replays used a stored sign reading and a building hint and made zero provider calls. The packaged routing health check now also exercises 1730 to 1106 with elevators preferred. It requires the 1602–1501 crossing as the only transfer and checks that the arrival cell belongs to the mapped 1106 doorway.
+
+
 ## Burnaby floor alignment review · November 19, 2026
 
 Reviewed all 89 supplied floor plans against the archived BCIT building layer. Compiled 65 approximate alignments across 33 buildings from measured wall corners and stacked structural features. Kept the original SE12 floor 3 control set. Documented 24 unavailable plans individually, including the missing matching footprints for NE21 and NW7. [Alignment evidence and limits](device-location.md)

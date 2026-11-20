@@ -68,7 +68,8 @@ function route(result: NavigationResult) {
 }
 
 const crossings = [
-  { floor: 1, sw03: '1602', sw01: '1290', type: 'outdoor', id: 'sw03-sw01-f1-lobby-vestibule' },
+  // The first floor has two legal entrances. Target 1098 itself to exercise its specific crossing.
+  { floor: 1, sw03: '1602', sw01: '1098', type: 'outdoor', id: 'sw03-sw01-f1-lobby-vestibule' },
   { floor: 2, sw03: '2063', sw01: '2070', type: 'building-link', id: 'sw1-sw3-f2-passage-inquiry' },
   { floor: 3, sw03: '3086', sw01: '3080', type: 'building-link', id: 'sw1-sw3-f3-passage-inquiry' },
   { floor: 4, sw03: '4075', sw01: '4076', type: 'building-link', id: 'sw1-sw3-f4-passage-inquiry' },
