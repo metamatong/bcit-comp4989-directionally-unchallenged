@@ -8,7 +8,7 @@ DirectionallyUnchallenged uses a React/TypeScript client and Express server for 
 2. The browser sends GPS-derived building IDs and the photo bundle to the single vision stage for labels, label kind/placement and visible scene features. If that work makes the GPS reading stale, the browser refreshes it before matching.
 3. The browser intersects the GPS accuracy area with official building footprints. Raw coordinates stay on-device; derived building candidates and metadata go to the extraction and location endpoints. Only building IDs are forwarded to the provider; they cannot supply unseen room digits or a floor. Evidence reuse requires unchanged building context.
 4. Source localization ranks exact photo-label matches within GPS-compatible buildings and selects the strongest starting estimate. The visitor is not asked to select or confirm a start. GPS cannot distinguish floors.
-5. Navigation resolves the destination and searches generated floor walking areas plus the current mapped transfer data. The route overview is followed by step-by-step maps; the route step selects the floor. A GPS dot is shown only on floors with a geographic calibration.
+5. Navigation resolves the destination and searches generated floor walking areas plus the current mapped transfer data. A complete walking route opens on its first step and starts a foreground location watch. The route step selects the floor map, and a fresh GPS reading can show a dot on a geographically aligned floor. The full itinerary remains available through **Route overview**.
 
 ## Visitor API
 
@@ -27,9 +27,9 @@ There is no visitor API for choosing a starting doorway, selecting a starting po
 
 `server/floor-graph.ts` loads source-derived room/corridor areas for all supplied plans. `server/floor-search.ts` combines those grids with mapped corridors and floor transfers. Cross-building links are fixed source data. The current published route dataset still contains legacy hand-authored same-building stair/elevator records; replacing these with automatic transfer inference is not complete. Do not describe those records as automatically derived or add a visitor/manual approval step to compensate.
 
-Floor-plan geographic calibration is independent from route connectivity. The campus footprint catalogue supports building-level GPS narrowing, and SE12 floor 3 has an active approximate overlay. Thirteen proposed registrations remain separate development candidates pending independent source evidence. Other floor maps hide the dot until source-grounded transforms are available. See [device location](device-location.md), [photo localization](photo-localization.md) and [floor routing](floor-routing.md).
+Floor-plan geographic calibration is independent from route connectivity. The campus footprint catalogue supports building-level GPS narrowing. Reviewed exterior corners and shared structural features provide approximate drawing alignments for 65 of the 89 supplied floor plans. The server validates the compiled catalogue before exposing it to the browser. See [device location](device-location.md), [photo localization](photo-localization.md) and [floor routing](floor-routing.md).
 
-The router preserves main's approach tiers (mapped stops, shared entrances, then corridor-side stops), shared-door departure regions, directional transfer constraints and visitor exclusions. It selects a reachable approach automatically without origin-choice fields or endpoints. If only a partial route is supported, the overview marks the missing first or final segment and does not offer GO. Guided tracking stops on Finish route.
+The router preserves main's approach tiers (mapped stops, shared entrances, then corridor-side stops), shared-door departure regions, directional transfer constraints and visitor exclusions. It selects a reachable approach automatically without origin-choice fields or endpoints. Partial routes open in the overview, which marks the missing first or final segment. Guided tracking stops when the visitor opens the overview or finishes the route.
 
 ## Privacy and runtime
 

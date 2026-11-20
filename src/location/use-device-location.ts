@@ -68,8 +68,8 @@ export function usePhotoDeviceLocation() {
   return { snapshot, status, capture, clear, cancelPending };
 }
 
-export function useWalkingLocation() {
-  const [active, setActive] = useState(false);
+export function useWalkingLocation(startActive = false) {
+  const [active, setActive] = useState(startActive);
   const [watchRevision, setWatchRevision] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reading, setReading] = useState<DeviceReading>();

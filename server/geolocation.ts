@@ -6,19 +6,24 @@ import { visualPlans } from './visual-data';
 import { fitCalibration } from '../src/location/geometry';
 import type { LocationCatalogue } from '../src/location/types';
 
-export function locationCatalogue(): LocationCatalogue {
-  const catalogue = readJson<LocationCatalogue>('data/campus/geolocation/calibrations.json');
-  const source = catalogue.geographicSource;
-  if (
-    source.file !== 'data/campus/geolocation/bcit-burnaby-footprints.json' ||
-    createHash('sha256')
-      .update(readFileSync(`${root}/${source.file}`))
-      .digest('hex') !== source.sha256
-  )
+export function archivedBuildingFootprints(source: LocationCatalogue['geographicSource']) {
+  const sourceFile = 'data/campus/geolocation/bcit-burnaby-footprints.json';
+  if (source.file !== sourceFile)
     throw Error('Geographic source hash changed. Review device-location calibration.');
-  const footprint = readJson<{
+  const bytes = readFileSync(`${root}/${sourceFile}`);
+  if (createHash('sha256').update(bytes).digest('hex') !== source.sha256)
+    throw Error('Geographic source hash changed. Review device-location calibration.');
+  const footprint = JSON.parse(bytes.toString('utf8')) as {
+    spatialReference?: { wkid: number };
+    exceededTransferLimit?: boolean;
     features: { attributes: { BuildingName: string }; geometry: { rings: number[][][] } }[];
-  }>(source.file);
+  };
+  if (
+    footprint.spatialReference?.wkid !== 4326 ||
+    footprint.exceededTransferLimit ||
+    !footprint.features?.length
+  )
+    throw Error('Expected complete BCIT WGS84 building footprints.');
   const supplied = new Set(visualPlans.map((plan) => plan.building));
   const buildings = footprint.features
     .filter((f) => supplied.has(f.attributes.BuildingName))
@@ -46,6 +51,12 @@ export function locationCatalogue(): LocationCatalogue {
     )
   )
     throw Error('Invalid campus building footprint coordinates.');
+  return buildings;
+}
+
+export function locationCatalogue(): LocationCatalogue {
+  const catalogue = readJson<LocationCatalogue>('data/campus/geolocation/calibrations.json');
+  const buildings = archivedBuildingFootprints(catalogue.geographicSource);
   if (JSON.stringify(buildings) !== JSON.stringify(catalogue.buildings))
     throw Error('Footprint catalogue differs from the official source.');
   const plans = visualPlans;
@@ -59,13 +70,7 @@ export function locationCatalogue(): LocationCatalogue {
     if (!plan || floor.sourceSha256 !== plan.sourceSha256 || !floor.reason || !floor.version)
       throw Error(`Invalid calibration provenance: ${floor.planId}`);
     if (floor.status === 'approximate') {
-      if (
-        !floor.method ||
-        !['manual-corners', 'footprint-outline', 'stacked-cores'].includes(floor.method) ||
-        (floor.method === 'footprint-outline' && floor.registrationRmseMetres === undefined) ||
-        (floor.registrationRmseMetres !== undefined &&
-          (!Number.isFinite(floor.registrationRmseMetres) || floor.registrationRmseMetres < 0))
-      )
+      if (floor.method !== 'manual-corners' && floor.method !== 'stacked-features')
         throw Error(`Invalid calibration method: ${floor.planId}`);
       const fit = fitCalibration(floor.controls, plan.width, plan.height);
       const recorded = [...floor.residualsMetres, floor.heldOutMetres];
@@ -81,8 +86,7 @@ export function locationCatalogue(): LocationCatalogue {
       floor.method !== undefined ||
       floor.controls.length ||
       floor.heldOutMetres !== null ||
-      floor.residualsMetres.length ||
-      floor.registrationRmseMetres !== undefined
+      floor.residualsMetres.length
     )
       throw Error(`Invalid calibration availability: ${floor.planId}`);
   }

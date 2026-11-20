@@ -1,5 +1,5 @@
 /** Manual progress through saved route steps; never infers movement or camera heading. */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import type { NavigationResult } from '../wayfinding';
 import type { VisualPlan } from '../types';
@@ -7,22 +7,26 @@ import { planLabel } from '../topology';
 import { RouteMap } from './RouteMap';
 import type { LocationCatalogue } from '../location/types';
 import { deviceOverlay, overlapsFootprint } from '../location/geometry';
-import type { useWalkingLocation } from '../location/use-device-location';
+import { useWalkingLocation } from '../location/use-device-location';
 
 export function GuidedDirections({
   route,
   plans,
   locationCatalogue,
-  tracking,
+  index,
+  onStepChange,
+  transferNotice,
   onOverview,
 }: {
   route: Extract<NavigationResult, { status: 'route' }>;
   plans: VisualPlan[];
   locationCatalogue?: LocationCatalogue;
-  tracking: ReturnType<typeof useWalkingLocation>;
+  index: number;
+  onStepChange: (index: number) => void;
+  transferNotice?: string;
   onOverview: () => void;
 }) {
-  const [index, setIndex] = useState(0);
+  const tracking = useWalkingLocation(true);
   const heading = useRef<HTMLHeadingElement>(null);
   const step = route.steps[index];
   const complete = !step;
@@ -31,38 +35,38 @@ export function GuidedDirections({
   const plan = plans.find((item) => item.id === stop.planId)!;
   const calibration = locationCatalogue?.floors.find((floor) => floor.planId === plan.id);
   const building = locationCatalogue?.buildings.find((item) => item.building === plan.building);
-  const withinBuilding = !!(
-    tracking.fresh &&
-    tracking.reading &&
-    building &&
-    overlapsFootprint(tracking.reading, building.rings)
-  );
-  const projected =
-    tracking.fresh && tracking.reading ? deviceOverlay(tracking.reading, plan, calibration) : null;
-  const onPlan = !!(
+  const reading = !complete && tracking.fresh ? tracking.reading : null;
+  const withinBuilding = reading && building && overlapsFootprint(reading, building.rings);
+  const projected = reading && withinBuilding ? deviceOverlay(reading, plan, calibration) : null;
+  const device =
     projected &&
     projected.point.x >= 0 &&
     projected.point.x <= 1 &&
     projected.point.y >= 0 &&
     projected.point.y <= 1
-  );
+      ? projected
+      : null;
   const positionStatus = complete
     ? 'Location tracking stopped. Route complete.'
-    : !tracking.fresh
+    : !reading
       ? tracking.status ||
         (tracking.reading ? 'Waiting for a fresh GPS update…' : 'Waiting for GPS…')
-      : !withinBuilding
-        ? 'The GPS area does not overlap this building. The position dot is hidden.'
-        : !onPlan
-          ? `A floor-plan alignment is unavailable for ${planLabel(plan)}. The position dot is hidden.`
-          : `GPS position is approximate on ${planLabel(plan)} · reported accuracy ±${tracking.reading!.accuracy.toFixed(0)} m · indoor accuracy unmeasured.`;
+      : !building
+        ? `An official building footprint is unavailable for ${planLabel(plan)}. The position dot is hidden.`
+        : !withinBuilding
+          ? 'The GPS area does not overlap this building. The position dot is hidden.'
+          : !projected
+            ? `A floor-plan alignment is unavailable for ${planLabel(plan)}. The position dot is hidden.`
+            : !device
+              ? 'The GPS position falls outside this floor drawing. The position dot is hidden.'
+              : `GPS position is approximate on ${planLabel(plan)} · reported accuracy ±${reading.accuracy.toFixed(0)} m · indoor accuracy unmeasured.`;
   useEffect(() => {
     heading.current?.focus({ preventScroll: true });
     heading.current?.scrollIntoView?.({ block: 'start' });
   }, [index]);
   function move(next: number) {
     if (next >= route.steps.length) tracking.stop();
-    setIndex(next);
+    onStepChange(next);
   }
   return (
     <section className="guided-directions" aria-label="Step-by-step directions">
@@ -75,7 +79,7 @@ export function GuidedDirections({
           plan={plan}
           label={`${planLabel(plan)} · ${complete ? 'Destination' : `Step ${index + 1}`}`}
           paths={step?.kind === 'corridor' ? [step.path] : []}
-          device={withinBuilding && onPlan ? projected : null}
+          device={device}
           markers={
             step?.kind === 'corridor'
               ? [
@@ -113,8 +117,13 @@ export function GuidedDirections({
           </p>
         )}
       </div>
+      {index === 0 && transferNotice && (
+        <p className="helper" role="note">
+          {transferNotice}
+        </p>
+      )}
       <p className="guided-location-status" role="status">
-        {withinBuilding && onPlan && <span className="guided-location-dot" aria-hidden="true" />}
+        {device && <span className="guided-location-dot" aria-hidden="true" />}
         {positionStatus}
       </p>
       <div className="guided-controls">

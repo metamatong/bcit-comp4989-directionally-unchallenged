@@ -1,4 +1,4 @@
-/** One route overview followed by a continuous stack of source maps and endpoint legends. */
+/** Open complete routes in guided directions and keep the full itinerary available. */
 import { useEffect, useRef, useState } from 'react';
 import { Route } from 'lucide-react';
 import { planLabel } from '../topology';
@@ -6,7 +6,6 @@ import type { VisualPlan } from '../types';
 import type { MapStop, NavigationResult, PlaceChoice, WalkingStep } from '../wayfinding';
 import { RouteMapImage, type MapMarker } from './RouteMap';
 import type { LocationCatalogue } from '../location/types';
-import { useWalkingLocation } from '../location/use-device-location';
 import { GuidedDirections } from './GuidedDirections';
 
 type FoundRoute = Extract<NavigationResult, { status: 'route' }>;
@@ -146,58 +145,42 @@ export function RouteDirections({
   locationCatalogue?: LocationCatalogue;
   preferElevators?: boolean;
 }) {
-  const [guided, setGuided] = useState(false);
-  const [startingGuided, setStartingGuided] = useState(false);
-  const [guidedError, setGuidedError] = useState('');
+  const [showOverview, setShowOverview] = useState(false);
+  const [stepIndex, setStepIndex] = useState(0);
   const [whole, setWhole] = useState(false);
-  const tracking = useWalkingLocation();
+  const canGuide = !requestedRoom && !requestedOrigin && route.steps.length > 0;
+  const guided = canGuide && !showOverview;
+  const complete = stepIndex >= route.steps.length;
+  const usesNonPreferredTransfer = route.steps.some(
+    (step) => step.kind === (preferElevators ? 'stairs' : 'elevator'),
+  );
+  const transferNotice = usesNonPreferredTransfer
+    ? preferElevators
+      ? 'No mapped elevator route is available for the full trip, so this route includes stairs.'
+      : 'This route uses an elevator because no complete route without elevators is mapped.'
+    : undefined;
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true });
     headingRef.current?.scrollIntoView?.({ block: 'start' });
   }, [route.origin.id, route.destination.id, guided]);
-  const visits = floorItinerary(route);
-  const planById = new Map(plans.map((plan) => [plan.id, plan]));
-  const routePlans = [...new Set(visits.map((visit) => visit.start.planId))].map((id) =>
-    planById.get(id)!,
-  );
-  useEffect(() => {
-    if (!startingGuided) return;
-    if (tracking.fresh) {
-      setStartingGuided(false);
-      setGuided(true);
-      return;
-    }
-    if (tracking.status && !tracking.status.startsWith('Waiting for a fresh device reading')) {
-      setStartingGuided(false);
-      setGuidedError(tracking.status);
-      if (tracking.active) tracking.stop();
-    }
-  }, [startingGuided, tracking.fresh, tracking.status, tracking.active]);
-  function startGuided() {
-    setGuidedError('');
-    if (tracking.fresh) {
-      setGuided(true);
-      return;
-    }
-    setStartingGuided(true);
-    tracking.start();
-  }
-  function returnToOverview() {
-    tracking.stop();
-    setStartingGuided(false);
-    setGuided(false);
-  }
   if (guided)
     return (
       <GuidedDirections
         route={route}
         plans={plans}
         locationCatalogue={locationCatalogue}
-        tracking={tracking}
-        onOverview={returnToOverview}
+        index={stepIndex}
+        onStepChange={setStepIndex}
+        transferNotice={transferNotice}
+        onOverview={() => setShowOverview(true)}
       />
     );
+  const visits = floorItinerary(route);
+  const planById = new Map(plans.map((plan) => [plan.id, plan]));
+  const routePlans = [...new Set(visits.map((visit) => visit.start.planId))].map((id) =>
+    planById.get(id)!,
+  );
   return (
     <div className="route-directions">
       <div className="way-heading">
@@ -229,35 +212,19 @@ export function RouteDirections({
         </p>
       )}
       <p className="helper" role="note">
-        {preferElevators
-          ? route.steps.some((step) => step.kind === 'stairs')
-            ? 'No mapped elevator route is available for the full trip, so this route includes stairs.'
-            : 'Elevators preferred.'
-          : route.steps.some((step) => step.kind === 'elevator')
-            ? 'This route uses an elevator because no complete route without elevators is mapped.'
-            : 'Stairs preferred.'}
+        {transferNotice ?? (preferElevators ? 'Elevators preferred.' : 'Stairs preferred.')}
       </p>
-      {!requestedRoom && !requestedOrigin && route.steps.length > 0 && (
-        <>
-          {guidedError && (
-            <p className="photo-failure" role="alert">
-              {guidedError}
-            </p>
-          )}
-          {startingGuided && (
-            <p className="helper" role="status">
-              Allow device location to start step-by-step directions…
-            </p>
-          )}
-          <button
-            type="button"
-            className="primary full-width"
-            disabled={startingGuided}
-            onClick={startGuided}
-          >
-            {startingGuided ? 'Getting GPS location…' : 'GO'}
-          </button>
-        </>
+      {canGuide && (
+        <button
+          type="button"
+          className="primary full-width"
+          onClick={() => {
+            if (complete) setStepIndex(0);
+            setShowOverview(false);
+          }}
+        >
+          {complete ? 'Restart directions' : 'Back to steps'}
+        </button>
       )}
       <div className="route-map-stack" role="group" aria-label="Route maps in travel order">
         <div className="map-bar">

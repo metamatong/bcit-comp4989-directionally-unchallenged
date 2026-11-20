@@ -32,8 +32,11 @@ describe('source-grounded device location', () => {
       expect(floor.sourceSha256).toBe(visualPlans.find((p) => p.id === floor.planId)?.sourceSha256);
       expect(floor.reason.length).toBeGreaterThan(20);
     }
-    expect(catalogue.floors.filter((f) => f.status === 'unavailable')).toHaveLength(
-      visualPlans.length - 1,
+    expect(catalogue.floors.find((floor) => floor.planId === 'SW3-F3-p1')?.status).toBe(
+      'approximate',
+    );
+    expect(catalogue.floors.find((floor) => floor.planId === 'NW7-F1-p1')?.status).toBe(
+      'unavailable',
     );
   });
   it('undoes prototype crop/resize and preserves pixel aspect ratio through normalization', () => {

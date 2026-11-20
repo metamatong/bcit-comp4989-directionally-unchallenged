@@ -1,0 +1,2495 @@
+{
+  "geographicSource": {
+    "url": "https://services2.arcgis.com/IgcrRjRW95F0HKSw/arcgis/rest/services/Bsite_Building_Footprint_20241022/FeatureServer/0/query?where=1%3D1&outFields=BuildingName%2COBJECTID&outSR=4326&returnGeometry=true&f=json",
+    "retrievedAt": "2026-11-18",
+    "file": "data/campus/geolocation/bcit-burnaby-footprints.json",
+    "sha256": "e6581a55511e447922b460f8c591fc5ecb3d733fd9e1054bbc9b91f3c89a76f0"
+  },
+  "plans": {
+    "NE1-F1-p1": {
+      "sourceSha256": "e1cd3e6fafda64dc760db39c8b7e7f1260f03bb45701ff7b198fccc403f25063",
+      "geometrySha256": "5f8a24a8c72853f16c947d39a5cf6f1507e355a9416d62480235e87599c87bf1",
+      "corners": [
+        {
+          "vertex": 30,
+          "lines": [
+            729,
+            116
+          ]
+        },
+        {
+          "vertex": 39,
+          "lines": [
+            229,
+            226
+          ]
+        },
+        {
+          "vertex": 49,
+          "lines": [
+            713,
+            705
+          ]
+        },
+        {
+          "vertex": 26,
+          "lines": [
+            293,
+            235
+          ]
+        }
+      ]
+    },
+    "NE1-F2-p1": {
+      "sourceSha256": "faa60aee96e54e113f2cd3db05318eb32807f81e0360425cdab335787e9f3569",
+      "geometrySha256": "72804a8f3d1f92120e8c64602214fc5240b0ec44bbbc53d8094575630992d7c7",
+      "corners": [
+        {
+          "vertex": 30,
+          "lines": [
+            1221,
+            1222
+          ]
+        },
+        {
+          "vertex": 39,
+          "lines": [
+            390,
+            108
+          ]
+        },
+        {
+          "vertex": 23,
+          "lines": [
+            369,
+            457
+          ]
+        },
+        {
+          "vertex": 47,
+          "lines": [
+            528,
+            1069
+          ]
+        }
+      ]
+    },
+    "NE1-F3-p1": {
+      "sourceSha256": "b2f9b412c8c35643f8b98ef2c777c4ecd698ecff16cc42faf0be864cbee11d98",
+      "geometrySha256": "c485d93c52e3d9b5e88e9e97551421be1eacd29658f038245ae99479a96142b2",
+      "corners": [
+        {
+          "vertex": 5,
+          "lines": [
+            1212,
+            1213
+          ]
+        },
+        {
+          "vertex": 30,
+          "lines": [
+            1831,
+            267
+          ]
+        },
+        {
+          "vertex": 39,
+          "lines": [
+            406,
+            591
+          ]
+        },
+        {
+          "vertex": 47,
+          "lines": [
+            284,
+            1851
+          ]
+        }
+      ]
+    },
+    "NE1-F4-p1": {
+      "sourceSha256": "7de553763ef82a28e8a5231299d9350e2ff724da092f0a81ff5935bc76fa613c",
+      "geometrySha256": "9810633b2c0d07cfd19a7e63d105e6d28f762225897bef3ab08a3a299c7d212e",
+      "corners": [
+        {
+          "vertex": 23,
+          "lines": [
+            177,
+            124
+          ]
+        },
+        {
+          "vertex": 30,
+          "lines": [
+            375,
+            381
+          ]
+        },
+        {
+          "vertex": 39,
+          "lines": [
+            382,
+            384
+          ]
+        },
+        {
+          "vertex": 47,
+          "lines": [
+            57,
+            614
+          ]
+        }
+      ]
+    },
+    "NE2-F1-p1": {
+      "sourceSha256": "5b72c8327a3537d4f8ac653894c8296f5319218ebf600a303c254d03f53e748b",
+      "issue": "The drawing shows two large adjoining volumes. The GIS outline matches only one and the drawing does not establish the shared outer corners."
+    },
+    "NE2-F2-p1": {
+      "sourceSha256": "c44395c2fcb996c0d7776e130fe980c08b8a8e4f4b631484eb7e0e7ace6f545d",
+      "issue": "The GIS outline and the two volumes on this drawing do not yield four unambiguous exterior controls."
+    },
+    "NE3-F1-p1": {
+      "sourceSha256": "e81d833bcab3225443eb526ba18cbb95a702772b63ea998b94e4d05e5269e085",
+      "issue": "Irregular source wings and the GIS perimeter disagree. The shared exterior corners could not be distinguished from context linework."
+    },
+    "NE3-F2-p1": {
+      "sourceSha256": "deaff5a543a64a0f25ba23f4e6414ad5d9ec5f61d8dda7f1acc4be086f30d169",
+      "issue": "The enclosed upper floor and the adjacent context outline do not provide four identified points on the GIS perimeter."
+    },
+    "NE4-F1-p1": {
+      "sourceSha256": "6bfa6bfcb7bfd9912adb21d067d0b9dbba5c4004464c19bb1308b0fa4b71ef8f",
+      "geometrySha256": "4c1ff266f77463846ae86201d7077c9f7ec57c81d974e2b97982d9aeb92eb118",
+      "rasterSha256": "c0c4fc7ae0e1b6a9e005445b9a10ce63c647a482782fce6d7625459e4b234425",
+      "corners": [
+        {
+          "vertex": 0,
+          "page": [
+            276.25,
+            135.0
+          ]
+        },
+        {
+          "vertex": 7,
+          "page": [
+            963.75,
+            135.0
+          ]
+        },
+        {
+          "vertex": 8,
+          "page": [
+            963.75,
+            598.75
+          ]
+        },
+        {
+          "vertex": 10,
+          "page": [
+            276.25,
+            598.75
+          ]
+        }
+      ]
+    },
+    "NE4-F2-p1": {
+      "sourceSha256": "e65b057df2ebc63621261dc8f3b43f90b72ef98b70e4d591f4ccaba486d6ad70",
+      "geometrySha256": "d9f9be5702686985ed10ad86ba2199ed9c3ef112619ccec96a087ec954289b4c",
+      "rasterSha256": "708bcd011983c2b780da78f4f0ec041f07d65d8eaf25c64cf1bc586eedc62e8f",
+      "corners": [
+        {
+          "vertex": 0,
+          "page": [
+            276.25,
+            118.75
+          ]
+        },
+        {
+          "vertex": 7,
+          "page": [
+            963.75,
+            118.75
+          ]
+        },
+        {
+          "vertex": 8,
+          "page": [
+            963.75,
+            582.5
+          ]
+        },
+        {
+          "vertex": 10,
+          "page": [
+            276.25,
+            582.5
+          ]
+        }
+      ]
+    },
+    "NE6-F1-p1": {
+      "sourceSha256": "3053320239229c6ea0c10e5515e0d910f21bed46dc76fffb3e93bb3a960a488f",
+      "issue": "The footprint and drawn shop wings differ. The candidate match only covers part of the drawing."
+    },
+    "NE6-F2-p1": {
+      "sourceSha256": "df1c4f99febd8759739eca7cd42c8aa01e8d101bc5270085ff510e7a2f028d36",
+      "issue": "The footprint and the upper floor have different exterior projections. The proposed controls do not establish the missing fourth corner."
+    },
+    "NE7-F1-p1": {
+      "sourceSha256": "4dc5e3b247f209f9ba5591abe5b82b71ea42a3a97f244aac190bb14da30fb3c3",
+      "geometrySha256": "851f1d1a4dc68d24f2d206d02fe4772218d63465a9172233a189bc414f0804ee",
+      "corners": [
+        {
+          "vertex": 10,
+          "lines": [
+            390,
+            209
+          ]
+        },
+        {
+          "vertex": 11,
+          "lines": [
+            313,
+            314
+          ]
+        },
+        {
+          "vertex": 0,
+          "lines": [
+            255,
+            175
+          ]
+        },
+        {
+          "vertex": 3,
+          "lines": [
+            175,
+            257
+          ]
+        }
+      ]
+    },
+    "NE8-F1-p1": {
+      "sourceSha256": "c6750e5a52b98f5f8da904f1205c537e522ec044531027d59787d44e48b42059",
+      "geometrySha256": "9bb2dedaf8b485bcc532c7d0c1e36ab1f4573f270a2b61c2407828d50888c9bc",
+      "corners": [
+        {
+          "vertex": 0,
+          "lines": [
+            25,
+            753
+          ]
+        },
+        {
+          "vertex": 4,
+          "lines": [
+            2,
+            748
+          ]
+        },
+        {
+          "vertex": 13,
+          "lines": [
+            16,
+            18
+          ]
+        },
+        {
+          "vertex": 3,
+          "lines": [
+            859,
+            860
+          ]
+        }
+      ]
+    },
+    "NE8-F2-p1": {
+      "sourceSha256": "6c5db12fde7c91871a442022a90df6612d466c349cbbad58fe5e4147e4c80a64",
+      "geometrySha256": "d1216d9c3bce2ef7c9f2baee393439c9396be6564a5e76ca03c2b35d89cb1a00",
+      "corners": [
+        {
+          "vertex": 0,
+          "lines": [
+            467,
+            468
+          ]
+        },
+        {
+          "vertex": 4,
+          "lines": [
+            470,
+            471
+          ]
+        },
+        {
+          "vertex": 13,
+          "lines": [
+            468,
+            469
+          ]
+        },
+        {
+          "vertex": 3,
+          "lines": [
+            471,
+            472
+          ]
+        }
+      ]
+    },
+    "NE9-F1-p1": {
+      "sourceSha256": "12d494551733c7b053d0f05c6b844fea20976f41f03c242cb5655d2164fb0336",
+      "geometrySha256": "230c499a633e6cb540f4aaa94bcbedf548ad7b0dc45a0117f0ea21117f2030ba",
+      "corners": [
+        {
+          "vertex": 1,
+          "lines": [
+            909,
+            980
+          ]
+        },
+        {
+          "vertex": 8,
+          "lines": [
+            805,
+            920
+          ]
+        },
+        {
+          "vertex": 17,
+          "lines": [
+            146,
+            914
+          ]
+        },
+        {
+          "vertex": 19,
+          "lines": [
+            933,
+            700
+          ]
+        }
+      ]
+    },
+    "NE9-F2-p1": {
+      "sourceSha256": "27fc98b2577ce64466833fe236d2e3e9b717c11a47ac8b349802ce04c592d064",
+      "geometrySha256": "376512f130f75f661899479890085ecac25680c126a267b8fa56596ad2b58ffe",
+      "sourcePlanId": "NE9-F1-p1",
+      "sourceGeometrySha256": "230c499a633e6cb540f4aaa94bcbedf548ad7b0dc45a0117f0ea21117f2030ba",
+      "sharedFeatures": [
+        {
+          "label": "Northwest outside corner of the narrow west wing",
+          "source": [
+            256.25,
+            76.25
+          ],
+          "target": [
+            211.25,
+            80.0
+          ]
+        },
+        {
+          "label": "Southwest outside corner of the narrow west wing",
+          "source": [
+            256.25,
+            558.75
+          ],
+          "target": [
+            211.25,
+            623.75
+          ]
+        },
+        {
+          "label": "Outside corner at the head of the north staircase",
+          "source": [
+            396.25,
+            51.25
+          ],
+          "target": [
+            371.25,
+            51.25
+          ]
+        },
+        {
+          "label": "Outside southeast corner of the elevator enclosure",
+          "source": [
+            396.25,
+            587.5
+          ],
+          "target": [
+            368.75,
+            651.25
+          ]
+        }
+      ]
+    },
+    "NE10-F1-p1": {
+      "sourceSha256": "c73a86c17a1b1c72d69f0f48d4ac7934db9c5ba80a3fec0d3106cac51e4eedf0",
+      "geometrySha256": "61c194f56e01af33730fe4e0f8875857cd299e9a7d0ff2822d74207e87963f75",
+      "corners": [
+        {
+          "vertex": 0,
+          "lines": [
+            397,
+            90
+          ]
+        },
+        {
+          "vertex": 6,
+          "lines": [
+            190,
+            333
+          ]
+        },
+        {
+          "vertex": 17,
+          "lines": [
+            21,
+            327
+          ]
+        },
+        {
+          "vertex": 12,
+          "lines": [
+            557,
+            261
+          ]
+        }
+      ]
+    },
+    "NE12-F1-p1": {
+      "sourceSha256": "745bbe7055d35633d508e93d29193294a65defb111d82fd908e7da6a0c9b4753",
+      "geometrySha256": "de7857c64d89848927392a135baff49da391022456ab316471263f4d80688a53",
+      "corners": [
+        {
+          "vertex": 0,
+          "lines": [
+            464,
+            469
+          ]
+        },
+        {
+          "vertex": 1,
+          "lines": [
+            15,
+            449
+          ]
+        },
+        {
+          "vertex": 13,
+          "lines": [
+            6,
+            105
+          ]
+        },
+        {
+          "vertex": 3,
+          "lines": [
+            257,
+            585
+          ]
+        }
+      ]
+    },
+    "NE12-F2-p1": {
+      "sourceSha256": "2d36756fde5e71f391e0510402f06e76e4e56fad9a47f7cb71b8b9b8ffaf9f3a",
+      "geometrySha256": "25a418ba81e21940ebf7dc24453a61162a730c0eb758df888726483d9a1b3c46",
+      "sourcePlanId": "NE12-F1-p1",
+      "sourceGeometrySha256": "de7857c64d89848927392a135baff49da391022456ab316471263f4d80688a53",
+      "sharedFeatures": [
+        {
+          "label": "Outside northwest corner of the shared classroom wall",
+          "source": [
+            300.0,
+            66.25
+          ],
+          "target": [
+            300.0,
+            58.75
+          ]
+        },
+        {
+          "label": "Outside southwestern corner of the shared classroom wall",
+          "source": [
+            300.0,
+            555.0
+          ],
+          "target": [
+            300.0,
+            546.25
+          ]
+        },
+        {
+          "label": "Top of the stair wall on the east edge of the central bay",
+          "source": [
+            720.0,
+            177.5
+          ],
+          "target": [
+            720.0,
+            168.75
+          ]
+        },
+        {
+          "label": "Top west corner of the southwest interior stair enclosure",
+          "source": [
+            421.25,
+            417.5
+          ],
+          "target": [
+            421.25,
+            410.0
+          ]
+        }
+      ]
+    },
+    "NE16-F1-p1": {
+      "sourceSha256": "f559cb5f1ad52f7e94a6bab6e8557e2bc13b6e5d69d45689449ff060778a7e2a",
+      "issue": "The exterior polygon and sloped and inset drawing walls disagree. The shared geographic points remain ambiguous."
+    },
+    "NE18-F1-p1": {
+      "sourceSha256": "df5defb058adc8faacca09567879cb412d91f78b84e4e23c3a97862fda29b71e",
+      "geometrySha256": "30e827ab14f795d379143d54fcccc5645eeb02233d66075eb3c572dd3959b16c",
+      "corners": [
+        {
+          "vertex": 3,
+          "lines": [
+            260,
+            261
+          ]
+        },
+        {
+          "vertex": 5,
+          "lines": [
+            289,
+            290
+          ]
+        },
+        {
+          "vertex": 10,
+          "lines": [
+            268,
+            269
+          ]
+        },
+        {
+          "vertex": 7,
+          "lines": [
+            290,
+            88
+          ]
+        }
+      ]
+    },
+    "NE20-F1-p1": {
+      "sourceSha256": "2ee9c26ee27dbace21fd00623c6c0e7f35c5cb77d6e49f11a896eb7fe2370784",
+      "geometrySha256": "3d2d54b455ba6d75d143d58b0e9d09a0424d96b7681d8309b53723eb6e052c99",
+      "corners": [
+        {
+          "vertex": 0,
+          "lines": [
+            28,
+            137
+          ]
+        },
+        {
+          "vertex": 5,
+          "lines": [
+            119,
+            60
+          ]
+        },
+        {
+          "vertex": 6,
+          "lines": [
+            0,
+            214
+          ]
+        },
+        {
+          "vertex": 9,
+          "lines": [
+            233,
+            237
+          ]
+        }
+      ]
+    },
+    "NE20-F2-p1": {
+      "sourceSha256": "9370e3ebdb420bcd9533b483b43d55f16d105b998fd1c33890ff8e82a42d3b26",
+      "issue": "The wide open upper-floor outline differs from the ground footprint. Shared structural points are needed."
+    },
+    "NE21-F1-p1": {
+      "sourceSha256": "2dc9851ab8cb94d85760211500788ac55b6bb19097240f5381c80f94f3dcb962",
+      "issue": "No matching current building footprint was found. BCIT maps the new NE21 pavilion as a future footprint; the archived drawing depicts the earlier one-floor layout."
+    },
+    "NE22-F1-p1": {
+      "sourceSha256": "0712f878d5cc01f9c015214bc9b1f978d287cbb42c82813ea4bd08c28af2d4e2",
+      "geometrySha256": "61835aac97d012c2391e62e77882274a2304b761b559197679a31f2fc0229e7a",
+      "corners": [
+        {
+          "vertex": 9,
+          "lines": [
+            43,
+            188
+          ]
+        },
+        {
+          "vertex": 10,
+          "lines": [
+            198,
+            199
+          ]
+        },
+        {
+          "vertex": 0,
+          "lines": [
+            164,
+            153
+          ]
+        },
+        {
+          "vertex": 3,
+          "lines": [
+            273,
+            274
+          ]
+        }
+      ]
+    },
+    "NE23-F1-p1": {
+      "sourceSha256": "2ef12ddaa7e25ea33b3ed2617da2156faee8fd032d31e6abc07ea3ac8b49b41c",
+      "geometrySha256": "0b5609d20c7b6eaef3685f21c1df9d99d247cc11324f6090e4a339d6e98bd816",
+      "rasterSha256": "5f04bfedc936a8a96e55bffef9d261b29a51b3a0dbfb8152bc5954f0467c9ca2",
+      "corners": [
+        {
+          "vertex": 7,
+          "page": [
+            505.0,
+            50.0
+          ]
+        },
+        {
+          "vertex": 8,
+          "page": [
+            865.0,
+            50.0
+          ]
+        },
+        {
+          "vertex": 0,
+          "page": [
+            865.0,
+            678.75
+          ]
+        },
+        {
+          "vertex": 1,
+          "page": [
+            505.0,
+            678.75
+          ]
+        }
+      ]
+    },
+    "NE24-F1-p1": {
+      "sourceSha256": "57f0cedf9eb458970ed0039d3edb97a10116aa4cf1db63e6b7df6d9e53d2e6d1",
+      "geometrySha256": "2536f210094bc0a48e61c93def0111c55c87d0195ecc130fef38b0ce3cc8106c",
+      "corners": [
+        {
+          "vertex": 4,
+          "lines": [
+            256,
+            257
+          ]
+        },
+        {
+          "vertex": 5,
+          "lines": [
+            252,
+            253
+          ]
+        },
+        {
+          "vertex": 10,
+          "lines": [
+            246,
+            247
+          ]
+        },
+        {
+          "vertex": 11,
+          "lines": [
+            284,
+            262
+          ]
+        }
+      ]
+    },
+    "NE25-F1-p1": {
+      "sourceSha256": "2cf4b481bb70c2afc1b8c97f7fcf739cab946a033019ddaec87b215bc1ee120f",
+      "geometrySha256": "13cecb2bdcc6c3bb386de8970c170815ea98c4169e4bf2d626c4eae358284dca",
+      "corners": [
+        {
+          "vertex": 18,
+          "lines": [
+            111,
+            108
+          ]
+        },
+        {
+          "vertex": 24,
+          "lines": [
+            190,
+            226
+          ]
+        },
+        {
+          "vertex": 29,
+          "lines": [
+            181,
+            161
+          ]
+        },
+        {
+          "vertex": 31,
+          "lines": [
+            34,
+            33
+          ]
+        }
+      ]
+    },
+    "NE25-F2-p1": {
+      "sourceSha256": "b38116c8cf312f8898ecc577346f7c2a10e1c09f14d5c660412f9f0607c6d7f1",
+      "geometrySha256": "71aad753d43bb9c08956569ecdaeb69cebabd55c7e47a5165e165b33c52bb330",
+      "corners": [
+        {
+          "vertex": 22,
+          "lines": [
+            159,
+            182
+          ]
+        },
+        {
+          "vertex": 24,
+          "lines": [
+            236,
+            263
+          ]
+        },
+        {
+          "vertex": 29,
+          "lines": [
+            221,
+            203
+          ]
+        },
+        {
+          "vertex": 31,
+          "lines": [
+            46,
+            41
+          ]
+        }
+      ]
+    },
+    "NE25-F3-p1": {
+      "sourceSha256": "7a5dfbeced7bc46f888b79f0d94712b438a74cabad5981447f0098faca03cd6e",
+      "geometrySha256": "06786899050f39e956b3fac2f9df54493b12c31296ae4f798abb7f536921c7f5",
+      "corners": [
+        {
+          "vertex": 22,
+          "lines": [
+            178,
+            231
+          ]
+        },
+        {
+          "vertex": 24,
+          "lines": [
+            296,
+            339
+          ]
+        },
+        {
+          "vertex": 29,
+          "lines": [
+            280,
+            249
+          ]
+        },
+        {
+          "vertex": 31,
+          "lines": [
+            53,
+            47
+          ]
+        }
+      ]
+    },
+    "NE28-F1-p1": {
+      "sourceSha256": "426204fd07b3045101ad059536f7204d334d9a7e69c20e6068b7319c4115fbe6",
+      "geometrySha256": "f25716e7b50e378bac025ae1c6e34d8702e629d25f8687368595078fb0da702f",
+      "corners": [
+        {
+          "vertex": 4,
+          "lines": [
+            442,
+            536
+          ]
+        },
+        {
+          "vertex": 5,
+          "lines": [
+            542,
+            442
+          ]
+        },
+        {
+          "vertex": 10,
+          "lines": [
+            443,
+            444
+          ]
+        },
+        {
+          "vertex": 11,
+          "lines": [
+            497,
+            500
+          ]
+        }
+      ]
+    },
+    "NW1-F1-p1": {
+      "sourceSha256": "5fe97df581ec4b29147c9bbe7cf50154b5ce4b518f889b086930884e867e9e6f",
+      "geometrySha256": "be040a35e4c354e0dd3a667380fc25538a83c18aa91e44b58afac6ea0e8e76bb",
+      "corners": [
+        {
+          "vertex": 4,
+          "lines": [
+            53,
+            814
+          ]
+        },
+        {
+          "vertex": 10,
+          "lines": [
+            819,
+            129
+          ]
+        },
+        {
+          "vertex": 13,
+          "lines": [
+            94,
+            79
+          ]
+        },
+        {
+          "vertex": 3,
+          "lines": [
+            810,
+            31
+          ]
+        }
+      ]
+    },
+    "NW3-F1-p1": {
+      "sourceSha256": "0848e964d48b7c7d24f17430ec2648b80d226bf45773b0c66a4bf7014ce1b119",
+      "issue": "The drawing contains separate wings and a detached area. Its exterior corners could not be matched unambiguously to the footprint."
+    },
+    "NW3-F2-p1": {
+      "sourceSha256": "fe77a8d0661f8c8f5d2a749f0d795339c2cb46f00c2de8a3604e8fbe1f65feaf",
+      "issue": "The geometry available in the ground footprint could not be placed on the visible upper-floor structure with independent controls."
+    },
+    "NW4-F1-p1": {
+      "sourceSha256": "6ee2285db8b205f1b637f2e375171ed09c1d328772fcf2a780c67164b36c4964",
+      "issue": "The outline proposal followed the page border instead of the building. Independently matching the exterior walls is required."
+    },
+    "NW4-F2-p1": {
+      "sourceSha256": "a2cc781a104420e59321f9c7bc9e62dce9732d5339025d13a5dfedc6775d0e50",
+      "issue": "The proposal matched the page border. The upper-floor plan needs identified exterior or stacked structural controls."
+    },
+    "NW4-F3-p1": {
+      "sourceSha256": "feb1cea012d8de5bdaf3b93648a3b61960d6384c3eb48b3ddbfd2289518c0b2c",
+      "geometrySha256": "e502e9007fc6a591d0ad6d039bf0f3d9b68189d347e1be057475b28b3d3a4ded",
+      "corners": [
+        {
+          "vertex": 0,
+          "lines": [
+            1778,
+            310
+          ]
+        },
+        {
+          "vertex": 1,
+          "lines": [
+            721,
+            1390
+          ]
+        },
+        {
+          "vertex": 6,
+          "lines": [
+            1841,
+            560
+          ]
+        },
+        {
+          "vertex": 8,
+          "lines": [
+            466,
+            1965
+          ]
+        }
+      ]
+    },
+    "NW4-F4-p1": {
+      "sourceSha256": "b5d7da7227c43f1f63496715b2625fda999d3433295d7b68ae77cfce907ba41a",
+      "geometrySha256": "ae0cdd65780e7200b16459ac0049f549f7a9fc914671397908d7c6f874f01f12",
+      "rasterSha256": "635191c6b65ebd575e9ae9748260b6ae6b08ef36b63122bc249e682d7d77c137",
+      "corners": [
+        {
+          "vertex": 0,
+          "page": [
+            143.75,
+            266.25
+          ]
+        },
+        {
+          "vertex": 1,
+          "page": [
+            717.5,
+            266.25
+          ]
+        },
+        {
+          "vertex": 6,
+          "page": [
+            716.25,
+            976.25
+          ]
+        },
+        {
+          "vertex": 8,
+          "page": [
+            71.25,
+            693.75
+          ]
+        }
+      ]
+    },
+    "NW5-F1-p1": {
+      "sourceSha256": "1c5787cad49efdd8699606289c7daabf4eaac2b9b495f1a6710e85b72bf9256b",
+      "issue": "Several exterior steps and entrances differ from the footprint. The alignment lacks a check across the complete floor."
+    },
+    "NW5-F2-p1": {
+      "sourceSha256": "630a10d041db9a4b6a9bdfd413db0b9c4bf396a84b570f0994efc6c768d794da",
+      "issue": "The top two outline orientations are ambiguous and the upper-floor shape differs from the ground footprint."
+    },
+    "NW6-F1-p1": {
+      "sourceSha256": "47ed7ca662fd42a730bf1c3912414e11c71207605ca698d3582b9642c901f38b",
+      "geometrySha256": "ddb857b86bd62bc7edb9b57651790e404119d0da9b6dd41b24e75811bd63c40c",
+      "corners": [
+        {
+          "vertex": 9,
+          "lines": [
+            415,
+            467
+          ]
+        },
+        {
+          "vertex": 0,
+          "lines": [
+            24,
+            409
+          ]
+        },
+        {
+          "vertex": 3,
+          "lines": [
+            409,
+            64
+          ]
+        },
+        {
+          "vertex": 8,
+          "lines": [
+            473,
+            415
+          ]
+        }
+      ]
+    },
+    "NW6-F2-p1": {
+      "sourceSha256": "861b09c471e21d456ce6bf1e3c4975691755ebcd7c74cc18f0000f64d528db99",
+      "geometrySha256": "20a031a2813da79e5df07e0e2a7eb37836eecba405681a6f65d2f269268dbb6f",
+      "corners": [
+        {
+          "vertex": 9,
+          "lines": [
+            474,
+            475
+          ]
+        },
+        {
+          "vertex": 0,
+          "lines": [
+            558,
+            457
+          ]
+        },
+        {
+          "vertex": 3,
+          "lines": [
+            457,
+            458
+          ]
+        },
+        {
+          "vertex": 8,
+          "lines": [
+            473,
+            474
+          ]
+        }
+      ]
+    },
+    "NW7-F1-p1": {
+      "sourceSha256": "6e475b29d8e27bd3447a1bf91ecd3f47747fe573dda7efd2448066ad7cb0abc4",
+      "issue": "BCIT supplies this drawing and shows NW7 on historical maps. The current building layer has no identified NW7 polygon."
+    },
+    "SE1-F1-p1": {
+      "sourceSha256": "6d9d47c2ead6d127243ebcc52539e2d82fc7c587cf083e5cdeb6756c1b828b2f",
+      "geometrySha256": "6e49592d0bb0a3326693e16ea4af27a68565c6b8903747ea9e271b960c989353",
+      "corners": [
+        {
+          "vertex": 3,
+          "lines": [
+            446,
+            403
+          ]
+        },
+        {
+          "vertex": 39,
+          "lines": [
+            148,
+            17
+          ]
+        },
+        {
+          "vertex": 24,
+          "lines": [
+            611,
+            75
+          ]
+        },
+        {
+          "vertex": 13,
+          "lines": [
+            78,
+            578
+          ]
+        }
+      ]
+    },
+    "SE1-F2-p1": {
+      "sourceSha256": "bdc50f57a5a2577bf15b723ceb482cbddff79426587cbff4cd91d7f0af42ffc1",
+      "geometrySha256": "5af4c2c897c34cd2badf6e5aa1bea1ef026d3683151c6e0428149be8382252d7",
+      "sourcePlanId": "SE1-F1-p1",
+      "sourceGeometrySha256": "6e49592d0bb0a3326693e16ea4af27a68565c6b8903747ea9e271b960c989353",
+      "sharedFeatures": [
+        {
+          "label": "Outside north wall corner at the east end of the long wing",
+          "source": [
+            1078.75,
+            181.25
+          ],
+          "target": [
+            1143.75,
+            136.25
+          ]
+        },
+        {
+          "label": "Outside south wall corner at the west end of the long wing",
+          "source": [
+            145.0,
+            367.5
+          ],
+          "target": [
+            62.5,
+            351.25
+          ]
+        },
+        {
+          "label": "West stair block outer turn beside the diagonal concrete wing",
+          "source": [
+            352.5,
+            381.25
+          ],
+          "target": [
+            302.5,
+            368.75
+          ]
+        },
+        {
+          "label": "Right-angle notch at the southeast end of the classroom wing",
+          "source": [
+            992.5,
+            396.25
+          ],
+          "target": [
+            1042.5,
+            385.0
+          ]
+        }
+      ]
+    },
+    "SE2-F1-p1": {
+      "sourceSha256": "f29ad4fab4ad4d8248efcbe560cc9d636838f238905d70dca8740e0cffc79427",
+      "issue": "The candidate outline is offset from the exterior walls and attached structures. A geographic anchor for this floor is still needed."
+    },
+    "SE2-F2-p1": {
+      "sourceSha256": "34522f932c9117f04bad7aab1dd1dabb60987acd55c003a4288b0369fcab2994",
+      "geometrySha256": "9783304c5c133701ac406739b380a3acb3df7cc1710c1a854920cc34fd0381f5",
+      "sourcePlanId": "SE2-F3-p1",
+      "sourceGeometrySha256": "f9d597cec7b01a572338ade8243e50529297d8c0f8d14c9e519481d555675c7d",
+      "sharedFeatures": [
+        {
+          "label": "Upper north corner of the atrium along its east edge",
+          "source": [
+            535.0,
+            91.25
+          ],
+          "target": [
+            533.75,
+            140.0
+          ]
+        },
+        {
+          "label": "West wing elevator shaft centre beside the north corridor",
+          "source": [
+            303.75,
+            296.25
+          ],
+          "target": [
+            302.5,
+            345.0
+          ]
+        },
+        {
+          "label": "Northwest turn of the grand stair structure",
+          "source": [
+            290.0,
+            408.75
+          ],
+          "target": [
+            283.75,
+            461.25
+          ]
+        },
+        {
+          "label": "West wing southwest outside wall corner",
+          "source": [
+            202.5,
+            602.5
+          ],
+          "target": [
+            200.0,
+            655.0
+          ]
+        }
+      ]
+    },
+    "SE2-F3-p1": {
+      "sourceSha256": "295b20fa5d44325925363e6f1054647b2c5a87e27faf9e62d42d18657ea613f2",
+      "geometrySha256": "f9d597cec7b01a572338ade8243e50529297d8c0f8d14c9e519481d555675c7d",
+      "corners": [
+        {
+          "vertex": 41,
+          "lines": [
+            482,
+            486
+          ]
+        },
+        {
+          "vertex": 13,
+          "lines": [
+            632,
+            633
+          ]
+        },
+        {
+          "vertex": 16,
+          "lines": [
+            634,
+            635
+          ]
+        },
+        {
+          "vertex": 34,
+          "lines": [
+            245,
+            247
+          ]
+        }
+      ]
+    },
+    "SE4-F1-p1": {
+      "sourceSha256": "ea46965300370a40cc2e0f4e6f3cfe1ef5904b0306342f339a7574bad372d214",
+      "geometrySha256": "dce064a27abf269c29361daf5964dea8dd2962ba36b19c177cdce30b78dceba3",
+      "corners": [
+        {
+          "vertex": 0,
+          "lines": [
+            300,
+            298
+          ]
+        },
+        {
+          "vertex": 6,
+          "lines": [
+            282,
+            284
+          ]
+        },
+        {
+          "vertex": 15,
+          "lines": [
+            111,
+            106
+          ]
+        },
+        {
+          "vertex": 11,
+          "lines": [
+            44,
+            38
+          ]
+        }
+      ]
+    },
+    "SE6-F1-p1": {
+      "sourceSha256": "fb9c9521bc97ed18738f43b9a0d2d55836c6cc5cf614ff0e5c22d3f2974b5649",
+      "geometrySha256": "752ecf843efca10926b5f80979d3d3ff2557b07171d390ebd6488959b8c63c45",
+      "sourcePlanId": "SE6-F2-p1",
+      "sourceGeometrySha256": "35655e1c4a58a4060025c27d57ebb71ffe32788defc0dcb639c32b06ef93f927",
+      "sharedFeatures": [
+        {
+          "label": "Left outside corner at the head of the north classroom wing",
+          "source": [
+            273.75,
+            108.75
+          ],
+          "target": [
+            228.75,
+            112.5
+          ]
+        },
+        {
+          "label": "Right outside corner at the head of the north classroom wing",
+          "source": [
+            532.5,
+            108.75
+          ],
+          "target": [
+            505.0,
+            112.5
+          ]
+        },
+        {
+          "label": "Left end of the wall crossing the classroom wing before the stair area",
+          "source": [
+            275.0,
+            618.75
+          ],
+          "target": [
+            228.75,
+            646.25
+          ]
+        },
+        {
+          "label": "Pointed tip of the stair enclosure at the north end",
+          "source": [
+            403.75,
+            60.0
+          ],
+          "target": [
+            367.5,
+            60.0
+          ]
+        }
+      ]
+    },
+    "SE6-F2-p1": {
+      "sourceSha256": "a654145dd55e0d876a9af6f60bd7f6074ffebf5bb9791a6fbbdd6a10f927e4ba",
+      "geometrySha256": "35655e1c4a58a4060025c27d57ebb71ffe32788defc0dcb639c32b06ef93f927",
+      "corners": [
+        {
+          "vertex": 0,
+          "lines": [
+            752,
+            586
+          ]
+        },
+        {
+          "vertex": 10,
+          "lines": [
+            759,
+            760
+          ]
+        },
+        {
+          "vertex": 17,
+          "lines": [
+            768,
+            769
+          ]
+        },
+        {
+          "vertex": 12,
+          "lines": [
+            720,
+            721
+          ]
+        }
+      ]
+    },
+    "SE6-F3-p1": {
+      "sourceSha256": "dd4c18546aadceace40550bc7e13867899f8d0253e8dd2cbccb63aefde96c5ed",
+      "geometrySha256": "6a0f60a2bd146fe9cec18b3d97d49720398f451282027dad72d32c114944b9f3",
+      "corners": [
+        {
+          "vertex": 0,
+          "lines": [
+            1,
+            447
+          ]
+        },
+        {
+          "vertex": 10,
+          "lines": [
+            1477,
+            1478
+          ]
+        },
+        {
+          "vertex": 24,
+          "lines": [
+            35,
+            304
+          ]
+        },
+        {
+          "vertex": 12,
+          "lines": [
+            176,
+            773
+          ]
+        }
+      ]
+    },
+    "SE8-F1-p1": {
+      "sourceSha256": "4d7beaa3994a10cc26a95f0824c7d3a331dcdeceefd5b574b3a71b7a4ff11ce9",
+      "geometrySha256": "3e02411e7d88d5b698a81ca855435a351a148bde2e9799d2c0c9aa0a2b19818d",
+      "corners": [
+        {
+          "vertex": 4,
+          "lines": [
+            57,
+            109
+          ]
+        },
+        {
+          "vertex": 12,
+          "lines": [
+            263,
+            177
+          ]
+        },
+        {
+          "vertex": 15,
+          "lines": [
+            177,
+            319
+          ]
+        },
+        {
+          "vertex": 16,
+          "lines": [
+            97,
+            57
+          ]
+        }
+      ]
+    },
+    "SE8-F2-p1": {
+      "sourceSha256": "308c5edc163b6f9bfea4b45caac9f84fc32904b833d4aab35507cbd0e4b813a1",
+      "geometrySha256": "5a8ab4f10902ebeffaa7142398202b866a74801ea91f20234478ba1fd8aa5b42",
+      "corners": [
+        {
+          "vertex": 4,
+          "lines": [
+            0,
+            77
+          ]
+        },
+        {
+          "vertex": 12,
+          "lines": [
+            155,
+            185
+          ]
+        },
+        {
+          "vertex": 16,
+          "lines": [
+            65,
+            403
+          ]
+        },
+        {
+          "vertex": 0,
+          "lines": [
+            404,
+            7
+          ]
+        }
+      ]
+    },
+    "SE9-F1-p1": {
+      "sourceSha256": "1e2502a1d017ba16c6232a432fe84bdda3777fcc06140e5d78f65df3d9252953",
+      "issue": "The drawing and GIS correspondences disagreed by up to 0.62 m in the fit and 2.21 m at the withheld corner. Better source controls are needed."
+    },
+    "SE10-F1-p1": {
+      "sourceSha256": "c7e219c19a401f3c621a3af8b051246844516f97a7267cccf0729107be3fa7c8",
+      "geometrySha256": "ff7fb96bbe28f8153becd2b3c401b67496ef11d9e08d8665a07b256eed573d93",
+      "corners": [
+        {
+          "vertex": 27,
+          "lines": [
+            443,
+            444
+          ]
+        },
+        {
+          "vertex": 35,
+          "lines": [
+            72,
+            409
+          ]
+        },
+        {
+          "vertex": 2,
+          "lines": [
+            401,
+            324
+          ]
+        },
+        {
+          "vertex": 13,
+          "lines": [
+            451,
+            452
+          ]
+        }
+      ]
+    },
+    "SE10-F2-p1": {
+      "sourceSha256": "d2d25372a244ebca9d00fe5f55f9aa05e561a63723c90bd0c0be71c35d04c8b7",
+      "geometrySha256": "cab797cd19ac48fdb367053e8d7f3de8153c6705884720eecbefc33935551237",
+      "corners": [
+        {
+          "vertex": 27,
+          "lines": [
+            659,
+            660
+          ]
+        },
+        {
+          "vertex": 35,
+          "lines": [
+            166,
+            159
+          ]
+        },
+        {
+          "vertex": 2,
+          "lines": [
+            964,
+            36
+          ]
+        },
+        {
+          "vertex": 13,
+          "lines": [
+            952,
+            953
+          ]
+        }
+      ]
+    },
+    "SE12-F1-p1": {
+      "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "issue": "The historic sheet shows a different extent and orientation from the published GIS outline. It needs verified shared features through another floor."
+    },
+    "SE12-F2-p1": {
+      "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "geometrySha256": "a947ba158ee9237567a65f8c2fdc0224cff445b20deaa3a7b2c1dd2cdf36b6a1",
+      "corners": [
+        {
+          "vertex": 0,
+          "lines": [
+            17,
+            630
+          ]
+        },
+        {
+          "vertex": 17,
+          "lines": [
+            490,
+            189
+          ]
+        },
+        {
+          "vertex": 23,
+          "lines": [
+            804,
+            805
+          ]
+        },
+        {
+          "vertex": 8,
+          "lines": [
+            793,
+            794
+          ]
+        }
+      ]
+    },
+    "SE12-F3-p1": {
+      "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "geometrySha256": "01450da2096473396003afdf07086d157810b745c0f0d00c9a92ca7702b3de4c",
+      "rasterSha256": "75f1fae4a8354a32b33110151792dcd5cc472412a5034dc16ce7ecc31e457097",
+      "corners": [
+        { "vertex": 43, "page": [106.44428571428571, 478.82962795941376] },
+        { "vertex": 17, "page": [1160.8328571428572, 260.1655467869222] },
+        { "vertex": 18, "page": [1160.8328571428572, 478.82962795941376] },
+        { "vertex": 53, "page": [106.44428571428571, 260.1655467869222] }
+      ]
+    },
+    "SE12-F4-p1": {
+      "sourceSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
+      "geometrySha256": "3355f0092bd44ad38abba7dfa1b8f1bf83899c3c98a221bd3739b35f4e249eb3",
+      "corners": [
+        {
+          "vertex": 0,
+          "lines": [
+            1201,
+            287
+          ]
+        },
+        {
+          "vertex": 17,
+          "lines": [
+            1147,
+            1148
+          ]
+        },
+        {
+          "vertex": 18,
+          "lines": [
+            1150,
+            1151
+          ]
+        },
+        {
+          "vertex": 43,
+          "lines": [
+            91,
+            90
+          ]
+        }
+      ]
+    },
+    "SE14-F1-p1": {
+      "sourceSha256": "a1abfb2b5a1f4b2edf29c113877ecb10bfdee1a15572db256f7dfa561486e115",
+      "geometrySha256": "9177dc882059cf13ac438e16f2bed1d614c99ecb349cf65b95764d4a02879b8c",
+      "sourcePlanId": "SE14-F2-p1",
+      "sourceGeometrySha256": "f943940151aec55639bab53b8530172f532de0e773a37125296588facc3e551c",
+      "sharedFeatures": [
+        {
+          "label": "West wing northwest exterior corner",
+          "source": [
+            192.5,
+            167.5
+          ],
+          "target": [
+            206.25,
+            155.0
+          ]
+        },
+        {
+          "label": "Northeast outer corner of the east wing at the stair turn",
+          "source": [
+            996.25,
+            288.75
+          ],
+          "target": [
+            1002.5,
+            267.5
+          ]
+        },
+        {
+          "label": "Southeast corner of the east wing exterior outline",
+          "source": [
+            996.25,
+            548.75
+          ],
+          "target": [
+            1002.5,
+            530.0
+          ]
+        },
+        {
+          "label": "Southeast outside corner of the east stair enclosure",
+          "source": [
+            1048.75,
+            390.0
+          ],
+          "target": [
+            1051.25,
+            370.0
+          ]
+        }
+      ]
+    },
+    "SE14-F2-p1": {
+      "sourceSha256": "9afccccf29c3678eb6818f01060293dc78964e9bc703880a78a60e50f09afaa8",
+      "geometrySha256": "f943940151aec55639bab53b8530172f532de0e773a37125296588facc3e551c",
+      "corners": [
+        {
+          "vertex": 30,
+          "lines": [
+            59,
+            62
+          ]
+        },
+        {
+          "vertex": 6,
+          "lines": [
+            281,
+            572
+          ]
+        },
+        {
+          "vertex": 18,
+          "lines": [
+            614,
+            615
+          ]
+        },
+        {
+          "vertex": 10,
+          "lines": [
+            131,
+            129
+          ]
+        }
+      ]
+    },
+    "SE14-F3-p1": {
+      "sourceSha256": "be4301059beb977d467f1a9ddf1c31ecd3f79da90ab9ed0b22c473c14f47b0c3",
+      "geometrySha256": "544b33686c67ab1b5f191eee6fc8ce254a00ac06d620781185092a42620ff6b0",
+      "corners": [
+        {
+          "vertex": 30,
+          "lines": [
+            380,
+            381
+          ]
+        },
+        {
+          "vertex": 6,
+          "lines": [
+            219,
+            99
+          ]
+        },
+        {
+          "vertex": 12,
+          "lines": [
+            112,
+            93
+          ]
+        },
+        {
+          "vertex": 18,
+          "lines": [
+            408,
+            409
+          ]
+        }
+      ]
+    },
+    "SE16-F1-p1": {
+      "sourceSha256": "bb906ef2e6970b57ab6c1da50c7a3bd06c2dc6cf769e707ed69e9ca3401f45a2",
+      "geometrySha256": "c350be012e8826340df05d16f227ca05f27cf9b27e12a90dfb9bb86e8079ca79",
+      "corners": [
+        {
+          "vertex": 33,
+          "lines": [
+            806,
+            807
+          ]
+        },
+        {
+          "vertex": 36,
+          "lines": [
+            810,
+            811
+          ]
+        },
+        {
+          "vertex": 47,
+          "lines": [
+            776,
+            777
+          ]
+        },
+        {
+          "vertex": 18,
+          "lines": [
+            792,
+            236
+          ]
+        }
+      ]
+    },
+    "SE30-F1-p1": {
+      "sourceSha256": "fcf21f8eebcec31d83c18749b6a6eb8e5ea923bcf7e126b4e6e9c907362e32d6",
+      "issue": "The simple plan lacks a reliably matched fourth exterior corner. The GIS perimeter and the drawn outline differ along the upper edge."
+    },
+    "SE40-F1-p1": {
+      "sourceSha256": "fa5531e5397aa83c3d49459ab38968d34e267bbb9fbe278f375064a08fb7097f",
+      "geometrySha256": "bcff8a4c5e55d1b3b20ce2282388b9ff025dc1d4851f2aae1ae9b4469ce2b049",
+      "sourcePlanId": "SE40-F2-p1",
+      "sourceGeometrySha256": "a7523c23df6637b40ee504868dfdf298a265fe5691f498fcb52e32da05239f84",
+      "sharedFeatures": [
+        {
+          "label": "Outside northwest corner of the north office wing",
+          "source": [
+            400.0,
+            62.5
+          ],
+          "target": [
+            398.75,
+            62.5
+          ]
+        },
+        {
+          "label": "Outside southwest corner of the south office wing",
+          "source": [
+            400.0,
+            722.5
+          ],
+          "target": [
+            398.75,
+            722.5
+          ]
+        },
+        {
+          "label": "Outside southeast corner of the south office wing",
+          "source": [
+            950.0,
+            722.5
+          ],
+          "target": [
+            948.75,
+            722.5
+          ]
+        },
+        {
+          "label": "Outside northeast corner of the north office wing",
+          "source": [
+            948.75,
+            62.5
+          ],
+          "target": [
+            948.75,
+            62.5
+          ]
+        }
+      ]
+    },
+    "SE40-F2-p1": {
+      "sourceSha256": "61cdd12eaad71adb44350f0bb3b6a3aefa8b8bd1fdb66b1f253d00c16e475c11",
+      "geometrySha256": "a7523c23df6637b40ee504868dfdf298a265fe5691f498fcb52e32da05239f84",
+      "corners": [
+        {
+          "vertex": 29,
+          "lines": [
+            165,
+            183
+          ]
+        },
+        {
+          "vertex": 24,
+          "lines": [
+            159,
+            168
+          ]
+        },
+        {
+          "vertex": 9,
+          "lines": [
+            58,
+            123
+          ]
+        },
+        {
+          "vertex": 15,
+          "lines": [
+            249,
+            245
+          ]
+        }
+      ]
+    },
+    "SE41-F1-p1": {
+      "sourceSha256": "2685f7b4004ef2b6ce899a4225f8adab6932a948531379fb4c4b6217050ce7c8",
+      "issue": "The drawing and GIS correspondences disagreed by up to 0.51 m in the fit and 2.28 m at the withheld corner. Better source controls are needed."
+    },
+    "SE41-F2-p1": {
+      "sourceSha256": "beacac3caaf9b7c8f280a6c6447be242bd839adcae52aee450e10086f032809c",
+      "issue": "The drawing and GIS correspondences disagreed by up to 0.56 m in the fit and 2.50 m at the withheld corner. Better source controls are needed."
+    },
+    "SE42-F1-p1": {
+      "sourceSha256": "3ecce3687ca074b3ab877fae9e6fab37c2a6816931d3cc46336f679b708547a7",
+      "geometrySha256": "7ffc065529fceaf774d491e5365cc0383d2064e7fe6812ee4ba410fecb9c11bd",
+      "sourcePlanId": "SE42-F2-p1",
+      "sourceGeometrySha256": "eaff5fa462d8234242d04ec433317b76a17f6d977cf41f7637a381585f98d456",
+      "sharedFeatures": [
+        {
+          "label": "Outside corner at north arm head",
+          "source": [
+            740.0,
+            42.5
+          ],
+          "target": [
+            752.5,
+            47.5
+          ]
+        },
+        {
+          "label": "Outside corner at far end of the north stair wall",
+          "source": [
+            923.75,
+            58.75
+          ],
+          "target": [
+            936.25,
+            63.75
+          ]
+        },
+        {
+          "label": "Outside reentrant wall corner at the bottom of the diagonal run",
+          "source": [
+            646.25,
+            675.0
+          ],
+          "target": [
+            658.75,
+            668.75
+          ]
+        },
+        {
+          "label": "Bottom exterior corner of the south classroom wing",
+          "source": [
+            310.0,
+            682.5
+          ],
+          "target": [
+            337.5,
+            673.75
+          ]
+        }
+      ]
+    },
+    "SE42-F2-p1": {
+      "sourceSha256": "e8c802e70d4b6b60d4327e59aecf4017d71216a2ee592a129580e1c4de02e8a6",
+      "geometrySha256": "eaff5fa462d8234242d04ec433317b76a17f6d977cf41f7637a381585f98d456",
+      "corners": [
+        {
+          "vertex": 1,
+          "lines": [
+            450,
+            452
+          ]
+        },
+        {
+          "vertex": 2,
+          "lines": [
+            438,
+            428
+          ]
+        },
+        {
+          "vertex": 14,
+          "lines": [
+            326,
+            327
+          ]
+        },
+        {
+          "vertex": 23,
+          "lines": [
+            360,
+            410
+          ]
+        }
+      ]
+    },
+    "SE50-F1-p1": {
+      "sourceSha256": "e15e88f03a45ab790b61644b5feb7e949bd68a1b9fee647d97f1ea1c0a22ba09",
+      "geometrySha256": "b7c301301b66f375b856ef517e9ddf51b9c7f8ab7f488b16e2518b2502168dcc",
+      "corners": [
+        {
+          "vertex": 21,
+          "lines": [
+            1031,
+            799
+          ]
+        },
+        {
+          "vertex": 25,
+          "lines": [
+            771,
+            772
+          ]
+        },
+        {
+          "vertex": 4,
+          "lines": [
+            789,
+            790
+          ]
+        },
+        {
+          "vertex": 19,
+          "lines": [
+            1032,
+            1033
+          ]
+        }
+      ]
+    },
+    "SW1-F1-p1": {
+      "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
+      "geometrySha256": "c32ff7cbd303b260c1b996c840d80abd3be51ee61452e931378b80d55fa5e00b",
+      "corners": [
+        {
+          "vertex": 7,
+          "lines": [
+            145,
+            200
+          ]
+        },
+        {
+          "vertex": 22,
+          "lines": [
+            573,
+            554
+          ]
+        },
+        {
+          "vertex": 44,
+          "lines": [
+            1891,
+            677
+          ]
+        },
+        {
+          "vertex": 74,
+          "lines": [
+            606,
+            1886
+          ]
+        }
+      ]
+    },
+    "SW1-F2-p1": {
+      "sourceSha256": "37ab5548156a14f390b7d51010172c3ba7975744fb47ee441eee3586f5ce639b",
+      "geometrySha256": "2b31aff75716ae469c4fb2486d4d6ffbb4943102ff6b7bce14ad9bc99a5c38a8",
+      "corners": [
+        {
+          "vertex": 7,
+          "lines": [
+            426,
+            430
+          ]
+        },
+        {
+          "vertex": 8,
+          "lines": [
+            224,
+            249
+          ]
+        },
+        {
+          "vertex": 51,
+          "lines": [
+            148,
+            162
+          ]
+        },
+        {
+          "vertex": 74,
+          "lines": [
+            168,
+            163
+          ]
+        }
+      ]
+    },
+    "SW1-F3-p1": {
+      "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
+      "geometrySha256": "a106aa22d224128aa1795cf6a7223c42c44c8ed33ad08cd210d25bfb18a35d5f",
+      "corners": [
+        {
+          "vertex": 2,
+          "lines": [
+            29,
+            3
+          ]
+        },
+        {
+          "vertex": 24,
+          "lines": [
+            379,
+            225
+          ]
+        },
+        {
+          "vertex": 60,
+          "lines": [
+            1611,
+            1897
+          ]
+        },
+        {
+          "vertex": 48,
+          "lines": [
+            1066,
+            1067
+          ]
+        }
+      ]
+    },
+    "SW1-F4-p1": {
+      "sourceSha256": "ed111bbfb9b7423af5a9369253f7820ed4e7eddbe6bf3a3421cda77bf3f53e30",
+      "geometrySha256": "66a10c38b0d09ad68a23e5303e6f59d06536cb3033525f9a5d3527a4487177a3",
+      "sourcePlanId": "SW1-F3-p1",
+      "sourceGeometrySha256": "a106aa22d224128aa1795cf6a7223c42c44c8ed33ad08cd210d25bfb18a35d5f",
+      "sharedFeatures": [
+        {
+          "label": "Stair core S300 to S400",
+          "source": [
+            232.7,
+            181.0
+          ],
+          "target": [
+            78.3,
+            347.37
+          ]
+        },
+        {
+          "label": "Stair core S320 to S420",
+          "source": [
+            477.2,
+            208.4
+          ],
+          "target": [
+            387.075,
+            389.375
+          ]
+        },
+        {
+          "label": "Stair core S350 to S450",
+          "source": [
+            861.2,
+            213.4
+          ],
+          "target": [
+            867.075,
+            389.255
+          ]
+        },
+        {
+          "label": "Stair core S390 to S490",
+          "source": [
+            1108.65,
+            182.8
+          ],
+          "target": [
+            1176.25,
+            346.365
+          ]
+        }
+      ]
+    },
+    "SW2-F1-p1": {
+      "sourceSha256": "5e9a307920757c5cc581ab5b3d15b5abeee637bf5064f145bfd23b280136f0b2",
+      "geometrySha256": "20a811f1ac5f9cb6fa848b644f14912c36c6e46d16599fc05eab6f5cb263b42f",
+      "corners": [
+        {
+          "vertex": 8,
+          "lines": [
+            672,
+            673
+          ]
+        },
+        {
+          "vertex": 21,
+          "lines": [
+            657,
+            658
+          ]
+        },
+        {
+          "vertex": 26,
+          "lines": [
+            652,
+            653
+          ]
+        },
+        {
+          "vertex": 4,
+          "lines": [
+            647,
+            648
+          ]
+        }
+      ]
+    },
+    "SW2-F2-p1": {
+      "sourceSha256": "eca0df928f4fae9b954bebed2d13a9075b0e30193b38e435bd9242f733e5a9ae",
+      "geometrySha256": "9b62834ecb7633fa09e358d77e776d8bafa16061e165214acf78109f6bb59a4b",
+      "corners": [
+        {
+          "vertex": 8,
+          "lines": [
+            492,
+            325
+          ]
+        },
+        {
+          "vertex": 21,
+          "lines": [
+            435,
+            726
+          ]
+        },
+        {
+          "vertex": 26,
+          "lines": [
+            849,
+            850
+          ]
+        },
+        {
+          "vertex": 23,
+          "lines": [
+            138,
+            1090
+          ]
+        }
+      ]
+    },
+    "SW2-F3-p1": {
+      "sourceSha256": "e4e37fcf1075c893df1edd0ddb595451e68070bd252a6376bca02636728137b7",
+      "geometrySha256": "81b3de0d8f09d864f34aad2c4b6a5948cda8b8d385c6041f5d4c3b4df1b3b460",
+      "corners": [
+        {
+          "vertex": 8,
+          "lines": [
+            735,
+            736
+          ]
+        },
+        {
+          "vertex": 21,
+          "lines": [
+            184,
+            804
+          ]
+        },
+        {
+          "vertex": 26,
+          "lines": [
+            797,
+            798
+          ]
+        },
+        {
+          "vertex": 23,
+          "lines": [
+            801,
+            302
+          ]
+        }
+      ]
+    },
+    "SW3-F1-p1": {
+      "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "geometrySha256": "b84c85a181b40a916c61e12058a558cfc315511ddf9c49faf7e957907fcb7026",
+      "corners": [
+        {
+          "vertex": 25,
+          "lines": [
+            569,
+            739
+          ]
+        },
+        {
+          "vertex": 5,
+          "lines": [
+            771,
+            170
+          ]
+        },
+        {
+          "vertex": 21,
+          "lines": [
+            437,
+            438
+          ]
+        },
+        {
+          "vertex": 16,
+          "lines": [
+            565,
+            566
+          ]
+        }
+      ]
+    },
+    "SW3-F2-p1": {
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "geometrySha256": "5ccf5a99a432e0541d5a699ff4a154f7d9221ce42052efba0b5ac74e7070cf9f",
+      "corners": [
+        {
+          "vertex": 25,
+          "lines": [
+            364,
+            366
+          ]
+        },
+        {
+          "vertex": 5,
+          "lines": [
+            199,
+            117
+          ]
+        },
+        {
+          "vertex": 21,
+          "lines": [
+            331,
+            333
+          ]
+        },
+        {
+          "vertex": 16,
+          "lines": [
+            334,
+            330
+          ]
+        }
+      ]
+    },
+    "SW3-F3-p1": {
+      "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+      "geometrySha256": "a7b6078230a39d775b7dc4bd962ae7a2bb887039cd7d3833f6311e356a6f9ba6",
+      "sourcePlanId": "SW3-F2-p1",
+      "sourceGeometrySha256": "5ccf5a99a432e0541d5a699ff4a154f7d9221ce42052efba0b5ac74e7070cf9f",
+      "sharedFeatures": [
+        {
+          "label": "North wing end, west wall corner",
+          "source": [
+            571.25,
+            72.5
+          ],
+          "target": [
+            551.25,
+            276.25
+          ]
+        },
+        {
+          "label": "East wing, north wall end corner",
+          "source": [
+            1010.0,
+            271.25
+          ],
+          "target": [
+            901.25,
+            435.0
+          ]
+        },
+        {
+          "label": "East stair enclosure outside southeast corner",
+          "source": [
+            1052.5,
+            446.25
+          ],
+          "target": [
+            935.0,
+            572.5
+          ]
+        },
+        {
+          "label": "South wall projection at central stair, west corner",
+          "source": [
+            598.75,
+            455.0
+          ],
+          "target": [
+            573.75,
+            581.25
+          ]
+        }
+      ]
+    },
+    "SW3-F4-p1": {
+      "sourceSha256": "ec9b5c3ae80da356b78dc7ea89e3228e6cd6b5e882d9c20a6b7e10bbd5ec034a",
+      "geometrySha256": "de3046d9dc5f89aa386d2b536dc40b8958d81e4d6f64e05470811444c27eb1d8",
+      "sourcePlanId": "SW3-F2-p1",
+      "sourceGeometrySha256": "5ccf5a99a432e0541d5a699ff4a154f7d9221ce42052efba0b5ac74e7070cf9f",
+      "sharedFeatures": [
+        {
+          "label": "North wing end, west wall corner",
+          "source": [
+            571.25,
+            72.5
+          ],
+          "target": [
+            551.25,
+            238.75
+          ]
+        },
+        {
+          "label": "East wing, north wall end corner",
+          "source": [
+            1010.0,
+            271.25
+          ],
+          "target": [
+            901.25,
+            396.25
+          ]
+        },
+        {
+          "label": "East stair enclosure outside southeast corner",
+          "source": [
+            1052.5,
+            446.25
+          ],
+          "target": [
+            935.0,
+            535.0
+          ]
+        },
+        {
+          "label": "South wall projection at central stair, west corner",
+          "source": [
+            598.75,
+            455.0
+          ],
+          "target": [
+            573.75,
+            542.5
+          ]
+        }
+      ]
+    },
+    "SW5-F1-p1": {
+      "sourceSha256": "37105ff14e81094e4e968500a70da3cea6cd2e13803dd2853909ee35bcd10790",
+      "geometrySha256": "26f64576381c0ce18de4000b8de6236c05878a43b61679e8d7bf157fe3cd6451",
+      "corners": [
+        {
+          "vertex": 56,
+          "lines": [
+            279,
+            37
+          ]
+        },
+        {
+          "vertex": 9,
+          "lines": [
+            274,
+            238
+          ]
+        },
+        {
+          "vertex": 34,
+          "lines": [
+            254,
+            255
+          ]
+        },
+        {
+          "vertex": 12,
+          "lines": [
+            296,
+            297
+          ]
+        }
+      ]
+    },
+    "SW5-F2-p1": {
+      "sourceSha256": "3157fabbf5eeaa7751c0d66c3baa88ba6bc1029bce0013b7b75fe5f8bdb007b1",
+      "geometrySha256": "100ac83d1589b50d40654d975920868fb9ce4a8a9651dac764cedc17c18be861",
+      "corners": [
+        {
+          "vertex": 56,
+          "lines": [
+            224,
+            373
+          ]
+        },
+        {
+          "vertex": 9,
+          "lines": [
+            256,
+            90
+          ]
+        },
+        {
+          "vertex": 34,
+          "lines": [
+            236,
+            237
+          ]
+        },
+        {
+          "vertex": 12,
+          "lines": [
+            279,
+            280
+          ]
+        }
+      ]
+    },
+    "SW9-F1-p1": {
+      "sourceSha256": "7e78bd140b8e62e6da91bb9b0d17f1b165c5637cd523903815642722b5ded28f",
+      "issue": "The drawing and GIS correspondences disagreed by up to 0.91 m in the fit and 3.82 m at the withheld corner. Better source controls are needed."
+    },
+    "SW9-F2-p1": {
+      "sourceSha256": "369a31fa5c234b90a0217f4eab70d602fb99117e180a38a6a68cfbb732b6dc02",
+      "issue": "The drawing and GIS correspondences disagreed by up to 1.04 m in the fit and 3.71 m at the withheld corner. Better source controls are needed."
+    }
+  }
+}

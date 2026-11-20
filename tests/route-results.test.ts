@@ -184,7 +184,8 @@ it.each([true, 'denied'] as const)(
       expect(host.textContent).toContain('Finding your starting place stopped');
       expect(labelReads).toBe(1);
       await click(button('Try again'));
-      await wait(() => expect(host.querySelector('.route-directions')).not.toBeNull());
+      await wait(() => expect(host.querySelector('.guided-directions')).not.toBeNull());
+      expect(watchPosition).toHaveBeenCalledTimes(1);
       expect(labelReads).toBe(1);
       expect(host.querySelector('.journey-evidence .floor-point-picker')).toBeNull();
       expect(host.textContent).toContain('Starting area estimated');
@@ -220,12 +221,14 @@ it.each([true, 'denied'] as const)(
           });
       };
       reviewCrossings('rejected');
+      await click(button('Route overview'));
       await click(button('Recheck current route'));
       await wait(() => expect(button('Retry route')).toBeDefined());
       expect(host.textContent).toContain('continuous route between these buildings');
       reviewCrossings('verified');
       await click(button('Retry route'));
-      await wait(() => expect(host.querySelector('.route-directions')).not.toBeNull());
+      await wait(() => expect(host.querySelector('.guided-directions')).not.toBeNull());
+      await click(button('Route overview'));
       expect(requestBodies.filter((body) => body.includes('"image":'))).toHaveLength(1);
       const result = host.querySelector('.workspace > section')!;
       expect(result.getAttribute('aria-label')).toBe('Your walking route');
@@ -268,8 +271,8 @@ it.each([true, 'denied'] as const)(
       expect(host.querySelector('img.evidence-photo')).toBeNull();
       expect(provider.calls).toBe(1);
       expect(result.querySelector('.route-device-controls')).toBeNull();
-      await click(button('GO'));
-      expect(watchPosition).toHaveBeenCalledTimes(1);
+      await click(button('Back to steps'));
+      expect(watchPosition).toHaveBeenCalledTimes(3);
       await act(async () => deviceSuccess({ ...gpsPosition, timestamp: Date.now() }));
       expect(result.querySelectorAll('.device-position')).toHaveLength(1);
       await click(button('Next step'));
@@ -286,8 +289,10 @@ it.each([true, 'denied'] as const)(
         .querySelector<HTMLInputElement>('input')!;
       expect(preference.checked).toBe(false);
       await click(preference);
-      expect(host.querySelector('.route-directions')).toBeNull();
+      expect(host.querySelector('.guided-directions')).toBeNull();
       await click(button('Get Directions to SW03 2082'));
+      await wait(() => expect(host.querySelector('.guided-directions')).not.toBeNull());
+      await click(button('Route overview'));
       await wait(() =>
         expect(host.querySelector('.route-directions .helper')?.textContent).toContain(
           'Elevators preferred',
@@ -303,6 +308,8 @@ it.each([true, 'denied'] as const)(
       await click(host.querySelector<HTMLElement>('.journey-inputs > summary')!);
       await setDestination('SW03 1730');
       await click(button('Get Directions to SW03 1730'));
+      await wait(() => expect(host.querySelector('.guided-directions')).not.toBeNull());
+      await click(button('Route overview'));
       await wait(() =>
         expect(
           host.querySelector('.route-map-visit:last-of-type .pin-legend')?.textContent,

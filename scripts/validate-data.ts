@@ -11,13 +11,21 @@ import { topologyContentHash } from '../server/topology-provenance';
 import { validateCorridorTraces } from '../server/visitor-paths';
 import { floorGraphs } from '../server/floor-graph';
 import { locationCatalogue } from '../server/geolocation';
+import { compileLocationCatalogue } from './prepare-geolocation';
 const graphs = floorGraphs();
 console.log(
   `Validated ${graphs.places.length} source-place occurrences across ${graphs.ordered.length} compiled floor graphs.`,
 );
 const locationCoverage = locationCatalogue();
+// Retain sub-millimetre comparison precision without depending on the last floating-point bits.
+const calibrationSnapshot = (catalogue: ReturnType<typeof locationCatalogue>) =>
+  JSON.stringify(catalogue, (_key, value: unknown) =>
+    typeof value === 'number' ? Number(value.toFixed(9)) : value,
+  );
+if (calibrationSnapshot(locationCoverage) !== calibrationSnapshot(compileLocationCatalogue()))
+  throw Error('Floor calibration catalogue differs from the archived source correspondences.');
 console.log(
-  `Validated official geographic source and ${locationCoverage.floors.length} floor calibration records.`,
+  `Validated official GIS and ${locationCoverage.floors.length} floor calibration records (${locationCoverage.floors.filter((floor) => floor.status === 'approximate').length} approximate alignments).`,
 );
 const manifest = readJson<{ sources: { file: string; sha256: string; campus: string }[] }>(
   'data/campus/manifest.json',
