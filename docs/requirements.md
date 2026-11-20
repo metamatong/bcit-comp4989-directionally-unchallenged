@@ -9,7 +9,7 @@ The supplied original [brief](project-brief.txt) remains unchanged. Current prod
 | Required GPS | **Get Directions** requests GPS by default. The browser keeps raw coordinates and sends derived building candidates. |
 | Starting place | The strongest source-linked photo/GPS building match is selected automatically; there is no start chooser in the visitor app/API. |
 | Floor GPS dot | Building footprints cover 43 of 45 supplied buildings, including SE12, SW03, SW05 and SW01. Only SE12 floor 3 has an active approximate alignment. Thirteen proposed alignments are retained as development candidates pending independent source evidence; all other 88 floor plans hide the dot. |
-| Route display | Route overview with floor maps, followed by one current step per guided page. GPS does not identify floors or advance steps. |
+| Route display | A complete walking route opens on the first guided step. The visitor advances manually and can open the overview for floor maps in travel order. |
 | Same-building transfers | Still use legacy hand-authored records in the published graph. Automatic inference from stacked floor plans is an outstanding implementation gap. |
 | Cross-building transfers | Fixed mapped records; this is the only connection type intended to require developer-maintained links. |
 | Accessibility preference | Stairs are preferred by default; the checkbox prefers elevators. A fallback route can still include stairs when no complete elevator path is mapped. |

@@ -6,7 +6,7 @@ The app combines that building match with the photo labels and automatically sel
 
 ## Guided directions
 
-**GO** starts a fresh foreground GPS watch and opens step-by-step directions only after a fresh reading arrives. The route step selects the floor map. The position dot and reported accuracy area update from each fresh GPS reading when that floor has a geographic alignment. GPS does not identify floors or advance route steps; the visitor advances with the route controls. Tracking stops when the visitor returns to the route overview, finishes, or leaves the page.
+A complete walking route opens on its first step and starts a foreground GPS watch automatically. The step is visible while the watch waits for a fresh reading. The route step selects the floor map, and the visitor advances with the route controls. The position dot and reported accuracy area update from fresh GPS readings when the floor has a geographic alignment. Tracking stops when the visitor opens the route overview, finishes, or leaves the page. **Back to steps** returns to the current step and starts a new watch.
 
 The browser requests high accuracy and zero cached age. A stale or invalid first fix gets one retry within the original 15-second deadline; permission denial and cancellation end acquisition. A reading is eligible only when fresh and valid. The live overlay disappears when readings become stale. Browsers may combine GPS with network signals, and reported accuracy can understate indoor error. Phone use requires HTTPS and location permission; localhost works on the computer running the app. [W3C Geolocation](https://www.w3.org/TR/geolocation/)
 

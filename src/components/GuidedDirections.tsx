@@ -1,5 +1,5 @@
 /** Manual progress through saved route steps; never infers movement or camera heading. */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
 import type { NavigationResult } from '../wayfinding';
 import type { VisualPlan } from '../types';
@@ -7,22 +7,26 @@ import { planLabel } from '../topology';
 import { RouteMap } from './RouteMap';
 import type { LocationCatalogue } from '../location/types';
 import { deviceOverlay, overlapsFootprint } from '../location/geometry';
-import type { useWalkingLocation } from '../location/use-device-location';
+import { useWalkingLocation } from '../location/use-device-location';
 
 export function GuidedDirections({
   route,
   plans,
   locationCatalogue,
-  tracking,
+  index,
+  onStepChange,
+  transferNotice,
   onOverview,
 }: {
   route: Extract<NavigationResult, { status: 'route' }>;
   plans: VisualPlan[];
   locationCatalogue?: LocationCatalogue;
-  tracking: ReturnType<typeof useWalkingLocation>;
+  index: number;
+  onStepChange: (index: number) => void;
+  transferNotice?: string;
   onOverview: () => void;
 }) {
-  const [index, setIndex] = useState(0);
+  const tracking = useWalkingLocation(true);
   const heading = useRef<HTMLHeadingElement>(null);
   const step = route.steps[index];
   const complete = !step;
@@ -62,7 +66,7 @@ export function GuidedDirections({
   }, [index]);
   function move(next: number) {
     if (next >= route.steps.length) tracking.stop();
-    setIndex(next);
+    onStepChange(next);
   }
   return (
     <section className="guided-directions" aria-label="Step-by-step directions">
@@ -113,6 +117,11 @@ export function GuidedDirections({
           </p>
         )}
       </div>
+      {index === 0 && transferNotice && (
+        <p className="helper" role="note">
+          {transferNotice}
+        </p>
+      )}
       <p className="guided-location-status" role="status">
         {withinBuilding && onPlan && <span className="guided-location-dot" aria-hidden="true" />}
         {positionStatus}

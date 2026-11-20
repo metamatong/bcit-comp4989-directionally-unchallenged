@@ -53,10 +53,9 @@ it('opens only the current instruction, advances manually, finishes, and returns
         }),
       ),
     );
-    expect(host.querySelectorAll('.walking-map')).toHaveLength(3);
-    await click('GO');
-    expect(host.querySelector('.guided-directions')).toBeNull();
-    expect(button('Getting GPS location…')).toBeDefined();
+    expect(host.querySelectorAll('.walking-map')).toHaveLength(1);
+    expect(host.textContent).toContain('Step 1 of 5');
+    expect(host.textContent).toContain('Waiting for GPS…');
     const se12 = catalogue.floors.find((floor) => floor.planId === 'SE12-F3-p1')!;
     const emit = (latitude: number, longitude: number) =>
       act(async () =>
@@ -95,6 +94,9 @@ it('opens only the current instruction, advances manually, finishes, and returns
       'floor-plan alignment is unavailable for SW03 · Floor 3',
     );
     await click('Previous');
+    await click('Route overview');
+    expect(host.querySelectorAll('.walking-map')).toHaveLength(3);
+    await click('Back to steps');
     expect(host.textContent).toContain('Step 2 of 5');
     for (let i = 2; i < route.steps.length; i++) await click('Next step');
     await click('Finish route');
@@ -104,10 +106,9 @@ it('opens only the current instruction, advances manually, finishes, and returns
     await click('Done');
     expect(host.querySelectorAll('.walking-map')).toHaveLength(3);
     expect(recheck).not.toHaveBeenCalled();
-    await click('GO');
-    expect(host.querySelector('.guided-directions')).toBeNull();
-    await emit(se12.controls[0].latitude, se12.controls[0].longitude);
+    await click('Restart directions');
     expect(host.textContent).toContain('Step 1 of 5');
+    await emit(se12.controls[0].latitude, se12.controls[0].longitude);
     await click('Route overview');
     expect(host.querySelector('.route-overview')).not.toBeNull();
   } finally {

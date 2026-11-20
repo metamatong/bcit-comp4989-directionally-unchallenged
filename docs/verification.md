@@ -85,7 +85,7 @@ The temporary harness and image-free JSON results are in ignored `tmp/local-phot
 
 ## PR 24 working-file reconciliation · November 19, 2026
 
-Reconciled PR head `fe7c38cbf1506c975b6ba375a1eeb5be9b8b987e` with main `f845b414e5ddcc7e1588a2941391d67e7b717d69` by editing working files only. No Git commands, commits, pushes or merges were performed. Main's revision-89 routing data, SW03 west-wing connections, approach compiler, visitor exclusions, bounded stale-GPS retry and partial-route presentation were retained. Automatic start selection replaces origin choices while retaining source-backed shared departure regions and approach tiers. Incomplete routes do not offer GO. Finish route stops the foreground GPS watch.
+Reconciled PR head `fe7c38cbf1506c975b6ba375a1eeb5be9b8b987e` with main `f845b414e5ddcc7e1588a2941391d67e7b717d69` by editing working files only. No Git commands, commits, pushes or merges were performed. Main's revision-89 routing data, SW03 west-wing connections, approach compiler, visitor exclusions, bounded stale-GPS retry and partial-route presentation were retained. Automatic start selection replaces origin choices while retaining source-backed shared departure regions and approach tiers. In the former **GO** flow, incomplete routes stayed in the overview. Finish route stops the foreground GPS watch.
 
 The thirteen proposed geographic registrations are preserved in `data/campus/geolocation/calibration-candidates.json` and are not exposed as active visitor alignments. Their independent source correspondence evidence is missing; generated outline-control residuals cannot supply that evidence. SE12 floor 3 retains its existing approximate alignment. The generator's tuple typing and existing test contracts were updated without adding new test cases or executing tests.
 
@@ -109,7 +109,7 @@ Five local visitor API pairs were sampled before checking reachability, using se
 
 ## Stair preference and guided directions · November 19, 2026
 
-The destination step offers **Accessibility: prefer elevators**; unchecked routes prefer stairs. The planner first looks for a complete route without the non-preferred transfer type, then falls back to all currently permitted connections. Route results retain the ordered floor-map overview. **GO** requires a fresh GPS reading, then opens step-by-step directions with the current map as the focus and a live position dot where floor calibration exists. Previous/next/finish controls update progress without inferring floors or advancing from GPS. GPS and accessibility remain approximate indoors.
+The destination step offers **Accessibility: prefer elevators**; unchecked routes prefer stairs. The planner first looks for a complete route without the non-preferred transfer type, then falls back to all currently permitted connections. Route results retain the ordered floor-map overview. At the time of this verification, **GO** required a fresh GPS reading before opening the guided step with its floor map and a live position dot where floor calibration existed. Previous/next/finish controls update progress without inferring floors or advancing from GPS. GPS and accessibility remain approximate indoors.
 
 ## SE12 302 to SW03 1730
 
