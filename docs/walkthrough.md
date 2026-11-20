@@ -1,11 +1,10 @@
 # Project walkthrough
 
-1. Upload or take a photo, then tap **Next**. The image stays on the device until the visitor taps **Get Directions**.
-2. Enter a destination such as `SW03 2605`. Stairs are preferred by default; check **Accessibility: prefer elevators** to prefer an elevator route. This does not verify accessibility. Optionally enable device location if standing where the photo was taken.
-3. Tap **Get Directions**. The configured AI provider reads the photo once for labels and visible features. Exact source lookup uses those readings and optional GPS building candidates to estimate a starting area. The app displays **Starting area estimated**, then calculates the route over the saved reviewed graph without further model calls.
-4. Walking directions show one arrow-separated overview and a vertical stack of floor maps in travel order. **Show full floors** changes all map views together; **Source plans** expands the official PDF links. Tap **GO** to open one route step and map at a time. Advance with **Next step**, go back with **Previous**, and mark the final instruction with **Finish route**. **Route overview** returns to the stacked maps. Transfers offer departure and arrival maps. This does not verify position or start tracking.
-5. Cross-building travel uses only mapped connections. Visitors can walk between SE12 and SW03 and continue from SW03 to SW01; floors 2–4 use indoor crossings and floor 1 includes an outdoor walk. No inferred crossing is used.
-6. After locating the starting floor, expand **Choose a point on the map** to set a corridor or room-area point. Select **Choose a map point** in the destination form for an unnamed destination. The server checks the chosen cell against the current sheet and graph.
-7. **Start over** clears the trip. Location evidence and trip editing are optional details below the route.
+1. Upload or take a photo containing a nearby room sign, then tap **Next**.
+2. Enter a destination such as `SW03 2605`. Stairs are preferred by default; check **Accessibility: prefer elevators** to prefer an elevator route.
+3. Tap **Get Directions**. The browser requests GPS automatically. The configured provider reads the photo once for labels and visible features. GPS narrows the building, and the app selects the strongest source match without asking the visitor to pick a start.
+4. The route overview shows the itinerary and floor maps in travel order. Tap **GO** to start guided directions; a fresh GPS reading is required first. The current route step selects the floor map. The GPS dot appears only on a geographically aligned floor. **Previous**, **Next step**, and **Finish route** control route progress; GPS does not determine floors or advance steps.
+5. Cross-building travel uses only the mapped building connections. A missing photo match, destination approach or route connection is explained in the app.
+6. **Start over** clears the trip. Photo and route details remain available under the edit and evidence sections.
 
-The visitor catalogue covers all 89 supplied Burnaby plans. Routes require complete floor approaches and reviewed transfers. Missing coverage is explicit. Photo-based starting estimates and walking routes have not been independently validated on campus. A provider error shows setup/retry guidance. This walkthrough performs no deployment or coursework submission.
+The catalogue covers all 89 supplied Burnaby plans. Building-level GPS footprints cover SE12, SW03, SW05 and SW01. Approximate floor-plan alignments cover every SE12, SW01 and SW03 floor plan plus SW05 floors 1–2. See [device-location coverage](device-location.md). No deployment or coursework submission is performed by this walkthrough.

@@ -1,3 +1,4 @@
+import { gpsHint } from './photo-fixtures';
 /** Exercise the published review snapshot and the same floor-grid search as the visitor API. */
 import { randomUUID } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -32,7 +33,7 @@ async function walk(from: string, to: string) {
   session.photoEvidence = evidence;
   const result = locateFromLabels(
     session,
-    { requestId: randomUUID(), revision: 0, evidenceId: evidence.id },
+    { requestId: randomUUID(), revision: 0, evidenceId: evidence.id, gps: gpsHint('SE12') },
     { sessionId: session.id, evidence, buildingHint: 'SE12', fingerprint: 'post-extraction-sign' },
   );
   expect(result.candidates.map((c) => c.anchorLabel)).toEqual([from]);

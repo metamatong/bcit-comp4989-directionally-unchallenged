@@ -7,7 +7,6 @@ import type {
   VisualPlan,
 } from '../types';
 import { buildingLabel, planLabel } from '../topology';
-import { RouteMapImage } from './RouteMap';
 
 export function PlanRegion({
   plan,
@@ -78,37 +77,27 @@ export function CampusLocationResults({
   readings = [],
   showSummary = true,
   selectedId,
-  onConfirm,
-  busy = false,
 }: {
   analysis: CampusPhotoAnalysis;
   readings?: PhotoLabelReading[];
   showSummary?: boolean;
   plans: VisualPlan[];
   selectedId?: string;
-  onConfirm?: (id: string) => void;
-  busy?: boolean;
 }) {
   const references = analysis.referenceLabels ?? [];
   const labelBased = analysis.method === 'photo-label-retrieval';
-  const requiredChoice =
-    labelBased &&
-    (analysis.candidates.length > 1 ||
-      analysis.labelRetrieval?.partial ||
-      analysis.candidates.some((c) => c.corridorOrigin?.needsConfirmation));
-  const selected = requiredChoice
-    ? analysis.candidates.find((c) => c.id === selectedId)
-    : undefined;
+  const selected =
+    analysis.candidates.find((candidate) => candidate.id === selectedId) ?? analysis.candidates[0];
   const visibleCandidates = selected ? [selected] : analysis.candidates;
   return (
     <section className="campus-results" aria-label="Photo comparison results">
       <h3>
         {selected
-          ? 'Selected starting place'
+          ? 'Likely starting place'
           : labelBased
             ? analysis.candidates.length
               ? 'Estimated starting place'
-              : 'Location needs more evidence'
+              : 'Couldn’t match the photo to a source location'
             : analysis.candidates.length
               ? analysis.candidates[0].doorwayVicinity
                 ? 'Possible starting corridor'
@@ -117,7 +106,7 @@ export function CampusLocationResults({
                 ? 'Camera position unresolved'
                 : 'No clear match'}
       </h3>
-      {showSummary && !selected && <p>{analysis.summary}</p>}
+      {showSummary && <p>{analysis.summary}</p>}
       {analysis.gpsStatus === 'used' && (
         <p className="helper">Device building matches were checked against the extracted labels.</p>
       )}
@@ -184,7 +173,7 @@ export function CampusLocationResults({
               <span className="pill">
                 {candidate.doorwayVicinity || candidate.corridorOrigin
                   ? 'Approximate vicinity'
-                  : 'Unverified estimate'}
+                  : 'Estimated location'}
               </span>
             </div>
             <PlanRegion plan={plan} candidate={candidate} />
@@ -233,130 +222,8 @@ export function CampusLocationResults({
           </article>
         );
       })}
-      {selected && onConfirm && analysis.candidates.length > 1 && (
-        <details key={selected.id}>
-          <summary>Change starting location</summary>
-          <StartingPlaceChoices
-            candidates={analysis.candidates.filter((c) => c.id !== selected.id)}
-            plans={plans}
-            onSelect={onConfirm}
-            busy={busy}
-          />
-        </details>
-      )}
       {!selected && analysis.clarification && (
         <p className="clarification-note">{analysis.clarification}</p>
-      )}
-    </section>
-  );
-}
-
-/** A repeated sign can be resolved using the same evidence receipt. */
-export function StartingPlaceChoices({
-  candidates,
-  plans,
-  onSelect,
-  busy,
-  partialMessage,
-  onRetake,
-}: {
-  candidates: CampusLocationCandidate[];
-  plans: VisualPlan[];
-  onSelect: (id: string) => void;
-  partialMessage?: string;
-  onRetake?: () => void;
-  busy: boolean;
-}) {
-  const candidate = candidates.length === 1 ? candidates[0] : undefined;
-  if (candidate?.corridorOrigin?.needsConfirmation) {
-    const plan = plans.find((p) => p.id === candidate.planId);
-    if (plan && candidate.bounds) {
-      const marks =
-        candidate.sourceLabels
-          ?.filter((ref) => candidate.corridorOrigin!.roomPlaceIds.includes(ref.id))
-          .map((ref) => ({
-            point: {
-              x: (ref.bounds[0] + ref.bounds[2]) / 2,
-              y: (ref.bounds[1] + ref.bounds[3]) / 2,
-            },
-            symbol: ref.label,
-            label: 'Printed room ' + ref.label,
-          })) ?? [];
-      return (
-        <section className="journey-panel" aria-label="Confirm starting corridor">
-          <h2>Are these room signs beside you?</h2>
-          <p>
-            {planLabel(plan)} · {candidate.anchorLabel}
-          </p>
-          <RouteMapImage
-            plan={plan}
-            bounds={candidate.bounds}
-            markers={marks}
-            label={`Possible starting area: ${candidate.anchorLabel}`}
-          />
-          {partialMessage && <p>{partialMessage}</p>}
-          <button
-            className="primary full-width"
-            disabled={busy}
-            onClick={() => onSelect(candidate.id)}
-          >
-            Yes, I’m in this corridor
-          </button>
-          {onRetake && (
-            <button className="text-button" disabled={busy} onClick={onRetake}>
-              I’m somewhere else
-            </button>
-          )}
-        </section>
-      );
-    }
-  }
-  return (
-    <section className="journey-panel" aria-label="Starting location choices">
-      <h2>{partialMessage ? 'Which sign are you beside?' : 'Which place are you at?'}</h2>
-      {partialMessage && <p>{partialMessage}</p>}
-      {plans.flatMap((plan) => {
-        const choices = candidates.filter((c) => c.planId === plan.id);
-        if (!choices.length) return [];
-        const markers = choices.flatMap((c, i) => {
-          const box = c.sourceLabels?.find((ref) => ref.id === c.sourcePlaceId)?.bounds;
-          return box
-            ? [
-                {
-                  point: { x: (box[0] + box[2]) / 2, y: (box[1] + box[3]) / 2 },
-                  symbol: String(i + 1),
-                  label: c.anchorLabel ?? 'Place',
-                },
-              ]
-            : [];
-        });
-        return (
-          <div key={plan.id}>
-            {choices.length > 1 && (
-              <RouteMapImage
-                plan={plan}
-                markers={markers}
-                label={'Matching signs on ' + planLabel(plan)}
-              />
-            )}
-            {choices.map((choice, i) => (
-              <button
-                key={choice.id}
-                className="secondary"
-                disabled={busy}
-                onClick={() => onSelect(choice.id)}
-              >
-                {planLabel(plan)} · {choice.anchorLabel}
-                {choices.length > 1 ? ' · Mark ' + (i + 1) : ''}
-              </button>
-            ))}
-          </div>
-        );
-      })}
-      {partialMessage && onRetake && (
-        <button className="text-button" disabled={busy} onClick={onRetake}>
-          My sign shows a different number
-        </button>
       )}
     </section>
   );

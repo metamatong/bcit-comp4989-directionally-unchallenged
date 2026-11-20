@@ -85,8 +85,8 @@ afterAll(async () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-it.each([false, true, 'denied'] as const)(
-  'routes from one extraction with initial GPS enabled %s',
+it.each([true, 'denied'] as const)(
+  'requires GPS and reuses one extraction when device permission is %s',
   async (useGps) => {
     provider.calls = 0;
     requestBodies.length = 0;
@@ -165,7 +165,6 @@ it.each([false, true, 'denied'] as const)(
       });
       await click(button('Next'));
       await setDestination('SW03 2082');
-      if (useGps) await click(host.querySelector<HTMLInputElement>('input[type=checkbox]')!);
       const elevatorOption = [...host.querySelectorAll('label')]
         .find((label) => label.textContent?.includes('Accessibility: prefer elevators'))!
         .querySelector<HTMLInputElement>('input')!;
@@ -175,35 +174,32 @@ it.each([false, true, 'denied'] as const)(
       rejectLocationOnce = true;
       labelReads = 0;
       await click(button('Get Directions'));
+      if (useGps === 'denied') {
+        await wait(() => expect(host.textContent).toContain('Location permission was denied'));
+        expect(provider.calls).toBe(0);
+        expect(host.querySelector('.route-directions')).toBeNull();
+        return;
+      }
       await wait(() => expect(button('Try again')).toBeDefined());
       expect(host.textContent).toContain('Finding your starting place stopped');
       expect(labelReads).toBe(1);
       await click(button('Try again'));
       await wait(() => expect(host.querySelector('.route-directions')).not.toBeNull());
       expect(labelReads).toBe(1);
-      if (useGps !== true) {
-        const evidence = host.querySelector('.journey-evidence')!;
-        expect(evidence.querySelectorAll('.campus-candidate')).toHaveLength(1);
-        expect(evidence.querySelector('.campus-candidate h3')?.textContent).toContain(
-          'SE12 · Floor 3',
-        );
-        expect(evidence.textContent).not.toContain('Select your starting location.');
-        expect(evidence.textContent).toContain('Adjust starting point on the map');
-      }
+      expect(host.querySelector('.journey-evidence .floor-point-picker')).toBeNull();
       expect(host.textContent).toContain('Starting area estimated');
       expect(button('Start at')).toBeUndefined();
-      expect(getCurrentPosition).toHaveBeenCalledTimes(useGps ? 2 : 0);
+      expect(getCurrentPosition).toHaveBeenCalledTimes(2);
       const locationRequests = requestBodies
         .map((body) => JSON.parse(body))
         .filter((body) => body.evidenceId);
-      expect(locationRequests.every((body) => Boolean(body.gps) === (useGps === true))).toBe(true);
+      expect(locationRequests.every((body) => Boolean(body.gps))).toBe(true);
       const extractionRequests = requestBodies
         .map((body) => JSON.parse(body))
         .filter((body) => body.image);
       expect(extractionRequests).toHaveLength(1);
-      expect(Boolean(extractionRequests[0].gps)).toBe(useGps === true);
-      if (useGps === true) expect(extractionRequests[0].gps.buildings).toContain('SE12');
-      expect(requestBodies.join('')).not.toMatch(/"(latitude|longitude)"/);
+      expect(extractionRequests[0].gps.buildings).toContain('SE12');
+      expect(requestBodies.join('')).not.toMatch(/latitude|longitude/);
       expect(provider.calls).toBe(1);
       // Withdraw all interbuilding passages in this fixture; the real map has alternate stairs.
       const crossings = store
@@ -271,37 +267,18 @@ it.each([false, true, 'denied'] as const)(
       expect(host.querySelector('.journey-inputs[open], .journey-evidence[open]')).toBeNull();
       expect(host.querySelector('img.evidence-photo')).toBeNull();
       expect(provider.calls).toBe(1);
-      expect(result.querySelector('.route-device-controls[open]')).toBeNull();
-      await click(result.querySelector<HTMLElement>('.route-device-controls > summary')!);
-      await click(button('Show my position'));
+      expect(result.querySelector('.route-device-controls')).toBeNull();
+      await click(button('GO'));
       expect(watchPosition).toHaveBeenCalledTimes(1);
-      await act(async () => deviceSuccess(position()));
+      await act(async () => deviceSuccess({ ...gpsPosition, timestamp: Date.now() }));
       expect(result.querySelectorAll('.device-position')).toHaveLength(1);
-      expect(getCurrentPosition).toHaveBeenCalledTimes(useGps ? 2 : 0);
-      expect(result.querySelector('[aria-label="Walking device location"]')?.textContent).toContain(
-        'Tracking floor · SE12 · Floor 3',
-      );
-      await click(result.querySelector<HTMLElement>('.route-device-controls > summary')!);
-      expect(result.querySelector('.route-device-controls > summary')?.textContent).toContain(
-        'tracking SE12 · Floor 3',
-      );
-      await click(result.querySelector<HTMLElement>('.route-device-controls > summary')!);
-      await act(async () => {
-        const floor = result.querySelector<HTMLSelectElement>(
-          '[aria-label="Current tracking floor"]',
-        )!;
-        floor.value = '1';
-        floor.dispatchEvent(new Event('change', { bubbles: true }));
-      });
+      await click(button('Next step'));
+      await click(button('Next step'));
       expect(result.querySelector('.device-position')).toBeNull();
+      await act(async () => deviceSuccess({ ...gpsPosition, timestamp: Date.now() + 1 }));
+      expect(result.querySelector('[aria-label="Current tracking floor"]')).toBeNull();
+      await click(button('Route overview'));
       expect(clearWatch).toHaveBeenCalledWith(42);
-      expect(watchPosition).toHaveBeenCalledTimes(1);
-      expect(result.querySelector('[aria-label="Walking device location"]')?.textContent).toContain(
-        'Tracking floor · SW03 · Floor 3',
-      );
-      expect(result.querySelector('[aria-label="Walking device location"]')?.textContent).toContain(
-        'Position overlay unavailable for this floor',
-      );
       expect(result.querySelectorAll('.route-map-visit')).toHaveLength(3);
       await click(host.querySelector<HTMLElement>('.journey-inputs > summary')!);
       const preference = [...host.querySelectorAll('label')]

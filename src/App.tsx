@@ -20,10 +20,10 @@ import {
 } from './api';
 import { preparePhoto, type PreparedPhoto } from './photo';
 import { PHOTO_STAGE_TIMEOUT_MS, PHOTO_RESPONSE_GRACE_MS } from './photo-views';
-import { CampusLocationResults, StartingPlaceChoices } from './components/CampusLocationResults';
+import { CampusLocationResults } from './components/CampusLocationResults';
 import { PhotoLocationInput } from './components/PhotoLocationInput';
 import { JourneyPanel, StartingPositionNotice } from './components/JourneyPanel';
-import { PhotoDeviceOption } from './components/PhotoDeviceLocation';
+import { PhotoDeviceRequirement } from './components/PhotoDeviceLocation';
 import { usePhotoDeviceLocation } from './location/use-device-location';
 import { gpsBuildingHint } from './location/building-hint';
 import { planLabel } from './topology';
@@ -162,6 +162,7 @@ export default function App() {
       !preparedPhoto ||
       !data?.liveAvailable ||
       !data.photoLocalizationAvailable ||
+      !data.locationCatalogue ||
       busyRef.current
     )
       return;
@@ -174,9 +175,14 @@ export default function App() {
     setShowPhotoResults(false);
     setPhotoError('');
     setActiveDestination(destination.trim());
-    setReadStatus('Finding your starting point and route…');
+    setReadStatus('Requesting GPS and finding your starting point…');
     let stage: 'evidence' | 'location' = 'evidence';
     try {
+      stage = 'location';
+      const firstReading = await photoDevice.capture();
+      controller.signal.throwIfAborted();
+      let gps = gpsBuildingHint(firstReading.reading, data.locationCatalogue);
+      setReadStatus('Reading your photo…');
       const media = {
         consent: true,
         image: { mimeType: preparedPhoto.mimeType, data: preparedPhoto.data },
@@ -187,14 +193,8 @@ export default function App() {
         async (active) => {
           let latest = active;
           stage = 'evidence';
-          setReadStatus('Finding your starting point and route…');
-          const device = await photoDevice.capture();
-          controller.signal.throwIfAborted();
-          let gps =
-            device && data.locationCatalogue
-              ? gpsBuildingHint(device.reading, data.locationCatalogue)
-              : undefined;
-          const contextKey = JSON.stringify([gps?.buildings ?? null, gps?.sourceSha256 ?? null]);
+          setReadStatus('Reading your photo…');
+          const contextKey = JSON.stringify([gps.buildings, gps.sourceSha256]);
           const cached = evidenceForPhoto.current;
           if (!(
             cached?.photo === preparedPhoto &&
@@ -206,7 +206,7 @@ export default function App() {
               `/api/sessions/${active.id}/photo/evidence`,
               {
                 ...media,
-                ...(gps ? { gps } : {}),
+                gps,
                 requestId: crypto.randomUUID(),
                 revision: active.revision,
               },
@@ -228,15 +228,11 @@ export default function App() {
           const evidence = latest.photoEvidence;
           if (!evidence) throw new Error('Read this photo again before comparing plans.');
           stage = 'location';
-          setReadStatus('Finding your starting place from the extracted evidence…');
-          // Extraction may consume most of the 30-second GPS validity window.
-          if (gps && Date.now() - gps.capturedAt > 25000) {
+          setReadStatus('Requesting GPS and matching your photo…');
+          if (Date.now() - gps.capturedAt > 20000) {
             const refreshed = await photoDevice.capture();
             controller.signal.throwIfAborted();
-            gps =
-              refreshed && data.locationCatalogue
-                ? gpsBuildingHint(refreshed.reading, data.locationCatalogue)
-                : undefined;
+            gps = gpsBuildingHint(refreshed.reading, data.locationCatalogue!);
           }
           return request<Session>(
             `/api/sessions/${active.id}/photo/location`,
@@ -244,7 +240,7 @@ export default function App() {
               requestId: crypto.randomUUID(),
               revision: latest.revision,
               evidenceId: evidence.id,
-              ...(gps ? { gps } : {}),
+              gps,
             },
             {
               signal: controller.signal,
@@ -300,7 +296,8 @@ export default function App() {
       session.campusAnalysis?.candidates.some((candidate) => candidate.planId === plan.id) ||
       session.campusAnalysis?.referenceLabels?.some((ref) => ref.planId === plan.id),
   );
-  const photoReady = data.liveAvailable && data.photoLocalizationAvailable;
+  const photoReady =
+    data.liveAvailable && data.photoLocalizationAvailable && !!data.locationCatalogue;
   const provider = aiProviderDetails(data.provider);
   const analysis = showPhotoResults ? session.campusAnalysis : null;
   const region = analysis ? session.campusLocation : null;
@@ -321,20 +318,7 @@ export default function App() {
           setActiveDestination('');
         }}
         canUsePhotoResult={!!analysis?.candidates.length}
-        deviceOption={
-          <>
-            <PhotoDeviceOption
-              enabled={photoDevice.enabled}
-              onChange={photoDevice.setEnabled}
-              disabled={busy || !data.locationCatalogue}
-            />
-            {photoDevice.status && (
-              <p className="helper" role="status">
-                {photoDevice.status}
-              </p>
-            )}
-          </>
-        }
+        locationRequirement={<PhotoDeviceRequirement />}
         onDestinationChange={(value) => {
           setDestination(value);
           setActiveDestination('');
@@ -357,16 +341,12 @@ export default function App() {
     directionsMode &&
     analysis?.method === 'photo-label-retrieval' &&
     !routeCandidate &&
-    (!analysis.candidates.length ||
-      analysis.labelRetrieval.partial === true ||
-      analysis.candidates.some((c) => c.corridorOrigin?.needsConfirmation));
+    !analysis.candidates.length;
   const photoResults = analysis && (
     <>
       <CampusLocationResults
         analysis={analysis}
         selectedId={routeCandidate?.id}
-        onConfirm={(candidateId) => void send({ type: 'confirm-campus-region', candidateId })}
-        busy={busy}
         showSummary={!summaryInRoutePanel}
         plans={plans}
         readings={
@@ -449,15 +429,16 @@ export default function App() {
           </div>
         )}
         <div className="workspace">
-          {analysis && photoDevice.enabled && photoDevice.status && (
-            <p className="setup-notice" role="note">
-              {photoDevice.status} The starting-place estimate uses the extracted photo evidence.
-            </p>
-          )}
           {data.liveAvailable && !data.photoLocalizationAvailable && (
             <p className="setup-notice" role="note">
               Floor-plan images are not ready on this server. Restart after preparing the source
               plans.
+            </p>
+          )}
+          {data.liveAvailable && !data.locationCatalogue && (
+            <p className="setup-notice" role="note">
+              GPS building data is unavailable on this server. Reload after restoring the campus
+              location catalogue to get directions.
             </p>
           )}
           {directionsMode ? (
@@ -493,15 +474,6 @@ export default function App() {
                     setShowPhotoResults(false);
                     setFlowStep('photo');
                   }}
-                />
-              ) : analysis?.candidates.length ? (
-                <StartingPlaceChoices
-                  candidates={analysis.candidates}
-                  partialMessage={analysis.labelRetrieval.partial ? analysis.summary : undefined}
-                  onRetake={removePhoto}
-                  plans={plans}
-                  busy={busy}
-                  onSelect={(id) => void send({ type: 'confirm-campus-region', candidateId: id })}
                 />
               ) : (
                 <section className="journey-panel">
@@ -603,22 +575,22 @@ export default function App() {
               <h2 id="about-heading">About DirectionallyUnchallenged</h2>
               <p>
                 Visitor wayfinding searches the supplied BCIT Burnaby floor plans using official
-                source labels and reviewed connections.
+                source labels and mapped walking areas.
               </p>
               <div className="about-section">
                 <h3>What you can do</h3>
                 <p>
                   Add a photo, enter a destination, and tap Get Directions. The app reads the photo
-                  once, finds the starting place from its labels and calculates a route over saved
-                  connections.
+                  once, requests GPS to narrow the building, uses the photo to match a floor and
+                  starting area, and calculates a route.
                 </p>
               </div>
               <div className="about-section">
-                <h3>What still needs validation</h3>
+                <h3>Location updates</h3>
                 <p>
-                  Directions use reviewed connections and source corridor traces. Walking accuracy,
-                  distances, travel times, accessibility and live conditions have not been
-                  independently field-verified.
+                  GPS cannot identify floors. The route step selects the floor map, and a location
+                  dot appears only where that plan has a geographic alignment. Indoor GPS accuracy
+                  is limited.
                 </p>
               </div>
               <div className="about-section">
@@ -626,10 +598,10 @@ export default function App() {
                 <p>
                   Get Directions sends the photo and detail views to {provider.recipient} for label
                   and feature extraction. The app uses source records for location and routing.
-                  Photo bytes are discarded after processing. Optional GPS shares building
-                  candidates with the extraction provider and the app while coordinates stay in this
-                  tab. Hosted session results are encrypted and expire after 30 minutes.{' '}
-                  {provider.dataUse}
+                  Photo bytes are discarded after processing. GPS is required; the provider receives
+                  matching building IDs as context, and the app receives those IDs and reading
+                  metadata while raw coordinates stay in this tab. Hosted session results are
+                  encrypted and expire after 30 minutes. {provider.dataUse}
                 </p>
               </div>
             </>

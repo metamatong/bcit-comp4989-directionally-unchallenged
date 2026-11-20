@@ -4,7 +4,6 @@ import { BrowserLocation, eligibleReading } from './browser-location';
 import type { DeviceReading, PhotoReading } from './types';
 
 export function usePhotoDeviceLocation() {
-  const [enabled, setEnabled] = useState(false);
   const [snapshot, setSnapshot] = useState<PhotoReading>();
   const [status, setStatus] = useState('');
   const provider = useRef<BrowserLocation | null>(null);
@@ -19,18 +18,16 @@ export function usePhotoDeviceLocation() {
     cancel();
     setSnapshot(undefined);
     setStatus('');
-    setEnabled(false);
   }
   function cancelPending() {
     if (!pending.current) return;
     cancel();
-    setStatus('Photo location was confirmed before a device reading arrived.');
+    setStatus('Waiting for the photo’s GPS reading timed out. Request location again to continue.');
   }
-  function capture() {
+  function capture(): Promise<PhotoReading> {
     cancel();
     setSnapshot(undefined);
     setStatus('');
-    if (!enabled) return Promise.resolve(undefined);
     const submission = generation.current;
     pending.current = true;
     setStatus('Requesting device location for this photo…');
@@ -38,7 +35,8 @@ export function usePhotoDeviceLocation() {
     return provider.current
       .once()
       .then((reading) => {
-        if (generation.current !== submission) return;
+        if (generation.current !== submission)
+          throw new DOMException('The GPS request was cancelled.', 'AbortError');
         pending.current = false;
         const next = { submission, reading };
         setSnapshot(next);
@@ -46,9 +44,10 @@ export function usePhotoDeviceLocation() {
         return next;
       })
       .catch((error) => {
-        if (generation.current !== submission) return;
+        if (generation.current !== submission) throw error;
         pending.current = false;
         setStatus((error as Error).message);
+        throw error;
       });
   }
   useEffect(() => {
@@ -66,11 +65,12 @@ export function usePhotoDeviceLocation() {
       cancel();
     };
   }, []);
-  return { enabled, setEnabled, snapshot, status, capture, clear, cancelPending };
+  return { snapshot, status, capture, clear, cancelPending };
 }
 
 export function useWalkingLocation() {
   const [active, setActive] = useState(false);
+  const [watchRevision, setWatchRevision] = useState(0);
   const [paused, setPaused] = useState(false);
   const [reading, setReading] = useState<DeviceReading>();
   const [status, setStatus] = useState('');
@@ -82,10 +82,12 @@ export function useWalkingLocation() {
     setPaused(true);
   }
   function start() {
+    provider.current?.stop();
     setReading(undefined);
     setStatus('Waiting for a fresh device reading…');
     setPaused(false);
     setActive(true);
+    setWatchRevision((revision) => revision + 1);
   }
   useEffect(() => {
     if (!active) return;
@@ -141,7 +143,7 @@ export function useWalkingLocation() {
       document.removeEventListener('visibilitychange', hide);
       permission?.removeEventListener('change', revoked);
     };
-  }, [active]);
+  }, [active, watchRevision]);
   return {
     active,
     paused,

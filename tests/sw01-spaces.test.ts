@@ -1,3 +1,4 @@
+import { gpsHint } from './photo-fixtures';
 /** Replay exact signs through the visitor planner against a fresh import of the published graph. */
 import { randomUUID } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -36,7 +37,7 @@ function sign(label: string, building = 'SW1') {
   session.photoEvidence = evidence;
   locateFromLabels(
     session,
-    { revision: 0, requestId: randomUUID(), evidenceId: evidence.id },
+    { revision: 0, requestId: randomUUID(), evidenceId: evidence.id, gps: gpsHint(building) },
     {
       sessionId: session.id,
       evidence,
@@ -139,7 +140,7 @@ it('binds every confirmed landing to its original sheet, public cell and node ve
     expect(f.stairApproach({ ...n, point: { x: 0, y: 0 } })).toBeUndefined();
   }
 });
-it('routes chosen map cells and rejects walls, stale data and an origin on another floor', async () => {
+it('routes to chosen destination cells and rejects walls, stale data and the wrong destination floor', async () => {
   const f = floorGraphs().byId.get('SW1-F2-p1')!;
   const [lobby, other] = ['2000', '2016'].map(
     (label) => f.places.find((p) => p.label === label)!.cells[0],
@@ -152,11 +153,10 @@ it('routes chosen map cells and rejects walls, stale data and an origin on anoth
   });
   const result = route(
     await walk('S290', 'Map point', 'SW1', {
-      originPoint: pin(lobby),
       destinationPoint: pin(other),
     }),
   );
-  expect(result.origin.point).toEqual(f.point(lobby));
+  expect(result.origin.label).toContain('S290');
   expect(result.destination.point).toEqual(f.point(other));
   await expect(
     walk('S290', 'Map point', 'SW1', {
@@ -165,16 +165,16 @@ it('routes chosen map cells and rejects walls, stale data and an origin on anoth
   ).rejects.toThrow('shaded');
   await expect(
     walk('S290', 'Map point', 'SW1', {
-      originPoint: { ...pin(lobby), graphVersion: '0'.repeat(16) },
+      destinationPoint: { ...pin(other), graphVersion: '0'.repeat(16) },
     }),
   ).rejects.toThrow('changed');
   await expect(
-    walk('S290', 'Map point', 'SW1', { originPoint: { ...pin(lobby), planId: 'SW1-F3-p1' } }),
+    walk('S290', 'SW01 floor 2', 'SW1', {
+      destinationPoint: { ...pin(other), planId: 'SW1-F3-p1' },
+    }),
   ).rejects.toThrow('floor identified');
   const c = sign('S290');
-  expect(() => pointFloor(c, 'destination', 'SW03 2605', 'SW1-F2-p1')).toThrow(
-    'Named destinations',
-  );
+  expect(() => pointFloor(c, 'SW03 2605', 'SW1-F2-p1')).toThrow('Named destinations');
   expect(
     navigationSchema.safeParse({
       revision: 0,
@@ -225,7 +225,7 @@ it('crosses outdoors between the selected west entrance doors with no invented e
     ]);
   }
 });
-it('routes from an interior map cell to its public exit using a room-only terminal leg', async () => {
+it('routes to an interior destination cell through its public entrance using a room-only terminal leg', async () => {
   const floor = floorGraphs().byId.get('SW1-F2-p1')!;
   const room = floor.places.find((p) => p.label === '2016')!;
   const candidates = (floor.interior?.runs ?? []).filter(
@@ -246,9 +246,9 @@ it('routes from an interior map cell to its public exit using a room-only termin
     graphVersion: floor.version,
     point: inside,
   };
-  const trip = route(await walk('2016', 'SW01 2000', 'SW1', { originPoint: start }));
-  expect(trip.origin.point).toEqual(inside);
-  expect(trip.steps[0].path[0]).toEqual(inside);
+  const trip = route(await walk('2000', 'Map point', 'SW1', { destinationPoint: start }));
+  expect(trip.destination.point).toEqual(inside);
+  expect(trip.steps.at(-1)?.path.at(-1)).toEqual(inside);
 });
 
 it('excludes 1494 and the staff passage through 1498 from visitor endpoints and pin routes', async () => {
@@ -299,10 +299,8 @@ it.each([
     expect(result.mappedPortion).toBeUndefined();
   },
 );
-it('offers only entrances of a multi-door room that can reach the selected destination', async () => {
-  const choice = await walk('1225', 'SW01 1139');
-  expect(choice.status).toBe('choose-origin');
-  expect(choice.origins.length).toBeGreaterThan(0);
-  for (const origin of choice.origins)
-    expect((await walk('1225', 'SW01 1139', 'SW1', { originId: origin.id })).status).toBe('route');
+it('automatically selects a reachable approach for a multi-door room', async () => {
+  const trip = route(await walk('1225', 'SW01 1139'));
+  expect(trip.origins.length).toBeGreaterThan(0);
+  expect(trip.destination.label).toContain('1139');
 });

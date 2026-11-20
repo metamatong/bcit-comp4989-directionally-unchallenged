@@ -17,13 +17,12 @@ export const pinSchema = z
 
 export function pointFloor(
   candidate: CampusLocationCandidate,
-  role: 'origin' | 'destination',
   destination: string,
   planId: string,
 ) {
   const floor = floorGraphs().byId.get(planId);
   const scope = mapDestinationScope(destination);
-  if (role === 'destination' && !scope)
+  if (!scope)
     throw new TopologyError(
       'Named destinations use their mapped entrances. Choose Map point for a custom destination.',
       400,
@@ -33,10 +32,8 @@ export function pointFloor(
       .byId.get(candidate.planId)
       ?.places.some((p) => p.id === candidate.sourcePlaceId) ||
     !floor ||
-    (role === 'origin'
-      ? planId !== candidate.planId
-      : (scope?.building && floor.plan.building !== scope.building) ||
-        (scope?.floor && floor.plan.floor !== scope.floor))
+    (scope?.building && floor.plan.building !== scope.building) ||
+    (scope?.floor && floor.plan.floor !== scope.floor)
   )
     throw new TopologyError('Choose a point on the floor identified for this trip.', 400);
   return floor;
@@ -44,16 +41,15 @@ export function pointFloor(
 
 export function pinnedStop(
   candidate: CampusLocationCandidate,
-  role: 'origin' | 'destination',
   destination: string,
   pin: FloorPin,
   search: FloorSearch,
 ): SearchStop {
-  const floor = pointFloor(candidate, role, destination, pin.planId);
+  const floor = pointFloor(candidate, destination, pin.planId);
   if (pin.graphVersion !== floor.version || pin.sourceSha256 !== floor.plan.sourceSha256)
     throw new TopologyError('The floor map changed. Select the point again.', 409);
   const cell = floor.containingCell(pin.point);
-  const label = role === 'origin' ? 'Selected starting point' : 'Selected destination';
+  const label = 'Selected destination';
   if (cell !== undefined) return { key: cell, stop: floor.stop(cell, label) };
   const access = floor.interiorAt(pin.point);
   if (access) return search.terminal(pin.planId, label, access.cell, access.path);

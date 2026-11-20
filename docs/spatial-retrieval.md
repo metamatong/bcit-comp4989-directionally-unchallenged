@@ -1,6 +1,6 @@
 # Spatial retrieval for SE12, SW03 and SW01
 
-A caller can resolve a complete identifier to source pages and printed positions, inspect nearby labels and drawing doors, and query the published graph for mapped passages. The photo pipeline uses pilot labels after the selected AI provider reads the image. Visitor routes use the index to find destination candidates and calculate directions over the saved reviewed graph. A source label does not create a navigable doorway, corridor or floor transition; these require current graph bindings and approved source traces.
+A caller can resolve a complete identifier to source pages and printed positions, inspect nearby labels and drawing doors, and query the published route data for mapped passages. The photo pipeline uses exact plan labels after the configured provider reads the image. Visitor routes use the index to find destination candidates and calculate directions over generated walking areas plus mapped transfers. A source label does not create a navigable doorway, corridor or floor transition by itself.
 
 ## Try a lookup
 
@@ -49,7 +49,7 @@ SW03 floor 2 includes the office label 2082 and its drawing door on corridor 200
 
 The revision 82 export contains 92 approved points and 63 passages. Fifteen corridors have original-page traces, including the approaches to SE12 room 302, SW03 rooms 2082, 2605 and 3615, and both doors to 1710. The second-, third- and fourth-floor SE12 crossings meet the east side of SW03. The SW03 east elevator and S360/S460 stair connect floors 3 and 4. In SE12, four approved stair chains serve floors 2–4. The SE12 floor 2–3 elevator inquiry remains a floor-service report.
 
-SW03 and SW01 share four confirmed bidirectional passages. Floor 1 joins the lobby 1602 doors to vestibule 1098 via outdoors. The office corridors on floors 2–4 lead to the SW01 landings by S290, S390 and S490. Querying any of the eight entrance marks now returns the same-floor crossing from the reviewed graph. The original upper-floor inquiry IDs are preserved in the confirmation records. [Marked endpoints and directions](topology-editor.md#sw03-and-sw01)
+The current route data includes crossings between SW03 and SW01 on floors 1–4. Floor 1 joins the lobby 1602 doors to vestibule 1098 via outdoors; floors 2–4 use indoor passages. These are cross-building links in the fixed route dataset.
 
 ## Rebuild and maintain
 

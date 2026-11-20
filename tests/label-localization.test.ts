@@ -1,4 +1,4 @@
-/** Single-pass evidence resolution with exact source labels and optional building-level GPS hints. */
+/** Single-pass evidence resolution with exact source labels and required building-level GPS hints. */
 import { randomUUID } from 'node:crypto';
 import { expect, it } from 'vitest';
 import { locateFromLabels, labelLocationRequestSchema } from '../server/label-localization';
@@ -41,7 +41,7 @@ function locate(
     requestId: randomUUID(),
     revision: 1,
     evidenceId: evidence.id,
-    ...(gps ? { gps } : {}),
+    gps: gps ?? hint(catalogue.buildings.map((building) => building.building)),
   });
   const result = locateFromLabels(session, input, record);
   return { result, session, record, input };
@@ -68,6 +68,24 @@ it('resolves 302 to the unique SE12 source doorway using extracted evidence only
   expect(result.candidates[0].matches.every((match) => match.kind === 'printed-label')).toBe(true);
 });
 
+it('matches a room identifier followed by its source-grounded room type', () => {
+  const { result, session } = locate([label('302 Classroom')]);
+  expect(result).toMatchObject({
+    outcome: 'candidates',
+    labelRetrieval: {
+      exactMatchPlanIds: ['SE12-F3-p1'],
+      clearLabels: ['302 CLASSROOM'],
+      unmatchedLabels: [],
+      partial: false,
+    },
+    candidates: [{ planId: 'SE12-F3-p1', anchorLabel: '302' }],
+  });
+  expect(result.candidates[0].labelMatches).toEqual([
+    { observedLabel: '302 Classroom', planLabel: '302' },
+  ]);
+  expect(session.campusLocation?.planId).toBe('SE12-F3-p1');
+});
+
 it('uses all clear labels to constrain the floor and the attached sign to select its doorway', () => {
   const { result } = locate([label('302'), label('306', 'other')], hint(['SE12']));
   expect(result.candidates[0].doorwayVicinity?.room).toBe('302');
@@ -77,13 +95,16 @@ it('uses all clear labels to constrain the floor and the attached sign to select
   ]);
 });
 
-it.each(['3021', '0302', '302A'])('preserves the complete identifier %s', (text) => {
-  expect(
-    locate([label(text)]).result.candidates.some(
-      (candidate) => candidate.doorwayVicinity?.room === '302',
-    ),
-  ).toBe(false);
-});
+it.each(['3021', '0302', '302A', '3021 Classroom', '0302 Classroom', '302 A Classroom'])(
+  'preserves the complete identifier %s',
+  (text) => {
+    expect(
+      locate([label(text)]).result.candidates.some(
+        (candidate) => candidate.doorwayVicinity?.room === '302',
+      ),
+    ).toBe(false);
+  },
+);
 
 it('abstains on conflicting, unknown, uncertain and directional-only readings', () => {
   for (const labels of [
@@ -123,9 +144,9 @@ it('uses fresh GPS building candidates and reports contradictions or an outside-
   );
 });
 
-it('narrows a repeated source identifier using the opted-in GPS building candidates', () => {
+it('narrows a repeated source identifier using required GPS building candidates', () => {
   const unscoped = locate([label('S300', 'other')]);
-  expect(unscoped.session.campusLocation).toBeNull();
+  expect(unscoped.session.campusLocation?.id).toBe(unscoped.result.candidates[0].id);
   expect(unscoped.result.candidates.length).toBeGreaterThan(1);
   expect(locate([label('S300', 'other')], hint(['SE12'])).result).toMatchObject({
     outcome: 'candidates',
@@ -169,11 +190,11 @@ it('derives a building hint on-device without transmitting latitude or longitude
 });
 
 it.each(['323', '306'])(
-  'preserves a grounded %s beside a misread sign, with or without GPS',
+  'preserves a grounded %s beside a misread sign with broad or narrow GPS scope',
   (room) => {
     for (const buildings of [undefined, hint(['SE12'])]) {
       const { result, session } = locate([label(room), label('98')], buildings);
-      expect(session.campusLocation).toBeNull();
+      expect(session.campusLocation?.id).toBe(result.candidates[0].id);
       expect(session.providerCalls).toBe(0);
       const match = result.candidates.find((c) => c.planId === 'SE12-F3-p1');
       expect(match?.labelMatches).toEqual([{ observedLabel: room, planLabel: room }]);
@@ -191,9 +212,9 @@ it.each(['323', '306'])(
   },
 );
 
-it('offers a supported contextual sign for confirmation when the only door reading is absent from the catalogue', () => {
+it('selects a supported contextual sign when the only door reading is absent from the catalogue', () => {
   const { result, session } = locate([label('306', 'other'), label('98', 'door')], hint(['SE12']));
-  expect(session.campusLocation).toBeNull();
+  expect(session.campusLocation?.anchorLabel).toBe('306');
   expect(result.candidates.map((c) => c.anchorLabel)).toEqual(['306']);
   expect(result.labelRetrieval.partial).toBe(true);
 });

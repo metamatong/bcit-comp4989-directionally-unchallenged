@@ -131,7 +131,6 @@ it('upgrades a saved journal once and retains the exact directions, history and 
       revision: 1,
       candidateId: start.id,
       destination: 'SW03 2605',
-      originId: savedNode.id,
       networkRevision: document.revision,
     },
     store,

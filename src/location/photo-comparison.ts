@@ -1,4 +1,4 @@
-/** Compare independent photo hypotheses with a historical, submission-associated reading. */
+/** Compare a photo hypothesis with its submission-associated device reading. */
 import type { CampusLocationCandidate, VisualPlan } from '../types';
 import type { DeviceReading, LocationCatalogue } from './types';
 import { deviceOverlay, overlapsBounds, overlapsFootprint } from './geometry';
@@ -24,7 +24,7 @@ export function comparePhotoLocation(
     overlay,
     message: building
       ? overlapsFootprint(reading, building.rings)
-        ? 'The reported device area overlaps this building. The floor and photo region still need confirmation.'
+        ? 'The reported device area overlaps this building. The photo provides the floor and room evidence.'
         : 'The reported device area disagrees with this building. Check your surroundings or request another reading.'
       : 'Device comparison is unavailable for this source plan.',
   };

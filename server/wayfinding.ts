@@ -7,7 +7,6 @@ import type {
   NavigationResult,
   MapStop,
   PlaceChoice,
-  StartingPoints,
   WalkingStep,
   OriginIssue,
 } from '../src/wayfinding';
@@ -31,29 +30,19 @@ import {
   routeTool,
 } from './generated-route';
 
-export const startingPointsSchema = z
+export const navigationSchema = z
   .object({
     revision: z.number().int().nonnegative(),
     candidateId: z.string().uuid(),
-  })
-  .strict();
-export const navigationSchema = startingPointsSchema
-  .extend({
     destination: z.string().trim().min(1).max(150),
     preferElevators: z.boolean().optional(),
-    originId: z.string().min(1).max(180).optional(),
     destinationId: z.string().min(1).max(180).optional(),
-    originPoint: pinSchema.optional(),
     destinationPoint: pinSchema.optional(),
     networkRevision: z.number().int().nonnegative().optional(),
   })
   .strict()
-  .refine(
-    (r) =>
-      !(r.originId || r.destinationId || r.originPoint || r.destinationPoint) ||
-      r.networkRevision !== undefined,
-  )
-  .refine((r) => !(r.originId && r.originPoint) && !(r.destinationId && r.destinationPoint));
+  .refine((r) => !(r.destinationId || r.destinationPoint) || r.networkRevision !== undefined)
+  .refine((r) => !r.destinationId || !r.destinationPoint);
 
 function stop(node: TopologyNode): MapStop {
   return {
@@ -259,18 +248,6 @@ function readVisitorMap(
   return { plans, doc, network, nodes, origins };
 }
 
-/** Source-bound checkpoints inside the photo hypothesis; routing uses a point only when unique. */
-export function startingPoints(
-  candidate: CampusLocationCandidate,
-  store: TopologyStore,
-): StartingPoints {
-  const map = readVisitorMap(candidate, store);
-  const origins = candidate.sourcePlaceId
-    ? new CampusJourney(map).selectableOrigins(candidate)
-    : map.origins;
-  return { networkRevision: map.doc.revision, origins };
-}
-
 /** Distinguish missing map coverage from evidence that could refer to multiple mapped doorways. */
 function missingOriginIssue(
   candidate: CampusLocationCandidate,
@@ -305,7 +282,7 @@ export function planVisitorJourney(
     throw new TopologyError('Analyze the current photo before requesting directions.', 409);
   const map = readVisitorMap(candidate, store, request.networkRevision);
   if (candidate.sourcePlaceId) return new CampusJourney(map).route(candidate, request);
-  if (request.originPoint || request.destinationPoint)
+  if (request.destinationPoint)
     throw new TopologyError(
       'Locate a place on the current floor map before selecting a point.',
       409,
@@ -362,7 +339,7 @@ export function planVisitorJourney(
       status: 'unmapped-origin-and-destination',
       originIssue: missingOriginIssue(candidate, map),
       message:
-        'The starting place and destination need mapped approaches before a reviewed route can be calculated.',
+        'The photo location and destination need mapped approaches before a route can be calculated.',
     };
   if (!choice.nodes.length)
     return {
@@ -370,7 +347,7 @@ export function planVisitorJourney(
       ...(destinationMatch ? { destinationMatch } : {}),
       status: 'unmapped-destination',
       message:
-        'This destination is shown in the source plan, but its arrival approach has not been connected to the reviewed graph.',
+        'This destination is shown in the source plan, but its entrance has no mapped connection to a walking area.',
     };
   if (!origins.length) {
     const originIssue = missingOriginIssue(candidate, map);
@@ -379,30 +356,9 @@ export function planVisitorJourney(
       ...(destinationMatch ? { destinationMatch } : {}),
       status: 'unmapped-origin',
       originIssue,
-      message:
-        originIssue === 'ambiguous-doorway'
-          ? 'This room has multiple source doorways. The extracted label does not identify a unique starting doorway.'
-          : originIssue === 'unmapped-doorway'
-            ? 'The room label was found on the plan, but its doorway and walking connection have not been mapped for routing yet.'
-            : 'This place is on the plan, but a walking route from it has not been mapped yet.',
+      message: 'The photo location could not be connected to a mapped walking area.',
     };
   }
-  const origin = request.originId
-    ? origins.find((n) => n.id === request.originId)
-    : origins.length === 1
-      ? origins[0]
-      : undefined;
-  if (!origin)
-    return {
-      ...context,
-      ...(destinationMatch ? { destinationMatch } : {}),
-      status: origins.length > 1 ? 'unmapped-origin' : 'choose-origin',
-      ...(origins.length > 1 ? { originIssue: 'ambiguous-region' as const } : {}),
-      message:
-        origins.length > 1
-          ? 'The photo covers more than one reviewed starting point. Take a closer photo of the doorway or sign beside you.'
-          : 'The exact starting point could not be identified. Try a closer photo of a mapped doorway, stair landing, or elevator.',
-    };
   const preferredEdges = new Set(
     doc.edges
       .filter((edge) => edge.kind !== (request.preferElevators ? 'stairs' : 'elevator'))
@@ -410,18 +366,20 @@ export function planVisitorJourney(
       .filter((id) => network.allowed.has(id)),
   );
   const routesUsing = (allowed: ReadonlySet<string>) =>
-    choice.nodes
-      .map((n) =>
-        computeTopologyRoute(
-          doc,
-          {
-            revision: doc.revision,
-            fromNodeId: origin.id,
-            toNodeId: n.id,
-            mode: 'fewest-connections',
-          },
-          plans,
-          allowed,
+    origins
+      .flatMap((origin) =>
+        choice.nodes.map((n) =>
+          computeTopologyRoute(
+            doc,
+            {
+              revision: doc.revision,
+              fromNodeId: origin.id,
+              toNodeId: n.id,
+              mode: 'fewest-connections',
+            },
+            plans,
+            allowed,
+          ),
         ),
       )
       .filter((r) => r.outcome === 'route')
@@ -433,8 +391,7 @@ export function planVisitorJourney(
       ...context,
       ...(destinationMatch ? { destinationMatch } : {}),
       status: 'no-route',
-      message:
-        'The marked places are known, but a continuous reviewed walking route between them is missing.',
+      message: 'The photo location and destination do not have a continuous walking route.',
     };
   const byId = new Map(nodes.map((n) => [n.id, n]));
   const edges = new Map(doc.edges.map((e) => [e.id, e]));
@@ -455,13 +412,13 @@ export function planVisitorJourney(
     ...context,
     ...(destinationMatch ? { destinationMatch } : {}),
     status: 'route',
-    origin,
+    origin: stop(byId.get(route.nodeIds[0])!),
     destination: stop(byId.get(route.nodeIds.at(-1)!)!),
     steps: removeBacktracking(steps),
   };
 }
 
-/** Visitor navigation uses only the current reviewed graph and its source corridor traces. */
+/** Visitor navigation uses source-bound route geometry and fixed building links. */
 export async function planVisitorNavigation(
   candidate: CampusLocationCandidate,
   request: NavigationChoice,
@@ -482,7 +439,7 @@ export async function planVisitorNavigation(
       origins: [],
       destinations: reviewed.destinations,
       status: 'no-route',
-      message: 'The saved corridor geometry needs review before directions can be displayed.',
+      message: 'The mapped walking path crosses an area that is not open for travel.',
     };
   return reviewed;
 }
@@ -591,7 +548,7 @@ export async function planAiVisitorJourney(
       role: 'user' as const,
       parts: [
         {
-          text: `Current reviewed floor connections: ${JSON.stringify(floorConnections.filter((connection) => planIds.includes(connection.from.planId) && planIds.includes(connection.to.planId)))}. These source-bound landings and permitted directions are available when joining floor-local paths. Use their recorded points and direction when using these transfers.`,
+          text: `Mapped floor transfers: ${JSON.stringify(floorConnections.filter((connection) => planIds.includes(connection.from.planId) && planIds.includes(connection.to.planId)))}. These source-bound landings and permitted directions are available when joining floor-local paths. Use their recorded points and direction when using these transfers.`,
         },
         {
           text: `Source-drawing corridor polylines in normalized page coordinates: ${JSON.stringify(drawingTraces)}. These are drawing evidence. Follow their intermediate bends when they describe your corridor. Preserve every bend needed to stay inside a corridor. Generate other floor-local legs from the supplied plan images. All returned floor paths will be checked for intersections with source drawing strokes. A direct line between endpoints is valid only when the entire segment follows the visible corridor.`,

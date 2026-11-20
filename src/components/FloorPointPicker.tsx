@@ -16,7 +16,6 @@ type Props = {
   candidate: CampusLocationCandidate;
   destination: string;
   plans: VisualPlan[];
-  role: 'origin' | 'destination';
   initiallyOpen?: boolean;
   onPick: (pin: FloorPin) => void;
 };
@@ -145,7 +144,6 @@ export function FloorPointPicker({
   sessionId,
   revision,
   onPick,
-  role,
   initiallyOpen = false,
 }: Props) {
   const [open, setOpen] = useState(initiallyOpen);
@@ -154,12 +152,11 @@ export function FloorPointPicker({
   const [surface, setSurface] = useState<WalkingSurface>();
   const [error, setError] = useState('');
   const scope = mapDestinationScope(destination);
-  const chooseBuilding = role === 'destination' && scope !== undefined && !scope.building;
+  const chooseBuilding = scope !== undefined && !scope.building;
   const building = scope?.building ?? selectedBuilding;
-  const floors = plans.filter((p) =>
-    role === 'origin'
-      ? p.id === candidate.planId
-      : scope !== undefined && p.building === building && (!scope.floor || p.floor === scope.floor),
+  const floors = plans.filter(
+    (p) =>
+      scope !== undefined && p.building === building && (!scope.floor || p.floor === scope.floor),
   );
   const plan =
     floors.find((p) => p.id === floorId) ??
@@ -172,7 +169,7 @@ export function FloorPointPicker({
     const abort = new AbortController();
     request<WalkingSurface>(
       '/api/sessions/' + sessionId + '/navigation/surface',
-      { revision, candidateId: candidate.id, role, destination, planId: plan.id },
+      { revision, candidateId: candidate.id, destination, planId: plan.id },
       { signal: abort.signal },
     )
       .then((s) => {
@@ -182,16 +179,14 @@ export function FloorPointPicker({
         if (!abort.signal.aborted) setError(e.message);
       });
     return () => abort.abort();
-  }, [open, plan?.id, role, candidate.id, destination, revision, sessionId]);
+  }, [open, plan?.id, candidate.id, destination, revision, sessionId]);
   return (
     <details
       className="floor-point-picker"
       open={open}
       onToggle={(e) => setOpen(e.currentTarget.open)}
     >
-      <summary>
-        {role === 'origin' ? 'Adjust starting point on the map' : 'Choose a destination on the map'}
-      </summary>
+      <summary>Choose a destination on the map</summary>
       {open && (
         <>
           {chooseBuilding && (
@@ -233,7 +228,7 @@ export function FloorPointPicker({
             (!surface || surface.planId !== plan.id ? (
               <p role="status">Loading walking areas…</p>
             ) : (
-              <MapSelection key={plan.id + role} plan={plan} surface={surface} onPick={onPick} />
+              <MapSelection key={plan.id} plan={plan} surface={surface} onPick={onPick} />
             ))}
         </>
       )}

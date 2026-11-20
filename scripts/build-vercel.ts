@@ -148,7 +148,6 @@ await writeFile(
     routes: [
       { src: '^/api(?:/.*)?$', dest: '/api' },
       { src: '^/data/campus/visual/(?:png|atlas)/.+\\.png$', dest: '/api' },
-      { src: '^/internal/topology(?:/.*)?$', dest: '/api' },
       ...redirects,
       { handle: 'filesystem' },
     ],

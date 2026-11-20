@@ -105,7 +105,7 @@ describe('source-grounded device location', () => {
       ).message;
     });
     expect(new Set(messages).size).toBe(1);
-    expect(messages[0]).toContain('floor and photo region still need confirmation');
+    expect(messages[0]).toContain('photo provides the floor and room evidence');
     const rings = [
       [
         [0, 0],

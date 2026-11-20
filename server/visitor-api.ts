@@ -3,26 +3,16 @@ import { aiProviderDetails, type AiProviderName } from '../src/ai-provider';
 import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 export const actionSchema = z.discriminatedUnion('type', [
-  z.object({ type: z.literal('confirm-campus-region'), candidateId: z.string().uuid() }).strict(),
   z.object({ type: z.literal('reset') }).strict(),
 ]);
 import { newSession } from './session';
 import { ProviderError, type Provider } from './provider';
-import {
-  labelLocationRequestSchema,
-  locateFromLabels,
-  selectLocatedCandidate,
-} from './label-localization';
+import { labelLocationRequestSchema, locateFromLabels } from './label-localization';
 import { readPhotoEvidence, PhotoEvidenceError } from './photo-evidence';
 import { photoEvidenceRequestSchema, releasePhotoBytes } from './photo-media';
 import { TopologyError, type TopologyStore } from './topology';
 import { pointFloor } from './map-points';
-import {
-  navigationSchema,
-  planVisitorNavigation,
-  startingPoints,
-  startingPointsSchema,
-} from './wayfinding';
+import { navigationSchema, planVisitorNavigation } from './wayfinding';
 import type { VisitorRecord, VisitorSessions } from './visitor-sessions';
 
 type Reply = { body: unknown; status?: number; changed?: boolean; retryAfter?: number };
@@ -80,16 +70,12 @@ function action(
       },
     };
   try {
-    if (action.type === 'confirm-campus-region')
-      selectLocatedCandidate(session, action.candidateId);
-    else {
-      delete record.evidence;
-      Object.assign(session, newSession(available, providerName), {
-        id: session.id,
-        revision: session.revision,
-        appliedActions: session.appliedActions,
-      });
-    }
+    delete record.evidence;
+    Object.assign(session, newSession(available, providerName), {
+      id: session.id,
+      revision: session.revision,
+      appliedActions: session.appliedActions,
+    });
     session.appliedActions = [...session.appliedActions, requestId].slice(-80);
     session.revision++;
     session.lastTouched = Date.now();
@@ -122,7 +108,7 @@ function photoStage(options: Options, stage: 'evidence' | 'location'): Operation
           error:
             stage === 'evidence'
               ? `Choose a valid photo with its detail crops and explicitly agree to send it to ${provider.recipient}.`
-              : 'Submit the current evidence ID and optional device building candidates. This step accepts no images.',
+              : 'Submit the current evidence ID and GPS-derived building candidates. This step accepts no images.',
         },
       };
     if (stage === 'evidence' && !options.liveAvailable)
@@ -202,58 +188,39 @@ function photoStage(options: Options, stage: 'evidence' | 'location'): Operation
     }
   };
 }
-function navigation(store: TopologyStore, origins: boolean): Operation {
+function navigation(store: TopologyStore): Operation {
   return async (req, res, { session }) => {
     const controller = new AbortController();
     res.on('close', () => {
       if (!res.writableEnded) controller.abort();
     });
     try {
-      let result;
-      if (origins) {
-        const input = startingPointsSchema.safeParse(req.body);
-        if (!input.success)
-          return { status: 400, body: { error: 'Choose a starting area from the current photo.' } };
-        const candidate = session.campusAnalysis?.candidates.find(
-          (c) => c.id === input.data.candidateId,
-        );
-        if (!candidate || input.data.revision !== session.revision)
-          return {
-            status: 409,
-            body: {
-              error: 'The photo session changed. Refresh before choosing a starting point.',
-              session,
-            },
-          };
-        result = startingPoints(candidate, store);
-      } else {
-        const input = navigationSchema.safeParse(req.body);
-        if (!input.success)
-          return {
-            status: 400,
-            body: {
-              error: 'Enter a destination for the current photo location.',
-            },
-          };
-        if (
-          input.data.revision !== session.revision ||
-          session.campusLocation?.id !== input.data.candidateId ||
-          !session.campusAnalysis?.candidates.some((c) => c.id === input.data.candidateId)
-        )
-          return {
-            status: 409,
-            body: {
-              error: 'Analyze a current photo before requesting directions.',
-              session,
-            },
-          };
-        result = await planVisitorNavigation(
-          session.campusLocation,
-          input.data,
-          store,
-          controller.signal,
-        );
-      }
+      const input = navigationSchema.safeParse(req.body);
+      if (!input.success)
+        return {
+          status: 400,
+          body: {
+            error: 'Enter a destination for the current photo location.',
+          },
+        };
+      if (
+        input.data.revision !== session.revision ||
+        session.campusLocation?.id !== input.data.candidateId ||
+        !session.campusAnalysis?.candidates.some((c) => c.id === input.data.candidateId)
+      )
+        return {
+          status: 409,
+          body: {
+            error: 'Analyze a current photo before requesting directions.',
+            session,
+          },
+        };
+      const result = await planVisitorNavigation(
+        session.campusLocation,
+        input.data,
+        store,
+        controller.signal,
+      );
       session.lastTouched = Date.now();
       return { body: result, changed: true };
     } catch (error) {
@@ -311,14 +278,15 @@ export function visitorRouter(
   router.post('/:id/photo/evidence', mutation(sessions, photoStage(options, 'evidence')));
   router.post('/:id/photo', mutation(sessions, photoStage(options, 'location')));
   router.post('/:id/photo/location', mutation(sessions, photoStage(options, 'location')));
-  router.post('/:id/navigation/origins', mutation(sessions, navigation(topology, true)));
   router.post('/:id/navigation/surface', async (req, res) => {
-    const input = startingPointsSchema
-      .extend({
-        role: z.enum(['origin', 'destination']),
+    const input = z
+      .object({
+        revision: z.number().int().nonnegative(),
+        candidateId: z.string().uuid(),
         destination: z.string().max(150),
         planId: z.string().max(100),
       })
+      .strict()
       .safeParse(req.body);
     if (!input.success) {
       res.status(400).json({ error: 'Select a floor for this trip.' });
@@ -335,16 +303,11 @@ export function visitorRouter(
       candidate.id !== input.data.candidateId ||
       record.session.revision !== input.data.revision
     ) {
-      res.status(409).json({ error: 'Locate your starting floor before choosing a map point.' });
+      res.status(409).json({ error: 'Analyze a current photo before choosing a map point.' });
       return;
     }
     try {
-      const floor = pointFloor(
-        candidate,
-        input.data.role,
-        input.data.destination,
-        input.data.planId,
-      );
+      const floor = pointFloor(candidate, input.data.destination, input.data.planId);
       res.json({
         planId: floor.plan.id,
         sourceSha256: floor.plan.sourceSha256,
@@ -358,7 +321,7 @@ export function visitorRouter(
       res.status(error.httpStatus).json({ error: error.message });
     }
   });
-  router.post('/:id/navigation', mutation(sessions, navigation(topology, false)));
+  router.post('/:id/navigation', mutation(sessions, navigation(topology)));
   router.post(
     '/:id/actions',
     mutation(sessions, (req, _res, record) =>

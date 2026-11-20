@@ -22,7 +22,7 @@ beforeEach(() => {
 });
 afterEach(() => rmSync(directory, { recursive: true, force: true }));
 
-async function navigate(plan: string, sign: string, destination: string, allowDoorChoice = false) {
+async function navigate(plan: string, sign: string, destination: string) {
   const readings = resolveStartingSigns([
     { text: sign, kind: 'room', placement: 'door', clarity: 'clear', viewId: 'full' },
   ]);
@@ -30,13 +30,6 @@ async function navigate(plan: string, sign: string, destination: string, allowDo
   const candidate = candidateFromSignMatch(match, readings.references);
   const request = { revision: 0, candidateId: candidate.id, destination };
   const result = await planVisitorNavigation(candidate, request, store);
-  if (allowDoorChoice && result.status === 'choose-origin') {
-    return planVisitorNavigation(
-      candidate,
-      { ...request, originId: result.origins[0].id, networkRevision: result.networkRevision },
-      store,
-    );
-  }
   return result;
 }
 
@@ -46,7 +39,7 @@ it.each([
 ])(
   'walks between %s %s and %s using the confirmed outdoor entrances',
   async (plan, sign, goal, from, to) => {
-    const result = await navigate(plan, sign, goal, sign === '1920');
+    const result = await navigate(plan, sign, goal);
     if (result.status !== 'route') throw Error(result.status);
     const crossing = result.steps.find((s) => s.kind === 'outdoor')!;
     expect([crossing.from.planId, crossing.to.planId]).toEqual(['SW3-F1-p1', 'SW3-F1-p1']);
@@ -88,7 +81,7 @@ it('removes access from the main passage to 1920 when the outdoor crossing is wi
       note: 'Withdraw the outdoor permission in this copy.',
     },
   });
-  const result = await navigate('SE12-F3-p1', '323', 'SW03 1920', true);
+  const result = await navigate('SE12-F3-p1', '323', 'SW03 1920');
   expect(result.status).not.toBe('route');
   expect(result.mappedPortion?.destination.id).not.toBe(binding.toNodeId);
 });

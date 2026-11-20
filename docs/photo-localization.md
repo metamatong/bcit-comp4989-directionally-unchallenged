@@ -1,52 +1,31 @@
 # Photo evidence and source localization
 
-The visitor workflow uses the photograph in one vision stage. Every later request uses structured evidence and saved source records.
+The visitor workflow uses the photograph in one vision stage. Later requests use structured evidence and source records.
 
 ## Extraction
 
-The browser prepares one full view and four overlapping detail crops directly from the original image. Selection stays local. **Get Directions** sends the consented bundle to `POST /api/sessions/:id/photo/evidence`. The configured provider receives these views without map hints or the destination.
+The browser prepares one full view and four overlapping detail crops from the original image. Selection stays local. **Get Directions** sends the photo bundle to `POST /api/sessions/:id/photo/evidence`. The configured provider receives the views without map hints or the destination.
 
 The bounded result contains exact labels, clarity, source view, label kind and sign placement. Kinds distinguish room and landmark signs, explicitly printed building identifiers and explicitly printed floor numbers. Placement distinguishes door signs, directional signs and other/unknown contexts. Structured features record visible door count, window side relative to the photo and corridor shape. Unclear fields remain null or unknown.
 
-Exact identifiers preserve all digits, prefixes, suffixes and leading zeroes. Labels are not derived from expected room numbering. A strict OpenAI schema bounds the response, and application validation rejects unusable or incomplete output. Explicit transport recovery shares the extraction deadline.
+Exact identifiers preserve all digits, prefixes, suffixes and leading zeroes. Labels are not derived from expected room numbering. Application validation rejects unusable or incomplete output.
 
-## Evidence receipt and location
+## Evidence receipt and automatic starting match
 
 The server retains an image-free, session-bound receipt containing the image/crop fingerprint, extracted fields, source scope and expiry. It releases request media bytes after extraction. Receipts expire after five minutes and are invalidated by a new extraction or reset.
 
-`POST /api/sessions/:id/photo/location` accepts a request UUID, current session revision, evidence ID and optional GPS-derived building hint. It rejects photos, crops and client-supplied extracted labels. The `/photo` alias accepts the same metadata-only request. Requests are serialized by the existing session lease and remain idempotent by stage/request ID.
+`POST /api/sessions/:id/photo/location` accepts a request UUID, current session revision, evidence ID and required GPS-derived building hint. It rejects photos, crops and client-supplied extracted labels. The browser computes building candidates from official footprints and keeps raw coordinates locally.
 
-The resolver narrows the candidate buildings using explicit building/floor signage and any fresh device building matches. It compares every clear nondirectional room or landmark reading against the supplied records, preserving the full identifier. It automatically selects a single place only when all those readings agree. Direction signs remain visible as context.
+The resolver uses GPS to narrow the building candidates, then ranks exact source matches using the photo labels, sign placement and available floor evidence. It selects the strongest source-linked estimate automatically. The visitor is not asked to confirm a starting room, doorway or corridor. If no usable source match remains, the app explains the gap and offers a new photo.
 
-When a second reading is missing from the catalogue or disagrees with the location, a supported doorway can be offered for explicit confirmation. Competing supported doorway signs on disjoint floors cannot silently select either floor. For example, a reported `323` and `98` with a device match for SE12 offers SE12 floor 3 room 323 and explains the unmatched reading. The navigation endpoint requires the visitor to select the candidate first. The visitor can also reject it and take another photo. The evidence panel shows the actual readings and the provider’s reported clarity.
+GPS can narrow a building but cannot distinguish floors within that building. The photo and exact source labels provide floor evidence. When multiple floors remain plausible, the implementation ranks photo matches and takes the top match; the current data does not provide an indoor GPS signal that could independently resolve the floor. Building footprints and per-floor drawing alignment are separate coverage layers. [Device-location coverage](device-location.md)
 
+Window and corridor features remain observations because most source records lack equivalent semantic annotations. The resolver rejects contradictory evidence, such as a clear door-attached sign combined with a reported zero visible doorways. It does not infer camera heading, scale, distance or exact physical position from photo features.
 
-Window and corridor features remain visible observations because most source records lack equivalent semantic annotations. The resolver rejects an internally contradictory zero-visible-door result paired with a door-attached sign. It does not infer a camera heading, scale, distance or exact physical position from the photo features.
+## Navigation
 
-## Optional GPS
+`POST /api/sessions/:id/navigation` resolves the destination and searches source-derived floor walking areas plus mapped transfers. No start-selection endpoint or starting-map-point picker is exposed. A missing starting approach or route remains a coverage gap and does not trigger a manual approval flow.
 
-The unchecked-by-default photo option confirms the visitor is currently at the photographed location. After extraction, the browser requests a fresh reading and compares its accuracy area with official building footprints. Raw latitude/longitude stay in browser memory. The location request sends only matching building IDs, accuracy, capture time and the footprint hash.
+## Remaining source limits
 
-The server validates freshness and map provenance before applying building scope to the source evidence. A valid matched footprint with no usable sign returns a building-only result with no floor, doorway or route. Contradictory building evidence remains unresolved. GPS failure is displayed, while unique label evidence can still resolve a place. [Device lifecycle](device-location.md)
-
-## Navigation and rendering
-
-`POST /api/sessions/:id/navigation` resolves the destination and computes a route over current approved graph points and connections, respecting source hashes, endpoint versions and direction. Source corridor bends produce the walking lines. The visitor planner includes source-derived floor cells and explicit door crossings. [Floor routing](floor-routing.md) Missing endpoints or connections produce a coverage gap.
-
-Location lookup, navigation and drawing the arrows make no provider requests. Relevant source plans are loaded only for displaying the result. Legacy visual-comparison helpers are outside the visitor request path.
-
-## Verification
-
-Tests cover a single provider stage, metadata-only lookup, exact identifier boundaries, directional-sign abstention, source doorway ambiguity, GPS consent/freshness/conflict, session/evidence binding, stale writes, retries and cancellation. Normal visitor API tests use a provider that rejects every operation except evidence extraction. Browser tests assert that only the extraction request carries media. Live checks and mocked GPS tests are recorded separately in the [verification record](verification.md).
-
-## Door plaques and direction signs
-
-The extraction stage records sign placement and the visible travel cue separately. An explicit arrow or instruction to travel excludes that sign from the starting location. Two complete room numbers can identify an approximate shared corridor when their entrances face each other on one floor plan.
-
-The app can select that corridor automatically when the room signs are clearly associated with doorways and the other evidence agrees. A straight hall with visible doors lets the app offer a corridor for confirmation when the provider marks the signs as directional but reports no explicit arrow or instruction, including older receipts without a cue field. The visitor can inspect the marked plan and select **Yes, I’m in this corridor** or **I’m somewhere else**. Navigation accepts an ambiguous corridor only after the visitor selects it. Lockers and the number of doors alone cannot locate a floor. [Shared corridor geometry](floor-routing.md#starting-between-two-rooms)
-
-## Label recognition and starting-route coverage
-
-A source occurrence binds its printed label and bounds to the original PDF and compiled graph. The printed bounds locate the sign on the drawing. Walking starts use a door or a point in the signed corridor. SE12 323 has two marked approaches to its window corridor. Selecting a door uses the current session evidence without sending another image.
-
-The app distinguishes a missing doorway, a doorway awaiting a public approach, and a missing connection between known approaches. A fallback model is recorded with the extraction and does not affect routing.
+The public visitor UI and API no longer expose a connection-review editor. Current route coverage still depends on the source-bound connections present in the published route dataset. Replacing same-building hand-authored transfer records with automatic transfer inference requires floor-to-floor geometric correspondence in the source data; that correspondence is not present for every plan. Cross-building links remain fixed developer-maintained data.

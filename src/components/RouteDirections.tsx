@@ -5,10 +5,8 @@ import { planLabel } from '../topology';
 import type { VisualPlan } from '../types';
 import type { MapStop, NavigationResult, PlaceChoice, WalkingStep } from '../wayfinding';
 import { RouteMapImage, type MapMarker } from './RouteMap';
-import type { DeviceOverlay, LocationCatalogue } from '../location/types';
-import { deviceOverlay, overlapsFootprint } from '../location/geometry';
+import type { LocationCatalogue } from '../location/types';
 import { useWalkingLocation } from '../location/use-device-location';
-import { WalkingDeviceLocation } from './WalkingDeviceLocation';
 import { GuidedDirections } from './GuidedDirections';
 
 type FoundRoute = Extract<NavigationResult, { status: 'route' }>;
@@ -61,7 +59,6 @@ function FloorMap({
   first,
   last,
   whole,
-  device,
   requestedRoom,
   requestedOrigin,
 }: {
@@ -70,7 +67,6 @@ function FloorMap({
   first: boolean;
   last: boolean;
   whole: boolean;
-  device?: DeviceOverlay | null;
   requestedRoom?: PlaceChoice;
   requestedOrigin?: PlaceChoice;
 }) {
@@ -116,7 +112,6 @@ function FloorMap({
         markers={markers}
         bounds={first ? visit.start.startRegion : undefined}
         whole={whole}
-        device={device}
         label={`${heading}, walking directions from ${visit.start.label} to ${visit.end.label}`}
       />
       <figcaption>
@@ -152,8 +147,9 @@ export function RouteDirections({
   preferElevators?: boolean;
 }) {
   const [guided, setGuided] = useState(false);
+  const [startingGuided, setStartingGuided] = useState(false);
+  const [guidedError, setGuidedError] = useState('');
   const [whole, setWhole] = useState(false);
-  const [activeVisit, setActiveVisit] = useState(0);
   const tracking = useWalkingLocation();
   const headingRef = useRef<HTMLHeadingElement>(null);
   useEffect(() => {
@@ -162,26 +158,46 @@ export function RouteDirections({
   }, [route.origin.id, route.destination.id, guided]);
   const visits = floorItinerary(route);
   const planById = new Map(plans.map((plan) => [plan.id, plan]));
-  const activePlan = planById.get(visits[activeVisit].start.planId)!;
-  const calibration = locationCatalogue?.floors.find((floor) => floor.planId === activePlan.id);
-  const building = locationCatalogue?.buildings.find(
-    (item) => item.building === activePlan.building,
-  );
-  const outside = !!(
-    tracking.fresh &&
-    tracking.reading &&
-    building &&
-    !overlapsFootprint(tracking.reading, building.rings)
-  );
-  const overlay =
-    tracking.fresh && tracking.reading
-      ? deviceOverlay(tracking.reading, activePlan, calibration)
-      : null;
   const routePlans = [...new Set(visits.map((visit) => visit.start.planId))].map((id) =>
     planById.get(id)!,
   );
+  useEffect(() => {
+    if (!startingGuided) return;
+    if (tracking.fresh) {
+      setStartingGuided(false);
+      setGuided(true);
+      return;
+    }
+    if (tracking.status && !tracking.status.startsWith('Waiting for a fresh device reading')) {
+      setStartingGuided(false);
+      setGuidedError(tracking.status);
+      if (tracking.active) tracking.stop();
+    }
+  }, [startingGuided, tracking.fresh, tracking.status, tracking.active]);
+  function startGuided() {
+    setGuidedError('');
+    if (tracking.fresh) {
+      setGuided(true);
+      return;
+    }
+    setStartingGuided(true);
+    tracking.start();
+  }
+  function returnToOverview() {
+    tracking.stop();
+    setStartingGuided(false);
+    setGuided(false);
+  }
   if (guided)
-    return <GuidedDirections route={route} plans={plans} onOverview={() => setGuided(false)} />;
+    return (
+      <GuidedDirections
+        route={route}
+        plans={plans}
+        locationCatalogue={locationCatalogue}
+        tracking={tracking}
+        onOverview={returnToOverview}
+      />
+    );
   return (
     <div className="route-directions">
       <div className="way-heading">
@@ -215,23 +231,33 @@ export function RouteDirections({
       <p className="helper" role="note">
         {preferElevators
           ? route.steps.some((step) => step.kind === 'stairs')
-            ? 'This route includes stairs. No complete stair-free alternative is mapped. Accessibility is unverified.'
-            : 'Elevators preferred. Accessibility and elevator availability are unverified.'
+            ? 'No mapped elevator route is available for the full trip, so this route includes stairs.'
+            : 'Elevators preferred.'
           : route.steps.some((step) => step.kind === 'elevator')
             ? 'This route uses an elevator because no complete route without elevators is mapped.'
             : 'Stairs preferred.'}
       </p>
       {!requestedRoom && !requestedOrigin && route.steps.length > 0 && (
-        <button
-          type="button"
-          className="primary full-width"
-          onClick={() => {
-            tracking.stop();
-            setGuided(true);
-          }}
-        >
-          GO
-        </button>
+        <>
+          {guidedError && (
+            <p className="photo-failure" role="alert">
+              {guidedError}
+            </p>
+          )}
+          {startingGuided && (
+            <p className="helper" role="status">
+              Allow device location to start step-by-step directions…
+            </p>
+          )}
+          <button
+            type="button"
+            className="primary full-width"
+            disabled={startingGuided}
+            onClick={startGuided}
+          >
+            {startingGuided ? 'Getting GPS location…' : 'GO'}
+          </button>
+        </>
       )}
       <div className="route-map-stack" role="group" aria-label="Route maps in travel order">
         <div className="map-bar">
@@ -249,7 +275,6 @@ export function RouteDirections({
             requestedRoom={index === visits.length - 1 ? requestedRoom : undefined}
             requestedOrigin={index === 0 ? requestedOrigin : undefined}
             whole={whole}
-            device={index === activeVisit ? overlay : null}
           />
         ))}
         <div className="map-credit">
@@ -264,38 +289,6 @@ export function RouteDirections({
           </details>
         </div>
       </div>
-      <details className="route-device-controls">
-        <summary>
-          {tracking.active
-            ? `Device position · tracking ${planLabel(activePlan)}`
-            : 'Device position'}
-        </summary>
-        {visits.length > 1 && (
-          <label className="tracking-floor-choice">
-            Current floor
-            <select
-              aria-label="Current tracking floor"
-              value={activeVisit}
-              onChange={(event) => {
-                tracking.stop();
-                setActiveVisit(Number(event.target.value));
-              }}
-            >
-              {visits.map((visit, index) => (
-                <option key={index} value={index}>
-                  {planLabel(planById.get(visit.start.planId)!)} · {visit.start.label}
-                </option>
-              ))}
-            </select>
-          </label>
-        )}
-        <WalkingDeviceLocation
-          tracking={tracking}
-          floorLabel={planLabel(activePlan)}
-          calibration={calibration}
-          outside={outside}
-        />
-      </details>
       <button type="button" className="text-button" onClick={onRecheck}>
         Recheck current route
       </button>

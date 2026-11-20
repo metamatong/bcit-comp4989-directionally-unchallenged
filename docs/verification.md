@@ -1,5 +1,14 @@
 # Verification record
 
+This file is a historical log. Older entries describe workflows and route data that have since changed. The current visitor app uses GPS-required automatic start matching and has no start-confirmation, connection-review or topology-editor screen/API; see [current architecture](architecture.md) and [device-location coverage](device-location.md).
+
+
+## PR #24 conflict resolution · November 19, 2026
+
+Merged the PR head `fe7c38c` with main `0261e7d` using a two-parent Git merge. Resolved eleven conflicting files. Retained main's current floor graphs, west-wing routes, partial-route handling and GPS building context during extraction. Adopted the PR's required GPS, automatic starting estimates and guided-position flow; removed editor API tests now verify the endpoints cannot mutate or expose storage. The thirteen proposed geographic registrations remain inactive development candidates pending independent source evidence.
+
+Validation: all 490 unit/DOM tests across 49 files passed (`npm run test:unit`), followed by successful `npm run build` and `npm run data:validate`. Validation covered 89 compiled floor graphs, 3,463 source-place occurrences, 90 source hashes and revision-89 published topology. This verifies data integrity, not general route coverage: 88 floors still lack active geographic alignment, and existing routing coverage gaps remain documented. No browser/screenshot checks, new live-provider photo runs or physical-campus validation were performed for this merge. Earlier photo simulations remain historical and were not derived from image GPS metadata.
+
 ## GPS building context during extraction · November 19, 2026
 
 Implemented in the main-comparison worktree based on `f845b414e5ddcc7e1588a2941391d67e7b717d69`. Optional GPS is now captured before extraction. The API accepts validated building IDs, timestamp, accuracy and source hash; only building IDs enter the provider prompt as uncertain context. No raw coordinates, floor plans, room list or inferred floor is forwarded. Instructions still require exact visible characters and forbid filling obscured text from the hint. The later location/routing stages remain model-free. Evidence fingerprints and browser retry caching include building/source context; stale GPS is reacquired before location. The optional checkbox and main's ambiguity/confirmation behavior remain in place.
@@ -26,6 +35,64 @@ Validation: `npm run format`, `npm run test:unit` (**491 tests, 49 files passed*
 `npm test` was not used because it also launches Playwright; browser/screenshot checks remain skipped per the user's instructions. Mocked provider/device tests, the live Gemini batch and unperformed physical-campus checks are distinct. No Git actions or deployment occurred during this change.
 
 
+## Main comparison with the same ten photos · November 19, 2026
+
+At the user's request to return to main and compare behavior, created a separate managed worktree at local main `f845b414e5ddcc7e1588a2941391d67e7b717d69`. The main checkout is detached at that commit; the original `cole-gps-coverage` checkout and its uncommitted reconciliation edits remain intact. No pull, commit, push, merge or deployment occurred. The main worktree's application files were not edited. It reused installed dependencies through a directory junction, read the original private configuration without copying it, and ran a temporary copy of the same photo harness. Both temporary HTTP listeners have stopped.
+
+Ran `node --import tsx tmp/local-photo-batch.ts` in the main worktree with the same ten original files, image preparation, simulated SE12/SW3 GPS scopes, Gemini configuration, published network revision 89 and destinations (`SE12 302`, `SW03 1730`). This fresh run returned eight successful extractions and two HTTP 504 errors. Main automatically located three photos, offered candidates requiring selection for three, and found no starting candidates for two. The two failed extractions produced no navigation attempts. All six navigation requests submitted for the three automatic starts returned routes.
+
+| Photo | Fresh main result | Earlier revised result |
+| --- | --- | --- |
+| `IMG20261116141702.jpg` | Automatic 319; both routes returned | Automatic 319; both routes returned |
+| `IMG20261116141611.jpg` | Provider timeout after primary/fallback attempts | Automatic 311 from 311/313 readings |
+| `discord-temp-38A5926D-4B16-483E-90D4-37761CC35000.jpg` | Provider timeout on fallback while primary was cooling down | Read 1730, but contradictory zero-door evidence prevented localization |
+| `photoooo.jpg` | Candidate 302 requires confirmation because CLASSROOM is unmatched | Automatic 302 |
+| `IMG_8200.jpg` | Automatic SW03 floor-2 corridor 2600 between 2680 and 2695; both routes returned | Provider timeout |
+| `IMG20261116141532.jpg` | Locker labels; no starting candidates | Same unresolved outcome |
+| `IMG20261116141547.jpg` | No readable labels; no starting candidates | Uncertain 102; no starting candidates |
+| `IMG20261116141555.jpg` | Offers 309A and questionable 301 for selection | Automatically selects questionable 301 |
+| `IMG20261116141524.jpg` | Offers 306 and 308 for selection | Automatically selects 308 |
+| `IMG_8205.jpg` | Automatic 323; both routes returned | Automatic 323; both routes returned |
+
+Fresh provider responses varied in label classification and availability. Main made twelve transport attempts: eight successes, three timeouts and one 503. The extraction implementation (`server/photo-evidence.ts`), Gemini adapter/configuration, browser photo preparation and published network JSON match the reconciled checkout after line-ending normalization. Therefore the live-run differences alone do not establish a code regression.
+
+To isolate implementation differences, ran `node --import tsx tmp/compare-photo-evidence.ts` in the original checkout, then ran it again with the main worktree's `tmp/photo-batch-2026-11-19/results.json` argument and output name `main-fresh-evidence-comparison`. These checks replayed all nine successful original receipts and all eight successful main receipts through both implementations, refreshing expiry metadata only and making no provider calls. All **17 candidate-set comparisons matched**. For each revised selected candidate, the main planner was tested with the corresponding source-place candidate and, when required, each offered origin. All **24 route comparisons matched exactly** in origin, destination and walking steps. These cover seven distinct photos with routable estimates; repeated evidence sets are not independent accuracy samples. The other three photos remain unresolved consistently when fed the same evidence.
+
+No route-path regression was observed for these inputs and destinations. Start selection is intentionally different: with the original evidence, main requires candidate confirmation for five of the six photos that the revised implementation starts automatically; main additionally asks for a doorway for the 311 candidate. The questionable 301 reading appears in both live runs, but only the revised implementation commits to it automatically. That remains an unresolved localization risk; unchanged route geometry does not validate the starting estimate. The 306/308 ranking also does not establish which doorway the camera is nearest.
+
+Image-free artifacts are retained under the original checkout's ignored `tmp/photo-batch-2026-11-19/`: `main-live-results.json`, `main-evidence-comparison.json`, and `main-fresh-evidence-comparison.json`. No browser, screenshot, real-device GPS, physical-campus, build or full-unit-suite checks ran. The separate main worktree remains available for further baseline work.
+
+## Ten supplied campus photos, local live-provider batch · November 19, 2026
+
+At the user's request, ran `node --import tsx tmp/local-photo-batch.ts` against a temporary loopback HTTP listener using the current visitor session, evidence, localization and navigation endpoints. The configured provider was Gemini 3.5 Flash-Lite with Gemini 3.8 Flash fallback. An isolated import of published network revision 89 supplied routing; the ignored revision-29 local topology file was preserved. Simulated building-only GPS metadata used SE12 or SW3, with a fresh timestamp and the real geographic source hash. These were not device readings. Sharp prepared the context image and four crops with the browser's regions, dimensions and byte limits; JPEG encoding was not browser-identical. No browser, screenshot, GPS sensor or physical-campus check ran.
+
+| Photo | Live extraction / automatic start | Route API result |
+| --- | --- | --- |
+| `IMG20261116141702.jpg` | Read 319; SE12 floor 3, anchor 319 | Both destinations returned routes |
+| `IMG20261116141611.jpg` | Read 313 and 311; SE12 floor 3, anchor 311 | Both destinations returned routes |
+| `discord-temp-38A5926D-4B16-483E-90D4-37761CC35000.jpg` | Read 1730, but also reported zero visible doors while classifying the sign as at a door; localization rejected the contradiction | No start; navigation not submitted |
+| `photoooo.jpg` | Read 302; SE12 floor 3, anchor 302 | Both destinations returned routes; same-room destination had zero steps |
+| `IMG_8200.jpg` | Primary timed out after about 15 seconds; fallback timed out at the 45-second stage deadline; HTTP 504 | No extraction; navigation not submitted |
+| `IMG20261116141532.jpg` | Locker identifiers were classified as room labels but did not match a starting place | No start; navigation not submitted |
+| `IMG20261116141547.jpg` | Only an uncertain 102 reading; no starting match | No start; navigation not submitted |
+| `IMG20261116141555.jpg` | Read clear 309A and claimed clear 301 from a partly obscured neighbouring sign; automatic anchor 301 is questionable | Both destinations returned routes, but localization is not a verified pass |
+| `IMG20261116141524.jpg` | Read 306 and 308; SE12 floor 3, anchor 308 | Both destinations returned routes; choosing 308 does not establish camera proximity |
+| `IMG_8205.jpg` | Read clear 323 and uncertain 321; SE12 floor 3, anchor 323 | Both destinations returned routes |
+
+The two destinations were `SE12 302` and `SW03 1730`. Nine of ten photo extractions returned HTTP 200; six photos produced automatic starts and twelve route responses. Three successful extractions remained unresolved, and one extraction timed out. Eleven live provider attempts occurred: nine successful primary attempts and two timeout attempts for the fifth photo. No later localization or routing model calls occurred. Returning routes is a functional result, not a measured localization success rate: the 301 origin is questionable, multi-sign ranking does not establish the nearest doorway, and the simulated GPS scope cannot validate device accuracy.
+
+The temporary harness and image-free JSON results are in ignored `tmp/local-photo-batch.ts` and `tmp/photo-batch-2026-11-19/results.json`. Original and prepared image bytes were not copied into reports or session storage. The first sandboxed harness attempt could not initialize its hard-linked temporary topology; the harness then wrote its isolated imported fixture directly. A subsequent sandboxed attempt could not fetch its loopback endpoint. The complete run used approved network access. No application behavior was changed, and no unit suite, build or data-validation command was rerun for this photo-only check.
+
+## PR 24 working-file reconciliation · November 19, 2026
+
+Reconciled PR head `fe7c38cbf1506c975b6ba375a1eeb5be9b8b987e` with main `f845b414e5ddcc7e1588a2941391d67e7b717d69` by editing working files only. No Git commands, commits, pushes or merges were performed. Main's revision-89 routing data, SW03 west-wing connections, approach compiler, visitor exclusions, bounded stale-GPS retry and partial-route presentation were retained. Automatic start selection replaces origin choices while retaining source-backed shared departure regions and approach tiers. Incomplete routes do not offer GO. Finish route stops the foreground GPS watch.
+
+The thirteen proposed geographic registrations are preserved in `data/campus/geolocation/calibration-candidates.json` and are not exposed as active visitor alignments. Their independent source correspondence evidence is missing; generated outline-control residuals cannot supply that evidence. SE12 floor 3 retains its existing approximate alignment. The generator's tuple typing and existing test contracts were updated without adding new test cases or executing tests.
+
+Final `npm run build` and `npm run data:validate` both passed. The build type-checks existing test sources but does not execute them. Vite emitted two non-fatal Zod pure-annotation warnings. Data validation covered 3,463 source-place occurrences on 89 floor graphs, 89 calibration coverage records, 90 original PDF hashes, 631 derived asset hashes, all 5,463 original labels, and published network revision 89 with 100 points and 69 passages. The separate ignored local topology file remained at revision 29 and was not overwritten.
+
+Preparation also ran `node --import tsx scripts/prepare-geolocation.ts` and targeted Prettier formatting of edited TypeScript files. Earlier build attempts exposed stale test contracts; these were corrected before the final passing build. No unit/API tests, route samples, browser/screenshot checks, live provider requests, Vercel packaging, deployment or physical-campus checks ran. Passing compilation and data validation does not establish runtime route or indoor GPS accuracy.
+
 ## SW03 west wing and outstanding visitor approaches · November 19, 2026
 
 Revision 89 records two user-confirmed bidirectional connections. The walk from SE12 323 to SW03 1920 uses the outdoor 1700–1900 connection on floor 1 and reaches the 1920 doorway. The return trip follows the same exterior entrances in reverse. A route to SW03 2910 continues up the west stairs from S190 to S299. Both directions of the staircase were checked independently. The original 166 incomplete visit records fell to 114. The new total also includes five additional signed source occurrences. [Room-level coverage](three-building-routing.md)
@@ -42,7 +109,7 @@ Five local visitor API pairs were sampled before checking reachability, using se
 
 ## Stair preference and guided directions · November 19, 2026
 
-The destination step offers **Accessibility: prefer elevators**; unchecked routes prefer stairs. The planner first looks for a complete route without the non-preferred transfer type, then falls back to all currently permitted connections. Route results retain the ordered floor-map overview. **GO** opens manual single-step directions with one instruction and map at a time; previous/next/finish controls update progress without inferring position, starting a location watch, or making another provider request. Transfer steps let visitors view the departure and arrival floors. Accessibility and elevator availability remain unverified.
+The destination step offers **Accessibility: prefer elevators**; unchecked routes prefer stairs. The planner first looks for a complete route without the non-preferred transfer type, then falls back to all currently permitted connections. Route results retain the ordered floor-map overview. **GO** requires a fresh GPS reading, then opens step-by-step directions with the current map as the focus and a live position dot where floor calibration exists. Previous/next/finish controls update progress without inferring floors or advancing from GPS. GPS and accessibility remain approximate indoors.
 
 ## SE12 302 to SW03 1730
 
@@ -62,12 +129,12 @@ The first unfiltered HTTP sample returned two routes out of five. Replaying seed
 
 After the user confirmed the marked doors, the visitor router returned a route in both directions for each pair below. Each trip started from simulated structured sign readings on the actual floor data. For rooms with multiple entrances, the return trip used the door reached on the outbound trip.
 
-| Floor | SW03 start or destination | SW01 start or destination | Transfer |
-|---|---|---|---|
-| 1 | Lobby 1602 | Corridor 1290, through vestibule 1098 | Outdoors |
-| 2 | Room 2063 | Room 2070 | Indoors |
-| 3 | Room 3086 | Room 3080 | Indoors |
-| 4 | Room 4075 | Room 4076 | Indoors |
+| Floor | SW03 start or destination | SW01 start or destination             | Transfer |
+| ----- | ------------------------- | ------------------------------------- | -------- |
+| 1     | Lobby 1602                | Corridor 1290, through vestibule 1098 | Outdoors |
+| 2     | Room 2063                 | Room 2070                             | Indoors  |
+| 3     | Room 3086                 | Room 3080                             | Indoors  |
+| 4     | Room 4075                 | Room 4076                             | Indoors  |
 
 A separate trip from SE12 302 to SW01 3080 traversed the two confirmed third-floor passages and SW03 corridor 3600. Withdrawing the SW03–SW01 floor 3 approval in an isolated copy disconnected that trip segment. Both entrances to SW03 1710 retained their incoming-only approvals when the public lobby became traversable both ways.
 
@@ -95,17 +162,15 @@ The released graph had four floor 2–3 stair transfers in SE12. None of their s
 
 The visitor API returned complete routes for **0 of 5** randomly paired journeys. Sampling used all 3,428 indexed place occurrences in graph `3b4497fbb23af67363a67fc5151ac607f2a0287186c10680299fbb7543babe36` and seed `5872ff95`. All ten occurrences were selected without replacement before any route lookup. All five starts localized with simulated exact sign, building and floor readings. The check used no visitor images or provider calls. These results measure post-extraction routing on real source data.
 
-| Origin | Destination | Response |
-|---|---|---|
-| SE12 F3 305 | SW01 F3 3382A | Destination approach missing |
-| NW04 F4 4000A | SW02 F2 250 | Destination approach missing |
-| SE12 F4 434 | NE01 F1 5150 (sampled OCR) | Both approaches missing. The source sign reads **S150**, a stair. |
-| SE16 F1 117 | SE02 F2 226 | The destination door is known, but its public approach is missing |
-| NW05 F2 208 | NE07 F1 143A | Origin approach missing |
+| Origin        | Destination                | Response                                                          |
+| ------------- | -------------------------- | ----------------------------------------------------------------- |
+| SE12 F3 305   | SW01 F3 3382A              | Destination approach missing                                      |
+| NW04 F4 4000A | SW02 F2 250                | Destination approach missing                                      |
+| SE12 F4 434   | NE01 F1 5150 (sampled OCR) | Both approaches missing. The source sign reads **S150**, a stair. |
+| SE16 F1 117   | SE02 F2 226                | The destination door is known, but its public approach is missing |
+| NW05 F2 208   | NE07 F1 143A               | Origin approach missing                                           |
 
 The sampled building pairs also lack confirmed interbuilding passages. Correcting an endpoint alone would not connect these five trips. After reading the original signs, the NE01 stair received an exact S150 transcription and overlapping, conflicting OCR identifiers were excluded from the place catalogue. The five samples were retained as observed, with no replacement or additional route trials. The final build was type-checked. Physical campus travel and live photo recognition were outside this sample.
-
-
 
 ## Earlier SE12 323 starting-route coverage diagnosis
 
@@ -186,7 +251,6 @@ The authorized original `photoooo.jpg` was tested through the running local HTTP
 GPS building hints were simulated separately. SE12 corroborated the label match, SW03 produced a conflict, and stored session data contained no image bytes or raw device coordinates. Unit and DOM tests also cover the unchecked state, permission denial, fresh acquisition, repeated-label disambiguation, stale/source-mismatched hints, cancellation and zero downstream inference. This does not validate a physical GPS sensor or campus traversal.
 
 Validation passed with 367 unit/API tests, 24 desktop/mobile browser tests, formatting, production build, data validation and Vercel packaging. Legacy visual-comparison helper tests remain isolated from the active visitor API.
-
 
 ## OpenAI response-length exhaustion · November 17, 2026
 
@@ -322,13 +386,13 @@ Latest automated checks: November 13, 2026 on macOS arm64, Node 22.15.1. The cur
 
 ## Current checks
 
-| Check | Result | Scope |
-|---|---|---|
-| `npm run test:unit` | **184 passed** | Photo/provider tests and 58 topology tests covering candidate answers, endpoint reuse, routing, HTTP access and Node-rendered review controls |
-| Earlier `npm test` | **101 passed** | 79 unit/API cases and 22 browser cases after demo removal, before screen checks were stopped |
-| `npm run build` | Passed | TypeScript check and Vite production build |
-| `npm run data:validate` | Passed | 90 original PDFs, 89 geometry records, 631 derived asset hashes and all 5,463 extracted labels. Revision 21 has 22 points, 11 edges, 10 eligible edges, 14 questions, 12 marked-point answers and six floor observations. |
-| Documentation links | Checked | Local references match the current hierarchy |
+| Check                   | Result         | Scope                                                                                                                                                                                                                     |
+| ----------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm run test:unit`     | **184 passed** | Photo/provider tests and 58 topology tests covering candidate answers, endpoint reuse, routing, HTTP access and Node-rendered review controls                                                                             |
+| Earlier `npm test`      | **101 passed** | 79 unit/API cases and 22 browser cases after demo removal, before screen checks were stopped                                                                                                                              |
+| `npm run build`         | Passed         | TypeScript check and Vite production build                                                                                                                                                                                |
+| `npm run data:validate` | Passed         | 90 original PDFs, 89 geometry records, 631 derived asset hashes and all 5,463 extracted labels. Revision 21 has 22 points, 11 edges, 10 eligible edges, 14 questions, 12 marked-point answers and six floor observations. |
+| Documentation links     | Checked        | Local references match the current hierarchy                                                                                                                                                                              |
 
 The automated browser run had already completed when the user requested no further screen checks. No further browser test suite has run. On October 16, the user explicitly requested inspection of a displayed 404; only the existing page's error text was read, with no interactions or photo submission. Future validation should honor the no-screen-test preference. Automated tests use no real Gemini credentials or provider quota; separate live diagnostics are recorded below.
 
@@ -384,7 +448,6 @@ All **171 non-browser tests** passed, including 20 new candidate/API regressions
 
 The production build, formatting, source/topology/candidate validation, documentation links and whitespace checks passed. The owned local server was restarted as a detached process. Read-only localhost requests returned HTTP 200 for the editor, its API and the transformed component module; the API reported two unanswered candidates and an empty graph. Direct candidate-catalogue access returned HTTP 404. No browser, screenshot, manual application screen, live Gemini generation or physical-campus checks were run. No deployment or push occurred.
 
-
 ## Floor correction and second-floor outdoor proposal — November 13, 2026
 
 The user corrected the SE12–SW03 connected levels to 2 and 3 and explicitly said the second-floor journey exits one building and enters the other via outdoors. The reported ground-adjacent portion of SE12 floor 2 is recorded as context only; no entrance position, global elevation, floor renumbering, distance or accessibility inference follows from it.
@@ -403,18 +466,15 @@ Startup/API/client configuration messages now distinguish a missing key, missing
 
 The proposal was updated to match the real-plan-only scope and regenerated as two pages. Automated text-boundary checks found no out-of-margin text. Visual inspection was skipped under the user's no-screen-check direction. Group/member placeholders remain; it was not submitted.
 
-
 ## Photo-focused interface
 
 The Campus library component, general catalogue/search endpoint, browse links, promotional intro/banner and empty-state slogans have been removed. Floor-plan assets and Gemini's two-stage image/geometry comparison remain intact. Only plans associated with returned location candidates are passed to the result display; full-plan and source-PDF links belong to those candidates. Geometry JSON remains an internal model input.
 
 All 83 unit/API tests, the production build and source-asset validation passed. API regression checks cover the missing catalogue/search endpoint and continued availability of plan assets for results. Browser test expectations were updated but were not executed, and no manual screen or screenshot checks were performed, per the user's request. The local server is restarted to load the backend changes. No live Gemini generation is required by this change.
 
-
 ## Integration with the latest main branch
 
 The library removal was rebased onto the newer UI/provider changes already on main. The final integration preserves native photo capture, a single best-match result and configured Gemini model fallback behavior while removing library browsing and promotional copy. All 90 unit/API tests, the production build and validation of 90 original PDF hashes and 631 derived assets passed. Browser/screen checks were not run at the user's request; their expectations were updated. No live inference calls were made. The proposal was regenerated from the combined source, with automated page/margin checks only.
-
 
 ## Exact labels and original-image crops — October 16, 2026
 

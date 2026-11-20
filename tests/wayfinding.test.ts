@@ -65,7 +65,6 @@ function journey(
       revision: 3,
       candidateId: c.id,
       destination,
-      originId: n.id,
       networkRevision: source.read().revision,
       ...overrides,
     },
@@ -104,7 +103,6 @@ describe('visitor routes on the current three-building pilot', () => {
             revision: 1,
             candidateId: start.id,
             destination: 'SW03 2082',
-            originId,
             networkRevision: isolated.read().revision,
           },
           isolated,
@@ -360,11 +358,18 @@ describe('visitor routes on the current three-building pilot', () => {
   );
   it('uses a unique point inside the photo region and rejects an unrelated selection', () => {
     const n = bound(lower);
-    expect(journey(n, 'SW03 3615', { originId: undefined })).toMatchObject({
+    expect(journey(n, 'SW03 3615')).toMatchObject({
       status: 'route',
       origins: [{ id: n.id }],
     });
-    expect(journey(n, 'SW03 3615', { originId: bound(upper).id }).status).toBe('choose-origin');
+    expect(
+      navigationSchema.safeParse({
+        revision: 1,
+        candidateId: randomUUID(),
+        destination: 'SW03 3615',
+        originId: bound(upper).id,
+      }).success,
+    ).toBe(false);
     const c = {
       ...candidate(n),
       bounds: [0.001, 0.001, 0.002, 0.002] as [number, number, number, number],

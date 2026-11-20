@@ -80,24 +80,19 @@ it('performs two separate API calls before any location result, with idempotency
   expect(repeated.status).toBe(200);
   expect(provider.calls - before).toBe(1);
 
-  const confirmed: Session = await (
-    await post(`/api/sessions/${initial.id}/actions`, {
-      requestId: randomUUID(),
-      revision: result.revision,
-      action: {
-        type: 'confirm-campus-region',
-        candidateId: se12.id,
-      },
-    })
-  ).json();
-  expect(confirmed.campusLocation).toMatchObject({ id: se12.id, planId: 'SE12-F3-p1' });
-  expect(confirmed).not.toHaveProperty('route');
+  const removedConfirmation = await post(`/api/sessions/${initial.id}/actions`, {
+    requestId: randomUUID(),
+    revision: result.revision,
+    action: { type: 'confirm-campus-region', candidateId: se12.id },
+  });
+  expect(removedConfirmation.status).toBe(400);
+  expect(result).not.toHaveProperty('route');
   const stored = await (await fetch(`${base}/api/sessions/${initial.id}`)).json();
   expect(JSON.stringify(stored)).not.toContain(input.detailCrops[0].image.data);
   const reset: Session = await (
     await post(`/api/sessions/${initial.id}/actions`, {
       requestId: randomUUID(),
-      revision: confirmed.revision,
+      revision: result.revision,
       action: { type: 'reset' },
     })
   ).json();

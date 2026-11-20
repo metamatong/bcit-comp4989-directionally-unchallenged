@@ -31,7 +31,6 @@ export type MapStop = {
   corridorVicinity?: boolean;
   sharedEntrance?: string;
 };
-export type StartingPoints = { networkRevision: number; origins: MapStop[] };
 export type PlaceChoice = {
   id: string;
   planId: string;
@@ -56,9 +55,7 @@ export type NavigationChoice = {
   candidateId: string;
   destination: string;
   networkRevision?: number;
-  originId?: string;
   destinationId?: string;
-  originPoint?: FloorPin;
   destinationPoint?: FloorPin;
 };
 export type WalkingPath = { origin: MapStop; destination: MapStop; steps: WalkingStep[] };
@@ -74,7 +71,6 @@ export type NavigationResult = {
 } & (
   | {
       status:
-        | 'choose-origin'
         | 'choose-destination'
         | 'unknown-destination'
         | 'restricted-place'
