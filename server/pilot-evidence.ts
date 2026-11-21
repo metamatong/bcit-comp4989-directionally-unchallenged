@@ -6,20 +6,12 @@ import { z } from 'zod';
 import type { PlanBounds, VisualPlan } from '../src/types';
 import { root, readJson } from './data';
 import { boundsSchema, planGeometrySummary, visualPlans } from './visual-data';
+import { canonicalPilotBuilding } from './pilot-scope';
 
+/** Buildings with imported photo and topology evidence; SW5 is added by its assigned teammate. */
 export const pilotBuildings = ['SE12', 'SW3', 'SW1'] as const;
 export type PilotBuilding = (typeof pilotBuildings)[number];
-export function canonicalBuilding(text: string): PilotBuilding | undefined {
-  const aliases: Record<string, PilotBuilding> = {
-    SE12: 'SE12',
-    SW03: 'SW3',
-    SW3: 'SW3',
-    SW01: 'SW1',
-    SW1: 'SW1',
-  };
-  const key = text.normalize('NFKC').trim().toUpperCase();
-  return Object.hasOwn(aliases, key) ? aliases[key] : undefined;
-}
+export const canonicalBuilding = canonicalPilotBuilding;
 export function isPilotPlan(plan: VisualPlan) {
   return pilotBuildings.some((building) => building === plan.building);
 }
@@ -144,7 +136,10 @@ function byPage<T extends { planId: string }>(items: T[], plans: VisualPlan[]) {
   return map;
 }
 function loadEvidence() {
-  const plans = visualPlans.filter(isPilotPlan);
+  // This evidence bundle is intentionally limited to the three buildings already imported.
+  const plans = visualPlans.filter((plan) =>
+    pilotBuildings.includes(plan.building as PilotBuilding),
+  );
   const expectedIds = pilotBuildings.flatMap((building) =>
     [1, 2, 3, 4].map((floor) => `${building}-F${floor}-p1`),
   );

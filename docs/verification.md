@@ -2,6 +2,16 @@
 
 This file is a historical log. Older entries describe workflows and route data that have since changed. The current visitor app uses GPS-required automatic start matching and has no start-confirmation, connection-review or topology-editor screen/API; see [current architecture](architecture.md) and [device-location coverage](device-location.md).
 
+## Four-building visitor scope and inferred floor transfers · November 21, 2026
+
+Restricted visitor bootstrap plans, GPS footprints/calibrations, photo starting-place matching and destination routing to SE12, SW03, SW05 and SW01. The 89-plan source archive remains intact. The existing photo and required-GPS production flow is unchanged. SW05-specific route data and transfer inference were left for its assigned teammate.
+
+For the currently maintained SE12, SW03 and SW01 route data, visitor routing now ignores the legacy manually approved same-building stair/elevator edges and constructs bidirectional transfers from source-bound landing records on adjacent floors. It pairs exact stair suffixes first and uses nearby landing positions for changed labels; elevator stops pair by their source-plan positions. Cross-building indoor links and outdoor crossings continue to use the fixed reviewed records. The route search still computes each walk through the compiled floor grid; developers do not draw every origin/destination trip.
+
+When the full trip cannot be connected, the existing partial-route behavior returns a reachable portion when one can be found, marks the last mapped stop and locates the requested room on the plan. No synthetic path is drawn across missing map coverage.
+
+Validation: `npm run build` passed (TypeScript check and Vite production build). No unit, browser, provider or physical-campus tests were run. The build emitted the existing non-fatal Zod annotation warnings. The route pairing heuristic has not been checked against physical campus travel; SW05 integration remains separate.
+
 ## SW01 first-floor lobby approaches · November 20, 2026
 
 Replaying the SW03 1730 sign with elevators preferred previously returned a partial walk ending at lobby 1101 after two outdoor transfers. The updated visitor router returns a complete walk to the drawn door of 1106. It uses one outdoor transfer from SW03 lobby 1602 to SW01 lobby 1501, followed by the indoor aisle through atrium 1303. Starting at SW01 1020 uses the paired south doors beside S120 and reaches 1106 entirely indoors. The 1602–1501 outdoor connection was confirmed in both directions on the marked floor plans. The outdoor distance and intermediate path remain unmeasured.

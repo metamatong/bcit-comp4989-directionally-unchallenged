@@ -1,9 +1,10 @@
 import express from 'express';
 import { randomUUID } from 'node:crypto';
-import { coverage, root } from './data';
+import { root } from './data';
 import type { Provider } from './provider';
 import { visualPlans } from './visual-data';
 import { locationCatalogue } from './geolocation';
+import { isPilotBuilding, isPilotPlan } from './pilot-scope';
 import type { LocationCatalogue } from '../src/location/types';
 import { protectTopologyFiles } from './topology-api';
 import { TopologyStore } from './topology';
@@ -26,10 +27,24 @@ export function createApp(options: {
   hosted?: boolean;
 }) {
   const app = express();
+  const visitorPlans = visualPlans.filter(isPilotPlan);
+  const visitorCoverage = {
+    floorPlans: visitorPlans.length,
+    buildings: [...new Set(visitorPlans.map((plan) => plan.building))],
+    extractedLabelCandidates: visitorPlans.reduce((sum, plan) => sum + plan.labelCount, 0),
+  };
   let locationData: LocationCatalogue | undefined;
   let locationNotice: string | undefined;
   try {
-    locationData = locationCatalogue();
+    const catalogue = locationCatalogue();
+    locationData = {
+      ...catalogue,
+      buildings: catalogue.buildings.filter((building) => isPilotBuilding(building.building)),
+      floors: catalogue.floors.filter((floor) => {
+        const plan = visualPlans.find((item) => item.id === floor.planId);
+        return !!plan && isPilotPlan(plan);
+      }),
+    };
   } catch {
     locationNotice =
       'Device-location source validation failed. Photo analysis remains available. Restore the location source data and restart the server.';
@@ -71,15 +86,15 @@ export function createApp(options: {
   app.use(express.json({ limit: '12kb' }));
   app.get('/api/bootstrap', (_req, res) =>
     res.json({
-      coverage,
+      coverage: visitorCoverage,
       liveAvailable: options.liveAvailable,
       model: options.model,
       provider: options.provider.name ?? 'gemini',
       setupNotice: options.liveAvailable ? null : (options.setupNotice ?? null),
-      visualPlans,
+      visualPlans: visitorPlans,
       locationCatalogue: locationData,
       locationNotice,
-      photoLocalizationAvailable: visualPlans.length > 0,
+      photoLocalizationAvailable: visitorPlans.length > 0,
     }),
   );
   app.use(

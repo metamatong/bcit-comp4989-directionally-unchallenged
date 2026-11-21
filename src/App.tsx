@@ -574,8 +574,8 @@ export default function App() {
               </span>
               <h2 id="about-heading">About DirectionallyUnchallenged</h2>
               <p>
-                Visitor wayfinding searches the supplied BCIT Burnaby floor plans using official
-                source labels and mapped walking areas.
+                Visitor wayfinding is limited to SE12, SW03, SW05 and SW01. It uses official source
+                labels and walking areas compiled from the BCIT Burnaby plans.
               </p>
               <div className="about-section">
                 <h3>What you can do</h3>

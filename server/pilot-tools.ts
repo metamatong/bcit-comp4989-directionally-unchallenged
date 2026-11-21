@@ -40,7 +40,7 @@ export const pilotToolDeclarations = [
   ),
   tool(
     'resolve_spatial_labels',
-    'Inspect the original three-building evidence collection, including raw OCR and drawing annotations.',
+    'Inspect the original pilot evidence collection, including raw OCR and drawing annotations.',
     lookupSchema,
   ),
   tool(

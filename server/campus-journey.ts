@@ -2,15 +2,9 @@
 import type { CampusLocationCandidate } from '../src/types';
 import type { NavigationChoice, NavigationResult, PlaceChoice } from '../src/wayfinding';
 import { planLabel } from '../src/topology';
-import {
-  floorGraphs,
-  sourceBuilding,
-  landmarkKind,
-  visitorExclusion,
-  type FloorPlace,
-} from './floor-graph';
+import { floorGraphs, landmarkKind, visitorExclusion, type FloorPlace } from './floor-graph';
 import { FloorSearch, type SearchStop, type VisitorMap } from './floor-search';
-import { labelKey, pilotEvidence } from './pilot-evidence';
+import { canonicalBuilding, labelKey, pilotEvidence } from './pilot-evidence';
 import { reviewedNetwork } from './pilot-network';
 import { pinnedStop } from './map-points';
 import { commonDoorDeparture } from './shared-corridor';
@@ -37,7 +31,7 @@ function queryParts(value: string) {
       (_match, area: string, digits: string) => area + '0' + digits,
     );
   const match = /^((?:NE|NW|SE|SW)\s*-?\s*\d+)\s*(?:[-·]\s*|\s+)(.+)$/.exec(token);
-  const building = match ? (sourceBuilding(match[1]) ?? 'unknown') : undefined;
+  const building = match ? (canonicalBuilding(match[1]) ?? 'unknown') : undefined;
   if (match) token = match[2];
   const floor = /^FLOOR\s+(\d+)\s*[·-]?\s+(.+)$/.exec(token);
   return {
@@ -315,7 +309,7 @@ export class CampusJourney {
       return {
         ...context,
         status: 'unknown-destination',
-        message: 'No matching place was found on the supplied Burnaby floor plans.',
+        message: 'No matching place was found in the four-building pilot.',
       };
     const goal: BoundPlace | undefined = request.destinationId
       ? choices.find((c) => c.place.id === request.destinationId)

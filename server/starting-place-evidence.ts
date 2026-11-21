@@ -13,6 +13,7 @@ import {
   type FloorPlace,
 } from './floor-graph';
 import { labelKey, looksLikeIdentifier } from './pilot-evidence';
+import { isPilotBuilding } from './pilot-scope';
 import type { SharedCorridor } from './shared-corridor';
 
 type Sign = PhotoLabelReading;
@@ -177,17 +178,19 @@ export function resolveStartingSigns(
     )
       describedKinds.set(sign, kind);
   }
-  const pages: FloorReadings[] = graphs.ordered.map((floor) => {
-    const hits = new Map<Sign, FloorPlace[]>();
-    for (const sign of readings) {
-      const describedKind = describedKinds.get(sign);
-      const places = floor.places.filter(
-        (p) => matchesSign(p, sign) && (!describedKind || p.kind === describedKind),
-      );
-      if (places.length) hits.set(sign, places);
-    }
-    return { floor, hits };
-  });
+  const pages: FloorReadings[] = graphs.ordered
+    .filter((floor) => isPilotBuilding(floor.plan.building))
+    .map((floor) => {
+      const hits = new Map<Sign, FloorPlace[]>();
+      for (const sign of readings) {
+        const describedKind = describedKinds.get(sign);
+        const places = floor.places.filter(
+          (p) => matchesSign(p, sign) && (!describedKind || p.kind === describedKind),
+        );
+        if (places.length) hits.set(sign, places);
+      }
+      return { floor, hits };
+    });
   const constrained = pages.filter(
     ({ floor: { plan } }) =>
       (!buildingHint || sourceBuilding(buildingHint) === plan.building) &&

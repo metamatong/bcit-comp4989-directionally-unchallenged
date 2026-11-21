@@ -19,6 +19,8 @@ import { TopologyError, TopologyStore, topologyEligibility } from './topology';
 import { sourceCorridorTraces, visitorPassages, stepText } from './visitor-paths';
 import { attachPathEndpoints, routeDrawingCrossings } from './route-geometry';
 import { planImagePart } from './visual-data';
+import { isPilotPlan } from './pilot-scope';
+import { inferSameBuildingTransfers } from './inferred-transfers';
 import type { Provider } from './provider';
 import { stageDeadline } from './provider-timing';
 import { NAVIGATION_TIMEOUT_MS } from '../src/photo-views';
@@ -210,19 +212,36 @@ function readVisitorMap(
   store: TopologyStore,
   expectedRevision?: number,
 ) {
-  const plans = store.plans;
+  const plans = store.plans.filter(isPilotPlan);
   if (!plans.some((p) => p.id === candidate.planId))
-    throw new TopologyError('Select a place on a current Burnaby floor plan first.', 409);
-  const doc = store.read();
-  if (expectedRevision !== undefined && expectedRevision !== doc.revision)
+    throw new TopologyError(
+      'Directions are currently available only in the four-building pilot.',
+      409,
+    );
+  const sourceDocument = store.read();
+  if (expectedRevision !== undefined && expectedRevision !== sourceDocument.revision)
     throw new TopologyError(
       'The walking map changed. Check the starting point and destination again.',
       409,
     );
-  const eligible = topologyEligibility(doc, plans);
-  const network = visitorPassages(doc, eligible, store.candidates, plans);
-  const approved = new Set(eligible.nodeIds);
-  const nodes = doc.nodes.filter((n) => approved.has(n.id));
+  const eligible = topologyEligibility(sourceDocument, plans);
+  const approvedNodes = new Set(eligible.nodeIds);
+  const nodes = sourceDocument.nodes.filter((n) => approvedNodes.has(n.id));
+  const inferredTransfers = inferSameBuildingTransfers(nodes, plans);
+  const edges = sourceDocument.edges.filter(
+    (edge) => edge.kind !== 'stairs' && edge.kind !== 'elevator',
+  );
+  const doc = { ...sourceDocument, edges: [...edges, ...inferredTransfers] };
+  const eligibleEdges = new Set(
+    eligible.edgeIds.filter((id) => edges.some((edge) => edge.id === id)),
+  );
+  for (const edge of inferredTransfers) eligibleEdges.add(edge.id);
+  const network = visitorPassages(
+    doc,
+    { ...eligible, edgeIds: [...eligibleEdges] },
+    store.candidates,
+    plans,
+  );
   const vicinity = candidate.doorwayVicinity;
   const activeDoor = vicinity ? network.doors.get(vicinity.doorId) : undefined;
   const origins = nodes
@@ -313,7 +332,7 @@ export function planVisitorJourney(
       ...context,
       status: 'unknown-destination',
       message:
-        'No matching destination was found in the three-building pilot. Check the room number and building.',
+        'No matching destination was found in the four-building pilot. Check the room number and building.',
     };
   const choice = request.destinationId
     ? choices.find((c) => c.place.id === request.destinationId)

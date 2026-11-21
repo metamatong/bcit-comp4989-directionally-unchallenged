@@ -1,8 +1,8 @@
 # DirectionallyUnchallenged
 
-Add a photo, enter a destination and tap **Get Directions** for walking directions on the supplied BCIT Burnaby plans. The app requests GPS automatically, reads the photo once, matches signs to the catalogue and selects the strongest starting estimate without asking the visitor to choose one.
+Add a photo, enter a destination and tap **Get Directions** for walking directions in the SE12, SW03, SW05 and SW01 pilot. The source archive contains all supplied BCIT Burnaby plans, but the visitor app exposes only those four buildings. The app requests GPS automatically, reads the photo once, matches signs to the catalogue and selects the strongest starting estimate without asking the visitor to choose one.
 
-The catalogue covers **89 official floor plans in 45 buildings**. GPS-derived building IDs also provide context during extraction. GPS narrows the building; the photo provides floor and nearby-place evidence. Continuous travel depends on mapped approaches and transfers. The current same-building transfers are legacy route data awaiting automatic inference from stacked floor plans. [Floor graph coverage and remaining gaps](docs/floor-routing.md)
+The archived catalogue contains **89 official floor plans in 45 buildings**. Visitor routes are restricted to the four-building pilot. GPS narrows the building; the photo provides floor and nearby-place evidence. The route search computes paths through compiled walking areas, doors and corridors. Same-building stair and elevator transfers are inferred from source-plan landings for the currently maintained SE12, SW03 and SW01 route data; SW05-specific route integration is handled separately. Only links between buildings use fixed reviewed records. [Floor graph coverage and remaining gaps](docs/floor-routing.md)
 
 ## Run locally
 
@@ -43,11 +43,11 @@ The Git-connected Vercel project builds the frontend and the visitor API with `n
 4. The app ranks source matches using the photo evidence and GPS building match, then selects the strongest starting estimate automatically. It does not ask visitors to choose a starting room or doorway.
 5. A complete walking route opens directly on its first step. The current step selects the floor map. Live tracking starts automatically, and the position dot appears when a fresh reading can be shown on a geographically aligned floor. Use **Previous**, **Next step**, and **Finish route** to mark progress. **Route overview** opens the full itinerary, and **Back to steps** returns to the current step.
 
-GPS building footprints cover 43 of the 45 supplied buildings. Approximate drawing alignment is available on 65 of the 89 floor plans across 33 buildings. The dot also requires a fresh reading whose reported accuracy area overlaps the archived footprint. The remaining 24 plans have individual coverage notes. Indoor phone accuracy remains unmeasured. [Device-location coverage](docs/device-location.md)
+The visitor app exposes GPS building and floor alignment data only for the four pilot buildings. The dot requires a fresh reading whose reported accuracy area overlaps the archived footprint. Indoor phone accuracy remains unmeasured. [Device-location coverage](docs/device-location.md)
 
-The current route dataset includes examples such as SE12 302 to SW03 2605 and SW03 1710. These journeys use source-derived floor walking areas and mapped transfers. The dataset still contains hand-authored same-building transfers; replacing those with automatic stair/elevator inference is not complete. Physical distance and accessibility remain unmeasured.
+The current route dataset includes examples such as SE12 302 to SW03 2605 and SW03 1710. Each journey is calculated over source-derived floor walking areas. Same-building floor changes are inferred from corresponding stair and elevator landings. Building-to-building links remain explicit source-backed records. Physical distance and accessibility remain unmeasured.
 
-SE12 323 to SW03 1750 retains the shared corridor departure and corridor-side arrival. The SW03 west wing remains connected through the outdoor 1700–1900 passage and S190–S299 stairs. Missing first or final connections can show a clearly labelled partial route in the overview. Shafts, voids and staff-only spaces remain excluded. [Three-building coverage](docs/three-building-routing.md)
+SE12 323 to SW03 1750 retains the shared corridor departure and corridor-side arrival. The SW03 west wing remains connected through the outdoor 1700–1900 passage and S190–S299 stairs. If part of a trip is unmapped, the app shows the reachable route segment, marks the last mapped stop and identifies the requested destination on the plan. Shafts, voids and staff-only spaces remain excluded. [Current route coverage](docs/three-building-routing.md)
 
 On floor 1, the SW03 lobby 1602 exit connects outdoors to the east doors of SW01 lobby 1501 in both directions. Follow the indoor aisle across atrium 1303 to the 1106 doorway. Visitors already at vestibule 1020 can turn beside S120 and reach 1106 through lobby 1101. [SW01 first-floor plan](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0101.pdf)
 
