@@ -120,7 +120,7 @@ async function setup(page: Page, hasCandidate = true, mapPicker = false) {
     await route.fulfill({ json: current });
   });
   await page.goto('/');
-  await expect(page.getByTestId('provider-status')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Snap a nearby room sign' })).toBeVisible();
   return { uploads, evidenceUploads, requests };
 }
 
@@ -128,11 +128,11 @@ async function choosePhoto(page: Page) {
   await page
     .getByLabel('Upload campus photo', { exact: true })
     .setInputFiles(resolve('data/campus/visual/png/SE12-F1-p1/overview.png'));
-  await expect(page.getByText('Photo ready.', { exact: true })).toBeVisible();
+  // Auto-advances directly to the Destination screen once local preparation completes.
+  await expect(page.getByLabel('Destination', { exact: true })).toBeVisible();
 }
 
 async function submitPhoto(page: Page) {
-  await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByLabel('Destination', { exact: true }).fill('SW03 2082');
   await page.getByRole('button', { name: 'Get Directions', exact: true }).click();
 }
@@ -145,10 +145,11 @@ test('submits photo and destination and displays directions without route confir
   expect(evidenceUploads).toHaveLength(0);
   expect(uploads).toHaveLength(0);
   await submitPhoto(page);
+  await expect(page.getByRole('button', { name: 'Route overview', exact: true })).toBeVisible();
+  await page.getByRole('button', { name: 'Route overview', exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'Walking directions', exact: true }),
   ).toBeVisible();
-  await expect(page.getByText('Starting area estimated', { exact: true })).toBeVisible();
   await expect(page.locator('.route-floor-label')).toHaveText([
     'SE12 · Floor 3',
     'SW03 · Floor 3',
@@ -238,38 +239,35 @@ test('cancelling analysis discards a late comparison response', async ({ page })
   await page.getByRole('button', { name: 'Cancel analysis', exact: true }).click();
   release();
   await expect(page.getByRole('region', { name: 'Photo comparison results' })).toHaveCount(0);
-  await expect(page.getByRole('heading', { name: 'Take a photo of where you are' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Snap a nearby room sign' })).toBeVisible();
 });
 
 test('starting over clears the photo and directions', async ({ page }) => {
   const { uploads } = await setup(page);
   await choosePhoto(page);
   await submitPhoto(page);
+  await page.getByRole('button', { name: 'Route overview', exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'Walking directions', exact: true }),
   ).toBeVisible();
   await page.getByRole('button', { name: 'Start over', exact: true }).click();
   await expect(
-    page.getByRole('heading', { name: 'Take a photo of where you are', exact: true }),
+    page.getByRole('heading', { name: 'Snap a nearby room sign', exact: true }),
   ).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Walking directions', exact: true })).toHaveCount(
     0,
   );
-  await expect(page.getByTestId('provider-status')).toHaveText('Gemini ready');
   expect(uploads).toHaveLength(1);
 });
 
 test('privacy information keeps the photo local and ready for the next step', async ({ page }) => {
   const { evidenceUploads, uploads } = await setup(page);
-  await choosePhoto(page);
-  await page.getByRole('button', { name: /Coverage & privacy/ }).click();
+  await page.getByRole('button', { name: 'Coverage & privacy', exact: true }).click();
   await expect(page.getByRole('dialog', { name: 'About DirectionallyUnchallenged' })).toBeVisible();
   await page.getByRole('dialog').press('Escape');
   await expect(page.getByRole('dialog')).not.toBeVisible();
-  await expect(
-    page.getByRole('img', { name: 'Selected campus location', exact: true }),
-  ).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Next', exact: true })).toBeEnabled();
+  await choosePhoto(page);
+  await expect(page.getByRole('button', { name: 'Get Directions', exact: true })).toBeDisabled();
   expect(evidenceUploads).toHaveLength(0);
   expect(uploads).toHaveLength(0);
 });
@@ -290,7 +288,6 @@ test('picks an explicit destination floor in another building with one photo rea
     }),
   );
   await choosePhoto(page);
-  await page.getByRole('button', { name: 'Next', exact: true }).click();
   await page.getByRole('button', { name: 'Choose a map point', exact: true }).click();
   await page.getByRole('button', { name: 'Get Directions', exact: true }).click();
   const map = page.getByRole('group', { name: /Select a walking point/ });

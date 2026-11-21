@@ -10,9 +10,13 @@
   font-synthesis: none;
   font-weight: 400;
   --green: #164d3d;
-  --muted: #6d7b71;
+  --muted: #506b63;
   --border: #e2e7dd;
   --cream: #f8f9f5;
+  --surface: #fffefa;
+  --sage: #f1f7f3;
+  --sage-pill: #e4efe8;
+  --sheet-shadow: 0 -10px 32px rgba(22, 52, 40, 0.08);
 }
 * {
   box-sizing: border-box;
@@ -486,10 +490,7 @@ a:hover {
     border-radius: 9px;
   }
   .header-end {
-    gap: 0;
-  }
-  .header-end .icon-button {
-    display: none;
+    gap: 8px;
   }
   .provider-status {
     font-size: 9px;

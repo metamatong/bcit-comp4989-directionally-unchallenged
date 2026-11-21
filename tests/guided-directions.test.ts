@@ -39,6 +39,7 @@ it('opens only the current instruction, advances manually, finishes, and returns
   document.body.append(host);
   const root = createRoot(host);
   const recheck = vi.fn();
+  const startOver = vi.fn();
   const button = (text: string) =>
     [...host.querySelectorAll('button')].find((b) => b.textContent?.trim() === text)!;
   const click = (text: string) => act(async () => button(text).click());
@@ -53,6 +54,7 @@ it('opens only the current instruction, advances manually, finishes, and returns
             floors: catalogue.floors.filter((floor) => floor.planId !== 'SW3-F3-p1'),
           },
           onRecheck: recheck,
+          onStartOver: startOver,
         }),
       ),
     );
@@ -76,7 +78,9 @@ it('opens only the current instruction, advances manually, finishes, and returns
     expect(host.querySelector('.device-position circle')?.getAttribute('cx')).not.toBe(
       firstPosition,
     );
-    expect(host.querySelector('.guided-map')?.nextElementSibling?.className).toBe('guided-step');
+    expect(host.querySelector('.guided-map')?.nextElementSibling?.classList.contains('guided-step')).toBe(true);
+    expect(host.querySelector('.map-floor-badge')?.textContent).toBe('SE12 · Floor 3');
+    expect(host.querySelector('.step-progress-fill')).not.toBeNull();
     expect(host.textContent).toContain('Step 1 of 5');
     expect(button('Previous').disabled).toBe(true);
     await click('Next step');
@@ -94,11 +98,12 @@ it('opens only the current instruction, advances manually, finishes, and returns
     await emit(sw3Latitude, sw3Longitude);
     expect(host.querySelector('.device-position')).toBeNull();
     expect(host.querySelector('.guided-location-status')?.textContent).toContain(
-      'floor-plan alignment is unavailable for SW03 · Floor 3',
+      'Floor-plan alignment is unavailable for SW03 · Floor 3',
     );
     await click('Previous');
-    await click('Route overview');
+    await click('Overview');
     expect(host.querySelectorAll('.walking-map')).toHaveLength(3);
+    expect(host.querySelectorAll('.timeline-transfer-pill').length).toBeGreaterThan(0);
     await click('Back to steps');
     expect(host.textContent).toContain('Step 2 of 5');
     for (let i = 2; i < route.steps.length; i++) await click('Next step');
@@ -107,12 +112,15 @@ it('opens only the current instruction, advances manually, finishes, and returns
     expect(host.textContent).toContain('Location tracking stopped');
     expect(clearWatch).toHaveBeenCalled();
     await click('Done');
-    expect(host.querySelectorAll('.walking-map')).toHaveLength(3);
+    expect(startOver).toHaveBeenCalledTimes(1);
+    expect(host.querySelector('.route-overview')).toBeNull();
     expect(recheck).not.toHaveBeenCalled();
+    await click('Overview');
+    expect(host.querySelectorAll('.walking-map')).toHaveLength(3);
     await click('Restart directions');
     expect(host.textContent).toContain('Step 1 of 5');
     await emit(se12.controls[0].latitude, se12.controls[0].longitude);
-    await click('Route overview');
+    await click('Overview');
     expect(host.querySelector('.route-overview')).not.toBeNull();
   } finally {
     await act(async () => root.unmount());

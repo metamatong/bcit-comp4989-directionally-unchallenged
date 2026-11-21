@@ -6,7 +6,6 @@ import {
   LoaderCircle,
   MapPin,
   Search,
-  ShieldCheck,
   Upload,
   X,
 } from 'lucide-react';
@@ -74,17 +73,8 @@ export function PhotoLocationInput({
   const phonePhoto = useRef<HTMLInputElement>(null);
   const canSubmitPhoto = !!photo && ready && !reading && !busy && !!destination.trim();
 
-  return (
-    <section className="photo-location-input" aria-labelledby="location-heading">
-      <div className="flow-progress" role="group" aria-label="Route setup progress">
-        <span className={step === 'photo' ? 'current' : 'complete'}>1&nbsp; Photo</span>
-        <span aria-hidden="true">·</span>
-        <span className={step === 'destination' ? 'current' : ''}>2&nbsp; Destination</span>
-      </div>
-      <h1 id="location-heading">
-        {step === 'photo' ? 'Take a photo of where you are' : 'Where do you want to go?'}
-      </h1>
-
+  const hiddenInputs = (
+    <>
       <input
         ref={upload}
         type="file"
@@ -110,176 +100,305 @@ export function PhotoLocationInput({
           event.target.value = '';
         }}
       />
+    </>
+  );
 
-      {step === 'photo' ? (
-        <>
-          <div className="photo-actions">
-            <button
-              type="button"
-              className="secondary"
-              disabled={reading || busy}
-              onClick={() => upload.current?.click()}
-            >
-              <Upload size={20} />
-              Upload photo
-            </button>
-            <button
-              type="button"
-              className="secondary"
-              disabled={reading || busy}
-              onClick={() => phonePhoto.current?.click()}
-            >
-              <Camera size={20} />
-              Take a photo
-            </button>
+  // Compact inline edit form when modifying destination inside Route Overview.
+  if (canUsePhotoResult) {
+    return (
+      <section className="destination-inline" aria-label="Edit destination">
+        {hiddenInputs}
+        <form
+          aria-label="Find a route"
+          aria-busy={busy}
+          onSubmit={(event) => {
+            event.preventDefault();
+          }}
+        >
+          <div className="destination-field">
+            <label htmlFor="trip-destination" className="visually-hidden">
+              Destination
+            </label>
+            <div className="destination-input-pill">
+              <MapPin size={19} aria-hidden="true" />
+              <input
+                id="trip-destination"
+                type="text"
+                maxLength={150}
+                value={destination}
+                disabled={busy}
+                autoComplete="off"
+                placeholder="e.g. SW03 2605"
+                onChange={(event) => onDestinationChange(event.target.value)}
+              />
+            </div>
           </div>
-          {photo && (
-            <img className="evidence-photo" src={photo.preview} alt="Selected campus location" />
+          {!destination.trim() && (
+            <button
+              type="button"
+              className="text-button map-point-link"
+              disabled={busy}
+              onClick={() => onDestinationChange('Map point')}
+            >
+              Choose a map point
+            </button>
           )}
-          {(photo || reading) && (
-            <div className="photo-controls">
-              <button type="button" className="text-button" onClick={onDiscard}>
-                <X size={16} />
-                {reading ? 'Cancel photo preparation' : 'Remove photo'}
+          <label className="switch-card">
+            <span className="switch-label">Prefer elevators</span>
+            <span className="pill-switch">
+              <input
+                type="checkbox"
+                role="switch"
+                checked={preferElevators}
+                disabled={busy}
+                onChange={(event) => onPreferElevatorsChange?.(event.target.checked)}
+              />
+              <span className="pill-switch-track" aria-hidden="true" />
+            </span>
+          </label>
+        </form>
+        <button
+          type="button"
+          className="text-button back-step"
+          disabled={busy}
+          onClick={() => onBack?.()}
+        >
+          <Camera size={16} /> Use a different photo
+        </button>
+      </section>
+    );
+  }
+
+  if (step === 'photo') {
+    return (
+      <section className="photo-stage" aria-labelledby="location-heading">
+        {hiddenInputs}
+        <div className="photo-stage-canvas">
+          {photo ? (
+            <div className="photo-preview-card">
+              <img
+                className="evidence-photo"
+                src={photo.preview}
+                alt="Selected campus location"
+              />
+              <button
+                type="button"
+                className="photo-remove-fab"
+                aria-label="Remove photo"
+                disabled={busy}
+                onClick={onDiscard}
+              >
+                <X size={18} />
               </button>
+              <h1 id="location-heading" className="visually-hidden">
+                Snap a nearby room sign
+              </h1>
+            </div>
+          ) : (
+            <div className="viewfinder-card">
+              <div className="viewfinder-icon" aria-hidden="true">
+                {reading ? <LoaderCircle className="spin" size={44} /> : <Camera size={44} strokeWidth={1.6} />}
+              </div>
+              <h1 id="location-heading">Snap a nearby room sign</h1>
+              <span className="scope-pill">SE12 · SW03 · SW05 · SW01</span>
             </div>
           )}
+
           {error && (
             <p className="photo-failure" role="alert">
               {error}
             </p>
           )}
-          {status && (
+          {status && !error && (
             <p className="photo-status" role="status">
               {reading && <LoaderCircle className="spin" size={15} />}
               {status}
             </p>
           )}
+        </div>
+
+        <div className="bottom-sheet">
+          {photo ? (
+            <>
+              <button
+                type="button"
+                className="primary full-width sheet-pill-btn"
+                disabled={reading || busy}
+                onClick={() => onNext?.()}
+              >
+                Next <ArrowRight size={18} />
+              </button>
+              <div className="sheet-secondary-row">
+                <button
+                  type="button"
+                  className="secondary sheet-pill-btn"
+                  disabled={reading || busy}
+                  onClick={() => phonePhoto.current?.click()}
+                >
+                  <Camera size={18} />
+                  Take a photo
+                </button>
+                <button
+                  type="button"
+                  className="secondary sheet-pill-btn"
+                  disabled={reading || busy}
+                  onClick={() => upload.current?.click()}
+                >
+                  <Upload size={18} />
+                  Upload photo
+                </button>
+              </div>
+              <button type="button" className="text-button sheet-text-action" onClick={onDiscard}>
+                <X size={15} />
+                Remove photo
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                className="primary full-width sheet-pill-btn"
+                disabled={reading || busy}
+                onClick={() => phonePhoto.current?.click()}
+              >
+                <Camera size={19} />
+                Take a photo
+              </button>
+              <button
+                type="button"
+                className="secondary full-width sheet-pill-btn"
+                disabled={reading || busy}
+                onClick={() => upload.current?.click()}
+              >
+                <Upload size={19} />
+                Upload photo
+              </button>
+              {reading && (
+                <button type="button" className="text-button sheet-text-action" onClick={onDiscard}>
+                  <X size={15} />
+                  Cancel photo preparation
+                </button>
+              )}
+            </>
+          )}
+        </div>
+      </section>
+    );
+  }
+
+  return (
+    <section className="destination-stage" aria-labelledby="location-heading">
+      {hiddenInputs}
+      <form
+        className="destination-form"
+        aria-label="Find a route"
+        aria-busy={busy}
+        onSubmit={(event) => {
+          event.preventDefault();
+          onAnalyze();
+        }}
+      >
+        <div className="destination-top-bar">
           <button
             type="button"
-            className="primary full-width"
-            disabled={!photo || reading || busy}
-            onClick={() => onNext?.()}
+            className="icon-button destination-back-btn"
+            aria-label="Back to photo"
+            disabled={busy}
+            onClick={() => onBack?.()}
           >
-            Next <ArrowRight size={17} />
+            <ArrowLeft size={21} />
           </button>
-          <p className="helper">
-            <ShieldCheck size={14} /> Include a nearby room sign or doorway if you can. Your photo
-            stays on this device until you tap Get Directions.
-          </p>
-        </>
-      ) : (
-        <>
           {photo && (
             <div className="photo-step-summary">
               <img src={photo.preview} alt="Selected starting location" />
-              <span>Starting photo added</span>
+              <span>Photo added</span>
               <button
                 type="button"
-                className="text-button"
+                className="text-button photo-change-link"
                 onClick={() => (busy ? onDiscard() : onBack?.())}
               >
                 {busy ? 'Cancel analysis' : 'Change'}
               </button>
             </div>
           )}
-          <form
-            aria-label="Find a route"
-            aria-busy={busy}
-            onSubmit={(event) => {
-              event.preventDefault();
-              onAnalyze();
-            }}
-          >
-            <div className="destination-field">
-              <label htmlFor="trip-destination">Destination</label>
-              <div>
-                <MapPin size={19} />
-                <input
-                  id="trip-destination"
-                  type="text"
-                  maxLength={150}
-                  value={destination}
-                  disabled={busy}
-                  autoComplete="off"
-                  autoFocus
-                  placeholder="Room or building, e.g. SW03 2605"
-                  onChange={(event) => onDestinationChange(event.target.value)}
-                />
-              </div>
-              <small>Include the building and room, for example SW03 2605.</small>
-            </div>
-            {!destination.trim() && (
-              <button
-                type="button"
-                className="text-button"
+        </div>
+
+        <div className="destination-body">
+          <h1 id="location-heading">Where are you headed?</h1>
+
+          <div className="destination-field">
+            <label htmlFor="trip-destination" className="visually-hidden">
+              Destination
+            </label>
+            <div className="destination-input-pill">
+              <MapPin size={20} aria-hidden="true" />
+              <input
+                id="trip-destination"
+                type="text"
+                maxLength={150}
+                value={destination}
                 disabled={busy}
-                onClick={() => onDestinationChange('Map point')}
-              >
-                Choose a map point
-              </button>
-            )}
-            {!canUsePhotoResult && locationRequirement}
-            <div className="device-location-option">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={preferElevators}
-                  disabled={busy}
-                  onChange={(event) => onPreferElevatorsChange?.(event.target.checked)}
-                />{' '}
-                Accessibility: prefer elevators
-              </label>
-              <p className="helper">
-                Stairs are preferred by default. If the full route has no mapped elevator path, it
-                may still include stairs.
-              </p>
+                autoComplete="off"
+                autoFocus
+                placeholder="e.g. SW03 2605"
+                onChange={(event) => onDestinationChange(event.target.value)}
+              />
             </div>
-            {error ? (
-              <p className="photo-failure" role="alert">
-                {error}
+          </div>
+
+          <label className="switch-card">
+            <span className="switch-label">Prefer elevators</span>
+            <span className="pill-switch">
+              <input
+                type="checkbox"
+                role="switch"
+                checked={preferElevators}
+                disabled={busy}
+                onChange={(event) => onPreferElevatorsChange?.(event.target.checked)}
+              />
+              <span className="pill-switch-track" aria-hidden="true" />
+            </span>
+          </label>
+
+          {!destination.trim() && (
+            <button
+              type="button"
+              className="text-button map-point-link"
+              disabled={busy}
+              onClick={() => onDestinationChange('Map point')}
+            >
+              Choose a map point
+            </button>
+          )}
+
+          {error ? (
+            <p className="photo-failure" role="alert">
+              {error}
+            </p>
+          ) : (
+            status && (
+              <p className="photo-status" role="status">
+                {busy && <LoaderCircle className="spin" size={15} />}
+                {status}
+                {busy && <ElapsedTime />}
               </p>
-            ) : (
-              status && (
-                <p className="photo-status" role="status">
-                  {busy && <LoaderCircle className="spin" size={15} />}
-                  {status}
-                  {busy && <ElapsedTime />}
-                </p>
-              )
-            )}
-            {!canUsePhotoResult && (
-              <button
-                type="submit"
-                className="primary full-width go-button"
-                disabled={!canSubmitPhoto}
-              >
-                {busy ? <LoaderCircle className="spin" size={17} /> : <Search size={17} />}
-                {busy ? 'Finding your route…' : error ? 'Try again' : 'Get Directions'}
-              </button>
-            )}
-          </form>
+            )
+          )}
+        </div>
+
+        <div className="bottom-sheet destination-sheet">
+          <span className="sheet-handle" aria-hidden="true" />
           <button
-            type="button"
-            className="text-button back-step"
-            disabled={busy}
-            onClick={() => onBack?.()}
+            type="submit"
+            className="primary full-width sheet-pill-btn go-button"
+            disabled={!canSubmitPhoto}
           >
-            {photo ? (
-              <>
-                <ArrowLeft size={16} /> Back to photo
-              </>
-            ) : (
-              <>
-                <Camera size={16} /> Use a different photo
-              </>
-            )}
+            {busy ? <LoaderCircle className="spin" size={18} /> : <Search size={18} />}
+            {busy ? 'Finding your route…' : error ? 'Try again' : 'Get Directions'}
           </button>
-          <p className="helper">
-            <ShieldCheck size={14} /> Photos are processed for this route and not saved by the app.
-          </p>
-        </>
-      )}
+          {locationRequirement}
+        </div>
+      </form>
     </section>
   );
 }

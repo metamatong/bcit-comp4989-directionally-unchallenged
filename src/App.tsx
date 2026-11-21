@@ -2,7 +2,6 @@ import { aiProviderDetails } from './ai-provider';
 import { useEffect, useRef, useState } from 'react';
 import {
   AlertTriangle,
-  ArrowUpRight,
   Compass,
   Info,
   RotateCcw,
@@ -22,11 +21,10 @@ import { preparePhoto, type PreparedPhoto } from './photo';
 import { PHOTO_STAGE_TIMEOUT_MS, PHOTO_RESPONSE_GRACE_MS } from './photo-views';
 import { CampusLocationResults } from './components/CampusLocationResults';
 import { PhotoLocationInput } from './components/PhotoLocationInput';
-import { JourneyPanel, StartingPositionNotice } from './components/JourneyPanel';
+import { JourneyPanel } from './components/JourneyPanel';
 import { PhotoDeviceRequirement } from './components/PhotoDeviceLocation';
 import { usePhotoDeviceLocation } from './location/use-device-location';
 import { gpsBuildingHint } from './location/building-hint';
-import { planLabel } from './topology';
 import './wayfinding.css';
 import type { Bootstrap, Session } from './types';
 
@@ -46,6 +44,7 @@ export default function App() {
   const [destination, setDestination] = useState('');
   const [preferElevators, setPreferElevators] = useState(false);
   const [activeDestination, setActiveDestination] = useState('');
+  const [guidedMode, setGuidedMode] = useState(false);
   const photoAbort = useRef<AbortController | null>(null);
   const evidenceForPhoto = useRef<{ photo: PreparedPhoto; id: string; contextKey: string } | null>(
     null,
@@ -97,7 +96,14 @@ export default function App() {
     setShowPhotoResults(false);
     setActiveDestination('');
     setFlowStep('photo');
+    setGuidedMode(false);
     setError('');
+  }
+  function startOver() {
+    removePhoto();
+    setDestination('');
+    setPreferElevators(false);
+    void send({ type: 'reset' });
   }
   async function send(action: unknown): Promise<Session | undefined> {
     const current = sessionRef.current;
@@ -140,6 +146,7 @@ export default function App() {
     setShowPhotoResults(false);
     setActiveDestination('');
     setFlowStep('photo');
+    setGuidedMode(false);
     setReading(true);
     setPhotoError('');
     setError('');
@@ -148,7 +155,9 @@ export default function App() {
       const prepared = await preparePhoto(file);
       if (!evidenceGate.current.isCurrent(generation)) return;
       setPreparedPhoto(prepared);
-      setReadStatus('Photo ready.');
+      setReadStatus('');
+      // Auto-advance straight to Destination once local photo preparation finishes.
+      setFlowStep('destination');
     } catch (failure) {
       if (evidenceGate.current.isCurrent(generation)) setReadStatus((failure as Error).message);
     } finally {
@@ -285,7 +294,7 @@ export default function App() {
         <h1>DirectionallyUnchallenged</h1>
         <p>{error || 'Loading…'}</p>
         {error && (
-          <button className="primary" onClick={() => location.reload()}>
+          <button className="primary sheet-pill-btn" onClick={() => location.reload()}>
             Try again
           </button>
         )}
@@ -302,40 +311,37 @@ export default function App() {
   const analysis = showPhotoResults ? session.campusAnalysis : null;
   const region = analysis ? session.campusLocation : null;
   const routeCandidate = region ?? undefined;
-  const labelOnly =
-    !!routeCandidate?.anchorLabel &&
-    !routeCandidate.doorwayVicinity &&
-    !routeCandidate.corridorOrigin;
   const directionsMode = Boolean(analysis && activeDestination);
+  const isDestinationScreen = !analysis && !!preparedPhoto && flowStep === 'destination';
+  const showAppHeader = !guidedMode && !isDestinationScreen && !(directionsMode && routeCandidate);
+
   const photoInput = (
-    <>
-      <PhotoLocationInput
-        step={analysis ? 'destination' : preparedPhoto ? flowStep : 'photo'}
-        destination={destination}
-        preferElevators={preferElevators}
-        onPreferElevatorsChange={(value) => {
-          setPreferElevators(value);
-          setActiveDestination('');
-        }}
-        canUsePhotoResult={!!analysis?.candidates.length}
-        locationRequirement={<PhotoDeviceRequirement />}
-        onDestinationChange={(value) => {
-          setDestination(value);
-          setActiveDestination('');
-        }}
-        photo={preparedPhoto}
-        ready={photoReady}
-        reading={reading}
-        busy={busy}
-        status={readStatus}
-        error={photoError}
-        onPhoto={(file) => void readPhoto(file)}
-        onNext={() => setFlowStep('destination')}
-        onBack={() => (preparedPhoto ? setFlowStep('photo') : removePhoto())}
-        onAnalyze={() => void analyzePhoto()}
-        onDiscard={removePhoto}
-      />
-    </>
+    <PhotoLocationInput
+      step={analysis ? 'destination' : preparedPhoto ? flowStep : 'photo'}
+      destination={destination}
+      preferElevators={preferElevators}
+      onPreferElevatorsChange={(value) => {
+        setPreferElevators(value);
+        setActiveDestination('');
+      }}
+      canUsePhotoResult={!!analysis?.candidates.length}
+      locationRequirement={<PhotoDeviceRequirement />}
+      onDestinationChange={(value) => {
+        setDestination(value);
+        setActiveDestination('');
+      }}
+      photo={preparedPhoto}
+      ready={photoReady}
+      reading={reading}
+      busy={busy}
+      status={readStatus}
+      error={photoError}
+      onPhoto={(file) => void readPhoto(file)}
+      onNext={() => setFlowStep('destination')}
+      onBack={() => (preparedPhoto ? setFlowStep('photo') : removePhoto())}
+      onAnalyze={() => void analyzePhoto()}
+      onDiscard={removePhoto}
+    />
   );
   const summaryInRoutePanel =
     directionsMode &&
@@ -343,72 +349,73 @@ export default function App() {
     !routeCandidate &&
     !analysis.candidates.length;
   const photoResults = analysis && (
-    <>
-      <CampusLocationResults
-        analysis={analysis}
-        selectedId={routeCandidate?.id}
-        showSummary={!summaryInRoutePanel}
-        plans={plans}
-        readings={
-          session.photoEvidence?.id === analysis.evidenceId
-            ? session.photoEvidence?.labels
-            : undefined
-        }
-      />
-    </>
+    <CampusLocationResults
+      analysis={analysis}
+      selectedId={routeCandidate?.id}
+      showSummary={!summaryInRoutePanel}
+      plans={plans}
+      readings={
+        session.photoEvidence?.id === analysis.evidenceId
+          ? session.photoEvidence?.labels
+          : undefined
+      }
+    />
   );
   const updateDestination = analysis &&
     destination.trim() &&
     destination.trim() !== activeDestination && (
       <button
-        className="primary full-width"
+        className="primary full-width sheet-pill-btn"
         disabled={busy}
         onClick={() => setActiveDestination(destination.trim())}
       >
         Get Directions to {destination.trim()}
       </button>
     );
+  const editInputs = analysis ? (
+    <details key={analysis.requestId} className="journey-inputs" open={!directionsMode}>
+      <summary>Edit photo or destination</summary>
+      {photoInput}
+      {updateDestination}
+    </details>
+  ) : undefined;
+
   return (
-    <div className="app-shell visitor-shell">
-      <header className="header">
-        <a
-          className="brand"
-          href="#"
-          onClick={(event) => {
-            event.preventDefault();
-          }}
-        >
-          <span className="brand-mark">
-            <Compass size={25} strokeWidth={1.7} />
-          </span>
-          <span className="brand-name">
-            Directionally
-            <wbr />
-            Unchallenged
-          </span>
-          <span className="brand-dot">.</span>
-        </a>
-        <div className="header-end">
-          <span
-            className={`provider-status ${data.liveAvailable ? 'live' : ''}`}
-            data-testid="provider-status"
+    <div className={`app-shell visitor-shell${guidedMode ? ' guided-active' : ''}`}>
+      {showAppHeader && (
+        <header className="header">
+          <a
+            className="brand"
+            href="#"
+            onClick={(event) => {
+              event.preventDefault();
+            }}
           >
-            <span className="status-dot" />
-            {data.liveAvailable ? `${provider.label} ready` : 'Setup required'}
-          </span>
-          <button
-            className="icon-button"
-            aria-label="About DirectionallyUnchallenged"
-            onClick={() => setAboutOpen(true)}
-          >
-            <Info size={19} />
-          </button>
-        </div>
-      </header>
-      <main>
-        {!data.liveAvailable && (
+            <span className="brand-mark">
+              <Compass size={22} strokeWidth={1.8} />
+            </span>
+            <span className="brand-name">
+              Directionally
+              <wbr />
+              Unchallenged
+            </span>
+            <span className="brand-dot">.</span>
+          </a>
+          <div className="header-end">
+            <button
+              className="icon-button info-circle-btn"
+              aria-label="Coverage & privacy"
+              onClick={() => setAboutOpen(true)}
+            >
+              <Info size={19} />
+            </button>
+          </div>
+        </header>
+      )}
+      <main className={guidedMode ? 'main-guided' : 'main-flow'}>
+        {!guidedMode && !data.liveAvailable && (
           <div className="setup-notice" role="note">
-            <ShieldCheck size={21} />
+            <ShieldCheck size={19} />
             <div>
               <strong>{provider.label} setup required</strong>
               <p>
@@ -418,7 +425,7 @@ export default function App() {
             </div>
           </div>
         )}
-        {error && (
+        {!guidedMode && error && (
           <div role="alert" className="error-banner">
             <AlertTriangle size={18} />
             <span>{error}</span>
@@ -429,53 +436,46 @@ export default function App() {
           </div>
         )}
         <div className="workspace">
-          {data.liveAvailable && !data.photoLocalizationAvailable && (
+          {!guidedMode && data.liveAvailable && !data.photoLocalizationAvailable && (
             <p className="setup-notice" role="note">
               Floor-plan images are not ready on this server. Restart after preparing the source
               plans.
             </p>
           )}
-          {data.liveAvailable && !data.locationCatalogue && (
+          {!guidedMode && data.liveAvailable && !data.locationCatalogue && (
             <p className="setup-notice" role="note">
               GPS building data is unavailable on this server. Reload after restoring the campus
               location catalogue to get directions.
             </p>
           )}
           {directionsMode ? (
-            <>
-              {routeCandidate && analysis?.candidates.length ? (
-                <StartingPositionNotice
-                  labelOnly={labelOnly}
-                  detail={
-                    labelOnly
-                      ? planLabel(routeCandidate) + ' · ' + routeCandidate.anchorLabel
-                      : undefined
-                  }
-                />
-              ) : null}
-              {routeCandidate ? (
-                <JourneyPanel
-                  key={JSON.stringify([
-                    session.id,
-                    routeCandidate.id,
-                    activeDestination,
-                    preferElevators,
-                  ])}
-                  sessionId={session.id}
-                  revision={session.revision}
-                  candidate={routeCandidate}
-                  destination={activeDestination}
-                  preferElevators={preferElevators}
-                  plans={data.visualPlans}
-                  locationCatalogue={data.locationCatalogue}
-                  locationEvidence={photoResults}
-                  busy={busy}
-                  onTryAnotherPhoto={() => {
-                    setShowPhotoResults(false);
-                    setFlowStep('photo');
-                  }}
-                />
-              ) : (
+            routeCandidate ? (
+              <JourneyPanel
+                key={JSON.stringify([
+                  session.id,
+                  routeCandidate.id,
+                  activeDestination,
+                  preferElevators,
+                ])}
+                sessionId={session.id}
+                revision={session.revision}
+                candidate={routeCandidate}
+                destination={activeDestination}
+                preferElevators={preferElevators}
+                plans={data.visualPlans}
+                locationCatalogue={data.locationCatalogue}
+                locationEvidence={photoResults}
+                editInputs={editInputs}
+                busy={busy}
+                onGuidedChange={setGuidedMode}
+                onStartOver={startOver}
+                onTryAnotherPhoto={() => {
+                  setShowPhotoResults(false);
+                  setFlowStep('photo');
+                }}
+              />
+            ) : (
+              <>
                 <section className="journey-panel">
                   <h2>
                     {analysis?.gpsStatus === 'building-only'
@@ -488,7 +488,7 @@ export default function App() {
                       : 'Try another photo showing a nearby room sign, doorway, or hallway junction.'}
                   </p>
                   <button
-                    className="primary full-width"
+                    className="primary full-width sheet-pill-btn"
                     onClick={() => {
                       setShowPhotoResults(false);
                       setFlowStep('photo');
@@ -497,56 +497,52 @@ export default function App() {
                     Try another photo
                   </button>
                 </section>
-              )}
-              {analysis && !routeCandidate && (
-                <details className="journey-evidence">
-                  <summary>Location evidence</summary>
-                  {photoResults}
-                </details>
-              )}
-            </>
+                <div className="overview-utilities">
+                  {editInputs}
+                  {analysis && (
+                    <details className="journey-evidence">
+                      <summary>Location evidence</summary>
+                      {photoResults}
+                    </details>
+                  )}
+                  <div className="overview-footer-actions">
+                    <button
+                      type="button"
+                      className="text-button"
+                      disabled={busy}
+                      onClick={startOver}
+                    >
+                      <RotateCcw size={15} />
+                      Start over
+                    </button>
+                  </div>
+                </div>
+              </>
+            )
           ) : (
             <>
               {!analysis && photoInput}
-              {photoResults}
+              {analysis && (
+                <div className="analysis-edit-view">
+                  {editInputs}
+                  {photoResults}
+                  <div className="overview-footer-actions">
+                    <button
+                      type="button"
+                      className="text-button"
+                      disabled={busy}
+                      onClick={startOver}
+                    >
+                      <RotateCcw size={15} />
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              )}
             </>
-          )}
-          {analysis && (
-            <details key={analysis.requestId} className="journey-inputs" open={!directionsMode}>
-              <summary>Edit photo or destination</summary>
-              {photoInput}
-              {updateDestination}
-            </details>
-          )}
-          {analysis && (
-            <div className="result-actions">
-              <button
-                className="text-button"
-                disabled={busy}
-                onClick={() => {
-                  removePhoto();
-                  setDestination('');
-                  setPreferElevators(false);
-                  void send({ type: 'reset' });
-                }}
-              >
-                <RotateCcw size={15} />
-                {directionsMode ? 'Start over' : 'Clear'}
-              </button>
-            </div>
           )}
         </div>
       </main>
-      <footer>
-        <span>
-          DirectionallyUnchallenged<span className="brand-dot">.</span>
-          <small>A COMP 4989 project · Independent student prototype</small>
-        </span>
-        <button onClick={() => setAboutOpen(true)}>
-          Coverage & privacy
-          <ArrowUpRight size={14} />
-        </button>
-      </footer>
       <dialog
         ref={dialog}
         aria-labelledby="about-heading"
@@ -577,12 +573,21 @@ export default function App() {
                 Visitor wayfinding is limited to SE12, SW03, SW05 and SW01. It uses official source
                 labels and walking areas compiled from the BCIT Burnaby plans.
               </p>
+              <div className="about-status-row">
+                <span
+                  className={`provider-status ${data.liveAvailable ? 'live' : ''}`}
+                  data-testid="provider-status"
+                >
+                  <span className="status-dot" />
+                  {data.liveAvailable ? `${provider.label} ready` : 'Setup required'}
+                </span>
+              </div>
               <div className="about-section">
                 <h3>What you can do</h3>
                 <p>
-                  Add a photo, enter a destination, and tap Get Directions. The app reads the photo
-                  once, requests GPS to narrow the building, uses the photo to match a floor and
-                  starting area, and calculates a route.
+                  Take or upload a photo of a nearby sign, enter a destination, and tap Get
+                  Directions. The app reads the photo once, requests GPS to narrow the building,
+                  uses the photo to match a floor and starting area, and calculates a route.
                 </p>
               </div>
               <div className="about-section">
@@ -604,6 +609,9 @@ export default function App() {
                   encrypted and expire after 30 minutes. {provider.dataUse}
                 </p>
               </div>
+              <p className="about-credit">
+                A COMP 4989 project · Independent student prototype
+              </p>
             </>
           )}
         </div>

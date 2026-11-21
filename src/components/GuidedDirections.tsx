@@ -1,11 +1,11 @@
 /** Manual progress through saved route steps; never infers movement or camera heading. */
 import { useEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Maximize2, Minimize2 } from 'lucide-react';
 import type { NavigationResult, WalkingSurface } from '../wayfinding';
 import type { VisualPlan } from '../types';
 import { fetchWalkingSurface } from '../api';
 import { planLabel } from '../topology';
-import { RouteMap } from './RouteMap';
+import { RouteMapImage } from './RouteMap';
 import type { DeviceOverlay, DeviceReading, LocationCatalogue } from '../location/types';
 import { overlapsFootprint } from '../location/geometry';
 import {
@@ -48,27 +48,27 @@ function locationStatusMessage({
   }
   const floor = planLabel(plan);
   if (!hasBuilding) {
-    return `An official building footprint is unavailable for ${floor}. The position dot is hidden.`;
+    return `Building footprint unavailable for ${floor}. Position dot hidden.`;
   }
   if (matchResult?.status === 'unavailable') {
-    return `A floor-plan alignment is unavailable for ${floor}. The position dot is hidden.`;
+    return `Floor-plan alignment is unavailable for ${floor}. Position dot hidden.`;
   }
   if (matchResult?.status === 'low-accuracy') {
-    return `GPS accuracy is too wide (±${reading.accuracy.toFixed(0)} m) to place a position on ${floor}. The position dot is hidden.`;
+    return `GPS accuracy too wide (±${reading.accuracy.toFixed(0)} m). Position dot hidden.`;
   }
   if (matchResult?.status === 'too-far') {
-    return `The GPS reading is too far from mapped corridors on ${floor}. The position dot is hidden.`;
+    return `GPS reading is outside mapped corridors on ${floor}. Position dot hidden.`;
   }
   if (matchResult?.status === 'raw' && !withinBuilding) {
-    return 'The GPS area does not overlap this building. The position dot is hidden.';
+    return 'GPS area does not overlap this building. Position dot hidden.';
   }
   if (matchResult?.status === 'outside-page' || !device) {
-    return 'The GPS position falls outside this floor drawing. The position dot is hidden.';
+    return 'GPS position falls outside this floor plan. Position dot hidden.';
   }
   if (device.snapDistanceMetres !== undefined) {
-    return `Approximate corridor match on ${floor} · raw GPS ~${Math.round(device.snapDistanceMetres)} m away · reported ±${reading.accuracy.toFixed(0)} m · indoor accuracy unmeasured.`;
+    return `Approx. corridor GPS (±${reading.accuracy.toFixed(0)} m · indoor accuracy unmeasured)`;
   }
-  return `GPS position is approximate on ${floor} · reported accuracy ±${reading.accuracy.toFixed(0)} m · indoor accuracy unmeasured.`;
+  return `Approx. GPS (±${reading.accuracy.toFixed(0)} m · indoor accuracy unmeasured)`;
 }
 
 export function GuidedDirections({
@@ -80,6 +80,7 @@ export function GuidedDirections({
   onStepChange,
   transferNotice,
   onOverview,
+  onDone,
 }: {
   route: Extract<NavigationResult, { status: 'route' }>;
   plans: VisualPlan[];
@@ -89,9 +90,11 @@ export function GuidedDirections({
   onStepChange: (index: number) => void;
   transferNotice?: string;
   onOverview: () => void;
+  onDone?: () => void;
 }) {
   const tracking = useWalkingLocation(true);
   const heading = useRef<HTMLHeadingElement>(null);
+  const [whole, setWhole] = useState(false);
   const [loadedSurfaces, setLoadedSurfaces] = useState<Record<string, WalkingSurface | null>>({});
   const matchHistory = useRef<MatchHistory | null>(null);
   const step = route.steps[index];
@@ -116,6 +119,11 @@ export function GuidedDirections({
     });
     return () => controller.abort();
   }, [complete, hasProvidedSurface, loadedSurfaces, plan.id]);
+
+  // Reset full-floor toggle when advancing to a different step.
+  useEffect(() => {
+    setWhole(false);
+  }, [index, plan.id]);
 
   const reading = !complete && tracking.fresh ? (tracking.reading ?? null) : null;
   const history = matchHistory.current;
@@ -180,26 +188,45 @@ export function GuidedDirections({
     matchResult,
     device,
   });
+
   useEffect(() => {
     heading.current?.focus({ preventScroll: true });
-    heading.current?.scrollIntoView?.({ block: 'start' });
+    heading.current?.scrollIntoView?.({ block: 'nearest' });
   }, [index]);
+
   function move(next: number) {
     if (next >= route.steps.length) tracking.stop();
     onStepChange(next);
   }
+
+  const progressPercent = complete
+    ? 100
+    : Math.max(8, Math.round(((index + 1) / Math.max(route.steps.length, 1)) * 100));
+
   return (
-    <section className="guided-directions" aria-label="Step-by-step directions">
-      <button type="button" className="text-button" onClick={onOverview}>
-        <ArrowLeft size={17} /> Route overview
-      </button>
+    <section className="guided-directions guided-stage" aria-label="Step-by-step directions">
       <div className="guided-map">
-        <RouteMap
+        <div className="map-floating-bar">
+          <button
+            type="button"
+            className="map-floating-pill map-overview-btn"
+            aria-label="Route overview"
+            onClick={onOverview}
+          >
+            <ArrowLeft size={16} aria-hidden="true" />
+            <span>Overview</span>
+          </button>
+          <span className="map-floating-pill map-floor-badge">{planLabel(plan)}</span>
+        </div>
+
+        <RouteMapImage
           key={`${index}-${plan.id}`}
           plan={plan}
           label={`${planLabel(plan)} · ${complete ? 'Destination' : `Step ${index + 1}`}`}
           paths={step?.kind === 'corridor' ? [step.path] : []}
           device={device}
+          whole={whole}
+          fillContainer
           markers={
             step?.kind === 'corridor'
               ? [
@@ -216,16 +243,32 @@ export function GuidedDirections({
                 ]
           }
         />
+
+        <button
+          type="button"
+          className="map-floating-fab"
+          aria-pressed={whole}
+          aria-label={whole ? 'Zoom to route' : 'Show full floor'}
+          title={whole ? 'Zoom to route' : 'Show full floor'}
+          onClick={() => setWhole(!whole)}
+        >
+          {whole ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+        </button>
       </div>
-      <div className="guided-step" aria-live="polite">
+
+      <div className="guided-step bottom-sheet" aria-live="polite">
+        <span className="sheet-handle" aria-hidden="true" />
         <p className="guided-step-count">
           {complete ? 'Route complete' : `Step ${index + 1} of ${route.steps.length}`}
         </p>
+        <div className="step-progress-track" aria-hidden="true">
+          <div className="step-progress-fill" style={{ width: `${progressPercent}%` }} />
+        </div>
         <h2 ref={heading} tabIndex={-1}>
           {complete ? `Destination: ${route.destination.label}` : step.instruction}
         </h2>
         {!complete && (
-          <p>
+          <p className="guided-step-subtitle">
             {step.from.label} → {step.to.label}
             {transfer && (
               <>
@@ -236,35 +279,43 @@ export function GuidedDirections({
             )}
           </p>
         )}
-      </div>
-      {index === 0 && transferNotice && (
-        <p className="helper" role="note">
-          {transferNotice}
-        </p>
-      )}
-      <p className="guided-location-status" role="status">
-        {device && <span className="guided-location-dot" aria-hidden="true" />}
-        {positionStatus}
-      </p>
-      <div className="guided-controls">
-        <button
-          type="button"
-          className="secondary"
-          disabled={index === 0}
-          onClick={() => move(index - 1)}
-        >
-          <ArrowLeft size={17} /> Previous
-        </button>
-        {complete ? (
-          <button type="button" className="primary" onClick={onOverview}>
-            Done
-          </button>
-        ) : (
-          <button type="button" className="primary" onClick={() => move(index + 1)}>
-            {index === route.steps.length - 1 ? 'Finish route' : 'Next step'}{' '}
-            <ArrowRight size={17} />
-          </button>
+        {index === 0 && transferNotice && (
+          <p className="guided-transfer-note" role="note">
+            {transferNotice}
+          </p>
         )}
+        <p className="guided-location-status" role="status">
+          {device && <span className="guided-location-dot" aria-hidden="true" />}
+          <span>{positionStatus}</span>
+        </p>
+        <div className="guided-controls">
+          <button
+            type="button"
+            className="secondary sheet-pill-btn"
+            disabled={index === 0}
+            onClick={() => move(index - 1)}
+          >
+            Previous
+          </button>
+          {complete ? (
+            <button
+              type="button"
+              className="primary sheet-pill-btn"
+              onClick={onDone ?? onOverview}
+            >
+              Done
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="primary sheet-pill-btn"
+              onClick={() => move(index + 1)}
+            >
+              {index === route.steps.length - 1 ? 'Finish route' : 'Next step'}{' '}
+              <ArrowRight size={17} />
+            </button>
+          )}
+        </div>
       </div>
     </section>
   );

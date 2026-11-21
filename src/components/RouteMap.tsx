@@ -25,7 +25,8 @@ export function RouteMapImage({
   label,
   device,
   whole = false,
-}: MapProps & { whole?: boolean }) {
+  fillContainer = false,
+}: MapProps & { whole?: boolean; fillContainer?: boolean }) {
   // Frame the zoomed step strictly around the route geometry so noisy GPS readings never jump the viewport.
   const points = [
     ...markers.map((m) => m.point),
@@ -51,7 +52,8 @@ export function RouteMapImage({
   return (
     <svg
       viewBox={`${x} ${y} ${w} ${h}`}
-      style={{ aspectRatio: `${w} / ${h}` }}
+      style={fillContainer ? undefined : { aspectRatio: `${w} / ${h}` }}
+      preserveAspectRatio="xMidYMid meet"
       role="img"
       aria-label={label}
       className="walking-map"

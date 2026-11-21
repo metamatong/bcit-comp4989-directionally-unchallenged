@@ -16,10 +16,10 @@ test('starts with photo controls, with no library, plan images or promotional he
   await page.goto('/');
   await expect(page).toHaveTitle('DirectionallyUnchallenged · Find your way');
   await expect(page.locator('.brand')).toHaveText('DirectionallyUnchallenged.');
-  await expect(page.locator('footer')).toContainText('DirectionallyUnchallenged.');
-  await expect(page.getByTestId('provider-status')).toHaveText('Setup required');
+  await expect(page.getByRole('button', { name: 'Coverage & privacy', exact: true })).toBeVisible();
+  await expect(page.getByRole('note')).toContainText('setup required');
   await expect(
-    page.getByRole('heading', { name: 'Take a photo of where you are', exact: true }),
+    page.getByRole('heading', { name: 'Snap a nearby room sign', exact: true }),
   ).toBeVisible();
   await expect(page.getByRole('button', { name: 'Upload photo', exact: true })).toBeVisible();
   await expect(page.getByRole('button', { name: 'Take a photo', exact: true })).toBeVisible();
@@ -50,12 +50,16 @@ test('clears a saved Demo preference and uses Gemini readiness without a mode ac
     await route.fulfill({ json: { ...data, liveAvailable: true } });
   });
   await page.goto('/');
+  await page.getByRole('button', { name: 'Coverage & privacy', exact: true }).click();
   await expect(page.getByTestId('provider-status')).toHaveText('Gemini ready');
+  await page.getByRole('dialog').press('Escape');
   expect(
     await page.evaluate(() => localStorage.getItem('directionallyunchallenged.ai-mode')),
   ).toBeNull();
   await page.reload();
+  await page.getByRole('button', { name: 'Coverage & privacy', exact: true }).click();
   await expect(page.getByTestId('provider-status')).toHaveText('Gemini ready');
+  await page.getByRole('dialog').press('Escape');
   expect(modeRequests).toEqual([]);
   await expect(page.getByRole('button', { name: /Demo|Enable Live AI|Live AI/i })).toHaveCount(0);
 });
@@ -69,9 +73,8 @@ test('prepares an image locally but disables analysis and sending when the key i
   });
   await page.goto('/');
   await page.getByLabel('Upload campus photo', { exact: true }).setInputFiles(fixture);
-  await expect(page.getByText('Photo ready.', { exact: true })).toBeVisible();
-  await expect(page.getByRole('note')).toContainText('GEMINI_API_KEY is missing');
-  await page.getByRole('button', { name: 'Next', exact: true }).click();
+  await expect(page.getByLabel('Destination', { exact: true })).toBeVisible();
+  await expect(page.getByRole('note').first()).toContainText('GEMINI_API_KEY is missing');
   await page.getByLabel('Destination', { exact: true }).fill('SW03 2082');
   const form = page.getByRole('form', { name: 'Find a route' });
   await expect(form.getByRole('button', { name: 'Get Directions', exact: true })).toBeDisabled();
@@ -131,12 +134,10 @@ for (const failure of [
     );
     await page.goto('/');
     await page.getByLabel('Upload campus photo', { exact: true }).setInputFiles(fixture);
-    await page.getByRole('button', { name: 'Next', exact: true }).click();
     await page.getByLabel('Destination', { exact: true }).fill('SW03 2082');
     await page.getByRole('button', { name: 'Get Directions', exact: true }).click();
     await expect(page.getByRole('alert')).toContainText(failure.message);
     await expect(page.getByRole('button', { name: /Demo|landmark|checkpoint/i })).toHaveCount(0);
     await expect(page.getByRole('heading', { name: 'Best match' })).toHaveCount(0);
-    await expect(page.getByTestId('provider-status')).toHaveText('Gemini ready');
   });
 }
