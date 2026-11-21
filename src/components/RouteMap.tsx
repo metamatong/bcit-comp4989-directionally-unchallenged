@@ -26,6 +26,7 @@ export function RouteMapImage({
   device,
   whole = false,
 }: MapProps & { whole?: boolean }) {
+  // Frame the zoomed step strictly around the route geometry so noisy GPS readings never jump the viewport.
   const points = [
     ...markers.map((m) => m.point),
     ...paths.flat(),
@@ -35,7 +36,6 @@ export function RouteMapImage({
           { x: bounds[2], y: bounds[3] },
         ]
       : []),
-    ...(device ? [device.point] : []),
   ];
   const width = plan.width,
     height = plan.height;

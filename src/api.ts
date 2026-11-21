@@ -1,4 +1,5 @@
 import type { Bootstrap, Session } from './types';
+import type { WalkingSurface } from './wayfinding';
 
 /** Remove obsolete preferences; provider readiness now comes only from the server. */
 export function clearLegacyModePreference(storage?: Pick<Storage, 'removeItem'>) {
@@ -57,6 +58,34 @@ export async function request<T>(
 }
 export const bootstrap = () => request<Bootstrap>('/api/bootstrap');
 export const createSession = () => request<Session>('/api/sessions', {});
+
+const walkingSurfaces = new Map<string, Promise<WalkingSurface | null>>();
+
+/** Lazily load and cache public walkable corridor runs for client-side GPS map-matching. */
+export async function fetchWalkingSurface(
+  planId: string,
+  signal?: AbortSignal,
+): Promise<WalkingSurface | null> {
+  let pending = walkingSurfaces.get(planId);
+  if (!pending) {
+    pending = request<WalkingSurface>(
+      `/api/plans/${encodeURIComponent(planId)}/walking-surface`,
+      undefined,
+      { timeoutMs: 10000 },
+    )
+      .then((surface) =>
+        surface && Array.isArray(surface.runs) && Number.isFinite(surface.step) ? surface : null,
+      )
+      .catch(() => null)
+      .then((surface) => {
+        if (!surface) walkingSurfaces.delete(planId);
+        return surface;
+      });
+    walkingSurfaces.set(planId, pending);
+  }
+  const result = await pending;
+  return signal?.aborted ? null : result;
+}
 
 /** A server restart can expire the session while the photo still exists in this tab. */
 export async function readPhotoInSession<T>(

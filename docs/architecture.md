@@ -13,6 +13,7 @@ DirectionallyUnchallenged uses a React/TypeScript client and Express server for 
 ## Visitor API
 
 - `GET /api/bootstrap`: visual plan metadata, provider readiness, source coverage and validated building/floor location catalogue.
+- `GET /api/plans/:planId/walking-surface`: pilot-scoped public corridor/lobby walking cells (`step`, `runs`, source hashes) fetched lazily by the browser for client-side indoor GPS map-matching; kept distinct from `LocationCatalogue`.
 - `POST /api/sessions`: creates an empty live-analysis session.
 - `POST /api/sessions/:id/photo/evidence`: the only image and vision request.
 - `POST /api/sessions/:id/photo/location`: metadata-only localization with a required GPS building hint.

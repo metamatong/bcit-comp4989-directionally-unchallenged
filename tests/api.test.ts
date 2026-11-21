@@ -217,3 +217,17 @@ it.each([
     await new Promise<void>((resolve) => isolated.close(() => resolve()));
   }
 });
+
+it('serves public walking surfaces for pilot floors and rejects non-pilot plans', async () => {
+  const pilot = await fetch(`${base}/api/plans/SE12-F3-p1/walking-surface`);
+  expect(pilot.status).toBe(200);
+  const surface = await pilot.json();
+  expect(surface.planId).toBe('SE12-F3-p1');
+  expect(surface.step).toBeGreaterThan(0);
+  expect(Array.isArray(surface.runs)).toBe(true);
+  expect(surface.runs.length).toBeGreaterThan(0);
+  expect(surface.interiorRuns).toBeUndefined();
+
+  const nonPilot = await fetch(`${base}/api/plans/NE1-F1-p1/walking-surface`);
+  expect(nonPilot.status).toBe(404);
+});

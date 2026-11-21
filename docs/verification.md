@@ -2,6 +2,17 @@
 
 This file is a historical log. Older entries describe workflows and route data that have since changed. The current visitor app uses GPS-required automatic start matching and has no start-confirmation, connection-review or topology-editor screen/API; see [current architecture](architecture.md) and [device-location coverage](device-location.md).
 
+## Client-side indoor GPS corridor map-matching · November 21, 2026
+
+Added client-side indoor GPS corridor map-matching (`src/location/map-matching.ts`) to mitigate 5–15 m outward indoor GPS offsets during guided directions while keeping raw coordinates strictly in browser memory. Added the read-only pilot endpoint `GET /api/plans/:planId/walking-surface` (`server/app.ts`) and cached client fetcher (`src/api.ts`) so drawing-derived walking areas stay separate from `LocationCatalogue`. Updated `GuidedDirections` and `DevicePosition` to constrain eligible indoor fixes onto verified public walking cells within `min(20 m, max(reportedAccuracy, 12 m))` (rejecting fixes wider than 35 m or outside range, exempting outdoor transfer steps, applying kinematic continuity and a mild active-route tie-breaker, and reporting honest corridor-matched status and uncertainty). Removed `device.point` from `RouteMapImage`'s zoomed `viewBox` calculation so GPS drift does not jump the step viewport. Updated `AGENTS.md` validation guidance to include small, focused regression tests on changes.
+
+Validation:
+- `npx.cmd vitest run tests/map-matching.test.ts tests/guided-directions.test.ts tests/browser-location.test.ts tests/device-location-lifecycle.test.ts`: **16/16 tests passed** across 4 files (synthetic 10 m exterior pull on SE12 F3, outlier/wide-accuracy/stale-hash rejection, parallel-corridor continuity vs. genuine detour, outdoor step exemption, and `GuidedDirections` viewport stability).
+- `npx.cmd vitest run tests/api.test.ts`: new `GET /api/plans/:planId/walking-surface` pilot vs. non-pilot check passed; two pre-existing assertions failed (sandbox `TopologyStore` hard-link `503` on `/api/health?check=routing`, and an earlier `89` vs. `14` pilot-plan count expectation).
+- `npx.cmd vitest run tests/device-location.test.ts`: 5/6 passed; one pre-existing assertion expects SW3 floors to be unaligned, predating the November 19 Burnaby floor alignments.
+- `npm.cmd run build` (TypeScript check + Vite production bundle) and `npm.cmd run data:validate` (90 source hashes, 631 derived assets, 89 floor graphs and calibrations) both passed.
+- No browser automation, live provider calls, or physical-campus phone walkthroughs were run. Indoor corridor accuracy remains unmeasured until tested on campus.
+
 ## Four-building visitor scope and inferred floor transfers · November 21, 2026
 
 Restricted visitor bootstrap plans, GPS footprints/calibrations, photo starting-place matching and destination routing to SE12, SW03, SW05 and SW01. The 89-plan source archive remains intact. The existing photo and required-GPS production flow is unchanged. SW05-specific route data and transfer inference were left for its assigned teammate.

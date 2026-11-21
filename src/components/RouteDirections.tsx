@@ -3,7 +3,13 @@ import { useEffect, useRef, useState } from 'react';
 import { Route } from 'lucide-react';
 import { planLabel } from '../topology';
 import type { VisualPlan } from '../types';
-import type { MapStop, NavigationResult, PlaceChoice, WalkingStep } from '../wayfinding';
+import type {
+  MapStop,
+  NavigationResult,
+  PlaceChoice,
+  WalkingStep,
+  WalkingSurface,
+} from '../wayfinding';
 import { RouteMapImage, type MapMarker } from './RouteMap';
 import type { LocationCatalogue } from '../location/types';
 import { GuidedDirections } from './GuidedDirections';
@@ -133,6 +139,7 @@ export function RouteDirections({
   plans,
   onRecheck,
   locationCatalogue,
+  walkingSurfaces,
   preferElevators = false,
   requestedRoom,
   requestedOrigin,
@@ -143,6 +150,7 @@ export function RouteDirections({
   plans: VisualPlan[];
   onRecheck: () => void;
   locationCatalogue?: LocationCatalogue;
+  walkingSurfaces?: Record<string, WalkingSurface | null>;
   preferElevators?: boolean;
 }) {
   const [showOverview, setShowOverview] = useState(false);
@@ -170,6 +178,7 @@ export function RouteDirections({
         route={route}
         plans={plans}
         locationCatalogue={locationCatalogue}
+        walkingSurfaces={walkingSurfaces}
         index={stepIndex}
         onStepChange={setStepIndex}
         transferNotice={transferNotice}

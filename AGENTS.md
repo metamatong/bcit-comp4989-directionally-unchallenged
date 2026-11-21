@@ -29,6 +29,5 @@
 
 ## Validation
 
-- Do not add or run tests unless the user asks. For requested verification, use the project's existing build and data-validation commands as appropriate and report exactly what ran.
-- Do not perform browser or screenshot checks unless requested.
+- Add a small, focused set of tests to verify major functionality remains intact after changes, and run the project's unit tests, build, and data-validation commands as appropriate, reporting exactly what ran.
 - Distinguish mocked checks, live provider checks and physical-campus accuracy. One successful photo or map alignment does not establish general accuracy.

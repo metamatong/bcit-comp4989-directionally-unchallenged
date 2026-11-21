@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { root } from './data';
 import type { Provider } from './provider';
 import { visualPlans } from './visual-data';
+import { floorGraphs } from './floor-graph';
 import { locationCatalogue } from './geolocation';
 import { isPilotBuilding, isPilotPlan } from './pilot-scope';
 import type { LocationCatalogue } from '../src/location/types';
@@ -97,6 +98,22 @@ export function createApp(options: {
       photoLocalizationAvailable: visitorPlans.length > 0,
     }),
   );
+  // Public corridor/lobby walking cells for client-side map-matching; kept distinct from GIS alignments.
+  app.get('/api/plans/:planId/walking-surface', (req, res) => {
+    const plan = visitorPlans.find((item) => item.id === req.params.planId);
+    const floor = plan ? floorGraphs().byId.get(plan.id) : undefined;
+    if (!plan || !floor || floor.plan.sourceSha256 !== plan.sourceSha256) {
+      res.status(404).json({ error: 'Floor walking surface is unavailable for this plan.' });
+      return;
+    }
+    res.json({
+      planId: floor.plan.id,
+      sourceSha256: floor.plan.sourceSha256,
+      graphVersion: floor.version,
+      step: floor.step,
+      runs: floor.runs,
+    });
+  });
   app.use(
     '/api/sessions',
     visitorRouter(options, options.sessions ?? new MemoryVisitorSessions(), topologyStore),

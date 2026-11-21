@@ -33,4 +33,6 @@ export type DeviceOverlay = {
   point: { x: number; y: number };
   radiusX: number;
   radiusY: number;
+  /** Set when indoor map-matching pulled the raw reading onto a nearby corridor. */
+  snapDistanceMetres?: number;
 };

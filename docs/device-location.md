@@ -6,9 +6,16 @@ The app combines that building match with the photo labels and automatically sel
 
 ## Guided directions
 
-A complete walking route opens on its first step and starts a foreground GPS watch automatically. The step is visible while the watch waits for a fresh reading. The route step selects the floor map, and the visitor advances with the route controls. The position dot and reported accuracy area update from fresh GPS readings when the floor has a geographic alignment. Tracking stops when the visitor opens the route overview, finishes, or leaves the page. **Back to steps** returns to the current step and starts a new watch.
+A complete walking route opens on its first step and starts a foreground GPS watch automatically. The step is visible while the watch waits for a fresh reading. The route step selects the floor map, and the visitor advances with the route controls. The position dot and uncertainty area update from fresh GPS readings when the floor has a geographic alignment. Tracking stops when the visitor opens the route overview, finishes, or leaves the page. **Back to steps** returns to the current step and starts a new watch.
 
-The dot also requires the reported GPS accuracy area to overlap the archived building footprint and the projected position to fall inside the floor-plan page. Some drawings extend beyond the footprint, including the north wing on SW03 floors 2–4. A reading there can fail the footprint check even when the floor has an alignment.
+For indoor steps on geographically aligned pilot floors, the browser lazily loads that floor's public corridor/lobby walking cells (`GET /api/plans/:planId/walking-surface`, kept separate from the geographic calibration catalogue) and runs client-side corridor map-matching (`src/location/map-matching.ts`):
+
+- Readings with reported horizontal accuracy wider than **35 m** are hidden instead of plotted.
+- Eligible indoor readings are constrained to the nearest verified public walkable cell within `min(20 m, max(reportedAccuracy, 12 m))`, using kinematic continuity and a mild, capped tie-breaker toward the active corridor step so sudden noise spikes do not jump across walls while genuine detours into other hallways still appear.
+- When a reading is pulled onto a corridor (`≥ 0.5 m` shift), the overlay renders a dashed corridor-matched halo whose radius stays at least as wide as both the reported accuracy and snap distance, and the status line reports the approximate raw offset distance alongside reported accuracy.
+- Readings farther than the snap limit from all mapped corridors remain hidden rather than fabricating a match.
+- **Outdoor steps** are exempt from indoor corridor snapping and retain standard footprint-overlap and page-bounds checks. When a floor walking surface is unavailable or still loading, the tracker falls back to raw footprint-overlap gating.
+- The zoomed step map frames strictly around the route step's markers and path (`src/components/RouteMap.tsx`) so live GPS drift does not jump or zoom out the viewport.
 
 The browser requests high accuracy and zero cached age. A stale or invalid first fix gets one retry within the original 15-second deadline; permission denial and cancellation end acquisition. A reading is eligible only when fresh and valid. The live overlay disappears when readings become stale. Browsers may combine GPS with network signals, and reported accuracy can understate indoor error. Phone use requires HTTPS and location permission; localhost works on the computer running the app. [W3C Geolocation](https://www.w3.org/TR/geolocation/)
 
