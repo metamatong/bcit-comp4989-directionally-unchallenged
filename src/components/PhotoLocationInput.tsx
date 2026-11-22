@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -10,6 +10,8 @@ import {
   X,
 } from 'lucide-react';
 import type { PreparedPhoto } from '../photo';
+import type { DestinationSuggestion } from '../types';
+import { filterDestinationSuggestions, formatPlaceKind } from '../destination-suggestions';
 
 type PhotoLocationInputProps = {
   step?: 'photo' | 'destination';
@@ -20,6 +22,7 @@ type PhotoLocationInputProps = {
   status: string;
   error?: string;
   destination: string;
+  destinations?: readonly DestinationSuggestion[];
   preferElevators?: boolean;
   onPreferElevatorsChange?: (value: boolean) => void;
   canUsePhotoResult?: boolean;
@@ -31,6 +34,120 @@ type PhotoLocationInputProps = {
   onAnalyze: () => void;
   onDiscard: () => void;
 };
+
+function DestinationCombobox({
+  value,
+  destinations,
+  disabled,
+  autoFocus = false,
+  onChange,
+}: {
+  value: string;
+  destinations: readonly DestinationSuggestion[];
+  disabled: boolean;
+  autoFocus?: boolean;
+  onChange: (next: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+
+  const suggestions = useMemo(
+    () => filterDestinationSuggestions(destinations, value, 8),
+    [destinations, value],
+  );
+  const showDropdown = open && !disabled && value.trim().length > 0 && suggestions.length > 0;
+  const listId = 'destination-suggestions';
+
+  function selectSuggestion(item: DestinationSuggestion) {
+    onChange(item.value);
+    setOpen(false);
+    setActiveIndex(-1);
+  }
+
+  return (
+    <div className="destination-field">
+      <label htmlFor="trip-destination" className="visually-hidden">
+        Destination
+      </label>
+      <div className="destination-input-pill">
+        <MapPin size={20} aria-hidden="true" />
+        <input
+          id="trip-destination"
+          type="text"
+          role="combobox"
+          aria-autocomplete="list"
+          aria-expanded={showDropdown}
+          aria-controls={showDropdown ? listId : undefined}
+          aria-activedescendant={
+            showDropdown && activeIndex >= 0 ? `destination-option-${activeIndex}` : undefined
+          }
+          maxLength={150}
+          value={value}
+          disabled={disabled}
+          autoComplete="off"
+          autoFocus={autoFocus}
+          placeholder="e.g. SW03 2605"
+          onFocus={() => {
+            if (value.trim()) setOpen(true);
+          }}
+          onBlur={() => {
+            setOpen(false);
+            setActiveIndex(-1);
+          }}
+          onChange={(event) => {
+            onChange(event.target.value);
+            setOpen(true);
+            setActiveIndex(-1);
+          }}
+          onKeyDown={(event) => {
+            if (!showDropdown) return;
+            if (event.key === 'ArrowDown') {
+              event.preventDefault();
+              setActiveIndex((current) => (current + 1) % suggestions.length);
+            } else if (event.key === 'ArrowUp') {
+              event.preventDefault();
+              setActiveIndex((current) => (current <= 0 ? suggestions.length - 1 : current - 1));
+            } else if (event.key === 'Enter' && activeIndex >= 0 && suggestions[activeIndex]) {
+              event.preventDefault();
+              selectSuggestion(suggestions[activeIndex]);
+            } else if (event.key === 'Escape') {
+              event.preventDefault();
+              setOpen(false);
+              setActiveIndex(-1);
+            }
+          }}
+        />
+      </div>
+      {showDropdown && (
+        <ul id={listId} className="destination-suggestions" role="listbox" aria-label="Room suggestions">
+          {suggestions.map((item, index) => {
+            const active = index === activeIndex;
+            const kindText = formatPlaceKind(item.kind);
+            return (
+              <li
+                key={`${item.building}-${item.floor}-${item.label}`}
+                id={`destination-option-${index}`}
+                role="option"
+                aria-selected={active}
+                className={active ? 'destination-option active' : 'destination-option'}
+                onMouseDown={(event) => {
+                  event.preventDefault();
+                  selectSuggestion(item);
+                }}
+              >
+                <span className="destination-option-value">{item.value}</span>
+                <span className="destination-option-meta">
+                  Floor {item.floor}
+                  {kindText ? ` · ${kindText}` : ''}
+                </span>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
 
 function ElapsedTime() {
   const [seconds, setSeconds] = useState(0);
@@ -58,6 +175,7 @@ export function PhotoLocationInput({
   status,
   error,
   destination,
+  destinations = [],
   preferElevators = false,
   onPreferElevatorsChange,
   canUsePhotoResult = false,
@@ -115,24 +233,12 @@ export function PhotoLocationInput({
             event.preventDefault();
           }}
         >
-          <div className="destination-field">
-            <label htmlFor="trip-destination" className="visually-hidden">
-              Destination
-            </label>
-            <div className="destination-input-pill">
-              <MapPin size={19} aria-hidden="true" />
-              <input
-                id="trip-destination"
-                type="text"
-                maxLength={150}
-                value={destination}
-                disabled={busy}
-                autoComplete="off"
-                placeholder="e.g. SW03 2605"
-                onChange={(event) => onDestinationChange(event.target.value)}
-              />
-            </div>
-          </div>
+          <DestinationCombobox
+            value={destination}
+            destinations={destinations}
+            disabled={busy}
+            onChange={onDestinationChange}
+          />
           {!destination.trim() && (
             <button
               type="button"
@@ -197,7 +303,11 @@ export function PhotoLocationInput({
           ) : (
             <div className="viewfinder-card">
               <div className="viewfinder-icon" aria-hidden="true">
-                {reading ? <LoaderCircle className="spin" size={44} /> : <Camera size={44} strokeWidth={1.6} />}
+                {reading ? (
+                  <LoaderCircle className="spin" size={44} />
+                ) : (
+                  <Camera size={44} strokeWidth={1.6} />
+                )}
               </div>
               <h1 id="location-heading">Snap a nearby room sign</h1>
               <span className="scope-pill">SE12 · SW03 · SW05 · SW01</span>
@@ -326,25 +436,13 @@ export function PhotoLocationInput({
         <div className="destination-body">
           <h1 id="location-heading">Where are you headed?</h1>
 
-          <div className="destination-field">
-            <label htmlFor="trip-destination" className="visually-hidden">
-              Destination
-            </label>
-            <div className="destination-input-pill">
-              <MapPin size={20} aria-hidden="true" />
-              <input
-                id="trip-destination"
-                type="text"
-                maxLength={150}
-                value={destination}
-                disabled={busy}
-                autoComplete="off"
-                autoFocus
-                placeholder="e.g. SW03 2605"
-                onChange={(event) => onDestinationChange(event.target.value)}
-              />
-            </div>
-          </div>
+          <DestinationCombobox
+            value={destination}
+            destinations={destinations}
+            disabled={busy}
+            autoFocus
+            onChange={onDestinationChange}
+          />
 
           <label className="switch-card">
             <span className="switch-label">Prefer elevators</span>

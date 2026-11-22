@@ -319,6 +319,7 @@ export default function App() {
     <PhotoLocationInput
       step={analysis ? 'destination' : preparedPhoto ? flowStep : 'photo'}
       destination={destination}
+      destinations={data.destinations}
       preferElevators={preferElevators}
       onPreferElevatorsChange={(value) => {
         setPreferElevators(value);

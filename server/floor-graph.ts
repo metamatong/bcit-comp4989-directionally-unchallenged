@@ -5,11 +5,12 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { root } from './data';
 import { boundsSchema, visualPlans } from './visual-data';
-import type { VisualPlan } from '../src/types';
+import type { DestinationSuggestion, VisualPlan } from '../src/types';
 import type { TopologyNode } from '../src/topology';
 import type { MapStop, PagePoint } from '../src/wayfinding';
 import { FloorInterior, interiorSchema } from './floor-interior';
 import { CorridorFrontages, corridorBandSchema } from './shared-corridor';
+import { isPilotPlan } from './pilot-scope';
 
 const index = z.number().int().nonnegative();
 const unit = z.number().min(0).max(1);
@@ -348,4 +349,52 @@ export function sourceBuilding(value: string) {
   if (!match) return undefined;
   const name = match[1].toUpperCase() + match[2];
   return buildings.has(name) ? name : undefined;
+}
+
+const PILOT_DISPLAY_BUILDING: Record<string, string> = {
+  SE12: 'SE12',
+  SW3: 'SW03',
+  SW5: 'SW05',
+  SW1: 'SW01',
+};
+
+let pilotDestinationCache: DestinationSuggestion[] | undefined;
+
+/** Routable visitor-eligible destinations in the 4-building pilot, preserving exact identifiers. */
+export function pilotDestinations(): DestinationSuggestion[] {
+  if (pilotDestinationCache) return pilotDestinationCache;
+  const seen = new Set<string>();
+  const items: DestinationSuggestion[] = [];
+  for (const floor of floorGraphs().ordered) {
+    if (!isPilotPlan(floor.plan)) continue;
+    const building = PILOT_DISPLAY_BUILDING[floor.plan.building] ?? floor.plan.building;
+    for (const place of floor.places) {
+      if (visitorExclusion(place)) continue;
+      const routable =
+        place.cells.length > 0 ||
+        (place.terminalPaths?.length ?? 0) > 0 ||
+        (place.sharedAccess?.cells.length ?? 0) > 0 ||
+        Boolean(place.reviewedDoor || place.reviewedLanding);
+      if (!routable) continue;
+      const key = `${building}|${floor.plan.floor}|${place.label}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      items.push({
+        value: `${building} ${place.label}`,
+        building,
+        floor: floor.plan.floor,
+        label: place.label,
+        kind: place.kind,
+      });
+    }
+  }
+  const order = ['SE12', 'SW03', 'SW05', 'SW01'];
+  items.sort((a, b) => {
+    const ba = order.indexOf(a.building);
+    const bb = order.indexOf(b.building);
+    if (ba !== bb) return ba - bb;
+    return a.label.localeCompare(b.label, undefined, { numeric: true });
+  });
+  pilotDestinationCache = items;
+  return items;
 }

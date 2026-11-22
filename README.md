@@ -38,7 +38,7 @@ The Git-connected Vercel project builds the frontend and the visitor API with `n
 ## Use
 
 1. Take or upload a photo containing a nearby room sign; once prepared locally, the app advances directly to the destination screen.
-2. Enter a destination such as `SW03 2605`. Stairs are preferred by default; toggle **Prefer elevators** to prefer an elevator route.
+2. Enter a destination such as `SW03 2605` (matching pilot destinations appear in a dropdown as you type). Stairs are preferred by default; toggle **Prefer elevators** to prefer an elevator route.
 3. Tap **Get Directions**. The browser requests GPS automatically. The app sends the photo and derived building IDs to the configured provider for label and feature extraction, then sends only the evidence ID and GPS-derived building candidates to source lookup. Raw coordinates stay in the browser.
 4. The app ranks source matches using the photo evidence and GPS building match, then selects the strongest starting estimate automatically. It does not ask visitors to choose a starting room or doorway.
 5. A complete walking route opens directly on its first step in a full-viewport floor-map and bottom-sheet layout. The current step selects the floor map. Live tracking starts automatically, and the position dot appears when a fresh reading can be shown on a geographically aligned floor. Use **Previous**, **Next step**, and **Finish route** in the bottom sheet to mark progress; tapping **Done** on the finished route returns immediately to the photo start screen. **Overview** opens the full vertical timeline itinerary (plus tucked source plans, location evidence, edit controls, and **Start over**), and **Back to steps** returns to the current step.
