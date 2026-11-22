@@ -73,7 +73,7 @@ export class CampusJourney {
     const recorded = uniqueOccurrence
       ? (pilotEvidence()
           .find((p) => p.plan.id === place.planId)
-          ?.drawnDoors.filter((d) => labelKey(d.room) === place.label) ?? [])
+          ?.entranceDoors.filter((d) => labelKey(d.room) === place.label) ?? [])
       : [];
     const usedCells = new Set<number>();
     const reviewedCoordinates = recorded

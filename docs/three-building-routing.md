@@ -1,30 +1,40 @@
-# Visitor routes in SE12, SW03 and SW01
+# Visitor routes in SE12, SW03, SW05 and SW01
 
-The graph connects 1,062 of 1,170 visitor place occurrences to the same public passage in both directions. The audit covers all twelve supplied sheets for these buildings. It keeps 139 shafts and voids and 14 staff-only records out of visitor counts. A reviewed passenger landing beside a shaft remains a separate, usable stop.
+Of 1,191 visitor occurrences, 1,037 connect in both directions to the SE12 end of the confirmed third-floor passage to SW03. The audit covers fourteen sheets and excludes 145 shafts or voids and 14 staff-only entries.
 
 A **mapped stop** is a doorway, a public circulation point or a marked room area. A **shared entrance** serves the named space through a suite or vestibule. A **corridor-side stop** lies along a verified common wall and is labelled as an approximate arrival. The **remaining** column includes every occurrence without a continuous walk to the common network in both directions. A one-way destination can still accept arrivals. Counts describe stored drawing evidence and confirmations. They do not measure indoor positioning accuracy.
 
 | Official sheet | Visitor places | Mapped stop | Shared entrance | Corridor-side stop | Remaining |
 |---|---:|---:|---:|---:|---:|
-| [SE12 floor 1](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1201.pdf) | 49 | 35 | 1 | 0 | 13 |
-| [SE12 floor 2](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1202.pdf) | 66 | 42 | 2 | 3 | 19 |
+| [SE12 floor 1](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1201.pdf) | 49 | 0 | 0 | 0 | 49 |
+| [SE12 floor 2](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1202.pdf) | 66 | 33 | 2 | 3 | 28 |
 | [SE12 floor 3](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1203.pdf) | 62 | 56 | 1 | 3 | 2 |
 | [SE12 floor 4](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1204.pdf) | 68 | 61 | 4 | 0 | 3 |
 | [SW03 floor 1](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0301.pdf) | 38 | 26 | 8 | 0 | 4 |
-| [SW03 floor 2](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0302.pdf) | 82 | 66 | 9 | 1 | 6 |
+| [SW03 floor 2](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0302.pdf) | 82 | 65 | 9 | 1 | 7 |
 | [SW03 floor 3](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0303.pdf) | 45 | 37 | 7 | 1 | 0 |
 | [SW03 floor 4](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0304.pdf) | 52 | 41 | 8 | 3 | 0 |
+| [SW05 floor 1](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0501.pdf) | 11 | 9 | 2 | 0 | 0 |
+| [SW05 floor 2](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0502.pdf) | 10 | 10 | 0 | 0 | 0 |
 | [SW01 floor 1](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0101.pdf) | 254 | 207 | 20 | 2 | 25 |
 | [SW01 floor 2](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0102.pdf) | 221 | 179 | 14 | 0 | 28 |
 | [SW01 floor 3](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0103.pdf) | 164 | 152 | 1 | 5 | 6 |
 | [SW01 floor 4](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0104.pdf) | 69 | 64 | 3 | 0 | 2 |
-| **Total** | **1,170** | **966** | **78** | **18** | **108** |
+| **Total** | **1,191** | **940** | **79** | **18** | **154** |
 
-The audit traverses the directed graph outward and in reverse from the SE12 end of the confirmed third-floor SW03 passage. SW03 1710 accepts arrivals at two approved doors and remains outside the round-trip count. Across the three buildings, 108 visitor occurrences still lack a complete round trip. These include detached circulation in the north annex and upper service areas of SW01 and unsigned or unconnected approaches elsewhere. All visitor records on SW03 floors 3 and 4 now have a round trip. [Complete origin and destination inventory](three-building-coverage.csv)
+The audit searches the visitor graph forward and in reverse. Older three-building reports traversed saved vertical edges, including connections that the current visitor router omits. Counts now reflect runtime transfer inference and retain floors with zero interbuilding coverage. A room may still accept arrivals in one direction. [Complete origin and destination inventory](three-building-coverage.csv)
+
+## SW05 first and second floors
+
+The visitor router pairs SW05 stair enclosures across the two registered source sheets. It requires the matching signed stair number, a fitted doorway with a public grid approach on each floor and a unique overlapping enclosure in both directions. The left stair is S180–S280 and the right stair is S189–S289. These pairs are computed at runtime without device GPS or a stored inter-floor approval. [SW05 floor 1](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0501.pdf) · [SW05 floor 2](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0502.pdf)
+
+SW03 and SW05 connect on floor 1. Visitors can walk outdoors in both directions between the south doors of SW03 lobby 1602, beside corridor 1604 and stair S170, and the main doors of SW05 lobby 1800. Routes from SW05 floor 2 use the internal stairs to reach this crossing.
+
+21 of 21 visitor places on the two SW05 sheets can start and finish a walk to lobby 1800 within the building. From lobby 1800, visitors can reach lecture room 1840 through west vestibule 1843 (C) and lecture room 1850 through east vestibule 1853 (D). Both approaches work in either direction. The west exterior door (E), the central pair (G) and the east door (F) open only from the inside. The plans locate these exits. Their onward outdoor paths have not been mapped. The six shaft callouts remain searchable plan evidence and are excluded from visitor endpoints.
 
 ## How the visitor sees a route
 
-An exact SE12 323 door reading can describe either of two doors. For SW03 1750 the two walks share the same first turn and direction. The app shades the possible starting stretch and draws the route through SW03 to the public side of the 1750 lecture-room door on corridor 1700. When the source doors lead in different directions, the visitor can select their entrance.
+An exact SE12 323 door reading can describe either of two doors. For SW03 1750 the two walks share the same first turn and direction. The app shades the possible starting stretch and draws the route through SW03 to the public side of the 1750 lecture-room door on corridor 1700. When the approaches lead in different directions, the router uses the available sign evidence and the connected approaches to select a departure.
 
 When a named room has a missing first or final connection, the app can show a partial walk between reachable public points. A separate marker identifies the printed room. The line begins or ends at a named stop on that room’s sheet, and the text identifies the missing leg. Partial walks do not count toward round-trip coverage. The last checkpoint is selected by its position on the drawing among reachable signed corridors and approved transfer stops. The system draws only checked walking geometry.
 

@@ -21,7 +21,7 @@ import { sourceCorridorTraces, visitorPassages, stepText } from './visitor-paths
 import { attachPathEndpoints, routeDrawingCrossings } from './route-geometry';
 import { planImagePart } from './visual-data';
 import { isPilotPlan } from './pilot-scope';
-import { inferSameBuildingTransfers } from './inferred-transfers';
+import { visitorTransferNetwork } from './inferred-transfers';
 import type { Provider } from './provider';
 import { stageDeadline } from './provider-timing';
 import { NAVIGATION_TIMEOUT_MS } from '../src/photo-views';
@@ -208,17 +208,12 @@ function removeBacktracking(steps: WalkingStep[]) {
   return result;
 }
 
-function readVisitorMap(
-  candidate: CampusLocationCandidate,
-  store: TopologyStore,
+/** The route planner and the coverage report must search the same directed network. */
+export function visitorNetworkMap(
+  store: Pick<TopologyStore, 'plans' | 'read' | 'candidates'>,
   expectedRevision?: number,
 ) {
   const plans = store.plans.filter(isPilotPlan);
-  if (!plans.some((p) => p.id === candidate.planId))
-    throw new TopologyError(
-      'Directions are currently available only in the four-building pilot.',
-      409,
-    );
   const sourceDocument = store.read();
   if (expectedRevision !== undefined && expectedRevision !== sourceDocument.revision)
     throw new TopologyError(
@@ -227,22 +222,42 @@ function readVisitorMap(
     );
   const eligible = topologyEligibility(sourceDocument, plans);
   const approvedNodes = new Set(eligible.nodeIds);
-  const nodes = sourceDocument.nodes.filter((n) => approvedNodes.has(n.id));
-  const inferredTransfers = inferSameBuildingTransfers(nodes, plans);
+  const published = sourceDocument.nodes.filter((n) => approvedNodes.has(n.id));
+  const inferred = visitorTransferNetwork(published, plans);
+  const nodes = [...published, ...inferred.landings];
   const edges = sourceDocument.edges.filter(
     (edge) => edge.kind !== 'stairs' && edge.kind !== 'elevator',
   );
-  const doc = { ...sourceDocument, edges: [...edges, ...inferredTransfers] };
+  const doc = {
+    ...sourceDocument,
+    nodes: [...sourceDocument.nodes, ...inferred.landings],
+    edges: [...edges, ...inferred.edges],
+  };
   const eligibleEdges = new Set(
     eligible.edgeIds.filter((id) => edges.some((edge) => edge.id === id)),
   );
-  for (const edge of inferredTransfers) eligibleEdges.add(edge.id);
+  for (const edge of inferred.edges) eligibleEdges.add(edge.id);
   const network = visitorPassages(
     doc,
-    { ...eligible, edgeIds: [...eligibleEdges] },
+    { ...eligible, nodeIds: nodes.map((n) => n.id), edgeIds: [...eligibleEdges] },
     store.candidates,
     plans,
   );
+  return { plans, doc, network, nodes };
+}
+
+function readVisitorMap(
+  candidate: CampusLocationCandidate,
+  store: TopologyStore,
+  expectedRevision?: number,
+) {
+  if (!store.plans.some((p) => p.id === candidate.planId && isPilotPlan(p)))
+    throw new TopologyError(
+      'Directions are currently available only in the four-building pilot.',
+      409,
+    );
+  const map = visitorNetworkMap(store, expectedRevision);
+  const { nodes, network } = map;
   const vicinity = candidate.doorwayVicinity;
   const activeDoor = vicinity ? network.doors.get(vicinity.doorId) : undefined;
   const origins = nodes
@@ -265,7 +280,7 @@ function readVisitorMap(
       );
     })
     .map(stop);
-  return { plans, doc, network, nodes, origins };
+  return { ...map, origins };
 }
 
 /** Distinguish missing map coverage from evidence that could refer to multiple mapped doorways. */
@@ -277,7 +292,7 @@ function missingOriginIssue(
   if (!candidate.anchorLabel) return 'unmapped-connection';
   const doors = pilotEvidence()
     .find((page) => page.plan.id === candidate.planId)!
-    .drawnDoors.filter((door) => labelKey(door.room) === labelKey(candidate.anchorLabel!));
+    .entranceDoors.filter((door) => labelKey(door.room) === labelKey(candidate.anchorLabel!));
   if (!doors.length) return 'unmapped-doorway';
   const hasDeparture = doors.some((door) => {
     const nodeId = map.network.doors.get(door.id);

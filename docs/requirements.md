@@ -10,8 +10,8 @@ The supplied original [brief](project-brief.txt) remains unchanged. Current prod
 | Starting place | The strongest source-linked photo/GPS building match is selected automatically; there is no start chooser in the visitor app/API. |
 | Floor GPS dot | Building footprints cover 43 of 45 supplied buildings. The device overlay has an approximate alignment on 65 of 89 floor plans. The remaining 24 have documented source gaps. Indoor phone accuracy remains unmeasured. |
 | Route display | A complete walking route opens on the first guided step. The visitor advances manually and can open the overview for floor maps in travel order. |
-| Same-building transfers | Inferred at runtime from source-plan landing labels and positions in SE12, SW03 and SW01. SW05 route integration is handled separately. |
-| Cross-building transfers | Fixed reviewed records; this is the only connection type intended to require manual review. |
+| Same-building transfers | The router pairs adjacent-floor landings in all four pilot buildings. In SW05 it matches the signed stair enclosures S180/S280 and S189/S289 across the two sheets. |
+| Cross-building transfers | Fixed records specify the confirmed doors and travel directions. The SW03–SW05 connection runs outdoors in both directions on floor 1 between lobbies 1602 and 1800. |
 | Partial route | When the complete path is unavailable, show the reachable route portion, last mapped stop and requested destination marker where possible. |
 | Accessibility preference | Stairs are preferred by default; the checkbox prefers elevators. A fallback route can still include stairs when no complete elevator path is mapped. |
 | Privacy | Photo bytes are transient; raw GPS coordinates stay in browser memory. |

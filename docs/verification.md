@@ -2,6 +2,16 @@
 
 This file is a historical log. Older entries describe workflows and route data that have since changed. The current visitor app uses GPS-required automatic start matching and has no start-confirmation, connection-review or topology-editor screen/API; see [current architecture](architecture.md) and [device-location coverage](device-location.md).
 
+## SW05 source and walking network · November 22, 2026
+
+The visitor router pairs SW05 stair enclosures across the two registered source sheets. It requires the matching signed stair number, a fitted doorway with a public grid approach on each floor and a unique overlapping enclosure in both directions. The left stair is S180–S280 and the right stair is S189–S289. These pairs are computed at runtime without device GPS or a stored inter-floor approval. The route planner returned a walk from SW05 lobby 1800 to classroom 2895 and from classroom 2825 to ground-floor AV room 1845. It also connected communications room 2880 to the public side of the 1856 janitor door. The 1856 label is printed in the lobby, and its doorway opens into vestibule 1854. These checks used structured source signs. No visitor media or external model call was used.
+
+SW03 and SW05 connect on floor 1. Visitors can walk outdoors in both directions between the south doors of SW03 lobby 1602, beside corridor 1604 and stair S170, and the main doors of SW05 lobby 1800. Routes from SW05 floor 2 use the internal stairs to reach this crossing. From lobby 1800, visitors can reach lecture room 1840 through west vestibule 1843 (C) and lecture room 1850 through east vestibule 1853 (D). Both approaches work in either direction. The west exterior door (E), the central pair (G) and the east door (F) open only from the inside. The plans locate these exits. Their onward outdoor paths have not been mapped. [SW05 floor 1](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0501.pdf) · [SW05 floor 2](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0502.pdf)
+
+On revision 91, the local visitor location and navigation APIs processed four trips using stored sign evidence and a simulated GPS building match. SW03 1730 reached SW05 1840 at vestibule 1843 and SW05 2825 via the east staircase. SW05 1850 returned to SW03 1730 from vestibule 1853, and SW05 2895 returned via the west staircase. Each trip used the confirmed outdoor crossing exactly once. The source and network audit found round trips for all 11 visitor places on floor 1 and all 10 on floor 2. `npm run build:vercel` passed, including source validation and the existing packaged route checks.
+
+The release check used clean copies of the PR and its base, `5144dac`. The PR passed 448 of 508 unit and API tests. The base passed 446 of 506. The same 60 cases failed in both runs with matching assertions. The SW05 source-retrieval and coverage checks passed, as did all 10 offline floor-compiler tests.
+
 ## Client-side indoor GPS corridor map-matching · November 21, 2026
 
 Added client-side indoor GPS corridor map-matching (`src/location/map-matching.ts`) to mitigate 5–15 m outward indoor GPS offsets during guided directions while keeping raw coordinates strictly in browser memory. Added the read-only pilot endpoint `GET /api/plans/:planId/walking-surface` (`server/app.ts`) and cached client fetcher (`src/api.ts`) so drawing-derived walking areas stay separate from `LocationCatalogue`. Updated `GuidedDirections` and `DevicePosition` to constrain eligible indoor fixes onto verified public walking cells within `min(20 m, max(reportedAccuracy, 12 m))` (rejecting fixes wider than 35 m or outside range, exempting outdoor transfer steps, applying kinematic continuity and a mild active-route tie-breaker, and reporting honest corridor-matched status and uncertainty). Removed `device.point` from `RouteMapImage`'s zoomed `viewBox` calculation so GPS drift does not jump the step viewport. Updated `AGENTS.md` validation guidance to include small, focused regression tests on changes.
@@ -13,7 +23,7 @@ Validation:
 - `npm.cmd run build` (TypeScript check + Vite production bundle) and `npm.cmd run data:validate` (90 source hashes, 631 derived assets, 89 floor graphs and calibrations) both passed.
 - No browser automation, live provider calls, or physical-campus phone walkthroughs were run. Indoor corridor accuracy remains unmeasured until tested on campus.
 
-## Four-building visitor scope and inferred floor transfers · November 21, 2026
+## Four-building visitor scope and inferred floor transfers · November 21, 2026 (historical)
 
 Restricted visitor bootstrap plans, GPS footprints/calibrations, photo starting-place matching and destination routing to SE12, SW03, SW05 and SW01. The 89-plan source archive remains intact. The existing photo and required-GPS production flow is unchanged. SW05-specific route data and transfer inference were left for its assigned teammate.
 

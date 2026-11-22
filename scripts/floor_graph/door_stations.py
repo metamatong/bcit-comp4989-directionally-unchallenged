@@ -7,6 +7,30 @@ from cad_doorways import apertures, clear_segment, label_centre
 from surfaces import at_label
 
 
+def retain_transcribed_doors(places, door_annotations, labels):
+    """Keep source doorway identity when seating lines split a room into false enclosures."""
+    for label in labels:
+        matches = [p for p in places if p["label"] == label]
+        marks = [d for d in door_annotations if d["room"] == label]
+        if len(matches) != 1 or not marks:
+            raise ValueError("Missing room or transcribed door for " + label)
+        place = matches[0]
+        cells_by_door = {tuple(d[:2]): d[2] for d in place["doors"] if d[2] is not None}
+        # Room stops are usable in either direction. Outward-only exterior doors
+        # remain in the source inventory, separate from ordinary room entrances.
+        coordinates = {
+            (door["point"]["x"], door["point"]["y"])
+            for door in marks
+            if door.get("exteriorAccess") != "exit-only"
+        }
+        place["doors"] = [
+            [x, y, cells_by_door.get((x, y))] for x, y in sorted(coordinates)
+        ]
+        place["cells"] = sorted(
+            {cell for _, _, cell in place["doors"] if cell is not None}
+        )
+
+
 def stamp_region(regions, box):
     region = at_label(regions, box)
     if region:

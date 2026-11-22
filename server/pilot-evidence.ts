@@ -1,4 +1,4 @@
-/** Source-bound labels on the twelve SE12, SW3 and SW1 floor plans. */
+/** Source-bound drawing labels and OCR from every official pilot floor plan. */
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -6,15 +6,17 @@ import { z } from 'zod';
 import type { PlanBounds, VisualPlan } from '../src/types';
 import { root, readJson } from './data';
 import { boundsSchema, planGeometrySummary, visualPlans } from './visual-data';
-import { canonicalPilotBuilding } from './pilot-scope';
+import {
+  canonicalPilotBuilding,
+  isPilotBuilding,
+  isPilotPlan,
+  PILOT_BUILDINGS,
+} from './pilot-scope';
 
-/** Buildings with imported photo and topology evidence; SW5 is added by its assigned teammate. */
-export const pilotBuildings = ['SE12', 'SW3', 'SW1'] as const;
+export const pilotBuildings = PILOT_BUILDINGS;
 export type PilotBuilding = (typeof pilotBuildings)[number];
 export const canonicalBuilding = canonicalPilotBuilding;
-export function isPilotPlan(plan: VisualPlan) {
-  return pilotBuildings.some((building) => building === plan.building);
-}
+export { isPilotPlan };
 export const labelKey = (text: string) =>
   text.normalize('NFKC').trim().replace(/\s+/g, ' ').toUpperCase();
 export const looksLikeIdentifier = (text: string) =>
@@ -67,8 +69,12 @@ const annotationsSchema = z.object({
             room: z.string().min(1),
             point: z.object({ x: z.number().min(0).max(1), y: z.number().min(0).max(1) }).strict(),
             adjoiningLabel: z.string().nullable(),
+            /** Visitor-confirmed operation of an exterior door on the drawing. */
+            exteriorAccess: z.literal('exit-only').optional(),
             /** Optional extent of the corridor along this room frontage, traced on the source page. */
             corridorBounds: boundsSchema.optional(),
+            /** Enclosure of a numbered stair on this sheet, used to compare stacked landings. */
+            stairwellBounds: boundsSchema.optional(),
           })
           .strict(),
       ),
@@ -132,22 +138,33 @@ function byPage<T extends { planId: string }>(items: T[], plans: VisualPlan[]) {
     map.size !== plans.length ||
     plans.some((plan) => !map.has(plan.id))
   )
-    throw new Error('Pilot evidence must cover each of the twelve official pages exactly once.');
+    throw new Error('Pilot evidence must cover each official pilot page exactly once.');
   return map;
 }
 function loadEvidence() {
-  // This evidence bundle is intentionally limited to the three buildings already imported.
-  const plans = visualPlans.filter((plan) =>
-    pilotBuildings.includes(plan.building as PilotBuilding),
-  );
-  const expectedIds = pilotBuildings.flatMap((building) =>
-    [1, 2, 3, 4].map((floor) => `${building}-F${floor}-p1`),
-  );
-  if (plans.length !== 12 || expectedIds.some((id) => !plans.some((plan) => plan.id === id)))
-    throw new Error('Incomplete official pilot plan inventory.');
+  const plans = visualPlans.filter(isPilotPlan);
   const manifest = readJson<{
-    sources: { id: string; campus: string; kind: string; sha256: string; url: string }[];
+    sources: {
+      id: string;
+      building?: string;
+      campus: string;
+      kind: string;
+      sha256: string;
+      url: string;
+    }[];
   }>('data/campus/manifest.json');
+  const sourceIds = new Set(plans.map((plan) => plan.sourceId));
+  const expected = manifest.sources.filter(
+    (source) =>
+      source.campus === 'Burnaby' &&
+      source.kind === 'floor-plan' &&
+      isPilotBuilding(source.building ?? ''),
+  );
+  if (
+    pilotBuildings.some((building) => !plans.some((plan) => plan.building === building)) ||
+    expected.some((source) => !sourceIds.has(source.id))
+  )
+    throw new Error('Incomplete official pilot plan inventory.');
   const ocr = ocrSchema.parse(checkedSpatialJson('pilot-ocr'));
   const pages = byPage(ocr.pages, plans);
   const reviewed = byPage(
@@ -268,13 +285,36 @@ function loadEvidence() {
         )
           throw new Error(`Invalid corridor frontage on ${plan.id} at room ${door.room}`);
       }
+      if (door.stairwellBounds) {
+        const enclosure = door.stairwellBounds;
+        const label = annotation.labels.find((l) => l.text === door.room && l.kind === 'stairs');
+        if (
+          !label ||
+          !centerIn(label.bounds, enclosure) ||
+          door.point.x < enclosure[0] ||
+          door.point.x > enclosure[2] ||
+          door.point.y < enclosure[1] ||
+          door.point.y > enclosure[3] ||
+          !annotation.labels.some((l) => l.text === door.adjoiningLabel)
+        ) {
+          throw Error('Invalid signed stair enclosure on ' + plan.id + ' at ' + door.room);
+        }
+      }
       return {
         ...door,
         id: `${plan.id}:drawn-door:${i + 1}`,
         basis: 'plan-read-door-symbol' as const,
       };
     });
-    return { plan, drawingRegion: annotation.drawingRegion, observations, byLabel, drawnDoors };
+    const entranceDoors = drawnDoors.filter((door) => door.exteriorAccess !== 'exit-only');
+    return {
+      plan,
+      drawingRegion: annotation.drawingRegion,
+      observations,
+      byLabel,
+      drawnDoors,
+      entranceDoors,
+    };
   });
 }
 let cache: ReturnType<typeof loadEvidence> | undefined;

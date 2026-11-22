@@ -1,4 +1,4 @@
-"""Rebuild the checked-in OCR evidence for the 12 Burnaby pilot pages.
+"""Rebuild the checked-in OCR evidence for the official Burnaby pilot pages.
 
 Requires Poppler (pdftoppm), Tesseract with English data, and Pillow. Run from
 any directory. Original source PDFs and the existing geometry are read only.
@@ -18,7 +18,7 @@ from PIL import Image
 ROOT = Path(__file__).resolve().parents[1]
 CAMPUS = ROOT / "data/campus"
 OUTPUT = CAMPUS / "spatial"
-PILOT = {"SE12", "SW3", "SW1"}
+PILOT = {"SE12", "SW3", "SW5", "SW1"}
 DPI = (300, 400)
 
 
@@ -89,13 +89,13 @@ def extract(entry, plan):
 
 def main():
     manifest = json.loads((CAMPUS / "manifest.json").read_text())
-    sources = {source["id"]: source for source in manifest["sources"] if source.get("building") in PILOT}
+    sources = {source["id"]: source for source in manifest["sources"]
+               if source.get("building") in PILOT and source["campus"] == "Burnaby" and source["kind"] == "floor-plan"}
     index = json.loads((CAMPUS / "visual/index.json").read_text())
     plans = sorted((plan for plan in index["plans"] if plan["building"] in PILOT), key=lambda p: p["id"])
-    if {(p["building"], p["floor"], p["page"]) for p in plans} != {
-        (b, str(f), 1) for b in PILOT for f in range(1, 5)
-    } or len(plans) != 12:
-        raise ValueError("Review the official twelve-page pilot inventory before regeneration")
+    if ({p["building"] for p in plans} != PILOT or {p["sourceId"] for p in plans} != set(sources)
+        or len({p["id"] for p in plans}) != len(plans)):
+        raise ValueError("Incomplete official pilot plan inventory")
     with ThreadPoolExecutor(max_workers=2) as pool:
         records = list(pool.map(lambda plan: extract(sources[plan["sourceId"]], plan), plans))
     engine = subprocess.check_output(["tesseract", "--version"], text=True).splitlines()[0].strip()

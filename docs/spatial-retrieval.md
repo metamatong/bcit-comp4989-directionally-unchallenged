@@ -1,6 +1,8 @@
-# Spatial retrieval for SE12, SW03 and SW01
+# Spatial retrieval for SE12, SW03, SW05 and SW01
 
 A caller can resolve a complete identifier to source pages and printed positions, inspect nearby labels and drawing doors, and query the published route data for mapped passages. The photo pipeline uses exact plan labels after the configured provider reads the image. Visitor routes use the index to find destination candidates and calculate directions over generated walking areas plus mapped transfers. A source label does not create a navigable doorway, corridor or floor transition by itself.
+
+Both SW05 PDFs are included in the pilot evidence inventory. Their 841 OCR readings are retained with the source hashes. Transcriptions distinguish 2895, 2875 and 2825 on floor 2 and flag conflicting OCR at the corresponding printed positions. The four-building bundle contains 17,500 OCR readings on 14 sheets. [SW05 floor 1](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0501.pdf) · [SW05 floor 2](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0502.pdf)
 
 ## Try a lookup
 

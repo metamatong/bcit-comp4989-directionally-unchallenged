@@ -1,6 +1,8 @@
 /** Audit signed origins and destinations against the directed visitor graph, including isolated floors. */
-import { TopologyStore, topologyEligibility } from '../server/topology';
-import { visitorPassages } from '../server/visitor-paths';
+import { TopologyStore } from '../server/topology';
+import { visitorNetworkMap } from '../server/wayfinding';
+import { isPilotBuilding, PILOT_BUILDINGS } from '../server/pilot-scope';
+import { buildingLabel } from '../src/topology';
 import { floorGraphs, sourceBuilding, visitorExclusion } from '../server/floor-graph';
 import { FloorSearch, type SearchStop } from '../server/floor-search';
 import { CampusJourney } from '../server/campus-journey';
@@ -19,15 +21,15 @@ export function publishedCoverageStore(): AuditStore {
 
 export function buildingCoverage(buildingName: string, store: AuditStore = new TopologyStore()) {
   const combined = buildingName === '--network';
-  const building = combined ? 'SE12/SW03/SW01' : sourceBuilding(buildingName);
-  if (!building) throw Error('Select a supplied Burnaby building.');
-  const doc = store.read(),
-    eligibility = topologyEligibility(doc, store.plans);
-  const network = visitorPassages(doc, eligibility, store.candidates, store.plans);
-  const nodes = doc.nodes.filter((n) => eligibility.nodeIds.includes(n.id));
-  const map = { doc, plans: store.plans, nodes, network };
+  const building = combined
+    ? PILOT_BUILDINGS.map(buildingLabel).join('/')
+    : sourceBuilding(buildingName);
+  if (!building || (!combined && !isPilotBuilding(building)))
+    throw Error('Select a visitor pilot building.');
+  const map = visitorNetworkMap(store);
+  const { doc, network } = map;
   const floorList = floorGraphs().ordered.filter((f) =>
-    combined ? ['SE12', 'SW3', 'SW1'].includes(f.plan.building) : f.plan.building === building,
+    combined ? isPilotBuilding(f.plan.building) : f.plan.building === building,
   );
   const sheets = new Set(floorList.map((f) => f.plan.id));
   const search = new FloorSearch(map),

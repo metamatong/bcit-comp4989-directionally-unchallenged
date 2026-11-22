@@ -188,6 +188,7 @@ def open_ramp_markings(geometry, records, sealed, public, words):
 def signed_door_cells(grid, words, sides, records):
     """Resolve a marked public-side approach beside another door's overlapping swing."""
     cells = {}
+    callout_doors = {}
     for record in records:
         labels = [w for w in words if w["text"] == record["room"]]
         target = grid.norm(record["point"])
@@ -199,6 +200,17 @@ def signed_door_cells(grid, words, sides, records):
             )
         a, b, faces, middle, radius = found[0]
         room = labels[0]["region"]
+        if "roomProbe" in record:
+            # Some plans print the identifier outside its room. A point just inside the
+            # fitted doorway identifies the enclosure without making the text walkable.
+            probe = grid.norm(record["roomProbe"])
+            x, y = np.rint(probe).astype(int)
+            if (
+                not (0 <= x < grid.w and 0 <= y < grid.h)
+                or np.linalg.norm(probe - middle) > 2 * radius
+            ):
+                raise ValueError("Invalid room-side callout point: " + record["room"])
+            room = int(grid.regions[y, x])
         if room not in (a, b):
             raise ValueError("Door must bound its labelled room: " + record["room"])
         public_side = 1 if a == room else 0
@@ -229,7 +241,10 @@ def signed_door_cells(grid, words, sides, records):
         if cell is None:
             raise ValueError("The marked door needs a public walking cell.")
         cells[(room, tuple(middle))] = cell
-    return cells
+        if "roomProbe" in record:
+            threshold = np.round(middle / [grid.w, grid.h], 7).tolist()
+            callout_doors.setdefault(record["room"], []).append([*threshold, cell])
+    return cells, callout_doors
 
 
 def _on_room_front(record, grid, places, place, middle, target, along_wall, radius):

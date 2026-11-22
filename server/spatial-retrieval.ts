@@ -74,7 +74,7 @@ function retrieveOne(text: string, scope?: string, floor?: string) {
         (!building || plan.building === building) &&
         (!floor || floor === plan.floor),
     )
-    .flatMap(({ plan, byLabel, drawnDoors }) => {
+    .flatMap(({ plan, byLabel, entranceDoors }) => {
       const words = byLabel.get(token.label) ?? [];
       const usable = words.filter(
         (item) => item.context === 'drawing' && item.disposition === 'candidate',
@@ -85,7 +85,7 @@ function retrieveOne(text: string, scope?: string, floor?: string) {
         {
           ...source(plan),
           occurrences: occurrences(usable),
-          doorHypotheses: drawnDoors.filter((door) => labelKey(door.room) === token.label),
+          doorHypotheses: entranceDoors.filter((door) => labelKey(door.room) === token.label),
           otherEvidence: words.filter(
             (item) => item.context !== 'drawing' || item.disposition !== 'candidate',
           ),

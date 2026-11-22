@@ -2,7 +2,7 @@
 
 The visitor planner uses four official Burnaby drawings and the published route data. It reads room numbers together with their space-use captions. It distinguishes a room-side door, a shared suite entrance and an interior area. The room number identifies the space. The route coordinates come from its traversable geometry.
 
-The current inventory covers all three interconnected buildings and reports each direction independently. [Coverage by room and floor](three-building-routing.md)
+The current inventory covers all four pilot buildings and reports each direction independently. [Coverage by room and floor](three-building-routing.md)
 
 On floor 1 the southern double doors at vestibule 1020 lead past S120 into lobby 1101. The 1501 east entrance serves the public aisle through atrium 1303. Both indoor approaches now reach the door of room 1106. The compiler keeps the short projected strokes and two diagonal mechanical diagram lines in the archived drawing and clears their registered spans in the public walking mask. Columns, other walls and door thresholds retain their own collision masks. [Official SW01 floor 1 plan](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0101.pdf)
 

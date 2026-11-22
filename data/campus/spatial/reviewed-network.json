@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
-  "revision": 90,
-  "sourceDocumentSha256": "68ad3f863dd9ad5f6092ecf77f92143339c6f3f9dba65dea58bc2018dec56fc5",
+  "revision": 91,
+  "sourceDocumentSha256": "dcc6fa6e449b71512a5f0a946c536d9200dc00184be4267c4404cb62dbb89f66",
   "nodes": [
     {
       "version": 2,
@@ -1769,6 +1769,40 @@
         "x": 0.6768791,
         "y": 0.5536616
       }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "c619690938bc8e3e1d2265a252fc51e53b379b4d631ed8142698d2896ff0a8d4",
+      "reviewBasis": "user-confirmation",
+      "id": "5370e26a-bee8-49f0-9495-aa6c5e6ba328",
+      "planId": "SW3-F1-p1",
+      "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "label": "Lobby 1602 · south doors to SW05",
+      "aliases": [
+        "Lobby 1602 · south doors to SW05"
+      ],
+      "kind": "outdoor-access",
+      "point": {
+        "x": 0.5063,
+        "y": 0.5665
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "7de5e9859ad95fcaf198443603587bfa8a259acc3f1951eba3a1fe51c23e2625",
+      "reviewBasis": "user-confirmation",
+      "id": "bf993082-dcf0-4494-afaf-350f9c8dc57d",
+      "planId": "SW5-F1-p1",
+      "sourceSha256": "37105ff14e81094e4e968500a70da3cea6cd2e13803dd2853909ee35bcd10790",
+      "label": "Lobby 1800 · doors to SW03",
+      "aliases": [
+        "Lobby 1800 · doors to SW03"
+      ],
+      "kind": "outdoor-access",
+      "point": {
+        "x": 0.505,
+        "y": 0.107
+      }
     }
   ],
   "edges": [
@@ -3372,6 +3406,29 @@
         "fromNodeId": "984afed3-954f-483d-a5e8-9ec3239665cc",
         "toNodeId": "cd159c51-a5d4-4050-8ce5-6d734745901e",
         "reviewedEdgeHash": "654b1d7e53c4ad9633eec8c1501c744088bbcbd93ac9ce09f7348e7699dac023"
+      }
+    },
+    {
+      "version": 1,
+      "reviewContentHash": "d04c445b527b9bcf6f2c4f05a684313a4c26f5fc5b4b1174ed74edda970f1462",
+      "reviewBasis": "user-confirmation",
+      "id": "41b31b6f-5730-4b96-a081-d1e981aa8fe7",
+      "fromNodeId": "5370e26a-bee8-49f0-9495-aa6c5e6ba328",
+      "toNodeId": "bf993082-dcf0-4494-afaf-350f9c8dc57d",
+      "endpointVersions": {
+        "from": 1,
+        "to": 1
+      },
+      "kind": "outdoor",
+      "direction": "both",
+      "distanceMeters": null,
+      "sourceCandidateId": "sw03-f1-1602-to-sw05-f1-1800",
+      "candidateBinding": {
+        "definitionHash": "fc5861a38d3dd4bd8103280bc765630d10426b8ae57730b6e3fd8e67f4ec3590",
+        "presentedHash": "81721c5f4ec6b8ee1a8642480b5155d23a9e79d3674159004d38446c985bcc7e",
+        "fromNodeId": "5370e26a-bee8-49f0-9495-aa6c5e6ba328",
+        "toNodeId": "bf993082-dcf0-4494-afaf-350f9c8dc57d",
+        "reviewedEdgeHash": "d04c445b527b9bcf6f2c4f05a684313a4c26f5fc5b4b1174ed74edda970f1462"
       }
     }
   ],
