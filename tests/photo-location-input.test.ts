@@ -173,4 +173,15 @@ describe('inline photo input (Node rendering, no browser)', () => {
     expect(button(markup, 'Cancel photo preparation')).not.toContain('disabled');
     expect(markup).not.toContain('aria-label="Photo analysis"');
   });
+  it('renders photo preparation errors as a high-visibility alert on the photo step', () => {
+    const { markup } = renderInput({
+      step: 'photo',
+      error: 'Choose a photo smaller than 8 MB.',
+      status: 'Preparing your photo locally…',
+    });
+    expect(markup).toContain(
+      '<p class="photo-failure" role="alert">Choose a photo smaller than 8 MB.</p>',
+    );
+    expect(markup).not.toContain('class="photo-status"');
+  });
 });

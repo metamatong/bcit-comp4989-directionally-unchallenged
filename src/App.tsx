@@ -159,7 +159,14 @@ export default function App() {
       // Auto-advance straight to Destination once local photo preparation finishes.
       setFlowStep('destination');
     } catch (failure) {
-      if (evidenceGate.current.isCurrent(generation)) setReadStatus((failure as Error).message);
+      if (evidenceGate.current.isCurrent(generation)) {
+        setReadStatus('');
+        setPhotoError(
+          failure instanceof Error
+            ? failure.message
+            : 'Unable to prepare this photo. Choose a smaller image.',
+        );
+      }
     } finally {
       if (evidenceGate.current.isCurrent(generation)) setReading(false);
     }

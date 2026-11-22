@@ -14,3 +14,4 @@ data/campus/topology.json
 data/campus/topology.json.*.tmp
 .vercel/
 .vscode/
+debug.log
