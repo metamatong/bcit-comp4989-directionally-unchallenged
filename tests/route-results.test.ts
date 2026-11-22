@@ -163,10 +163,11 @@ it.each([true, 'denied'] as const)(
         });
         fileInput.dispatchEvent(new Event('change', { bubbles: true }));
       });
-      await click(button('Next'));
+      // Photo preparation auto-advances straight to Destination.
+      await wait(() => expect(host.querySelector('#trip-destination')).not.toBeNull());
       await setDestination('SW03 2082');
       const elevatorOption = [...host.querySelectorAll('label')]
-        .find((label) => label.textContent?.includes('Accessibility: prefer elevators'))!
+        .find((label) => label.textContent?.includes('Prefer elevators'))!
         .querySelector<HTMLInputElement>('input')!;
       expect(elevatorOption.checked).toBe(false);
       expect(getCurrentPosition).not.toHaveBeenCalled();
@@ -188,7 +189,7 @@ it.each([true, 'denied'] as const)(
       expect(watchPosition).toHaveBeenCalledTimes(1);
       expect(labelReads).toBe(1);
       expect(host.querySelector('.journey-evidence .floor-point-picker')).toBeNull();
-      expect(host.textContent).toContain('Starting area estimated');
+      expect(host.querySelector('header.header')).toBeNull();
       expect(button('Start at')).toBeUndefined();
       expect(getCurrentPosition).toHaveBeenCalledTimes(2);
       const locationRequests = requestBodies
@@ -221,14 +222,14 @@ it.each([true, 'denied'] as const)(
           });
       };
       reviewCrossings('rejected');
-      await click(button('Route overview'));
+      await click(button('Overview'));
       await click(button('Recheck current route'));
       await wait(() => expect(button('Retry route')).toBeDefined());
       expect(host.textContent).toContain('continuous route between these buildings');
       reviewCrossings('verified');
       await click(button('Retry route'));
       await wait(() => expect(host.querySelector('.guided-directions')).not.toBeNull());
-      await click(button('Route overview'));
+      await click(button('Overview'));
       expect(requestBodies.filter((body) => body.includes('"image":'))).toHaveLength(1);
       const result = host.querySelector('.workspace > section')!;
       expect(result.getAttribute('aria-label')).toBe('Your walking route');
@@ -280,19 +281,19 @@ it.each([true, 'denied'] as const)(
       expect(result.querySelector('.device-position')).toBeNull();
       await act(async () => deviceSuccess({ ...gpsPosition, timestamp: Date.now() + 1 }));
       expect(result.querySelector('[aria-label="Current tracking floor"]')).toBeNull();
-      await click(button('Route overview'));
+      await click(button('Overview'));
       expect(clearWatch).toHaveBeenCalledWith(42);
       expect(result.querySelectorAll('.route-map-visit')).toHaveLength(3);
       await click(host.querySelector<HTMLElement>('.journey-inputs > summary')!);
       const preference = [...host.querySelectorAll('label')]
-        .find((label) => label.textContent?.includes('Accessibility: prefer elevators'))!
+        .find((label) => label.textContent?.includes('Prefer elevators'))!
         .querySelector<HTMLInputElement>('input')!;
       expect(preference.checked).toBe(false);
       await click(preference);
       expect(host.querySelector('.guided-directions')).toBeNull();
       await click(button('Get Directions to SW03 2082'));
       await wait(() => expect(host.querySelector('.guided-directions')).not.toBeNull());
-      await click(button('Route overview'));
+      await click(button('Overview'));
       await wait(() =>
         expect(host.querySelector('.route-directions .helper')?.textContent).toContain(
           'Elevators preferred',
@@ -309,7 +310,7 @@ it.each([true, 'denied'] as const)(
       await setDestination('SW03 1730');
       await click(button('Get Directions to SW03 1730'));
       await wait(() => expect(host.querySelector('.guided-directions')).not.toBeNull());
-      await click(button('Route overview'));
+      await click(button('Overview'));
       await wait(() =>
         expect(
           host.querySelector('.route-map-visit:last-of-type .pin-legend')?.textContent,
@@ -331,6 +332,21 @@ it.each([true, 'denied'] as const)(
       await wait(() =>
         expect(host.querySelector('.journey-panel h2')?.textContent).toBe('Destination not found'),
       );
+      // Verify finishing a route and clicking Done returns immediately to the photo start screen.
+      await click(host.querySelector<HTMLElement>('.journey-inputs > summary')!);
+      await setDestination('SW03 1730');
+      await click(button('Get Directions to SW03 1730'));
+      await wait(() => expect(host.querySelector('.guided-directions')).not.toBeNull());
+      while (button('Next step')) await click(button('Next step'));
+      await click(button('Finish route'));
+      expect(host.textContent).toContain('Route complete');
+      await click(button('Done'));
+      await wait(() =>
+        expect(host.querySelector('#location-heading')?.textContent).toBe(
+          'Snap a nearby room sign',
+        ),
+      );
+      expect(host.querySelector('.route-overview')).toBeNull();
       expect(provider.calls).toBe(1);
       expect(requestBodies.filter((body) => body.includes('confirm-campus-region'))).toHaveLength(
         0,

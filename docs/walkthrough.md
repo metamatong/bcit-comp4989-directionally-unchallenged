@@ -1,10 +1,10 @@
 # Project walkthrough
 
-1. Upload or take a photo containing a nearby room sign, then tap **Next**.
-2. Enter a destination such as `SW03 2605`. Stairs are preferred by default; check **Accessibility: prefer elevators** to prefer an elevator route.
+1. Take or upload a photo containing a nearby room sign. Once prepared locally, the app advances straight to the destination screen.
+2. Enter a destination such as `SW03 2605`. Stairs are preferred by default; toggle **Prefer elevators** to prefer an elevator route.
 3. Tap **Get Directions**. The browser requests GPS automatically. The configured provider reads the photo once for labels and visible features. GPS narrows the building, and the app selects the strongest source match without asking the visitor to pick a start.
-4. A complete walking route opens on the first guided step and starts live tracking. The current step selects the floor map. A fresh GPS reading can show a dot on a geographically aligned floor. Use **Previous**, **Next step**, and **Finish route** to control progress. **Route overview** shows the full itinerary and floor maps in travel order, and **Back to steps** returns to your current instruction.
+4. A complete walking route opens on the first guided step with an edge-to-edge floor map and thumb-zone bottom sheet, and starts live tracking. The current step selects the floor map. A fresh GPS reading can show a dot on a geographically aligned floor. Use **Previous**, **Next step**, and **Finish route** to control progress; tapping **Done** on the finished screen returns immediately to the photo start screen. **Overview** opens the full vertical timeline itinerary and floor maps in travel order, and **Back to steps** returns to your current instruction.
 5. Cross-building travel uses only the mapped building connections. A missing photo match, destination approach or route connection is explained in the app.
-6. **Start over** clears the trip. Photo and route details remain available under the edit and evidence sections.
+6. **Start over**, destination editing, and location evidence live neatly inside **Overview** (or below fallback messages) to keep active step-by-step walking uncluttered.
 
 The catalogue covers all 89 supplied Burnaby plans, with approximate GPS alignments available on 65. The walkthrough uses SE12, SW03, SW05 and SW01, which all have building footprints. See [device-location coverage](device-location.md).

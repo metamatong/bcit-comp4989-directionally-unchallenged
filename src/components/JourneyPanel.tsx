@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Check, MapPin, Route } from 'lucide-react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
+import { Check, MapPin, RotateCcw, Route } from 'lucide-react';
 import { request } from '../api';
 import type { CampusLocationCandidate, VisualPlan } from '../types';
 import { mapDestinationScope, type NavigationChoice, type NavigationResult } from '../wayfinding';
@@ -44,8 +44,11 @@ type JourneyProps = {
   plans: VisualPlan[];
   busy: boolean;
   onTryAnotherPhoto: () => void;
+  onStartOver?: () => void;
+  onGuidedChange?: (guided: boolean) => void;
   locationCatalogue?: LocationCatalogue;
   locationEvidence?: ReactNode;
+  editInputs?: ReactNode;
 };
 
 export function JourneyPanel(props: JourneyProps) {
@@ -57,18 +60,31 @@ export function JourneyPanel(props: JourneyProps) {
     preferElevators = false,
     plans,
     locationEvidence,
+    editInputs,
+    onStartOver,
+    onGuidedChange,
   } = props;
   const [result, setResult] = useState<NavigationResult>();
   const [error, setError] = useState('');
   const [refresh, setRefresh] = useState(0);
+  const [guided, setGuided] = useState(false);
   const [choice, setChoice] = useState<
     Omit<NavigationChoice, 'candidateId' | 'destination' | 'revision'>
   >({});
+
+  const handleGuidedChange = useCallback(
+    (next: boolean) => {
+      setGuided(next);
+      onGuidedChange?.(next);
+    },
+    [onGuidedChange],
+  );
 
   useEffect(() => {
     const controller = new AbortController();
     setResult(undefined);
     setError('');
+    handleGuidedChange(false);
     request<NavigationResult>(
       `/api/sessions/${sessionId}/navigation`,
       { revision, candidateId: candidate.id, destination, preferElevators, ...choice },
@@ -108,13 +124,19 @@ export function JourneyPanel(props: JourneyProps) {
     );
   }
 
+  const routeOwnsUtilities =
+    !error &&
+    !!result &&
+    !(useMapDestination && !choice.destinationPoint) &&
+    (result.status === 'route' || Boolean(result.mappedPortion));
+
   let panel: ReactNode;
   if (error) {
     panel = (
       <section className="journey-panel">
         <p role="alert">{error}</p>
         <button
-          className="secondary"
+          className="secondary sheet-pill-btn"
           onClick={() => {
             setChoice({});
             recheck();
@@ -126,9 +148,9 @@ export function JourneyPanel(props: JourneyProps) {
     );
   } else if (!result) {
     panel = (
-      <section className="journey-panel" role="status">
+      <section className="journey-panel journey-loading" role="status">
         <p className="photo-status">
-          <Route size={15} className="spin" /> Finding your route…
+          <Route size={16} className="spin" /> Finding your route…
         </p>
       </section>
     );
@@ -142,6 +164,11 @@ export function JourneyPanel(props: JourneyProps) {
         plans={plans}
         locationCatalogue={props.locationCatalogue}
         onTryAnotherPhoto={props.onTryAnotherPhoto}
+        onStartOver={onStartOver}
+        onGuidedChange={handleGuidedChange}
+        guided={guided}
+        locationEvidence={locationEvidence}
+        editInputs={editInputs}
         result={result}
         onRecheck={recheck}
         onChoose={(field, id) =>
@@ -154,15 +181,34 @@ export function JourneyPanel(props: JourneyProps) {
       />
     );
   }
+
   return (
     <>
       {panel}
-      {useMapDestination && choice.destinationPoint && pointPicker()}
-      {locationEvidence && (
-        <details className="journey-evidence">
-          <summary>Location evidence</summary>
-          {locationEvidence}
-        </details>
+      {useMapDestination && choice.destinationPoint && !guided && pointPicker()}
+      {!routeOwnsUtilities && (
+        <div className="overview-utilities">
+          {editInputs}
+          {locationEvidence && (
+            <details className="journey-evidence">
+              <summary>Location evidence</summary>
+              {locationEvidence}
+            </details>
+          )}
+          {onStartOver && (
+            <div className="overview-footer-actions">
+              <button
+                type="button"
+                className="text-button"
+                disabled={props.busy}
+                onClick={onStartOver}
+              >
+                <RotateCcw size={15} />
+                Start over
+              </button>
+            </div>
+          )}
+        </div>
       )}
     </>
   );
@@ -173,14 +219,28 @@ function JourneyResult({
   plans,
   locationCatalogue,
   onTryAnotherPhoto,
+  onStartOver,
+  onGuidedChange,
+  guided,
+  locationEvidence,
+  editInputs,
   busy,
   onRecheck,
   onChoose,
   preferElevators,
 }: Pick<
   JourneyProps,
-  'plans' | 'locationCatalogue' | 'onTryAnotherPhoto' | 'busy' | 'preferElevators'
+  | 'plans'
+  | 'locationCatalogue'
+  | 'onTryAnotherPhoto'
+  | 'onStartOver'
+  | 'onGuidedChange'
+  | 'locationEvidence'
+  | 'editInputs'
+  | 'busy'
+  | 'preferElevators'
 > & {
+  guided: boolean;
   result: NavigationResult;
   onRecheck: () => void;
   onChoose: (field: 'destinationId', id: string) => void;
@@ -195,8 +255,11 @@ function JourneyResult({
 
   if (result.status === 'route')
     return (
-      <section className="journey-panel" aria-label="Your walking route">
-        {result.destinationMatch && (
+      <section
+        className={guided ? 'journey-panel journey-panel-guided' : 'journey-panel journey-panel-overview'}
+        aria-label="Your walking route"
+      >
+        {!guided && result.destinationMatch && (
           <p className="destination-match" role="status">
             Matching “{result.destinationMatch.requested}” to {result.destinationMatch.matched}.
           </p>
@@ -207,8 +270,13 @@ function JourneyResult({
           plans={plans}
           onRecheck={onRecheck}
           locationCatalogue={locationCatalogue}
+          onGuidedChange={onGuidedChange}
+          locationEvidence={locationEvidence}
+          editInputs={editInputs}
+          onStartOver={onStartOver}
+          busy={busy}
         />
-        {result.arrivalNote && <p role="note">{result.arrivalNote}</p>}
+        {!guided && result.arrivalNote && <p role="note">{result.arrivalNote}</p>}
       </section>
     );
 
@@ -219,7 +287,7 @@ function JourneyResult({
     const planIds = [...new Set(options.map((option) => option.planId))];
     return (
       <section className="journey-panel" aria-label="Route location choices">
-        <h2>{'Which destination do you mean?'}</h2>
+        <h2>Which destination do you mean?</h2>
         {planIds.map((id) => {
           const plan = plans.find((p) => p.id === id);
           if (!plan) return null;
@@ -234,7 +302,7 @@ function JourneyResult({
             return point ? [{ point, symbol: String(i + 1), label: place.label }] : [];
           });
           return (
-            <div key={id}>
+            <div key={id} className="destination-choice-group">
               <h3>{planLabel(plan)}</h3>
               {group.length > 1 && (
                 <RouteMapImage
@@ -244,17 +312,19 @@ function JourneyResult({
                   label="Numbered location choices on the floor plan"
                 />
               )}
-              {group.map((place, i) => (
-                <button
-                  className="secondary"
-                  key={place.id}
-                  disabled={busy}
-                  onClick={() => onChoose('destinationId', place.id)}
-                >
-                  {group.length > 1 ? i + 1 + ' · ' : ''}
-                  {place.label}
-                </button>
-              ))}
+              <div className="place-choices">
+                {group.map((place, i) => (
+                  <button
+                    className="secondary sheet-pill-btn"
+                    key={place.id}
+                    disabled={busy}
+                    onClick={() => onChoose('destinationId', place.id)}
+                  >
+                    {group.length > 1 ? i + 1 + ' · ' : ''}
+                    {place.label}
+                  </button>
+                ))}
+              </div>
             </div>
           );
         })}
@@ -277,7 +347,10 @@ function JourneyResult({
     (result.status === 'unmapped-origin' || result.status === 'unmapped-origin-and-destination');
 
   return (
-    <section className="journey-panel" aria-label="Route to destination">
+    <section
+      className={result.mappedPortion ? 'journey-panel journey-panel-overview' : 'journey-panel'}
+      aria-label="Route to destination"
+    >
       {result.mappedPortion ? (
         <RouteDirections
           route={{ ...result, ...result.mappedPortion, status: 'route' }}
@@ -287,6 +360,10 @@ function JourneyResult({
           locationCatalogue={locationCatalogue}
           preferElevators={preferElevators}
           onRecheck={onRecheck}
+          locationEvidence={locationEvidence}
+          editInputs={editInputs}
+          onStartOver={onStartOver}
+          busy={busy}
         />
       ) : (
         <>
@@ -300,12 +377,16 @@ function JourneyResult({
         </>
       )}
       {!result.mappedPortion && result.status === 'no-route' && (
-        <button className="secondary" disabled={busy} onClick={onRecheck}>
+        <button className="secondary full-width sheet-pill-btn" disabled={busy} onClick={onRecheck}>
           Retry route
         </button>
       )}
       {needsAnotherPhoto && (
-        <button className="primary full-width" disabled={busy} onClick={onTryAnotherPhoto}>
+        <button
+          className="primary full-width sheet-pill-btn"
+          disabled={busy}
+          onClick={onTryAnotherPhoto}
+        >
           Try another photo
         </button>
       )}

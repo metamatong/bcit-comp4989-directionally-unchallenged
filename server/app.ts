@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { root } from './data';
 import type { Provider } from './provider';
 import { visualPlans } from './visual-data';
-import { floorGraphs } from './floor-graph';
+import { floorGraphs, pilotDestinations } from './floor-graph';
 import { locationCatalogue } from './geolocation';
 import { isPilotBuilding, isPilotPlan } from './pilot-scope';
 import type { LocationCatalogue } from '../src/location/types';
@@ -93,6 +93,7 @@ export function createApp(options: {
       provider: options.provider.name ?? 'gemini',
       setupNotice: options.liveAvailable ? null : (options.setupNotice ?? null),
       visualPlans: visitorPlans,
+      destinations: pilotDestinations(),
       locationCatalogue: locationData,
       locationNotice,
       photoLocalizationAvailable: visitorPlans.length > 0,

@@ -1,6 +1,6 @@
 /** Open complete routes in guided directions and keep the full itinerary available. */
-import { useEffect, useRef, useState } from 'react';
-import { Route } from 'lucide-react';
+import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
+import { RotateCcw } from 'lucide-react';
 import { planLabel } from '../topology';
 import type { VisualPlan } from '../types';
 import type {
@@ -15,7 +15,12 @@ import type { LocationCatalogue } from '../location/types';
 import { GuidedDirections } from './GuidedDirections';
 
 type FoundRoute = Extract<NavigationResult, { status: 'route' }>;
-type FloorVisit = { start: MapStop; end: MapStop; walks: WalkingStep[] };
+type FloorVisit = {
+  start: MapStop;
+  end: MapStop;
+  walks: WalkingStep[];
+  exitTransfer?: WalkingStep;
+};
 
 function floorItinerary(route: FoundRoute): FloorVisit[] {
   let visit: FloorVisit = { start: route.origin, end: route.origin, walks: [] };
@@ -26,12 +31,35 @@ function floorItinerary(route: FoundRoute): FloorVisit[] {
       visit.end = step.to;
     } else {
       visit.end = step.from;
+      visit.exitTransfer = step;
       // Re-entering a floor is a new visit. Never connect points across different maps or an outdoor gap.
       visit = { start: step.to, end: step.to, walks: [] };
       visits.push(visit);
     }
   }
   return visits;
+}
+
+function transferLabel(step: WalkingStep, plans: Map<string, VisualPlan>): string {
+  const fromPlan = plans.get(step.from.planId);
+  const toPlan = plans.get(step.to.planId);
+  if (step.kind === 'building-link') {
+    return `→ Connecting passage to ${toPlan ? planLabel(toPlan) : step.to.label}`;
+  }
+  if (step.kind === 'outdoor') {
+    return `→ Outside to ${toPlan ? planLabel(toPlan) : step.to.label} (outdoor path unmapped)`;
+  }
+  const fromFloor = fromPlan?.floor ?? '';
+  const toFloor = toPlan?.floor ?? '';
+  const fromNum = Number(fromFloor);
+  const toNum = Number(toFloor);
+  const arrow =
+    Number.isFinite(fromNum) && Number.isFinite(toNum) && fromNum !== toNum
+      ? toNum < fromNum
+        ? '↓'
+        : '↑'
+      : '↕';
+  return `${arrow} ${step.from.label} (Floor ${fromFloor} → ${toFloor})`;
 }
 
 function routeOverview(route: FoundRoute, plans: Map<string, VisualPlan>) {
@@ -111,16 +139,18 @@ function FloorMap({
   const heading = planLabel(plan);
   return (
     <figure className="route-map-visit" aria-label={heading}>
-      <RouteMapImage
-        plan={plan}
-        paths={visit.walks.map((step) => step.path)}
-        markers={markers}
-        bounds={first ? visit.start.startRegion : undefined}
-        whole={whole}
-        label={`${heading}, walking directions from ${visit.start.label} to ${visit.end.label}`}
-      />
+      <span className="route-floor-label">{heading}</span>
+      <div className="timeline-map-frame">
+        <RouteMapImage
+          plan={plan}
+          paths={visit.walks.map((step) => step.path)}
+          markers={markers}
+          bounds={first ? visit.start.startRegion : undefined}
+          whole={whole}
+          label={`${heading}, walking directions from ${visit.start.label} to ${visit.end.label}`}
+        />
+      </div>
       <figcaption>
-        <span className="route-floor-label">{heading}</span>
         <div className="pin-legend">
           {markers.map((marker) => (
             <span key={marker.symbol}>
@@ -143,6 +173,11 @@ export function RouteDirections({
   preferElevators = false,
   requestedRoom,
   requestedOrigin,
+  onGuidedChange,
+  locationEvidence,
+  editInputs,
+  onStartOver,
+  busy = false,
 }: {
   route: FoundRoute;
   requestedRoom?: PlaceChoice;
@@ -152,6 +187,11 @@ export function RouteDirections({
   locationCatalogue?: LocationCatalogue;
   walkingSurfaces?: Record<string, WalkingSurface | null>;
   preferElevators?: boolean;
+  onGuidedChange?: (guided: boolean) => void;
+  locationEvidence?: ReactNode;
+  editInputs?: ReactNode;
+  onStartOver?: () => void;
+  busy?: boolean;
 }) {
   const [showOverview, setShowOverview] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
@@ -168,10 +208,24 @@ export function RouteDirections({
       : 'This route uses an elevator because no complete route without elevators is mapped.'
     : undefined;
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const guidedChangeRef = useRef(onGuidedChange);
+  guidedChangeRef.current = onGuidedChange;
+
+  useEffect(() => {
+    guidedChangeRef.current?.(guided);
+  }, [guided]);
+
+  useEffect(() => {
+    return () => {
+      guidedChangeRef.current?.(false);
+    };
+  }, []);
+
   useEffect(() => {
     headingRef.current?.focus({ preventScroll: true });
     headingRef.current?.scrollIntoView?.({ block: 'start' });
   }, [route.origin.id, route.destination.id, guided]);
+
   if (guided)
     return (
       <GuidedDirections
@@ -183,58 +237,65 @@ export function RouteDirections({
         onStepChange={setStepIndex}
         transferNotice={transferNotice}
         onOverview={() => setShowOverview(true)}
+        onDone={onStartOver}
       />
     );
+
   const visits = floorItinerary(route);
   const planById = new Map(plans.map((plan) => [plan.id, plan]));
   const routePlans = [...new Set(visits.map((visit) => visit.start.planId))].map((id) =>
     planById.get(id)!,
   );
+
   return (
-    <div className="route-directions">
-      <div className="way-heading">
-        <Route size={22} />
-        <h2 tabIndex={-1} ref={headingRef}>
-          {requestedRoom
-            ? 'Directions to the last mapped stop'
-            : requestedOrigin
-              ? 'Directions from the first mapped stop'
-              : 'Walking directions'}
-        </h2>
+    <div className="route-directions overview-stage">
+      <div className="overview-sticky-header">
+        <div className="overview-title-group">
+          <h2 tabIndex={-1} ref={headingRef}>
+            {requestedRoom
+              ? 'Directions to the last mapped stop'
+              : requestedOrigin
+                ? 'Directions from the first mapped stop'
+                : 'Walking directions'}
+          </h2>
+          <p className="helper overview-pref" role="note">
+            {transferNotice ?? (preferElevators ? 'Elevators preferred.' : 'Stairs preferred.')}
+          </p>
+        </div>
+        {canGuide && (
+          <button
+            type="button"
+            className="primary overview-back-pill"
+            onClick={() => {
+              if (complete) setStepIndex(0);
+              setShowOverview(false);
+            }}
+          >
+            {complete ? 'Restart directions' : 'Back to steps'}
+          </button>
+        )}
       </div>
+
       <p className="route-overview" aria-label="Route overview">
         {(requestedRoom || requestedOrigin) && !route.steps.length
           ? 'Mapped stop · ' + route.destination.label
           : routeOverview(route, planById)}
       </p>
+
       {requestedRoom && (
-        <p role="note">
+        <p className="overview-note" role="note">
           The walking line ends at {route.destination.label}. The final walk to{' '}
           {requestedRoom.label} is unverified. R marks the requested place on its floor plan.
         </p>
       )}
       {requestedOrigin && (
-        <p role="note">
+        <p className="overview-note" role="note">
           S marks the sign for {requestedOrigin.label}. The walk from that sign to{' '}
           {route.origin.label} is unverified. Follow the walking line once you reach{' '}
           {route.origin.label}.
         </p>
       )}
-      <p className="helper" role="note">
-        {transferNotice ?? (preferElevators ? 'Elevators preferred.' : 'Stairs preferred.')}
-      </p>
-      {canGuide && (
-        <button
-          type="button"
-          className="primary full-width"
-          onClick={() => {
-            if (complete) setStepIndex(0);
-            setShowOverview(false);
-          }}
-        >
-          {complete ? 'Restart directions' : 'Back to steps'}
-        </button>
-      )}
+
       <div className="route-map-stack" role="group" aria-label="Route maps in travel order">
         <div className="map-bar">
           <button type="button" aria-pressed={whole} onClick={() => setWhole(!whole)}>
@@ -242,16 +303,24 @@ export function RouteDirections({
           </button>
         </div>
         {visits.map((visit, index) => (
-          <FloorMap
-            key={index}
-            visit={visit}
-            plan={planById.get(visit.start.planId)!}
-            first={index === 0}
-            last={index === visits.length - 1}
-            requestedRoom={index === visits.length - 1 ? requestedRoom : undefined}
-            requestedOrigin={index === 0 ? requestedOrigin : undefined}
-            whole={whole}
-          />
+          <Fragment key={`visit-${index}`}>
+            <FloorMap
+              visit={visit}
+              plan={planById.get(visit.start.planId)!}
+              first={index === 0}
+              last={index === visits.length - 1}
+              requestedRoom={index === visits.length - 1 ? requestedRoom : undefined}
+              requestedOrigin={index === 0 ? requestedOrigin : undefined}
+              whole={whole}
+            />
+            {visit.exitTransfer && (
+              <div className="timeline-transfer" role="note">
+                <span className="timeline-transfer-pill">
+                  {transferLabel(visit.exitTransfer, planById)}
+                </span>
+              </div>
+            )}
+          </Fragment>
         ))}
         <div className="map-credit">
           <span>{[...new Set(routePlans.map((plan) => plan.attribution))].join(' · ')}</span>
@@ -265,9 +334,27 @@ export function RouteDirections({
           </details>
         </div>
       </div>
-      <button type="button" className="text-button" onClick={onRecheck}>
-        Recheck current route
-      </button>
+
+      <div className="overview-utilities">
+        {editInputs}
+        {locationEvidence && (
+          <details className="journey-evidence">
+            <summary>Location evidence</summary>
+            {locationEvidence}
+          </details>
+        )}
+        <div className="overview-footer-actions">
+          <button type="button" className="text-button" onClick={onRecheck}>
+            Recheck current route
+          </button>
+          {onStartOver && (
+            <button type="button" className="text-button" disabled={busy} onClick={onStartOver}>
+              <RotateCcw size={15} />
+              Start over
+            </button>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

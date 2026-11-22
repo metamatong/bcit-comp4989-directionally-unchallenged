@@ -180,6 +180,13 @@ export type CatalogueRecord = {
   labelCount: number;
   routingSupported: boolean;
 };
+export type DestinationSuggestion = {
+  value: string;
+  building: string;
+  floor: string;
+  label: string;
+  kind: string;
+};
 export type Bootstrap = {
   provider?: import('./ai-provider').AiProviderName;
   locationCatalogue?: import('./location/types').LocationCatalogue;
@@ -189,5 +196,6 @@ export type Bootstrap = {
   setupNotice?: string | null;
   coverage: { floorPlans: number; buildings: string[]; extractedLabelCandidates: number };
   visualPlans: VisualPlan[];
+  destinations?: DestinationSuggestion[];
   photoLocalizationAvailable: boolean;
 };

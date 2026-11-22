@@ -37,11 +37,11 @@ The Git-connected Vercel project builds the frontend and the visitor API with `n
 
 ## Use
 
-1. Upload or capture a photo containing a nearby room sign, then tap **Next**.
-2. Enter a destination such as `SW03 2605`. Stairs are preferred by default; check **Accessibility: prefer elevators** to prefer an elevator route.
+1. Take or upload a photo containing a nearby room sign; once prepared locally, the app advances directly to the destination screen.
+2. Enter a destination such as `SW03 2605` (matching pilot destinations appear in a dropdown as you type). Stairs are preferred by default; toggle **Prefer elevators** to prefer an elevator route.
 3. Tap **Get Directions**. The browser requests GPS automatically. The app sends the photo and derived building IDs to the configured provider for label and feature extraction, then sends only the evidence ID and GPS-derived building candidates to source lookup. Raw coordinates stay in the browser.
 4. The app ranks source matches using the photo evidence and GPS building match, then selects the strongest starting estimate automatically. It does not ask visitors to choose a starting room or doorway.
-5. A complete walking route opens directly on its first step. The current step selects the floor map. Live tracking starts automatically, and the position dot appears when a fresh reading can be shown on a geographically aligned floor. Use **Previous**, **Next step**, and **Finish route** to mark progress. **Route overview** opens the full itinerary, and **Back to steps** returns to the current step.
+5. A complete walking route opens directly on its first step in a full-viewport floor-map and bottom-sheet layout. The current step selects the floor map. Live tracking starts automatically, and the position dot appears when a fresh reading can be shown on a geographically aligned floor. Use **Previous**, **Next step**, and **Finish route** in the bottom sheet to mark progress; tapping **Done** on the finished route returns immediately to the photo start screen. **Overview** opens the full vertical timeline itinerary (plus tucked source plans, location evidence, edit controls, and **Start over**), and **Back to steps** returns to the current step.
 
 The visitor app exposes GPS building and floor alignment data only for the four pilot buildings. The dot requires a fresh reading whose reported accuracy area overlaps the archived footprint. Indoor phone accuracy remains unmeasured. [Device-location coverage](docs/device-location.md)
 
@@ -51,7 +51,7 @@ SE12 323 to SW03 1750 retains the shared corridor departure and corridor-side ar
 
 On floor 1, the SW03 lobby 1602 exit connects outdoors to the east doors of SW01 lobby 1501 in both directions. Follow the indoor aisle across atrium 1303 to the 1106 doorway. Visitors already at vestibule 1020 can turn beside S120 and reach 1106 through lobby 1101. [SW01 first-floor plan](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0101.pdf)
 
-The full photo and four detail crops are prepared locally from the original image. The footer’s **Coverage & privacy** dialog identifies the extraction provider and data handling. The server keeps image-free evidence receipts, and the browser discards its prepared photo after locating the result, removal or navigation away. Explicit retries can reuse unexpired extraction evidence.
+The full photo and four detail crops are prepared locally from the original image. The top-right info button’s **Coverage & privacy** dialog identifies the extraction provider, readiness status, and data handling. The server keeps image-free evidence receipts, and the browser discards its prepared photo after locating the result, removal or navigation away. Explicit retries can reuse unexpired extraction evidence.
 
 GPS requests are part of **Get Directions** and are required to continue. The route overview no longer offers optional location tracking or floor selection.
 

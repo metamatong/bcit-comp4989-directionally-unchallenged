@@ -53,17 +53,29 @@ describe('inline photo input (Node rendering, no browser)', () => {
   });
   it('exposes upload and native capture before the destination step', () => {
     const { markup, props } = renderInput();
-    expect(markup).toContain('<h1 id="location-heading">Take a photo of where you are</h1>');
+    expect(markup).toContain('<h1 id="location-heading">Snap a nearby room sign</h1>');
+    expect(markup).toContain('SE12 · SW03 · SW05 · SW01');
     expect(button(markup, 'Upload photo')).not.toContain('disabled');
     expect(button(markup, 'Take a photo')).not.toContain('disabled');
     expect(markup).toContain('capture="environment"');
     expect(markup).not.toContain('id="trip-destination"');
-    expect(button(markup, 'Next')).toContain('disabled');
-    expect(markup).toContain('Your photo stays on this device until you tap Get Directions.');
     expect(markup).not.toContain('<dialog');
     expect(markup).not.toContain('Analyze a photo');
     expect(markup).not.toContain('aria-label="Photo analysis"');
     expect(props.onAnalyze).not.toHaveBeenCalled();
+  });
+  it('renders the clean destination screen with elevator switch and no building pills', () => {
+    const { markup } = renderInput({
+      photo,
+      step: 'destination',
+      destination: 'SW03 2605',
+      preferElevators: false,
+    });
+    expect(markup).toContain('<h1 id="location-heading">Where are you headed?</h1>');
+    expect(markup).toContain('Prefer elevators');
+    expect(markup).toContain('role="switch"');
+    expect(markup).not.toContain('building-chips');
+    expect(button(markup, 'Get Directions')).not.toContain('disabled');
   });
   it('keeps the preview local before Next and submits only after Go', () => {
     const { markup, props } = renderInput({ photo });
