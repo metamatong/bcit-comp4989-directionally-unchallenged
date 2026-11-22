@@ -13,6 +13,7 @@ import type {
 } from '../wayfinding';
 import { RouteMapImage, type MapMarker } from './RouteMap';
 import type { LocationCatalogue } from '../location/types';
+import { getMotionPermissionState, requestMotionPermission } from '../location/browser-motion';
 import { GuidedDirections } from './GuidedDirections';
 
 type FoundRoute = Extract<NavigationResult, { status: 'route' }>;
@@ -169,6 +170,7 @@ export function RouteDirections({
   locationCatalogue,
   gpsTestMode = false,
   walkingSurfaces,
+  enableParticlePdr,
   preferElevators = false,
   requestedRoom,
   requestedOrigin,
@@ -186,6 +188,7 @@ export function RouteDirections({
   locationCatalogue?: LocationCatalogue;
   gpsTestMode?: boolean;
   walkingSurfaces?: Record<string, WalkingSurface | null>;
+  enableParticlePdr?: boolean;
   preferElevators?: boolean;
   onGuidedChange?: (guided: boolean) => void;
   locationEvidence?: ReactNode;
@@ -234,6 +237,7 @@ export function RouteDirections({
         locationCatalogue={locationCatalogue}
         gpsTestMode={gpsTestMode}
         walkingSurfaces={walkingSurfaces}
+        enableParticlePdr={enableParticlePdr}
         index={stepIndex}
         onStepChange={setStepIndex}
         transferNotice={transferNotice}
@@ -268,6 +272,9 @@ export function RouteDirections({
             type="button"
             className="primary overview-back-pill"
             onClick={() => {
+              if (!gpsTestMode && getMotionPermissionState() === 'unknown') {
+                void requestMotionPermission();
+              }
               if (complete) setStepIndex(0);
               setShowOverview(false);
             }}

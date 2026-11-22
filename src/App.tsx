@@ -621,8 +621,10 @@ export default function App() {
                 <h3>Location updates</h3>
                 <p>
                   GPS cannot identify floors. The route step selects the floor map, and a location
-                  dot appears only where that plan has a geographic alignment. Indoor GPS accuracy
-                  is limited.
+                  dot appears only where that plan has a geographic alignment. When device motion
+                  sensors are available and permitted, they run locally in this tab to steady
+                  indoor tracking and are never transmitted or stored. Indoor accuracy remains
+                  unmeasured.
                 </p>
               </div>
               <div className="about-section">
