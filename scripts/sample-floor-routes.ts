@@ -11,6 +11,8 @@ import {
   type FloorPlace,
 } from '../server/floor-graph';
 import { locationCatalogue } from '../server/geolocation';
+import { isPilotBuilding, PILOT_BUILDINGS } from '../server/pilot-scope';
+import { buildingLabel } from '../src/topology';
 import { newSession } from '../server/session';
 import { MemoryVisitorSessions } from '../server/visitor-sessions';
 import type { PhotoEvidence, Session } from '../src/types';
@@ -23,8 +25,7 @@ const { values, positionals } = parseArgs({
 if (positionals.length > 1) throw Error('Supply at most one random seed.');
 const building = values.building && sourceBuilding(values.building);
 if (values.building && !building) throw Error('Select a supplied Burnaby building.');
-if (building && values.network)
-  throw Error('Choose the three-building network or a single building.');
+if (building && values.network) throw Error('Choose the four-building pilot or a single building.');
 const seed = positionals[0] ?? randomBytes(4).toString('hex');
 if (!/^[0-9a-f]{8}$/i.test(seed)) throw Error('Supply an eight-digit hexadecimal random seed.');
 let state = parseInt(seed, 16);
@@ -34,9 +35,7 @@ function draw(limit: number) {
 }
 const places = floorGraphs()
   .ordered.filter((f) =>
-    values.network
-      ? ['SW1', 'SW3', 'SE12'].includes(f.plan.building)
-      : !building || f.plan.building === building,
+    values.network ? isPilotBuilding(f.plan.building) : !building || f.plan.building === building,
   )
   .flatMap((f) => f.places)
   .filter((p) => !values.network || !visitorExclusion(p));
@@ -162,7 +161,7 @@ try {
     JSON.stringify({
       seed,
       ...(building ? { building } : {}),
-      ...(values.network ? { buildings: ['SE12', 'SW03', 'SW01'] } : {}),
+      ...(values.network ? { buildings: PILOT_BUILDINGS.map(buildingLabel) } : {}),
       population: places.length,
       selection:
         'First five photo starts and next five destinations drawn without replacement before routing.',

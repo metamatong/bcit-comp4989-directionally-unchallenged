@@ -8,23 +8,25 @@ import { exportPilotNetwork } from '../scripts/export-pilot-network';
 import { createHash } from 'node:crypto';
 
 const find = (...labels: string[]) => lookupPilotLabels({ purpose: 'destination', labels });
-describe('twelve source pages', () => {
+describe('official pilot source pages', () => {
   it('preserves every original observation and covers the previously empty floors', () => {
     const coverage = pilotCoverage();
-    expect(coverage).toHaveLength(12);
+    expect(coverage).toHaveLength(14);
     expect(coverage.reduce((sum, p) => sum + p.geometryLabels, 0)).toBe(4641);
-    for (const building of ['SE12', 'SW3', 'SW1']) {
+    for (const building of ['SE12', 'SW3', 'SW5', 'SW1']) {
       expect(
         coverage
           .filter((p) => p.building === building)
           .map((p) => p.floor)
           .sort(),
-      ).toEqual(['1', '2', '3', '4']);
+      ).toEqual(building === 'SW5' ? ['1', '2'] : ['1', '2', '3', '4']);
     }
     for (const p of coverage) {
       expect(p.planReadLabels).toBeGreaterThanOrEqual(8);
       expect(p.ocrWords).toBeGreaterThan(100);
-      expect(p.distinctIdentifierCandidates).toBeGreaterThan(20);
+      expect(p.distinctIdentifierCandidates).toBeGreaterThanOrEqual(
+        p.building === 'SW5' ? p.planReadLabels : 21,
+      );
       const whole = getPilotContext({ planId: p.planId, bounds: [0, 0, 1, 1] });
       if (whole.status !== 'source-context') throw new Error(`Missing context for ${p.planId}`);
       expect(whole.observations).toHaveLength(p.geometryLabels + p.planReadLabels + p.ocrWords);
@@ -34,6 +36,7 @@ describe('twelve source pages', () => {
   it.each([
     ['SW03 2605', 'SW3-F2-p1', 'classroom'],
     ['SW3 3615', 'SW3-F3-p1', 'classroom'],
+    ['SW05 2895', 'SW5-F2-p1', 'classroom'],
     ['SE12 101N', 'SE12-F1-p1', 'meeting'],
     ['SW01-2004', 'SW1-F2-p1', 'classroom'],
     ['sw1 4035', 'SW1-F4-p1', 'classroom'],
@@ -105,7 +108,7 @@ describe('twelve source pages', () => {
       new Set(['geometry', 'ocr', 'plan-transcription']),
     );
   });
-  it('retrieves additional printed identifiers across all 12 floors, including untranscribed rooms', () => {
+  it('retrieves additional printed identifiers on the other pilot floors, including untranscribed rooms', () => {
     const controls = [
       ['SE12', '1', '103F', '101F'],
       ['SE12', '2', '205B', '206A'],
@@ -153,6 +156,16 @@ describe('twelve source pages', () => {
 describe('reviewed graph revision', () => {
   const data = reviewedNetwork();
   const plans = pilotEvidence().map((p) => p.plan);
+  it('keeps SW05 lecture exits in the drawing without offering them as room entrances', () => {
+    const region = getPilotContext({ planId: 'SW5-F1-p1', bounds: [0.3, 0.75, 0.75, 0.86] });
+    if (region.status !== 'source-context') throw new Error('Missing SW05 ground floor');
+    for (const room of ['1840', '1850']) {
+      const exits = region.doorHypotheses.filter((door) => door.room === room);
+      expect(exits).toHaveLength(2);
+      expect(exits.every((door) => door.exteriorAccess === 'exit-only')).toBe(true);
+      expect(find('SW05 ' + room).results[0].matches[0].doorHypotheses).toEqual([]);
+    }
+  });
   it('distinguishes an approved SW01 crossing from a nearby source door symbol', () => {
     const region = getPilotContext({ planId: 'SW1-F2-p1', bounds: [0.79, 0.4, 0.82, 0.43] });
     if (region.status !== 'source-context') throw new Error('missing SW01 plan');

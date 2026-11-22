@@ -63,7 +63,7 @@ export function candidateFromSignMatch(
   const doors =
     pilotEvidence()
       .find((p) => p.plan.id === plan.id)
-      ?.drawnDoors.filter((d) => labelKey(d.room) === place.label) ?? [];
+      ?.entranceDoors.filter((d) => labelKey(d.room) === place.label) ?? [];
   const door =
     doors.length === 1 && floor.places.filter((p) => p.label === place.label).length === 1
       ? doors[0]

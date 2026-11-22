@@ -45,7 +45,7 @@ The pilot spatial evidence under `data/campus/spatial/` includes additional OCR,
 | Campus records | `coverage.json`, `landmarks.json` | Building/floor catalogue; no promoted verified room/entrance/transition records yet |
 | Legacy campus placeholders | `data/campus/graph.json`, `landmarks.json` | Empty; not consumed by the topology editor or its route checker |
 | Reviewed topology | `data/campus/topology.json` | Human-confirmed points/connections, original source hashes, evidence and version-bound review history |
-| Connection proposals | `data/campus/connection-candidates.json` | Source-bound questions for SE12, SW03 and SW01, with separate confirmation and direction records |
+| Connection proposals | `data/campus/connection-candidates.json` | Source-bound questions for the four pilot buildings, with separate confirmation and direction records |
 
 Floor-plan coordinates use PDF points with a top-left origin. `data/campus/geolocation/floor-alignment-evidence.json` binds exterior corners or stacked features to the official drawings and geographic source. The compiler produces approximate GPS overlays for 65 of 89 plans and records the gaps on the remaining 24. Indoor GPS accuracy and routing distances remain unmeasured. Raw drawing primitives remain unclassified. [Geographic provenance and coverage](device-location.md)
 
@@ -105,9 +105,11 @@ The following is **document coverage**, not routing support. `coverage.json` is 
 
 ## Route records and extension
 
-The visitor app no longer exposes a topology editor or connection-approval workflow. Its published route dataset contains source-bound points, walking traces, vertical transfers and fixed cross-building links. Existing same-building transfer records are legacy hand-authored data; replacing them with automatic stair/elevator matching from stacked floor plans remains an implementation gap. Cross-building connections are intended to remain in a fixed developer-maintained dataset.
+The visitor router uses fixed records for crossings between buildings. It infers vertical transfers at runtime from the source landing inventory in SE12, SW03 and SW01. For SW05 it derives the landings and stair pairs from the two registered floor drawings. The published dataset also preserves the earlier hand-authored vertical records for provenance.
 
-The published route snapshot currently contains 100 points and 69 connections. It includes routes in SE12, SW03 and SW01, with cross-building links between these buildings. Other supplied plans have searchable labels and generated walking areas, but floor-to-floor links are not universally available. Do not infer a physical connection from matching labels alone. [SW01 source records and coverage](sw01-routing.md)
+The published route snapshot contains 103 points and 71 connections at revision 91. SW03 and SW05 connect on floor 1. Visitors can walk outdoors in both directions between the south doors of SW03 lobby 1602, beside corridor 1604 and stair S170, and the main doors of SW05 lobby 1800. Routes from SW05 floor 2 use the internal stairs to reach this crossing. Other supplied plans have searchable labels and generated walking areas, but floor-to-floor links are not universally available. Do not infer a physical connection from matching labels alone. [SW01 source records and coverage](sw01-routing.md)
+
+SW05 room 1840 shares the public entrance at vestibule 1843, and room 1850 shares the entrance at 1853. The project user confirmed that the west, centre and east exterior lecture doors open only from inside. Their drawn leaves carry `exteriorAccess: "exit-only"` in the source annotations. Indoor room stops use the vestibules. The published-network validator permits a directional departure at a marked exterior exit and rejects a crossing that would bring visitors back through that exit.
 
 Rebuild derived assets from the official plans and preserve their source hashes. The building GPS footprint layer and the per-floor geographic alignments have separate provenance. See [device-location coverage](device-location.md).
 

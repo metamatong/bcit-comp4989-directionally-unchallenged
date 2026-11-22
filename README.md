@@ -2,7 +2,7 @@
 
 Add a photo, enter a destination and tap **Get Directions** for walking directions in the SE12, SW03, SW05 and SW01 pilot. The source archive contains all supplied BCIT Burnaby plans, but the visitor app exposes only those four buildings. The app requests GPS automatically, reads the photo once, matches signs to the catalogue and selects the strongest starting estimate without asking the visitor to choose one.
 
-The archived catalogue contains **89 official floor plans in 45 buildings**. Visitor routes are restricted to the four-building pilot. GPS narrows the building; the photo provides floor and nearby-place evidence. The route search computes paths through compiled walking areas, doors and corridors. Same-building stair and elevator transfers are inferred from source-plan landings for the currently maintained SE12, SW03 and SW01 route data; SW05-specific route integration is handled separately. Only links between buildings use fixed reviewed records. [Floor graph coverage and remaining gaps](docs/floor-routing.md)
+The archived catalogue contains **89 official floor plans in 45 buildings**. Visitor routes are restricted to the four-building pilot. GPS narrows the building; the photo provides floor and nearby-place evidence. The route search computes paths through compiled walking areas, doors and corridors. The visitor graph infers same-building transfers from corresponding landings. The two SW05 source sheets connect through S180–S280 and S189–S289. Only links between buildings use fixed reviewed records. [Floor graph coverage and remaining gaps](docs/floor-routing.md)
 
 ## Run locally
 
@@ -53,6 +53,8 @@ SE12 323 to SW03 1750 retains the shared corridor departure and corridor-side ar
 
 On floor 1, the SW03 lobby 1602 exit connects outdoors to the east doors of SW01 lobby 1501 in both directions. Follow the indoor aisle across atrium 1303 to the 1106 doorway. Visitors already at vestibule 1020 can turn beside S120 and reach 1106 through lobby 1101. [SW01 first-floor plan](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0101.pdf)
 
+SW03 and SW05 connect on floor 1. Visitors can walk outdoors in both directions between the south doors of SW03 lobby 1602, beside corridor 1604 and stair S170, and the main doors of SW05 lobby 1800. Routes from SW05 floor 2 use the internal stairs to reach this crossing. [SW05 floor 1](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0501.pdf) · [SW05 floor 2](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0502.pdf)
+
 The full photo and four detail crops are prepared locally from the original image. The top-right info button’s **Coverage & privacy** dialog identifies the extraction provider, readiness status, and data handling. The server keeps image-free evidence receipts, and the browser discards its prepared photo after locating the result, removal or navigation away. Explicit retries can reuse unexpired extraction evidence.
 
 GPS requests are part of **Get Directions** and are required to continue in production. Local testing can disable GPS with `GPS_TEST_MODE=true`; the route overview no longer offers optional location tracking or floor selection.
@@ -72,7 +74,7 @@ npm run ai:metrics -- /path/to/server.log  # Summarize AI attempt latency and to
 
 Tests mock AI providers and spend no provider quota. Browser automation, when requested, uses an isolated server on port 3100 with credentials disabled and installed Google Chrome. It is not a physical-phone or Safari test. The browser OCR packages, worker assets and installation hook have been removed; optional local PDF preprocessing can still use Tesseract.
 
-Exact retrieval preserves every digit, prefix, suffix and leading zero, including `302`, `3021` and `0302`. All 5,463 original labels remain available as evidence. The visitor place index also contains floor-wide transcriptions, repeated OCR and doorway positions. The legacy pilot evidence is available with `npm run spatial:query -- resolve_spatial_labels '{"purpose":"destination","labels":["SW03 2605"]}'`.
+Exact retrieval preserves every digit, prefix, suffix and leading zero, including `302`, `3021` and `0302`. All 5,463 original geometry labels remain available as evidence. Supplemental OCR and source transcriptions cover all fourteen pilot sheets. The visitor place index also contains floor-wide transcriptions, repeated OCR and doorway positions. The legacy pilot evidence is available with `npm run spatial:query -- resolve_spatial_labels '{"purpose":"destination","labels":["SW03 2605"]}'`.
 
 Extraction has a 45-second server budget and uses strict OpenAI output schemas when OpenAI is selected. Retries honor that deadline and request budgets. Provider metrics record timings, payload sizes and token counts without photos, prompts or visitor identifiers. Location lookup and routing perform no model inference. [Provider details](docs/provider.md)
 
@@ -87,7 +89,7 @@ Extraction has a 45-second server budget and uses strict OpenAI output schemas w
 - [Project walkthrough](docs/walkthrough.md) and [mobile landing screen](outputs/screenshots/landing-mobile-390x844.png)
 - [Proposal source](docs/proposal.md) and [two-page proposal](output/pdf/proposal_groupnumber.pdf)
 
-The latest user direction removes the synthetic fallback described in the original brief. Visitor routes combine drawing-derived walking areas with mapped transfer data. The current same-building transfer records are legacy source-bound data; automatic transfer inference is still a gap. Photo-label estimates and routes have not been field-validated. Closures, ETAs and accessibility are not available. The separately referenced assignment PDF was not supplied. Verify assignment requirements and dates against it before submission. Coursework submission is separate from hosting the visitor app.
+The latest user direction removes the synthetic fallback described in the original brief. Visitor routes combine drawing-derived walking areas with mapped transfer data. For SE12, SW03 and SW01, runtime transfer inference uses the original landing inventory. SW05 landing nodes come from the compiled source doorways and independently aligned stair enclosures. Photo-label estimates and routes have not been field-validated. Closures, ETAs and accessibility are not available. The separately referenced assignment PDF was not supplied. Verify assignment requirements and dates against it before submission. Coursework submission is separate from hosting the visitor app.
 
 ## Project hierarchy
 

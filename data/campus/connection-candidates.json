@@ -2704,6 +2704,37 @@
       "rationale": "The source sheets show the marked exterior doors and the visitor described the east approach. Confirm whether the outdoor walk from the SW03 door reaches lobby 1501 directly, and the permitted direction.",
       "preparedBy": "assistant-source-review",
       "preparedOn": "2026-11-20"
+    },
+    {
+      "id": "sw03-f1-1602-to-sw05-f1-1800",
+      "version": 1,
+      "title": "SW03 to SW05 · first-floor lobby entrances",
+      "kind": "outdoor",
+      "from": {
+        "planId": "SW3-F1-p1",
+        "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+        "point": {
+          "x": 0.5063,
+          "y": 0.5665
+        },
+        "label": "Lobby 1602 · south doors to SW05",
+        "kind": "outdoor-access",
+        "description": "Lobby side of the south double doors of 1602 beside corridor 1604 and stair S170, facing SW05."
+      },
+      "to": {
+        "planId": "SW5-F1-p1",
+        "sourceSha256": "37105ff14e81094e4e968500a70da3cea6cd2e13803dd2853909ee35bcd10790",
+        "point": {
+          "x": 0.505,
+          "y": 0.107
+        },
+        "label": "Lobby 1800 · doors to SW03",
+        "kind": "outdoor-access",
+        "description": "Lobby side of the paired main doors at the top of the SW05 first-floor drawing."
+      },
+      "rationale": "The two first-floor drawings locate the marked lobby doors. The connection class and permitted travel directions come from the project user. No other storey is covered by this connection.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-22"
     }
   ]
 }

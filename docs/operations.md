@@ -52,4 +52,4 @@ Keep infrastructure smoke tests, live provider results and physical-campus evalu
 
 ## Route data
 
-The visitor app does not expose a route editor or connection-approval workflow. The published route dataset remains source-bound; its same-building transfer records are legacy data awaiting replacement with automatic inference from aligned floor plans. Cross-building connections are intended to stay in fixed developer-maintained data.
+The visitor app does not expose a route editor or connection-approval workflow. The published route dataset remains source-bound; its legacy same-building edge records are replaced by inferred transfers in the visitor router. SW05 derives its stair landing nodes from the floor graphs and fits their correspondence using archived source alignment controls. Cross-building connections are intended to stay in fixed developer-maintained data.

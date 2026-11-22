@@ -97,6 +97,15 @@ export function validateNetworkExport(value: unknown, plans: VisualPlan[]) {
   if (new Set(ids).size !== ids.length) throw new Error('Duplicate spatial graph ID');
   const planMap = new Map(plans.map((plan) => [plan.id, plan]));
   const nodes = new Map(data.nodes.map((item) => [item.id, item]));
+  const exitOnlyDoors = new Set(
+    pilotEvidence().flatMap(({ plan, drawnDoors }) =>
+      drawnDoors
+        .filter((door) => door.exteriorAccess === 'exit-only')
+        .map(({ point }) => `${plan.id}:${point.x},${point.y}`),
+    ),
+  );
+  const exitOnly = (node: (typeof data.nodes)[number]) =>
+    exitOnlyDoors.has(`${node.planId}:${node.point.x},${node.point.y}`);
   for (const rule of data.visitorRestrictions ?? []) {
     if (
       planMap.get(rule.planId)?.sourceSha256 !== rule.sourceSha256 ||
@@ -142,6 +151,11 @@ export function validateNetworkExport(value: unknown, plans: VisualPlan[]) {
       throw new Error(`Invalid candidate endpoint binding: ${passage.id}`);
     const a = planMap.get(from.planId)!,
       b = planMap.get(to.planId)!;
+    if (
+      (passage.kind === 'outdoor' || passage.kind === 'building-link') &&
+      (exitOnly(to) || (passage.direction === 'both' && exitOnly(from)))
+    )
+      throw new Error(`Outdoor arrival at an exit-only door: ${passage.id}`);
     const vertical = passage.kind === 'stairs' || passage.kind === 'elevator';
     if (
       (passage.kind === 'corridor' && a.id !== b.id) ||

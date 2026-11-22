@@ -55,7 +55,7 @@ export const pilotToolDeclarations = [
   ),
   tool(
     'get_spatial_coverage',
-    'Read per-floor label and reviewed-network coverage for SE12, SW03 and SW01.',
+    'Read per-floor label and reviewed-network coverage for SE12, SW03, SW05 and SW01.',
     empty,
   ),
 ];

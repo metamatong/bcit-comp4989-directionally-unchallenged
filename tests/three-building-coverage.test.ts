@@ -15,9 +15,10 @@ it('reproduces the directional inventory and keeps excluded spaces out of both e
   );
   // Git checkouts on Windows may use CRLF; compare the CSV content, not checkout endings.
   expect(coverageCsv(report, true)).toBe(published.replace(/\r\n/g, '\n'));
-  expect(Object.keys(report.floors)).toHaveLength(12);
+  expect(Object.keys(report.floors)).toHaveLength(14);
   for (const floor of Object.values(report.floors)) {
-    expect(floor.roundTrip).toBeGreaterThan(0);
+    // The per-occurrence snapshot retains floors that have no route to the common hub.
+    expect(floor.places).toBeGreaterThan(0);
     expect(floor.mappedRoundTrip + floor.sharedRoundTrip + floor.vicinityRoundTrip).toBe(
       floor.roundTrip,
     );
@@ -31,6 +32,14 @@ it('reproduces the directional inventory and keeps excluded spaces out of both e
     arrivalAccess: 'mapped',
   });
   expect(record('SW3-F1-p1', '1710')).toMatchObject({ arrivalAccess: 'mapped' });
+  expect(report.floors['SW5-F1-p1']).toMatchObject({ visitorPlaces: 11, roundTrip: 11 });
+  expect(report.floors['SW5-F2-p1']).toMatchObject({ visitorPlaces: 10, roundTrip: 10 });
+  for (const label of ['1840', '1850']) {
+    expect(record('SW5-F1-p1', label)).toMatchObject({
+      originAccess: 'shared',
+      arrivalAccess: 'shared',
+    });
+  }
   expect(record('SW1-F2-p1', '2410')).toMatchObject({
     originAccess: 'shared',
     arrivalAccess: 'shared',
@@ -58,6 +67,7 @@ it('keeps each newly confirmed crossing bidirectional and tied to the marked she
     'se12-f2-court-to-203y-exterior',
     'sw3-f1-1700-to-1900-west-exterior',
     'sw3-f1-f2-west-s190-s299',
+    'sw03-f1-1602-to-sw05-f1-1800',
   ];
   for (const id of ids) {
     const definition = candidates.find((c) => c.id === id)!;

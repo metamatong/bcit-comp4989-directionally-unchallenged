@@ -2557,12 +2557,23 @@
     {
       "planId": "SW5-F2-p1",
       "sourceSha256": "3157fabbf5eeaa7751c0d66c3baa88ba6bc1029bce0013b7b75fe5f8bdb007b1",
-      "basis": "Enclosed circulation identified on this drawing. Retain wall and door boundaries.",
-      "corridorSeeds": [
-        [
-          0.4477124,
-          0.3017677
-        ]
+      "basis": "Source transcription of classroom corridor 2800 and the two flanking stair corridors 2820 and 2890 on the SW05 second-floor drawing.",
+      "areas": [
+        [[0.3007314, 0.2633478], [0.3213508, 0.259139], [0.4310613, 0.2867965], [0.4345627, 0.2657528], [0.4582944, 0.2699615], [0.4598506, 0.2886003], [0.5275444, 0.3012266], [0.5808434, 0.2892015], [0.5792873, 0.268759], [0.6088547, 0.2633478], [0.6123561, 0.2849928], [0.7325708, 0.2513228], [0.7543573, 0.2585378], [0.7543573, 0.2922078], [0.5275444, 0.3487253], [0.3003424, 0.2922078]],
+        [[0.2995643, 0.2922078], [0.3742608, 0.3090428], [0.3462496, 0.455748], [0.2991752, 0.4353054]],
+        [[0.681606, 0.3096441], [0.7563025, 0.2922078], [0.7563025, 0.4377104], [0.7092281, 0.4617605]]
+      ],
+      "cadInteriorBounds": [
+        [[0.217, 0.259], [0.283, 0.259], [0.283, 0.11], [0.457, 0.058], [0.59, 0.058], [0.762, 0.109], [0.762, 0.259], [0.836, 0.259], [0.836, 0.435], [0.76, 0.435], [0.67, 0.478], [0.647, 0.321], [0.527, 0.345], [0.405, 0.321], [0.38, 0.479], [0.295, 0.438], [0.217, 0.438]]
+      ],
+      "accessPoints": [
+        {"label": "2800", "point": [0.5302677, 0.3282828], "basis": "Open central classroom corridor."},
+        {"label": "2820", "point": [0.3279645, 0.3811929], "basis": "West side corridor between its lobby doors and S280."},
+        {"label": "2890", "point": [0.7302365, 0.3811929], "basis": "East side corridor between its lobby doors and S289."}
+      ],
+      "doorApproaches": [
+        {"room": "S280", "threshold": [0.2974342, 0.3995992], "point": [0.3066421, 0.3995602], "basis": "Hall side of the drawn S280 stair door adjoining 2820."},
+        {"room": "S289", "threshold": [0.7572717, 0.3995992], "point": [0.7480638, 0.3995602], "basis": "Hall side of the drawn S289 stair door adjoining 2890."}
       ]
     },
     {
@@ -2751,119 +2762,37 @@
     },
     {
       "planId": "SW5-F1-p1",
+      "transcribedDoorRooms": ["1840", "1850"],
       "sourceSha256": "37105ff14e81094e4e968500a70da3cea6cd2e13803dd2853909ee35bcd10790",
-      "basis": "Labels read from this official source drawing.",
-      "labels": [
-        {
-          "text": "1800",
-          "kind": "corridor",
-          "bounds": [
-            0.511875,
-            0.1681159,
-            0.529375,
-            0.1777778
-          ]
-        },
-        {
-          "text": "1845",
-          "kind": "room",
-          "bounds": [
-            0.4375,
-            0.2956522,
-            0.455,
-            0.305314
-          ]
-        },
-        {
-          "text": "1855",
-          "kind": "room",
-          "bounds": [
-            0.5625,
-            0.2985507,
-            0.58,
-            0.3082126
-          ]
-        },
-        {
-          "text": "1856",
-          "kind": "janitor",
-          "bounds": [
-            0.670625,
-            0.247343,
-            0.688125,
-            0.2570048
-          ]
-        },
-        {
-          "text": "1854",
-          "kind": "corridor",
-          "bounds": [
-            0.633125,
-            0.2985507,
-            0.650625,
-            0.3082126
-          ]
-        },
-        {
-          "text": "S180",
-          "kind": "stairs",
-          "bounds": [
-            0.26625,
-            0.4115942,
-            0.28375,
-            0.421256
-          ]
-        },
-        {
-          "text": "S189",
-          "kind": "stairs",
-          "bounds": [
-            0.761875,
-            0.4115942,
-            0.779375,
-            0.421256
-          ]
-        },
-        {
-          "text": "1843",
-          "kind": "corridor",
-          "bounds": [
-            0.36,
-            0.426087,
-            0.3775,
-            0.4357488
-          ]
-        },
-        {
-          "text": "1853",
-          "kind": "corridor",
-          "bounds": [
-            0.65625,
-            0.426087,
-            0.67375,
-            0.4357488
-          ]
-        },
-        {
-          "text": "1840",
-          "kind": "lecture",
-          "bounds": [
-            0.406875,
-            0.578744,
-            0.424375,
-            0.5884058
-          ]
-        },
-        {
-          "text": "1850",
-          "kind": "lecture",
-          "bounds": [
-            0.613125,
-            0.578744,
-            0.630625,
-            0.5884058
-          ]
-        }
+      "basis": "Source transcription of the public lobby and vestibules on the SW05 first-floor drawing. Structural ink and thresholds bound each approach.",
+      "sharedSuites": [
+        {"entrance": "1843", "rooms": ["1840"], "threshold": [0.368, 0.43], "basis": "The project user confirmed that visitors enter and leave lecture room 1840 from lobby 1800 through west vestibule 1843 (C)."},
+        {"entrance": "1853", "rooms": ["1850"], "threshold": [0.665, 0.43], "basis": "The project user confirmed that visitors enter and leave lecture room 1850 from lobby 1800 through east vestibule 1853 (D)."}
+      ],
+      "areas": [
+        [[0.2964519, 0.1473064], [0.4470121, 0.1016114], [0.5866791, 0.1016114], [0.7376284, 0.1461039], [0.7376284, 0.2819865], [0.673436, 0.2970178], [0.6567071, 0.2982203], [0.6415344, 0.2380952], [0.5897915, 0.2537278], [0.5166511, 0.273569], [0.4438998, 0.2549303], [0.3863212, 0.2368927], [0.375817, 0.285594], [0.2960629, 0.2867965]],
+        [[0.2952848, 0.2098365], [0.3730937, 0.208634], [0.3851541, 0.2368927], [0.3404139, 0.4659692], [0.3015095, 0.4467292], [0.3030657, 0.3950216], [0.3026766, 0.2916065], [0.2956738, 0.2819865]],
+        [[0.6372549, 0.2194565], [0.7372393, 0.2032227], [0.7372393, 0.2819865], [0.7317927, 0.2946128], [0.7321818, 0.4449254], [0.6936664, 0.465368], [0.6535948, 0.2892015]],
+        [[0.3520853, 0.3878066], [0.3909897, 0.4088504], [0.3742608, 0.4816017], [0.3404139, 0.465368]],
+        [[0.6399782, 0.4100529], [0.6831622, 0.3860029], [0.6932773, 0.467773], [0.6594304, 0.4828042]],
+        [[0.6236383, 0.2934103], [0.6532057, 0.2825878], [0.6602085, 0.3234728], [0.6275288, 0.3288841]]
+      ],
+      "cadInteriorBounds": [
+        [[0.225, 0.275], [0.286, 0.275], [0.286, 0.133], [0.448, 0.093], [0.581, 0.093], [0.747, 0.13], [0.747, 0.275], [0.813, 0.275], [0.813, 0.451], [0.741, 0.451], [0.692, 0.481], [0.738, 0.803], [0.517, 0.848], [0.301, 0.803], [0.344, 0.475], [0.298, 0.451], [0.225, 0.451]]
+      ],
+      "accessPoints": [
+        {"label": "1800", "point": [0.5162621, 0.1917989], "basis": "Open lobby aisle just inside the main doors."},
+        {"label": "1843", "point": [0.3692032, 0.4371092], "basis": "Inside the west vestibule at the lobby-side door."},
+        {"label": "1853", "point": [0.6668223, 0.4359067], "basis": "Inside the east vestibule at the lobby-side door."},
+        {"label": "1854", "point": [0.6368659, 0.3138528], "basis": "Public vestibule between the east AV and janitor doors."}
+      ],
+      "doorApproaches": [
+        {"room": "S180", "threshold": [0.2996306, 0.4117052], "point": [0.3083461, 0.4116443], "basis": "Hall side of the drawn S180 stair door adjoining 1800."},
+        {"room": "S189", "threshold": [0.7348319, 0.4116411], "point": [0.7260473, 0.41169], "basis": "Hall side of the drawn S189 stair door adjoining 1800."},
+        {"room": "1856", "threshold": [0.6393589, 0.2812997], "point": [0.63885, 0.2902], "roomProbe": [0.64036, 0.26112], "basis": "The 1856 JANITOR callout is printed east of the room. Its own yellow leaf opens from the north side of vestibule 1854."}
+      ],
+      "nonPlaceReadings": [
+        {"text": "VEST", "bounds": [0.6333742, 0.3099747, 0.6493056, 0.3178662], "basis": "The VEST caption underneath 1854 identifies the same numbered vestibule."}
       ]
     },
     {

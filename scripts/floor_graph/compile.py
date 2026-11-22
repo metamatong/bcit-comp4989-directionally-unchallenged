@@ -13,6 +13,7 @@ import pymupdf
 from cad_routing import compile_cad_floor
 from corridor_frontages import bind_frontages, corridor_bands, recorded_swings
 from doors import SCALE
+from door_stations import retain_transcribed_doors
 from drawing_frontages import DrawingFrontages, identify_stamps
 from labels import (
     CAMPUS,
@@ -228,7 +229,9 @@ def compile_floor(item):
         regions,
         2 if sides and np.median([d[4] for d in sides]) < 12 else CELL,
     )
-    door_cells = signed_door_cells(grid, words, sides, extra.get("doorApproaches", []))
+    door_cells, callout_doors = signed_door_cells(
+        grid, words, sides, extra.get("doorApproaches", [])
+    )
     entries = defaultdict(list)
     physical_doors = defaultdict(list)
     portals = []
@@ -321,6 +324,9 @@ def compile_floor(item):
             ]
             if other_rooms:
                 access, doors = [], []
+        if label in callout_doors:
+            doors = callout_doors[label]
+            access = [cell for _, _, cell in doors]
         open_front = False
         for landing in extra.get("accessPoints", []):
             if (
@@ -352,6 +358,8 @@ def compile_floor(item):
         grid, words, places, door_symbols, extra.get("corridorDoorways", [])
     )
     bind_frontages(grid, places, words, marked_doors, structural_ink)
+    exact_rooms = extra.get("transcribedDoorRooms", [])
+    retain_transcribed_doors(places, review.get("doors", []), exact_rooms)
     terminal = None
     if frontages:
         approved_doors = {
@@ -367,6 +375,8 @@ def compile_floor(item):
         # An explicitly traced frontage already represents the entrance. A
         # nearby automated grid sample must not become an extra doorway.
         protected.update(room for room, *_ in marked_doors)
+        protected.update(callout_doors)
+        protected.update(exact_rooms)
         protected.update(item["room"] for item in extra.get("corridorDoorways", []))
         protected.update(
             item["label"]
@@ -409,6 +419,15 @@ def compile_floor(item):
 def floor_record(plan, grid, places, portals, bands, door_approaches, symbol_count):
     if AREAS.get(plan["id"], {}).get("cadInteriorBounds"):
         subcell_passages(grid, portals)
+    # Floor portals are bidirectional. Crossing an exit-only exterior threshold
+    # requires a separate, outward-directed outdoor connection.
+    exit_only = {
+        (door["point"]["x"], door["point"]["y"])
+        for door in MANUAL.get(plan["id"], {}).get("doors", [])
+        if door.get("exteriorAccess") == "exit-only"
+    }
+    if exit_only:
+        portals = [portal for portal in portals if tuple(portal[3]) not in exit_only]
     ties = ties_for(plan, grid)
     parts = connectivity(grid, places, portals, ties)
     return {
