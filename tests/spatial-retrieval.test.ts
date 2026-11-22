@@ -12,7 +12,7 @@ describe('official pilot source pages', () => {
   it('preserves every original observation and covers the previously empty floors', () => {
     const coverage = pilotCoverage();
     expect(coverage).toHaveLength(14);
-    expect(coverage.reduce((sum, p) => sum + p.geometryLabels, 0)).toBe(4641);
+    expect(coverage.reduce((sum, p) => sum + p.geometryLabels, 0)).toBe(4646);
     for (const building of ['SE12', 'SW3', 'SW5', 'SW1']) {
       expect(
         coverage
