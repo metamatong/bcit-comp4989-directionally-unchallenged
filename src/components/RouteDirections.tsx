@@ -3,6 +3,7 @@ import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { planLabel } from '../topology';
 import type { VisualPlan } from '../types';
+import { floorTransferInstruction } from '../wayfinding';
 import type {
   MapStop,
   NavigationResult,
@@ -49,17 +50,14 @@ function transferLabel(step: WalkingStep, plans: Map<string, VisualPlan>): strin
   if (step.kind === 'outdoor') {
     return `→ Outside to ${toPlan ? planLabel(toPlan) : step.to.label} (outdoor path unmapped)`;
   }
-  const fromFloor = fromPlan?.floor ?? '';
-  const toFloor = toPlan?.floor ?? '';
-  const fromNum = Number(fromFloor);
-  const toNum = Number(toFloor);
-  const arrow =
-    Number.isFinite(fromNum) && Number.isFinite(toNum) && fromNum !== toNum
-      ? toNum < fromNum
-        ? '↓'
-        : '↑'
-      : '↕';
-  return `${arrow} ${step.from.label} (Floor ${fromFloor} → ${toFloor})`;
+  if (step.kind === 'stairs' || step.kind === 'elevator')
+    return floorTransferInstruction(
+      step.kind,
+      step.from.label,
+      fromPlan?.floor ?? '',
+      toPlan?.floor ?? '',
+    );
+  return `${step.from.label} → ${toPlan ? planLabel(toPlan) : step.to.label}`;
 }
 
 function routeOverview(route: FoundRoute, plans: Map<string, VisualPlan>) {
@@ -79,7 +77,7 @@ function routeOverview(route: FoundRoute, plans: Map<string, VisualPlan>) {
     } else {
       const fromFloor = plans.get(step.from.planId)!.floor;
       const toFloor = plans.get(step.to.planId)!.floor;
-      parts.push(`${step.from.label} (Floor ${fromFloor} → ${toFloor})`);
+      parts.push(floorTransferInstruction(step.kind, step.from.label, fromFloor, toFloor));
     }
   }
   if (route.steps.at(-1)?.kind !== 'corridor') parts.push(route.destination.label);
@@ -169,6 +167,7 @@ export function RouteDirections({
   plans,
   onRecheck,
   locationCatalogue,
+  gpsTestMode = false,
   walkingSurfaces,
   preferElevators = false,
   requestedRoom,
@@ -185,6 +184,7 @@ export function RouteDirections({
   plans: VisualPlan[];
   onRecheck: () => void;
   locationCatalogue?: LocationCatalogue;
+  gpsTestMode?: boolean;
   walkingSurfaces?: Record<string, WalkingSurface | null>;
   preferElevators?: boolean;
   onGuidedChange?: (guided: boolean) => void;
@@ -232,6 +232,7 @@ export function RouteDirections({
         route={route}
         plans={plans}
         locationCatalogue={locationCatalogue}
+        gpsTestMode={gpsTestMode}
         walkingSurfaces={walkingSurfaces}
         index={stepIndex}
         onStepChange={setStepIndex}

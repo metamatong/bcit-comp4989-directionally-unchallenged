@@ -11,6 +11,7 @@ import {
   type TopologyEligibility,
 } from '../src/topology';
 import type { PagePoint, MapStop } from '../src/wayfinding';
+import { floorTransferInstruction } from '../src/wayfinding';
 import type { VisualPlan } from '../src/types';
 import { topologyContentHash } from './topology-provenance';
 import type { SourceDoorwayOpening } from './route-geometry';
@@ -222,13 +223,20 @@ export function visitorPassages(
   return { allowed, traces, doors, withdrawn };
 }
 
-export function stepText(kind: TopologyEdge['kind'], to: MapStop, plans: VisualPlan[]) {
+export function stepText(
+  kind: TopologyEdge['kind'],
+  from: MapStop,
+  to: MapStop,
+  plans: VisualPlan[],
+) {
   const target = planLabel(plans.find((p) => p.id === to.planId)!);
+  const fromPlan = plans.find((p) => p.id === from.planId)!;
+  const toPlan = plans.find((p) => p.id === to.planId)!;
   switch (kind) {
     case 'stairs':
-      return `Take the stairs to ${target}.`;
+      return floorTransferInstruction('stairs', from.label, fromPlan.floor, toPlan.floor);
     case 'elevator':
-      return `Take the elevator to ${target}.`;
+      return floorTransferInstruction('elevator', from.label, fromPlan.floor, toPlan.floor);
     case 'building-link':
       return `Use the connecting passage to ${target}.`;
     case 'outdoor':

@@ -2,13 +2,14 @@
 import { z } from 'zod';
 import type { CampusLocationCandidate, VisualPlan } from '../src/types';
 import { buildingLabel, planLabel, type TopologyNode, type TopologyEdge } from '../src/topology';
-import type {
-  NavigationChoice,
-  NavigationResult,
-  MapStop,
-  PlaceChoice,
-  WalkingStep,
-  OriginIssue,
+import {
+  floorTransferInstruction,
+  type NavigationChoice,
+  type NavigationResult,
+  type MapStop,
+  type PlaceChoice,
+  type WalkingStep,
+  type OriginIssue,
 } from '../src/wayfinding';
 import { canonicalBuilding, labelKey, looksLikeIdentifier, pilotEvidence } from './pilot-evidence';
 import { reviewedNetwork } from './pilot-network';
@@ -423,7 +424,7 @@ export function planVisitorJourney(
       kind: edge.kind,
       from,
       to,
-      instruction: trace?.instruction ?? stepText(edge.kind, to, plans),
+      instruction: trace?.instruction ?? stepText(edge.kind, from, to, plans),
       path: trace ? (trace.fromId === from.id ? trace.path : [...trace.path].reverse()) : [],
     };
   });
@@ -648,7 +649,15 @@ export async function planAiVisitorJourney(
         from,
         to,
         path: step.kind === 'corridor' ? attachPathEndpoints(from.point, step.path, to.point) : [],
-        instruction: step.instruction,
+        instruction:
+          step.kind === 'stairs' || step.kind === 'elevator'
+            ? floorTransferInstruction(
+                step.kind,
+                from.label,
+                plans.find((plan) => plan.id === from.planId)!.floor,
+                plans.find((plan) => plan.id === to.planId)!.floor,
+              )
+            : step.instruction,
       });
     }
     const crossings = routeDrawingCrossings(steps, routePlans);

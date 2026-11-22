@@ -14,6 +14,7 @@ import {
   type PreviousMatch,
 } from '../location/map-matching';
 import { useWalkingLocation } from '../location/use-device-location';
+import { floorTransferInstruction } from '../wayfinding';
 
 type MatchHistory = {
   planId: string;
@@ -75,6 +76,7 @@ export function GuidedDirections({
   route,
   plans,
   locationCatalogue,
+  gpsTestMode = false,
   walkingSurfaces,
   index,
   onStepChange,
@@ -85,6 +87,7 @@ export function GuidedDirections({
   route: Extract<NavigationResult, { status: 'route' }>;
   plans: VisualPlan[];
   locationCatalogue?: LocationCatalogue;
+  gpsTestMode?: boolean;
   walkingSurfaces?: Record<string, WalkingSurface | null>;
   index: number;
   onStepChange: (index: number) => void;
@@ -92,7 +95,7 @@ export function GuidedDirections({
   onOverview: () => void;
   onDone?: () => void;
 }) {
-  const tracking = useWalkingLocation(true);
+  const tracking = useWalkingLocation(!gpsTestMode);
   const heading = useRef<HTMLHeadingElement>(null);
   const [whole, setWhole] = useState(false);
   const [loadedSurfaces, setLoadedSurfaces] = useState<Record<string, WalkingSurface | null>>({});
@@ -102,6 +105,11 @@ export function GuidedDirections({
   const transfer = !!step && step.from.planId !== step.to.planId;
   const stop = complete ? route.destination : step.from;
   const plan = plans.find((item) => item.id === stop.planId)!;
+  const targetPlan = step ? plans.find((item) => item.id === step.to.planId) : undefined;
+  const stepInstruction =
+    step && targetPlan && (step.kind === 'stairs' || step.kind === 'elevator')
+      ? floorTransferInstruction(step.kind, step.from.label, plan.floor, targetPlan.floor)
+      : step?.instruction;
   const calibration = locationCatalogue?.floors.find((floor) => floor.planId === plan.id);
   const building = locationCatalogue?.buildings.find((item) => item.building === plan.building);
   const hasProvidedSurface = !!walkingSurfaces && plan.id in walkingSurfaces;
@@ -188,6 +196,9 @@ export function GuidedDirections({
     matchResult,
     device,
   });
+  const visiblePositionStatus = gpsTestMode
+    ? 'GPS disabled for local testing. Follow the route steps on the map.'
+    : positionStatus;
 
   useEffect(() => {
     heading.current?.focus({ preventScroll: true });
@@ -265,7 +276,7 @@ export function GuidedDirections({
           <div className="step-progress-fill" style={{ width: `${progressPercent}%` }} />
         </div>
         <h2 ref={heading} tabIndex={-1}>
-          {complete ? `Destination: ${route.destination.label}` : step.instruction}
+          {complete ? `Destination: ${route.destination.label}` : stepInstruction}
         </h2>
         {!complete && (
           <p className="guided-step-subtitle">
@@ -286,7 +297,7 @@ export function GuidedDirections({
         )}
         <p className="guided-location-status" role="status">
           {device && <span className="guided-location-dot" aria-hidden="true" />}
-          <span>{positionStatus}</span>
+          <span>{visiblePositionStatus}</span>
         </p>
         <div className="guided-controls">
           <button

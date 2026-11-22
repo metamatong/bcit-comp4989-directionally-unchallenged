@@ -31,6 +31,8 @@ To use OpenAI, set `AI_PROVIDER=openai` and fill in `OPENAI_API_KEY` in `.env`. 
 
 The Node server does not restart automatically when files change. Restart it manually after backend or environment changes: Ctrl+C, then `npm run dev`. Frontend edits can still refresh through Vite HMR on the same port. Do not launch another instance on port 3000. Without valid provider configuration, photo analysis is disabled and the app displays setup guidance.
 
+For local testing away from campus, set `GPS_TEST_MODE=true` in `.env` and restart the server. This skips the photo GPS request and live GPS tracking; starting-place matching then relies on visible photo signs across the pilot buildings. Set it back to `false` for the normal GPS-required flow. The setting is ignored in production and hosted deployments.
+
 ## Vercel deployment
 
 The Git-connected Vercel project builds the frontend and the visitor API with `npm run build:vercel`. Preview and Production use server-side settings for the selected AI provider and a free Upstash for Redis connection for expiring sessions. The build verifies the source archive and packages compact summaries for all 89 plans. [Setup and Preview checks](docs/operations.md#vercel)
@@ -53,7 +55,7 @@ On floor 1, the SW03 lobby 1602 exit connects outdoors to the east doors of SW01
 
 The full photo and four detail crops are prepared locally from the original image. The top-right info button’s **Coverage & privacy** dialog identifies the extraction provider, readiness status, and data handling. The server keeps image-free evidence receipts, and the browser discards its prepared photo after locating the result, removal or navigation away. Explicit retries can reuse unexpired extraction evidence.
 
-GPS requests are part of **Get Directions** and are required to continue. The route overview no longer offers optional location tracking or floor selection.
+GPS requests are part of **Get Directions** and are required to continue in production. Local testing can disable GPS with `GPS_TEST_MODE=true`; the route overview no longer offers optional location tracking or floor selection.
 
 ## Checks
 

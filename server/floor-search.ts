@@ -22,12 +22,15 @@ const asStop = ({ id, planId, label, point }: TopologyNode): MapStop => ({
   point,
 });
 function reversed(step: WalkingStep) {
-  const target = floorGraphs().byId.get(step.from.planId)!.plan;
+  const plans = [
+    floorGraphs().byId.get(step.to.planId)!.plan,
+    floorGraphs().byId.get(step.from.planId)!.plan,
+  ];
   return {
     ...step,
     from: step.to,
     to: step.from,
-    instruction: stepText(step.kind, step.from, [target]),
+    instruction: stepText(step.kind, step.to, step.from, plans),
     path: [...step.path].reverse(),
   };
 }
@@ -59,7 +62,7 @@ export class FloorSearch {
         to: to.stop,
         kind: edge.kind,
         path: [],
-        instruction: trace?.instruction ?? stepText(edge.kind, to.stop, map.plans),
+        instruction: trace?.instruction ?? stepText(edge.kind, from.stop, to.stop, map.plans),
       };
       if (edge.kind === 'corridor') {
         if (!trace) continue;

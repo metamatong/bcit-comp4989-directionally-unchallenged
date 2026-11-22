@@ -47,6 +47,7 @@ type JourneyProps = {
   onStartOver?: () => void;
   onGuidedChange?: (guided: boolean) => void;
   locationCatalogue?: LocationCatalogue;
+  gpsTestMode?: boolean;
   locationEvidence?: ReactNode;
   editInputs?: ReactNode;
 };
@@ -163,6 +164,7 @@ export function JourneyPanel(props: JourneyProps) {
         preferElevators={preferElevators}
         plans={plans}
         locationCatalogue={props.locationCatalogue}
+        gpsTestMode={props.gpsTestMode}
         onTryAnotherPhoto={props.onTryAnotherPhoto}
         onStartOver={onStartOver}
         onGuidedChange={handleGuidedChange}
@@ -218,6 +220,7 @@ function JourneyResult({
   result,
   plans,
   locationCatalogue,
+  gpsTestMode,
   onTryAnotherPhoto,
   onStartOver,
   onGuidedChange,
@@ -232,6 +235,7 @@ function JourneyResult({
   JourneyProps,
   | 'plans'
   | 'locationCatalogue'
+  | 'gpsTestMode'
   | 'onTryAnotherPhoto'
   | 'onStartOver'
   | 'onGuidedChange'
@@ -270,6 +274,7 @@ function JourneyResult({
           plans={plans}
           onRecheck={onRecheck}
           locationCatalogue={locationCatalogue}
+          gpsTestMode={gpsTestMode}
           onGuidedChange={onGuidedChange}
           locationEvidence={locationEvidence}
           editInputs={editInputs}
@@ -358,6 +363,7 @@ function JourneyResult({
           requestedOrigin={result.mappedPortion.requestedOrigin}
           plans={plans}
           locationCatalogue={locationCatalogue}
+          gpsTestMode={gpsTestMode}
           preferElevators={preferElevators}
           onRecheck={onRecheck}
           locationEvidence={locationEvidence}

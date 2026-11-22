@@ -20,12 +20,13 @@ export const labelLocationRequestSchema = z
     requestId: z.string().uuid(),
     revision: z.number().int().nonnegative(),
     evidenceId: z.string().uuid(),
-    gps: gpsContextSchema,
+    gps: gpsContextSchema.optional(),
   })
   .strict();
 export type LabelLocationRequest = z.infer<typeof labelLocationRequestSchema>;
 
-function deviceScope(gps: LabelLocationRequest['gps']): DeviceScope {
+function deviceScope(gps: LabelLocationRequest['gps']): DeviceScope | undefined {
+  if (!gps) return undefined;
   const age = Date.now() - gps.capturedAt;
   if (age < -5000 || age > 30000)
     throw new PhotoEvidenceError('The device reading expired. Request a fresh location reading.');
@@ -197,7 +198,9 @@ function describe(result: Resolution, candidates: CampusLocationCandidate[], dev
   }
   if (candidates.length)
     return {
-      summary: `GPS narrows the building to ${candidates[0].building}. The strongest photo match is floor ${candidates[0].floor}.`,
+      summary: device?.buildings.length
+        ? `GPS narrows the building to ${candidates[0].building}. The strongest photo match is floor ${candidates[0].floor}.`
+        : `The photo signs match ${candidates[0].building}, floor ${candidates[0].floor}. This is the strongest available starting-place match.`,
       clarification: '',
     };
   if (result.gpsStatus === 'building-only')
@@ -250,7 +253,7 @@ export function locateFromLabels(
     throw new PhotoEvidenceError('Photo evidence expired. Read the photo again.');
   const started = performance.now(),
     evidence = record.evidence,
-    device = deviceScope(input.gps);
+    device = input.gps ? deviceScope(input.gps) : undefined;
   const result = resolveStartingSigns(
     evidence.labels,
     record.buildingHint,

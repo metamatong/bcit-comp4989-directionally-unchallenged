@@ -93,7 +93,12 @@ function action(
     };
   }
 }
-type Options = { provider: Provider; liveAvailable: boolean; setupNotice?: string | null };
+type Options = {
+  provider: Provider;
+  liveAvailable: boolean;
+  setupNotice?: string | null;
+  gpsTestMode?: boolean;
+};
 function photoStage(options: Options, stage: 'evidence' | 'location'): Operation {
   const provider = aiProviderDetails(options.provider.name);
   return async (req, res, record) => {
@@ -110,6 +115,11 @@ function photoStage(options: Options, stage: 'evidence' | 'location'): Operation
               ? `Choose a valid photo with its detail crops and explicitly agree to send it to ${provider.recipient}.`
               : 'Submit the current evidence ID and GPS-derived building candidates. This step accepts no images.',
         },
+      };
+    if (!options.gpsTestMode && !parsed.data.gps)
+      return {
+        status: 400,
+        body: { error: 'A fresh GPS reading is required to locate your starting point.' },
       };
     if (stage === 'evidence' && !options.liveAvailable)
       return {

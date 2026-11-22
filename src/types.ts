@@ -189,6 +189,7 @@ export type DestinationSuggestion = {
 };
 export type Bootstrap = {
   provider?: import('./ai-provider').AiProviderName;
+  gpsTestMode?: boolean;
   locationCatalogue?: import('./location/types').LocationCatalogue;
   locationNotice?: string;
   liveAvailable: boolean;

@@ -49,6 +49,27 @@ export type WalkingStep = {
   /** Ordered in the direction of travel, on a single original page. */
   path: PagePoint[];
 };
+
+/** Give vertical transfers explicit travel direction, floor count and destination. */
+export function floorTransferInstruction(
+  kind: 'stairs' | 'elevator',
+  fromLabel: string,
+  fromFloor: string,
+  toFloor: string,
+) {
+  const from = /^-?\d+$/.test(fromFloor) ? Number(fromFloor) : NaN;
+  const to = /^-?\d+$/.test(toFloor) ? Number(toFloor) : NaN;
+  if (!Number.isFinite(from) || !Number.isFinite(to) || from === to)
+    return `From Floor ${fromFloor}, at ${fromLabel}, take the ${kind} to Floor ${toFloor}.`;
+
+  const direction = to > from ? 'UP ↑' : 'DOWN ↓';
+  const count = Math.abs(to - from);
+  const floors = `${count} ${count === 1 ? 'floor' : 'floors'}`;
+  return kind === 'stairs'
+    ? `From Floor ${fromFloor}, at ${fromLabel}, take the stairs ${direction} ${floors} to Floor ${toFloor}.`
+    : `From Floor ${fromFloor}, at ${fromLabel}, take the elevator ${direction} ${floors} to Floor ${toFloor}. Select Floor ${toFloor}.`;
+}
+
 export type NavigationChoice = {
   preferElevators?: boolean;
   revision: number;
