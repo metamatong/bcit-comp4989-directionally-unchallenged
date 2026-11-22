@@ -311,16 +311,123 @@ describe('StepMotionEstimator (pure IMU signal processing)', () => {
     for (let timestamp = 1020; timestamp <= 2600; timestamp += 20) sample(timestamp, 0);
     expect(estimator.snapshot()).toMatchObject({ hasGyro: true, gyroFresh: true, gyroFreshSince: 1000 });
 
-    for (let timestamp = 2620; timestamp < 4100; timestamp += 20) sample(timestamp, null);
+    for (let timestamp = 2620; timestamp <= 3100; timestamp += 20) sample(timestamp, null);
     expect(estimator.snapshot().gyroFresh).toBe(true);
-    expect(sample(4100, null).gyroFreshnessChanged).toBe(true);
+    expect(sample(3101, null).gyroFreshnessChanged).toBe(true);
     expect(estimator.snapshot()).toMatchObject({
       hasGyro: true, gyroFresh: false, gyroFreshSince: null, activity: 'stationary',
     });
-    expect(sample(4120, 0).gyroFreshnessChanged).toBe(true);
-    expect(estimator.snapshot()).toMatchObject({ gyroFresh: true, gyroFreshSince: 4120 });
-    expect(estimator.checkFreshness(5620)).toBe(true);
+    expect(sample(3120, 0).gyroFreshnessChanged).toBe(true);
+    expect(estimator.snapshot()).toMatchObject({ gyroFresh: true, gyroFreshSince: 3120 });
+    expect(estimator.checkFreshness(3620)).toBe(false);
+    expect(estimator.checkFreshness(3621)).toBe(true);
     expect(estimator.snapshot().gyroFresh).toBe(false);
+  });
+
+  it('reports a new gyro stream when a valid sample is the first event past the gap limit', () => {
+    const estimator = new StepMotionEstimator();
+    const sample = (timestamp: number, rotGamma: number | null) =>
+      estimator.ingest({ ax: 0, ay: 0, az: 9.81, rotAlpha: 0, rotBeta: 0, rotGamma, timestamp });
+    sample(1000, 90);
+    for (let timestamp = 1020; timestamp <= 1500; timestamp += 20) sample(timestamp, null);
+    expect(estimator.snapshot().gyroFreshSince).toBe(1000);
+    expect(sample(1501, 0).gyroFreshnessChanged).toBe(true);
+    expect(estimator.snapshot()).toMatchObject({ gyroFresh: true, gyroFreshSince: 1501 });
+  });
+
+  it('integrates yaw accurately when gyro arrives at half accel cadence, gates steps on stale gyro, and resets gyro epoch across >500 ms stalls', () => {
+    // 1. 50 Hz accel with 25 Hz gyro (every other frame has null rotationRate) turning 90 deg CCW over 1.0 s.
+    const estimator = new StepMotionEstimator();
+    let t = 0;
+    for (let i = 0; i < 25; i++, t += 20) {
+      estimator.ingest({
+        ax: 0,
+        ay: 0,
+        az: 9.81,
+        rotAlpha: i % 2 === 0 ? 0.001 : null,
+        rotBeta: i % 2 === 0 ? 0 : null,
+        rotGamma: i % 2 === 0 ? 0 : null,
+        timestamp: t,
+      });
+    }
+    for (let i = 0; i < 50; i++, t += 20) {
+      estimator.ingest({
+        ax: 0,
+        ay: 0,
+        az: 9.81,
+        rotAlpha: i % 2 === 0 ? 0 : null,
+        rotBeta: i % 2 === 0 ? 0 : null,
+        rotGamma: i % 2 === 0 ? 90 : null,
+        timestamp: t,
+      });
+    }
+    let step: DetectedStep | null = null;
+    for (let dt = 0; dt <= 800 && !step; dt += 20) {
+      const bounce = 2.8 * Math.sin((2 * Math.PI * dt) / 600);
+      const res = estimator.ingest({
+        ax: 0,
+        ay: 0,
+        az: 9.81 + bounce,
+        rotAlpha: 0,
+        rotBeta: 0,
+        rotGamma: 0,
+        timestamp: t + dt,
+      });
+      if (res.step) step = res.step;
+    }
+    expect(step).not.toBeNull();
+    expect(step!.hasGyro).toBe(true);
+    expect(step!.deltaYawRad).toBeCloseTo(Math.PI / 2, 1);
+
+    // 2. Step emitted ~800 ms into a gyro outage (>500 ms, <1500 ms) must report hasGyro: false and 0 yaw.
+    const outEstimator = new StepMotionEstimator();
+    let ot = 0;
+    for (; ot <= 500; ot += 20) {
+      outEstimator.ingest({ ax: 0, ay: 0, az: 9.81, rotAlpha: 0, rotBeta: 0, rotGamma: 45, timestamp: ot });
+    }
+    // Keep sending acceleration after the gyro continuity limit passes, then take a step.
+    for (let k = 0; k < 30; k++, ot += 20) {
+      outEstimator.ingest({ ax: 0, ay: 0, az: 9.81, rotAlpha: null, rotBeta: null, rotGamma: null, timestamp: ot });
+    }
+    let staleGyroStep: DetectedStep | null = null;
+    for (let dt = 0; dt <= 800 && !staleGyroStep; dt += 20) {
+      const bounce = 2.8 * Math.sin((2 * Math.PI * dt) / 600);
+      const res = outEstimator.ingest({
+        ax: 0,
+        ay: 0,
+        az: 9.81 + bounce,
+        rotAlpha: null,
+        rotBeta: null,
+        rotGamma: null,
+        timestamp: ot + dt,
+      });
+      if (res.step) staleGyroStep = res.step;
+    }
+    expect(staleGyroStep).not.toBeNull();
+    expect(staleGyroStep!.hasGyro).toBe(false);
+    expect(staleGyroStep!.deltaYawRad).toBe(0);
+
+    // 3. An 800 ms devicemotion stall (>500 ms, <1500 ms) resets activity to 'unknown' and advances gyroFreshSince.
+    const stallEstimator = new StepMotionEstimator();
+    for (let st = 1000; st <= 2000; st += 20) {
+      stallEstimator.ingest({ ax: 0, ay: 0, az: 9.81, rotAlpha: 0, rotBeta: 0, rotGamma: 1, timestamp: st });
+    }
+    expect(stallEstimator.snapshot().gyroFreshSince).toBe(1000);
+    const afterStall = stallEstimator.ingest({
+      ax: 0,
+      ay: 0,
+      az: 9.81,
+      rotAlpha: 0,
+      rotBeta: 0,
+      rotGamma: 0,
+      timestamp: 2800,
+    });
+    expect(afterStall.gyroFreshnessChanged).toBe(true);
+    expect(stallEstimator.snapshot()).toMatchObject({
+      activity: 'unknown',
+      gyroFresh: true,
+      gyroFreshSince: 2800,
+    });
   });
 });
 
@@ -411,8 +518,11 @@ describe('BrowserMotion adapter & permissions', () => {
     expect(steps).toHaveLength(1);
     expect(steps[0].deltaYawRad).toBeCloseTo(Math.PI / 2, 1);
 
-    // Stop firing events -> watchdog transitions activity to 'unknown' after >1.5 s silence.
-    vi.advanceTimersByTime(2500);
+    // The watchdog expires the gyro before the accelerometer activity goes unknown.
+    vi.advanceTimersByTime(750);
+    expect(snapshots.at(-1)?.gyroFresh).toBe(false);
+    expect(motion.snapshot().activity).toBe('moving');
+    vi.advanceTimersByTime(1750);
     expect(motion.snapshot().activity).toBe('unknown');
 
     motion.stop();

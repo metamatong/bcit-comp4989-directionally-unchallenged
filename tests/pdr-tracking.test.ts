@@ -311,7 +311,7 @@ describe('IndoorPdrTracker lifecycle, deduplication, ambiguity, and halo invaria
     }
   });
 
-  it.each(['time', 'steps'])('expires a resolved bridge at the %s limit', (limit) => {
+  it.each(['time', 'steps', 'unusable step'])('ends a resolved bridge on %s', (limit) => {
     const tracker = new IndoorPdrTracker({ enableParticleFilter: true, seed: 42 });
     const startPt = cellToPage(160, 133, se12Surface, se12Plan);
     tracker.configureContext({
@@ -375,6 +375,20 @@ describe('IndoorPdrTracker lifecycle, deduplication, ambiguity, and halo invaria
     const r1Px = bridged1.overlay.radiusX * se12Plan.width;
     expect(r1Px).toBeGreaterThan(baseRadiusPx + 0.3 * se12Fit.scale);
 
+    if (limit === 'unusable step') {
+      const timestamp = lastGpsT + 4000;
+      expect(tracker.ingestStep({
+        stepIndex: 101,
+        stepLengthMetres: 0.7,
+        deltaYawRad: 0,
+        hasGyro: false,
+        turnNoiseRad: 0,
+        timestamp,
+      })).toBe(false);
+      expect(tracker.evaluateAt(timestamp, false, 'moving').status).toBe('waiting');
+      return;
+    }
+
     const rejected = tracker.ingestGpsReading(
       readingFromPage(finalTruth, se12Fit, 50, lastGpsT + 4000),
       moving,
@@ -405,35 +419,154 @@ describe('IndoorPdrTracker lifecycle, deduplication, ambiguity, and halo invaria
     expect(tracker.evaluateAt(deadline, false, 'moving').status).toBe('waiting');
   });
 
-  it('falls back on gyro loss and re-anchors only with a fix captured after recovery', () => {
+  it.each(['gyro expiry', 'a step without gyro'] as const)(
+    'falls back after %s and re-anchors only with a fix captured after recovery',
+    (interruption) => {
+      const tracker = new IndoorPdrTracker({ enableParticleFilter: true, seed: 42 });
+      const point = cellToPage(160, 133, se12Surface, se12Plan);
+      tracker.configureContext({
+        plan: se12Plan,
+        calibration: se12Calibration,
+        surface: se12Surface,
+        stepKind: 'corridor',
+        isSamePlanStep: true,
+      });
+      const motion = makeMotionSnapshot('moving');
+      tracker.ingestGpsReading(readingFromPage(point, se12Fit, 8, 10_000), motion);
+      expect(tracker.evaluateAt(10_500, true, 'moving')).toMatchObject({
+        overlay: { trackingMode: 'pdr' },
+      });
+
+      if (interruption === 'gyro expiry') {
+        tracker.updateMotion({ ...motion, gyroFresh: false, gyroFreshSince: null });
+      } else {
+        expect(
+          tracker.ingestStep({
+            stepIndex: 1,
+            stepLengthMetres: 0.7,
+            deltaYawRad: 0,
+            hasGyro: false,
+            turnNoiseRad: 0,
+            timestamp: 10_750,
+          }),
+        ).toBe(false);
+      }
+      expect(tracker.evaluateAt(11_500, true, 'moving')).toMatchObject({
+        overlay: { trackingMode: 'matched' },
+      });
+      if (interruption === 'a step without gyro') {
+        // The same stream still appears fresh. A new GPS timestamp alone cannot restart PDR.
+        expect(
+          tracker.ingestGpsReading(readingFromPage(point, se12Fit, 8, 11_000), motion),
+        ).toMatchObject({ overlay: { trackingMode: 'motion-gated' } });
+      }
+      expect(tracker.evaluateAt(12_500, false, 'moving').status).toBe('waiting');
+
+      const recovered = { ...motion, gyroFreshSince: 13_500 };
+      tracker.updateMotion(recovered);
+      expect(tracker.evaluateAt(13_500, false, 'moving').status).toBe('waiting');
+      const delayed = { ...readingFromPage(point, se12Fit, 8, 13_000), receivedAt: 13_600 };
+      expect(tracker.ingestGpsReading(delayed, recovered)).toMatchObject({
+        overlay: { trackingMode: 'motion-gated' },
+      });
+      expect(
+        tracker.ingestGpsReading(readingFromPage(point, se12Fit, 8, 13_500), recovered),
+      ).toMatchObject({ overlay: { trackingMode: 'motion-gated' } });
+      expect(
+        tracker.ingestGpsReading(readingFromPage(point, se12Fit, 8, 14_000), recovered),
+      ).toMatchObject({ overlay: { trackingMode: 'pdr' } });
+    },
+  );
+
+  it('does not resurrect stale particles across a 500-1499 ms motion stall and clears stale stationary anchors across Tier 3', () => {
+    // 1. Stale particle cloud must stay cleared across an 'unknown' motion stall even without a new GPS fix.
     const tracker = new IndoorPdrTracker({ enableParticleFilter: true, seed: 42 });
-    const point = cellToPage(160, 133, se12Surface, se12Plan);
+    const startPt = cellToPage(160, 133, se12Surface, se12Plan);
     tracker.configureContext({
-      plan: se12Plan, calibration: se12Calibration, surface: se12Surface,
-      stepKind: 'corridor', isSamePlanStep: true,
+      plan: se12Plan,
+      calibration: se12Calibration,
+      surface: se12Surface,
+      stepKind: 'corridor',
+      isSamePlanStep: true,
     });
-    const motion = makeMotionSnapshot('moving');
-    tracker.ingestGpsReading(readingFromPage(point, se12Fit, 8, 10_000), motion);
-    expect(tracker.evaluateAt(10_500, true, 'moving')).toMatchObject({
-      overlay: { trackingMode: 'pdr' },
-    });
+    const moving = makeMotionSnapshot('moving', { gyroFreshSince: 1000 });
+    let t = 10_000;
+    for (let k = 0; k < 7; k++) {
+      const truth = { x: startPt.x + (k * 2.1 * se12Fit.scale) / se12Plan.width, y: startPt.y };
+      tracker.ingestGpsReading(readingFromPage(truth, se12Fit, 8, t), moving);
+      for (let s = 0; s < 3; s++) {
+        t += 550;
+        tracker.ingestStep({
+          stepIndex: k * 3 + s + 1,
+          stepLengthMetres: 0.7,
+          deltaYawRad: 0,
+          hasGyro: true,
+          turnNoiseRad: 0,
+          timestamp: t,
+        });
+      }
+      t += 350;
+    }
+    const lastTruth = { x: startPt.x + (15 * se12Fit.scale) / se12Plan.width, y: startPt.y };
+    tracker.ingestGpsReading(readingFromPage(lastTruth, se12Fit, 8, t), moving);
+    expect(tracker.evaluateAt(t + 3000, false, 'moving').status).toBe('bridged');
 
-    tracker.updateMotion({ ...motion, gyroFresh: false, gyroFreshSince: null });
-    expect(tracker.evaluateAt(11_500, true, 'moving')).toMatchObject({
-      overlay: { trackingMode: 'matched' },
-    });
-    expect(tracker.evaluateAt(12_500, false, 'moving').status).toBe('waiting');
+    // Simulate an 800 ms devicemotion stall: activity drops to 'unknown' (even if gyroFreshSince hadn't changed yet),
+    // then resumes as 'moving' with a new epoch and no new GPS fix -> must NOT resurrect the old bridge.
+    tracker.updateMotion({ ...moving, activity: 'unknown', gyroFreshSince: 1000 });
+    tracker.updateMotion({ ...moving, activity: 'moving', gyroFreshSince: t + 3800 });
+    expect(tracker.evaluateAt(t + 4200, false, 'moving').status).toBe('waiting');
+    expect(
+      tracker.ingestStep({
+        stepIndex: 99,
+        stepLengthMetres: 0.7,
+        deltaYawRad: 0,
+        hasGyro: true,
+        turnNoiseRad: 0,
+        timestamp: t + 4500,
+      }),
+    ).toBe(false);
 
-    const recovered = { ...motion, gyroFreshSince: 13_500 };
-    tracker.updateMotion(recovered);
-    expect(tracker.evaluateAt(13_500, false, 'moving').status).toBe('waiting');
-    const delayed = { ...readingFromPage(point, se12Fit, 8, 13_000), receivedAt: 13_600 };
-    expect(tracker.ingestGpsReading(delayed, recovered)).toMatchObject({
-      overlay: { trackingMode: 'motion-gated' },
+    // 2. Stale Tier 2 stationaryAnchor at Point A must not leak across Tier 3 relocation to Point B.
+    const tracker2 = new IndoorPdrTracker({ enableParticleFilter: true, seed: 42 });
+    tracker2.configureContext({
+      plan: se12Plan,
+      calibration: se12Calibration,
+      surface: se12Surface,
+      stepKind: 'corridor',
+      isSamePlanStep: true,
     });
-    expect(tracker.ingestGpsReading(readingFromPage(point, se12Fit, 8, 14_000), recovered)).toMatchObject({
-      overlay: { trackingMode: 'pdr' },
+    const pointA = cellToPage(160, 133, se12Surface, se12Plan);
+    const pointB = cellToPage(320, 133, se12Surface, se12Plan); // ~35 m East of Point A
+    const noGyroStationary = makeMotionSnapshot('stationary', {
+      hasGyro: false,
+      gyroFresh: false,
+      gyroFreshSince: null,
     });
+    // Outage #1: Tier 2 anchors at Point A.
+    const aFix = tracker2.ingestGpsReading(readingFromPage(pointA, se12Fit, 7, 10_000), noGyroStationary);
+    expect(aFix.status).toBe('matched');
+
+    // Gyro recovers; visitor relocates to Point B while remaining 'stationary' (e.g., smooth wheelchair travel).
+    const gyroStationary = makeMotionSnapshot('stationary', {
+      hasGyro: true,
+      gyroFresh: true,
+      gyroFreshSince: 11_000,
+    });
+    tracker2.updateMotion(gyroStationary);
+    const b1 = tracker2.ingestGpsReading(readingFromPage(pointB, se12Fit, 7, 12_000), gyroStationary);
+    expect(b1).toMatchObject({ status: 'matched', overlay: { trackingMode: 'pdr' } });
+
+    // Outage #2 while still 'stationary': next Tier 2 fix near Point B must anchor at Point B, not stale Point A!
+    tracker2.updateMotion(noGyroStationary);
+    const afterOutage2 = tracker2.ingestGpsReading(
+      readingFromPage(pointB, se12Fit, 7, 14_000),
+      noGyroStationary,
+    );
+    expect(afterOutage2.status).toBe('matched');
+    if (afterOutage2.status === 'matched') {
+      expect(distMetres(afterOutage2.overlay.point, pointB, se12Plan, se12Fit.scale)).toBeLessThan(2.0);
+    }
   });
 
   it('disables step advancement on transfers/outdoor and requires a post-transition GPS fix on new floors or after surface load', () => {
@@ -1012,7 +1145,7 @@ describe('GuidedDirections DOM integration (iOS fallback, background return, fus
     }
   });
 
-  it('labels fused tracking and ends a Stage 2 bridge when only the gyroscope goes silent', async () => {
+  it('ends a Stage 2 bridge during a short gyro-only gap and waits for GPS after recovery', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(50_000);
     vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
@@ -1109,9 +1242,11 @@ describe('GuidedDirections DOM integration (iOS fallback, background return, fus
         'Approx. step tracking · waiting for GPS…',
       );
 
-      for (let i = 0; i < 90; i++) {
+      // Walk through a turn with a one-second gap in rotation samples.
+      for (let i = 0; i < 50; i++) {
+        const bounce = 2.6 * Math.sin((2 * Math.PI * (i * 20)) / 600);
         await act(async () => {
-          dispatchDeviceMotion({ x: 0, y: 9.81, z: 0 });
+          dispatchDeviceMotion({ x: 0, y: 9.81 + bounce, z: 0 });
           vi.advanceTimersByTime(20);
         });
       }
@@ -1119,6 +1254,28 @@ describe('GuidedDirections DOM integration (iOS fallback, background return, fus
       expect(host.querySelector('.guided-location-status')?.textContent).toContain(
         'Waiting for a fresh GPS update…',
       );
+
+      const gyroRecoveredAt = Date.now();
+      for (let i = 0; i < 30; i++) {
+        const bounce = 2.6 * Math.sin((2 * Math.PI * (i * 20)) / 600);
+        await act(async () => {
+          dispatchDeviceMotion({ x: 0, y: 9.81 + bounce, z: 0 }, { alpha: 0, beta: 0, gamma: 0 });
+          vi.advanceTimersByTime(20);
+        });
+      }
+      expect(host.querySelector('.device-position')).toBeNull();
+
+      const afterTurn = se12Fit.unproject(cellToPage(275, 145, se12Surface, se12Plan));
+      const fixAt = (timestamp: number) => act(async () => reportLocation({
+        coords: { ...afterTurn, accuracy: 7 },
+        timestamp,
+      } as GeolocationPosition));
+      await fixAt(gyroRecoveredAt - 100);
+      expect(host.querySelector('.device-position')?.getAttribute('data-tracking-mode')).toBe(
+        'motion-gated',
+      );
+      await fixAt(Date.now());
+      expect(host.querySelector('.device-position')?.getAttribute('data-tracking-mode')).toBe('pdr');
     } finally {
       await act(async () => root.unmount());
       host.remove();

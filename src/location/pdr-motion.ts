@@ -25,7 +25,6 @@ export const PDR_MOTION_CONFIG = Object.freeze({
   accelSmoothTauSec: 0.06,
   maxFrameGapMs: 500,
   sensorSilenceTimeoutMs: 1500,
-  gyroSilenceTimeoutMs: 1500,
   stationaryWindowMs: 1200,
   minStationaryWindowMs: 600,
   stationaryEnterVar: 0.14,
@@ -184,7 +183,7 @@ export class StepMotionEstimator {
   }
 
   private expireGyro(now: number): boolean {
-    if (this.lastGyroAt === null || now - this.lastGyroAt < PDR_MOTION_CONFIG.gyroSilenceTimeoutMs) {
+    if (this.lastGyroAt === null || now - this.lastGyroAt <= PDR_MOTION_CONFIG.maxFrameGapMs) {
       return false;
     }
     this.lastGyroAt = null;
@@ -196,6 +195,8 @@ export class StepMotionEstimator {
 
   ingest(sample: RawMotionSample): MotionIngestResult {
     const { ax, ay, az, timestamp } = sample;
+    const previousGyroFreshSince = this.gyroFreshSince;
+    const gyroExpired = Number.isFinite(timestamp) && this.expireGyro(timestamp);
     if (
       !Number.isFinite(ax) ||
       !Number.isFinite(ay) ||
@@ -206,7 +207,7 @@ export class StepMotionEstimator {
         step: null,
         activityChanged: false,
         capabilityChanged: false,
-        gyroFreshnessChanged: false,
+        gyroFreshnessChanged: gyroExpired,
       };
     }
     const accelNorm = Math.hypot(ax, ay, az);
@@ -218,7 +219,7 @@ export class StepMotionEstimator {
         step: null,
         activityChanged: false,
         capabilityChanged: false,
-        gyroFreshnessChanged: false,
+        gyroFreshnessChanged: gyroExpired,
       };
     }
 
@@ -234,8 +235,6 @@ export class StepMotionEstimator {
     }
 
     const previousEventAt = this.lastEventAt;
-    const previousGyroFreshSince = this.gyroFreshSince;
-    this.expireGyro(timestamp);
     const dtMs = previousEventAt === null ? 0 : timestamp - previousEventAt;
     if (dtMs > PDR_MOTION_CONFIG.maxFrameGapMs) {
       this.resetDynamicState();
@@ -290,17 +289,18 @@ export class StepMotionEstimator {
         this.hasGyro = true;
         capabilityChanged = true;
       }
-      const consecutiveGyroFrames = this.lastGyroAt === previousEventAt;
+      // The expiry check above clears the previous timestamp across a sampling gap.
+      const gyroDtSec = this.lastGyroAt === null ? 0 : (timestamp - this.lastGyroAt) / 1000;
       if (this.hasGyro) {
         this.lastGyroAt = timestamp;
         this.gyroFreshSince ??= timestamp;
       }
-      if (this.hasGyro && consecutiveGyroFrames && dtSec > 0) {
+      if (this.hasGyro && gyroDtSec > 0) {
         if (
           this.activity === 'stationary' &&
           omegaNorm < PDR_MOTION_CONFIG.stationaryGyroBiasGateRadPerSec
         ) {
-          const alphaB = 1 - Math.exp(-dtSec / PDR_MOTION_CONFIG.gyroBiasTauSec);
+          const alphaB = 1 - Math.exp(-gyroDtSec / PDR_MOTION_CONFIG.gyroBiasTauSec);
           this.biasX = clamp(
             this.biasX + alphaB * (omega.wx - this.biasX),
             -PDR_MOTION_CONFIG.maxGyroBiasRadPerSec,
@@ -331,8 +331,8 @@ export class StepMotionEstimator {
           Math.abs(omegaCcw) < PDR_MOTION_CONFIG.stationaryYawDeadbandRadPerSec
             ? 0
             : omegaCcw;
-        this.accumulatedYawRad += effectiveCcw * dtSec;
-        this.accumulatedTiltNoiseRad += PDR_MOTION_CONFIG.tiltNoiseGain * omegaTilt * dtSec;
+        this.accumulatedYawRad += effectiveCcw * gyroDtSec;
+        this.accumulatedTiltNoiseRad += PDR_MOTION_CONFIG.tiltNoiseGain * omegaTilt * gyroDtSec;
       }
     }
 
@@ -437,12 +437,13 @@ export class StepMotionEstimator {
         this.stepCount += 1;
         this.estimatedDistanceMetres += stepLengthMetres;
         this.lastStepAt = timestamp;
+        const stepHasFreshGyro = this.gyroFreshSince !== null;
         return {
           stepIndex: this.stepCount,
           stepLengthMetres,
-          deltaYawRad,
-          hasGyro: this.gyroFreshSince !== null,
-          turnNoiseRad,
+          deltaYawRad: stepHasFreshGyro ? deltaYawRad : 0,
+          hasGyro: stepHasFreshGyro,
+          turnNoiseRad: stepHasFreshGyro ? turnNoiseRad : 0,
           timestamp,
         };
       }

@@ -183,7 +183,7 @@ export class IndoorPdrTracker {
   private particles: Particle[] = [];
   private particleInitialized = false;
   private gyroStreamStart: number | null = null;
-  private gyroNeedsNewFix = false;
+  private invalidatedGyroStreamStart: number | null = null;
   private particleDivergentCount = 0;
   private lastAcceptedGpsAt: number | null = null;
   private lastAcceptedGpsAccuracy = 0;
@@ -297,7 +297,7 @@ export class IndoorPdrTracker {
     this.stationaryAnchor = null;
     this.stationaryCandidates = [];
     this.gyroStreamStart = null;
-    this.gyroNeedsNewFix = false;
+    this.invalidatedGyroStreamStart = null;
     this.clearParticleEstimate();
   }
 
@@ -314,23 +314,33 @@ export class IndoorPdrTracker {
     this.cachedSummary = null;
   }
 
+  private invalidateParticleTracking() {
+    if (this.lastAcceptedCorridorPoint && this.lastAcceptedGpsAt !== null) {
+      this.previousMatch = {
+        point: this.lastAcceptedCorridorPoint,
+        timestamp: this.lastAcceptedGpsAt,
+      };
+    }
+    this.stationaryAnchor = null;
+    this.stationaryCandidates = [];
+    this.clearParticleEstimate();
+    this.invalidatedGyroStreamStart = this.gyroStreamStart ?? this.invalidatedGyroStreamStart;
+  }
+
   updateMotion(motion?: MotionSnapshot | null) {
     if (!motion?.active || motion.activity !== 'stationary') {
       this.stationaryAnchor = null;
       this.stationaryCandidates = [];
     }
     if (!this.enableParticleFilter) return;
-    const streamStart = motion?.active && motion.gyroFresh ? motion.gyroFreshSince : null;
-    // The stream's start also identifies a restart if the browser batches loss and recovery.
-    if (this.gyroStreamStart !== null && streamStart !== this.gyroStreamStart) {
-      if (this.lastAcceptedCorridorPoint && this.lastAcceptedGpsAt !== null) {
-        this.previousMatch = {
-          point: this.lastAcceptedCorridorPoint,
-          timestamp: this.lastAcceptedGpsAt,
-        };
-      }
-      this.clearParticleEstimate();
-      this.gyroNeedsNewFix = true;
+    const motionUnavailable = !motion?.active || motion.activity === 'unknown';
+    const streamStart = !motionUnavailable && motion.gyroFresh ? motion.gyroFreshSince : null;
+    // Both a gyro epoch change and a motion 'unknown' stall invalidate existing particles.
+    if (
+      (this.gyroStreamStart !== null && streamStart !== this.gyroStreamStart) ||
+      (motionUnavailable && this.particleInitialized)
+    ) {
+      this.invalidateParticleTracking();
     }
     this.gyroStreamStart = streamStart;
   }
@@ -391,7 +401,9 @@ export class IndoorPdrTracker {
       this.enableParticleFilter &&
       motion &&
       this.gyroStreamStart !== null &&
-      (!this.gyroNeedsNewFix || reading.timestamp > this.gyroStreamStart)
+      (this.invalidatedGyroStreamStart === null ||
+        (this.gyroStreamStart > this.invalidatedGyroStreamStart &&
+          reading.timestamp > this.gyroStreamStart))
     ) {
       return this.updateParticleFilterWithGps(reading, motion);
     }
@@ -414,7 +426,11 @@ export class IndoorPdrTracker {
     if (!this.enableParticleFilter || !this.particleInitialized || !this.fit || !this.grid) {
       return false;
     }
-    if (!step.hasGyro || this.bridgeExpired(step.timestamp)) {
+    if (!step.hasGyro) {
+      this.invalidateParticleTracking();
+      return false;
+    }
+    if (this.bridgeExpired(step.timestamp)) {
       return false;
     }
 
@@ -651,7 +667,9 @@ export class IndoorPdrTracker {
     }
 
     if (this.bridgeExpired(reading.receivedAt)) this.clearParticleEstimate();
-    this.gyroNeedsNewFix = false;
+    this.stationaryAnchor = null;
+    this.stationaryCandidates = [];
+    this.invalidatedGyroStreamStart = null;
     this.lastMatchStepDistanceMetres = motion.estimatedDistanceMetres;
     const rawPoint = fit.project(reading);
     const rawPx = { x: rawPoint.x * ctx.plan.width, y: rawPoint.y * ctx.plan.height };

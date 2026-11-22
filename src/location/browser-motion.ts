@@ -144,13 +144,13 @@ export class BrowserMotion {
     };
 
     this.target.addEventListener('devicemotion', this.handler);
-    // Watchdog distinguishes a stalled/silent sensor stream from verified standing still.
+    // Check gyro continuity and accelerometer activity even when callbacks stop.
     this.watchdog = setInterval(() => {
       if (!this.active) return;
       if (this.estimator.checkFreshness(Date.now())) {
         onSnapshotChange(this.snapshot());
       }
-    }, 750);
+    }, 250);
   }
 
   stop(notify?: (snapshot: MotionSnapshot) => void) {
