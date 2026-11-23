@@ -1191,7 +1191,7 @@ describe('GuidedDirections DOM integration (iOS fallback, background return, fus
     document.body.append(host);
     const root = createRoot(host);
     const nextStep = () => act(async () => {
-      [...host.querySelectorAll('button')].find((button) => button.textContent?.trim() === 'Next step')!.click();
+      [...host.querySelectorAll('button')].find((button) => button.textContent?.trim() === 'Next')!.click();
     });
     const emit = (point: PagePoint, fit: ReturnType<typeof fitCalibration>, timestamp: number) =>
       act(async () => reportLocation({
@@ -1285,17 +1285,17 @@ describe('GuidedDirections DOM integration (iOS fallback, background return, fus
       expect(host.querySelector('.device-position')).not.toBeNull();
       expect(host.querySelector('.walking-map')?.getAttribute('viewBox')).toBe(initialViewBox);
 
-      // Tapping Next step triggers the one-time iOS motion prompt; denial degrades cleanly to Tier 1.
+      // Tapping Next triggers the one-time iOS motion prompt; denial degrades cleanly to Tier 1.
       expect(host.querySelector('.map-floating-fab')).toBeNull();
       const nextBtn = [...host.querySelectorAll('button')].find(
-        (button) => button.textContent?.trim() === 'Next step',
+        (button) => button.textContent?.trim() === 'Next',
       ) as HTMLButtonElement;
       await act(async () => {
         nextBtn.click();
         await Promise.resolve();
       });
       expect(requestPermission).toHaveBeenCalledTimes(1);
-      expect(host.querySelector('.guided-location-status')?.textContent).toContain('Approx. GPS');
+      expect(host.querySelector('.guided-location-status')?.textContent).toContain('Approx. location');
       expect(host.querySelector('.device-position')?.getAttribute('data-tracking-mode')).toBe(
         'matched',
       );
@@ -1414,7 +1414,7 @@ describe('GuidedDirections DOM integration (iOS fallback, background return, fus
       });
 
       expect(host.querySelector('.guided-location-status')?.textContent).toContain(
-        'Approx. corridor GPS + motion',
+        'Approx. location',
       );
       expect(host.querySelector('.device-position')?.getAttribute('data-tracking-mode')).toBe('pdr');
 
@@ -1430,7 +1430,7 @@ describe('GuidedDirections DOM integration (iOS fallback, background return, fus
         'pdr-bridged',
       );
       expect(host.querySelector('.guided-location-status')?.textContent).toContain(
-        'Approx. step tracking · waiting for GPS…',
+        'Estimating location · waiting for GPS',
       );
 
       // Walk through a turn with a one-second gap in rotation samples.
@@ -1530,15 +1530,15 @@ describe('GuidedDirections DOM integration (iOS fallback, background return, fus
       expect(host.querySelector('.device-position')?.getAttribute('data-matched')).toBe('true');
       expect(host.querySelector('.device-position')?.getAttribute('data-held')).toBe('true');
       expect(host.querySelector('.guided-location-status')?.textContent).toContain(
-        'last update 3 s ago',
+        '3s ago',
       );
       const announcement = host.querySelector('.guided-location-status [role="status"]');
-      expect(announcement?.textContent).toBe('Holding last known corridor GPS position');
+      expect(announcement?.textContent).toBe('Using last location · 3s ago');
       expect(announcement?.parentElement?.closest('[aria-live]')).toBeNull();
 
       await act(async () => vi.advanceTimersByTime(1_000));
-      expect(host.querySelector('.guided-location-status')?.textContent).toContain('last update 4 s ago');
-      expect(announcement?.textContent).toBe('Holding last known corridor GPS position');
+      expect(host.querySelector('.guided-location-status')?.textContent).toContain('4s ago');
+      expect(announcement?.textContent).toBe('Using last location · 4s ago');
 
       // At 9 seconds past capture the hold expires. A fresh accepted fix restores the dot.
       await act(async () => vi.advanceTimersByTime(5_000));
@@ -1548,8 +1548,7 @@ describe('GuidedDirections DOM integration (iOS fallback, background return, fus
         reportLocation({ coords: { ...pt, accuracy: 7 }, timestamp: Date.now() } as GeolocationPosition),
       );
       expect(host.querySelector('.device-position')).not.toBeNull();
-      expect(announcement?.textContent).toMatch(/^Approx\./);
-      expect(announcement?.textContent).not.toContain('±');
+      expect(announcement?.textContent).toBe('Approx. location · ±7m');
     } finally {
       clearWalkingSurfaceCacheForTests();
       await act(async () => root.unmount());

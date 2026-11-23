@@ -1,6 +1,6 @@
 /** Manual progress through saved route steps; never infers floor changes or camera heading. */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react';
 import type { NavigationResult, WalkingSurface } from '../wayfinding';
 import type { VisualPlan } from '../types';
 import { fetchWalkingSurface, getCachedWalkingSurface } from '../api';
@@ -45,26 +45,13 @@ function locationStatusMessage({
   evaluation: TrackerEvaluation | null;
   device: DeviceOverlay | null;
 }): { announcement: string; detail?: string } {
-  if (complete) return { announcement: 'Location tracking stopped. Route complete.' };
+  if (complete) return { announcement: 'Route complete' };
   if (evaluation?.status === 'bridged' && device) {
-    return { announcement: 'Approx. step tracking · waiting for GPS…' };
+    return { announcement: 'Estimating location · waiting for GPS' };
   }
   if (evaluation?.status === 'held' && device) {
     const age = Math.max(1, device.ageSeconds ?? 0);
-    if (device.trackingMode === 'stationary-hold') {
-      return {
-        announcement: 'Holding corridor position while stationary',
-        detail: ` (last GPS ${age} s ago)`,
-      };
-    }
-    const position =
-      device.corridorMatched || device.snapDistanceMetres !== undefined
-        ? 'Holding last known corridor GPS position'
-        : 'Holding last known GPS position';
-    return {
-      announcement: position,
-      detail: ` (last update ${age} s ago · waiting for update…)`,
-    };
+    return { announcement: `Using last location · ${age}s ago` };
   }
   if (!reading || evaluation?.status === 'waiting') {
     return {
@@ -74,40 +61,28 @@ function locationStatusMessage({
   }
   const floor = planLabel(plan);
   if (!hasBuilding) {
-    return { announcement: `Building footprint unavailable for ${floor}. Position dot hidden.` };
+    return { announcement: `Location unavailable on ${floor}` };
   }
   if (evaluation?.status === 'unavailable') {
-    return { announcement: `Floor-plan alignment is unavailable for ${floor}. Position dot hidden.` };
+    return { announcement: `Location unavailable on ${floor}` };
   }
   if (evaluation?.status === 'low-accuracy') {
-    return {
-      announcement: 'GPS accuracy too wide. Position dot hidden.',
-      detail: ` (±${reading.accuracy.toFixed(0)} m)`,
-    };
+    return { announcement: 'GPS signal too weak' };
   }
   if (evaluation?.status === 'too-far') {
-    return { announcement: `GPS reading is outside mapped corridors on ${floor}. Position dot hidden.` };
+    return { announcement: 'Location off mapped route' };
   }
   if (
     evaluation?.status === 'outside-building' ||
     (evaluation?.status === 'raw' && !withinBuilding)
   ) {
-    return { announcement: 'GPS area does not overlap this building. Position dot hidden.' };
+    return { announcement: 'Location outside this building' };
   }
   if (evaluation?.status === 'outside-page' || !device) {
-    return { announcement: 'GPS position falls outside this floor plan. Position dot hidden.' };
+    return { announcement: `Location off ${floor} map` };
   }
   const accuracy = (device.reportedAccuracyMetres ?? reading.accuracy).toFixed(0);
-  let label = 'Approx. GPS';
-  if (device.trackingMode === 'motion-gated' || device.trackingMode === 'pdr') {
-    label = 'Approx. corridor GPS + motion';
-  } else if (device.snapDistanceMetres !== undefined) {
-    label = 'Approx. corridor GPS';
-  }
-  return {
-    announcement: label,
-    detail: ` (±${accuracy} m · indoor accuracy unmeasured)`,
-  };
+  return { announcement: `Approx. location · ±${accuracy}m` };
 }
 
 export function GuidedDirections({
@@ -175,6 +150,19 @@ export function GuidedDirections({
         targetPlanLabel: targetPlan ? planLabel(targetPlan) : undefined,
       })
     : undefined;
+  const fromFloorNumber = Number(plan.floor);
+  const toFloorNumber = Number(targetPlan?.floor);
+  const transferDirection =
+    step &&
+    (step.kind === 'stairs' || step.kind === 'elevator') &&
+    Number.isFinite(fromFloorNumber) &&
+    Number.isFinite(toFloorNumber)
+      ? toFloorNumber > fromFloorNumber
+        ? 'up'
+        : toFloorNumber < fromFloorNumber
+          ? 'down'
+          : undefined
+      : undefined;
   const calibration = locationCatalogue?.floors.find((floor) => floor.planId === plan.id);
   const building = locationCatalogue?.buildings.find((item) => item.building === plan.building);
   const hasProvidedSurface = !!walkingSurfaces && plan.id in walkingSurfaces;
@@ -310,7 +298,7 @@ export function GuidedDirections({
         : null;
 
   const positionStatus = gpsTestMode
-    ? { announcement: 'GPS disabled for local testing. Follow the route steps on the map.' }
+    ? { announcement: 'GPS off · follow the map' }
     : locationStatusMessage({
         complete,
         reading: watchReading,
@@ -382,6 +370,20 @@ export function GuidedDirections({
                 ]
           }
         />
+        {transferDirection && targetPlan && (
+          <div
+            className={`guided-transfer-overlay is-${transferDirection}`}
+            aria-label={`${transferDirection === 'up' ? 'Up' : 'Down'} to Floor ${targetPlan.floor}`}
+          >
+            {transferDirection === 'up' ? (
+              <ArrowUp size={26} strokeWidth={3} aria-hidden="true" />
+            ) : (
+              <ArrowDown size={26} strokeWidth={3} aria-hidden="true" />
+            )}
+            <span>{transferDirection === 'up' ? 'UP' : 'DOWN'}</span>
+            <small>Floor {targetPlan.floor}</small>
+          </div>
+        )}
       </div>
 
       <div className="guided-step bottom-sheet">
@@ -392,7 +394,7 @@ export function GuidedDirections({
           <div className="step-progress-fill" style={{ width: `${progressPercent}%` }} />
         </div>
         <p ref={instructionRef} tabIndex={-1} className="guided-step-instruction">
-          {complete ? `Destination: ${route.destination.label}` : stepInstruction}
+          {complete ? `Arrived · ${route.destination.label}` : stepInstruction}
         </p>
         {index === 0 && transferNotice && (
           <p className="guided-transfer-note" role="note">
@@ -422,7 +424,7 @@ export function GuidedDirections({
             disabled={index === 0}
             onClick={() => move(index - 1)}
           >
-            Previous
+            Back
           </button>
           {complete ? (
             <button
@@ -438,7 +440,7 @@ export function GuidedDirections({
               className="primary sheet-pill-btn"
               onClick={() => move(index + 1)}
             >
-              {index === route.steps.length - 1 ? 'Finish route' : 'Next step'}{' '}
+              {index === route.steps.length - 1 ? 'Finish' : 'Next'}{' '}
               <ArrowRight size={17} />
             </button>
           )}

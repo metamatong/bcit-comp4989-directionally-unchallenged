@@ -50,7 +50,7 @@ export type WalkingStep = {
   path: PagePoint[];
 };
 
-/** Give vertical transfers explicit travel direction, floor count and destination. */
+/** Give vertical transfers a compact direction and destination floor. */
 export function floorTransferInstruction(
   kind: 'stairs' | 'elevator',
   fromLabel: string,
@@ -60,14 +60,13 @@ export function floorTransferInstruction(
   const from = /^-?\d+$/.test(fromFloor) ? Number(fromFloor) : NaN;
   const to = /^-?\d+$/.test(toFloor) ? Number(toFloor) : NaN;
   if (!Number.isFinite(from) || !Number.isFinite(to) || from === to)
-    return `From Floor ${fromFloor}, at ${fromLabel}, take the ${kind} to Floor ${toFloor}.`;
+    return `${kind === 'stairs' ? 'Stairs' : 'Elevator'} at ${fromLabel} · Floor ${toFloor}.`;
 
-  const direction = to > from ? 'UP ↑' : 'DOWN ↓';
-  const count = Math.abs(to - from);
-  const floors = `${count} ${count === 1 ? 'floor' : 'floors'}`;
+  const direction = to > from ? '↑ UP' : '↓ DOWN';
+  const location = fromLabel.split(' · ')[0];
   return kind === 'stairs'
-    ? `From Floor ${fromFloor}, at ${fromLabel}, take the stairs ${direction} ${floors} to Floor ${toFloor}.`
-    : `From Floor ${fromFloor}, at ${fromLabel}, take the elevator ${direction} ${floors} to Floor ${toFloor}. Select Floor ${toFloor}.`;
+    ? `Stairs at ${location} · ${direction} · Floor ${toFloor}.`
+    : `Elevator at ${location} · ${direction} · Floor ${toFloor}.`;
 }
 
 /** Format a stop label with a middot qualifier as parenthetical prose while preserving exact IDs. */
@@ -95,42 +94,26 @@ export function guidedStepInstruction(
   if (step.kind === 'corridor') {
     const genericFrom = !from || /^corridor$/i.test(from);
     const genericTo = !to || /^corridor$/i.test(to);
-    if ((genericFrom && genericTo) || from === to) return 'Follow the marked corridor.';
-    if (genericFrom) return `Follow the corridor to ${to}.`;
-    if (genericTo) return `Follow the corridor from ${from}.`;
-    if (/^corridor\b/i.test(from)) return `Walk from ${from} to ${to}.`;
-    return `Follow the corridor from ${from} to ${to}.`;
+    if ((genericFrom && genericTo) || from === to) return 'Follow the blue line.';
+    if (genericTo) return 'Follow the blue line.';
+    return `Follow the blue line to ${to}.`;
   }
 
   if (step.kind === 'stairs' || step.kind === 'elevator') {
-    const action =
-      step.kind === 'stairs'
-        ? /^stairs?\b/i.test(from)
-          ? `Take ${from}`
-          : `Take the stairs at ${from}`
-        : /elevator\b/i.test(from)
-          ? `Take ${from}`
-          : `Take the elevator at ${from}`;
-    const fromFloor = context?.fromFloor ?? '';
-    const toFloor = context?.toFloor ?? '';
-    const fromNum = /^-?\d+$/.test(fromFloor) ? Number(fromFloor) : NaN;
-    const toNum = /^-?\d+$/.test(toFloor) ? Number(toFloor) : NaN;
-    if (Number.isFinite(fromNum) && Number.isFinite(toNum) && fromNum !== toNum) {
-      const direction = toNum > fromNum ? 'UP ↑' : 'DOWN ↓';
-      const count = Math.abs(toNum - fromNum);
-      const floors = `${count} ${count === 1 ? 'floor' : 'floors'}`;
-      return `${action} ${direction} ${floors} to Floor ${toFloor}.`;
-    }
-    return toFloor ? `${action} to Floor ${toFloor}.` : step.instruction;
+    const label = from.split(' (')[0];
+    const isNamedStair = /^stairs?\b/i.test(label);
+    const isNamedElevator = /elevator\b/i.test(label);
+    if (step.kind === 'stairs') return isNamedStair ? `Take ${label}.` : `Take stairs at ${label}.`;
+    return isNamedElevator ? `Take ${label}.` : `Take elevator at ${label}.`;
   }
 
   if (step.kind === 'building-link') {
     const target = context?.targetPlanLabel || to;
-    return `Use the connecting passage to ${target}.`;
+    return `Take the passage to ${target}.`;
   }
 
-  const targetSuffix = context?.targetPlanLabel ? ` (${context.targetPlanLabel})` : '';
-  return `Walk outdoors from ${from} to ${to}${targetSuffix}. Outdoor path unmapped.`;
+  const target = context?.targetPlanLabel || to;
+  return `Go outside to ${target}. Path not mapped.`;
 }
 
 export type NavigationChoice = {

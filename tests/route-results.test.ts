@@ -246,7 +246,7 @@ it.each([true, 'denied'] as const)(
       ).toEqual(['SE12 · Floor 3', 'SW03 · Floor 3', 'SW03 · Floor 2']);
       const overview = result.querySelector('.route-overview')!;
       expect(overview.textContent).toBe(
-        '302 · window-side corridor door → Connecting passage to SW03 · Floor 3 → S370 · beside lounge 3704 (Floor 3 → 2) → 2082 · 2000 corridor door',
+        '302 · window-side corridor door → Connecting passage to SW03 · Floor 3 → Stairs at S370 · ↓ DOWN · Floor 2. → 2082 · 2000 corridor door',
       );
       const stack = result.querySelector('.route-map-stack')!;
       expect(result.querySelectorAll('.route-overview, .route-map-stack')).toHaveLength(2);
@@ -276,8 +276,8 @@ it.each([true, 'denied'] as const)(
       expect(watchPosition).toHaveBeenCalledTimes(3);
       await act(async () => deviceSuccess({ ...gpsPosition, timestamp: Date.now() }));
       expect(result.querySelectorAll('.device-position')).toHaveLength(1);
-      await click(button('Next step'));
-      await click(button('Next step'));
+      await click(button('Next'));
+      await click(button('Next'));
       expect(result.querySelector('.device-position')).toBeNull();
       await act(async () => deviceSuccess({ ...gpsPosition, timestamp: Date.now() + 1 }));
       expect(result.querySelector('[aria-label="Current tracking floor"]')).toBeNull();
@@ -337,8 +337,8 @@ it.each([true, 'denied'] as const)(
       await setDestination('SW03 1730');
       await click(button('Get Directions to SW03 1730'));
       await wait(() => expect(host.querySelector('.guided-directions')).not.toBeNull());
-      while (button('Next step')) await click(button('Next step'));
-      await click(button('Finish route'));
+      while (button('Next')) await click(button('Next'));
+      await click(button('Finish'));
       expect(host.textContent).toContain('Route complete');
       await click(button('Done'));
       await wait(() =>

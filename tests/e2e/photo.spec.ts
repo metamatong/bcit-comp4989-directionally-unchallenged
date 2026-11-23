@@ -151,10 +151,10 @@ test('submits photo and destination and displays directions without route confir
   await expect(page.locator('.guided-step h2')).toHaveCount(0);
   await expect(page.locator('.guided-step-subtitle')).toHaveCount(0);
   await expect(page.locator('.guided-step-instruction')).toHaveText(
-    'Follow the corridor from 302 (window-side corridor door) to Passage to SW03.',
+    'Follow the blue line to Passage to SW03.',
   );
-  const prevBox = await page.getByRole('button', { name: 'Previous', exact: true }).boundingBox();
-  const nextBox = await page.getByRole('button', { name: 'Next step', exact: true }).boundingBox();
+  const prevBox = await page.getByRole('button', { name: 'Back', exact: true }).boundingBox();
+  const nextBox = await page.getByRole('button', { name: 'Next', exact: true }).boundingBox();
   const viewportHeight = await page.evaluate(() => window.innerHeight);
   expect(prevBox).not.toBeNull();
   expect(nextBox).not.toBeNull();
@@ -174,7 +174,7 @@ test('submits photo and destination and displays directions without route confir
   await expect(maps.locator('figure')).toHaveCount(3);
   await expect(maps.locator('figcaption .pin-legend')).toHaveCount(3);
   await expect(page.getByLabel('Route overview', { exact: true })).toHaveText(
-    '302 · window-side corridor door → Connecting passage to SW03 · Floor 3 → From Floor 3, at East elevator at 3696 · corridor 3600, take the elevator DOWN ↓ 1 floor to Floor 2. Select Floor 2. → 2082 · 2000 corridor door',
+    '302 · window-side corridor door → Connecting passage to SW03 · Floor 3 → Elevator at East elevator at 3696 · ↓ DOWN · Floor 2. → 2082 · 2000 corridor door',
   );
   await expect(page.getByRole('button', { name: 'Show full floors', exact: true })).toHaveCount(1);
   await expect(page.getByRole('button', { name: 'Show my position', exact: true })).toBeHidden();

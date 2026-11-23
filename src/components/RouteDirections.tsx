@@ -208,8 +208,8 @@ export function RouteDirections({
   );
   const transferNotice = usesNonPreferredTransfer
     ? preferElevators
-      ? 'No mapped elevator route is available for the full trip, so this route includes stairs.'
-      : 'This route uses an elevator because no complete route without elevators is mapped.'
+      ? 'No full elevator route · stairs used'
+      : 'No full stair-free route · elevator used'
     : undefined;
   const headingRef = useRef<HTMLHeadingElement>(null);
   const guidedChangeRef = useRef(onGuidedChange);

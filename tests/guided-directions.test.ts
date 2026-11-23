@@ -93,7 +93,7 @@ it('opens only the current instruction, advances manually, finishes, and returns
     expect(host.querySelector('.guided-step h2')).toBeNull();
     expect(host.querySelector('.guided-step-subtitle')).toBeNull();
     expect(host.querySelector('.guided-step-instruction')?.textContent).toBe(
-      'Follow the corridor from 302 (window-side corridor door) to Passage to SW03.',
+      'Follow the blue line to Passage to SW03.',
     );
     expect(host.querySelector('.guided-step-instruction')?.textContent).not.toMatch(
       /306|308|310|312/,
@@ -101,14 +101,18 @@ it('opens only the current instruction, advances manually, finishes, and returns
     expect(host.querySelector('.map-floor-badge')?.textContent).toBe('SE12 · Floor 3');
     expect(host.querySelector('.step-progress-fill')).not.toBeNull();
     expect(host.textContent).toContain('Step 1 of 5');
-    expect(button('Previous').disabled).toBe(true);
-    await click('Next step');
+    expect(button('Back').disabled).toBe(true);
+    await click('Next');
     expect(host.textContent).toContain('Step 2 of 5');
     expect(host.querySelector('.walking-map')?.getAttribute('aria-label')).toContain('SE12');
-    await click('Next step');
+    await click('Next');
     expect(host.querySelector('.walking-map')?.getAttribute('aria-label')).toContain('SW03');
     expect(host.querySelectorAll('[data-walking-line]')).toHaveLength(1);
     expect(route.steps[2].kind).toBe('corridor');
+    await click('Next');
+    expect(host.querySelector('.guided-transfer-overlay')?.textContent).toContain('DOWN');
+    expect(host.querySelector('.guided-transfer-overlay')?.textContent).toContain('Floor 2');
+    await click('Back');
     const sw3 = catalogue.buildings.find((building) => building.building === 'SW3')!.rings[0];
     const sw3Latitude =
       (Math.min(...sw3.map((point) => point[1])) + Math.max(...sw3.map((point) => point[1]))) / 2;
@@ -117,18 +121,18 @@ it('opens only the current instruction, advances manually, finishes, and returns
     await emit(sw3Latitude, sw3Longitude);
     expect(host.querySelector('.device-position')).toBeNull();
     expect(host.querySelector('.guided-location-status')?.textContent).toContain(
-      'Floor-plan alignment is unavailable for SW03 · Floor 3',
+      'Location unavailable on SW03 · Floor 3',
     );
-    await click('Previous');
+    await click('Back');
     await click('Overview');
     expect(host.querySelectorAll('.walking-map')).toHaveLength(3);
     expect(host.querySelectorAll('.timeline-transfer-pill').length).toBeGreaterThan(0);
     await click('Back to steps');
     expect(host.textContent).toContain('Step 2 of 5');
-    for (let i = 2; i < route.steps.length; i++) await click('Next step');
-    await click('Finish route');
+    for (let i = 2; i < route.steps.length; i++) await click('Next');
+    await click('Finish');
     expect(host.textContent).toContain('Route complete');
-    expect(host.textContent).toContain('Location tracking stopped');
+    expect(host.textContent).toContain('Route complete');
     expect(clearWatch).toHaveBeenCalled();
     await click('Done');
     expect(startOver).toHaveBeenCalledTimes(1);
@@ -164,7 +168,7 @@ it('formats concise guided step instructions for every step kind without listing
     path: [],
   };
   expect(guidedStepInstruction(corridorStep)).toBe(
-    'Follow the corridor from 302 (window-side corridor door) to Passage to SW03.',
+    'Follow the blue line to Passage to SW03.',
   );
 
   const corridorPrefixStep: WalkingStep = {
@@ -172,7 +176,7 @@ it('formats concise guided step instructions for every step kind without listing
     from: mkStop('SE12-F3-p1', 'Corridor outside room 323'),
   };
   expect(guidedStepInstruction(corridorPrefixStep)).toBe(
-    'Walk from Corridor outside room 323 to Passage to SW03.',
+    'Follow the blue line to Passage to SW03.',
   );
 
   const stairsStep: WalkingStep = {
@@ -183,7 +187,7 @@ it('formats concise guided step instructions for every step kind without listing
     path: [],
   };
   expect(guidedStepInstruction(stairsStep, { fromFloor: '3', toFloor: '2' })).toBe(
-    'Take the stairs at S360 (beside shaft 3696) DOWN ↓ 1 floor to Floor 2.',
+    'Take stairs at S360.',
   );
 
   const elevatorStep: WalkingStep = {
@@ -194,7 +198,7 @@ it('formats concise guided step instructions for every step kind without listing
     path: [],
   };
   expect(guidedStepInstruction(elevatorStep, { fromFloor: '3', toFloor: '2' })).toBe(
-    'Take East elevator at 3696 (corridor 3600) DOWN ↓ 1 floor to Floor 2.',
+    'Take East elevator at 3696.',
   );
 
   const linkStep: WalkingStep = {
@@ -205,7 +209,7 @@ it('formats concise guided step instructions for every step kind without listing
     path: [],
   };
   expect(guidedStepInstruction(linkStep, { targetPlanLabel: 'SW03 · Floor 3' })).toBe(
-    'Use the connecting passage to SW03 · Floor 3.',
+    'Take the passage to SW03 · Floor 3.',
   );
 
   const outdoorStep: WalkingStep = {
@@ -216,6 +220,6 @@ it('formats concise guided step instructions for every step kind without listing
     path: [],
   };
   expect(guidedStepInstruction(outdoorStep, { targetPlanLabel: 'SW01 · Floor 1' })).toBe(
-    'Walk outdoors from Door toward SW01 (lobby 1602) to Door toward SW03 (vestibule 1098) (SW01 · Floor 1). Outdoor path unmapped.',
+    'Go outside to SW01 · Floor 1. Path not mapped.',
   );
 });

@@ -634,6 +634,48 @@
   z-index: 5;
 }
 
+.guided-transfer-overlay {
+  position: absolute;
+  z-index: 4;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  grid-template-columns: 30px auto;
+  align-items: center;
+  column-gap: 7px;
+  min-width: 148px;
+  padding: 11px 16px;
+  border: 2px solid #ffffff;
+  border-radius: 18px;
+  color: #ffffff;
+  background: #124f40;
+  box-shadow: 0 8px 24px rgba(18, 45, 35, 0.28);
+  pointer-events: none;
+}
+
+.guided-transfer-overlay.is-down {
+  background: #8b3e22;
+}
+
+.guided-transfer-overlay svg {
+  grid-row: span 2;
+}
+
+.guided-transfer-overlay span {
+  font-size: 21px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: 0.04em;
+}
+
+.guided-transfer-overlay small {
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1;
+}
+
 .map-floating-pill {
   pointer-events: auto;
   display: inline-flex;
@@ -687,9 +729,9 @@
 }
 
 .guided-step .guided-step-instruction {
-  font-size: 16.5px;
-  font-weight: 450;
-  line-height: 1.45;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 1.35;
   color: #14372e;
   margin: 2px 0;
 }
