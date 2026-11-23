@@ -1,9 +1,29 @@
-import { wallMesh, stairMeshes } from "./pilot-meshes.mjs";
+import { wallMesh } from "./pilot-meshes.mjs";
 import * as T from "three";
 import { TrackballControls } from "three/addons/controls/TrackballControls.js";
 import { sourceOrientation } from "./sheet-orientation.ts";
 
 const el = id => document.getElementById(id);
+// A raised, fixed-size stair pictogram stays readable across different drawing scales.
+function stairMarker(){
+  const marker=new T.Group();
+  const plaque=new T.Mesh(new T.CylinderGeometry(.22,.22,.045,32),
+    new T.MeshBasicMaterial({color:0x26364b}));
+  plaque.position.y=.265;
+  marker.add(plaque);
+  const stem=new T.Mesh(new T.CylinderGeometry(.018,.028,.25,8),
+    new T.MeshBasicMaterial({color:0xffb454}));
+  stem.position.y=.125;
+  marker.add(stem);
+  const gold=new T.MeshLambertMaterial({color:0xffb454});
+  for(let i=0;i<4;i++){
+    const height=.032*(i+1);
+    const step=new T.Mesh(new T.BoxGeometry(.071,height,.17),gold);
+    step.position.set((i-1.5)*.071,.2875+height/2,0);
+    marker.add(step);
+  }
+  return marker;
+}
 async function start() {
   const response = await fetch("/api/snapshot?source=navigation",{cache:"no-store"});
   if (!response.ok) throw Error("Navigation records could not be loaded.");
@@ -18,19 +38,15 @@ async function start() {
   controls.staticMoving = true;
   const sheets = [];
   const nodes = new Map(network.nodes.map(n=>[n.id,n]));
-  const floorNumbers=new Map(plans.map(plan=>[plan.id,Number(plan.floor)]));
-  const transfers=new Map();
+  const planById=new Map(plans.map(plan=>[plan.id,plan]));
+  const stairStops=new Set();
   for(const edge of network.edges){
-    if(edge.kind!=="stairs" || edge.direction!=="both") continue;
+    if(edge.kind!=="stairs") continue;
     const a=nodes.get(edge.fromNodeId), b=nodes.get(edge.toNodeId);
-    for(const [here,there] of [[a,b],[b,a]]){
-      if(here.planId.split("-")[0]!==there.planId.split("-")[0])continue;
-      const delta=floorNumbers.get(there.planId)-floorNumbers.get(here.planId);
-      if(!delta)continue;
-      const key=here.planId+"/"+here.label.split(" ")[0];
-      if(!transfers.has(key))transfers.set(key,{point:here.point});
-      transfers.get(key)[delta>0?"above":"below"]=there.label.split(" ")[0];
-    }
+    const lower=planById.get(a?.planId), upper=planById.get(b?.planId);
+    if(!lower || !upper || lower.building!==upper.building || lower.floor===upper.floor)continue;
+    stairStops.add(a.id);
+    stairStops.add(b.id);
   }
   const buildings = el("building");
   buildings.add(new Option("SW03 + SE12 + SW01","SW3,SE12,SW1"));
@@ -140,8 +156,14 @@ async function start() {
         group.add(walls);
         walls.visible=!walls.userData.estimated||el("estimates").checked;
       }
-      const localFlights=stairMeshes(plan,height,transfers);
-      for(const flight of localFlights)group.add(flight);
+      for(const id of stairStops){
+        const landing=nodes.get(id);
+        if(landing.planId!==plan.id)continue;
+        const marker=stairMarker();
+        marker.position.set((landing.point.x-.5)*10,0,(landing.point.y-.5)*height);
+        marker.rotation.y=-group.rotation.y;
+        group.add(marker);
+      }
       scene.add(group);layers.set(plan.id,{plan,group,height});
       const texture=loader.load("/image?id="+encodeURIComponent(plan.id),undefined,undefined,()=>{if(group.parent) el("status").textContent="Could not load sheet "+plan.id;});
       texture.colorSpace=T.SRGBColorSpace;
@@ -163,7 +185,7 @@ async function start() {
         const from=nodes.get(edge.fromNodeId),to=nodes.get(edge.toNodeId);
         const a=layers.get(from.planId),b=layers.get(to.planId);
         if(!a||!b||a.plan.building!==building||b.plan.building!==building||a.plan.floor===b.plan.floor)continue;
-        const point=(layer,node)=>layer.group.localToWorld(new T.Vector3((node.point.x-.5)*10,.045,(node.point.y-.5)*layer.height));
+        const point=(layer,node)=>layer.group.localToWorld(new T.Vector3((node.point.x-.5)*10,edge.kind==="stairs" ? .43 : .045,(node.point.y-.5)*layer.height));
         const start=point(a,from), end=point(b,to);
         const color=edge.kind==="stairs" ? 0xffb454 : 0xb99aff;
         scene.add(new T.Line(new T.BufferGeometry().setFromPoints([start,end]),
