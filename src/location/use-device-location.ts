@@ -1,7 +1,7 @@
 /** Browser-only location lifecycle. Readings never enter application session/API state. */
 import { useEffect, useRef, useState } from 'react';
 import { BrowserLocation, eligibleReading } from './browser-location';
-import type { DeviceReading, PhotoReading } from './types';
+import type { PhotoReading, WalkingReading } from './types';
 
 export function usePhotoDeviceLocation() {
   const [snapshot, setSnapshot] = useState<PhotoReading>();
@@ -70,12 +70,15 @@ export function usePhotoDeviceLocation() {
 
 export type WalkingPauseReason = 'none' | 'hidden' | 'denied' | 'manual';
 
+/** Silence interval after which a visible active watch restarts quietly to recover wedged streams. */
+export const WATCH_STALL_RESTART_MS = 15_000;
+
 export function useWalkingLocation(startActive = false) {
   const [active, setActive] = useState(startActive);
   const [watchRevision, setWatchRevision] = useState(0);
   const [paused, setPaused] = useState(false);
   const [pauseReason, setPauseReason] = useState<WalkingPauseReason>('none');
-  const [reading, setReading] = useState<DeviceReading>();
+  const [reading, setReading] = useState<WalkingReading>();
   const [status, setStatus] = useState('');
   const [now, setNow] = useState(Date.now());
   const provider = useRef<BrowserLocation | null>(null);
@@ -100,6 +103,9 @@ export function useWalkingLocation(startActive = false) {
   useEffect(() => {
     if (!active) return;
     let disposed = false;
+    let latestCaptureTimestamp = -Infinity;
+    let lastFixOrStartAt = Date.now();
+    let lastRecoveryRestartAt = -Infinity;
     const location = new BrowserLocation();
     provider.current = location;
     const hide = () => {
@@ -108,11 +114,12 @@ export function useWalkingLocation(startActive = false) {
         setStatus('Tracking paused while the page is hidden. Resume when you are ready.');
       }
     };
-    if (document.hidden) hide();
-    else
+    const startWatch = () => {
       location.start(
         (next) => {
           if (disposed) return;
+          latestCaptureTimestamp = next.captureTimestamp;
+          lastFixOrStartAt = Date.now();
           setReading(next);
           setNow(Date.now());
           setStatus('');
@@ -122,9 +129,38 @@ export function useWalkingLocation(startActive = false) {
           setStatus(message);
           if (denied) stopWithReason('denied');
         },
+        {
+          minCaptureTimestamp: latestCaptureTimestamp,
+          // Transient watch timeouts are common indoors; silently restart without blanking readings.
+          onTimeout: () => {
+            if (disposed) return;
+            setStatus('');
+            const tickNow = Date.now();
+            if (!document.hidden && tickNow - lastRecoveryRestartAt >= WATCH_STALL_RESTART_MS) {
+              lastRecoveryRestartAt = tickNow;
+              lastFixOrStartAt = tickNow;
+              startWatch();
+            }
+          },
+        },
       );
+    };
+    if (document.hidden) hide();
+    else startWatch();
     // Freshness changes only the evidence display, never route progress.
-    const timer = window.setInterval(() => setNow(Date.now()), 500);
+    const timer = window.setInterval(() => {
+      const tickNow = Date.now();
+      setNow(tickNow);
+      if (
+        !document.hidden &&
+        tickNow - lastFixOrStartAt >= WATCH_STALL_RESTART_MS &&
+        tickNow - lastRecoveryRestartAt >= WATCH_STALL_RESTART_MS
+      ) {
+        lastRecoveryRestartAt = tickNow;
+        lastFixOrStartAt = tickNow;
+        startWatch();
+      }
+    }, 500);
     document.addEventListener('visibilitychange', hide);
     let permission: PermissionStatus | undefined;
     const revoked = () => {

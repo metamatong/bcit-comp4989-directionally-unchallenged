@@ -60,12 +60,34 @@ export const bootstrap = () => request<Bootstrap>('/api/bootstrap');
 export const createSession = () => request<Session>('/api/sessions', {});
 
 const walkingSurfaces = new Map<string, Promise<WalkingSurface | null>>();
+const resolvedWalkingSurfaces = new Map<string, WalkingSurface>();
+
+/** Synchronously return a previously fetched walking surface when already cached in memory. */
+export function getCachedWalkingSurface(planId: string): WalkingSurface | undefined {
+  return resolvedWalkingSurfaces.get(planId);
+}
+
+/** Kick off deduplicated background fetches for floor walking surfaces ahead of guided steps. */
+export function prefetchWalkingSurfaces(planIds: Iterable<string>) {
+  for (const planId of planIds) {
+    if (planId && !resolvedWalkingSurfaces.has(planId) && !walkingSurfaces.has(planId)) {
+      void fetchWalkingSurface(planId);
+    }
+  }
+}
+
+export function clearWalkingSurfaceCacheForTests() {
+  walkingSurfaces.clear();
+  resolvedWalkingSurfaces.clear();
+}
 
 /** Lazily load and cache public walkable corridor runs for client-side GPS map-matching. */
 export async function fetchWalkingSurface(
   planId: string,
   signal?: AbortSignal,
 ): Promise<WalkingSurface | null> {
+  const cached = resolvedWalkingSurfaces.get(planId);
+  if (cached) return signal?.aborted ? null : cached;
   let pending = walkingSurfaces.get(planId);
   if (!pending) {
     pending = request<WalkingSurface>(
@@ -78,7 +100,8 @@ export async function fetchWalkingSurface(
       )
       .catch(() => null)
       .then((surface) => {
-        if (!surface) walkingSurfaces.delete(planId);
+        if (surface) resolvedWalkingSurfaces.set(planId, surface);
+        else walkingSurfaces.delete(planId);
         return surface;
       });
     walkingSurfaces.set(planId, pending);

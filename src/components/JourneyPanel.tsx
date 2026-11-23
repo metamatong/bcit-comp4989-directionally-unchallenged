@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { Check, MapPin, RotateCcw, Route } from 'lucide-react';
-import { request } from '../api';
+import { prefetchWalkingSurfaces, request } from '../api';
 import type { CampusLocationCandidate, VisualPlan } from '../types';
 import { mapDestinationScope, type NavigationChoice, type NavigationResult } from '../wayfinding';
 import { FloorPointPicker } from './FloorPointPicker';
@@ -80,6 +80,12 @@ export function JourneyPanel(props: JourneyProps) {
     },
     [onGuidedChange],
   );
+
+  useEffect(() => {
+    if (!props.gpsTestMode && candidate.planId) {
+      prefetchWalkingSurfaces([candidate.planId]);
+    }
+  }, [props.gpsTestMode, candidate.planId]);
 
   useEffect(() => {
     const controller = new AbortController();

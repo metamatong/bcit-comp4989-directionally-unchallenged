@@ -9,8 +9,8 @@
  */
 import type { VisualPlan } from '../types';
 import type { PagePoint, WalkingStep, WalkingSurface } from '../wayfinding';
-import { LOCATION_FRESH_MS } from './browser-location';
-import { fitCalibration } from './geometry';
+import { eligibleReading, LOCATION_FRESH_MS } from './browser-location';
+import { fitCalibration, overlapsFootprint } from './geometry';
 import {
   MAP_MATCH_CONFIG,
   matchDeviceToFloor,
@@ -25,6 +25,7 @@ import type {
   MotionActivityState,
   MotionSnapshot,
   TrackingMode,
+  WalkingReading,
 } from './types';
 import { getWalkableGrid, type WalkableGrid } from './walkable-grid';
 
@@ -76,12 +77,22 @@ export const PDR_TRACKER_CONFIG = Object.freeze({
   corridorProbeMetres: 3.0,
   routeTieBreakWeight: MAP_MATCH_CONFIG.routeTieBreakWeight,
   routeTieBreakCapMetres: MAP_MATCH_CONFIG.routeTieBreakCapMetres,
+  /** Bounded hold for recent GPS fixes when moving or without live motion confirmation. */
+  liveGpsHoldMs: 8_000,
+  /** Conservative uncertainty growth past LOCATION_FRESH_MS during non-stationary GPS hold. */
+  gpsHoldGrowthMetresPerSec: 1.5,
+  gpsHoldMaxExtraRadiusMetres: 15.0,
+  /** Bounded Tier 2 hold when live accelerometer variance actively confirms stationary state. */
+  stationaryHoldMaxMs: 45_000,
+  /** Consecutive rejected fixes required before blanking an otherwise held valid position. */
+  maxConsecutiveBadFixes: 3,
 });
 
 export type TrackerContext = {
   plan: VisualPlan;
   calibration?: FloorCalibration;
   surface?: WalkingSurface | null;
+  buildingRings?: number[][][];
   stepKind?: WalkingStep['kind'];
   transferStepIndex?: number;
   /** True only for single-floor corridor steps (step.from.planId === step.to.planId). */
@@ -91,8 +102,29 @@ export type TrackerContext = {
 };
 
 export type TrackerEvaluation =
-  | { status: 'waiting' | 'unavailable' | 'low-accuracy' | 'outside-page' | 'too-far' }
-  | { status: 'raw' | 'matched' | 'bridged'; overlay: DeviceOverlay; directionResolved?: boolean };
+  | {
+      status:
+        | 'waiting'
+        | 'unavailable'
+        | 'low-accuracy'
+        | 'outside-page'
+        | 'outside-building'
+        | 'too-far';
+    }
+  | {
+      status: 'raw' | 'matched' | 'bridged' | 'held';
+      overlay: DeviceOverlay;
+      directionResolved?: boolean;
+    };
+
+type StoredGpsResult = MapMatchResult | { status: 'outside-building' };
+
+type ValidOverlaySnapshot = {
+  status: 'matched' | 'raw';
+  overlay: DeviceOverlay;
+  timestamp: number;
+  reportedAccuracyMetres: number;
+};
 
 type Particle = {
   xPx: number;
@@ -170,7 +202,11 @@ export class IndoorPdrTracker {
   // Transition & deduplication guards
   private minAcceptedGpsTimestamp = -Infinity;
   private lastProcessedGpsTimestamp = -Infinity;
-  private lastGpsResult: MapMatchResult | null = null;
+  private lastProcessedCaptureTimestamp = -Infinity;
+  private lastGpsResult: StoredGpsResult | null = null;
+  private lastValidResult: ValidOverlaySnapshot | null = null;
+  private consecutiveBadFixes = 0;
+  private lastBadFixAt = -Infinity;
   private sawRawBeforeSurface = false;
 
   // Tier 1 / Tier 2 continuity & stationary anchor state
@@ -178,6 +214,9 @@ export class IndoorPdrTracker {
   private lastMatchStepDistanceMetres = 0;
   private stationaryAnchor: PagePoint | null = null;
   private stationaryCandidates: PreviousMatch[] = [];
+  private stationaryAnchorAfter = -Infinity;
+  private motionActivity: MotionActivityState = 'unknown';
+  private motionInterrupted = false;
 
   // Tier 3 particle filter state
   private particles: Particle[] = [];
@@ -291,11 +330,17 @@ export class IndoorPdrTracker {
       );
     }
     this.lastGpsResult = null;
+    this.lastValidResult = null;
+    this.consecutiveBadFixes = 0;
+    this.lastBadFixAt = -Infinity;
     this.sawRawBeforeSurface = false;
     this.previousMatch = null;
     this.lastMatchStepDistanceMetres = 0;
     this.stationaryAnchor = null;
     this.stationaryCandidates = [];
+    this.stationaryAnchorAfter = -Infinity;
+    this.motionActivity = 'unknown';
+    this.motionInterrupted = false;
     this.gyroStreamStart = null;
     this.invalidatedGyroStreamStart = null;
     this.clearParticleEstimate();
@@ -323,35 +368,114 @@ export class IndoorPdrTracker {
     }
     this.stationaryAnchor = null;
     this.stationaryCandidates = [];
+    // Never snap backwards onto an old pre-walk GPS anchor after a particle-bridge outage.
+    this.lastValidResult = null;
+    this.consecutiveBadFixes = 0;
     this.clearParticleEstimate();
     this.invalidatedGyroStreamStart = this.gyroStreamStart ?? this.invalidatedGyroStreamStart;
   }
 
-  updateMotion(motion?: MotionSnapshot | null) {
-    if (!motion?.active || motion.activity !== 'stationary') {
-      this.stationaryAnchor = null;
-      this.stationaryCandidates = [];
-    }
-    if (!this.enableParticleFilter) return;
-    const motionUnavailable = !motion?.active || motion.activity === 'unknown';
-    const streamStart = !motionUnavailable && motion.gyroFresh ? motion.gyroFreshSince : null;
-    // Both a gyro epoch change and a motion 'unknown' stall invalidate existing particles.
+  private releaseStationaryAnchor(after: number) {
+    this.stationaryAnchor = null;
+    this.stationaryCandidates = [];
+    this.stationaryAnchorAfter = Math.max(this.stationaryAnchorAfter, after);
+  }
+
+  private latchStationaryAnchor(now: number) {
+    const fix = this.lastValidResult;
     if (
-      (this.gyroStreamStart !== null && streamStart !== this.gyroStreamStart) ||
-      (motionUnavailable && this.particleInitialized)
+      !this.stationaryAnchor &&
+      this.motionActivity === 'stationary' &&
+      this.isPdrEligible() &&
+      fix?.status === 'matched' &&
+      fix.timestamp > this.stationaryAnchorAfter &&
+      fix.timestamp <= now &&
+      now - fix.timestamp <= PDR_TRACKER_CONFIG.liveGpsHoldMs
     ) {
-      this.invalidateParticleTracking();
+      this.stationaryAnchor = fix.overlay.point;
     }
-    this.gyroStreamStart = streamStart;
+  }
+
+  updateMotion(motion?: MotionSnapshot | null, observedAt = motion?.lastEventAt ?? Date.now()) {
+    const activity = motion?.active && motion.hasAccel ? motion.activity : 'unknown';
+    if (activity !== this.motionActivity) {
+      if (activity !== 'stationary' || this.motionInterrupted) {
+        // After sensor silence, require a fix captured after motion becomes observable again.
+        this.releaseStationaryAnchor(observedAt);
+      }
+      this.motionInterrupted = activity === 'unknown';
+      this.motionActivity = activity;
+    }
+    const lastStepAt = motion?.lastStepAt;
+    if (lastStepAt != null && lastStepAt > this.stationaryAnchorAfter) {
+      this.releaseStationaryAnchor(lastStepAt);
+    }
+
+    if (this.enableParticleFilter) {
+      const streamStart = activity !== 'unknown' && motion?.gyroFresh ? motion.gyroFreshSince : null;
+      // Both a gyro epoch change and a motion 'unknown' stall invalidate existing particles.
+      if (
+        (this.gyroStreamStart !== null && streamStart !== this.gyroStreamStart) ||
+        (activity === 'unknown' && this.particleInitialized)
+      ) {
+        this.invalidateParticleTracking();
+      }
+      this.gyroStreamStart = streamStart;
+    }
+    this.latchStationaryAnchor(observedAt);
+  }
+
+  private recordGpsOutcome(result: MapMatchResult, reading: DeviceReading): StoredGpsResult {
+    let normalized: StoredGpsResult = result;
+    if (
+      result.status === 'raw' &&
+      this.context?.buildingRings &&
+      !overlapsFootprint(reading, this.context.buildingRings)
+    ) {
+      normalized = { status: 'outside-building' };
+    }
+    this.lastGpsResult = normalized;
+
+    if (normalized.status === 'matched' || normalized.status === 'raw') {
+      const overlay: DeviceOverlay = {
+        ...normalized.overlay,
+        corridorMatched: normalized.status === 'matched',
+        reportedAccuracyMetres: reading.accuracy,
+      };
+      this.consecutiveBadFixes = 0;
+      this.lastValidResult = {
+        status: normalized.status,
+        overlay,
+        timestamp: reading.timestamp,
+        reportedAccuracyMetres: reading.accuracy,
+      };
+      return normalized.status === 'matched'
+        ? { ...normalized, overlay }
+        : { status: 'raw', overlay };
+    }
+
+    if (normalized.status === 'unavailable') {
+      this.lastValidResult = null;
+      this.consecutiveBadFixes = 0;
+      return normalized;
+    }
+
+    this.consecutiveBadFixes += 1;
+    this.lastBadFixAt = reading.timestamp;
+    return normalized;
   }
 
   /**
-   * Process a single fresh GPS reading strictly once per unique timestamp.
+   * Process a GPS reading strictly once per original browser timestamp.
    * Repeated calls with the same timestamp (e.g. from 500 ms freshness ticks) are idempotent no-ops.
    */
-  ingestGpsReading(reading: DeviceReading, motion?: MotionSnapshot | null): TrackerEvaluation {
+  ingestGpsReading(
+    reading: DeviceReading | WalkingReading,
+    motion?: MotionSnapshot | null,
+    observedAt = reading.receivedAt,
+  ): TrackerEvaluation {
     if (!this.context) return { status: 'waiting' };
-    this.updateMotion(motion);
+    this.updateMotion(motion, observedAt);
 
     // Reject stale pre-transition fixes (e.g. still-fresh reading from the previous floor).
     if (reading.timestamp <= this.minAcceptedGpsTimestamp) {
@@ -359,9 +483,12 @@ export class IndoorPdrTracker {
     }
 
     // Deduplicate: never double-count the same GPS timestamp across 500 ms freshness ticks.
-    if (reading.timestamp <= this.lastProcessedGpsTimestamp) {
-      return this.evaluateAt(reading.receivedAt, true, motion?.activity ?? 'unknown');
+    const captureTimestamp =
+      'captureTimestamp' in reading ? reading.captureTimestamp : reading.timestamp;
+    if (captureTimestamp <= this.lastProcessedCaptureTimestamp) {
+      return this.evaluateAt(observedAt, eligibleReading(reading, observedAt), this.motionActivity);
     }
+    this.lastProcessedCaptureTimestamp = captureTimestamp;
     this.lastProcessedGpsTimestamp = reading.timestamp;
 
     const ctx = this.context;
@@ -371,11 +498,7 @@ export class IndoorPdrTracker {
 
     // Non-corridor steps, unaligned floors, missing surface, or silent/unavailable motion -> Tier 1.
     if (!pdrEligible || activity === 'unknown') {
-      if (activity === 'unknown') {
-        this.stationaryAnchor = null;
-        this.stationaryCandidates = [];
-        this.clearParticleEstimate();
-      }
+      if (activity === 'unknown') this.clearParticleEstimate();
       const baseResult = matchDeviceToFloor({
         reading,
         plan: ctx.plan,
@@ -385,15 +508,15 @@ export class IndoorPdrTracker {
         stepKind: ctx.stepKind,
         previous: ctx.stepKind === 'corridor' && ctx.isSamePlanStep ? this.previousMatch : null,
       });
-      this.lastGpsResult = baseResult;
-      if (baseResult.status === 'raw' && !ctx.surface) {
+      const recorded = this.recordGpsOutcome(baseResult, reading);
+      if (recorded.status === 'raw' && !ctx.surface) {
         this.sawRawBeforeSurface = true;
       }
-      if (baseResult.status === 'matched') {
-        this.previousMatch = { point: baseResult.overlay.point, timestamp: reading.timestamp };
+      if (recorded.status === 'matched') {
+        this.previousMatch = { point: recorded.overlay.point, timestamp: reading.timestamp };
         this.lastMatchStepDistanceMetres = motion?.estimatedDistanceMetres ?? 0;
       }
-      return this.toEvaluation(baseResult);
+      return this.toEvaluation(recorded);
     }
 
     // Stage 2 (Tier 3): Corridor-constrained 120-particle filter when enabled and gyro is live.
@@ -405,11 +528,11 @@ export class IndoorPdrTracker {
         (this.gyroStreamStart > this.invalidatedGyroStreamStart &&
           reading.timestamp > this.gyroStreamStart))
     ) {
-      return this.updateParticleFilterWithGps(reading, motion);
+      return this.updateParticleFilterWithGps(reading, motion, observedAt);
     }
 
     // Stage 1 (Tier 2): Accelerometer-only hard stationary anchor + step-budgeted continuity.
-    return this.updateMotionGatedMatcher(reading, motion!);
+    return this.updateMotionGatedMatcher(reading, motion!, observedAt);
   }
 
   /**
@@ -420,8 +543,7 @@ export class IndoorPdrTracker {
     if (!this.isPdrEligible()) return false;
 
     // Any real detected step immediately releases the Tier 2 stationary anchor.
-    this.stationaryAnchor = null;
-    this.stationaryCandidates = [];
+    this.releaseStationaryAnchor(step.timestamp);
 
     if (!this.enableParticleFilter || !this.particleInitialized || !this.fit || !this.grid) {
       return false;
@@ -501,6 +623,28 @@ export class IndoorPdrTracker {
   ): TrackerEvaluation {
     if (!this.context) return { status: 'waiting' };
 
+    if (this.lastGpsResult?.status === 'unavailable') return { status: 'unavailable' };
+
+    const recentRejection: TrackerEvaluation =
+      this.lastGpsResult &&
+      this.lastGpsResult.status !== 'matched' &&
+      this.lastGpsResult.status !== 'raw' &&
+      now - this.lastBadFixAt <= PDR_TRACKER_CONFIG.liveGpsHoldMs
+        ? this.toEvaluation(this.lastGpsResult)
+        : { status: 'waiting' };
+    if (this.consecutiveBadFixes >= PDR_TRACKER_CONFIG.maxConsecutiveBadFixes) {
+      return recentRejection;
+    }
+
+    const heldFix = this.lastValidResult;
+    const canHoldStationary =
+      this.isPdrEligible() &&
+      this.motionActivity === 'stationary' &&
+      motionActivity === 'stationary' &&
+      !!this.stationaryAnchor &&
+      !!heldFix &&
+      now - heldFix.timestamp <= PDR_TRACKER_CONFIG.stationaryHoldMaxMs;
+
     if (
       motionActivity !== 'unknown' &&
       this.enableParticleFilter &&
@@ -511,25 +655,47 @@ export class IndoorPdrTracker {
       this.cachedSummary &&
       this.lastAcceptedGpsAt !== null
     ) {
-      if (freshGps) {
-        if (this.lastGpsResult && this.lastGpsResult.status !== 'matched') {
-          return this.toEvaluation(this.lastGpsResult);
+      if (!this.bridgeExpired(now)) {
+        if (now - this.lastAcceptedGpsAt <= LOCATION_FRESH_MS) {
+          return this.buildParticleEvaluation(now, false);
         }
-        return this.buildParticleEvaluation(now, false);
+        if (this.cachedSummary.directionResolved) return this.buildParticleEvaluation(now, true);
       }
-
-      // Bounded stale-GPS bridging: only when direction is resolved and both limits hold.
-      if (!this.bridgeExpired(now) && this.cachedSummary.directionResolved) {
-        return this.buildParticleEvaluation(now, true);
+      if (canHoldStationary && this.stepsSinceLastAcceptedGps === 0) {
+        return this.buildHeldEvaluation(now, 'stationary-hold');
       }
-
-      return { status: 'waiting' };
+      return recentRejection;
     }
 
-    if (!freshGps || !this.lastGpsResult) {
-      return { status: 'waiting' };
+    if (heldFix && this.fit) {
+      const ageMs = Math.max(0, now - heldFix.timestamp);
+
+      // Fresh live reading with no intervening rejected fix.
+      if (freshGps && ageMs <= LOCATION_FRESH_MS && this.consecutiveBadFixes === 0) {
+        return { status: heldFix.status, overlay: heldFix.overlay };
+      }
+
+      // Tier 2 verified-stationary hold across GPS silence (up to stationaryHoldMaxMs).
+      if (canHoldStationary) {
+        return this.buildHeldEvaluation(now, 'stationary-hold');
+      }
+
+      // Conservative bounded GPS hold across normal indoor watch gaps or 1-2 bad fixes.
+      if (ageMs <= PDR_TRACKER_CONFIG.liveGpsHoldMs) {
+        return this.buildHeldEvaluation(now, 'gps-hold');
+      }
     }
-    return this.toEvaluation(this.lastGpsResult);
+
+    // Immediate fresh fallback right after a Stage 2 gyro interruption clears lastValidResult.
+    if (
+      freshGps &&
+      now - this.lastProcessedGpsTimestamp <= LOCATION_FRESH_MS &&
+      this.lastGpsResult?.status === 'matched'
+    ) {
+      return this.toEvaluation(this.lastGpsResult);
+    }
+
+    return recentRejection;
   }
 
   private bridgeExpired(now: number): boolean {
@@ -540,19 +706,13 @@ export class IndoorPdrTracker {
     );
   }
 
-  private updateMotionGatedMatcher(reading: DeviceReading, motion: MotionSnapshot): TrackerEvaluation {
+  private updateMotionGatedMatcher(
+    reading: DeviceReading,
+    motion: MotionSnapshot,
+    observedAt: number,
+  ): TrackerEvaluation {
     const ctx = this.context!;
     const scale = this.fit!.scale;
-
-    if (motion.activity === 'stationary') {
-      if (!this.stationaryAnchor && this.previousMatch) {
-        this.stationaryAnchor = this.previousMatch.point;
-        this.stationaryCandidates = [];
-      }
-    } else {
-      this.stationaryAnchor = null;
-      this.stationaryCandidates = [];
-    }
 
     const deltaStepsMetres = Math.max(
       0,
@@ -577,8 +737,7 @@ export class IndoorPdrTracker {
 
     if (probeResult.status !== 'matched') {
       this.stationaryCandidates = [];
-      this.lastGpsResult = probeResult;
-      return this.toEvaluation(probeResult);
+      return this.toEvaluation(this.recordGpsOutcome(probeResult, reading));
     }
 
     // Independent per-unique-timestamp divergence check for hard stationary anchor release.
@@ -623,28 +782,27 @@ export class IndoorPdrTracker {
             stationaryAnchorReleased: true,
           },
         });
-        this.lastGpsResult = released;
-        if (released.status === 'matched') {
-          this.stationaryAnchor = released.overlay.point;
-          this.previousMatch = { point: released.overlay.point, timestamp: reading.timestamp };
+        const recordedReleased = this.recordGpsOutcome(released, reading);
+        if (recordedReleased.status === 'matched') {
+          this.latchStationaryAnchor(observedAt);
+          this.previousMatch = { point: recordedReleased.overlay.point, timestamp: reading.timestamp };
           this.lastMatchStepDistanceMetres = motion.estimatedDistanceMetres;
         }
-        return this.toEvaluation(released);
+        return this.toEvaluation(recordedReleased);
       }
-    } else if (motion.activity === 'stationary' && !this.stationaryAnchor) {
-      this.stationaryAnchor = probeResult.overlay.point;
-      this.stationaryCandidates = [];
     }
 
-    this.lastGpsResult = probeResult;
+    const recordedProbe = this.recordGpsOutcome(probeResult, reading);
+    this.latchStationaryAnchor(observedAt);
     this.previousMatch = { point: probeResult.overlay.point, timestamp: reading.timestamp };
     this.lastMatchStepDistanceMetres = motion.estimatedDistanceMetres;
-    return this.toEvaluation(probeResult);
+    return this.toEvaluation(recordedProbe);
   }
 
   private updateParticleFilterWithGps(
     reading: DeviceReading,
     motion: MotionSnapshot,
+    observedAt: number,
   ): TrackerEvaluation {
     const ctx = this.context!;
     const fit = this.fit!;
@@ -661,24 +819,25 @@ export class IndoorPdrTracker {
       stepKind: ctx.stepKind,
       previous: null,
     });
-    this.lastGpsResult = gpsMatch;
-    if (gpsMatch.status !== 'matched') {
-      return this.toEvaluation(gpsMatch);
+    const recordedGpsMatch = this.recordGpsOutcome(gpsMatch, reading);
+    if (recordedGpsMatch.status !== 'matched') {
+      return this.toEvaluation(recordedGpsMatch);
     }
 
     if (this.bridgeExpired(reading.receivedAt)) this.clearParticleEstimate();
     this.stationaryAnchor = null;
     this.stationaryCandidates = [];
+    this.latchStationaryAnchor(observedAt);
     this.invalidatedGyroStreamStart = null;
     this.lastMatchStepDistanceMetres = motion.estimatedDistanceMetres;
     const rawPoint = fit.project(reading);
     const rawPx = { x: rawPoint.x * ctx.plan.width, y: rawPoint.y * ctx.plan.height };
     const matchedPx = {
-      x: gpsMatch.overlay.point.x * ctx.plan.width,
-      y: gpsMatch.overlay.point.y * ctx.plan.height,
+      x: recordedGpsMatch.overlay.point.x * ctx.plan.width,
+      y: recordedGpsMatch.overlay.point.y * ctx.plan.height,
     };
     this.lastRawGpsPx = rawPx;
-    this.lastAcceptedCorridorPoint = gpsMatch.overlay.point;
+    this.lastAcceptedCorridorPoint = recordedGpsMatch.overlay.point;
 
     if (!this.particleInitialized) {
       this.seedParticles(matchedPx, rawPx, reading.accuracy, ctx.stepStartPoint);
@@ -689,8 +848,8 @@ export class IndoorPdrTracker {
       this.stepsSinceLastAcceptedGps = 0;
       this.cachedSummary = this.summarizeCloud();
       this.updateAnchorRadius(rawPx);
-      this.previousMatch = { point: gpsMatch.overlay.point, timestamp: reading.timestamp };
-      return this.buildParticleEvaluation(reading.receivedAt, false);
+      this.previousMatch = { point: recordedGpsMatch.overlay.point, timestamp: reading.timestamp };
+      return this.evaluateAt(observedAt, false, motion.activity);
     }
 
     // Conservative indoor GPS sigma prevents overconfident exterior-biased fixes from dragging particles into walls.
@@ -759,7 +918,7 @@ export class IndoorPdrTracker {
       point: this.toNormalizedWalkable(this.cachedSummary.centroidPx, grid),
       timestamp: reading.timestamp,
     };
-    return this.buildParticleEvaluation(reading.receivedAt, false);
+    return this.evaluateAt(observedAt, false, motion.activity);
   }
 
   private seedParticles(
@@ -1091,11 +1250,61 @@ export class IndoorPdrTracker {
         radiusY: (radiusMetres * fit.scale) / ctx.plan.height,
         ...(snapDistanceMetres !== undefined ? { snapDistanceMetres } : {}),
         trackingMode,
+        corridorMatched: true,
+        reportedAccuracyMetres: this.lastAcceptedGpsAccuracy,
       },
     };
   }
 
-  private toEvaluation(result: MapMatchResult): TrackerEvaluation {
+  private buildHeldEvaluation(
+    now: number,
+    mode: 'stationary-hold' | 'gps-hold',
+  ): TrackerEvaluation {
+    const ctx = this.context!;
+    const fit = this.fit!;
+    const valid = this.lastValidResult!;
+    const ageMs = Math.max(0, now - valid.timestamp);
+    const ageSeconds = Math.floor(ageMs / 1000);
+
+    if (mode === 'stationary-hold') {
+      const point = this.stationaryAnchor ?? valid.overlay.point;
+      if (!onPage(point)) return { status: 'outside-page' };
+      return {
+        status: 'held',
+        overlay: {
+          ...valid.overlay,
+          point,
+          trackingMode: 'stationary-hold',
+          corridorMatched: true,
+          ageSeconds,
+          reportedAccuracyMetres: valid.reportedAccuracyMetres,
+        },
+      };
+    }
+
+    if (!onPage(valid.overlay.point)) return { status: 'outside-page' };
+    const extraSec = Math.max(0, (ageMs - LOCATION_FRESH_MS) / 1000);
+    const extraMetres = Math.min(
+      PDR_TRACKER_CONFIG.gpsHoldMaxExtraRadiusMetres,
+      PDR_TRACKER_CONFIG.gpsHoldGrowthMetresPerSec * extraSec,
+    );
+    const baseRadiusMetres = (valid.overlay.radiusX * ctx.plan.width) / fit.scale;
+    const radiusMetres = baseRadiusMetres + extraMetres;
+    return {
+      status: 'held',
+      overlay: {
+        ...valid.overlay,
+        radiusX: (radiusMetres * fit.scale) / ctx.plan.width,
+        radiusY: (radiusMetres * fit.scale) / ctx.plan.height,
+        trackingMode: 'gps-hold',
+        corridorMatched: valid.status === 'matched',
+        ageSeconds,
+        reportedAccuracyMetres: valid.reportedAccuracyMetres,
+      },
+    };
+  }
+
+  private toEvaluation(result: StoredGpsResult): TrackerEvaluation {
     if (result.status === 'matched') {
       return { status: 'matched', overlay: result.overlay };
     }

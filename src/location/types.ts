@@ -5,6 +5,10 @@ export type DeviceReading = GeoPoint & {
   timestamp: number;
   receivedAt: number;
 };
+export type WalkingReading = DeviceReading & {
+  /** Original browser timestamp, even when `timestamp` is clamped for age and transition checks. */
+  captureTimestamp: number;
+};
 export type CalibrationControl = GeoPoint & { label: string; x: number; y: number };
 export type FloorCalibration = {
   planId: string;
@@ -29,7 +33,14 @@ export type GpsBuildingHint = {
   capturedAt: number;
   accuracy: number;
 };
-export type TrackingMode = 'raw' | 'matched' | 'motion-gated' | 'pdr' | 'pdr-bridged';
+export type TrackingMode =
+  | 'raw'
+  | 'matched'
+  | 'motion-gated'
+  | 'stationary-hold'
+  | 'gps-hold'
+  | 'pdr'
+  | 'pdr-bridged';
 
 export type DeviceOverlay = {
   point: { x: number; y: number };
@@ -39,6 +50,12 @@ export type DeviceOverlay = {
   snapDistanceMetres?: number;
   /** Fusion tier indicator for honest status labeling and tests; never persisted or transmitted. */
   trackingMode?: TrackingMode;
+  /** True when the displayed position came from indoor corridor matching rather than raw GPS. */
+  corridorMatched?: boolean;
+  /** Elapsed whole seconds since the underlying GPS fix was captured when holding across gaps. */
+  ageSeconds?: number;
+  /** Reported horizontal accuracy (metres) of the GPS fix backing this overlay. */
+  reportedAccuracyMetres?: number;
 };
 
 export type MotionPermissionState = 'unknown' | 'granted' | 'denied' | 'unsupported';

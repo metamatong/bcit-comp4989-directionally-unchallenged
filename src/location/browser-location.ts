@@ -1,7 +1,11 @@
 /** One foreground watch or one-shot acquisition, with bounded lifetime and late-callback guards. */
-import type { DeviceReading } from './types';
+import type { DeviceReading, WalkingReading } from './types';
 
 export const LOCATION_FRESH_MS = 2000;
+/** Maximum capture age accepted on arrival for continuous live walking watches. */
+export const WALKING_GPS_INGEST_MAX_AGE_MS = 8000;
+/** Forward GNSS-vs-wall-clock skew tolerance for continuous live walking watches. */
+export const WALKING_GPS_FUTURE_SKEW_MS = 1000;
 export const LOCATION_OPTIONS = { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 };
 export function eligibleReading(reading: DeviceReading, now = reading.receivedAt) {
   return (
@@ -17,6 +21,38 @@ export function eligibleReading(reading: DeviceReading, now = reading.receivedAt
     reading.accuracy >= 0 &&
     now - reading.timestamp >= 0 &&
     now - reading.timestamp <= LOCATION_FRESH_MS
+  );
+}
+/** Clamp small forward skew for age checks while preserving the fix's original identity. */
+function normalizeWatchReading(reading: DeviceReading): WalkingReading {
+  const futureSkew = reading.timestamp - reading.receivedAt;
+  return {
+    ...reading,
+    captureTimestamp: reading.timestamp,
+    timestamp:
+      futureSkew > 0 && futureSkew <= WALKING_GPS_FUTURE_SKEW_MS
+        ? reading.receivedAt
+        : reading.timestamp,
+  };
+}
+export function eligibleWatchReading(
+  reading: DeviceReading,
+  now = reading.receivedAt,
+  maxAgeMs = WALKING_GPS_INGEST_MAX_AGE_MS,
+) {
+  return (
+    [
+      reading.latitude,
+      reading.longitude,
+      reading.accuracy,
+      reading.timestamp,
+      reading.receivedAt,
+    ].every(Number.isFinite) &&
+    Math.abs(reading.latitude) <= 90 &&
+    Math.abs(reading.longitude) <= 180 &&
+    reading.accuracy >= 0 &&
+    now - reading.timestamp >= 0 &&
+    now - reading.timestamp <= maxAgeMs
   );
 }
 function toReading(position: GeolocationPosition): DeviceReading {
@@ -100,25 +136,31 @@ export class BrowserLocation {
     });
   }
   start(
-    onReading: (reading: DeviceReading) => void,
+    onReading: (reading: WalkingReading) => void,
     onError: (message: string, denied: boolean) => void,
+    options?: { minCaptureTimestamp?: number; onTimeout?: () => void },
   ) {
     this.stop();
     const generation = this.generation;
-    let latest = -Infinity;
+    let latestCaptureTimestamp = options?.minCaptureTimestamp ?? -Infinity;
     try {
       this.watchId = this.available().watchPosition(
         (position) => {
-          if (this.generation !== generation) return;
-          const reading = toReading(position);
-          if (eligibleReading(reading) && reading.timestamp > latest) {
-            latest = reading.timestamp;
+          if (this.generation !== generation || position.timestamp <= latestCaptureTimestamp)
+            return;
+          const reading = normalizeWatchReading(toReading(position));
+          if (eligibleWatchReading(reading)) {
+            latestCaptureTimestamp = reading.captureTimestamp;
             onReading(reading);
           }
         },
         (error) => {
           if (this.generation !== generation) return;
           if (error.code === 1) this.stop();
+          if (error.code === 3 && options?.onTimeout) {
+            options.onTimeout();
+            return;
+          }
           onError(errorMessage(error), error.code === 1);
         },
         LOCATION_OPTIONS,

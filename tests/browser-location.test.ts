@@ -94,4 +94,56 @@ describe('foreground browser location adapter', () => {
     expect(onError).toHaveBeenCalledWith(expect.stringContaining('denied'), true);
     expect(onReading).toHaveBeenCalledTimes(1);
   });
+  it('accepts recent indoor fixes and deduplicates by browser capture time before clamping', () => {
+    let success: PositionCallback = () => {},
+      failure: PositionErrorCallback = () => {};
+    const source = new BrowserLocation({
+      getCurrentPosition: vi.fn(),
+      watchPosition: (a: PositionCallback, b: PositionErrorCallback) => {
+        success = a;
+        failure = b;
+        return 11;
+      },
+      clearWatch: vi.fn(),
+    });
+    const onReading = vi.fn();
+    const onError = vi.fn();
+    const onTimeout = vi.fn();
+    source.start(onReading, onError, { minCaptureTimestamp: 5000, onTimeout });
+
+    // Stale > 8 s rejected; older than minTimestamp rejected; > 1 s future rejected.
+    success(position(1999));
+    success(position(4500));
+    success(position(11001));
+    expect(onReading).not.toHaveBeenCalled();
+
+    // 4 s old indoor fix accepted.
+    success(position(6000));
+    expect(onReading).toHaveBeenLastCalledWith(
+      expect.objectContaining({ timestamp: 6000, receivedAt: 10000 }),
+    );
+
+    // +300 ms forward GNSS clock skew clamped to receivedAt (10000).
+    success(position(10300));
+    expect(onReading).toHaveBeenLastCalledWith(
+      expect.objectContaining({ timestamp: 10000, receivedAt: 10000, captureTimestamp: 10300 }),
+    );
+    expect(onReading).toHaveBeenCalledTimes(2);
+
+    vi.setSystemTime(10200);
+    success(position(10300));
+    success(position(10250));
+    expect(onReading).toHaveBeenCalledTimes(2);
+    success(position(10400));
+    success(position(10500));
+    expect(onReading).toHaveBeenCalledTimes(4);
+    expect(onReading).toHaveBeenLastCalledWith(
+      expect.objectContaining({ timestamp: 10200, captureTimestamp: 10500 }),
+    );
+
+    // Timeout (code 3) invokes onTimeout instead of onError.
+    failure({ code: 3 } as GeolocationPositionError);
+    expect(onTimeout).toHaveBeenCalledTimes(1);
+    expect(onError).not.toHaveBeenCalled();
+  });
 });

@@ -10,21 +10,28 @@ export function DevicePosition({
   height: number;
 }) {
   const matched =
+    overlay.corridorMatched ||
     overlay.snapDistanceMetres !== undefined ||
     overlay.trackingMode === 'matched' ||
     overlay.trackingMode === 'motion-gated' ||
+    overlay.trackingMode === 'stationary-hold' ||
     overlay.trackingMode === 'pdr' ||
     overlay.trackingMode === 'pdr-bridged';
+  const held = overlay.trackingMode === 'gps-hold';
   return (
     <g
       className="device-position"
       data-matched={matched ? 'true' : undefined}
+      data-held={held ? 'true' : undefined}
       data-tracking-mode={overlay.trackingMode}
+      opacity={held ? 0.72 : undefined}
     >
       <title>
-        {matched
-          ? 'Approximate corridor-matched device position and uncertainty area'
-          : 'Approximate device position and reported horizontal accuracy area'}
+        {held
+          ? 'Held last known approximate device position and expanded uncertainty area'
+          : matched
+            ? 'Approximate corridor-matched device position and uncertainty area'
+            : 'Approximate device position and reported horizontal accuracy area'}
       </title>
       <ellipse
         cx={overlay.point.x * width}
@@ -34,7 +41,7 @@ export function DevicePosition({
         fill={matched ? '#0f766e22' : '#2474c72b'}
         stroke={matched ? '#0f766e' : '#155b9d'}
         strokeWidth={1.5}
-        strokeDasharray={matched ? '6 4' : undefined}
+        strokeDasharray={matched || held ? '6 4' : undefined}
         vectorEffect="non-scaling-stroke"
       />
       <circle

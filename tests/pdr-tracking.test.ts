@@ -12,6 +12,7 @@ import { floorGraphs } from '../server/floor-graph';
 import { locationCatalogue } from '../server/geolocation';
 import { pilotEvidence } from '../server/pilot-evidence';
 import { visualPlans } from '../server/visual-data';
+import { clearWalkingSurfaceCacheForTests, fetchWalkingSurface } from '../src/api';
 import { RouteDirections } from '../src/components/RouteDirections';
 import { resetMotionPermissionCacheForTests } from '../src/location/browser-motion';
 import { fitCalibration } from '../src/location/geometry';
@@ -311,7 +312,7 @@ describe('IndoorPdrTracker lifecycle, deduplication, ambiguity, and halo invaria
     }
   });
 
-  it.each(['time', 'steps', 'unusable step'])('ends a resolved bridge on %s', (limit) => {
+  it.each(['time', 'steps', 'unusable step', 'rejections'])('ends a resolved bridge on %s', (limit) => {
     const tracker = new IndoorPdrTracker({ enableParticleFilter: true, seed: 42 });
     const startPt = cellToPage(160, 133, se12Surface, se12Plan);
     tracker.configureContext({
@@ -395,6 +396,20 @@ describe('IndoorPdrTracker lifecycle, deduplication, ambiguity, and halo invaria
     );
     expect(rejected.status).toBe('low-accuracy');
 
+    if (limit === 'rejections') {
+      expect(tracker.evaluateAt(lastGpsT + 4000, true, 'moving').status).toBe('bridged');
+      tracker.ingestGpsReading(readingFromPage(finalTruth, se12Fit, 50, lastGpsT + 4500), moving);
+      expect(tracker.evaluateAt(lastGpsT + 4500, true, 'moving').status).toBe('bridged');
+      tracker.ingestGpsReading(readingFromPage(finalTruth, se12Fit, 50, lastGpsT + 5000), moving);
+      expect(tracker.evaluateAt(lastGpsT + 5000, true, 'moving').status).toBe('low-accuracy');
+      expect(tracker.evaluateAt(lastGpsT + 7500, false, 'moving').status).toBe('low-accuracy');
+      tracker.ingestGpsReading(readingFromPage(finalTruth, se12Fit, 8, lastGpsT + 8000), moving);
+      expect(tracker.evaluateAt(lastGpsT + 8000, true, 'moving')).toMatchObject({
+        status: 'matched', overlay: { trackingMode: 'pdr' },
+      });
+      return;
+    }
+
     if (limit === 'steps') {
       for (let stepIndex = 2; stepIndex <= PDR_TRACKER_CONFIG.maxBridgeSteps; stepIndex++) {
         const timestamp = lastGpsT + 3000 + (stepIndex - 1) * 550;
@@ -417,6 +432,8 @@ describe('IndoorPdrTracker lifecycle, deduplication, ambiguity, and halo invaria
     const deadline = lastGpsT + PDR_TRACKER_CONFIG.maxBridgeMs;
     expect(tracker.evaluateAt(deadline - 1, false, 'moving').status).toBe('bridged');
     expect(tracker.evaluateAt(deadline, false, 'moving').status).toBe('waiting');
+    tracker.ingestGpsReading(readingFromPage(finalTruth, se12Fit, 50, deadline + 500), moving);
+    expect(tracker.evaluateAt(deadline + 500, true, 'moving').status).toBe('low-accuracy');
   });
 
   it.each(['gyro expiry', 'a step without gyro'] as const)(
@@ -459,8 +476,17 @@ describe('IndoorPdrTracker lifecycle, deduplication, ambiguity, and halo invaria
         expect(
           tracker.ingestGpsReading(readingFromPage(point, se12Fit, 8, 11_000), motion),
         ).toMatchObject({ overlay: { trackingMode: 'motion-gated' } });
+        // The recent Tier 2 fix holds conservatively without particle bridging, then expires past liveGpsHoldMs.
+        expect(tracker.evaluateAt(12_500, false, 'moving')).toMatchObject({
+          status: 'held',
+          overlay: { trackingMode: 'gps-hold' },
+        });
+        expect(
+          tracker.evaluateAt(11_000 + PDR_TRACKER_CONFIG.liveGpsHoldMs + 1, false, 'moving').status,
+        ).toBe('waiting');
+      } else {
+        expect(tracker.evaluateAt(12_500, false, 'moving').status).toBe('waiting');
       }
-      expect(tracker.evaluateAt(12_500, false, 'moving').status).toBe('waiting');
 
       const recovered = { ...motion, gyroFreshSince: 13_500 };
       tracker.updateMotion(recovered);
@@ -648,6 +674,166 @@ describe('IndoorPdrTracker lifecycle, deduplication, ambiguity, and halo invaria
     expect(
       tracker.ingestGpsReading(readingFromPage(sw3Pt, sw3Fit, 6, 12_000), moving).status,
     ).toBe('matched');
+  });
+
+  it('holds Tier 2 stationary anchor across 45 s GPS silence and releases immediately on step, moving, silence, or floor change', () => {
+    const tracker = new IndoorPdrTracker({ enableParticleFilter: false });
+    const corridorPt = cellToPage(200, 133, se12Surface, se12Plan);
+    tracker.configureContext({
+      plan: se12Plan,
+      calibration: se12Calibration,
+      surface: se12Surface,
+      stepKind: 'corridor',
+      isSamePlanStep: true,
+    });
+
+    // Establish a match while moving, then stop with 0 new steps -> latches stationary anchor automatically.
+    const moving = makeMotionSnapshot('moving', { hasGyro: false, estimatedDistanceMetres: 2.1 });
+    tracker.updateMotion(moving, 9_500);
+    const first = tracker.ingestGpsReading(readingFromPage(corridorPt, se12Fit, 7, 10_000), moving);
+    expect(first.status).toBe('matched');
+    if (first.status !== 'matched') return;
+    const baseRadiusX = first.overlay.radiusX;
+
+    const stationary = makeMotionSnapshot('stationary', {
+      hasGyro: false,
+      estimatedDistanceMetres: 2.1,
+    });
+    tracker.updateMotion(stationary, 10_500);
+
+    // 30 s later with no GPS updates: dot holds steadily with 0 halo inflation.
+    const held30 = tracker.evaluateAt(40_000, false, 'stationary');
+    expect(held30).toMatchObject({
+      status: 'held',
+      overlay: {
+        point: first.overlay.point,
+        radiusX: baseRadiusX,
+        trackingMode: 'stationary-hold',
+        ageSeconds: 30,
+      },
+    });
+
+    // Past 45 s stationary cap: expires cleanly to waiting.
+    expect(
+      tracker.evaluateAt(10_000 + PDR_TRACKER_CONFIG.stationaryHoldMaxMs + 1, false, 'stationary')
+        .status,
+    ).toBe('waiting');
+
+    // Sensor silence ('unknown') immediately drops stationary hold past 8 s.
+    expect(tracker.evaluateAt(25_000, false, 'unknown').status).toBe('waiting');
+
+    // A detected step immediately releases the stationary anchor.
+    tracker.ingestStep({
+      stepIndex: 1,
+      stepLengthMetres: 0.7,
+      deltaYawRad: 0,
+      hasGyro: false,
+      turnNoiseRad: 0,
+      timestamp: 25_000,
+    });
+    expect(tracker.evaluateAt(25_500, false, 'stationary').status).toBe('waiting');
+
+    // A delayed match can still inform GPS, but it cannot anchor a stationary hold before the step.
+    const delayed = { ...readingFromPage(corridorPt, se12Fit, 7, 24_000), receivedAt: 27_000 };
+    const afterStep = { ...stationary, lastStepAt: 25_000 };
+    tracker.ingestGpsReading(delayed, afterStep);
+    expect(tracker.evaluateAt(27_000, false, 'stationary')).toMatchObject({
+      status: 'held', overlay: { trackingMode: 'gps-hold' },
+    });
+    expect(tracker.evaluateAt(33_000, false, 'stationary').status).toBe('waiting');
+  });
+
+  it.each([
+    { enableParticleFilter: false, interruption: 'moving' },
+    { enableParticleFilter: false, interruption: 'unknown' },
+    { enableParticleFilter: true, interruption: 'moving' },
+    { enableParticleFilter: true, interruption: 'unknown' },
+  ] as const)('requires a new stationary anchor after $interruption with particle filter $enableParticleFilter', ({ enableParticleFilter, interruption }) => {
+    const tracker = new IndoorPdrTracker({ enableParticleFilter });
+    const point = cellToPage(200, 133, se12Surface, se12Plan);
+    tracker.configureContext({
+      plan: se12Plan, calibration: se12Calibration, surface: se12Surface,
+      stepKind: 'corridor', isSamePlanStep: true,
+    });
+    const stationary = makeMotionSnapshot('stationary');
+    tracker.ingestGpsReading(readingFromPage(point, se12Fit, 7, 10_000), stationary);
+    expect(tracker.evaluateAt(29_000, false, 'stationary')).toMatchObject({
+      status: 'held', overlay: { trackingMode: 'stationary-hold' },
+    });
+    tracker.updateMotion({ ...stationary, activity: interruption }, 30_000);
+    expect(tracker.evaluateAt(30_000, false, interruption).status).toBe('waiting');
+
+    const recovered = interruption === 'unknown' ? { ...stationary, gyroFreshSince: 32_000 } : stationary;
+    tracker.updateMotion(recovered, 32_000);
+    expect(tracker.evaluateAt(32_000, false, 'stationary').status).toBe('waiting');
+    tracker.ingestGpsReading({
+      ...readingFromPage(point, se12Fit, 7, 29_500), receivedAt: 33_000,
+    }, recovered);
+    expect(tracker.evaluateAt(46_000, false, 'stationary').status).toBe('waiting');
+    tracker.ingestGpsReading(readingFromPage(point, se12Fit, 7, 46_500), recovered);
+    expect(tracker.evaluateAt(63_500, false, 'stationary')).toMatchObject({
+      status: 'held', overlay: { trackingMode: 'stationary-hold' },
+    });
+  });
+
+  it('conservatively holds recent GPS for 8 s with growing halo while moving/unknown and tolerates 1-2 bad indoor outliers', () => {
+    const tracker = new IndoorPdrTracker({ enableParticleFilter: false });
+    const corridorPt = cellToPage(200, 133, se12Surface, se12Plan);
+    tracker.configureContext({
+      plan: se12Plan,
+      calibration: se12Calibration,
+      surface: se12Surface,
+      stepKind: 'corridor',
+      isSamePlanStep: true,
+    });
+
+    const unknown = makeMotionSnapshot('unknown', { active: false, hasAccel: false, hasGyro: false });
+    // Indoor fix arriving 3 s old (captured at 10_000, received at 13_000).
+    const initial = tracker.ingestGpsReading(
+      { ...readingFromPage(corridorPt, se12Fit, 7, 10_000), receivedAt: 13_000 },
+      unknown,
+    );
+    expect(initial.status).toBe('matched');
+    if (initial.status !== 'matched') return;
+    const baseRadiusPx = initial.overlay.radiusX * se12Plan.width;
+
+    // At t = 15_000 (5 s old): held conservatively with expanded halo and honest ageSeconds.
+    const held5 = tracker.evaluateAt(15_000, false, 'unknown');
+    expect(held5.status).toBe('held');
+    if (held5.status === 'held') {
+      expect(held5.overlay.trackingMode).toBe('gps-hold');
+      expect(held5.overlay.ageSeconds).toBe(5);
+      expect(held5.overlay.radiusX * se12Plan.width).toBeGreaterThan(baseRadiusPx + 4 * se12Fit.scale);
+    }
+
+    // 1st and 2nd bad accuracy spikes (50 m) do NOT blank the held dot.
+    const firstOutlier = {
+      ...readingFromPage(corridorPt, se12Fit, 50, 15_500), captureTimestamp: 15_700,
+    };
+    expect(tracker.ingestGpsReading(firstOutlier, unknown).status).toBe('low-accuracy');
+    expect(tracker.evaluateAt(15_500, true, 'unknown').status).toBe('held');
+    tracker.ingestGpsReading({ ...firstOutlier, timestamp: 15_600, receivedAt: 15_600 }, unknown);
+    expect(
+      tracker.ingestGpsReading(readingFromPage(corridorPt, se12Fit, 50, 16_000), unknown).status,
+    ).toBe('low-accuracy');
+    expect(tracker.evaluateAt(16_000, true, 'unknown').status).toBe('held');
+
+    // 3rd consecutive bad fix hides the dot and surfaces low-accuracy.
+    expect(
+      tracker.ingestGpsReading(readingFromPage(corridorPt, se12Fit, 50, 16_500), unknown).status,
+    ).toBe('low-accuracy');
+    expect(tracker.evaluateAt(16_500, true, 'unknown').status).toBe('low-accuracy');
+
+    // A fresh valid fix resets outlier count; past 8 s without updates expires to waiting.
+    expect(
+      tracker.ingestGpsReading(readingFromPage(corridorPt, se12Fit, 7, 17_000), unknown).status,
+    ).toBe('matched');
+    expect(tracker.evaluateAt(17_000 + PDR_TRACKER_CONFIG.liveGpsHoldMs, false, 'unknown').status).toBe(
+      'held',
+    );
+    expect(
+      tracker.evaluateAt(17_000 + PDR_TRACKER_CONFIG.liveGpsHoldMs + 1, false, 'unknown').status,
+    ).toBe('waiting');
   });
 });
 
@@ -1277,6 +1463,90 @@ describe('GuidedDirections DOM integration (iOS fallback, background return, fus
       await fixAt(Date.now());
       expect(host.querySelector('.device-position')?.getAttribute('data-tracking-mode')).toBe('pdr');
     } finally {
+      await act(async () => root.unmount());
+      host.remove();
+    }
+  });
+
+  it('uses prefetched walking surfaces synchronously on Step 1, holds recent GPS for 8 s with honest status, and hides past 8 s', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(30_000);
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+    vi.stubGlobal('isSecureContext', true);
+    vi.spyOn(document, 'hidden', 'get').mockReturnValue(false);
+    clearWalkingSurfaceCacheForTests();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => se12Surface,
+      }),
+    );
+
+    // Simulate prefetch completing before GuidedDirections mounts.
+    await fetchWalkingSurface(se12Plan.id);
+
+    let reportLocation: PositionCallback = () => {};
+    vi.stubGlobal('navigator', {
+      geolocation: {
+        watchPosition: vi.fn((success: PositionCallback) => {
+          reportLocation = success;
+          return 21;
+        }),
+        clearWatch: vi.fn(),
+      },
+    });
+
+    const route = makeRouteFixture();
+    const host = document.createElement('div');
+    document.body.append(host);
+    const root = createRoot(host);
+    try {
+      await act(async () =>
+        root.render(
+          createElement(RouteDirections, {
+            route,
+            plans: pilotEvidence().map((p) => p.plan),
+            locationCatalogue: catalogue,
+            onRecheck: vi.fn(),
+          }),
+        ),
+      );
+
+      const pt = se12Fit.unproject(cellToPage(200, 133, se12Surface, se12Plan));
+      // Even an indoor fix captured 3 s before receipt displays immediately as a corridor-matched held dot.
+      await act(async () =>
+        reportLocation({
+          coords: { latitude: pt.latitude, longitude: pt.longitude, accuracy: 7 },
+          timestamp: 27_000,
+        } as GeolocationPosition),
+      );
+      expect(host.querySelector('.device-position')?.getAttribute('data-matched')).toBe('true');
+      expect(host.querySelector('.device-position')?.getAttribute('data-held')).toBe('true');
+      expect(host.querySelector('.guided-location-status')?.textContent).toContain(
+        'last update 3 s ago',
+      );
+      const announcement = host.querySelector('.guided-location-status [role="status"]');
+      expect(announcement?.textContent).toBe('Holding last known corridor GPS position');
+      expect(announcement?.parentElement?.closest('[aria-live]')).toBeNull();
+
+      await act(async () => vi.advanceTimersByTime(1_000));
+      expect(host.querySelector('.guided-location-status')?.textContent).toContain('last update 4 s ago');
+      expect(announcement?.textContent).toBe('Holding last known corridor GPS position');
+
+      // At 9 seconds past capture the hold expires. A fresh accepted fix restores the dot.
+      await act(async () => vi.advanceTimersByTime(5_000));
+      expect(host.querySelector('.device-position')).toBeNull();
+      expect(announcement?.textContent).toBe('Waiting for a fresh GPS update…');
+      await act(async () =>
+        reportLocation({ coords: { ...pt, accuracy: 7 }, timestamp: Date.now() } as GeolocationPosition),
+      );
+      expect(host.querySelector('.device-position')).not.toBeNull();
+      expect(announcement?.textContent).toMatch(/^Approx\./);
+      expect(announcement?.textContent).not.toContain('±');
+    } finally {
+      clearWalkingSurfaceCacheForTests();
       await act(async () => root.unmount());
       host.remove();
     }

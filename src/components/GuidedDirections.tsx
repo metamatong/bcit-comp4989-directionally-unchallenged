@@ -3,7 +3,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react
 import { ArrowLeft, ArrowRight, Maximize2, Minimize2 } from 'lucide-react';
 import type { NavigationResult, WalkingSurface } from '../wayfinding';
 import type { VisualPlan } from '../types';
-import { fetchWalkingSurface } from '../api';
+import { fetchWalkingSurface, getCachedWalkingSurface } from '../api';
 import { planLabel } from '../topology';
 import { RouteMapImage } from './RouteMap';
 import type {
@@ -44,40 +44,70 @@ function locationStatusMessage({
   plan: VisualPlan;
   evaluation: TrackerEvaluation | null;
   device: DeviceOverlay | null;
-}) {
-  if (complete) return 'Location tracking stopped. Route complete.';
+}): { announcement: string; detail?: string } {
+  if (complete) return { announcement: 'Location tracking stopped. Route complete.' };
   if (evaluation?.status === 'bridged' && device) {
-    return 'Approx. step tracking · waiting for GPS…';
+    return { announcement: 'Approx. step tracking · waiting for GPS…' };
+  }
+  if (evaluation?.status === 'held' && device) {
+    const age = Math.max(1, device.ageSeconds ?? 0);
+    if (device.trackingMode === 'stationary-hold') {
+      return {
+        announcement: 'Holding corridor position while stationary',
+        detail: ` (last GPS ${age} s ago)`,
+      };
+    }
+    const position =
+      device.corridorMatched || device.snapDistanceMetres !== undefined
+        ? 'Holding last known corridor GPS position'
+        : 'Holding last known GPS position';
+    return {
+      announcement: position,
+      detail: ` (last update ${age} s ago · waiting for update…)`,
+    };
   }
   if (!reading || evaluation?.status === 'waiting') {
-    return trackingStatus || (hasStaleReading ? 'Waiting for a fresh GPS update…' : 'Waiting for GPS…');
+    return {
+      announcement:
+        trackingStatus || (hasStaleReading ? 'Waiting for a fresh GPS update…' : 'Waiting for GPS…'),
+    };
   }
   const floor = planLabel(plan);
   if (!hasBuilding) {
-    return `Building footprint unavailable for ${floor}. Position dot hidden.`;
+    return { announcement: `Building footprint unavailable for ${floor}. Position dot hidden.` };
   }
   if (evaluation?.status === 'unavailable') {
-    return `Floor-plan alignment is unavailable for ${floor}. Position dot hidden.`;
+    return { announcement: `Floor-plan alignment is unavailable for ${floor}. Position dot hidden.` };
   }
   if (evaluation?.status === 'low-accuracy') {
-    return `GPS accuracy too wide (±${reading.accuracy.toFixed(0)} m). Position dot hidden.`;
+    return {
+      announcement: 'GPS accuracy too wide. Position dot hidden.',
+      detail: ` (±${reading.accuracy.toFixed(0)} m)`,
+    };
   }
   if (evaluation?.status === 'too-far') {
-    return `GPS reading is outside mapped corridors on ${floor}. Position dot hidden.`;
+    return { announcement: `GPS reading is outside mapped corridors on ${floor}. Position dot hidden.` };
   }
-  if (evaluation?.status === 'raw' && !withinBuilding) {
-    return 'GPS area does not overlap this building. Position dot hidden.';
+  if (
+    evaluation?.status === 'outside-building' ||
+    (evaluation?.status === 'raw' && !withinBuilding)
+  ) {
+    return { announcement: 'GPS area does not overlap this building. Position dot hidden.' };
   }
   if (evaluation?.status === 'outside-page' || !device) {
-    return 'GPS position falls outside this floor plan. Position dot hidden.';
+    return { announcement: 'GPS position falls outside this floor plan. Position dot hidden.' };
   }
+  const accuracy = (device.reportedAccuracyMetres ?? reading.accuracy).toFixed(0);
+  let label = 'Approx. GPS';
   if (device.trackingMode === 'motion-gated' || device.trackingMode === 'pdr') {
-    return `Approx. corridor GPS + motion (±${reading.accuracy.toFixed(0)} m · indoor accuracy unmeasured)`;
+    label = 'Approx. corridor GPS + motion';
+  } else if (device.snapDistanceMetres !== undefined) {
+    label = 'Approx. corridor GPS';
   }
-  if (device.snapDistanceMetres !== undefined) {
-    return `Approx. corridor GPS (±${reading.accuracy.toFixed(0)} m · indoor accuracy unmeasured)`;
-  }
-  return `Approx. GPS (±${reading.accuracy.toFixed(0)} m · indoor accuracy unmeasured)`;
+  return {
+    announcement: label,
+    detail: ` (±${accuracy} m · indoor accuracy unmeasured)`,
+  };
 }
 
 export function GuidedDirections({
@@ -109,7 +139,18 @@ export function GuidedDirections({
   const tracking = useWalkingLocation(!gpsTestMode);
   const heading = useRef<HTMLHeadingElement>(null);
   const [whole, setWhole] = useState(false);
-  const [loadedSurfaces, setLoadedSurfaces] = useState<Record<string, WalkingSurface | null>>({});
+  const [loadedSurfaces, setLoadedSurfaces] = useState<Record<string, WalkingSurface | null>>(
+    () => {
+      const initial: Record<string, WalkingSurface | null> = {};
+      for (const routeStep of route.steps) {
+        for (const id of [routeStep.from.planId, routeStep.to.planId]) {
+          const cached = getCachedWalkingSurface(id);
+          if (cached) initial[id] = cached;
+        }
+      }
+      return initial;
+    },
+  );
   const [permissionTick, setPermissionTick] = useState(0);
   const [evaluation, setEvaluation] = useState<TrackerEvaluation | null>(null);
   const trackerRef = useRef<IndoorPdrTracker | null>(null);
@@ -135,7 +176,9 @@ export function GuidedDirections({
   const calibration = locationCatalogue?.floors.find((floor) => floor.planId === plan.id);
   const building = locationCatalogue?.buildings.find((item) => item.building === plan.building);
   const hasProvidedSurface = !!walkingSurfaces && plan.id in walkingSurfaces;
-  const surface = hasProvidedSurface ? walkingSurfaces[plan.id] : loadedSurfaces[plan.id];
+  const surface = hasProvidedSurface
+    ? walkingSurfaces[plan.id]
+    : (loadedSurfaces[plan.id] ?? getCachedWalkingSurface(plan.id));
   const canTrack = !complete && tracking.active && !gpsTestMode;
   const stepKind = step?.kind;
   const transferStepIndex = step && !isSamePlanCorridor ? index : undefined;
@@ -143,7 +186,7 @@ export function GuidedDirections({
   const stepStartPoint = isSamePlanCorridor ? step.from.point : undefined;
 
   const handleDetectedStep = useCallback((detected: DetectedStep, snapshot: MotionSnapshot) => {
-    trackerRef.current?.updateMotion(snapshot);
+    trackerRef.current?.updateMotion(snapshot, detected.timestamp);
     trackerRef.current?.ingestStep(detected);
   }, []);
 
@@ -155,6 +198,11 @@ export function GuidedDirections({
 
   useEffect(() => {
     if (complete || hasProvidedSurface || plan.id in loadedSurfaces) return;
+    const cached = getCachedWalkingSurface(plan.id);
+    if (cached) {
+      setLoadedSurfaces((current) => (plan.id in current ? current : { ...current, [plan.id]: cached }));
+      return;
+    }
     const controller = new AbortController();
     fetchWalkingSurface(plan.id, controller.signal).then((fetched) => {
       if (!controller.signal.aborted) {
@@ -186,7 +234,8 @@ export function GuidedDirections({
     return () => document.removeEventListener('visibilitychange', onVisibility);
   }, [complete, gpsTestMode]);
 
-  const reading = !complete && tracking.fresh ? (tracking.reading ?? null) : null;
+  // Ingest every accepted watch fix (including 2-8 s indoor fixes); freshness drives live vs. hold state.
+  const watchReading = !complete && tracking.active ? (tracking.reading ?? null) : null;
   const tracker = trackerRef.current;
 
   // Apply the committed floor and transfer context before consuming a GPS fix for it.
@@ -200,6 +249,7 @@ export function GuidedDirections({
         plan,
         calibration,
         surface,
+        buildingRings: building?.rings,
         stepKind,
         transferStepIndex,
         isSamePlanStep: !transfer,
@@ -214,6 +264,7 @@ export function GuidedDirections({
     plan,
     calibration,
     surface,
+    building,
     stepKind,
     transferStepIndex,
     transfer,
@@ -226,14 +277,16 @@ export function GuidedDirections({
       setEvaluation(null);
       return;
     }
-    if (reading) tracker.ingestGpsReading(reading, motion);
-    else tracker.updateMotion(motion);
-    setEvaluation(tracker.evaluateAt(Math.max(tracking.now, Date.now()), !!reading, motion.activity));
+    const observedAt = Math.max(tracking.now, Date.now());
+    if (watchReading) tracker.ingestGpsReading(watchReading, motion, observedAt);
+    else tracker.updateMotion(motion, observedAt);
+    setEvaluation(tracker.evaluateAt(observedAt, tracking.fresh, motion.activity));
   }, [
     tracker,
     canTrack,
     building,
-    reading,
+    watchReading,
+    tracking.fresh,
     motion,
     tracking.now,
     plan,
@@ -247,30 +300,31 @@ export function GuidedDirections({
   ]);
 
   const withinBuilding =
-    evaluation?.status === 'raw' && !!reading && !!building
-      ? overlapsFootprint(reading, building.rings)
+    evaluation?.status === 'raw' && !!watchReading && !!building
+      ? overlapsFootprint(watchReading, building.rings)
       : false;
   const device =
-    evaluation?.status === 'matched' || evaluation?.status === 'bridged'
+    evaluation?.status === 'matched' ||
+    evaluation?.status === 'bridged' ||
+    evaluation?.status === 'held'
       ? evaluation.overlay
       : evaluation?.status === 'raw' && withinBuilding
         ? evaluation.overlay
         : null;
 
-  const positionStatus = locationStatusMessage({
-    complete,
-    reading,
-    trackingStatus: tracking.status,
-    hasStaleReading: !!tracking.reading,
-    hasBuilding: !!building,
-    withinBuilding,
-    plan,
-    evaluation,
-    device,
-  });
-  const visiblePositionStatus = gpsTestMode
-    ? 'GPS disabled for local testing. Follow the route steps on the map.'
-    : positionStatus;
+  const positionStatus = gpsTestMode
+    ? { announcement: 'GPS disabled for local testing. Follow the route steps on the map.' }
+    : locationStatusMessage({
+        complete,
+        reading: watchReading,
+        trackingStatus: tracking.status,
+        hasStaleReading: !!tracking.reading,
+        hasBuilding: !!building,
+        withinBuilding,
+        plan,
+        evaluation,
+        device,
+      });
 
   useEffect(() => {
     heading.current?.focus({ preventScroll: true });
@@ -348,7 +402,7 @@ export function GuidedDirections({
         </button>
       </div>
 
-      <div className="guided-step bottom-sheet" aria-live="polite">
+      <div className="guided-step bottom-sheet">
         <span className="sheet-handle" aria-hidden="true" />
         <p className="guided-step-count">
           {complete ? 'Route complete' : `Step ${index + 1} of ${route.steps.length}`}
@@ -376,9 +430,21 @@ export function GuidedDirections({
             {transferNotice}
           </p>
         )}
-        <p className="guided-location-status" role="status">
-          {device && <span className="guided-location-dot" aria-hidden="true" />}
-          <span>{visiblePositionStatus}</span>
+        <p className="guided-location-status">
+          {device && (
+            <span
+              className={
+                device.trackingMode === 'gps-hold'
+                  ? 'guided-location-dot is-held'
+                  : 'guided-location-dot'
+              }
+              aria-hidden="true"
+            />
+          )}
+          <span>
+            <span role="status">{positionStatus.announcement}</span>
+            {positionStatus.detail}
+          </span>
         </p>
         <div className="guided-controls">
           <button

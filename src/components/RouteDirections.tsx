@@ -1,6 +1,7 @@
 /** Open complete routes in guided directions and keep the full itinerary available. */
 import { Fragment, useEffect, useRef, useState, type ReactNode } from 'react';
 import { RotateCcw } from 'lucide-react';
+import { prefetchWalkingSurfaces } from '../api';
 import { planLabel } from '../topology';
 import type { VisualPlan } from '../types';
 import { floorTransferInstruction } from '../wayfinding';
@@ -213,6 +214,16 @@ export function RouteDirections({
   const headingRef = useRef<HTMLHeadingElement>(null);
   const guidedChangeRef = useRef(onGuidedChange);
   guidedChangeRef.current = onGuidedChange;
+
+  useEffect(() => {
+    if (gpsTestMode || walkingSurfaces || !canGuide) return;
+    const planIds = new Set<string>();
+    for (const step of route.steps) {
+      if (step.from.planId) planIds.add(step.from.planId);
+      if (step.to.planId) planIds.add(step.to.planId);
+    }
+    prefetchWalkingSurfaces(planIds);
+  }, [gpsTestMode, walkingSurfaces, canGuide, route.steps]);
 
   useEffect(() => {
     guidedChangeRef.current?.(guided);
