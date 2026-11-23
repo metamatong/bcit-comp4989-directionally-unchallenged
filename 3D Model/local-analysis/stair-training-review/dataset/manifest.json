@@ -1,0 +1,2407 @@
+{
+  "taxonomy": "Single-class stair-assembly: connected visible tread banks plus divider/intervening landing. Not room enclosure, doorway point or inter-floor link.",
+  "reviewer": "Codex source-image review (AI)",
+  "humanVerified": false,
+  "fieldVerified": false,
+  "sourceComplete": false,
+  "scope": "Selected complete patches only, not whole-floor ground truth",
+  "objects": [
+    {
+      "id": "SE12-F1-p1-stair-01",
+      "candidateId": "SE12-F1-p1-det-000",
+      "planId": "SE12-F1-p1",
+      "split": "train",
+      "sourcePdfSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "imageSha256": "31c873f400e965a825f8586c94439aec1254954c1dfc0c75987e233ad779b4df",
+      "bounds": [
+        0.475,
+        0.314,
+        0.497,
+        0.329
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.663Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F1-p1-det-000",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.4671717171717172,
+        0.3088235294117647,
+        0.5045454545454545,
+        0.33366013071895423
+      ],
+      "cropSha256": "c8c1dbcf1aa05dfbf3082cc90c8bb70c197d5b2c97b4efe3aef780d4ba10e4ac",
+      "yoloBox": [
+        0.5037837837837836,
+        0.5103947368421057,
+        0.5886486486486497,
+        0.603947368421054
+      ],
+      "yoloBoxes": [
+        [
+          0.5037837837837836,
+          0.5103947368421057,
+          0.5886486486486497,
+          0.603947368421054
+        ]
+      ],
+      "image": "images/train/SE12-F1-p1-stair-01.png"
+    },
+    {
+      "id": "SE12-F2-p1-stair-01",
+      "candidateId": "SE12-F2-p1-det-000",
+      "planId": "SE12-F2-p1",
+      "split": "train",
+      "sourcePdfSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "imageSha256": "0781545412b3ea5b6d166f153d8b191b2b68e1dbe4ae0ca15a02e226728b0e7d",
+      "bounds": [
+        0.744,
+        0.372,
+        0.765,
+        0.414
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F2-p1-det-000",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.7388888888888889,
+        0.36414141414141415,
+        0.7696078431372549,
+        0.4212121212121212
+      ],
+      "cropSha256": "aeb37f6584725b98ae50e716bd300ec0e6e329acf2f96b19f399e934550780b9",
+      "yoloBox": [
+        0.5081914893616991,
+        0.5056637168141596,
+        0.6836170212765963,
+        0.7359292035398229
+      ],
+      "yoloBoxes": [
+        [
+          0.5081914893616991,
+          0.5056637168141596,
+          0.6836170212765963,
+          0.7359292035398229
+        ]
+      ],
+      "image": "images/train/SE12-F2-p1-stair-01.png"
+    },
+    {
+      "id": "SE12-F2-p1-stair-02",
+      "candidateId": "SE12-F2-p1-det-002",
+      "planId": "SE12-F2-p1",
+      "split": "train",
+      "sourcePdfSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "imageSha256": "0781545412b3ea5b6d166f153d8b191b2b68e1dbe4ae0ca15a02e226728b0e7d",
+      "bounds": [
+        0.799,
+        0.57,
+        0.824,
+        0.613
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.789,
+        0.568,
+        0.823,
+        0.61
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F2-p1-det-002",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.7937908496732026,
+        0.5621212121212121,
+        0.8287581699346406,
+        0.6202020202020202
+      ],
+      "cropSha256": "62716d25dc318a4786a4a3d2212f2f7cbe3b394a584c2d0d6d6764155573ea7e",
+      "yoloBox": [
+        0.506448598130841,
+        0.5058260869565202,
+        0.7149532710280329,
+        0.7403478260869574
+      ],
+      "yoloBoxes": [
+        [
+          0.506448598130841,
+          0.5058260869565202,
+          0.7149532710280329,
+          0.7403478260869574
+        ]
+      ],
+      "image": "images/train/SE12-F2-p1-stair-02.png"
+    },
+    {
+      "id": "SE12-F2-p1-stair-03",
+      "candidateId": "SE12-F2-p1-det-003",
+      "planId": "SE12-F2-p1",
+      "split": "train",
+      "sourcePdfSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "imageSha256": "0781545412b3ea5b6d166f153d8b191b2b68e1dbe4ae0ca15a02e226728b0e7d",
+      "bounds": [
+        0.055,
+        0.456,
+        0.084,
+        0.496
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F2-p1-det-003",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.05,
+        0.447979797979798,
+        0.08888888888888889,
+        0.5035353535353535
+      ],
+      "cropSha256": "652506e7003715a089652addf933c83c2fc7dff5c9a868df82763e3d7ce18e58",
+      "yoloBox": [
+        0.5014285714285716,
+        0.5043636363636363,
+        0.7457142857142859,
+        0.7200000000000001
+      ],
+      "yoloBoxes": [
+        [
+          0.5014285714285716,
+          0.5043636363636363,
+          0.7457142857142859,
+          0.7200000000000001
+        ]
+      ],
+      "image": "images/train/SE12-F2-p1-stair-03.png"
+    },
+    {
+      "id": "SE12-F2-p1-stair-04",
+      "candidateId": "SE12-F2-p1-det-004",
+      "planId": "SE12-F2-p1",
+      "split": "train",
+      "sourcePdfSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "imageSha256": "0781545412b3ea5b6d166f153d8b191b2b68e1dbe4ae0ca15a02e226728b0e7d",
+      "bounds": [
+        0.402,
+        0.22,
+        0.429,
+        0.266
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F2-p1-det-004",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.39705882352941174,
+        0.21212121212121213,
+        0.43366013071895426,
+        0.2732323232323232
+      ],
+      "cropSha256": "598ab3429f07d14ad26ca01c82ef2766acd44857b9c9ed0324c490d1a93b013f",
+      "yoloBox": [
+        0.5038392857142853,
+        0.5052892561983471,
+        0.7376785714285699,
+        0.7527272727272732
+      ],
+      "yoloBoxes": [
+        [
+          0.5038392857142853,
+          0.5052892561983471,
+          0.7376785714285699,
+          0.7527272727272732
+        ]
+      ],
+      "image": "images/train/SE12-F2-p1-stair-04.png"
+    },
+    {
+      "id": "SE12-F2-p1-stair-05",
+      "candidateId": "SE12-F2-p1-det-007",
+      "planId": "SE12-F2-p1",
+      "split": "train",
+      "sourcePdfSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "imageSha256": "0781545412b3ea5b6d166f153d8b191b2b68e1dbe4ae0ca15a02e226728b0e7d",
+      "bounds": [
+        0.524,
+        0.445,
+        0.533,
+        0.528
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F2-p1-det-007",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.5189542483660131,
+        0.43737373737373736,
+        0.5375816993464052,
+        0.5353535353535354
+      ],
+      "cropSha256": "edceb682a798feaf170303b8d159f5025ef716f01f90379930ba52c0ca804240",
+      "yoloBox": [
+        0.5124561403508751,
+        0.50139175257732,
+        0.48315789473684423,
+        0.8471134020618557
+      ],
+      "yoloBoxes": [
+        [
+          0.5124561403508751,
+          0.50139175257732,
+          0.48315789473684423,
+          0.8471134020618557
+        ]
+      ],
+      "image": "images/train/SE12-F2-p1-stair-05.png"
+    },
+    {
+      "id": "SE12-F3-p1-stair-01",
+      "candidateId": "SE12-F3-p1-det-000",
+      "planId": "SE12-F3-p1",
+      "split": "validation",
+      "sourcePdfSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "imageSha256": "75f1fae4a8354a32b33110151792dcd5cc472412a5034dc16ce7ecc31e457097",
+      "bounds": [
+        0.058,
+        0.505,
+        0.086,
+        0.542
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F3-p1-det-000",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.052941176470588235,
+        0.49696969696969695,
+        0.09084967320261438,
+        0.5494949494949495
+      ],
+      "cropSha256": "d3e991d0f37cbc9974ea4b8c7037e6d50ab071eb1dcaf59d3f1ccfaf2e5b6eac",
+      "yoloBox": [
+        0.502758620689655,
+        0.5050961538461556,
+        0.7386206896551722,
+        0.7044230769230775
+      ],
+      "yoloBoxes": [
+        [
+          0.502758620689655,
+          0.5050961538461556,
+          0.7386206896551722,
+          0.7044230769230775
+        ]
+      ],
+      "image": "images/validation/SE12-F3-p1-stair-01.png"
+    },
+    {
+      "id": "SE12-F3-p1-stair-02",
+      "candidateId": "SE12-F3-p1-det-005",
+      "planId": "SE12-F3-p1",
+      "split": "validation",
+      "sourcePdfSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "imageSha256": "75f1fae4a8354a32b33110151792dcd5cc472412a5034dc16ce7ecc31e457097",
+      "bounds": [
+        0.78,
+        0.615,
+        0.804,
+        0.659
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F3-p1-det-005",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.7748366013071896,
+        0.6070707070707071,
+        0.8088235294117647,
+        0.6661616161616162
+      ],
+      "cropSha256": "1c37f7fce7077990fcc1ebd944bcd4cdfa291973acbf8d1c172a73ff06eeb2f3",
+      "yoloBox": [
+        0.5050000000000006,
+        0.5064957264957264,
+        0.706153846153847,
+        0.7446153846153853
+      ],
+      "yoloBoxes": [
+        [
+          0.5050000000000006,
+          0.5064957264957264,
+          0.706153846153847,
+          0.7446153846153853
+        ]
+      ],
+      "image": "images/validation/SE12-F3-p1-stair-02.png"
+    },
+    {
+      "id": "SE12-F3-p1-stair-03",
+      "candidateId": "SE12-F3-p1-det-007",
+      "planId": "SE12-F3-p1",
+      "split": "validation",
+      "sourcePdfSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "imageSha256": "75f1fae4a8354a32b33110151792dcd5cc472412a5034dc16ce7ecc31e457097",
+      "bounds": [
+        0.395,
+        0.276,
+        0.421,
+        0.319
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.394,
+        0.276,
+        0.418,
+        0.319
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F3-p1-det-007",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.38986928104575164,
+        0.2681818181818182,
+        0.4258169934640523,
+        0.32626262626262625
+      ],
+      "cropSha256": "2f3a9d0d23c7fb6dc034e09902961e436651f750ad75d5c0f7f0328c995dd123",
+      "yoloBox": [
+        0.5043636363636373,
+        0.504782608695652,
+        0.7232727272727267,
+        0.7403478260869564
+      ],
+      "yoloBoxes": [
+        [
+          0.5043636363636373,
+          0.504782608695652,
+          0.7232727272727267,
+          0.7403478260869564
+        ]
+      ],
+      "image": "images/validation/SE12-F3-p1-stair-03.png"
+    },
+    {
+      "id": "SE12-F3-p1-stair-04",
+      "candidateId": "SE12-F3-p1-det-011",
+      "planId": "SE12-F3-p1",
+      "split": "validation",
+      "sourcePdfSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "imageSha256": "75f1fae4a8354a32b33110151792dcd5cc472412a5034dc16ce7ecc31e457097",
+      "bounds": [
+        0.727,
+        0.373,
+        0.746,
+        0.464
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F3-p1-det-011",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.7218954248366013,
+        0.36515151515151517,
+        0.7506535947712418,
+        0.4712121212121212
+      ],
+      "cropSha256": "ed553c855ee90fa02a96dcf72a70dfb59b507f69131f106e31d3a71347758aa9",
+      "yoloBox": [
+        0.507840909090907,
+        0.5029999999999999,
+        0.6606818181818186,
+        0.8580000000000005
+      ],
+      "yoloBoxes": [
+        [
+          0.507840909090907,
+          0.5029999999999999,
+          0.6606818181818186,
+          0.8580000000000005
+        ]
+      ],
+      "image": "images/validation/SE12-F3-p1-stair-04.png"
+    },
+    {
+      "id": "SE12-F4-p1-stair-01",
+      "candidateId": "SE12-F4-p1-det-000",
+      "planId": "SE12-F4-p1",
+      "split": "heldout",
+      "sourcePdfSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
+      "imageSha256": "398ad468d676a4f15d69ce6e1298ee1cb4f8a106e7de9dae19a8371edf67164f",
+      "bounds": [
+        0.045,
+        0.508,
+        0.075,
+        0.545
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F4-p1-det-000",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.03986928104575163,
+        0.5,
+        0.07973856209150326,
+        0.5525252525252525
+      ],
+      "cropSha256": "b4f9758c55f1fbff27d850522345ff9cdf3d99516d10df48f1a2a759220fadee",
+      "yoloBox": [
+        0.5049180327868853,
+        0.5045192307692301,
+        0.7524590163934427,
+        0.7044230769230775
+      ],
+      "yoloBoxes": [
+        [
+          0.5049180327868853,
+          0.5045192307692301,
+          0.7524590163934427,
+          0.7044230769230775
+        ]
+      ],
+      "image": "images/heldout/SE12-F4-p1-stair-01.png"
+    },
+    {
+      "id": "SE12-F4-p1-stair-02",
+      "candidateId": "SE12-F4-p1-det-002",
+      "planId": "SE12-F4-p1",
+      "split": "heldout",
+      "sourcePdfSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
+      "imageSha256": "398ad468d676a4f15d69ce6e1298ee1cb4f8a106e7de9dae19a8371edf67164f",
+      "bounds": [
+        0.73,
+        0.369,
+        0.748,
+        0.468
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F4-p1-det-002",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.7248366013071895,
+        0.3611111111111111,
+        0.7526143790849673,
+        0.47525252525252526
+      ],
+      "cropSha256": "100529819ddf80e14580430f6251cbd557fe12e1122897fb624e2a644bf3f7dc",
+      "yoloBox": [
+        0.5098823529411767,
+        0.5027876106194689,
+        0.6480000000000002,
+        0.867345132743363
+      ],
+      "yoloBoxes": [
+        [
+          0.5098823529411767,
+          0.5027876106194689,
+          0.6480000000000002,
+          0.867345132743363
+        ]
+      ],
+      "image": "images/heldout/SE12-F4-p1-stair-02.png"
+    },
+    {
+      "id": "SE12-F4-p1-stair-03",
+      "candidateId": "SE12-F4-p1-det-003",
+      "planId": "SE12-F4-p1",
+      "split": "heldout",
+      "sourcePdfSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
+      "imageSha256": "398ad468d676a4f15d69ce6e1298ee1cb4f8a106e7de9dae19a8371edf67164f",
+      "bounds": [
+        0.386,
+        0.273,
+        0.415,
+        0.319
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F4-p1-det-003",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.3810457516339869,
+        0.26515151515151514,
+        0.4196078431372549,
+        0.32626262626262625
+      ],
+      "cropSha256": "529b80fbdd5dd55ecece85c18544dcd6bab980963bf14071ab0ce62f2ee582ec",
+      "yoloBox": [
+        0.5044915254237281,
+        0.504793388429753,
+        0.7520338983050834,
+        0.7527272727272725
+      ],
+      "yoloBoxes": [
+        [
+          0.5044915254237281,
+          0.504793388429753,
+          0.7520338983050834,
+          0.7527272727272725
+        ]
+      ],
+      "image": "images/heldout/SE12-F4-p1-stair-03.png"
+    },
+    {
+      "id": "SE12-F4-p1-stair-04",
+      "candidateId": "SE12-F4-p1-det-016",
+      "planId": "SE12-F4-p1",
+      "split": "heldout",
+      "sourcePdfSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
+      "imageSha256": "398ad468d676a4f15d69ce6e1298ee1cb4f8a106e7de9dae19a8371edf67164f",
+      "bounds": [
+        0.78,
+        0.622,
+        0.805,
+        0.663
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F4-p1-det-016",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.7748366013071896,
+        0.6141414141414141,
+        0.8098039215686275,
+        0.6702020202020202
+      ],
+      "cropSha256": "afa15414b0f3d94feabb79befa1e446fb87dab209ebd796839d7094ee845580b",
+      "yoloBox": [
+        0.5051401869158869,
+        0.5058558558558571,
+        0.7149532710280383,
+        0.7313513513513509
+      ],
+      "yoloBoxes": [
+        [
+          0.5051401869158869,
+          0.5058558558558571,
+          0.7149532710280383,
+          0.7313513513513509
+        ]
+      ],
+      "image": "images/heldout/SE12-F4-p1-stair-04.png"
+    },
+    {
+      "id": "SW3-F1-p1-stair-01",
+      "candidateId": "SW3-F1-p1-det-000",
+      "planId": "SW3-F1-p1",
+      "split": "train",
+      "sourcePdfSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "imageSha256": "3cf7d53c4365472d31a2760affb4c8aac4aa26ca808385298b960bf78544b545",
+      "bounds": [
+        0.768,
+        0.532,
+        0.789,
+        0.56
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.769,
+        0.534,
+        0.783,
+        0.558
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F1-p1-det-000",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.7630718954248366,
+        0.5242424242424243,
+        0.7937908496732026,
+        0.5671717171717172
+      ],
+      "cropSha256": "540cedd6961b58d672d8a84cd4c958ef03fa7121645cd471c0d200baa2cb126e",
+      "yoloBox": [
+        0.502234042553192,
+        0.5068235294117647,
+        0.6836170212765963,
+        0.6522352941176477
+      ],
+      "yoloBoxes": [
+        [
+          0.502234042553192,
+          0.5068235294117647,
+          0.6836170212765963,
+          0.6522352941176477
+        ]
+      ],
+      "image": "images/train/SW3-F1-p1-stair-01.png"
+    },
+    {
+      "id": "SW3-F1-p1-stair-02",
+      "candidateId": "SW3-F1-p1-det-001",
+      "planId": "SW3-F1-p1",
+      "split": "train",
+      "sourcePdfSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "imageSha256": "3cf7d53c4365472d31a2760affb4c8aac4aa26ca808385298b960bf78544b545",
+      "bounds": [
+        0.264,
+        0.47,
+        0.283,
+        0.495
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.265,
+        0.47,
+        0.281,
+        0.494
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F1-p1-det-001",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.25882352941176473,
+        0.4621212121212121,
+        0.2875816993464052,
+        0.5025252525252525
+      ],
+      "cropSha256": "900c866563d69abf746cc9ec1cf175fdfbde33cc93cd8f84a5c4144bd4fd1f14",
+      "yoloBox": [
+        0.5103409090909079,
+        0.5043750000000004,
+        0.6606818181818179,
+        0.6187500000000008
+      ],
+      "yoloBoxes": [
+        [
+          0.5103409090909079,
+          0.5043750000000004,
+          0.6606818181818179,
+          0.6187500000000008
+        ]
+      ],
+      "image": "images/train/SW3-F1-p1-stair-02.png"
+    },
+    {
+      "id": "SW3-F1-p1-stair-03",
+      "candidateId": "SW3-F1-p1-det-003",
+      "planId": "SW3-F1-p1",
+      "split": "train",
+      "sourcePdfSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "imageSha256": "3cf7d53c4365472d31a2760affb4c8aac4aa26ca808385298b960bf78544b545",
+      "bounds": [
+        0.283,
+        0.672,
+        0.3,
+        0.694
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.285,
+        0.672,
+        0.299,
+        0.693
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F1-p1-det-003",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.2777777777777778,
+        0.6641414141414141,
+        0.3045751633986928,
+        0.7015151515151515
+      ],
+      "cropSha256": "0c9ebaa8f8758258da5d7d808617a31ddedad425305a91f11d3c92d6649fb8a3",
+      "yoloBox": [
+        0.5120731707317069,
+        0.5045945945945957,
+        0.6343902439024405,
+        0.5886486486486459
+      ],
+      "yoloBoxes": [
+        [
+          0.5120731707317069,
+          0.5045945945945957,
+          0.6343902439024405,
+          0.5886486486486459
+        ]
+      ],
+      "image": "images/train/SW3-F1-p1-stair-03.png"
+    },
+    {
+      "id": "SW3-F1-p1-stair-04",
+      "candidateId": "SW3-F1-p1-det-006",
+      "planId": "SW3-F1-p1",
+      "split": "train",
+      "sourcePdfSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "imageSha256": "3cf7d53c4365472d31a2760affb4c8aac4aa26ca808385298b960bf78544b545",
+      "bounds": [
+        0.3075,
+        0.65,
+        0.317,
+        0.692
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.311,
+        0.65,
+        0.32,
+        0.686
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F1-p1-det-006",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.3022875816993464,
+        0.6424242424242425,
+        0.32189542483660133,
+        0.6994949494949495
+      ],
+      "cropSha256": "298dc9a6495db387ee9c14534cf734331e901c66baac86b7855b917c014b8f13",
+      "yoloBox": [
+        0.5080833333333347,
+        0.5007079646017703,
+        0.48449999999999943,
+        0.7359292035398219
+      ],
+      "yoloBoxes": [
+        [
+          0.5080833333333347,
+          0.5007079646017703,
+          0.48449999999999943,
+          0.7359292035398219
+        ]
+      ],
+      "image": "images/train/SW3-F1-p1-stair-04.png"
+    },
+    {
+      "id": "SW3-F1-p1-stair-05",
+      "candidateId": "SW3-F1-p1-det-007",
+      "planId": "SW3-F1-p1",
+      "split": "train",
+      "sourcePdfSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "imageSha256": "3cf7d53c4365472d31a2760affb4c8aac4aa26ca808385298b960bf78544b545",
+      "bounds": [
+        0.367,
+        0.572,
+        0.382,
+        0.589
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.387,
+        0.573,
+        0.402,
+        0.588
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F1-p1-det-007",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.36209150326797385,
+        0.5641414141414142,
+        0.3866013071895425,
+        0.5964646464646465
+      ],
+      "cropSha256": "4598af7ddf160d690ee20d20cc4d67a343c231d00a880cf1891676c349f3d72f",
+      "yoloBox": [
+        0.5062666666666665,
+        0.50609375,
+        0.612,
+        0.5259375000000007
+      ],
+      "yoloBoxes": [
+        [
+          0.5062666666666665,
+          0.50609375,
+          0.612,
+          0.5259375000000007
+        ]
+      ],
+      "image": "images/train/SW3-F1-p1-stair-05.png"
+    },
+    {
+      "id": "SW3-F1-p1-stair-06",
+      "candidateId": "SW3-F1-p1-det-009",
+      "planId": "SW3-F1-p1",
+      "split": "train",
+      "sourcePdfSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "imageSha256": "3cf7d53c4365472d31a2760affb4c8aac4aa26ca808385298b960bf78544b545",
+      "bounds": [
+        0.32,
+        0.572,
+        0.335,
+        0.589
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "previousBounds": [
+        0.318,
+        0.572,
+        0.353,
+        0.589
+      ],
+      "additionalBounds": [
+        [
+          0.337,
+          0.572,
+          0.352,
+          0.589
+        ]
+      ],
+      "correction": "Neon identified two adjacent exterior stair bays separated by a pier. Codex confirms on source contact sheet: two object labels in one fully annotated patch; previous merged box retained.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F1-p1-det-009",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.3150326797385621,
+        0.5641414141414142,
+        0.3568627450980392,
+        0.5964646464646465
+      ],
+      "cropSha256": "487011bffeeaa7e5b2e7f567ca79b9006b1a74d25e17ae9e0352546c2bb7d950",
+      "yoloBox": [
+        0.29804687500000043,
+        0.50609375,
+        0.35859375000000016,
+        0.5259375000000007
+      ],
+      "yoloBoxes": [
+        [
+          0.29804687500000043,
+          0.50609375,
+          0.35859375000000016,
+          0.5259375000000007
+        ],
+        [
+          0.7044531250000006,
+          0.50609375,
+          0.3585937499999988,
+          0.5259375000000007
+        ]
+      ],
+      "image": "images/train/SW3-F1-p1-stair-06.png"
+    },
+    {
+      "id": "SW3-F1-p1-stair-07",
+      "candidateId": "SW3-F1-p1-det-008",
+      "planId": "SW3-F1-p1",
+      "split": "train",
+      "sourcePdfSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "imageSha256": "3cf7d53c4365472d31a2760affb4c8aac4aa26ca808385298b960bf78544b545",
+      "bounds": [
+        0.392,
+        0.5,
+        0.398,
+        0.513
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.373,
+        0.502,
+        0.378,
+        0.513
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F1-p1-det-008",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.3869281045751634,
+        0.49242424242424243,
+        0.40261437908496733,
+        0.5202020202020202
+      ],
+      "cropSha256": "5096658a3c114784eff6fba773d415b0e9440eed1e903e7771d13f9ac24821d6",
+      "yoloBox": [
+        0.5145833333333336,
+        0.5067272727272705,
+        0.38250000000000034,
+        0.4680000000000002
+      ],
+      "yoloBoxes": [
+        [
+          0.5145833333333336,
+          0.5067272727272705,
+          0.38250000000000034,
+          0.4680000000000002
+        ]
+      ],
+      "image": "images/train/SW3-F1-p1-stair-07.png"
+    },
+    {
+      "id": "SW3-F1-p1-stair-08",
+      "candidateId": "SW3-F1-p1-det-017",
+      "planId": "SW3-F1-p1",
+      "split": "train",
+      "sourcePdfSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "imageSha256": "3cf7d53c4365472d31a2760affb4c8aac4aa26ca808385298b960bf78544b545",
+      "bounds": [
+        0.522,
+        0.519,
+        0.542,
+        0.559
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.523,
+        0.52,
+        0.54,
+        0.559
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F1-p1-det-017",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.5169934640522876,
+        0.5111111111111111,
+        0.5467320261437908,
+        0.5661616161616162
+      ],
+      "cropSha256": "9bc5694fed361b6221af20fe42aadcf95847eb94f3357d0b3076463cd4c71c0d",
+      "yoloBox": [
+        0.5046153846153857,
+        0.5066055045871566,
+        0.6725274725274755,
+        0.7266055045871556
+      ],
+      "yoloBoxes": [
+        [
+          0.5046153846153857,
+          0.5066055045871566,
+          0.6725274725274755,
+          0.7266055045871556
+        ]
+      ],
+      "image": "images/train/SW3-F1-p1-stair-08.png"
+    },
+    {
+      "id": "SW3-F2-p1-stair-01",
+      "candidateId": "SW3-F2-p1-det-000",
+      "planId": "SW3-F2-p1",
+      "split": "train",
+      "sourcePdfSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "imageSha256": "09f8418f5bd386380e11218207f850febe1ab5be6aa12be2e0507103b051a085",
+      "bounds": [
+        0.838,
+        0.484,
+        0.864,
+        0.518
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.84,
+        0.487,
+        0.864,
+        0.516
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F2-p1-det-000",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.8330065359477125,
+        0.4762626262626263,
+        0.8686274509803922,
+        0.5252525252525253
+      ],
+      "cropSha256": "34be5a8ef68579ada5c63b54c6506c8ea2e05733ebfc64327d6150044ab0741c",
+      "yoloBox": [
+        0.5051376146788976,
+        0.5049484536082468,
+        0.7299082568807349,
+        0.6940206185567012
+      ],
+      "yoloBoxes": [
+        [
+          0.5051376146788976,
+          0.5049484536082468,
+          0.7299082568807349,
+          0.6940206185567012
+        ]
+      ],
+      "image": "images/train/SW3-F2-p1-stair-01.png"
+    },
+    {
+      "id": "SW3-F2-p1-stair-02",
+      "candidateId": "SW3-F2-p1-det-002",
+      "planId": "SW3-F2-p1",
+      "split": "train",
+      "sourcePdfSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "imageSha256": "09f8418f5bd386380e11218207f850febe1ab5be6aa12be2e0507103b051a085",
+      "bounds": [
+        0.527,
+        0.482,
+        0.551,
+        0.519
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.528,
+        0.486,
+        0.551,
+        0.516
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F2-p1-det-002",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.5218954248366013,
+        0.47424242424242424,
+        0.5558823529411765,
+        0.5262626262626262
+      ],
+      "cropSha256": "b97ebd9237c1a3a398e37731f0d90e7b34425d7e933f61631406d3bc6fa455ca",
+      "yoloBox": [
+        0.5032692307692309,
+        0.5047572815533975,
+        0.706153846153847,
+        0.7112621359223315
+      ],
+      "yoloBoxes": [
+        [
+          0.5032692307692309,
+          0.5047572815533975,
+          0.706153846153847,
+          0.7112621359223315
+        ]
+      ],
+      "image": "images/train/SW3-F2-p1-stair-02.png"
+    },
+    {
+      "id": "SW3-F2-p1-stair-03",
+      "candidateId": "SW3-F2-p1-det-003",
+      "planId": "SW3-F2-p1",
+      "split": "train",
+      "sourcePdfSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "imageSha256": "09f8418f5bd386380e11218207f850febe1ab5be6aa12be2e0507103b051a085",
+      "bounds": [
+        0.2255,
+        0.658,
+        0.245,
+        0.689
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.227,
+        0.66,
+        0.244,
+        0.687
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F2-p1-det-003",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.22058823529411764,
+        0.65,
+        0.2496732026143791,
+        0.6964646464646465
+      ],
+      "cropSha256": "ba701cf98a0a05d49070841c99a36b151a7f88257482cba5619f235e0cba99c4",
+      "yoloBox": [
+        0.5041011235955062,
+        0.505760869565217,
+        0.6704494382022467,
+        0.667173913043477
+      ],
+      "yoloBoxes": [
+        [
+          0.5041011235955062,
+          0.505760869565217,
+          0.6704494382022467,
+          0.667173913043477
+        ]
+      ],
+      "image": "images/train/SW3-F2-p1-stair-03.png"
+    },
+    {
+      "id": "SW3-F2-p1-stair-04",
+      "candidateId": "SW3-F2-p1-missed-s280",
+      "planId": "SW3-F2-p1",
+      "split": "train",
+      "sourcePdfSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "imageSha256": "09f8418f5bd386380e11218207f850febe1ab5be6aa12be2e0507103b051a085",
+      "bounds": [
+        0.203,
+        0.407,
+        0.226,
+        0.438
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.204,
+        0.407,
+        0.226,
+        0.437
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F2-p1-missed-s280",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.1980392156862745,
+        0.398989898989899,
+        0.23071895424836603,
+        0.44545454545454544
+      ],
+      "cropSha256": "dd46664101eb60cfd9dfcc13196823b74cdaa850552890032faf190e11c12fac",
+      "yoloBox": [
+        0.5037000000000007,
+        0.505978260869565,
+        0.7037999999999993,
+        0.6671739130434794
+      ],
+      "yoloBoxes": [
+        [
+          0.5037000000000007,
+          0.505978260869565,
+          0.7037999999999993,
+          0.6671739130434794
+        ]
+      ],
+      "image": "images/train/SW3-F2-p1-stair-04.png"
+    },
+    {
+      "id": "SW3-F3-p1-stair-01",
+      "candidateId": "SW3-F3-p1-det-000",
+      "planId": "SW3-F3-p1",
+      "split": "validation",
+      "sourcePdfSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+      "imageSha256": "894128d27ceb331d541658b7facba9e6ffddd85e74a94d9917bcd3e42e76623d",
+      "bounds": [
+        0.746,
+        0.66,
+        0.763,
+        0.687
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.746,
+        0.663,
+        0.763,
+        0.685
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F3-p1-det-000",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.7408496732026144,
+        0.652020202020202,
+        0.7676470588235295,
+        0.6944444444444444
+      ],
+      "cropSha256": "106c7658c5f28614c787b3ed632f367dd4ec4fd7cd1da2751ba4d451fa17077e",
+      "yoloBox": [
+        0.5093902439024356,
+        0.5063095238095234,
+        0.6343902439024393,
+        0.6364285714285729
+      ],
+      "yoloBoxes": [
+        [
+          0.5093902439024356,
+          0.5063095238095234,
+          0.6343902439024393,
+          0.6364285714285729
+        ]
+      ],
+      "image": "images/validation/SW3-F3-p1-stair-01.png"
+    },
+    {
+      "id": "SW3-F3-p1-stair-02",
+      "candidateId": "SW3-F3-p1-det-005",
+      "planId": "SW3-F3-p1",
+      "split": "validation",
+      "sourcePdfSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+      "imageSha256": "894128d27ceb331d541658b7facba9e6ffddd85e74a94d9917bcd3e42e76623d",
+      "bounds": [
+        0.501,
+        0.66,
+        0.519,
+        0.687
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.502,
+        0.661,
+        0.518,
+        0.686
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F3-p1-det-005",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.49607843137254903,
+        0.652020202020202,
+        0.5238562091503268,
+        0.6944444444444444
+      ],
+      "cropSha256": "5f85773845b291298176ac943a3ab7b282cf5ea6f2706a9b420c7cb16a762d6a",
+      "yoloBox": [
+        0.5011764705882349,
+        0.5063095238095234,
+        0.6480000000000002,
+        0.6364285714285729
+      ],
+      "yoloBoxes": [
+        [
+          0.5011764705882349,
+          0.5063095238095234,
+          0.6480000000000002,
+          0.6364285714285729
+        ]
+      ],
+      "image": "images/validation/SW3-F3-p1-stair-02.png"
+    },
+    {
+      "id": "SW3-F3-p1-stair-03",
+      "candidateId": "SW3-F3-p1-det-004",
+      "planId": "SW3-F3-p1",
+      "split": "validation",
+      "sourcePdfSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+      "imageSha256": "894128d27ceb331d541658b7facba9e6ffddd85e74a94d9917bcd3e42e76623d",
+      "bounds": [
+        0.241,
+        0.6,
+        0.259,
+        0.623
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.241,
+        0.6,
+        0.256,
+        0.622
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F3-p1-det-004",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.23594771241830065,
+        0.5924242424242424,
+        0.26372549019607844,
+        0.6303030303030303
+      ],
+      "cropSha256": "7ef43a9f9943df9c2b6c74557a1fb9f7f3c12e9499ad9d2c5fc8ec0a064b77b8",
+      "yoloBox": [
+        0.5058823529411764,
+        0.503599999999999,
+        0.6480000000000002,
+        0.6072000000000011
+      ],
+      "yoloBoxes": [
+        [
+          0.5058823529411764,
+          0.503599999999999,
+          0.6480000000000002,
+          0.6072000000000011
+        ]
+      ],
+      "image": "images/validation/SW3-F3-p1-stair-03.png"
+    },
+    {
+      "id": "SW3-F4-p1-stair-01",
+      "candidateId": "SW3-F4-p1-det-000",
+      "planId": "SW3-F4-p1",
+      "split": "heldout",
+      "sourcePdfSha256": "ec9b5c3ae80da356b78dc7ea89e3228e6cd6b5e882d9c20a6b7e10bbd5ec034a",
+      "imageSha256": "92a800e07de1d97a674290864cb909607bac552ddff2c07caf58d924ec3551b2",
+      "bounds": [
+        0.746,
+        0.612,
+        0.763,
+        0.643
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.746,
+        0.616,
+        0.762,
+        0.64
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F4-p1-det-000",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.7408496732026144,
+        0.604040404040404,
+        0.7676470588235295,
+        0.6505050505050505
+      ],
+      "cropSha256": "0facbb1b5b2eed6ecd0b6d6e35c0f93512a6fe307d90212a178b14baa3b84575",
+      "yoloBox": [
+        0.5093902439024356,
+        0.5048913043478253,
+        0.6343902439024393,
+        0.6671739130434794
+      ],
+      "yoloBoxes": [
+        [
+          0.5093902439024356,
+          0.5048913043478253,
+          0.6343902439024393,
+          0.6671739130434794
+        ]
+      ],
+      "image": "images/heldout/SW3-F4-p1-stair-01.png"
+    },
+    {
+      "id": "SW3-F4-p1-stair-02",
+      "candidateId": "SW3-F4-p1-det-003",
+      "planId": "SW3-F4-p1",
+      "split": "heldout",
+      "sourcePdfSha256": "ec9b5c3ae80da356b78dc7ea89e3228e6cd6b5e882d9c20a6b7e10bbd5ec034a",
+      "imageSha256": "92a800e07de1d97a674290864cb909607bac552ddff2c07caf58d924ec3551b2",
+      "bounds": [
+        0.243,
+        0.55,
+        0.259,
+        0.574
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F4-p1-det-003",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.23790849673202613,
+        0.5424242424242425,
+        0.26372549019607844,
+        0.5813131313131313
+      ],
+      "cropSha256": "d35309915bb587098b0deb818b94b0e5d1ae74019d9e083a9f41f887abee70fe",
+      "yoloBox": [
+        0.5070886075949369,
+        0.5033766233766238,
+        0.6197468354430381,
+        0.6171428571428552
+      ],
+      "yoloBoxes": [
+        [
+          0.5070886075949369,
+          0.5033766233766238,
+          0.6197468354430381,
+          0.6171428571428552
+        ]
+      ],
+      "image": "images/heldout/SW3-F4-p1-stair-02.png"
+    },
+    {
+      "id": "SW3-F4-p1-stair-03",
+      "candidateId": "SW3-F4-p1-det-002",
+      "planId": "SW3-F4-p1",
+      "split": "heldout",
+      "sourcePdfSha256": "ec9b5c3ae80da356b78dc7ea89e3228e6cd6b5e882d9c20a6b7e10bbd5ec034a",
+      "imageSha256": "92a800e07de1d97a674290864cb909607bac552ddff2c07caf58d924ec3551b2",
+      "bounds": [
+        0.501,
+        0.61,
+        0.518,
+        0.639
+      ],
+      "status": "source-geometry-checked",
+      "reviewer": "Codex visual source review (AI)",
+      "className": "stair-assembly",
+      "note": "Codex visually checked the final box-review sheets against source-derived patches. Complete visible stair-tread assembly in this patch; approximate raster box, not a room, landing coordinate or connection approval.",
+      "previousBounds": [
+        0.501,
+        0.613,
+        0.518,
+        0.637
+      ],
+      "correction": "Corrected after rendered source overlay inspection; preserved previous bounds.",
+      "cropComplete": true,
+      "reviewedAt": "2026-11-19T18:47:49.664Z",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F4-p1-det-002",
+        "classification": "stair-flight",
+        "report": "stair-training-review.json"
+      },
+      "cropBounds": [
+        0.49607843137254903,
+        0.602020202020202,
+        0.5228758169934641,
+        0.6464646464646465
+      ],
+      "cropSha256": "b0795e044987790ffc28e3fee1fa0ca4463eb524eea6dac1e2ea08894e9b2d33",
+      "yoloBox": [
+        0.5008536585365869,
+        0.5057954545454553,
+        0.6343902439024393,
+        0.6524999999999996
+      ],
+      "yoloBoxes": [
+        [
+          0.5008536585365869,
+          0.5057954545454553,
+          0.6343902439024393,
+          0.6524999999999996
+        ]
+      ],
+      "image": "images/heldout/SW3-F4-p1-stair-03.png"
+    },
+    {
+      "id": "SE12-F1-p1-det-001-negative",
+      "candidateId": "SE12-F1-p1-det-001",
+      "planId": "SE12-F1-p1",
+      "split": "train",
+      "sourcePdfSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "imageSha256": "31c873f400e965a825f8586c94439aec1254954c1dfc0c75987e233ad779b4df",
+      "bounds": [
+        0.5085858585858586,
+        0.6660130718954248,
+        0.6904040404040404,
+        0.7836601307189542
+      ],
+      "cropFile": "crops/SE12-F1-p1-det-001.png",
+      "cropSha256": "7ce5de4dc1b57b605e82eb0caea1e163a7fbf5fb1230c111c20ac4d592b5696d",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F1-p1-det-001",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/train/SE12-F1-p1-det-001-negative.png",
+      "cropBounds": [
+        0.5085858585858586,
+        0.6660130718954248,
+        0.6904040404040404,
+        0.7836601307189542
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SE12-F1-p1-det-003-negative",
+      "candidateId": "SE12-F1-p1-det-003",
+      "planId": "SE12-F1-p1",
+      "split": "train",
+      "sourcePdfSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "imageSha256": "31c873f400e965a825f8586c94439aec1254954c1dfc0c75987e233ad779b4df",
+      "bounds": [
+        0.5060606060606061,
+        0.27712418300653596,
+        0.6878787878787879,
+        0.39477124183006534
+      ],
+      "cropFile": "crops/SE12-F1-p1-det-003.png",
+      "cropSha256": "770397a4d412b0d3f99812e61ff44ff29a7b382963b9d4176e64a14920961709",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F1-p1-det-003",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/train/SE12-F1-p1-det-003-negative.png",
+      "cropBounds": [
+        0.5060606060606061,
+        0.27712418300653596,
+        0.6878787878787879,
+        0.39477124183006534
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SE12-F1-p1-det-004-negative",
+      "candidateId": "SE12-F1-p1-det-004",
+      "planId": "SE12-F1-p1",
+      "split": "train",
+      "sourcePdfSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "imageSha256": "31c873f400e965a825f8586c94439aec1254954c1dfc0c75987e233ad779b4df",
+      "bounds": [
+        0.6237373737373737,
+        0.26601307189542484,
+        0.8055555555555556,
+        0.3836601307189543
+      ],
+      "cropFile": "crops/SE12-F1-p1-det-004.png",
+      "cropSha256": "ea054133bdb555881cbe6ba452a14144937dbcd17cdedc4df7c69e48e3214d6b",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F1-p1-det-004",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/train/SE12-F1-p1-det-004-negative.png",
+      "cropBounds": [
+        0.6237373737373737,
+        0.26601307189542484,
+        0.8055555555555556,
+        0.3836601307189543
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SE12-F2-p1-det-001-negative",
+      "candidateId": "SE12-F2-p1-det-001",
+      "planId": "SE12-F2-p1",
+      "split": "train",
+      "sourcePdfSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "imageSha256": "0781545412b3ea5b6d166f153d8b191b2b68e1dbe4ae0ca15a02e226728b0e7d",
+      "bounds": [
+        0.21928104575163399,
+        0.2585858585858586,
+        0.3369281045751634,
+        0.4404040404040404
+      ],
+      "cropFile": "crops/SE12-F2-p1-det-001.png",
+      "cropSha256": "4a9272df7542597b054817b4c316d9c712ed4709882228a2b1c4289d2f408840",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F2-p1-det-001",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/train/SE12-F2-p1-det-001-negative.png",
+      "cropBounds": [
+        0.21928104575163399,
+        0.2585858585858586,
+        0.3369281045751634,
+        0.4404040404040404
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SE12-F2-p1-det-006-negative",
+      "candidateId": "SE12-F2-p1-det-006",
+      "planId": "SE12-F2-p1",
+      "split": "train",
+      "sourcePdfSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "imageSha256": "0781545412b3ea5b6d166f153d8b191b2b68e1dbe4ae0ca15a02e226728b0e7d",
+      "bounds": [
+        0.11405228758169934,
+        0.3196969696969697,
+        0.23169934640522877,
+        0.501010101010101
+      ],
+      "cropFile": "crops/SE12-F2-p1-det-006.png",
+      "cropSha256": "ee0cdd7afa38de2f3df3f93a3d78a0c2116cfb2a905b8ffe0beb6c0e051fd51f",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F2-p1-det-006",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/train/SE12-F2-p1-det-006-negative.png",
+      "cropBounds": [
+        0.11405228758169934,
+        0.3196969696969697,
+        0.23169934640522877,
+        0.501010101010101
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SE12-F2-p1-det-009-negative",
+      "candidateId": "SE12-F2-p1-det-009",
+      "planId": "SE12-F2-p1",
+      "split": "train",
+      "sourcePdfSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "imageSha256": "0781545412b3ea5b6d166f153d8b191b2b68e1dbe4ae0ca15a02e226728b0e7d",
+      "bounds": [
+        0.20980392156862746,
+        0.23535353535353534,
+        0.32745098039215687,
+        0.4171717171717172
+      ],
+      "cropFile": "crops/SE12-F2-p1-det-009.png",
+      "cropSha256": "b2ca8378d029bb71ff6a4ff96abf2a12899b58b76f7299ddf86bbd92ded8e596",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F2-p1-det-009",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/train/SE12-F2-p1-det-009-negative.png",
+      "cropBounds": [
+        0.20980392156862746,
+        0.23535353535353534,
+        0.32745098039215687,
+        0.4171717171717172
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SE12-F2-p1-det-010-negative",
+      "candidateId": "SE12-F2-p1-det-010",
+      "planId": "SE12-F2-p1",
+      "split": "train",
+      "sourcePdfSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "imageSha256": "0781545412b3ea5b6d166f153d8b191b2b68e1dbe4ae0ca15a02e226728b0e7d",
+      "bounds": [
+        0.020261437908496733,
+        0.796969696969697,
+        0.13790849673202615,
+        0.9787878787878788
+      ],
+      "cropFile": "crops/SE12-F2-p1-det-010.png",
+      "cropSha256": "ea3cd254f9f7e0979cac0b561179899021357ae6550735ae1c4dce89da822d3a",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F2-p1-det-010",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/train/SE12-F2-p1-det-010-negative.png",
+      "cropBounds": [
+        0.020261437908496733,
+        0.796969696969697,
+        0.13790849673202615,
+        0.9787878787878788
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SE12-F2-p1-det-015-negative",
+      "candidateId": "SE12-F2-p1-det-015",
+      "planId": "SE12-F2-p1",
+      "split": "train",
+      "sourcePdfSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "imageSha256": "0781545412b3ea5b6d166f153d8b191b2b68e1dbe4ae0ca15a02e226728b0e7d",
+      "bounds": [
+        0.40490196078431373,
+        0.28585858585858587,
+        0.5225490196078432,
+        0.4676767676767677
+      ],
+      "cropFile": "crops/SE12-F2-p1-det-015.png",
+      "cropSha256": "d8b238ee8026ca11590fdb1482159ba8e032e2b75f1e502859c547697d2a2397",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F2-p1-det-015",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/train/SE12-F2-p1-det-015-negative.png",
+      "cropBounds": [
+        0.40490196078431373,
+        0.28585858585858587,
+        0.5225490196078432,
+        0.4676767676767677
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SW3-F1-p1-det-012-negative",
+      "candidateId": "SW3-F1-p1-det-012",
+      "planId": "SW3-F1-p1",
+      "split": "train",
+      "sourcePdfSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+      "imageSha256": "3cf7d53c4365472d31a2760affb4c8aac4aa26ca808385298b960bf78544b545",
+      "bounds": [
+        0.020261437908496733,
+        0.796969696969697,
+        0.13790849673202615,
+        0.9787878787878788
+      ],
+      "cropFile": "crops/SW3-F1-p1-det-012.png",
+      "cropSha256": "23cd45028f2fbad995606bcec0b4ddf501b5de7aecccd7b3772b36975e0ccf82",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F1-p1-det-012",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/train/SW3-F1-p1-det-012-negative.png",
+      "cropBounds": [
+        0.020261437908496733,
+        0.796969696969697,
+        0.13790849673202615,
+        0.9787878787878788
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SW3-F2-p1-det-006-negative",
+      "candidateId": "SW3-F2-p1-det-006",
+      "planId": "SW3-F2-p1",
+      "split": "train",
+      "sourcePdfSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "imageSha256": "09f8418f5bd386380e11218207f850febe1ab5be6aa12be2e0507103b051a085",
+      "bounds": [
+        0.43366013071895426,
+        0.23686868686868687,
+        0.5513071895424837,
+        0.41868686868686866
+      ],
+      "cropFile": "crops/SW3-F2-p1-det-006.png",
+      "cropSha256": "05053c13293f0ac4f9d349c4443f726c29f9d1c27107362b00c1c57502588a0d",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F2-p1-det-006",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/train/SW3-F2-p1-det-006-negative.png",
+      "cropBounds": [
+        0.43366013071895426,
+        0.23686868686868687,
+        0.5513071895424837,
+        0.41868686868686866
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SW3-F2-p1-det-013-negative",
+      "candidateId": "SW3-F2-p1-det-013",
+      "planId": "SW3-F2-p1",
+      "split": "train",
+      "sourcePdfSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "imageSha256": "09f8418f5bd386380e11218207f850febe1ab5be6aa12be2e0507103b051a085",
+      "bounds": [
+        0.3179738562091503,
+        0.35555555555555557,
+        0.43594771241830066,
+        0.5373737373737374
+      ],
+      "cropFile": "crops/SW3-F2-p1-det-013.png",
+      "cropSha256": "629fa7b936370169b92d4d248517e5bb31f7e55e7c5a0e090a3939c81dfd33f0",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F2-p1-det-013",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/train/SW3-F2-p1-det-013-negative.png",
+      "cropBounds": [
+        0.3179738562091503,
+        0.35555555555555557,
+        0.43594771241830066,
+        0.5373737373737374
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SW3-F2-p1-det-014-negative",
+      "candidateId": "SW3-F2-p1-det-014",
+      "planId": "SW3-F2-p1",
+      "split": "train",
+      "sourcePdfSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "imageSha256": "09f8418f5bd386380e11218207f850febe1ab5be6aa12be2e0507103b051a085",
+      "bounds": [
+        0.8751633986928105,
+        0.8181818181818182,
+        0.9928104575163399,
+        1
+      ],
+      "cropFile": "crops/SW3-F2-p1-det-014.png",
+      "cropSha256": "1a081947e6279c05fbe8237b4e1a0e42e5bf3d0846dd7e2758203455272c09ca",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F2-p1-det-014",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/train/SW3-F2-p1-det-014-negative.png",
+      "cropBounds": [
+        0.8751633986928105,
+        0.8181818181818182,
+        0.9928104575163399,
+        1
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SE12-F3-p1-det-002-negative",
+      "candidateId": "SE12-F3-p1-det-002",
+      "planId": "SE12-F3-p1",
+      "split": "validation",
+      "sourcePdfSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "imageSha256": "75f1fae4a8354a32b33110151792dcd5cc472412a5034dc16ce7ecc31e457097",
+      "bounds": [
+        0.08398692810457517,
+        0.8101010101010101,
+        0.20163398692810458,
+        0.9919191919191919
+      ],
+      "cropFile": "crops/SE12-F3-p1-det-002.png",
+      "cropSha256": "2ded3ad112746aecc4362c3ca82c52217c902d3666c724cd07131595c48b0ea5",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F3-p1-det-002",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/validation/SE12-F3-p1-det-002-negative.png",
+      "cropBounds": [
+        0.08398692810457517,
+        0.8101010101010101,
+        0.20163398692810458,
+        0.9919191919191919
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SE12-F3-p1-det-003-negative",
+      "candidateId": "SE12-F3-p1-det-003",
+      "planId": "SE12-F3-p1",
+      "split": "validation",
+      "sourcePdfSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "imageSha256": "75f1fae4a8354a32b33110151792dcd5cc472412a5034dc16ce7ecc31e457097",
+      "bounds": [
+        0.873202614379085,
+        0.05454545454545454,
+        0.9908496732026144,
+        0.23636363636363636
+      ],
+      "cropFile": "crops/SE12-F3-p1-det-003.png",
+      "cropSha256": "f8cb3e9f15b77dfae121e78602cf4b2d3f3e70ad4eba8b9c38a906c6d2685509",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F3-p1-det-003",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/validation/SE12-F3-p1-det-003-negative.png",
+      "cropBounds": [
+        0.873202614379085,
+        0.05454545454545454,
+        0.9908496732026144,
+        0.23636363636363636
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SE12-F3-p1-det-009-negative",
+      "candidateId": "SE12-F3-p1-det-009",
+      "planId": "SE12-F3-p1",
+      "split": "validation",
+      "sourcePdfSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "imageSha256": "75f1fae4a8354a32b33110151792dcd5cc472412a5034dc16ce7ecc31e457097",
+      "bounds": [
+        0.8598039215686275,
+        0.8181818181818182,
+        0.9774509803921568,
+        1
+      ],
+      "cropFile": "crops/SE12-F3-p1-det-009.png",
+      "cropSha256": "93072107757894d6134bda375f6e3927d9cde3c9f7af57ed263efe10979abbcf",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F3-p1-det-009",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/validation/SE12-F3-p1-det-009-negative.png",
+      "cropBounds": [
+        0.8598039215686275,
+        0.8181818181818182,
+        0.9774509803921568,
+        1
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SW3-F3-p1-det-007-negative",
+      "candidateId": "SW3-F3-p1-det-007",
+      "planId": "SW3-F3-p1",
+      "split": "validation",
+      "sourcePdfSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+      "imageSha256": "894128d27ceb331d541658b7facba9e6ffddd85e74a94d9917bcd3e42e76623d",
+      "bounds": [
+        0.020261437908496733,
+        0.796969696969697,
+        0.13790849673202615,
+        0.9787878787878788
+      ],
+      "cropFile": "crops/SW3-F3-p1-det-007.png",
+      "cropSha256": "79b03e0aacb6aaccf2c0bbb0a224b3c087abbc1de675b65c7d73bb3bbaebc1d1",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F3-p1-det-007",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/validation/SW3-F3-p1-det-007-negative.png",
+      "cropBounds": [
+        0.020261437908496733,
+        0.796969696969697,
+        0.13790849673202615,
+        0.9787878787878788
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SW3-F3-p1-det-013-negative",
+      "candidateId": "SW3-F3-p1-det-013",
+      "planId": "SW3-F3-p1",
+      "split": "validation",
+      "sourcePdfSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
+      "imageSha256": "894128d27ceb331d541658b7facba9e6ffddd85e74a94d9917bcd3e42e76623d",
+      "bounds": [
+        0.6111111111111112,
+        0.5792929292929293,
+        0.7287581699346405,
+        0.7611111111111111
+      ],
+      "cropFile": "crops/SW3-F3-p1-det-013.png",
+      "cropSha256": "d8874018a14246d2d0b72ef9e5de972dad66b0a746db004a925578bf2e55c3c5",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F3-p1-det-013",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/validation/SW3-F3-p1-det-013-negative.png",
+      "cropBounds": [
+        0.6111111111111112,
+        0.5792929292929293,
+        0.7287581699346405,
+        0.7611111111111111
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SE12-F4-p1-det-001-negative",
+      "candidateId": "SE12-F4-p1-det-001",
+      "planId": "SE12-F4-p1",
+      "split": "heldout",
+      "sourcePdfSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
+      "imageSha256": "398ad468d676a4f15d69ce6e1298ee1cb4f8a106e7de9dae19a8371edf67164f",
+      "bounds": [
+        0.8127450980392157,
+        0.33535353535353535,
+        0.9303921568627451,
+        0.5171717171717172
+      ],
+      "cropFile": "crops/SE12-F4-p1-det-001.png",
+      "cropSha256": "ec58ab2052a6d65c1cca41a173ad124825fa14cb89bbe2213ce7565526381334",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F4-p1-det-001",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/heldout/SE12-F4-p1-det-001-negative.png",
+      "cropBounds": [
+        0.8127450980392157,
+        0.33535353535353535,
+        0.9303921568627451,
+        0.5171717171717172
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SE12-F4-p1-det-008-negative",
+      "candidateId": "SE12-F4-p1-det-008",
+      "planId": "SE12-F4-p1",
+      "split": "heldout",
+      "sourcePdfSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
+      "imageSha256": "398ad468d676a4f15d69ce6e1298ee1cb4f8a106e7de9dae19a8371edf67164f",
+      "bounds": [
+        0.8738562091503268,
+        0.007575757575757576,
+        0.9915032679738562,
+        0.1893939393939394
+      ],
+      "cropFile": "crops/SE12-F4-p1-det-008.png",
+      "cropSha256": "1da1210a87a214a30da01f919c6d2b3726ee0631f3f911eaeb7f156856b2acb1",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F4-p1-det-008",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/heldout/SE12-F4-p1-det-008-negative.png",
+      "cropBounds": [
+        0.8738562091503268,
+        0.007575757575757576,
+        0.9915032679738562,
+        0.1893939393939394
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SE12-F4-p1-det-011-negative",
+      "candidateId": "SE12-F4-p1-det-011",
+      "planId": "SE12-F4-p1",
+      "split": "heldout",
+      "sourcePdfSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
+      "imageSha256": "398ad468d676a4f15d69ce6e1298ee1cb4f8a106e7de9dae19a8371edf67164f",
+      "bounds": [
+        0.8470588235294118,
+        0.7742424242424243,
+        0.9647058823529412,
+        0.956060606060606
+      ],
+      "cropFile": "crops/SE12-F4-p1-det-011.png",
+      "cropSha256": "87c4d0b8a45998c74a79ea4fb3ea4aa4e04ca752312be476385954bf2d1bdec7",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SE12-F4-p1-det-011",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/heldout/SE12-F4-p1-det-011-negative.png",
+      "cropBounds": [
+        0.8470588235294118,
+        0.7742424242424243,
+        0.9647058823529412,
+        0.956060606060606
+      ],
+      "yoloBox": null
+    },
+    {
+      "id": "SW3-F4-p1-det-007-negative",
+      "candidateId": "SW3-F4-p1-det-007",
+      "planId": "SW3-F4-p1",
+      "split": "heldout",
+      "sourcePdfSha256": "ec9b5c3ae80da356b78dc7ea89e3228e6cd6b5e882d9c20a6b7e10bbd5ec034a",
+      "imageSha256": "92a800e07de1d97a674290864cb909607bac552ddff2c07caf58d924ec3551b2",
+      "bounds": [
+        0.020261437908496733,
+        0.796969696969697,
+        0.13790849673202615,
+        0.9787878787878788
+      ],
+      "cropFile": "crops/SW3-F4-p1-det-007.png",
+      "cropSha256": "ea3cd254f9f7e0979cac0b561179899021357ae6550735ae1c4dce89da822d3a",
+      "status": "source-geometry-checked",
+      "cropComplete": true,
+      "reviewer": "Codex visual source review (AI)",
+      "note": "Whole selected context crop inspected: no visible stair assembly. Other classes are not annotated in this single-class dataset.",
+      "neonReview": {
+        "model": "Gemini 4 Neon Extra",
+        "candidateId": "SW3-F4-p1-det-007",
+        "classification": "other",
+        "report": "stair-training-review.json"
+      },
+      "image": "images/heldout/SW3-F4-p1-det-007-negative.png",
+      "cropBounds": [
+        0.020261437908496733,
+        0.796969696969697,
+        0.13790849673202615,
+        0.9787878787878788
+      ],
+      "yoloBox": null
+    }
+  ]
+}

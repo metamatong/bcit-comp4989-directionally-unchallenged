@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>BCIT · Spatial inspector</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <small>BCIT BURNABY / INTERNAL INSPECTION</small>
+        <h1>Spatial inspector</h1>
+      </div>
+      <a href="/three">Open Three.js twin →</a>
+      <a href="/training-review">Review training labels →</a><br />
+      <a href="/model-review">Model evidence and relationship questions →</a
+      ><br />
+      <a href="/stairs">Review stair connections →</a
+      ><button id="reload">Reload records</button>
+    </header>
+    <main>
+      <aside>
+        <label
+          >Network records<select id="source">
+            <option value="navigation">Navigation app · published</option>
+            <option value="local-navigation">Navigation app · local journal</option>
+            <option value="published">Model overlays + Published reviewed network</option>
+            <option value="local">Local topology journal</option>
+          </select></label
+        >
+        <p id="revision"></p>
+        <label
+          >Buildings<select id="building">
+            <option value="SW3,SE12">SW03 + SE12</option>
+          </select></label
+        >
+        <label
+          >Floor / sheet<select id="floor">
+            <option value="all">All floors · exploded</option>
+          </select></label
+        >
+        <label
+          >Compare with<select id="compare-floor">
+            <option value="">No second floor</option>
+          </select></label
+        >
+        <button id="fit-floors">Fit visible floors</button>
+        <label
+          >Floor separation (display units)<input
+            id="gap"
+            type="range"
+            min="30"
+            max="600"
+            value="145"
+        /></label>
+        <label
+          >Orbit · 360°<input
+            id="orbit"
+            type="range"
+            min="-180"
+            max="180"
+            step="0.1"
+            value="-18"
+        /></label>
+        <label
+          >Tilt · 360°<input
+            id="tilt"
+            type="range"
+            min="-180"
+            max="180"
+            step="0.1"
+            value="48"
+        /></label>
+        <label
+          >Roll · 360°<input
+            id="roll"
+            type="range"
+            min="-180"
+            max="180"
+            step="0.1"
+            value="0"
+        /></label>
+        <label
+          >Zoom<input id="zoom" type="range" min="25" max="1200" value="90"
+        /></label>
+        <label
+          >Plan opacity<input
+            id="opacity"
+            type="range"
+            min="10"
+            max="100"
+            value="65"
+        /></label>
+        <label class="check"
+          ><input id="grid" type="checkbox" checked />Drawing-derived floor
+          areas</label
+        >
+        <label class="check"
+          ><input id="unapproved" type="checkbox" />Show ineligible saved
+          connections</label
+        >
+        <button id="zoom-in">Zoom in +</button
+        ><button id="zoom-out">Zoom out -</button>
+        <button id="reset">Reset camera</button>
+        <button id="top-view">Top-down view</button>
+        <h2>Sheet orientation</h2>
+        <label class="check"
+          ><input id="north-up" type="checkbox" checked />Use source north
+          symbols</label
+        >
+        <label>Adjust sheet<select id="orientation-sheet"></select></label>
+        <label
+          >Sheet rotation · clockwise degrees<input
+            id="sheet-angle"
+            type="range"
+            min="-180"
+            max="180"
+            step="0.1"
+            value="0"
+        /></label>
+        <button id="restore-orientation">Restore sheet orientation</button>
+        <p id="orientation-note" class="notice"></p>
+        <p class="notice">
+          SW03 and SE12 use each source sheet's north symbol. Other sheets
+          retain their original orientation until reviewed. Floor heights, scale
+          alignment and building spacing remain schematic. Connection lines show
+          graph relationships, not physical passage geometry.
+        </p>
+        <div
+          id="relationship-legend"
+          class="legend"
+          aria-label="Relationship colors"
+        ></div>
+        <p class="legend">
+          Solid: eligible connection<br />Dashed: ineligible connection<br />Glow:
+          selected connection<br />● Cyan: eligible checkpoint<br />● Amber:
+          ineligible checkpoint<br />■ Green: floor drawing areas<br />● Pink:
+          printed label, not a start
+        </p>
+      </aside>
+      <section class="viewport">
+        <canvas
+          id="scene"
+          aria-label="Interactive schematic floor stack; use the adjacent connection list for accessible inspection"
+        ></canvas>
+        <div id="status" role="status">Loading official plans…</div>
+        <div class="hint">
+          Drag to rotate freely · Alt-drag to roll · Shift-drag to pan · Scroll
+          to zoom toward the pointer · Select a connection and focus it
+        </div>
+      </section>
+      <aside class="details">
+        <h2>Inspect a connection</h2>
+        <select id="connections" aria-label="Connection">
+          <option value="">Select a saved connection</option>
+        </select>
+        <button id="focus-link">Focus selected connection</button>
+        <pre id="detail">
+Select a checkpoint or connection to inspect its source, approval and permitted direction.</pre>
+        <h2>Exact source label</h2>
+        <form id="search">
+          <input
+            id="query"
+            placeholder="e.g. 2605"
+            aria-label="Exact label"
+          /><button>Find</button>
+        </form>
+        <div id="matches"></div>
+        <h2>Coverage</h2>
+        <p id="totals"></p>
+        <div id="coverage"></div>
+        <h2>Open review questions</h2>
+        <div id="questions"></div>
+      </aside>
+    </main>
+    <footer>
+      © British Columbia Institute of Technology · Official source plans with
+      separate research annotations. Read-only inspection; no live closure,
+      accessibility or physical-campus verification claim.
+    </footer>
+    <script type="module" src="/viewer.js"></script>
+  </body>
+</html>

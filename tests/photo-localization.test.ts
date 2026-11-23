@@ -86,8 +86,6 @@ describe('separate photo evidence and source-grounded localization stages (mocke
       createElement(CampusLocationResults, {
         analysis: result,
         plans: [plan],
-        onConfirm: () => {},
-        busy: false,
       }),
     );
     return { result, session, markup };

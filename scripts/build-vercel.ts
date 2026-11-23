@@ -118,7 +118,21 @@ const routing = await handler.checkPublishedRoute();
 const graphDigest = await readFile(join(root, 'data/campus/spatial/floor-graphs.sha256'), 'utf8');
 if (routing.graphVersion !== graphDigest.trim().slice(0, 16))
   throw Error('Packaged route used a different floor graph from this build.');
-console.log('Verified packaged SE12 302 to SW03 1730 route on graph ' + routing.graphVersion + '.');
+for (const trip of [routing, ...routing.alsoVerified]) {
+  console.log(
+    'Verified ' +
+      trip.origin.planId +
+      ' ' +
+      trip.origin.label +
+      ' to ' +
+      trip.destination.planId +
+      ' ' +
+      trip.destination.label +
+      ' on packaged graph ' +
+      trip.graphVersion +
+      '.',
+  );
+}
 const manifest = readJson<{ sources: { file: string; url: string }[] }>(
   'data/campus/manifest.json',
 );

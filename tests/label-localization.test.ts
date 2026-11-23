@@ -1,4 +1,4 @@
-/** Single-pass evidence resolution with exact source labels and optional building-level GPS hints. */
+/** Single-pass evidence resolution with exact source labels and required building-level GPS hints. */
 import { randomUUID } from 'node:crypto';
 import { expect, it } from 'vitest';
 import { locateFromLabels, labelLocationRequestSchema } from '../server/label-localization';
@@ -41,7 +41,7 @@ function locate(
     requestId: randomUUID(),
     revision: 1,
     evidenceId: evidence.id,
-    ...(gps ? { gps } : {}),
+    gps: gps ?? hint(catalogue.buildings.map((building) => building.building)),
   });
   const result = locateFromLabels(session, input, record);
   return { result, session, record, input };
@@ -144,9 +144,9 @@ it('uses fresh GPS building candidates and reports contradictions or an outside-
   );
 });
 
-it('narrows a repeated source identifier using the opted-in GPS building candidates', () => {
+it('narrows a repeated source identifier using required GPS building candidates', () => {
   const unscoped = locate([label('S300', 'other')]);
-  expect(unscoped.session.campusLocation).toBeNull();
+  expect(unscoped.session.campusLocation?.id).toBe(unscoped.result.candidates[0].id);
   expect(unscoped.result.candidates.length).toBeGreaterThan(1);
   expect(locate([label('S300', 'other')], hint(['SE12'])).result).toMatchObject({
     outcome: 'candidates',

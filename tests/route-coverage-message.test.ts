@@ -1,3 +1,4 @@
+import { gpsHint } from './photo-fixtures';
 // @vitest-environment jsdom
 /** Recognized signs without route coverage must not be presented as poor-photo failures. */
 import { act, createElement, Fragment } from 'react';
@@ -13,10 +14,7 @@ import { TopologyStore } from '../server/topology';
 import { reviewedNetwork } from '../server/pilot-network';
 import { planVisitorNavigation } from '../server/wayfinding';
 import { checkPublishedRoute } from '../server/routing-readiness';
-import {
-  StartingPlaceChoices,
-  CampusLocationResults,
-} from '../src/components/CampusLocationResults';
+import { CampusLocationResults } from '../src/components/CampusLocationResults';
 import { JourneyPanel, StartingPositionNotice } from '../src/components/JourneyPanel';
 import type { CampusLocationCandidate, PhotoEvidence } from '../src/types';
 import type { NavigationResult } from '../src/wayfinding';
@@ -57,7 +55,12 @@ function matchedPlace(label: string, usedFallbackModel = false) {
   session.photoEvidence = evidence;
   const analysis = locateFromLabels(
     session,
-    { requestId: randomUUID(), revision: 0, evidenceId: evidence.id },
+    {
+      requestId: randomUUID(),
+      revision: 0,
+      evidenceId: evidence.id,
+      gps: gpsHint(label === '2605' ? 'SW3' : 'SE12'),
+    },
     {
       sessionId: session.id,
       fingerprint: 'structured-evidence-fixture',
@@ -124,53 +127,59 @@ it('draws directions from SE12 302 to the SW03 1730 entrance without asking for 
   expect(directions.querySelector('.floor-point-picker')).toBeNull();
   expect(
     host.querySelector('.journey-evidence:not([open]) .floor-point-picker summary')?.textContent,
-  ).toBe('Adjust starting point on the map');
+  ).toBeUndefined();
   expect(vi.mocked(fetch)).toHaveBeenCalledOnce();
 });
 
-it('identifies a genuine destination gap with its room and floor and keeps the named destination', async () => {
+it('keeps the matched room on a coverage-error card without making a real room a permanent failure fixture', async () => {
   const { candidate } = matchedPlace('302');
-  const destination = 'SW03 1750';
-  const result = await navigate(candidate, destination);
-  expect(result.status).toBe('unmapped-destination');
+  const destination = 'SW03 1730';
+  const result: NavigationResult = {
+    status: 'unmapped-destination',
+    networkRevision: 1,
+    origins: [],
+    destinations: [],
+    message:
+      'The floor plan shows SW03 · Floor 1 · 1730. Its entrance has no mapped connection to a public corridor.',
+  };
   await show(candidate, result, destination);
   const panel = host.querySelector('[aria-label="Route to destination"]')!;
-  expect(panel.textContent).toContain('SW03 · Floor 1 · 1750');
+  expect(panel.textContent).toContain('SW03 · Floor 1 · 1730');
   expect(panel.querySelector('.floor-point-picker, select')).toBeNull();
   expect(vi.mocked(fetch)).toHaveBeenCalledOnce();
 });
 
-it.each([false, true])('offers the two 323 corridor doors with fallback=%s', async (fallback) => {
-  const { candidate } = matchedPlace('323', fallback);
-  const result = await navigate(candidate);
-  expect(result.status).toBe('choose-origin');
-  expect(result.origins).toHaveLength(2);
-  await show(candidate, result);
-  expect(host.textContent).toContain('Which doorway are you beside?');
-  expect(host.textContent).not.toContain('Try another photo');
-});
+it.each([false, true])(
+  'routes either 323 door along the same corridor to the actual 1750 entrance with fallback=%s',
+  async (fallback) => {
+    const { candidate } = matchedPlace('323', fallback);
+    const destination = 'SW03 1750';
+    const result = await navigate(candidate, destination);
+    if (result.status !== 'route') throw Error(result.message);
+    expect(result.origins).toHaveLength(2);
+    expect(result.origin.startRegion).toBeDefined();
+    expect(result.destination).toMatchObject({ label: '1750', planId: 'SW3-F1-p1' });
+    expect(result.steps.at(-1)?.path.at(-1)).toEqual(result.destination.point);
+    await show(candidate, result, destination);
+    expect(
+      host.querySelector('.route-map-stack figure:last-of-type .pin-legend')?.textContent,
+    ).toContain('Destination · 1750');
+    expect(
+      host.querySelector('.route-map-stack figure:last-of-type [data-walking-line]'),
+    ).toBeTruthy();
+    expect(host.textContent).not.toContain('Which doorway are you beside?');
+    expect(host.textContent).not.toContain('Try another photo');
+  },
+);
 
-it('each signed 323 doorway reaches the reviewed arrival route at 1710', async () => {
+it('automatically routes a signed 323 approach to the reviewed arrival route at 1710', async () => {
   const { candidate } = matchedPlace('323');
-  const choices = await navigate(candidate);
-  for (const door of choices.origins) {
-    const route = await planVisitorNavigation(
-      candidate,
-      {
-        revision: 1,
-        candidateId: candidate.id,
-        originId: door.id,
-        networkRevision: choices.networkRevision,
-        destination: 'SW03 1710',
-      },
-      store,
-    );
-    expect(route.status).toBe('route');
-    if (route.status === 'route') {
-      expect(route.origin.id).toBe(door.id);
-      expect(route.destination.planId).toBe('SW3-F1-p1');
-      expect(route.steps.some((s) => s.kind === 'building-link')).toBe(true);
-    }
+  const result = await navigate(candidate);
+  expect(result.status).toBe('route');
+  if (result.status === 'route') {
+    expect(result.destination.planId).toBe('SW3-F1-p1');
+    expect(result.steps.some((s) => s.kind === 'building-link')).toBe(true);
+    expect(result.origin.startRegion).toBeDefined();
   }
 });
 
@@ -194,8 +203,43 @@ it('identifies missing connections even when a unique source doorway exists', as
   expect(result).toMatchObject({ status: 'unmapped-origin', originIssue: 'unmapped-connection' });
   await expect(checkPublishedRoute(store)).rejects.toThrow('unmapped-origin');
   await show(candidate, result);
-  expect(host.textContent).toContain('Starting route not mapped');
+  expect(result.mappedPortion?.requestedOrigin?.id).toBe(candidate.sourcePlaceId);
+  expect(result.mappedPortion?.origin.planId).toBe(candidate.planId);
+  expect(host.textContent).toContain('Directions from the first mapped stop');
+  expect(host.textContent).toContain('The walk from that sign');
+  expect(host.querySelector('.pin-legend')?.textContent).toContain('Matched sign · 302');
   expect(host.textContent).not.toContain('Try another photo');
+});
+
+it('ends a partial walk at a reachable public stop on the requested sheet and marks the room separately', async () => {
+  const { candidate } = matchedPlace('2605');
+  const snapshot = store.snapshot();
+  const approval = snapshot.candidates.find(
+    (c) => c.id === 'se12-f3-302-to-sw03-link',
+  )!.latestAnswer!;
+  store.mutate({
+    revision: snapshot.document.revision,
+    command: {
+      type: 'review',
+      target: 'edge',
+      id: approval.bindings!.edgeId,
+      status: 'rejected',
+      reviewer: 'Isolated test',
+      note: 'Remove the last room approach in this copy.',
+    },
+  });
+  const result = await navigate(candidate, 'SE12 302');
+  const partial = result.mappedPortion;
+  expect(result.status).not.toBe('route');
+  expect(partial?.requested).toMatchObject({ planId: 'SE12-F3-p1', label: '302' });
+  expect(partial?.destination.planId).toBe('SE12-F3-p1');
+  expect(partial?.steps.at(-1)?.to.point).toEqual(partial?.destination.point);
+  await show(candidate, result, 'SE12 302');
+  expect(host.textContent).toContain('Directions to the last mapped stop');
+  const last = host.querySelector('.route-map-stack figure:last-of-type')!;
+  expect(last.querySelector('.pin-legend')?.textContent).toContain('Requested place · 302');
+  expect(last.querySelector('.pin-legend')?.textContent).toContain('Last mapped stop');
+  expect(host.querySelector('[aria-label="Route to destination"] .floor-point-picker')).toBeNull();
 });
 
 it('retains the photo action for an estimated region containing several reviewed starts', async () => {
@@ -209,11 +253,11 @@ it('retains the photo action for an estimated region containing several reviewed
   const result = await navigate(candidate);
   expect(result).toMatchObject({ status: 'unmapped-origin', originIssue: 'ambiguous-region' });
   await show(candidate, result);
-  expect(host.textContent).toContain('Starting point needs a closer match');
+  expect(host.textContent).toContain('Could not match the photo to a mapped route');
   expect(host.textContent).toContain('Try another photo');
 });
 
-it('shows a mismatched reading before a visitor confirms the remaining sign or chooses another photo', async () => {
+it('shows unmatched readings alongside the automatically selected source match', async () => {
   const s = newSession(),
     stamp = new Date();
   const evidence: PhotoEvidence = {
@@ -234,46 +278,25 @@ it('shows a mismatched reading before a visitor confirms the remaining sign or c
   s.photoEvidence = evidence;
   const analysis = locateFromLabels(
     s,
-    { requestId: randomUUID(), revision: 0, evidenceId: evidence.id },
+    { requestId: randomUUID(), revision: 0, evidenceId: evidence.id, gps: gpsHint('SE12') },
     { sessionId: s.id, evidence, fingerprint: 'signs', buildingHint: 'SE12' },
   );
-  const select = vi.fn(),
-    retake = vi.fn();
   await act(async () =>
     root.render(
-      createElement(
-        Fragment,
-        null,
-        createElement(StartingPlaceChoices, {
-          candidates: analysis.candidates,
-          plans: store.plans,
-          partialMessage: analysis.summary,
-          onSelect: select,
-          onRetake: retake,
-          busy: false,
-        }),
-        createElement(CampusLocationResults, {
-          analysis,
-          plans: store.plans,
-          readings: evidence.labels,
-        }),
-      ),
+      createElement(CampusLocationResults, {
+        analysis,
+        plans: store.plans,
+        readings: evidence.labels,
+      }),
     ),
   );
-  const panel = host.querySelector('[aria-label="Starting location choices"]')!;
-  expect(panel.textContent).toContain('98');
-  expect(panel.textContent).toContain('SE12 · Floor 3 · 323');
-  expect(select).not.toHaveBeenCalled();
-  expect(host.querySelector('.campus-results details')?.textContent).toContain(
-    'no floor-plan match',
-  );
-  await act(async () => panel.querySelector<HTMLButtonElement>('.text-button')!.click());
-  expect(retake).toHaveBeenCalledOnce();
-  await act(async () => panel.querySelector<HTMLButtonElement>('.secondary')!.click());
-  expect(select).toHaveBeenCalledWith(analysis.candidates[0].id);
+  expect(s.campusLocation?.id).toBe(analysis.candidates[0].id);
+  expect(host.textContent).toContain('98');
+  expect(host.querySelector('[aria-label="Starting location choices"]')).toBeNull();
+  expect(host.textContent).toContain('no floor-plan match');
 });
 
-it('lets the visitor explicitly accept or reject the proposed corridor, without treating a direction sign as a position', async () => {
+it('displays the automatically selected source-backed corridor without confirmation controls', async () => {
   const s = newSession(),
     stamp = new Date();
   const evidence: PhotoEvidence = {
@@ -295,32 +318,19 @@ it('lets the visitor explicitly accept or reject the proposed corridor, without 
   s.photoEvidence = evidence;
   const analysis = locateFromLabels(
     s,
-    { requestId: randomUUID(), revision: 0, evidenceId: evidence.id },
+    { requestId: randomUUID(), revision: 0, evidenceId: evidence.id, gps: gpsHint('SW3') },
     { sessionId: s.id, evidence, fingerprint: 'two-plaques' },
   );
-  const select = vi.fn(),
-    retake = vi.fn();
   await act(async () =>
     root.render(
-      createElement(StartingPlaceChoices, {
-        candidates: analysis.candidates,
+      createElement(CampusLocationResults, {
+        analysis,
         plans: store.plans,
-        onSelect: select,
-        onRetake: retake,
-        busy: false,
+        readings: evidence.labels,
       }),
     ),
   );
-  const panel = host.querySelector('[aria-label="Confirm starting corridor"]')!;
-  expect(panel.textContent).toContain('SW03 · Floor 2 · Corridor 2600 between 2680 and 2695');
-  const displayedSigns = [...panel.querySelectorAll('svg.walking-map g text')].map(
-    (el) => el.textContent,
-  );
-  expect(displayedSigns.sort()).toEqual(['2680', '2695']);
-  expect(select).not.toHaveBeenCalled();
-  await act(async () => panel.querySelector<HTMLButtonElement>('.text-button')!.click());
-  expect(retake).toHaveBeenCalledOnce();
-  expect(select).not.toHaveBeenCalled();
-  await act(async () => panel.querySelector<HTMLButtonElement>('button.primary')!.click());
-  expect(select).toHaveBeenCalledWith(analysis.candidates[0].id);
+  expect(s.campusLocation?.corridorOrigin?.roomLabels).toEqual(['2680', '2695']);
+  expect(host.querySelector('[aria-label="Confirm starting corridor"]')).toBeNull();
+  expect(host.querySelector('button')).toBeNull();
 });

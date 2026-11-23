@@ -1,0 +1,78 @@
+{
+  "model": "qwen3.5:latest",
+  "modelDigest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "createdAt": "2026-11-19T00:04:49.447Z",
+  "endpoint": "http://127.0.0.1:11434",
+  "method": "One manually located stair-region crop per call; floor-1 text rotated upright. Crop boundaries are drawing observations, not inferred landing points.",
+  "status": "running",
+  "observations": [
+    {
+      "id": "F1-A",
+      "planId": "SE12-F1-p1",
+      "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "bounds": [
+        0.45,
+        0.07973856209150326,
+        0.6196969696969697,
+        0.17973856209150327
+      ],
+      "rotation": 270,
+      "cropSha256": "218216a75e30bfc729a936392552bef03a858770bb8f08d8fa6dda1f4f71975c",
+      "cropFile": "F1-A.png",
+      "routeEligible": false,
+      "status": "unverified-model-observation",
+      "result": {
+        "exactLabel": "100",
+        "otherVisibleText": [
+          "WAS-1-RM-N",
+          "TO CONTE",
+          "1003",
+          "I-RM-LF",
+          "101Y",
+          "KNOCK",
+          "TABLE",
+          "100C",
+          "WAS-1-RM-"
+        ],
+        "stairSymbolVisible": true,
+        "uncertainty": "The stair symbol is present but the label '100' may be partially obscured or misaligned with the symbol. The text 'TO CONTE' suggests a connection to another area, possibly indicating an exit or entrance point."
+      },
+      "elapsedMs": 13551,
+      "tokens": {
+        "input": 969,
+        "output": 167
+      }
+    },
+    {
+      "id": "F1-B",
+      "planId": "SE12-F1-p1",
+      "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "bounds": [
+        0.4196969696969697,
+        0.2699346405228758,
+        0.5297979797979798,
+        0.33986928104575165
+      ],
+      "rotation": 270,
+      "cropSha256": "c06990d81348779ccdbcc479d5503f50c4db57bdd00bccfb63171b81ab4c22d9",
+      "cropFile": "F1-B.png",
+      "routeEligible": false,
+      "status": "unverified-model-observation",
+      "result": {
+        "exactLabel": "S102",
+        "otherVisibleText": [
+          ".02",
+          "OFFICE-OF"
+        ],
+        "stairSymbolVisible": true,
+        "uncertainty": "The text 'OFFICE-OF' is partially cut off and may be incomplete."
+      },
+      "elapsedMs": 2178,
+      "tokens": {
+        "input": 1062,
+        "output": 80
+      }
+    }
+  ],
+  "routingChanges": 0
+}

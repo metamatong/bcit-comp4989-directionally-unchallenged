@@ -1,0 +1,270 @@
+{
+  "model": "qwen3.5:latest",
+  "modelDigest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "createdAt": "2026-11-19T00:05:32.726Z",
+  "endpoint": "http://127.0.0.1:11434",
+  "method": "One manually located stair-region crop per call; floor-1 text rotated upright. Crop boundaries are drawing observations, not inferred landing points.",
+  "status": "complete",
+  "observations": [
+    {
+      "id": "F1-A",
+      "planId": "SE12-F1-p1",
+      "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "bounds": [
+        0.45,
+        0.07973856209150326,
+        0.6196969696969697,
+        0.17973856209150327
+      ],
+      "rotation": 270,
+      "cropSha256": "45d2d9349fe7340c095501c8333464e0105a6a5e8064503c8b955d7e810c83ff",
+      "cropFile": "F1-A.png",
+      "routeEligible": false,
+      "status": "unverified-model-observation",
+      "result": {
+        "exactLabel": "STCO STAIR",
+        "otherVisibleText": [
+          "TO OF"
+        ],
+        "stairSymbolVisible": true,
+        "uncertainty": "The text 'STCO' may be a misprint or stylized version of 'STO', but per instructions to preserve all characters including potential errors, it is transcribed as written."
+      },
+      "elapsedMs": 2392,
+      "tokens": {
+        "input": 969,
+        "output": 92
+      }
+    },
+    {
+      "id": "F1-B",
+      "planId": "SE12-F1-p1",
+      "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "bounds": [
+        0.4196969696969697,
+        0.2699346405228758,
+        0.5297979797979798,
+        0.33986928104575165
+      ],
+      "rotation": 270,
+      "cropSha256": "c5274fb36eda1b563e9e93cdcfeaff0697a2d63c28df3e685e2cf4cee947eb57",
+      "cropFile": "F1-B.png",
+      "routeEligible": false,
+      "status": "unverified-model-observation",
+      "result": {
+        "exactLabel": "STAIR",
+        "otherVisibleText": [
+          ".02 OFFICE-C"
+        ],
+        "stairSymbolVisible": true,
+        "uncertainty": "none"
+      },
+      "elapsedMs": 2049,
+      "tokens": {
+        "input": 1062,
+        "output": 58
+      }
+    },
+    {
+      "id": "F1-C",
+      "planId": "SE12-F1-p1",
+      "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "bounds": [
+        0.40959595959595957,
+        0.75,
+        0.55,
+        0.8199346405228758
+      ],
+      "rotation": 270,
+      "cropSha256": "c86a182c6ea023ca1ad6480326bbe85093bd5294fc8e7206a6153b83c87c63a6",
+      "cropFile": "F1-C.png",
+      "routeEligible": false,
+      "status": "unverified-model-observation",
+      "result": {
+        "exactLabel": "STAIR",
+        "otherVisibleText": [
+          "103M",
+          "STOR-GEN",
+          "8",
+          "103Q",
+          "COMM"
+        ],
+        "stairSymbolVisible": true,
+        "uncertainty": "none"
+      },
+      "elapsedMs": 2169,
+      "tokens": {
+        "input": 845,
+        "output": 81
+      }
+    },
+    {
+      "id": "F1-D",
+      "planId": "SE12-F1-p1",
+      "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "bounds": [
+        0.1696969696969697,
+        0.7699346405228759,
+        0.3398989898989899,
+        0.85
+      ],
+      "rotation": 270,
+      "cropSha256": "60a88ba242e618612b1884506e4a47655169ca7a895ae3ed6375e0b16ce72e11",
+      "cropFile": "F1-D.png",
+      "routeEligible": false,
+      "status": "unverified-model-observation",
+      "result": {
+        "exactLabel": ".03R STAIR",
+        "otherVisibleText": [],
+        "stairSymbolVisible": true,
+        "uncertainty": "none"
+      },
+      "elapsedMs": 1596,
+      "tokens": {
+        "input": 814,
+        "output": 34
+      }
+    },
+    {
+      "id": "F2-A",
+      "planId": "SE12-F2-p1",
+      "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "bounds": [
+        0.03986928104575163,
+        0.4,
+        0.11993464052287582,
+        0.5297979797979798
+      ],
+      "rotation": 0,
+      "cropSha256": "60de9d3156edbdff5166f084fa530599be819ad2a3c8dd6f7506a2ee216d1b35",
+      "cropFile": "F2-A.png",
+      "routeEligible": false,
+      "status": "unverified-model-observation",
+      "result": {
+        "exactLabel": "",
+        "otherVisibleText": [
+          ""
+        ],
+        "stairSymbolVisible": true,
+        "uncertainty": "The stair label is not visible in the image; it may be obscured or absent."
+      },
+      "elapsedMs": 2133,
+      "tokens": {
+        "input": 1031,
+        "output": 64
+      }
+    },
+    {
+      "id": "F2-B",
+      "planId": "SE12-F2-p1",
+      "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "bounds": [
+        0.36993464052287583,
+        0.1898989898989899,
+        0.4598039215686274,
+        0.2797979797979798
+      ],
+      "rotation": 0,
+      "cropSha256": "184cf3215118f30782f547bc26ca4c245ce2a5d8cda34e02a4aa302b0c475aa4",
+      "cropFile": "F2-B.png",
+      "routeEligible": false,
+      "status": "unverified-model-observation",
+      "result": {
+        "exactLabel": "S",
+        "otherVisibleText": [
+          "X"
+        ],
+        "stairSymbolVisible": true,
+        "uncertainty": "The text is very small and pixelated, making it difficult to read with certainty."
+      },
+      "elapsedMs": 1714,
+      "tokens": {
+        "input": 721,
+        "output": 68
+      }
+    },
+    {
+      "id": "F2-C",
+      "planId": "SE12-F2-p1",
+      "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "bounds": [
+        0.5,
+        0.4297979797979798,
+        0.5598039215686275,
+        0.5398989898989899
+      ],
+      "rotation": 0,
+      "cropSha256": "5de618b40263c4e431ee1a8a277b02d47f21f5a6646659b8db8da03bac6491b5",
+      "cropFile": "F2-C.png",
+      "routeEligible": false,
+      "status": "unverified-model-observation",
+      "result": {
+        "exactLabel": "down",
+        "otherVisibleText": [],
+        "stairSymbolVisible": true,
+        "uncertainty": "none"
+      },
+      "elapsedMs": 1597,
+      "tokens": {
+        "input": 907,
+        "output": 45
+      }
+    },
+    {
+      "id": "F2-D",
+      "planId": "SE12-F2-p1",
+      "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "bounds": [
+        0.7098039215686275,
+        0.3398989898989899,
+        0.7898692810457516,
+        0.4398989898989899
+      ],
+      "rotation": 0,
+      "cropSha256": "f3e8690e509dad96631d5b91caf46cc87ff5f94e9001a725458821996373b966",
+      "cropFile": "F2-D.png",
+      "routeEligible": false,
+      "status": "unverified-model-observation",
+      "result": {
+        "exactLabel": "S",
+        "otherVisibleText": [
+          "X"
+        ],
+        "stairSymbolVisible": true,
+        "uncertainty": "The label 'S' is clearly visible next to the stair symbol. The text 'X' is also present in the image but its context is unclear."
+      },
+      "elapsedMs": 2092,
+      "tokens": {
+        "input": 876,
+        "output": 81
+      }
+    },
+    {
+      "id": "F2-E",
+      "planId": "SE12-F2-p1",
+      "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "bounds": [
+        0.7699346405228759,
+        0.5398989898989899,
+        0.85,
+        0.6398989898989899
+      ],
+      "rotation": 0,
+      "cropSha256": "75ea57f39424e7eaa84a4edfde96a2d6498061db64ce143d0eb295ca93da66d4",
+      "cropFile": "F2-E.png",
+      "routeEligible": false,
+      "status": "unverified-model-observation",
+      "result": {
+        "exactLabel": "S",
+        "otherVisibleText": [],
+        "stairSymbolVisible": true,
+        "uncertainty": "none"
+      },
+      "elapsedMs": 1414,
+      "tokens": {
+        "input": 876,
+        "output": 29
+      }
+    }
+  ],
+  "routingChanges": 0
+}

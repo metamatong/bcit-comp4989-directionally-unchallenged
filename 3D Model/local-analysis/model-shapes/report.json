@@ -1,0 +1,88 @@
+{
+  "model": "qwen3.5:latest",
+  "modelDigest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "createdAt": "2026-11-19T08:59:09.457Z",
+  "observations": [
+    {
+      "id": "SE12-F3-p1-parking-0",
+      "planId": "SE12-F3-p1",
+      "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "imageSha256": "75f1fae4a8354a32b33110151792dcd5cc472412a5034dc16ce7ecc31e457097",
+      "bounds": [
+        0.04084967320261438,
+        0.4686868686868687,
+        0.10130718954248366,
+        0.5868686868686869
+      ],
+      "rawDetectorClass": "parking",
+      "raw": "{\n  \"classification\": \"stair-flight\",\n  \"visibleEvidence\": \"The image contains a set of repeated parallel horizontal lines bounded by vertical and angled lines, which visually represent a stair flight with treads and risers.\"\n}",
+      "finishReason": "stop",
+      "output": {
+        "classification": "stair-flight",
+        "visibleEvidence": "The image contains a set of repeated parallel horizontal lines bounded by vertical and angled lines, which visually represent a stair flight with treads and risers."
+      },
+      "elapsedMs": 6422
+    },
+    {
+      "id": "SE12-F3-p1-stair-0",
+      "planId": "SE12-F3-p1",
+      "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "imageSha256": "75f1fae4a8354a32b33110151792dcd5cc472412a5034dc16ce7ecc31e457097",
+      "bounds": [
+        0.8777777777777778,
+        0.09848484848484848,
+        0.953921568627451,
+        0.1712121212121212
+      ],
+      "rawDetectorClass": "stair",
+      "raw": "{\n  \"classification\": \"not-stair-flight\",\n  \"visibleEvidence\": \"The image contains a stylized logo with geometric shapes (a teal arrow-like form, blue 'Z' shape, and circular elements) but no repeated parallel tread lines bounded by a flight. No stair flight is visibly present.\"\n}",
+      "finishReason": "stop",
+      "output": {
+        "classification": "not-stair-flight",
+        "visibleEvidence": "The image contains a stylized logo with geometric shapes (a teal arrow-like form, blue 'Z' shape, and circular elements) but no repeated parallel tread lines bounded by a flight. No stair flight is visibly present."
+      },
+      "elapsedMs": 1779
+    },
+    {
+      "id": "SW3-F2-p1-parking-0",
+      "planId": "SW3-F2-p1",
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "imageSha256": "09f8418f5bd386380e11218207f850febe1ab5be6aa12be2e0507103b051a085",
+      "bounds": [
+        0.5120915032679738,
+        0.44242424242424244,
+        0.5640522875816993,
+        0.5505050505050505
+      ],
+      "rawDetectorClass": "parking",
+      "raw": "{\n  \"classification\": \"stair-flight\",\n  \"visibleEvidence\": \"The image contains a set of repeated parallel lines representing treads, bounded by vertical elements (stringers), labeled 'STAIR' and 'M271 SHAFT', which visually constitutes a stair flight.\"\n}",
+      "finishReason": "stop",
+      "output": {
+        "classification": "stair-flight",
+        "visibleEvidence": "The image contains a set of repeated parallel lines representing treads, bounded by vertical elements (stringers), labeled 'STAIR' and 'M271 SHAFT', which visually constitutes a stair flight."
+      },
+      "elapsedMs": 1583
+    },
+    {
+      "id": "SW3-F2-p1-stair-0",
+      "planId": "SW3-F2-p1",
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "imageSha256": "09f8418f5bd386380e11218207f850febe1ab5be6aa12be2e0507103b051a085",
+      "bounds": [
+        0.11830065359477124,
+        0.7782828282828282,
+        0.26895424836601306,
+        0.8575757575757575
+      ],
+      "rawDetectorClass": "stair",
+      "raw": "{\n  \"classification\": \"not-stair-flight\",\n  \"visibleEvidence\": \"The image shows a single continuous tread line with no repeated parallel lines indicating multiple steps, and no bounding flight structure is visible.\"\n}",
+      "finishReason": "stop",
+      "output": {
+        "classification": "not-stair-flight",
+        "visibleEvidence": "The image shows a single continuous tread line with no repeated parallel lines indicating multiple steps, and no bounding flight structure is visible."
+      },
+      "elapsedMs": 1350
+    }
+  ],
+  "routingChanges": 0
+}

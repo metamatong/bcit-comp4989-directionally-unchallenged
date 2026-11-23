@@ -12,7 +12,7 @@ import { TopologyStore } from '../server/topology';
 import { reviewedNetwork } from '../server/pilot-network';
 import { floorGraphs } from '../server/floor-graph';
 import type { Session } from '../src/types';
-import type { NavigationResult, StartingPoints } from '../src/wayfinding';
+import type { NavigationResult } from '../src/wayfinding';
 import { locationInput, labelReading, photoInput } from './photo-fixtures';
 
 const directory = mkdtempSync(join(tmpdir(), 'wayfinding-api-'));
@@ -79,26 +79,18 @@ it('takes a consented photo through both stages and uses its complete reviewed r
   expect((await nav({ ...query, revision: 0 })).status).toBe(409);
   const preview = (body: object) => post(prefix + '/navigation/origins', body);
   const identifying = { candidateId, revision: match.revision };
-  expect((await preview({ ...identifying, candidateId: randomUUID() })).status).toBe(409);
-  expect((await preview({ ...identifying, revision: 0 })).status).toBe(409);
-  expect((await preview({ ...identifying, bounds: [0, 0, 1, 1] })).status).toBe(400);
-  const options = await preview(identifying);
-  expect(options.status).toBe(200);
-  const points: StartingPoints = await options.json();
-  expect(points.origins.map((s) => s.id)).toEqual([room.id]);
-  expect(Object.keys(points).sort()).toEqual(['networkRevision', 'origins']);
-  const surface = (planId: string, role: 'origin' | 'destination', revision = match.revision) =>
+  expect((await preview(identifying)).status).toBe(404);
+  const points = { networkRevision: store.read().revision };
+  const surface = (planId: string, revision = match.revision) =>
     post(prefix + '/navigation/surface', {
       ...identifying,
       destination: 'SW01 floor 3',
       planId,
-      role,
       revision,
     });
-  expect((await surface('SW1-F3-p1', 'origin')).status).toBe(400);
-  expect((await surface('SW1-F2-p1', 'destination')).status).toBe(400);
-  expect((await surface('SW1-F3-p1', 'destination', 0)).status).toBe(409);
-  const sheet = await surface('SW1-F3-p1', 'destination');
+  expect((await surface('SW1-F2-p1')).status).toBe(400);
+  expect((await surface('SW1-F3-p1', 0)).status).toBe(409);
+  const sheet = await surface('SW1-F3-p1');
   expect(sheet.status).toBe(200);
   const mesh = await sheet.json();
   expect(mesh.runs.length).toBeGreaterThan(0);
@@ -172,7 +164,7 @@ it('takes a consented photo through both stages and uses its complete reviewed r
   expect(provider.calls).toBe(2);
 });
 
-it('requires a visitor choice before routing a partial GPS match using the original receipt', async () => {
+it('automatically routes a partial GPS match using the original receipt', async () => {
   const calls = provider.calls;
   modelReading = [
     {
@@ -207,22 +199,13 @@ it('requires a visitor choice before routing a partial GPS match using the origi
         gps,
       })
     ).json();
-    expect(located.campusLocation).toBeNull();
+    expect(located.campusLocation).toBeTruthy();
     const [candidate] = located.campusAnalysis!.candidates;
     expect(candidate).toMatchObject({ anchorLabel: '323', planId: 'SE12-F3-p1' });
     const q = { candidateId: candidate.id, destination: 'SW03 1710', revision: located.revision };
-    expect((await post(path + '/navigation', q)).status).toBe(409);
-    const selected: Session = await (
-      await post(path + '/actions', {
-        requestId: randomUUID(),
-        revision: located.revision,
-        action: { type: 'confirm-campus-region', candidateId: candidate.id },
-      })
-    ).json();
-    const result = await (
-      await post(path + '/navigation', { ...q, revision: selected.revision })
-    ).json();
-    expect(result.status).toBe('choose-origin');
+    const result = await (await post(path + '/navigation', q)).json();
+    expect(result.status).toBe('route');
+    expect(result.origin.startRegion).toBeDefined();
     expect(result.origins).toHaveLength(2);
     expect(provider.calls - calls).toBe(1);
   } finally {
@@ -230,7 +213,7 @@ it('requires a visitor choice before routing a partial GPS match using the origi
   }
 });
 
-it('starts from a shared locker corridor only after confirmation of the replayed Gemini classifications', async () => {
+it('automatically starts from the source-backed shared locker corridor', async () => {
   const calls = provider.calls;
   modelReading = [
     {
@@ -255,9 +238,17 @@ it('starts from a shared locker corridor only after confirmation of the replayed
     const path = '/' + visitor.id;
     const read: Session = await (await post(path + '/photo/evidence', photoInput())).json();
     const located: Session = await (
-      await post(path + '/photo/location', locationInput(read.photoEvidence!.id, read.revision))
+      await post(path + '/photo/location', {
+        ...locationInput(read.photoEvidence!.id, read.revision),
+        gps: {
+          buildings: ['SW3'],
+          accuracy: 2,
+          capturedAt: Date.now(),
+          sourceSha256: locationCatalogue().geographicSource.sha256,
+        },
+      })
     ).json();
-    expect(located.campusLocation).toBeNull();
+    expect(located.campusLocation).toBeTruthy();
     const [candidate] = located.campusAnalysis!.candidates;
     expect(candidate.corridorOrigin?.needsConfirmation).toBe(true);
     const request = {
@@ -265,18 +256,7 @@ it('starts from a shared locker corridor only after confirmation of the replayed
       candidateId: candidate.id,
       destination: 'SE12 302',
     };
-    expect((await post(path + '/navigation', request)).status).toBe(409);
-    const confirmed: Session = await (
-      await post(path + '/actions', {
-        requestId: randomUUID(),
-        revision: located.revision,
-        action: {
-          type: 'confirm-campus-region',
-          candidateId: candidate.id,
-        },
-      })
-    ).json();
-    const response = await post(path + '/navigation', { ...request, revision: confirmed.revision });
+    const response = await post(path + '/navigation', request);
     expect(response.status).toBe(200);
     expect(await response.json()).toMatchObject({
       status: 'route',
@@ -289,7 +269,7 @@ it('starts from a shared locker corridor only after confirmation of the replayed
   }
 });
 
-it('uses the selected 302 sign to reach the SW03 1730 door on corridor 1700', async () => {
+it('uses the automatically matched 302 sign to reach the SW03 1730 door on corridor 1700', async () => {
   const initialCalls = provider.calls;
   const session: Session = await (await post('', {})).json();
   const prefix = '/' + session.id;
@@ -300,21 +280,8 @@ it('uses the selected 302 sign to reach the SW03 1730 door on corridor 1700', as
       locationInput(extracted.photoEvidence!.id, extracted.revision),
     )
   ).json();
-  expect(located.campusLocation).toBeNull();
-  const choose = async (planId: string, revision: number) => {
-    const candidate = located.campusAnalysis!.candidates.find(
-      (c) => c.planId === planId && c.anchorLabel === '302',
-    )!;
-    const response = await post(prefix + '/actions', {
-      requestId: randomUUID(),
-      revision,
-      action: { type: 'confirm-campus-region', candidateId: candidate.id },
-    });
-    expect(response.status).toBe(200);
-    return response.json() as Promise<Session>;
-  };
-  const first = await choose('NE1-F3-p1', located.revision);
-  const chosen = await choose('SE12-F3-p1', first.revision);
+  expect(located.campusLocation).toBeTruthy();
+  const chosen = located;
   const response = await post(prefix + '/navigation', {
     candidateId: chosen.campusLocation!.id,
     revision: chosen.revision,
@@ -353,7 +320,6 @@ it('uses the selected 302 sign to reach the SW03 1730 door on corridor 1700', as
   };
   const surface = await post(prefix + '/navigation/surface', {
     ...query,
-    role: 'destination',
     planId: wrongFloor.plan.id,
   });
   expect(surface.status).toBe(400);

@@ -59,9 +59,9 @@ const controls: CalibrationControl[] = measuredControls.map((c) => ({
   y: (660 + (c.y * 1140) / 887) / ((4000 * 792) / 1224),
 }));
 
-// Outline registrations were fitted against the archived WGS84 footprint and
-// reviewed against each full-page drawing. Raster coordinates use the actual
-// source-bound PNG dimensions; scales are raster pixels per geographic metre.
+// Proposed outline registrations retained from the GPS coverage PR. Independent
+// source correspondences are not archived, so these do not enable visitor dots.
+// Raster coordinates use source-bound PNG dimensions; scales are pixels per metre.
 const outlineRegistrations: Record<
   string,
   {
@@ -179,10 +179,30 @@ const stackedCores = {
   pageWidth: 1224,
   pageHeight: 792,
   controls: [
-    { from: 'S300', to: 'S400', source: [232.7, 181.0], target: [78.3, 347.37] },
-    { from: 'S320', to: 'S420', source: [477.2, 208.4], target: [387.075, 389.375] },
-    { from: 'S350', to: 'S450', source: [861.2, 213.4], target: [867.075, 389.255] },
-    { from: 'S390', to: 'S490', source: [1108.65, 182.8], target: [1176.25, 346.365] },
+    {
+      from: 'S300',
+      to: 'S400',
+      source: [232.7, 181.0] as [number, number],
+      target: [78.3, 347.37],
+    },
+    {
+      from: 'S320',
+      to: 'S420',
+      source: [477.2, 208.4] as [number, number],
+      target: [387.075, 389.375],
+    },
+    {
+      from: 'S350',
+      to: 'S450',
+      source: [861.2, 213.4] as [number, number],
+      target: [867.075, 389.255],
+    },
+    {
+      from: 'S390',
+      to: 'S490',
+      source: [1108.65, 182.8] as [number, number],
+      target: [1176.25, 346.365],
+    },
   ],
 };
 
@@ -332,7 +352,7 @@ function outlineControlsForPlan(
   return footprintControls(feature.geometry.rings[0], plan, registration);
 }
 
-const floors = visualPlans.map((plan) => {
+const proposedFloors = visualPlans.map((plan) => {
   const available =
     plan.id === 'SE12-F3-p1' || plan.id in outlineRegistrations || plan.id === stackedCores.planId;
   const registration = outlineRegistrations[plan.id];
@@ -392,6 +412,27 @@ const floors = visualPlans.map((plan) => {
       : {}),
   };
 });
+// Outline controls (including their fourth point) come from the same proposed
+// transform. Their residuals cannot independently validate drawing alignment.
+// SW01-F4 also depends on an unverified outline transform on SW01-F3.
+const candidates = proposedFloors.filter(
+  (floor) => floor.status === 'approximate' && floor.planId !== 'SE12-F3-p1',
+);
+const floors: FloorCalibration[] = proposedFloors.map((floor) =>
+  candidates.includes(floor)
+    ? {
+        planId: floor.planId,
+        sourceSha256: floor.sourceSha256,
+        status: 'unavailable',
+        version: 'bcit-pilot-2026-11-19-pending-evidence',
+        reason:
+          'A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.',
+        controls: [],
+        residualsMetres: [],
+        heldOutMetres: null,
+      }
+    : floor,
+);
 const catalogue: LocationCatalogue = {
   geographicSource: {
     url: 'https://services2.arcgis.com/IgcrRjRW95F0HKSw/arcgis/rest/services/Bsite_Building_Footprint_20241022/FeatureServer/0/query?where=1%3D1&outFields=BuildingName%2COBJECTID&outSR=4326&returnGeometry=true&f=json',
@@ -411,6 +452,23 @@ const catalogue: LocationCatalogue = {
     ),
   floors,
 };
+writeFileSync(
+  'data/campus/geolocation/calibration-candidates.json',
+  JSON.stringify(
+    {
+      status: 'pending-independent-source-evidence',
+      geographicSource: catalogue.geographicSource,
+      note: 'Not consumed by the visitor app. Outline controls and residuals are derived from the proposed transform, not independent validation. Stacked-core alignment inherits that uncertainty.',
+      floors: candidates.map(({ status: _status, heldOutMetres, ...floor }) => ({
+        ...floor,
+        status: 'candidate',
+        fourthControlResidualMetres: heldOutMetres,
+      })),
+    },
+    null,
+    2,
+  ) + '\n',
+);
 writeFileSync(
   'data/campus/geolocation/calibrations.json',
   JSON.stringify(catalogue, null, 2) + '\n',

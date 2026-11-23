@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Stair connection review · BCIT</title>
+    <link rel="stylesheet" href="/stairs.css" />
+  </head>
+  <body>
+    <header>
+      <div>
+        <small>BCIT BURNABY · SOURCE REVIEW</small>
+        <h1>Match stair landings across floors</h1>
+      </div>
+      <a href="/local-review">Local model comparison</a
+      ><a href="/">Return to 3D inspector</a>
+    </header>
+    <section class="toolbar">
+      <label
+        >Buildings<select id="buildings">
+          <option value="SW3,SE12">SW03 + SE12</option>
+          <option value="all">All supplied buildings</option>
+        </select></label
+      ><label
+        >Records<select id="records">
+          <option value="navigation">Navigation app · published</option>
+            <option value="local-navigation">Navigation app · local journal</option>
+            <option value="published">Model overlays + Published network</option>
+          <option value="local">Local journal</option>
+        </select></label
+      ><label
+        >Marker layer<select id="layer">
+          <option value="all">All stair evidence</option>
+          <option value="landing">Marked landings only</option>
+          <option value="label">Extracted labels only</option>
+        </select></label
+      ><label
+        >Plan size<input
+          id="size"
+          type="range"
+          min="480"
+          max="1600"
+          value="680" /></label
+      ><button id="reload">Reload records</button>
+    </section>
+    <p id="status" role="status">Loading floor plans…</p>
+    <p class="intro">
+      Review each floor in its original drawing orientation.
+      <strong class="reviewed">Cyan = eligible saved landing</strong>;
+      <strong class="proposed">orange = proposed or ineligible landing</strong>;
+      <strong class="label"
+        >purple = extracted printed stair label, not a landing</strong
+      >. Matching names or nearby positions do not establish a connection.
+      Duplicate and uncertain extracted labels are retained for correction.
+    </p>
+    <section class="pair">
+      <h2>Compare A and B</h2>
+      <p>
+        Select a marker or list entry, then a marker on another floor of the
+        same building. To mark a missing landing, enable marking on its floor
+        card and click the exact landing. No relationship is saved to routing.
+      </p>
+      <div id="selection"></div>
+      <p id="pair-message" role="status"></p>
+      <button id="clear">Clear pair</button
+      ><button id="download" disabled>Download this review draft</button>
+      <p>
+        Reply with the two plan IDs and marker numbers, then
+        <strong>T / F / unknown</strong>. For T, specify
+        <strong>A → B, B → A, both, or unknown direction</strong>. Printed-label
+        selections need actual landing points before route approval. A
+        confirmation is not a dated field visit.
+      </p>
+    </section>
+    <details open>
+      <summary>Existing stair relationships and open questions</summary>
+      <div id="relationships"></div>
+    </details>
+    <section id="floors" aria-label="Floor plans with stair evidence"></section>
+    <footer>
+      © British Columbia Institute of Technology. Source-linked review evidence
+      only. No inferred vertical connections, floor heights or automatic
+      approvals. Review drafts download locally; this page does not write the
+      topology journal.
+    </footer>
+    <script type="module" src="/stairs.js"></script>
+  </body>
+</html>

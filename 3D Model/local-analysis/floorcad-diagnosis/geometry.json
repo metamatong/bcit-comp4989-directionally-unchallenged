@@ -1,0 +1,142 @@
+{
+  "planId": "SW3-F2-p1",
+  "imageSha256": "09f8418f5bd386380e11218207f850febe1ab5be6aa12be2e0507103b051a085",
+  "imageDimensions": [
+    3060,
+    1980
+  ],
+  "reviewedPointPixels": [
+    717.00084,
+    846.00054
+  ],
+  "nearestCandidates": [
+    {
+      "class": "parking",
+      "confidence": 0.3171236217021942,
+      "distancePixels": 410.29,
+      "box": [
+        1126.634521484375,
+        869.22802734375,
+        1181.6378173828125,
+        899.6292724609375
+      ],
+      "rotation": 90
+    },
+    {
+      "class": "parking",
+      "confidence": 0.6945831179618835,
+      "distancePixels": 440.28,
+      "box": [
+        692.171875,
+        1286.2848205566406,
+        748.997802734375,
+        1357.7396545410156
+      ],
+      "rotation": 0
+    },
+    {
+      "class": "parking",
+      "confidence": 0.5268517732620239,
+      "distancePixels": 749.89,
+      "box": [
+        1461.6744689941406,
+        741.6826171875,
+        1505.7640686035156,
+        757.73779296875
+      ],
+      "rotation": 90
+    },
+    {
+      "class": "parking",
+      "confidence": 0.5883711576461792,
+      "distancePixels": 792.7,
+      "box": [
+        1489.6668167114258,
+        628.9005126953125,
+        1524.0,
+        668.9110107421875
+      ],
+      "rotation": 90
+    },
+    {
+      "class": "parking",
+      "confidence": 0.4567660987377167,
+      "distancePixels": 850.88,
+      "box": [
+        1564.0139770507812,
+        927.0155944824219,
+        1608.4429321289062,
+        958.4044494628906
+      ],
+      "rotation": 90
+    }
+  ],
+  "tilesContainingReviewedPoint": [
+    {
+      "rotation": 0,
+      "tileOrigin": [
+        0,
+        0
+      ],
+      "pointMarginPixels": 178.0
+    },
+    {
+      "rotation": 0,
+      "tileOrigin": [
+        0,
+        768
+      ],
+      "pointMarginPixels": 78.0
+    },
+    {
+      "rotation": 90,
+      "tileOrigin": [
+        0,
+        1536
+      ],
+      "pointMarginPixels": 178.0
+    },
+    {
+      "rotation": 90,
+      "tileOrigin": [
+        0,
+        2036
+      ],
+      "pointMarginPixels": 178.0
+    },
+    {
+      "rotation": 90,
+      "tileOrigin": [
+        768,
+        1536
+      ],
+      "pointMarginPixels": 78.0
+    },
+    {
+      "rotation": 90,
+      "tileOrigin": [
+        768,
+        2036
+      ],
+      "pointMarginPixels": 78.0
+    }
+  ],
+  "note": "Reviewed landing point coverage is not whole stair-flight coverage. Filtered exports cannot distinguish low confidence from a prediction in another class.",
+  "excludedBaselineDetection": {
+    "class": "class_31",
+    "confidence": 0.3713570237159729,
+    "xyxyPixels": [
+      586.9652709960938,
+      796.0337524414062,
+      686.7525634765625,
+      855.873291015625
+    ],
+    "xyxyNormalized": [
+      0.19181871601179534,
+      0.40203724870778096,
+      0.22442894231260213,
+      0.4322592378866793
+    ],
+    "explanation": "Unmapped raw class_31 detection lies over part of the stair drawing, about 30 source pixels from the reviewed landing. Excluded by the prior circulation-class filter; not evidence that every class_31 object is a stair."
+  }
+}

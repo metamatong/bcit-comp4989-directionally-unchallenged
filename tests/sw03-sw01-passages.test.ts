@@ -1,3 +1,4 @@
+import { gpsHint } from './photo-fixtures';
 /** Exercise both floor approaches to each confirmed crossing through visitor localization and routing. */
 import { randomUUID } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -39,7 +40,7 @@ function navigate(building: string, label: string, destination: string, originId
   session.photoEvidence = evidence;
   locateFromLabels(
     session,
-    { requestId: randomUUID(), revision: 0, evidenceId: evidence.id },
+    { requestId: randomUUID(), revision: 0, evidenceId: evidence.id, gps: gpsHint(building) },
     {
       sessionId: session.id,
       evidence,
@@ -55,7 +56,6 @@ function navigate(building: string, label: string, destination: string, originId
       candidateId: candidate.id,
       destination,
       revision: 0,
-      originId,
       networkRevision: store.read().revision,
     },
     store,

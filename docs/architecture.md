@@ -27,7 +27,9 @@ There is no visitor API for choosing a starting doorway, selecting a starting po
 
 `server/floor-graph.ts` loads source-derived room/corridor areas for all supplied plans. `server/floor-search.ts` combines those grids with mapped corridors and floor transfers. Cross-building links are fixed source data. The current published route dataset still contains legacy hand-authored same-building stair/elevator records; replacing these with automatic transfer inference is not complete. Do not describe those records as automatically derived or add a visitor/manual approval step to compensate.
 
-Floor-plan geographic calibration is independent from route connectivity. The campus footprint catalogue supports building-level GPS narrowing, and 14 plans have approximate source-bound overlays: all floors of SE12, SW01 and SW03, plus SW05 floors 1–2. Other floor maps hide the dot until source-grounded transforms are available. See [device location](device-location.md), [photo localization](photo-localization.md) and [floor routing](floor-routing.md).
+Floor-plan geographic calibration is independent from route connectivity. The campus footprint catalogue supports building-level GPS narrowing, and SE12 floor 3 has an active approximate overlay. Thirteen proposed registrations remain separate development candidates pending independent source evidence. Other floor maps hide the dot until source-grounded transforms are available. See [device location](device-location.md), [photo localization](photo-localization.md) and [floor routing](floor-routing.md).
+
+The router preserves main's approach tiers (mapped stops, shared entrances, then corridor-side stops), shared-door departure regions, directional transfer constraints and visitor exclusions. It selects a reachable approach automatically without origin-choice fields or endpoints. If only a partial route is supported, the overview marks the missing first or final segment and does not offer GO. Guided tracking stops on Finish route.
 
 ## Privacy and runtime
 

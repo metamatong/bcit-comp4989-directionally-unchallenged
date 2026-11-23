@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <meta charset="utf-8" /><meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+  /><title>FloorCAD diagnosis</title
+  ><style>
+    body {
+      font: 17px system-ui;
+      background: #101b28;
+      color: #e4edf5;
+      max-width: 1200px;
+      margin: 36px auto;
+      padding: 20px;
+    }
+    a {
+      color: #78dce8;
+    }
+    article {
+      border: 1px solid #506070;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    img {
+      max-width: 100%;
+      max-height: 420px;
+      background: white;
+    }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+    p {
+      line-height: 1.5;
+    }
+  </style>
+  <h1>FloorCAD: S280 and class-label diagnosis</h1>
+  <a href="/model-review">Back to model comparison</a>
+  <p>
+    S280 is visibly drawn. Both local models identify a stair in tight, context
+    and rotated crops. OCR varies: these answers cannot replace exact source
+    identifiers or approve a route.
+  </p>
+  <p>
+    The whole-page detector produced a nearby <strong>class_31</strong> box,
+    excluded by our circulation-class filter. The tiled export contains only
+    four selected classes above confidence 0.25, so it cannot establish whether
+    another class or a lower-confidence detection was present. The reviewed
+    point was inside six tiles; it was not skipped by the grid.
+  </p>
+  <p>
+    Many visible flights receive the raw label parking, but that does not
+    justify a global relabel. Training-conversion mismatch and domain-specific
+    classification errors remain hypotheses. No weights were changed: reviewed
+    landing points are not training bounding boxes, and these model answers are
+    not verified training labels.
+  </p>
+  <section id="neon"></section>
+  <div id="results"></div>
+  <h2>Geometric evidence and excluded detection</h2>
+  <pre id="geometry"></pre>
+  <script type="module" src="/floorcad-diagnosis.js"></script>
+</html>

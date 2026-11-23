@@ -28,6 +28,8 @@ export type MapStop = {
   label: string;
   point: PagePoint;
   startRegion?: PlanBounds;
+  corridorVicinity?: boolean;
+  sharedEntrance?: string;
 };
 export type PlaceChoice = {
   id: string;
@@ -56,12 +58,16 @@ export type NavigationChoice = {
   destinationId?: string;
   destinationPoint?: FloorPin;
 };
+export type WalkingPath = { origin: MapStop; destination: MapStop; steps: WalkingStep[] };
 export type NavigationResult = {
   networkRevision: number;
   origins: MapStop[];
   destinations: PlaceChoice[];
   destinationMatch?: DestinationMatch;
   arrivalNote?: string;
+  /** The first or last stretch between a printed place and a public stop is unverified. */
+  mappedPortion?: WalkingPath & { requested?: PlaceChoice; requestedOrigin?: PlaceChoice };
+  restriction?: 'staff-only' | 'non-walking';
 } & (
   | {
       status:
@@ -76,5 +82,5 @@ export type NavigationResult = {
       message: string;
       originIssue?: OriginIssue;
     }
-  | { status: 'route'; origin: MapStop; destination: MapStop; steps: WalkingStep[] }
+  | ({ status: 'route' } & WalkingPath)
 );

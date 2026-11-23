@@ -1,5 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { randomUUID } from 'node:crypto';
+import { locationCatalogue } from '../server/geolocation';
+import type { LabelLocationRequest } from '../server/label-localization';
 import { PHOTO_CROP_REGIONS } from '../src/photo-views';
 import type { PlanBounds } from '../src/types';
 import type { PhotoEvidenceRequest, PhotoRequest } from '../server/photo-media';
@@ -106,9 +108,16 @@ export function comparison(
   ];
 }
 
-export function locationInput(
-  evidenceId: string,
-  revision: number,
-): { requestId: string; revision: number; evidenceId: string } {
-  return { requestId: randomUUID(), revision, evidenceId };
+export function locationInput(evidenceId: string, revision: number): LabelLocationRequest {
+  return { requestId: randomUUID(), revision, evidenceId, gps: gpsHint() };
+}
+
+/** Simulated building metadata only; never a live device reading. */
+export function gpsHint(building = 'SE12') {
+  return {
+    buildings: [building],
+    sourceSha256: locationCatalogue().geographicSource.sha256,
+    capturedAt: Date.now(),
+    accuracy: 2,
+  };
 }

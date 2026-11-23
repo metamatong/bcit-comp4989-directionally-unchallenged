@@ -80,7 +80,7 @@ it('opens only the current instruction, advances manually, finishes, and returns
     await click('Next step');
     expect(host.textContent).toContain('Step 2 of 5');
     expect(host.querySelector('.walking-map')?.getAttribute('aria-label')).toContain('SE12');
-    await click('Show arrival floor');
+    await click('Next step');
     expect(host.querySelector('.walking-map')?.getAttribute('aria-label')).toContain('SW03');
     expect(host.querySelectorAll('polyline')).toHaveLength(0);
     const sw3 = catalogue.buildings.find((building) => building.building === 'SW3')!.rings[0];
@@ -94,11 +94,12 @@ it('opens only the current instruction, advances manually, finishes, and returns
       'floor-plan alignment is unavailable for SW03 · Floor 3',
     );
     await click('Previous');
-    expect(host.textContent).toContain('Step 1 of 5');
-    for (let i = 1; i < route.steps.length; i++) await click('Next step');
+    expect(host.textContent).toContain('Step 2 of 5');
+    for (let i = 2; i < route.steps.length; i++) await click('Next step');
     await click('Finish route');
     expect(host.textContent).toContain('Route complete');
-    expect(host.textContent).toContain('floor-plan alignment is unavailable');
+    expect(host.textContent).toContain('Location tracking stopped');
+    expect(clearWatch).toHaveBeenCalled();
     await click('Done');
     expect(host.querySelectorAll('.walking-map')).toHaveLength(3);
     expect(recheck).not.toHaveBeenCalled();

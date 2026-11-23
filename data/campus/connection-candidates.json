@@ -2457,6 +2457,216 @@
       "rationale": "Review whether someone using ordinary visitor directions may travel between the marked doors through storage room 1498. The access rule is recorded separately from a walking-edge approval.",
       "preparedBy": "assistant-source-review",
       "preparedOn": "2026-11-18"
+    },
+    {
+      "id": "se12-f1-f2-s100-s200",
+      "version": 1,
+      "title": "SE12 floors 1 and 2 · west stairs S100 and S200",
+      "kind": "stairs",
+      "from": {
+        "planId": "SE12-F1-p1",
+        "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+        "point": {
+          "x": 0.502,
+          "y": 0.117
+        },
+        "label": "S100 · west exterior landing",
+        "kind": "stair-landing",
+        "description": "Flat portion of the projecting west stair beside 102 on the first-floor drawing."
+      },
+      "to": {
+        "planId": "SE12-F2-p1",
+        "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+        "point": {
+          "x": 0.07451,
+          "y": 0.443939
+        },
+        "label": "S200 · dining-side landing",
+        "kind": "stair-landing",
+        "description": "The upper landing of S200 is drawn separately to the left of 201 DINING. Confirm the direction of access on this floor."
+      },
+      "endpointRefs": {
+        "to": {
+          "candidateId": "se12-f2-f3-s200-s300",
+          "side": "from"
+        }
+      },
+      "rationale": "The first-floor S100 and second-floor S200 drawings show projecting west stair flights beside 102 and 201 DINING. Establish public service and travel direction at these two specific points.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-19"
+    },
+    {
+      "id": "se12-f1-s100-to-102z-exterior",
+      "version": 1,
+      "title": "SE12 floor 1 · west stair to corridor 102Z",
+      "kind": "outdoor",
+      "from": {
+        "planId": "SE12-F1-p1",
+        "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+        "point": {
+          "x": 0.502,
+          "y": 0.117
+        },
+        "label": "S100 · west exterior landing",
+        "kind": "stair-landing",
+        "description": "Flat portion of the projecting west stair beside 102 on the first-floor drawing."
+      },
+      "to": {
+        "planId": "SE12-F1-p1",
+        "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+        "point": {
+          "x": 0.455,
+          "y": 0.5155
+        },
+        "label": "102Z · exterior entrance",
+        "kind": "outdoor-access",
+        "description": "At the outer double doors on the corridor side of 102Z, facing the open area beside room 102."
+      },
+      "endpointRefs": {
+        "from": {
+          "candidateId": "se12-f1-f2-s100-s200",
+          "side": "from"
+        }
+      },
+      "rationale": "The original floor plan locates both exterior points. Confirm whether visitors can walk outdoors between these marks, and in which direction. The outdoor path geometry and distance have not been measured.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-19"
+    },
+    {
+      "id": "se12-f2-s200-to-201v-exterior",
+      "version": 1,
+      "title": "SE12 floor 2 · west stair to dining vestibule",
+      "kind": "outdoor",
+      "from": {
+        "planId": "SE12-F2-p1",
+        "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+        "point": {
+          "x": 0.07451,
+          "y": 0.443939
+        },
+        "label": "S200 · dining-side landing",
+        "kind": "stair-landing",
+        "description": "The upper landing of S200 is drawn separately to the left of 201 DINING. Confirm the direction of access on this floor."
+      },
+      "to": {
+        "planId": "SE12-F2-p1",
+        "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+        "point": {
+          "x": 0.294,
+          "y": 0.43
+        },
+        "label": "201V · dining exterior entrance",
+        "kind": "outdoor-access",
+        "description": "Inside the outer double doors of dining vestibule 201V, on the east side of the dining wing."
+      },
+      "endpointRefs": {
+        "from": {
+          "candidateId": "se12-f2-f3-s200-s300",
+          "side": "from"
+        }
+      },
+      "rationale": "The original floor plan locates both exterior points. Confirm whether visitors can walk outdoors between these marks, and in which direction. The outdoor path geometry and distance have not been measured.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-19"
+    },
+    {
+      "id": "se12-f2-court-to-203y-exterior",
+      "version": 1,
+      "title": "SE12 floor 2 · SW03-side exit to vestibule 203Y",
+      "kind": "outdoor",
+      "from": {
+        "planId": "SE12-F2-p1",
+        "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+        "point": {
+          "x": 0.5395,
+          "y": 0.5365
+        },
+        "label": "Exterior door toward SW03",
+        "kind": "outdoor-access",
+        "description": "The marker indicates a possible outward-opening door from 203F OFFICE-OPN beside stairs S203 at the bottom of the SE12 floor 2 drawing. Move B if another door serves the trip to SW03."
+      },
+      "to": {
+        "planId": "SE12-F2-p1",
+        "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+        "point": {
+          "x": 0.517,
+          "y": 0.303
+        },
+        "label": "203Y · exterior entrance",
+        "kind": "outdoor-access",
+        "description": "Between the two sets of doors at vestibule 203Y, opening onto corridor 203Z."
+      },
+      "endpointRefs": {
+        "from": {
+          "candidateId": "sw3-se12-floor2-passage",
+          "side": "to"
+        }
+      },
+      "rationale": "The original floor plan locates both exterior points. Confirm whether visitors can walk outdoors between these marks, and in which direction. The outdoor path geometry and distance have not been measured.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-19"
+    },
+    {
+      "id": "sw3-f1-1700-to-1900-west-exterior",
+      "version": 1,
+      "title": "SW03 floor 1 · exterior vestibule at S180 to west wing 1900",
+      "kind": "outdoor",
+      "from": {
+        "planId": "SW3-F1-p1",
+        "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+        "point": {
+          "x": 0.310866,
+          "y": 0.475379
+        },
+        "label": "1700 · exterior vestibule by S180",
+        "kind": "outdoor-access",
+        "description": "Inside the vestibule at the exterior double doors on the north side of the plan, beside the east end of S180."
+      },
+      "to": {
+        "planId": "SW3-F1-p1",
+        "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+        "point": {
+          "x": 0.24469,
+          "y": 0.471591
+        },
+        "label": "1900 · west exterior entrance",
+        "kind": "outdoor-access",
+        "description": "Public corridor side of the west-facing exterior double doors beside S180 and the 1910 marking, north of 1915."
+      },
+      "rationale": "Both doors open onto the exterior. The drawing does not establish a continuous outdoor public path, direction or entry permissions. Confirm the marked route before enabling it.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-19"
+    },
+    {
+      "id": "sw3-f1-f2-west-s190-s299",
+      "version": 1,
+      "title": "SW03 west wing · S190 and S299",
+      "kind": "stairs",
+      "from": {
+        "planId": "SW3-F1-p1",
+        "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+        "point": {
+          "x": 0.27982,
+          "y": 0.695076
+        },
+        "label": "S190 · corridor 1900 approach",
+        "kind": "stair-landing",
+        "description": "Hallway side of the double doors at the bottom of S190, beside office 1950 on the first-floor drawing."
+      },
+      "to": {
+        "planId": "SW3-F2-p1",
+        "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+        "point": {
+          "x": 0.2165033,
+          "y": 0.6957071
+        },
+        "label": "S299 · corridor 2900 approach",
+        "kind": "stair-landing",
+        "description": "Hallway side of the S299 doors at the end of corridor 2900 beside office 2930 on the second-floor drawing."
+      },
+      "rationale": "The two drawings show stairs at the end of the west-wing corridor near 1950 and 2930. Confirm which landings that staircase serves and the permitted directions.",
+      "preparedBy": "assistant-source-review",
+      "preparedOn": "2026-11-19"
     }
   ]
 }

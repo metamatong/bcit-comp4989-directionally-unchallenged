@@ -1,0 +1,35 @@
+{
+  "purpose": "Source-checked seed patches for a separate single-class stair detector experiment",
+  "weightsChanged": false,
+  "baseline": {
+    "repository": "mudasir13cs/floorcad-yolov8n-detect",
+    "revision": "02995225d7aed598bc7e0214f5b7f3fe7fe95657",
+    "sha256": "be1a5a404c5ad1c454ba7531e2c16548a6330945319cbf989751ff73578b494c"
+  },
+  "classMapping": {
+    "0": "stair-assembly"
+  },
+  "head": "New single-class detection head; original 35-class head is not equivalent",
+  "reviewEvidence": "../checked-objects.json and ../independent-classification.json",
+  "trainingStarted": false,
+  "requiredEvaluation": [
+    "Compare with pinned baseline on identical reserved source views.",
+    "Measure per-floor positive recall, hard-negative false positives and box overlap.",
+    "Evaluate original full-tile scale separately from enlarged patches.",
+    "Retain uncertain and missing source locations as coverage gaps; infer no connections."
+  ],
+  "limitations": [
+    "Two AI reviewers do not constitute human or field verification.",
+    "Selected candidate review is not a whole-floor census or detector recall estimate.",
+    "Training patches enlarge small source objects; full-tile scale and clutter evaluation remains necessary.",
+    "Floors 3 and 4 were previously inspected; floor-group split is not unseen-building generalization."
+  ],
+  "trainingExport": {
+    "stairBoxes": 33,
+    "positivePatches": 32,
+    "negativePatches": 21,
+    "ambiguousCandidatesExcluded": 5,
+    "weightsChanged": false,
+    "routingChanges": false
+  }
+}

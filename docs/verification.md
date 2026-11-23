@@ -2,6 +2,78 @@
 
 This file is a historical log. Older entries describe workflows and route data that have since changed. The current visitor app uses GPS-required automatic start matching and has no start-confirmation, connection-review or topology-editor screen/API; see [current architecture](architecture.md) and [device-location coverage](device-location.md).
 
+## Main comparison with the same ten photos · November 19, 2026
+
+At the user's request to return to main and compare behavior, created a separate managed worktree at local main `f845b414e5ddcc7e1588a2941391d67e7b717d69`. The main checkout is detached at that commit; the original `cole-gps-coverage` checkout and its uncommitted reconciliation edits remain intact. No pull, commit, push, merge or deployment occurred. The main worktree's application files were not edited. It reused installed dependencies through a directory junction, read the original private configuration without copying it, and ran a temporary copy of the same photo harness. Both temporary HTTP listeners have stopped.
+
+Ran `node --import tsx tmp/local-photo-batch.ts` in the main worktree with the same ten original files, image preparation, simulated SE12/SW3 GPS scopes, Gemini configuration, published network revision 89 and destinations (`SE12 302`, `SW03 1730`). This fresh run returned eight successful extractions and two HTTP 504 errors. Main automatically located three photos, offered candidates requiring selection for three, and found no starting candidates for two. The two failed extractions produced no navigation attempts. All six navigation requests submitted for the three automatic starts returned routes.
+
+| Photo | Fresh main result | Earlier revised result |
+| --- | --- | --- |
+| `IMG20261116141702.jpg` | Automatic 319; both routes returned | Automatic 319; both routes returned |
+| `IMG20261116141611.jpg` | Provider timeout after primary/fallback attempts | Automatic 311 from 311/313 readings |
+| `discord-temp-38A5926D-4B16-483E-90D4-37761CC35000.jpg` | Provider timeout on fallback while primary was cooling down | Read 1730, but contradictory zero-door evidence prevented localization |
+| `photoooo.jpg` | Candidate 302 requires confirmation because CLASSROOM is unmatched | Automatic 302 |
+| `IMG_8200.jpg` | Automatic SW03 floor-2 corridor 2600 between 2680 and 2695; both routes returned | Provider timeout |
+| `IMG20261116141532.jpg` | Locker labels; no starting candidates | Same unresolved outcome |
+| `IMG20261116141547.jpg` | No readable labels; no starting candidates | Uncertain 102; no starting candidates |
+| `IMG20261116141555.jpg` | Offers 309A and questionable 301 for selection | Automatically selects questionable 301 |
+| `IMG20261116141524.jpg` | Offers 306 and 308 for selection | Automatically selects 308 |
+| `IMG_8205.jpg` | Automatic 323; both routes returned | Automatic 323; both routes returned |
+
+Fresh provider responses varied in label classification and availability. Main made twelve transport attempts: eight successes, three timeouts and one 503. The extraction implementation (`server/photo-evidence.ts`), Gemini adapter/configuration, browser photo preparation and published network JSON match the reconciled checkout after line-ending normalization. Therefore the live-run differences alone do not establish a code regression.
+
+To isolate implementation differences, ran `node --import tsx tmp/compare-photo-evidence.ts` in the original checkout, then ran it again with the main worktree's `tmp/photo-batch-2026-11-19/results.json` argument and output name `main-fresh-evidence-comparison`. These checks replayed all nine successful original receipts and all eight successful main receipts through both implementations, refreshing expiry metadata only and making no provider calls. All **17 candidate-set comparisons matched**. For each revised selected candidate, the main planner was tested with the corresponding source-place candidate and, when required, each offered origin. All **24 route comparisons matched exactly** in origin, destination and walking steps. These cover seven distinct photos with routable estimates; repeated evidence sets are not independent accuracy samples. The other three photos remain unresolved consistently when fed the same evidence.
+
+No route-path regression was observed for these inputs and destinations. Start selection is intentionally different: with the original evidence, main requires candidate confirmation for five of the six photos that the revised implementation starts automatically; main additionally asks for a doorway for the 311 candidate. The questionable 301 reading appears in both live runs, but only the revised implementation commits to it automatically. That remains an unresolved localization risk; unchanged route geometry does not validate the starting estimate. The 306/308 ranking also does not establish which doorway the camera is nearest.
+
+Image-free artifacts are retained under the original checkout's ignored `tmp/photo-batch-2026-11-19/`: `main-live-results.json`, `main-evidence-comparison.json`, and `main-fresh-evidence-comparison.json`. No browser, screenshot, real-device GPS, physical-campus, build or full-unit-suite checks ran. The separate main worktree remains available for further baseline work.
+
+## Ten supplied campus photos, local live-provider batch · November 19, 2026
+
+At the user's request, ran `node --import tsx tmp/local-photo-batch.ts` against a temporary loopback HTTP listener using the current visitor session, evidence, localization and navigation endpoints. The configured provider was Gemini 3.5 Flash-Lite with Gemini 3.8 Flash fallback. An isolated import of published network revision 89 supplied routing; the ignored revision-29 local topology file was preserved. Simulated building-only GPS metadata used SE12 or SW3, with a fresh timestamp and the real geographic source hash. These were not device readings. Sharp prepared the context image and four crops with the browser's regions, dimensions and byte limits; JPEG encoding was not browser-identical. No browser, screenshot, GPS sensor or physical-campus check ran.
+
+| Photo | Live extraction / automatic start | Route API result |
+| --- | --- | --- |
+| `IMG20261116141702.jpg` | Read 319; SE12 floor 3, anchor 319 | Both destinations returned routes |
+| `IMG20261116141611.jpg` | Read 313 and 311; SE12 floor 3, anchor 311 | Both destinations returned routes |
+| `discord-temp-38A5926D-4B16-483E-90D4-37761CC35000.jpg` | Read 1730, but also reported zero visible doors while classifying the sign as at a door; localization rejected the contradiction | No start; navigation not submitted |
+| `photoooo.jpg` | Read 302; SE12 floor 3, anchor 302 | Both destinations returned routes; same-room destination had zero steps |
+| `IMG_8200.jpg` | Primary timed out after about 15 seconds; fallback timed out at the 45-second stage deadline; HTTP 504 | No extraction; navigation not submitted |
+| `IMG20261116141532.jpg` | Locker identifiers were classified as room labels but did not match a starting place | No start; navigation not submitted |
+| `IMG20261116141547.jpg` | Only an uncertain 102 reading; no starting match | No start; navigation not submitted |
+| `IMG20261116141555.jpg` | Read clear 309A and claimed clear 301 from a partly obscured neighbouring sign; automatic anchor 301 is questionable | Both destinations returned routes, but localization is not a verified pass |
+| `IMG20261116141524.jpg` | Read 306 and 308; SE12 floor 3, anchor 308 | Both destinations returned routes; choosing 308 does not establish camera proximity |
+| `IMG_8205.jpg` | Read clear 323 and uncertain 321; SE12 floor 3, anchor 323 | Both destinations returned routes |
+
+The two destinations were `SE12 302` and `SW03 1730`. Nine of ten photo extractions returned HTTP 200; six photos produced automatic starts and twelve route responses. Three successful extractions remained unresolved, and one extraction timed out. Eleven live provider attempts occurred: nine successful primary attempts and two timeout attempts for the fifth photo. No later localization or routing model calls occurred. Returning routes is a functional result, not a measured localization success rate: the 301 origin is questionable, multi-sign ranking does not establish the nearest doorway, and the simulated GPS scope cannot validate device accuracy.
+
+The temporary harness and image-free JSON results are in ignored `tmp/local-photo-batch.ts` and `tmp/photo-batch-2026-11-19/results.json`. Original and prepared image bytes were not copied into reports or session storage. The first sandboxed harness attempt could not initialize its hard-linked temporary topology; the harness then wrote its isolated imported fixture directly. A subsequent sandboxed attempt could not fetch its loopback endpoint. The complete run used approved network access. No application behavior was changed, and no unit suite, build or data-validation command was rerun for this photo-only check.
+
+## PR 24 working-file reconciliation · November 19, 2026
+
+Reconciled PR head `fe7c38cbf1506c975b6ba375a1eeb5be9b8b987e` with main `f845b414e5ddcc7e1588a2941391d67e7b717d69` by editing working files only. No Git commands, commits, pushes or merges were performed. Main's revision-89 routing data, SW03 west-wing connections, approach compiler, visitor exclusions, bounded stale-GPS retry and partial-route presentation were retained. Automatic start selection replaces origin choices while retaining source-backed shared departure regions and approach tiers. Incomplete routes do not offer GO. Finish route stops the foreground GPS watch.
+
+The thirteen proposed geographic registrations are preserved in `data/campus/geolocation/calibration-candidates.json` and are not exposed as active visitor alignments. Their independent source correspondence evidence is missing; generated outline-control residuals cannot supply that evidence. SE12 floor 3 retains its existing approximate alignment. The generator's tuple typing and existing test contracts were updated without adding new test cases or executing tests.
+
+Final `npm run build` and `npm run data:validate` both passed. The build type-checks existing test sources but does not execute them. Vite emitted two non-fatal Zod pure-annotation warnings. Data validation covered 3,463 source-place occurrences on 89 floor graphs, 89 calibration coverage records, 90 original PDF hashes, 631 derived asset hashes, all 5,463 original labels, and published network revision 89 with 100 points and 69 passages. The separate ignored local topology file remained at revision 29 and was not overwritten.
+
+Preparation also ran `node --import tsx scripts/prepare-geolocation.ts` and targeted Prettier formatting of edited TypeScript files. Earlier build attempts exposed stale test contracts; these were corrected before the final passing build. No unit/API tests, route samples, browser/screenshot checks, live provider requests, Vercel packaging, deployment or physical-campus checks ran. Passing compilation and data validation does not establish runtime route or indoor GPS accuracy.
+
+## SW03 west wing and outstanding visitor approaches · November 19, 2026
+
+Revision 89 records two user-confirmed bidirectional connections. The walk from SE12 323 to SW03 1920 uses the outdoor 1700–1900 connection on floor 1 and reaches the 1920 doorway. The return trip follows the same exterior entrances in reverse. A route to SW03 2910 continues up the west stairs from S190 to S299. Both directions of the staircase were checked independently. The original 166 incomplete visit records fell to 114. The new total also includes five additional signed source occurrences. [Room-level coverage](three-building-routing.md)
+
+Replaying the five place pairs from the previous random sample produced walking routes for all five. Four ended at a mapped room, landing or doorway. SW01 1023A ended at its labelled shared entrance. The two earlier partial results now reach SE12 100E and SW03 1920. These checks exercised the normal visitor planner after sign extraction, selecting a source door when the origin had multiple possibilities. They used no new photos, live model calls or physical campus measurements.
+
+## Three-building visitor routing · November 19, 2026
+
+The compiled visitor router takes SE12 323 through the floor-3 passage, down through SW03 floors 2 and 1 and to the doorway of 1750 on corridor 1700. Both of the 323 doors lead to the same first turn. The packaged readiness check also covers SE12 302 to SW03 1730. These checks replay exact sign evidence after extraction. They use no visitor media or provider calls.
+
+A directional search over all 12 target sheets found 999 of 1,165 visitor occurrences usable in both directions through the common network. Coverage by floor, arrival quality and restriction is published in the inventory. The other 77 compiled floor records retained their previous contents. The three outdoor links and two stair directions recorded in this release came from the project user's marked-point confirmations. No physical-campus walk was performed for this release. [Per-place inventory](three-building-routing.md)
+
+Five local visitor API pairs were sampled before checking reachability, using seed `89f36d66`. Three reached their destination. SW03 2690 to SE12 100E ended at SE12 corridor 101L. SW01 3382B to SW03 1920 ended at SW03 corridor 1700. Both results identified the last mapped stop and kept the connection to the room unresolved. The three complete pairs were SW03 3675 to SW01 3042, SW01 2355 to SW01 1023A and SW01 3010 to SW01 2386.
+
 ## Stair preference and guided directions · November 19, 2026
 
 The destination step offers **Accessibility: prefer elevators**; unchecked routes prefer stairs. The planner first looks for a complete route without the non-preferred transfer type, then falls back to all currently permitted connections. Route results retain the ordered floor-map overview. **GO** requires a fresh GPS reading, then opens step-by-step directions with the current map as the focus and a live position dot where floor calibration exists. Previous/next/finish controls update progress without inferring floors or advancing from GPS. GPS and accessibility remain approximate indoors.

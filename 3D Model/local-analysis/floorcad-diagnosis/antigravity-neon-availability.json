@@ -1,0 +1,15 @@
+{
+  "checkedAt": "2026-11-19",
+  "provider": "antigravity",
+  "connectionStatus": "active",
+  "requestedModel": "gemini-4-neon",
+  "discoveryFile": "antigravity-model-discovery.json",
+  "liveCatalogIncludesRequestedModel": false,
+  "probe": {"httpStatus": 400, "error": "Model 'gemini-4-neon' is not available in the active live catalog for provider 'antigravity'.", "upstreamInferenceConfirmed": false},
+  "cropTestsRun": false,
+  "fallbackUsed": false,
+  "officialAvailabilitySource": "https://antigravity.google/docs/models",
+  "interpretation": "Public product availability is confirmed, but this connected account/gateway catalogue does not currently expose Neon. This alone does not establish whether the cause is account entitlement, rollout, client compatibility, or upstream discovery.",
+  "routingChanges": 0,
+  "weightChanges": 0
+}

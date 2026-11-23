@@ -118,8 +118,6 @@ describe('visually supported doorway vicinities', () => {
         createElement(CampusLocationResults, {
           analysis: result,
           plans,
-          onConfirm: () => {},
-          busy: false,
         }),
       );
       expect(markup).toContain('Possible starting corridor');
@@ -133,11 +131,8 @@ describe('visually supported doorway vicinities', () => {
       if (choices.status === 'route') {
         expect(choices.origins).toHaveLength(1);
         expect(
-          planVisitorJourney(
-            match,
-            { ...query, networkRevision: choices.networkRevision, originId: choices.origins[0].id },
-            store,
-          ).status,
+          planVisitorJourney(match, { ...query, networkRevision: choices.networkRevision }, store)
+            .status,
         ).toBe('route');
       } else expect(choices.origins).toEqual([]);
     },

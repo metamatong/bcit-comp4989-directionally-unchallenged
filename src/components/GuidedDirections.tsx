@@ -46,18 +46,22 @@ export function GuidedDirections({
     projected.point.y >= 0 &&
     projected.point.y <= 1
   );
-  const positionStatus = !tracking.fresh
-    ? tracking.status || (tracking.reading ? 'Waiting for a fresh GPS update…' : 'Waiting for GPS…')
-    : !withinBuilding
-      ? 'The GPS area does not overlap this building. The position dot is hidden.'
-      : !onPlan
-        ? `A floor-plan alignment is unavailable for ${planLabel(plan)}. The position dot is hidden.`
-        : `GPS position is approximate on ${planLabel(plan)} · reported accuracy ±${tracking.reading!.accuracy.toFixed(0)} m · indoor accuracy unmeasured.`;
+  const positionStatus = complete
+    ? 'Location tracking stopped. Route complete.'
+    : !tracking.fresh
+      ? tracking.status ||
+        (tracking.reading ? 'Waiting for a fresh GPS update…' : 'Waiting for GPS…')
+      : !withinBuilding
+        ? 'The GPS area does not overlap this building. The position dot is hidden.'
+        : !onPlan
+          ? `A floor-plan alignment is unavailable for ${planLabel(plan)}. The position dot is hidden.`
+          : `GPS position is approximate on ${planLabel(plan)} · reported accuracy ±${tracking.reading!.accuracy.toFixed(0)} m · indoor accuracy unmeasured.`;
   useEffect(() => {
     heading.current?.focus({ preventScroll: true });
     heading.current?.scrollIntoView?.({ block: 'start' });
   }, [index]);
   function move(next: number) {
+    if (next >= route.steps.length) tracking.stop();
     setIndex(next);
   }
   return (

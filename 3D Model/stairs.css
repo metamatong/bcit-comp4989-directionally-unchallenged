@@ -1,0 +1,239 @@
+:root {
+  font: 15px system-ui;
+  color: #dce5ef;
+  background: #0b111b;
+  color-scheme: dark;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px;
+}
+h1 {
+  font-size: 26px;
+  margin: 5px 0;
+}
+small {
+  letter-spacing: 2px;
+  color: #8cb4c4;
+}
+a {
+  color: #78d9e5;
+}
+button,
+select,
+input {
+  font: inherit;
+  border: 1px solid #43536a;
+  border-radius: 6px;
+  background: #172335;
+  color: #e4edf6;
+  padding: 8px;
+}
+button {
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.toolbar {
+  display: flex;
+  gap: 18px;
+  align-items: end;
+  flex-wrap: wrap;
+  padding: 16px 24px;
+  background: #172130;
+}
+.toolbar label {
+  display: grid;
+  gap: 5px;
+}
+.intro,
+#status,
+details {
+  margin: 20px 24px;
+}
+.intro {
+  line-height: 1.7;
+}
+.reviewed {
+  color: #67dfef;
+}
+.proposed {
+  color: #ffb454;
+}
+.label {
+  color: #b99aff;
+}
+.pair {
+  margin: 20px 24px;
+  padding: 18px;
+  background: #162333;
+  border: 1px solid #405369;
+  border-radius: 10px;
+}
+.pair h2 {
+  margin-top: 0;
+}
+.pair p {
+  font-size: 13px;
+  line-height: 1.6;
+}
+#selection {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+#selection article {
+  padding: 12px;
+  background: #0b1421;
+  overflow-wrap: anywhere;
+}
+#selection img {
+  width: 100%;
+  display: block;
+}
+#relationships {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 15px;
+}
+#relationships button {
+  max-width: 480px;
+  text-align: left;
+  font-size: 13px;
+}
+#floors {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 24px;
+  align-items: start;
+}
+.floor {
+  width: var(--plan-size, 680px);
+  max-width: none;
+  background: #152132;
+  padding: 16px;
+  border: 1px solid #35465c;
+  border-radius: 10px;
+}
+.floor h2 {
+  margin: 0 0 10px;
+}
+.plan {
+  position: relative;
+  line-height: 0;
+  background: white;
+}
+.plan > img {
+  width: 100%;
+  display: block;
+}
+.mark {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 1px 4px;
+  min-width: 23px;
+  height: 23px;
+  border: 2px solid #172335;
+  border-radius: 50%;
+  color: #06101c;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 17px;
+  z-index: 1;
+}
+.mark.label {
+  background: #b99aff;
+}
+.mark.reviewed {
+  background: #67dfef;
+}
+.mark.proposed {
+  background: #ffb454;
+}
+.mark.chosen {
+  outline: 3px solid white;
+  z-index: 2;
+}
+.marker-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 12px;
+}
+.marker-list button {
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.source {
+  font-size: 11px;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+.missing {
+  color: #ffb454;
+  font-size: 12px;
+}
+.marking {
+  margin: 10px 0;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.marking input[type="text"] {
+  min-width: 0;
+  flex: 1;
+}
+footer {
+  padding: 24px;
+  font-size: 12px;
+  color: #a4b8c9;
+}
+#pair-message {
+  color: #ffb454;
+}
+summary {
+  cursor: pointer;
+}
+.crop {
+  position: relative;
+  overflow: hidden;
+  height: 220px;
+  background: white;
+}
+.crop img {
+  position: absolute;
+  max-width: none;
+}
+.crop .cross {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: #e63044;
+  font-size: 32px;
+  line-height: 1;
+}
+@media (max-width: 700px) {
+  #selection {
+    grid-template-columns: 1fr;
+  }
+  .floor {
+    max-width: calc(100vw - 48px);
+  }
+  header {
+    display: block;
+  }
+}

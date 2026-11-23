@@ -1,0 +1,17 @@
+{
+  "name": "bcit-spatial-inspector",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node launch.mjs start",
+    "build": "node launch.mjs build",
+    "test": "node launch.mjs test",
+    "format": "node launch.mjs format",
+    "data:validate": "node launch.mjs validate",
+    "analyze:plans": "node analyze-plans.mjs",
+    "analyze:stairs": "node analyze-stair-crops.mjs"
+  },
+  "dependencies": {
+    "three": "0.187.0"
+  }
+}

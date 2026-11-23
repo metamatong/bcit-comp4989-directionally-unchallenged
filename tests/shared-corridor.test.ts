@@ -1,3 +1,4 @@
+import { gpsHint } from './photo-fixtures';
 /** Replay the locker-hall sign roles against the distributable map, including negative controls. */
 import { randomUUID } from 'node:crypto';
 import { mkdtempSync, rmSync } from 'node:fs';
@@ -5,11 +6,11 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, expect, it } from 'vitest';
 import { floorGraphs } from '../server/floor-graph';
-import { locateFromLabels, selectLocatedCandidate } from '../server/label-localization';
+import { locateFromLabels } from '../server/label-localization';
 import { newSession } from '../server/session';
 import { TopologyStore } from '../server/topology';
 import { reviewedNetwork } from '../server/pilot-network';
-import { planVisitorNavigation, startingPoints } from '../server/wayfinding';
+import { planVisitorNavigation } from '../server/wayfinding';
 import type { PhotoFeatures, PhotoLabelReading, PhotoEvidence } from '../src/types';
 
 const dir = mkdtempSync(join(tmpdir(), 'signed-corridor-'));
@@ -52,15 +53,20 @@ function locate(
   session.photoEvidence = evidence;
   const analysis = locateFromLabels(
     session,
-    { requestId: randomUUID(), revision: session.revision, evidenceId: evidence.id },
+    {
+      requestId: randomUUID(),
+      revision: session.revision,
+      evidenceId: evidence.id,
+      gps: gpsHint(buildingHint ?? 'SW3'),
+    },
     { sessionId: session.id, evidence, fingerprint: 'sign-reading-replay', buildingHint },
   );
   return { session, analysis };
 }
 
-it('keeps two uncertain placement classifications as a corridor question and routes the confirmed public reference to SE12 302', async () => {
+it('automatically uses the source-backed corridor from the two sign classifications and routes its public reference to SE12 302', async () => {
   const { session, analysis } = locate([sign('2695'), sign('2680')]);
-  expect(session.campusLocation).toBeNull();
+  expect(session.campusLocation?.id).toBe(analysis.candidates[0].id);
   expect(analysis.candidates).toHaveLength(1);
   const [candidate] = analysis.candidates;
   expect(candidate).toMatchObject({
@@ -68,7 +74,6 @@ it('keeps two uncertain placement classifications as a corridor question and rou
     corridorOrigin: { roomLabels: ['2680', '2695'], needsConfirmation: true },
   });
   expect(analysis.referenceLabels?.map((r) => r.label).sort()).toEqual(['2680', '2695']);
-  selectLocatedCandidate(session, candidate.id);
   const route = await planVisitorNavigation(
     session.campusLocation!,
     { candidateId: candidate.id, revision: 0, destination: 'SE12 302', preferElevators: true },
@@ -112,14 +117,14 @@ it('automatically uses explicit local room plaques and preserves sign order and 
   }
 });
 
-it('asks before using a shared stretch when the second room sign might be in the distance', () => {
+it('automatically selects the supported shared stretch while retaining placement uncertainty', () => {
   const { session, analysis } = locate([sign('2695', 'door', 'none'), sign('2680', 'other')]);
   expect(analysis.candidates).toHaveLength(1);
   expect(analysis.candidates[0].corridorOrigin?.needsConfirmation).toBe(true);
-  expect(session.campusLocation).toBeNull();
+  expect(session.campusLocation?.id).toBe(analysis.candidates[0].id);
 });
 
-it('requires source identity and current room bindings even after a corridor was selected', () => {
+it('requires source identity and current room bindings for an automatic corridor start', async () => {
   const [candidate] = locate([sign('2680'), sign('2695')]).analysis.candidates;
   for (const invalid of [
     { ...candidate, sourcePlaceId: 'stale' },
@@ -130,7 +135,15 @@ it('requires source identity and current room bindings even after a corridor was
     },
     { ...candidate, corridorOrigin: { ...candidate.corridorOrigin!, bandId: 'another-band' } },
   ])
-    expect(startingPoints(invalid, store).origins).toEqual([]);
+    expect(
+      (
+        await planVisitorNavigation(
+          invalid,
+          { revision: 0, candidateId: invalid.id, destination: 'SE12 302' },
+          store,
+        )
+      ).origins,
+    ).toEqual([]);
 });
 
 it('requires distinct opposing local frontages, consistent context and no explicit travel cue', () => {
@@ -162,11 +175,19 @@ it('requires distinct opposing local frontages, consistent context and no explic
   expect(locate([sign('2695'), sign('2680')], straight, 'SW05').analysis.candidates).toEqual([]);
 });
 
-it('preserves individual source entrances and derives another pair from an independently named strip', () => {
+it('preserves individual source entrances and derives another pair from an independently named strip', async () => {
   for (const label of ['2695', '2680']) {
     const { session } = locate([sign(label, 'door', 'none')], straight, 'SW03');
     expect(session.campusLocation?.anchorLabel).toBe(label);
-    expect(startingPoints(session.campusLocation!, store).origins).toHaveLength(2);
+    expect(
+      (
+        await planVisitorNavigation(
+          session.campusLocation!,
+          { revision: 0, candidateId: session.campusLocation!.id, destination: 'SE12 302' },
+          store,
+        )
+      ).origins,
+    ).toHaveLength(2);
   }
   expect(
     locate([sign('4710', 'door'), sign('4725', 'door')], straight, 'SW03').session.campusLocation,

@@ -5,26 +5,27 @@ import { resolveStartingSigns } from './starting-place-evidence';
 import { TopologyStore } from './topology';
 import { planVisitorNavigation } from './wayfinding';
 
-export async function checkPublishedRoute(store = new TopologyStore()) {
+async function checkRoomTrip(store: TopologyStore, sign: string, target: string) {
   const signs = resolveStartingSigns([
-    { text: '302', kind: 'room', placement: 'door', clarity: 'clear', viewId: 'full' },
+    { text: sign, kind: 'room', placement: 'door', clarity: 'clear', viewId: 'full' },
   ]);
   const starts = signs.matches.filter((match) => match.place.planId === 'SE12-F3-p1');
-  if (starts.length !== 1) throw Error('Expected one SE12 floor 3 match for room 302.');
+  if (starts.length !== 1) throw Error('Expected one SE12 floor 3 match for room ' + sign + '.');
   const start = candidateFromSignMatch(starts[0], signs.references);
   const route = await planVisitorNavigation(
     start,
     {
       revision: 0,
       candidateId: start.id,
-      destination: 'SW03 1730',
+      destination: 'SW03 ' + target,
     },
     store,
   );
-  if (route.status !== 'route') throw Error('SE12 302 to SW03 1730 returned ' + route.status + '.');
+  if (route.status !== 'route')
+    throw Error('SE12 ' + sign + ' to SW03 ' + target + ' returned ' + route.status + '.');
 
   const floor = floorGraphs().byId.get('SW3-F1-p1')!;
-  const room = floor.places.find((place) => place.label === '1730');
+  const room = floor.places.find((place) => place.label === target);
   const cell = floor.containingCell(route.destination.point);
   const arrival = route.steps.at(-1);
   if (
@@ -38,7 +39,9 @@ export async function checkPublishedRoute(store = new TopologyStore()) {
     arrival.path.length < 2 ||
     !route.steps.some((step) => step.kind === 'building-link')
   ) {
-    throw Error('The route must reach the SW03 1730 doorway on floor 1 via the building passage.');
+    throw Error(
+      'The route must reach the SW03 ' + target + ' doorway on floor 1 via the building passage.',
+    );
   }
   return {
     status: route.status,
@@ -47,5 +50,16 @@ export async function checkPublishedRoute(store = new TopologyStore()) {
     origin: { planId: start.planId, label: start.anchorLabel },
     destination: { planId: floor.plan.id, label: room.label },
     floors: [...new Set([route.origin.planId, ...route.steps.map((step) => step.to.planId)])],
+  };
+}
+
+export async function checkPublishedRoute(store = new TopologyStore()) {
+  const original = await checkRoomTrip(store, '302', '1730');
+  return {
+    ...original,
+    alsoVerified: [
+      await checkRoomTrip(store, '323', '1750'),
+      await checkRoomTrip(store, '323', '1920'),
+    ],
   };
 }

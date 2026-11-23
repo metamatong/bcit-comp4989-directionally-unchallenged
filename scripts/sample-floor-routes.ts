@@ -4,7 +4,12 @@ import { once } from 'node:events';
 import type { AddressInfo } from 'node:net';
 import { parseArgs } from 'node:util';
 import { createApp } from '../server/app';
-import { floorGraphs, sourceBuilding, type FloorPlace } from '../server/floor-graph';
+import {
+  floorGraphs,
+  sourceBuilding,
+  visitorExclusion,
+  type FloorPlace,
+} from '../server/floor-graph';
 import { locationCatalogue } from '../server/geolocation';
 import { newSession } from '../server/session';
 import { MemoryVisitorSessions } from '../server/visitor-sessions';
@@ -12,12 +17,14 @@ import type { PhotoEvidence, Session } from '../src/types';
 import type { NavigationResult } from '../src/wayfinding';
 
 const { values, positionals } = parseArgs({
-  options: { building: { type: 'string' } },
+  options: { building: { type: 'string' }, network: { type: 'boolean' } },
   allowPositionals: true,
 });
 if (positionals.length > 1) throw Error('Supply at most one random seed.');
 const building = values.building && sourceBuilding(values.building);
 if (values.building && !building) throw Error('Select a supplied Burnaby building.');
+if (building && values.network)
+  throw Error('Choose the three-building network or a single building.');
 const seed = positionals[0] ?? randomBytes(4).toString('hex');
 if (!/^[0-9a-f]{8}$/i.test(seed)) throw Error('Supply an eight-digit hexadecimal random seed.');
 let state = parseInt(seed, 16);
@@ -26,8 +33,13 @@ function draw(limit: number) {
   return Math.floor((state / 2 ** 32) * limit);
 }
 const places = floorGraphs()
-  .ordered.filter((f) => !building || f.plan.building === building)
-  .flatMap((f) => f.places);
+  .ordered.filter((f) =>
+    values.network
+      ? ['SW1', 'SW3', 'SE12'].includes(f.plan.building)
+      : !building || f.plan.building === building,
+  )
+  .flatMap((f) => f.places)
+  .filter((p) => !values.network || !visitorExclusion(p));
 if (places.length < 10) throw Error('Ten distinct source occurrences are needed for five pairs.');
 for (let i = 0; i < 10; i++) {
   const j = i + draw(places.length - i);
@@ -99,7 +111,8 @@ async function check(origin: FloorPlace, goal: FloorPlace) {
       accuracy: 2,
     },
   });
-  const candidate = located.campusLocation?.sourcePlaceId === origin.id ? located.campusLocation : null;
+  const candidate =
+    located.campusLocation?.sourcePlaceId === origin.id ? located.campusLocation : null;
   const pair = {
     from: floor.building + ' F' + floor.floor + ' ' + origin.label,
     to: dest.building + ' F' + dest.floor + ' ' + goal.label,
@@ -133,7 +146,15 @@ async function check(origin: FloorPlace, goal: FloorPlace) {
     origins: result.origins.length,
     ...(result.status === 'route'
       ? { floors: [...new Set([result.origin.planId, ...result.steps.map((s) => s.to.planId)])] }
-      : { reason: result.message }),
+      : {
+          reason: result.message,
+          ...(result.mappedPortion
+            ? {
+                firstMappedStop: result.mappedPortion.origin.label,
+                lastMappedStop: result.mappedPortion.destination.label,
+              }
+            : {}),
+        }),
   };
 }
 try {
@@ -141,6 +162,7 @@ try {
     JSON.stringify({
       seed,
       ...(building ? { building } : {}),
+      ...(values.network ? { buildings: ['SE12', 'SW03', 'SW01'] } : {}),
       population: places.length,
       selection:
         'First five photo starts and next five destinations drawn without replacement before routing.',

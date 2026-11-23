@@ -265,25 +265,41 @@ function JourneyResult({
     'choose-destination': 'Destination match is unclear',
     'unknown-destination': 'Destination not found',
     'unmapped-destination': 'Destination entrance not connected',
-    'restricted-place': 'Staff-only area',
+    'restricted-place':
+      result.restriction === 'non-walking' ? 'Non-walking map feature' : 'Staff-only area',
     'unsupported-building': 'Routes are not mapped here yet',
     'unmapped-origin-and-destination': 'Route coverage is incomplete',
     'unmapped-origin': 'Could not match the photo to a mapped route',
     'no-route': 'Route unavailable',
   };
   const needsAnotherPhoto =
-    result.status === 'unmapped-origin' || result.status === 'unmapped-origin-and-destination';
+    !result.mappedPortion &&
+    (result.status === 'unmapped-origin' || result.status === 'unmapped-origin-and-destination');
 
   return (
     <section className="journey-panel" aria-label="Route to destination">
-      <div className="way-heading">
-        <MapPin size={21} />
-        <h2 tabIndex={-1} ref={headingRef}>
-          {headings[result.status]}
-        </h2>
-      </div>
-      <p role="status">{result.message}</p>
-      {result.status === 'no-route' && (
+      {result.mappedPortion ? (
+        <RouteDirections
+          route={{ ...result, ...result.mappedPortion, status: 'route' }}
+          requestedRoom={result.mappedPortion.requested}
+          requestedOrigin={result.mappedPortion.requestedOrigin}
+          plans={plans}
+          locationCatalogue={locationCatalogue}
+          preferElevators={preferElevators}
+          onRecheck={onRecheck}
+        />
+      ) : (
+        <>
+          <div className="way-heading">
+            <MapPin size={21} />
+            <h2 tabIndex={-1} ref={headingRef}>
+              {headings[result.status]}
+            </h2>
+          </div>
+          <p role="status">{result.message}</p>
+        </>
+      )}
+      {!result.mappedPortion && result.status === 'no-route' && (
         <button className="secondary" disabled={busy} onClick={onRecheck}>
           Retry route
         </button>

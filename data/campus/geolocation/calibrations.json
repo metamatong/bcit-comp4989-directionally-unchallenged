@@ -5916,92 +5916,22 @@
     {
       "planId": "SE12-F1-p1",
       "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
-      "status": "approximate",
-      "method": "footprint-outline",
-      "reason": "Approximate full-page registration to the archived SE12 ground footprint (boundary RMS 0.76 m). Floor-specific indoor accuracy remains unmeasured.",
-      "version": "bcit-pilot-2026-11-19-v3",
-      "controls": [
-        {
-          "label": "Footprint boundary vertex 0",
-          "latitude": 49.2504864233271,
-          "longitude": -123.001413327502,
-          "x": 0.8069417222466327,
-          "y": 0.31491175718730374
-        },
-        {
-          "label": "Footprint boundary vertex 17",
-          "latitude": 49.2494375079103,
-          "longitude": -123.001426553242,
-          "x": 0.8024885891282758,
-          "y": 0.6649997015804733
-        },
-        {
-          "label": "Footprint boundary vertex 35",
-          "latitude": 49.2500542564647,
-          "longitude": -123.00181908679,
-          "x": 0.6703217582417758,
-          "y": 0.45915256637783153
-        },
-        {
-          "label": "Footprint boundary vertex 18 (held out)",
-          "latitude": 49.2494387932512,
-          "longitude": -123.001758816794,
-          "x": 0.6906147864666008,
-          "y": 0.664570703830556
-        }
-      ],
-      "residualsMetres": [
-        0.00009573655506064696,
-        0.00007265969195960331,
-        0.00015036621970555703
-      ],
-      "heldOutMetres": 0.0001338525323924772,
-      "registrationRmseMetres": 0.7604906334990408
+      "status": "unavailable",
+      "version": "bcit-pilot-2026-11-19-pending-evidence",
+      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
+      "controls": [],
+      "residualsMetres": [],
+      "heldOutMetres": null
     },
     {
       "planId": "SE12-F2-p1",
       "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
-      "status": "approximate",
-      "method": "footprint-outline",
-      "reason": "Approximate full-page registration to the archived SE12 ground footprint (boundary RMS 0.97 m). Floor-specific indoor accuracy remains unmeasured.",
-      "version": "bcit-pilot-2026-11-19-v3",
-      "controls": [
-        {
-          "label": "Footprint boundary vertex 0",
-          "latitude": 49.2504864233271,
-          "longitude": -123.001413327502,
-          "x": 0.45494158729398193,
-          "y": 0.29405272044758785
-        },
-        {
-          "label": "Footprint boundary vertex 17",
-          "latitude": 49.2494375079103,
-          "longitude": -123.001426553242,
-          "x": 0.7616417110129333,
-          "y": 0.2979539586941787
-        },
-        {
-          "label": "Footprint boundary vertex 35",
-          "latitude": 49.2500542564647,
-          "longitude": -123.00181908679,
-          "x": 0.5813060472320077,
-          "y": 0.41374081749245656
-        },
-        {
-          "label": "Footprint boundary vertex 18 (held out)",
-          "latitude": 49.2494387932512,
-          "longitude": -123.001758816794,
-          "x": 0.7612658806963457,
-          "y": 0.39596278666659
-        }
-      ],
-      "residualsMetres": [
-        0.00009573655505962128,
-        0.00007265969198728371,
-        0.00015036621966112664
-      ],
-      "heldOutMetres": 0.00013385253237152689,
-      "registrationRmseMetres": 0.9691118285206455
+      "status": "unavailable",
+      "version": "bcit-pilot-2026-11-19-pending-evidence",
+      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
+      "controls": [],
+      "residualsMetres": [],
+      "heldOutMetres": null
     },
     {
       "planId": "SE12-F3-p1",
@@ -6050,47 +5980,12 @@
     {
       "planId": "SE12-F4-p1",
       "sourceSha256": "d73872a56148fc1e6ac5592277e8ffb0b575ced1c501a1f5c939f7fa9bae88fb",
-      "status": "approximate",
-      "method": "footprint-outline",
-      "reason": "Approximate full-page registration to the archived SE12 ground footprint (boundary RMS 0.26 m). Floor-specific indoor accuracy remains unmeasured.",
-      "version": "bcit-pilot-2026-11-19-v3",
-      "controls": [
-        {
-          "label": "Footprint boundary vertex 0",
-          "latitude": 49.2504864233271,
-          "longitude": -123.001413327502,
-          "x": 0.05652250182810478,
-          "y": 0.3150313332252187
-        },
-        {
-          "label": "Footprint boundary vertex 17",
-          "latitude": 49.2494375079103,
-          "longitude": -123.001426553242,
-          "x": 0.9466894591623916,
-          "y": 0.3263542937043158
-        },
-        {
-          "label": "Footprint boundary vertex 35",
-          "latitude": 49.2500542564647,
-          "longitude": -123.00181908679,
-          "x": 0.42328292387899524,
-          "y": 0.6624142683334978
-        },
-        {
-          "label": "Footprint boundary vertex 18 (held out)",
-          "latitude": 49.2494387932512,
-          "longitude": -123.001758816794,
-          "x": 0.9455986486164614,
-          "y": 0.6108152816237349
-        }
-      ],
-      "residualsMetres": [
-        0.00009573655507249306,
-        0.00007265969195960874,
-        0.0001503662196919175
-      ],
-      "heldOutMetres": 0.00013385253238296338,
-      "registrationRmseMetres": 0.2584962940443516
+      "status": "unavailable",
+      "version": "bcit-pilot-2026-11-19-pending-evidence",
+      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
+      "controls": [],
+      "residualsMetres": [],
+      "heldOutMetres": null
     },
     {
       "planId": "SE14-F1-p1",
@@ -6215,181 +6110,42 @@
     {
       "planId": "SW1-F1-p1",
       "sourceSha256": "23b7bcfabb01d07a22a25a58d6f8b49322e3f6c9f901b4b2e2a0331175766f90",
-      "status": "approximate",
-      "method": "footprint-outline",
-      "reason": "Approximate full-page registration to the archived SW1 ground footprint (boundary RMS 0.72 m). Floor-specific indoor accuracy remains unmeasured.",
-      "version": "bcit-pilot-2026-11-19-v3",
-      "controls": [
-        {
-          "label": "Footprint boundary vertex 7",
-          "latitude": 49.2512429487545,
-          "longitude": -123.001961652625,
-          "x": 0.3538012820010926,
-          "y": 0.2493500052653043
-        },
-        {
-          "label": "Footprint boundary vertex 33",
-          "latitude": 49.250153497127,
-          "longitude": -123.002697345891,
-          "x": 0.7083742145986857,
-          "y": 0.4908943357765479
-        },
-        {
-          "label": "Footprint boundary vertex 61",
-          "latitude": 49.2513171963242,
-          "longitude": -123.003631256159,
-          "x": 0.3296366675638127,
-          "y": 0.7975176812239506
-        },
-        {
-          "label": "Footprint boundary vertex 32 (held out)",
-          "latitude": 49.2501529298211,
-          "longitude": -123.002565917056,
-          "x": 0.7085588499811455,
-          "y": 0.44774334959117557
-        }
-      ],
-      "residualsMetres": [
-        0.0003575228669238416,
-        0.0002972818237519978,
-        0.00032401928138378307
-      ],
-      "heldOutMetres": 0.00029309732757042736,
-      "registrationRmseMetres": 0.7194855075700057
+      "status": "unavailable",
+      "version": "bcit-pilot-2026-11-19-pending-evidence",
+      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
+      "controls": [],
+      "residualsMetres": [],
+      "heldOutMetres": null
     },
     {
       "planId": "SW1-F2-p1",
       "sourceSha256": "37ab5548156a14f390b7d51010172c3ba7975744fb47ee441eee3586f5ce639b",
-      "status": "approximate",
-      "method": "footprint-outline",
-      "reason": "Approximate full-page registration to the archived SW1 ground footprint (boundary RMS 0.75 m). Floor-specific indoor accuracy remains unmeasured.",
-      "version": "bcit-pilot-2026-11-19-v3",
-      "controls": [
-        {
-          "label": "Footprint boundary vertex 7",
-          "latitude": 49.2512429487545,
-          "longitude": -123.001961652625,
-          "x": 0.43292513469234445,
-          "y": 0.23319493691826546
-        },
-        {
-          "label": "Footprint boundary vertex 33",
-          "latitude": 49.250153497127,
-          "longitude": -123.002697345891,
-          "x": 0.7976219867591868,
-          "y": 0.48163594544842836
-        },
-        {
-          "label": "Footprint boundary vertex 61",
-          "latitude": 49.2513171963242,
-          "longitude": -123.003631256159,
-          "x": 0.40807056174983897,
-          "y": 0.7970141330490653
-        },
-        {
-          "label": "Footprint boundary vertex 32 (held out)",
-          "latitude": 49.2501529298211,
-          "longitude": -123.002565917056,
-          "x": 0.7978118939308084,
-          "y": 0.4372528936737315
-        }
-      ],
-      "residualsMetres": [
-        0.0003575228669099763,
-        0.0002972818237284797,
-        0.00032401928133481665
-      ],
-      "heldOutMetres": 0.00029309732768119796,
-      "registrationRmseMetres": 0.7542232103400225
+      "status": "unavailable",
+      "version": "bcit-pilot-2026-11-19-pending-evidence",
+      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
+      "controls": [],
+      "residualsMetres": [],
+      "heldOutMetres": null
     },
     {
       "planId": "SW1-F3-p1",
       "sourceSha256": "68d980c7919448b4c843281c95f1f3ee07dbb90945f1335c354ce7b893a0bce2",
-      "status": "approximate",
-      "method": "footprint-outline",
-      "reason": "Approximate full-page registration to the archived SW1 ground footprint (boundary RMS 0.86 m). Floor-specific indoor accuracy remains unmeasured.",
-      "version": "bcit-pilot-2026-11-19-v3",
-      "controls": [
-        {
-          "label": "Footprint boundary vertex 7",
-          "latitude": 49.2512429487545,
-          "longitude": -123.001961652625,
-          "x": 0.44331796880664165,
-          "y": 0.22486221137179835
-        },
-        {
-          "label": "Footprint boundary vertex 33",
-          "latitude": 49.250153497127,
-          "longitude": -123.002697345891,
-          "x": 0.7672041746775475,
-          "y": 0.4455019431916599
-        },
-        {
-          "label": "Footprint boundary vertex 61",
-          "latitude": 49.2513171963242,
-          "longitude": -123.003631256159,
-          "x": 0.42124469539266013,
-          "y": 0.7255883876386534
-        },
-        {
-          "label": "Footprint boundary vertex 32 (held out)",
-          "latitude": 49.2501529298211,
-          "longitude": -123.002565917056,
-          "x": 0.7673728306802952,
-          "y": 0.4060854849392485
-        }
-      ],
-      "residualsMetres": [
-        0.00035752286690460955,
-        0.00029728182376270685,
-        0.00032401928133210045
-      ],
-      "heldOutMetres": 0.00029309732765954867,
-      "registrationRmseMetres": 0.8624585226021948
+      "status": "unavailable",
+      "version": "bcit-pilot-2026-11-19-pending-evidence",
+      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
+      "controls": [],
+      "residualsMetres": [],
+      "heldOutMetres": null
     },
     {
       "planId": "SW1-F4-p1",
       "sourceSha256": "ed111bbfb9b7423af5a9369253f7820ed4e7eddbe6bf3a3421cda77bf3f53e30",
-      "status": "approximate",
-      "method": "stacked-cores",
-      "reason": "Approximate stacked-floor registration from SW01 floor 3 using three shared stair cores (S300/S320/S350 to S400/S420/S450); the fourth pair (S390 to S490) was held out at 1.62 m. Floor-specific indoor accuracy remains unmeasured.",
-      "version": "bcit-pilot-2026-11-19-v3",
-      "controls": [
-        {
-          "label": "Shared stair core S300 to S400",
-          "latitude": 49.25209464168833,
-          "longitude": -123.00197389522096,
-          "x": 0.06397058823529411,
-          "y": 0.43859848484848485
-        },
-        {
-          "label": "Shared stair core S320 to S420",
-          "latitude": 49.251422731287406,
-          "longitude": -123.00208925189509,
-          "x": 0.3162377450980392,
-          "y": 0.491635101010101
-        },
-        {
-          "label": "Shared stair core S350 to S450",
-          "latitude": 49.250367460908606,
-          "longitude": -123.00211030314694,
-          "x": 0.7083946078431373,
-          "y": 0.49148358585858587
-        },
-        {
-          "label": "Shared stair core S390 to S490 (held out)",
-          "latitude": 49.24968744352758,
-          "longitude": -123.00198147533204,
-          "x": 0.9609885620915033,
-          "y": 0.43732954545454544
-        }
-      ],
-      "residualsMetres": [
-        0.7212409531241036,
-        1.1819358801746667,
-        0.46206301794328647
-      ],
-      "heldOutMetres": 1.6171038995927447
+      "status": "unavailable",
+      "version": "bcit-pilot-2026-11-19-pending-evidence",
+      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
+      "controls": [],
+      "residualsMetres": [],
+      "heldOutMetres": null
     },
     {
       "planId": "SW2-F1-p1",
@@ -6424,272 +6180,62 @@
     {
       "planId": "SW3-F1-p1",
       "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
-      "status": "approximate",
-      "method": "footprint-outline",
-      "reason": "Approximate full-page registration to the archived SW3 ground footprint (boundary RMS 0.37 m). Floor-specific indoor accuracy remains unmeasured.",
-      "version": "bcit-pilot-2026-11-19-v3",
-      "controls": [
-        {
-          "label": "Footprint boundary vertex 5",
-          "latitude": 49.2499297870203,
-          "longitude": -123.001807050759,
-          "x": 0.7986914731615962,
-          "y": 0.5939639633008394
-        },
-        {
-          "label": "Footprint boundary vertex 21",
-          "latitude": 49.2497042056932,
-          "longitude": -123.003522447147,
-          "x": 0.22277999104498852,
-          "y": 0.7732706906842552
-        },
-        {
-          "label": "Footprint boundary vertex 30",
-          "latitude": 49.25015612502,
-          "longitude": -123.003306035615,
-          "x": 0.295436017965318,
-          "y": 0.41405578326593045
-        },
-        {
-          "label": "Footprint boundary vertex 0 (held out)",
-          "latitude": 49.2500705892908,
-          "longitude": -123.001806614811,
-          "x": 0.7988378343514728,
-          "y": 0.4820451504445735
-        }
-      ],
-      "residualsMetres": [
-        0.0000013296490572421181,
-        0.000002820343164346878,
-        0.0000032076671259822858
-      ],
-      "heldOutMetres": 0.0000018866803441777568,
-      "registrationRmseMetres": 0.37064251296471623
+      "status": "unavailable",
+      "version": "bcit-pilot-2026-11-19-pending-evidence",
+      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
+      "controls": [],
+      "residualsMetres": [],
+      "heldOutMetres": null
     },
     {
       "planId": "SW3-F2-p1",
       "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
-      "status": "approximate",
-      "method": "footprint-outline",
-      "reason": "Approximate full-page registration to the archived SW3 ground footprint (boundary RMS 0.28 m). Floor-specific indoor accuracy remains unmeasured.",
-      "version": "bcit-pilot-2026-11-19-v3",
-      "controls": [
-        {
-          "label": "Footprint boundary vertex 5",
-          "latitude": 49.2499297870203,
-          "longitude": -123.001807050759,
-          "x": 0.8731591495216049,
-          "y": 0.5618549055683644
-        },
-        {
-          "label": "Footprint boundary vertex 21",
-          "latitude": 49.2497042056932,
-          "longitude": -123.003522447147,
-          "x": 0.14939818801296773,
-          "y": 0.7871937179480623
-        },
-        {
-          "label": "Footprint boundary vertex 30",
-          "latitude": 49.25015612502,
-          "longitude": -123.003306035615,
-          "x": 0.24070665734577365,
-          "y": 0.33576023406297767
-        },
-        {
-          "label": "Footprint boundary vertex 0 (held out)",
-          "latitude": 49.2500705892908,
-          "longitude": -123.001806614811,
-          "x": 0.8733430849332123,
-          "y": 0.4212040067426394
-        }
-      ],
-      "residualsMetres": [
-        0.0000013296490699031186,
-        0.0000028203431618444767,
-        0.0000032076671233123854
-      ],
-      "heldOutMetres": 0.000001886680350828469,
-      "registrationRmseMetres": 0.2803670013605136
+      "status": "unavailable",
+      "version": "bcit-pilot-2026-11-19-pending-evidence",
+      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
+      "controls": [],
+      "residualsMetres": [],
+      "heldOutMetres": null
     },
     {
       "planId": "SW3-F3-p1",
       "sourceSha256": "a34945534dd978027a28f5f2fbd0f018a03846360f9c36dc43c24f72d68a8874",
-      "status": "approximate",
-      "method": "footprint-outline",
-      "reason": "Approximate full-page registration to the archived SW3 ground footprint (boundary RMS 0.98 m). Floor-specific indoor accuracy remains unmeasured.",
-      "version": "bcit-pilot-2026-11-19-v3",
-      "controls": [
-        {
-          "label": "Footprint boundary vertex 5",
-          "latitude": 49.2499297870203,
-          "longitude": -123.001807050759,
-          "x": 0.764823565987092,
-          "y": 0.6851422213824825
-        },
-        {
-          "label": "Footprint boundary vertex 21",
-          "latitude": 49.2497042056932,
-          "longitude": -123.003522447147,
-          "x": 0.3135644617099499,
-          "y": 0.8256391479110681
-        },
-        {
-          "label": "Footprint boundary vertex 30",
-          "latitude": 49.25015612502,
-          "longitude": -123.003306035615,
-          "x": 0.37049455365377626,
-          "y": 0.5441740228039275
-        },
-        {
-          "label": "Footprint boundary vertex 0 (held out)",
-          "latitude": 49.2500705892908,
-          "longitude": -123.001806614811,
-          "x": 0.7649382482281926,
-          "y": 0.5974475238298926
-        }
-      ],
-      "residualsMetres": [
-        0.0000013296490898252185,
-        0.0000028203431880985543,
-        0.0000032076671142849573
-      ],
-      "heldOutMetres": 0.0000018866803479401903,
-      "registrationRmseMetres": 0.9827506920462026
+      "status": "unavailable",
+      "version": "bcit-pilot-2026-11-19-pending-evidence",
+      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
+      "controls": [],
+      "residualsMetres": [],
+      "heldOutMetres": null
     },
     {
       "planId": "SW3-F4-p1",
       "sourceSha256": "ec9b5c3ae80da356b78dc7ea89e3228e6cd6b5e882d9c20a6b7e10bbd5ec034a",
-      "status": "approximate",
-      "method": "footprint-outline",
-      "reason": "Approximate full-page registration to the archived SW3 ground footprint (boundary RMS 1.00 m). Floor-specific indoor accuracy remains unmeasured.",
-      "version": "bcit-pilot-2026-11-19-v3",
-      "controls": [
-        {
-          "label": "Footprint boundary vertex 5",
-          "latitude": 49.2499297870203,
-          "longitude": -123.001807050759,
-          "x": 0.7470928638725008,
-          "y": 0.6367695121858563
-        },
-        {
-          "label": "Footprint boundary vertex 21",
-          "latitude": 49.2497042056932,
-          "longitude": -123.003522447147,
-          "x": 0.297042238662384,
-          "y": 0.7768901857079501
-        },
-        {
-          "label": "Footprint boundary vertex 30",
-          "latitude": 49.25015612502,
-          "longitude": -123.003306035615,
-          "x": 0.35381987091343997,
-          "y": 0.49617882868784774
-        },
-        {
-          "label": "Footprint boundary vertex 0 (held out)",
-          "latitude": 49.2500705892908,
-          "longitude": -123.001806614811,
-          "x": 0.7472072389927336,
-          "y": 0.5493096624297474
-        }
-      ],
-      "residualsMetres": [
-        0.0000013296490405845613,
-        0.000002820343156504878,
-        0.0000032076671425603096
-      ],
-      "heldOutMetres": 0.0000018866803521031874,
-      "registrationRmseMetres": 0.9954252029727139
+      "status": "unavailable",
+      "version": "bcit-pilot-2026-11-19-pending-evidence",
+      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
+      "controls": [],
+      "residualsMetres": [],
+      "heldOutMetres": null
     },
     {
       "planId": "SW5-F1-p1",
       "sourceSha256": "37105ff14e81094e4e968500a70da3cea6cd2e13803dd2853909ee35bcd10790",
-      "status": "approximate",
-      "method": "footprint-outline",
-      "reason": "Approximate full-page registration to the archived SW5 ground footprint (boundary RMS 0.09 m). Floor-specific indoor accuracy remains unmeasured.",
-      "version": "bcit-pilot-2026-11-19-v3",
-      "controls": [
-        {
-          "label": "Footprint boundary vertex 1",
-          "latitude": 49.2498502794326,
-          "longitude": -123.002428568962,
-          "x": 0.7475492385540715,
-          "y": 0.13603579405982602
-        },
-        {
-          "label": "Footprint boundary vertex 21",
-          "latitude": 49.2495944125243,
-          "longitude": -123.00244787039,
-          "x": 0.726310204552549,
-          "y": 0.8026273569543662
-        },
-        {
-          "label": "Footprint boundary vertex 48",
-          "latitude": 49.2497974442072,
-          "longitude": -123.002895975663,
-          "x": 0.2332211372172908,
-          "y": 0.2736835880139502
-        },
-        {
-          "label": "Footprint boundary vertex 38 (held out)",
-          "latitude": 49.2496001481408,
-          "longitude": -123.002830540392,
-          "x": 0.3052252369040651,
-          "y": 0.7876847698470879
-        }
-      ],
-      "residualsMetres": [
-        0.000028839034445071815,
-        0.000025079466532912364,
-        0.00002074878112179208
-      ],
-      "heldOutMetres": 0.000041759767227242395,
-      "registrationRmseMetres": 0.09385623225645127
+      "status": "unavailable",
+      "version": "bcit-pilot-2026-11-19-pending-evidence",
+      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
+      "controls": [],
+      "residualsMetres": [],
+      "heldOutMetres": null
     },
     {
       "planId": "SW5-F2-p1",
       "sourceSha256": "3157fabbf5eeaa7751c0d66c3baa88ba6bc1029bce0013b7b75fe5f8bdb007b1",
-      "status": "approximate",
-      "method": "footprint-outline",
-      "reason": "Approximate full-page registration to the archived SW5 ground footprint (boundary RMS 0.09 m). Floor-specific indoor accuracy remains unmeasured.",
-      "version": "bcit-pilot-2026-11-19-v3",
-      "controls": [
-        {
-          "label": "Footprint boundary vertex 1",
-          "latitude": 49.2498502794326,
-          "longitude": -123.002428568962,
-          "x": 0.7752251118355353,
-          "y": 0.10538043639448962
-        },
-        {
-          "label": "Footprint boundary vertex 21",
-          "latitude": 49.2495944125243,
-          "longitude": -123.00244787039,
-          "x": 0.752589908517981,
-          "y": 0.8157910678197486
-        },
-        {
-          "label": "Footprint boundary vertex 48",
-          "latitude": 49.2497974442072,
-          "longitude": -123.002895975663,
-          "x": 0.22708713414525425,
-          "y": 0.2520766468785006
-        },
-        {
-          "label": "Footprint boundary vertex 38 (held out)",
-          "latitude": 49.2496001481408,
-          "longitude": -123.002830540392,
-          "x": 0.3038244959287867,
-          "y": 0.7998662146819242
-        }
-      ],
-      "residualsMetres": [
-        0.00002883903444447512,
-        0.000025079466542202953,
-        0.00002074878112062597
-      ],
-      "heldOutMetres": 0.000041759767226651376,
-      "registrationRmseMetres": 0.08729844092589746
+      "status": "unavailable",
+      "version": "bcit-pilot-2026-11-19-pending-evidence",
+      "reason": "A proposed alignment is retained for development. Independent source correspondences are missing; the GPS dot is hidden.",
+      "controls": [],
+      "residualsMetres": [],
+      "heldOutMetres": null
     },
     {
       "planId": "SW9-F1-p1",

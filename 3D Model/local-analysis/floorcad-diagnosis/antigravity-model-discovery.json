@@ -1,0 +1,129 @@
+{
+  "provider": "antigravity",
+  "connectionId": "f89b21f5-de78-40f3-a1a6-fdea7b31d4ec",
+  "models": [
+    {
+      "id": "claude-sonnet-5-5-low",
+      "name": "Claude Sonnet 5.5 (Low)",
+      "source": "imported",
+      "outputTokenLimit": 128000,
+      "apiFormat": "chat-completions",
+      "supportedEndpoints": [
+        "chat"
+      ],
+      "owned_by": "antigravity"
+    },
+    {
+      "id": "claude-opus-5-5-medium",
+      "name": "Claude Opus 5.5 (Medium)",
+      "source": "imported",
+      "outputTokenLimit": 128000,
+      "apiFormat": "chat-completions",
+      "supportedEndpoints": [
+        "chat"
+      ],
+      "owned_by": "antigravity"
+    },
+    {
+      "id": "claude-opus-5-5-low",
+      "name": "Claude Opus 5.5 (Low)",
+      "source": "imported",
+      "outputTokenLimit": 128000,
+      "apiFormat": "chat-completions",
+      "supportedEndpoints": [
+        "chat"
+      ],
+      "owned_by": "antigravity"
+    },
+    {
+      "id": "claude-sonnet-5-5-high",
+      "name": "Claude Sonnet 5.5 (High)",
+      "source": "imported",
+      "outputTokenLimit": 128000,
+      "apiFormat": "chat-completions",
+      "supportedEndpoints": [
+        "chat"
+      ],
+      "owned_by": "antigravity"
+    },
+    {
+      "id": "gemini-3-flash",
+      "name": "Gemini 3 Flash",
+      "source": "imported",
+      "outputTokenLimit": 65536,
+      "apiFormat": "chat-completions",
+      "supportedEndpoints": [
+        "chat"
+      ],
+      "owned_by": "antigravity"
+    },
+    {
+      "id": "gemini-3.5-flash-lite",
+      "name": "Gemini 3.5 Flash Lite",
+      "source": "imported",
+      "outputTokenLimit": 65535,
+      "apiFormat": "chat-completions",
+      "supportedEndpoints": [
+        "chat"
+      ],
+      "owned_by": "antigravity"
+    },
+    {
+      "id": "gemini-3.8-flash-tiered",
+      "name": "gemini-3.8-flash-tiered",
+      "source": "imported",
+      "outputTokenLimit": 65536,
+      "apiFormat": "chat-completions",
+      "supportedEndpoints": [
+        "chat"
+      ],
+      "owned_by": "antigravity"
+    },
+    {
+      "id": "gemini-3.1-flash-lite",
+      "name": "Gemini 3.1 Flash Lite",
+      "source": "imported",
+      "outputTokenLimit": 65535
+    },
+    {
+      "id": "gemini-4-hydrogen-sonar",
+      "name": "gemini-4-hydrogen-sonar",
+      "source": "imported",
+      "outputTokenLimit": 65536,
+      "apiFormat": "chat-completions",
+      "supportedEndpoints": [
+        "chat"
+      ],
+      "owned_by": "antigravity"
+    },
+    {
+      "id": "gpt-oss-120b-medium",
+      "name": "GPT-OSS 120B (Medium)",
+      "source": "imported",
+      "outputTokenLimit": 32768
+    },
+    {
+      "id": "claude-opus-5-5-high",
+      "name": "Claude Opus 5.5 (High)",
+      "source": "imported",
+      "outputTokenLimit": 128000,
+      "apiFormat": "chat-completions",
+      "supportedEndpoints": [
+        "chat"
+      ],
+      "owned_by": "antigravity"
+    },
+    {
+      "id": "claude-sonnet-5-5-medium",
+      "name": "Claude Sonnet 5.5 (Medium)",
+      "source": "imported",
+      "outputTokenLimit": 128000,
+      "apiFormat": "chat-completions",
+      "supportedEndpoints": [
+        "chat"
+      ],
+      "owned_by": "antigravity"
+    }
+  ],
+  "source": "cache"
+}

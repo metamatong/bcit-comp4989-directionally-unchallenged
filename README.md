@@ -4,6 +4,8 @@ Add a photo, enter a destination and tap **Get Directions** for walking directio
 
 The catalogue covers **89 official floor plans in 45 buildings**. GPS narrows the building; the photo provides floor and nearby-place evidence. Continuous travel depends on mapped approaches and transfers. The current same-building transfers are legacy route data awaiting automatic inference from stacked floor plans. [Floor graph coverage and remaining gaps](docs/floor-routing.md)
 
+[3D spatial twin and local setup](3D%20Model/README.md)
+
 ## Run locally
 
 Requires Node.js 22+ and npm. The included source assets need no Python to run.
@@ -43,9 +45,13 @@ The Git-connected Vercel project builds the frontend and the visitor API with `n
 4. The app ranks source matches using the photo evidence and GPS building match, then selects the strongest starting estimate automatically. It does not ask visitors to choose a starting room or doorway.
 5. **Walking directions** shows the route overview and floor maps in travel order. Tap **GO** to begin guided steps; a fresh GPS reading is required. The current route step selects the map. A live position dot appears only on a floor with a geographic alignment. Use **Previous**, **Next step**, and **Finish route** to mark route progress; GPS does not identify the floor or advance steps.
 
-GPS building footprints cover SE12, SW03, SW05 and SW01. Floor-plan position alignment is currently available only for SE12 floor 3; the dot stays hidden on other floors until a reliable alignment is available. [Device-location coverage](docs/device-location.md)
+GPS building footprints cover 43 of the 45 supplied buildings, including SE12, SW03, SW05 and SW01. Floor-plan position alignment is currently available only for SE12 floor 3; the dot stays hidden on other floors until a reliable alignment is available. [Device-location coverage](docs/device-location.md)
 
 The current route dataset includes examples such as SE12 302 to SW03 2605 and SW03 1710. These journeys use source-derived floor walking areas and mapped transfers. The dataset still contains hand-authored same-building transfers; replacing those with automatic stair/elevator inference is not complete. Physical distance and accessibility remain unmeasured.
+
+SE12 323 to SW03 1750 retains the shared corridor departure and corridor-side arrival. The SW03 west wing remains connected through the outdoor 1700–1900 passage and S190–S299 stairs. Missing first or final connections can show a clearly labelled partial route, without GO or invented connecting lines. Shafts, voids and staff-only spaces remain excluded. [Three-building coverage](docs/three-building-routing.md)
+
+Thirteen proposed GPS alignments are retained as development candidates, pending independent source evidence. They do not enable visitor position dots. [Alignment limitations](docs/device-location.md)
 
 The full photo and four detail crops are prepared locally from the original image. The footer’s **Coverage & privacy** dialog identifies the extraction provider and data handling. The server keeps image-free evidence receipts, and the browser discards its prepared photo after locating the result, removal or navigation away. Explicit retries can reuse unexpired extraction evidence.
 
@@ -103,7 +109,7 @@ mvp/
 │   ├── provider.ts, provider-config.ts, provider-budget.ts, provider-timing.ts, provider-metrics.ts
 │   ├── openai-provider.ts, openai-input.ts, openai-schema.ts, openai-response.ts, openai-stream.ts
 │   ├── floor-graph.ts, floor-interior.ts, floor-search.ts, route-queue.ts, map-points.ts
-│   ├── floor-coverage.ts, shared-corridor.ts, campus-journey.ts, routing-readiness.ts
+│   ├── floor-coverage.ts, shared-corridor.ts, campus-journey.ts, floor-checkpoints.ts, routing-readiness.ts
 │   ├── label-localization.ts, starting-place-evidence.ts, session.ts
 │   ├── photo-localization.ts, photo-plan-context.ts  Legacy source-comparison utilities
 │   ├── photo-evidence.ts, photo-media.ts, photo-grounding.ts, photo-doorways.ts, room-labels.ts
@@ -130,7 +136,8 @@ mvp/
 │   ├── floor_graph/              Floor compiler, source labels, doors, walking surfaces and landing access
 │   │   ├── cad_layers.py, cad_spaces.py, cad_routing.py, cad_places.py, cad_doorways.py
 │   │   ├── cad_frontages.py, cad_landings.py, open_fronts.py, public_components.py, terminal_paths.py
-│   │   └── corridor_frontages.py, landing_access.py, passage_openings.py
+│   │   ├── corridor_frontages.py, landing_access.py, passage_openings.py
+│   │   └── drawing_frontages.py, door_stations.py, corridor_vicinities.py, suite_entries.py
 │   ├── sample-floor-routes.ts, report-building-coverage.ts, prepare-geolocation.ts
 │   ├── validate-data.ts, build-vercel.ts, summarize-ai-metrics.ts
 │   └── render_proposal.py
@@ -147,16 +154,16 @@ mvp/
 │   ├── topology-candidates.test.ts, topology-english.test.ts, wayfinding.test.ts, wayfinding-api.test.ts
 │   ├── ai-wayfinding.test.ts, wayfinding-fixtures.ts, route-geometry.test.ts, route-recovery.test.ts
 │   ├── reviewed-navigation.test.ts, label-localization.test.ts, floor-four-passage.test.ts
-│   ├── se12-floor-transfers.test.ts, shared-corridor.test.ts
+│   ├── se12-floor-transfers.test.ts, shared-corridor.test.ts, west-wing-routes.test.ts
 │   ├── sw03-sw01-passages.test.ts, sw01-spaces.test.ts, test_passage_openings.py, test_sw01_cad.py
-│   ├── sw03-1710-route.test.ts, route-coverage-message.test.ts
-│   ├── route-preference.test.ts, guided-directions.test.ts
+│   ├── sw03-1710-route.test.ts, route-coverage-message.test.ts, three-building-coverage.test.ts
 │   ├── route-preference.test.ts, guided-directions.test.ts
 │   └── e2e/journey.spec.ts, photo.spec.ts
 ├── docs/
 │   ├── project-brief.txt, requirements.md, architecture.md, data.md
 │   ├── provider.md, operations.md, photo-localization.md, walkthrough.md
 │   ├── device-location.md, floor-routing.md, sw01-routing.md
+│   ├── three-building-routing.md, three-building-coverage.csv
 │   ├── verification.md, proposal.md, spatial-retrieval.md
 │   └── screenshots/  Automated test artifacts; mocked results are labeled
 ├── output/pdf/proposal_groupnumber.pdf

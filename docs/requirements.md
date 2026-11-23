@@ -8,7 +8,7 @@ The supplied original [brief](project-brief.txt) remains unchanged. Current prod
 | Photo localization | One configured provider stage extracts labels/features; source lookup automatically ranks matches. |
 | Required GPS | **Get Directions** requests GPS by default. The browser keeps raw coordinates and sends derived building candidates. |
 | Starting place | The strongest source-linked photo/GPS building match is selected automatically; there is no start chooser in the visitor app/API. |
-| Floor GPS dot | Building footprints are available for SE12, SW03, SW05 and SW01. Fourteen plans have approximate alignments: all floors of SE12, SW01 and SW03, and SW05 floors 1–2. The remaining 75 supplied plans are unaligned. |
+| Floor GPS dot | Building footprints cover 43 of 45 supplied buildings, including SE12, SW03, SW05 and SW01. Only SE12 floor 3 has an active approximate alignment. Thirteen proposed alignments are retained as development candidates pending independent source evidence; all other 88 floor plans hide the dot. |
 | Route display | Route overview with floor maps, followed by one current step per guided page. GPS does not identify floors or advance steps. |
 | Same-building transfers | Still use legacy hand-authored records in the published graph. Automatic inference from stacked floor plans is an outstanding implementation gap. |
 | Cross-building transfers | Fixed mapped records; this is the only connection type intended to require developer-maintained links. |
