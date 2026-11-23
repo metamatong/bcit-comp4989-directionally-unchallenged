@@ -18,6 +18,7 @@ export function photoInput(overrides: Partial<PhotoEvidenceRequest> = {}): Photo
     revision: 0,
     consent: true,
     description: '',
+    gps: gpsHint(),
     image: { ...fixtureImage },
     detailCrops: PHOTO_CROP_REGIONS.map((crop) => ({
       id: crop.id,

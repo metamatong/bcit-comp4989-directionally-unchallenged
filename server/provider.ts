@@ -35,8 +35,9 @@ export class ProviderError extends Error {
 }
 
 const retryableStatuses = new Set([500, 502, 503, 504]);
-const maximumAttempts = 3;
+const maximumServiceRetries = 2;
 const recoveryWindowMs = 60_000;
+type GeminiCredential = { apiKey: string; quotaRetryAt: Map<string, number> };
 
 function transportFailure(signal: AbortSignal) {
   if (signal.aborted && signal.reason?.name === 'TimeoutError') {
@@ -57,12 +58,39 @@ function transportFailure(signal: AbortSignal) {
   );
 }
 
+function checkRequestDeadline(signal?: AbortSignal, deadlineAt?: number) {
+  if (signal?.aborted || (deadlineAt !== undefined && Date.now() >= deadlineAt))
+    throw new ProviderError('The Gemini request timed out or was cancelled.', 504, 'timeout', true);
+}
+
 function requestedRetryDelay(response: Response): number | undefined {
   const value = response.headers.get('retry-after');
   if (!value?.trim()) return undefined;
   const seconds = Number(value);
   const milliseconds = Number.isFinite(seconds) ? seconds * 1000 : Date.parse(value) - Date.now();
   return Number.isFinite(milliseconds) && milliseconds >= 0 ? milliseconds : undefined;
+}
+
+async function quotaRetryDelayMs(response: Response): Promise<number> {
+  const header = requestedRetryDelay(response);
+  if (header !== undefined) {
+    await response.body?.cancel();
+    return header;
+  }
+  // Gemini can also send the delay as a protobuf Duration in a google.rpc.RetryInfo detail.
+  const body = await response.json().catch(() => null);
+  const details = body?.error?.details;
+  if (Array.isArray(details)) {
+    for (const detail of details) {
+      if (
+        detail?.['@type'] === 'type.googleapis.com/google.rpc.RetryInfo' &&
+        typeof detail.retryDelay === 'string' &&
+        /^\d{1,12}(?:\.\d{1,9})?s$/.test(detail.retryDelay)
+      )
+        return Math.ceil(Number(detail.retryDelay.slice(0, -1)) * 1000);
+    }
+  }
+  return recoveryWindowMs;
 }
 
 function unavailableError(status: number, retryDelay?: number) {
@@ -212,6 +240,7 @@ export const providerSystemInstruction = `You are DirectionallyUnchallenged, a b
 export class GeminiProvider implements Provider {
   readonly name = 'gemini';
   calls = 0;
+  private readonly credentials: GeminiCredential[];
   private minuteCalls: number[] = [];
   private dayCalls: number[] = [];
   private recoveringUntil = new Map<string, number>();
@@ -219,6 +248,7 @@ export class GeminiProvider implements Provider {
   constructor(
     private options: {
       apiKey: string;
+      fallbackApiKeys?: readonly [second?: string, third?: string];
       model: string;
       fallbackModels?: string[];
       requestsPerMinute: number;
@@ -236,7 +266,29 @@ export class GeminiProvider implements Provider {
       }) => void;
       onMetric?: MetricSink;
     },
-  ) {}
+  ) {
+    const [secondKey, thirdKey] = options.fallbackApiKeys ?? [];
+    const keys = [options.apiKey, secondKey, thirdKey]
+      .map((key) => key?.trim())
+      .filter((key): key is string => Boolean(key));
+    this.credentials = [...new Set(keys)].map((apiKey) => ({ apiKey, quotaRetryAt: new Map() }));
+  }
+
+  private quotaError(models: string[]) {
+    const earliestRetry = Math.min(
+      ...this.credentials.flatMap((key) => models.map((model) => key.quotaRetryAt.get(model) ?? 0)),
+    );
+    const seconds = Math.max(1, Math.ceil((earliestRetry - Date.now()) / 1000));
+    const prefix = models.length > 1 ? 'All configured Gemini models failed. ' : '';
+    return new ProviderError(
+      `${prefix}Gemini quota exhausted. Try again in ${seconds} seconds.`,
+      429,
+      'quota',
+      true,
+      seconds,
+    );
+  }
+
   private reserve() {
     const now = Date.now();
     this.minuteCalls = this.minuteCalls.filter((time) => now - time < 60000);
@@ -277,9 +329,15 @@ export class GeminiProvider implements Provider {
     onAttempt?: () => void,
     options: GenerationOptions = {},
   ): Promise<ModelPart[]> {
+    if (!this.options.apiKey.trim())
+      throw new Error('Gemini is not configured. Add the server API key and restart.');
     const configured = [...new Set([this.options.model, ...(this.options.fallbackModels ?? [])])];
     const now = Date.now();
-    const available = configured.filter((model) => (this.recoveringUntil.get(model) ?? 0) <= now);
+    const available = configured.filter(
+      (model) =>
+        (this.recoveringUntil.get(model) ?? 0) <= now &&
+        this.credentials.some((key) => (key.quotaRetryAt.get(model) ?? 0) <= now),
+    );
     // Once a backup has recovered the workflow, keep using it while the primary is cooling down.
     if (
       !available.includes(this.options.model) &&
@@ -318,7 +376,7 @@ export class GeminiProvider implements Provider {
             httpStatus: error.httpStatus,
             elapsedMs: Math.round(performance.now() - started),
           });
-          if (!signal?.aborted && ['timeout', 'unavailable', 'quota'].includes(error.code))
+          if (!signal?.aborted && ['timeout', 'unavailable'].includes(error.code))
             this.recoveringUntil.set(
               models[index],
               Date.now() + Math.max(recoveryWindowMs, (error.retryAfterSeconds ?? 0) * 1000),
@@ -334,6 +392,8 @@ export class GeminiProvider implements Provider {
             error.fallbackEligible);
         if (!shouldFallback) {
           if (index > 0 && error instanceof ProviderError) {
+            if (failures.every((failure) => failure.code === 'quota'))
+              throw this.quotaError(models);
             // An inaccessible backup must not hide a retryable failure from a usable model.
             // Authentication, cancellation and local budget failures still take precedence.
             const actionableError =
@@ -365,9 +425,11 @@ export class GeminiProvider implements Provider {
     options: GenerationOptions = {},
     hasAlternative = false,
   ): Promise<ModelPart[]> {
-    if (!this.options.apiKey)
-      throw new Error('Gemini is not configured. Add the server API key and restart.');
     const fetcher = this.options.fetchImpl ?? fetch;
+    checkRequestDeadline(signal, options.deadlineAt);
+    const now = Date.now();
+    const keys = this.credentials.filter((key) => (key.quotaRetryAt.get(model) ?? 0) <= now);
+    if (!keys.length) throw this.quotaError([model]);
     if (
       options.forceTool &&
       !declarations.some((item) => (item as { name?: string }).name === options.forceTool)
@@ -406,7 +468,8 @@ export class GeminiProvider implements Provider {
         thinkingConfig,
       },
     });
-    if (Buffer.byteLength(requestBody) > 18 * 1024 * 1024)
+    const requestBytes = Buffer.byteLength(requestBody);
+    if (requestBytes > 18 * 1024 * 1024)
       throw new ProviderError(
         'The image comparison is too large. Select a building to narrow the plans or use a smaller photo.',
         413,
@@ -417,24 +480,23 @@ export class GeminiProvider implements Provider {
     const preparationMs = Math.round(
       performance.now() - preparationStarted + (options.preparationMs ?? 0),
     );
-    const maximumWaitMs = remainingRequestMs(options, this.options.timeoutMs);
-    // Use the configured failover threshold while another model is available. Give the last model its full stage allowance.
-    const timeoutMs = hasAlternative
-      ? Math.min(maximumWaitMs, this.options.timeoutMs)
-      : maximumWaitMs;
-    for (let attempt = 0; attempt < maximumAttempts; attempt++) {
-      if (signal?.aborted)
-        throw new ProviderError(
-          'The AI request timed out. Live AI remains selected; try again later.',
-          504,
-          'timeout',
-          true,
-        );
+    let keyIndex = 0;
+    let serviceRetries = 0;
+    let attempts = 0;
+    while (keyIndex < keys.length) {
+      checkRequestDeadline(signal, options.deadlineAt);
+      const key = keys[keyIndex];
+      // Another in-flight photo can exhaust this key before its turn.
+      if ((key.quotaRetryAt.get(model) ?? 0) > Date.now()) {
+        keyIndex++;
+        continue;
+      }
       if (this.options.reserveSharedBudget) {
         await this.options.reserveSharedBudget(
           this.options.requestsPerMinute,
           this.options.requestsPerDay,
         );
+        checkRequestDeadline(signal, options.deadlineAt);
         this.calls++;
       } else this.reserve();
       onAttempt?.();
@@ -443,15 +505,19 @@ export class GeminiProvider implements Provider {
         provider: this.name,
         model,
         operation: options.forceTool ?? 'generate',
-        attempt: attempt + 1,
+        attempt: ++attempts,
         outcome: 'failure',
         preparationMs,
-        requestBytes: Buffer.byteLength(requestBody),
+        requestBytes,
         ...inputMetrics,
         elapsedMs: 0,
       };
       try {
         let response: Response;
+        const remainingMs = remainingRequestMs(options, this.options.timeoutMs);
+        const timeoutMs = hasAlternative
+          ? Math.min(remainingMs, this.options.timeoutMs)
+          : remainingMs;
         const attemptDeadline = AbortSignal.timeout(timeoutMs);
         const requestSignal = signal ? AbortSignal.any([signal, attemptDeadline]) : attemptDeadline;
         try {
@@ -461,7 +527,7 @@ export class GeminiProvider implements Provider {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'x-goog-api-key': this.options.apiKey,
+                'x-goog-api-key': key.apiKey,
               },
               signal: requestSignal,
               body: requestBody,
@@ -477,14 +543,18 @@ export class GeminiProvider implements Provider {
           metric.code = 'unavailable';
           const retryDelay = requestedRetryDelay(response);
           // Honor long server backoffs by returning them, rather than retrying early or holding the UI.
-          if (attempt === maximumAttempts - 1 || (retryDelay !== undefined && retryDelay > 8000)) {
+          if (
+            serviceRetries >= maximumServiceRetries ||
+            (retryDelay !== undefined && retryDelay > 8000)
+          ) {
             await response.body?.cancel();
             throw unavailableError(response.status, retryDelay);
           }
           const delay = Math.max(
-            1000 * 2 ** attempt + Math.floor(Math.random() * 250),
+            1000 * 2 ** serviceRetries + Math.floor(Math.random() * 250),
             retryDelay ?? 0,
           );
+          serviceRetries++;
           await response.body?.cancel();
           try {
             const pause =
@@ -504,16 +574,15 @@ export class GeminiProvider implements Provider {
           continue;
         }
         if (response.status === 429) {
-          const delay = requestedRetryDelay(response);
-          const seconds = delay === undefined ? undefined : Math.max(1, Math.ceil(delay / 1000));
-          await response.body?.cancel();
-          throw new ProviderError(
-            `Gemini quota exhausted. ${seconds ? `Try again in ${seconds} seconds.` : 'Wait for the provider limit to reset before trying again.'}`,
-            429,
-            'quota',
-            true,
-            seconds,
+          metric.code = 'quota';
+          const retryDelay = await quotaRetryDelayMs(response);
+          key.quotaRetryAt.set(
+            model,
+            Math.max(key.quotaRetryAt.get(model) ?? 0, Date.now() + Math.max(1000, retryDelay)),
           );
+          if (requestSignal.aborted) throw transportFailure(requestSignal);
+          keyIndex++;
+          continue;
         }
         if (response.status === 404) {
           await response.body?.cancel();
@@ -561,6 +630,6 @@ export class GeminiProvider implements Provider {
         emitMetric(this.options.onMetric, metric);
       }
     }
-    throw unavailableError(503);
+    throw this.quotaError([model]);
   }
 }

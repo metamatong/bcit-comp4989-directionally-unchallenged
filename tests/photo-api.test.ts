@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import type { Server } from 'node:http';
 import { afterAll, beforeAll, expect, it, vi } from 'vitest';
 import { createApp } from '../server/app';
+import { configuredApplication } from '../server/configured-app';
 import type { Provider } from '../server/provider';
 import type { Session } from '../src/types';
 import { labelReading, locationInput, photoInput } from './photo-fixtures';
@@ -44,6 +45,75 @@ beforeAll(async () => {
 });
 afterAll(() => new Promise<void>((resolve) => server.close(() => resolve())));
 
+it.each([200, 429])(
+  'stops at the third Gemini key when it returns HTTP %i',
+  async (thirdKeyStatus) => {
+    const keys = ['test-secret-1', 'test-secret-2', 'test-secret-3'];
+    const { app } = configuredApplication({
+      GEMINI_API_KEY: keys[0],
+      GEMINI_API_KEY_2: keys[1],
+      GEMINI_API_KEY_3: keys[2],
+      // Stale deployment settings must never generate extra attempts.
+      GEMINI_API_KEY_4: 'test-secret-unused-4',
+      GEMINI_API_KEY_5: 'test-secret-unused-5',
+      GEMINI_MODEL: 'gemini-3.5-flash-lite',
+      GEMINI_FALLBACK_MODELS: '',
+      AI_FREE_TIER_CONFIRMED: 'true',
+    });
+    const isolated = app.listen(0, '127.0.0.1');
+    await new Promise<void>((resolve) => isolated.once('listening', resolve));
+    const origin = `http://127.0.0.1:${(isolated.address() as { port: number }).port}`;
+    const localFetch = globalThis.fetch;
+    const sentKeys: (string | null)[] = [];
+    const metrics = vi.spyOn(console, 'info').mockImplementation(() => {});
+    const transport = vi.spyOn(globalThis, 'fetch').mockImplementation(async (url, init) => {
+      if (String(url).startsWith(origin + '/')) return localFetch(url, init);
+      expect(String(url)).toBe(
+        'https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent',
+      );
+      const key = new Headers(init?.headers).get('x-goog-api-key');
+      sentKeys.push(key);
+      if (key !== keys[2] || thirdKeyStatus === 429) return new Response(null, { status: 429 });
+      return Response.json({
+        candidates: [{ content: { parts: labelReading('302', 'clear', 'SE12') } }],
+      });
+    });
+    try {
+      const session: Session = await (await post('/api/sessions', {}, origin)).json();
+      const response = await post(
+        `/api/sessions/${session.id}/photo/evidence`,
+        photoInput(),
+        origin,
+      );
+      expect(response.status).toBe(thirdKeyStatus);
+      const body = await response.json();
+      const observed: Session = response.ok ? body : body.session;
+      expect(observed.providerCalls).toBe(3);
+      if (response.ok) {
+        expect(observed.photoEvidence).toMatchObject({
+          usedFallbackModel: false,
+          labels: [{ text: '302' }, { text: 'SE12' }],
+        });
+      } else {
+        expect(body.providerError).toMatchObject({ code: 'quota', retryable: true });
+        expect(observed.photoEvidence).toBeNull();
+      }
+      expect(sentKeys).toEqual(keys);
+      expect(metrics.mock.calls.map(([, event]) => JSON.parse(event).code)).toEqual([
+        'quota',
+        'quota',
+        response.ok ? undefined : 'quota',
+      ]);
+      const bootstrap = await (await localFetch(origin + '/api/bootstrap')).json();
+      expect(JSON.stringify([bootstrap, body, metrics.mock.calls])).not.toContain('test-secret-');
+    } finally {
+      transport.mockRestore();
+      metrics.mockRestore();
+      await new Promise<void>((resolve) => isolated.close(() => resolve()));
+    }
+  },
+);
+
 it('performs two separate API calls before any location result, with idempotency and no retained photos/crops', async () => {
   const initial = await start();
   const before = provider.calls;
@@ -70,11 +140,7 @@ it('performs two separate API calls before any location result, with idempotency
   expect(se12.anchorLabel).toBe('302');
   expect(result.campusLocation).toMatchObject({ id: se12.id, planId: 'SE12-F3-p1' });
   expect(result.photoEvidence?.id).toBe(observed.photoEvidence!.id);
-  expect(result.campusAnalysis?.labelRetrieval.exactMatchPlanIds).toEqual([
-    'NE1-F3-p1',
-    'SE2-F3-p1',
-    'SE12-F3-p1',
-  ]);
+  expect(result.campusAnalysis?.labelRetrieval.exactMatchPlanIds).toEqual(['SE12-F3-p1']);
   expect(JSON.stringify(result)).not.toContain(input.image.data);
   const repeated = await post(`/api/sessions/${initial.id}/photo`, request);
   expect(repeated.status).toBe(200);
@@ -252,7 +318,7 @@ it('serializes the two stages through the same session lock', async () => {
 
 it('serves the same source PNG/geometry and preserves every label for retrieval', async () => {
   const bootstrap = await (await fetch(`${base}/api/bootstrap`)).json();
-  expect(bootstrap.visualPlans).toHaveLength(89);
+  expect(bootstrap.visualPlans).toHaveLength(14);
   const plan = bootstrap.visualPlans.find((plan: { id: string }) => plan.id === 'SE12-F3-p1');
   expect((await fetch(base + plan.overview.url)).headers.get('content-type')).toContain(
     'image/png',

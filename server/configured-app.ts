@@ -57,6 +57,8 @@ export function configuredApplication(environment: NodeJS.ProcessEnv, hosted = f
     providerName === 'gemini'
       ? new GeminiProvider({
           ...providerOptions,
+          // All attempts still reserve the shared budget identified by the primary key.
+          fallbackApiKeys: [environment.GEMINI_API_KEY_2, environment.GEMINI_API_KEY_3],
           fallbackModels: liveAiFallbackModels(environment),
         })
       : new OpenAiProvider({

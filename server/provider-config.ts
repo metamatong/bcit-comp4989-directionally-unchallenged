@@ -69,7 +69,7 @@ export function liveAiSetupIssue(environment: NodeJS.ProcessEnv): string | null 
   if (!environment.GEMINI_API_KEY?.trim())
     return 'GEMINI_API_KEY is missing from the server environment. Add it to .env and restart.';
   if (environment.AI_FREE_TIER_CONFIRMED !== 'true')
-    return 'AI_FREE_TIER_CONFIRMED must be true after verifying the API project uses an eligible free tier.';
+    return 'AI_FREE_TIER_CONFIRMED must be true after verifying free-tier eligibility for each configured Gemini project.';
   if (!supportedFreeTierModels.has(environment.GEMINI_MODEL ?? defaultGeminiModel))
     return `GEMINI_MODEL is not supported. Supported models: ${[...supportedFreeTierModels].join(', ')}.`;
   const fallbackModels = liveAiFallbackModels(environment);
