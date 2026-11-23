@@ -4,6 +4,9 @@ import { TrackballControls } from "three/addons/controls/TrackballControls.js";
 import { sourceOrientation } from "./sheet-orientation.ts";
 
 const el = id => document.getElementById(id);
+const stairSymbolScale = 0.65;
+// Clear the 0.24-unit wall top by 0.03 at the underside of the symbol plaque.
+const stairMarkerLift = .24 + .03 - (.265 - .045/2)*stairSymbolScale;
 // A raised, fixed-size stair pictogram stays readable across different drawing scales.
 function stairMarker(){
   const marker=new T.Group();
@@ -13,7 +16,9 @@ function stairMarker(){
   marker.add(plaque);
   const stem=new T.Mesh(new T.CylinderGeometry(.018,.028,.25,8),
     new T.MeshBasicMaterial({color:0xffb454}));
-  stem.position.y=.125;
+  const stemExtension=stairMarkerLift/stairSymbolScale;
+  stem.scale.y=(.25+stemExtension)/.25;
+  stem.position.y=(.25-stemExtension)/2;
   marker.add(stem);
   const gold=new T.MeshLambertMaterial({color:0xffb454});
   for(let i=0;i<4;i++){
@@ -22,6 +27,13 @@ function stairMarker(){
     step.position.set((i-1.5)*.071,.2875+height/2,0);
     marker.add(step);
   }
+  marker.scale.setScalar(stairSymbolScale);
+  // Keep the original picking envelope around the smaller visible symbol.
+  const hitArea=new T.Mesh(new T.CylinderGeometry(.22,.22,.43,16),new T.MeshBasicMaterial());
+  hitArea.scale.setScalar(1/stairSymbolScale);
+  hitArea.position.y=.215/stairSymbolScale;
+  hitArea.visible=false;
+  marker.add(hitArea);
   return marker;
 }
 async function start() {
@@ -137,7 +149,60 @@ async function start() {
       failed.length?"Grid unavailable for "+failed.join(", ")+".":""].filter(Boolean).join(" ");
   }
   walkable.onchange=updateWalkable;
+  const markers=new Map(), stairLinks=new Map();
+  const raycaster=new T.Raycaster();
+  let overviewStatus="", restoreColors=[], press;
+  function clearFocus(){
+    for(const [material, color] of restoreColors)material.color.setHex(color);
+    restoreColors=[];
+    el("status").textContent=overviewStatus;
+  }
+  function focusLink(link){
+    clearFocus();
+    const ends=[markers.get(link.edge.fromNodeId),markers.get(link.edge.toNodeId)];
+    const materials=new Set(link.graphics.map(object=>object.material));
+    const bounds=new T.Box3();
+    for(const marker of ends){
+      bounds.expandByObject(marker);
+      marker.traverse(object=>{if(object.material)materials.add(object.material)});
+    }
+    for(const material of materials){
+      restoreColors.push([material,material.color.getHex()]);
+      material.color.setHex(0x31e6fc);
+    }
+    frame(bounds.expandByScalar(.12));
+    el("status").textContent=link.description;
+  }
+  function hitMarker(event){
+    const rect=canvas.getBoundingClientRect();
+    raycaster.setFromCamera(new T.Vector2(
+      (event.clientX-rect.left)/rect.width*2-1,
+      1-(event.clientY-rect.top)/rect.height*2),camera);
+    return raycaster.intersectObjects([...markers.values()],true)[0]?.object.parent;
+  }
+  canvas.addEventListener("pointerdown",event=>{
+    press=event.isPrimary && event.button===0 ? {id:event.pointerId,x:event.clientX,y:event.clientY} : undefined;
+  });
+  canvas.addEventListener("pointermove",event=>{
+    if(press && Math.hypot(event.clientX-press.x,event.clientY-press.y)>5)press=undefined;
+  });
+  canvas.addEventListener("pointercancel",()=>{press=undefined});
+  canvas.addEventListener("pointerup",event=>{
+    const click=press?.id===event.pointerId;
+    press=undefined;
+    if(!click)return;
+    const marker=hitMarker(event);
+    if(!marker)return;
+    const links=stairLinks.get(marker.userData.nodeId)??[];
+    if(links.length===1)focusLink(links[0]);
+    else{
+      clearFocus();
+      if(links.length)el("connections").open=true;
+      el("status").textContent=links.length?"Choose a connection in the floor connections list.":"Select two connected floors to inspect this landing.";
+    }
+  });
   function rebuild() {
+    clearFocus();markers.clear();stairLinks.clear();
     scene.traverse(obj=>{if(obj.isInstancedMesh)obj.dispose();obj.geometry?.dispose();obj.material?.map?.dispose();obj.material?.dispose()});
     scene.clear();sheets.length=0;
     scene.add(new T.HemisphereLight(0xffffff,0x697380,1.9));
@@ -160,8 +225,9 @@ async function start() {
         const landing=nodes.get(id);
         if(landing.planId!==plan.id)continue;
         const marker=stairMarker();
-        marker.position.set((landing.point.x-.5)*10,0,(landing.point.y-.5)*height);
+        marker.position.set((landing.point.x-.5)*10,stairMarkerLift,(landing.point.y-.5)*height);
         marker.rotation.y=-group.rotation.y;
+        marker.userData.nodeId=id;markers.set(id,marker);
         group.add(marker);
       }
       scene.add(group);layers.set(plan.id,{plan,group,height});
@@ -185,18 +251,20 @@ async function start() {
         const from=nodes.get(edge.fromNodeId),to=nodes.get(edge.toNodeId);
         const a=layers.get(from.planId),b=layers.get(to.planId);
         if(!a||!b||a.plan.building!==building||b.plan.building!==building||a.plan.floor===b.plan.floor)continue;
-        const point=(layer,node)=>layer.group.localToWorld(new T.Vector3((node.point.x-.5)*10,edge.kind==="stairs" ? .43 : .045,(node.point.y-.5)*layer.height));
+        const point=(layer,node)=>layer.group.localToWorld(new T.Vector3((node.point.x-.5)*10,edge.kind==="stairs" ? stairMarkerLift+.43*stairSymbolScale : .045,(node.point.y-.5)*layer.height));
         const start=point(a,from), end=point(b,to);
         const color=edge.kind==="stairs" ? 0xffb454 : 0xb99aff;
-        scene.add(new T.Line(new T.BufferGeometry().setFromPoints([start,end]),
-          new T.LineBasicMaterial({color})));
+        const shaft=new T.Line(new T.BufferGeometry().setFromPoints([start,end]),
+          new T.LineBasicMaterial({color}));
+        scene.add(shaft);
+        const graphics=[shaft];
         if(edge.kind==="stairs"){
           const addHead=(origin,tip)=>{
             const direction=tip.clone().sub(origin).normalize();
             const head=new T.Mesh(new T.ConeGeometry(.07,.22,12),new T.MeshBasicMaterial({color}));
             head.position.copy(tip).addScaledVector(direction,-.11);
             head.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),direction);
-            scene.add(head);
+            scene.add(head);graphics.push(head);
           };
           addHead(start,end);
           if(edge.direction==="both")addHead(end,start);
@@ -204,11 +272,22 @@ async function start() {
         count++;
         const row=document.createElement("li");
         row.textContent=building+" "+edge.kind+" · "+from.label+(edge.direction==="both"?" ↔ ":" → ")+to.label;
+        if(edge.kind==="stairs"){
+          const description=from.planId+" "+from.label+(edge.direction==="both"?" ↔ ":" → ")+to.planId+" "+to.label;
+          const link={edge,graphics,description};
+          for(const id of [from.id,to.id]){
+            if(!stairLinks.has(id))stairLinks.set(id,[]);
+            stairLinks.get(id).push(link);
+          }
+          const button=document.createElement("button");
+          button.textContent=description;button.onclick=()=>focusLink(link);
+          row.replaceChildren(button);
+        }
         list.append(row);
       }
       if(!count){const row=document.createElement("li");row.textContent=building+" · No direct published stair or elevator connection between these floors.";list.append(row)}
     }
-    el("status").textContent="Published revision "+network.revision+" · "+sheets.length+" floor sheets";
+    el("status").textContent=overviewStatus="Published revision "+network.revision+" · "+sheets.length+" floor sheets";
     if(visible.length)frame(new T.Box3().setFromObject(scene));
   }
   el("estimates").onchange=()=>scene.traverse(obj=>{
@@ -216,7 +295,7 @@ async function start() {
   });
   buildings.onchange=()=>{showFloorControls();rebuild()};
   el("opacity").oninput=()=>sheets.forEach(m=>m.opacity=Number(el("opacity").value));
-  el("fit").onclick=()=>frame(new T.Box3().setFromObject(scene));
+  el("fit").onclick=()=>{clearFocus();frame(new T.Box3().setFromObject(scene))};
   function resize(){
     const {width,height}=canvas.parentElement.getBoundingClientRect();
     renderer.setSize(width,height,false);camera.aspect=width/Math.max(1,height);camera.updateProjectionMatrix();controls.handleResize();

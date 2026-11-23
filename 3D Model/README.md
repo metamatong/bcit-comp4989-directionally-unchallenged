@@ -12,3 +12,5 @@ Choose buildings and floors independently. Selecting two floors displays their p
 The server reads the parent repository's plans, floor graphs and navigation network. Rebuild using npm run build inside this folder. Published changes to routing data should be verified against the same app checkout. The local-analysis folder contains the inputs and reports for the inspector and its review pages.
 
 The Three.js view marks each published inter-floor stair endpoint with one raised gold stair symbol. Symbols use a common display size and orientation. Select two floors of one building to see arrows for the permitted directions between their landings.
+
+Click either stair symbol on a visible two-floor connection to frame both landings and highlight their arrow in cyan. The floor connections list also provides a focus button for each stair pair. Fit view clears the highlight.
