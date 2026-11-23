@@ -160,7 +160,7 @@ test('submits photo and destination and displays directions without route confir
   await expect(maps.locator('figure')).toHaveCount(3);
   await expect(maps.locator('figcaption .pin-legend')).toHaveCount(3);
   await expect(page.getByLabel('Route overview', { exact: true })).toHaveText(
-    '302 · window-side corridor door → Connecting passage to SW03 · Floor 3 → East elevator at 3696 · corridor 3600 (Floor 3 → 2) → 2082 · 2000 corridor door',
+    '302 · window-side corridor door → Connecting passage to SW03 · Floor 3 → From Floor 3, at East elevator at 3696 · corridor 3600, take the elevator DOWN ↓ 1 floor to Floor 2. Select Floor 2. → 2082 · 2000 corridor door',
   );
   await expect(page.getByRole('button', { name: 'Show full floors', exact: true })).toHaveCount(1);
   await expect(page.getByRole('button', { name: 'Show my position', exact: true })).toBeHidden();

@@ -137,7 +137,7 @@ it('uses OpenAI only for evidence extraction and resolves the start from source 
   const result: Session = await response.json();
   expect(result.campusAnalysis).toMatchObject({
     method: 'photo-label-retrieval',
-    labelRetrieval: { exactMatchPlanIds: ['NE1-F3-p1', 'SE2-F3-p1', 'SE12-F3-p1'] },
+    labelRetrieval: { exactMatchPlanIds: ['SE12-F3-p1'] },
   });
   expect(result.campusAnalysis?.candidates.find((c) => c.planId === 'SE12-F3-p1')).toMatchObject({
     planId: 'SE12-F3-p1',

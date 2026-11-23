@@ -6,6 +6,8 @@ Use Node.js 22+, `npm ci`, and `npm run dev`. The app defaults to `127.0.0.1:300
 
 With `AI_PROVIDER=gemini` (default), set `GEMINI_API_KEY` in private `.env`, choose a primary `GEMINI_MODEL`, and set an ordered comma-separated `GEMINI_FALLBACK_MODELS` list. Supported stable Flash models are Gemini 3.5 Flash, 3.5 Flash-Lite, 3.6 Flash, 3.7 Flash and 3.8 Flash. Defaults use Gemini 3.5 Flash-Lite and Gemini 3.8 Flash. An existing 3.8 primary defaults to a 3.5 Flash-Lite backup. Gemini 2.5 is excluded because Google restricts it to existing users, although it is not currently listed as shut down. Verify eligibility and generation access for the specific API project before setting `AI_FREE_TIER_CONFIRMED=true`; model metadata can return HTTP 200 even when generation returns 404. `.env.example` is a keyless template. Never put secrets in frontend variables. `AI_DEFAULT_MODE` is obsolete and ignored. No mode switch or synthetic location fallback exists.
 
+For Gemini quota failover, set either or both of `GEMINI_API_KEY_2` and `GEMINI_API_KEY_3` alongside the primary `GEMINI_API_KEY`. Restart the local server after changing its private environment. On Vercel, open **Project Settings → Environment Variables** and save the keys as secrets for **Production**. Select **Preview** as well if those deployments need Gemini. New deployments pick up the saved settings. Hosted workers with the same primary key share one Redis request budget across both backups. Each warm worker tracks Google's retry time per key and model. [Vercel environment variables](https://vercel.com/docs/environment-variables/managing-environment-variables)
+
 For paid OpenAI, set `AI_PROVIDER=openai`, fill `OPENAI_API_KEY`, keep `OPENAI_MODEL=luna-6.0` (alias for `gpt-6-luna`) or select another compatible API model, then restart. OpenAI ignores Gemini settings and free-tier confirmation. The selected provider is shown in readiness and per-photo disclosure. There is no automatic provider switch. [Adapter and privacy details](provider.md)
 
 For Groq, set `AI_PROVIDER=groq`, fill `GROQ_API_KEY`, and keep `GROQ_MODEL=qwen/qwen3.8-27b` unless the adapter is updated for another Groq vision model. The Groq adapter uses the OpenAI-compatible Responses API and combines photo/plan views into one labeled contact sheet to fit the model's image limit. Groq rate limits and any account billing apply; check the Groq console before relying on free quota. Groq may retain request data for up to 30 days for reliability and abuse monitoring. [Groq data controls](https://console.groq.com/docs/your-data)
@@ -37,12 +39,12 @@ First-stage evidence IDs expire after five minutes and are bound to a session an
 ## Failures and recovery
 
 - Configuration errors: fix the selected provider and private server key/model settings (plus Gemini free-tier confirmation when applicable), restart and refresh.
-- Gemini quota, temporary service or response errors: try the configured Gemini fallbacks. If they also fail, the error is shown and no substitute location is generated.
+- A Gemini `quota` error triggers key failover on the current model. If the error reaches the visitor, the server supplies a retry interval. A `budget` error means the app reached its own shared ceiling. Temporary service or response errors follow the configured model retry and fallback rules.
 - `response_limit`: no partial result is applied. The next configured model may be tried; otherwise, retake the photo and retry.
 - A slow model: the server temporarily prioritizes an available configured backup. The photo status reports the failed stage and cause. A retry keeps the selected photo and reuses unexpired readings when possible. An expired session is renewed once on submission.
 - Insufficient evidence: provide another view. This is an analysis result, not a transport failure.
 
-Fallback is limited to configured Gemini models in this checkout; there is no sample-location substitution. Refresh state after an interrupted connection before retrying. Per-photo consent, typed validation and source constraints remain required. Photo selection is an unverified app hypothesis, not a field-verified user position.
+Refresh state after an interrupted connection before retrying. Per-photo consent, typed validation and source constraints remain required. Photo selection is an unverified app hypothesis, not a field-verified user position.
 
 ## Validation
 
