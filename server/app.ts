@@ -3,7 +3,8 @@ import { randomUUID } from 'node:crypto';
 import { root } from './data';
 import type { Provider } from './provider';
 import { visualPlans } from './visual-data';
-import { floorGraphs, pilotDestinations } from './floor-graph';
+import { floorGraphs } from './floor-graph';
+import { pilotDestinations } from './wayfinding';
 import { locationCatalogue } from './geolocation';
 import { isPilotBuilding, isPilotPlan } from './pilot-scope';
 import type { LocationCatalogue } from '../src/location/types';
@@ -86,7 +87,13 @@ export function createApp(options: {
   });
   app.use('/api/sessions/:id/photo', express.json({ limit: '4mb' }));
   app.use(express.json({ limit: '12kb' }));
-  app.get('/api/bootstrap', (_req, res) =>
+  app.get('/api/bootstrap', (_req, res) => {
+    let destinations: ReturnType<typeof pilotDestinations>;
+    try {
+      destinations = pilotDestinations(topologyStore);
+    } catch {
+      destinations = pilotDestinations();
+    }
     res.json({
       coverage: visitorCoverage,
       liveAvailable: options.liveAvailable,
@@ -95,12 +102,12 @@ export function createApp(options: {
       provider: options.provider.name ?? 'gemini',
       setupNotice: options.liveAvailable ? null : (options.setupNotice ?? null),
       visualPlans: visitorPlans,
-      destinations: pilotDestinations(),
+      destinations,
       locationCatalogue: locationData,
       locationNotice,
       photoLocalizationAvailable: visitorPlans.length > 0,
-    }),
-  );
+    });
+  });
   // Public corridor/lobby walking cells for client-side map-matching; kept distinct from GIS alignments.
   app.get('/api/plans/:planId/walking-surface', (req, res) => {
     const plan = visitorPlans.find((item) => item.id === req.params.planId);

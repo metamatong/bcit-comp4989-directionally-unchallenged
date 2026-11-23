@@ -1,6 +1,6 @@
 /** Resolve visitor endpoints and generate floor-plan routes with mapped building-link constraints. */
 import { z } from 'zod';
-import type { CampusLocationCandidate, VisualPlan } from '../src/types';
+import type { CampusLocationCandidate, DestinationSuggestion, VisualPlan } from '../src/types';
 import { buildingLabel, planLabel, type TopologyNode, type TopologyEdge } from '../src/topology';
 import {
   floorTransferInstruction,
@@ -14,12 +14,15 @@ import {
 import { canonicalBuilding, labelKey, looksLikeIdentifier, pilotEvidence } from './pilot-evidence';
 import { reviewedNetwork } from './pilot-network';
 import { CampusJourney } from './campus-journey';
+import { floorGraphs, visitorExclusion } from './floor-graph';
 import { lookupPilotLabels } from './spatial-retrieval';
 import { computeTopologyRoute } from './routing';
 import { TopologyError, TopologyStore, topologyEligibility } from './topology';
+import { readConnectionCandidates } from './topology-candidates';
+import { importReviewedNetwork } from './topology-import';
 import { sourceCorridorTraces, visitorPassages, stepText } from './visitor-paths';
 import { attachPathEndpoints, routeDrawingCrossings } from './route-geometry';
-import { planImagePart } from './visual-data';
+import { planImagePart, visualPlans } from './visual-data';
 import { isPilotPlan } from './pilot-scope';
 import { visitorTransferNetwork } from './inferred-transfers';
 import type { Provider } from './provider';
@@ -244,6 +247,74 @@ export function visitorNetworkMap(
     plans,
   );
   return { plans, doc, network, nodes };
+}
+
+const PILOT_DISPLAY_BUILDING: Record<string, string> = {
+  SE12: 'SE12',
+  SW3: 'SW03',
+  SW5: 'SW05',
+  SW1: 'SW01',
+};
+
+let publishedDestinationsCache: DestinationSuggestion[] | undefined;
+const storeDestinationsCache = new WeakMap<
+  object,
+  { revision: number; items: DestinationSuggestion[] }
+>();
+
+function collectPilotDestinations(journey: CampusJourney): DestinationSuggestion[] {
+  const seen = new Set<string>();
+  const items: DestinationSuggestion[] = [];
+  for (const floor of floorGraphs().ordered) {
+    if (!isPilotPlan(floor.plan)) continue;
+    const building = PILOT_DISPLAY_BUILDING[floor.plan.building] ?? floor.plan.building;
+    for (const place of floor.places) {
+      if (visitorExclusion(place) || !journey.routableDestination(place)) continue;
+      const key = `${building}|${floor.plan.floor}|${place.label}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      items.push({
+        value: `${building} ${place.label}`,
+        building,
+        floor: floor.plan.floor,
+        label: place.label,
+        kind: place.kind,
+      });
+    }
+  }
+  const order = ['SE12', 'SW03', 'SW05', 'SW01'];
+  items.sort((a, b) => {
+    const ba = order.indexOf(a.building);
+    const bb = order.indexOf(b.building);
+    if (ba !== bb) return ba - bb;
+    return a.label.localeCompare(b.label, undefined, { numeric: true });
+  });
+  return items;
+}
+
+/**
+ * Routable visitor-eligible destinations in the 4-building pilot, preserving exact identifiers.
+ * Uses the same CampusJourney arrival eligibility as live routing (floor cells, terminal paths,
+ * shared entrances, corridor vicinities, reviewed entrance doors and connected stair/elevator landings).
+ */
+export function pilotDestinations(
+  store?: Pick<TopologyStore, 'plans' | 'read' | 'candidates'>,
+): DestinationSuggestion[] {
+  if (!store) {
+    if (publishedDestinationsCache) return publishedDestinationsCache;
+    const candidates = readConnectionCandidates();
+    const published = importReviewedNetwork(reviewedNetwork(), candidates);
+    const map = visitorNetworkMap({ plans: visualPlans, candidates, read: () => published });
+    publishedDestinationsCache = collectPilotDestinations(new CampusJourney(map));
+    return publishedDestinationsCache;
+  }
+  const doc = store.read();
+  const cached = storeDestinationsCache.get(store);
+  if (cached?.revision === doc.revision) return cached.items;
+  const map = visitorNetworkMap({ plans: store.plans, candidates: store.candidates, read: () => doc });
+  const items = collectPilotDestinations(new CampusJourney(map));
+  storeDestinationsCache.set(store, { revision: doc.revision, items });
+  return items;
 }
 
 function readVisitorMap(

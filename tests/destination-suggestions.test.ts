@@ -1,8 +1,13 @@
 // @vitest-environment jsdom
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { act, createElement, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { describe, expect, it, vi } from 'vitest';
-import { pilotDestinations } from '../server/floor-graph';
+import { reviewedNetwork } from '../server/pilot-network';
+import { TopologyStore } from '../server/topology';
+import { pilotDestinations } from '../server/wayfinding';
 import { filterDestinationSuggestions } from '../src/destination-suggestions';
 import { PhotoLocationInput } from '../src/components/PhotoLocationInput';
 import type { PreparedPhoto } from '../src/photo';
@@ -19,12 +24,69 @@ const photo: PreparedPhoto = {
 describe('pilot destination suggestions', () => {
   it('exposes only routable visitor-eligible pilot buildings with exact identifiers', () => {
     const items = pilotDestinations();
+    const values = new Set(items.map((item) => item.value));
     const buildings = new Set(items.map((item) => item.building));
     expect([...buildings].sort()).toEqual(['SE12', 'SW01', 'SW03', 'SW05']);
-    expect(items.some((item) => item.value === 'SE12 302')).toBe(true);
-    expect(items.some((item) => item.value === 'SW03 2605')).toBe(true);
-    expect(items.some((item) => item.value === 'SW01 1106')).toBe(true);
+    expect(values.has('SE12 302')).toBe(true);
+    expect(values.has('SW03 2605')).toBe(true);
+    expect(values.has('SW01 1106')).toBe(true);
+    // Reviewed entrance doors, connected reviewed stair landings, and corridor-vicinity rooms.
+    expect(values.has('SW03 1710')).toBe(true);
+    for (const landing of ['SE12 S200', 'SW03 S190', 'SW03 S260', 'SW03 S370', 'SW03 S460']) {
+      expect(values.has(landing)).toBe(true);
+    }
+    for (const vicinity of [
+      'SE12 205H',
+      'SE12 305A',
+      'SE12 329',
+      'SE12 336',
+      'SW01 3314',
+      'SW01 3320',
+      'SW01 3321',
+      'SW03 4603',
+      'SW03 4702',
+    ]) {
+      expect(values.has(vicinity)).toBe(true);
+    }
+    // Disconnected stair landings with no active incoming links remain excluded.
+    for (const disconnected of ['SE12 S202', 'SE12 S228', 'SW03 S280']) {
+      expect(values.has(disconnected)).toBe(false);
+    }
     expect(items.some((item) => item.kind === 'staff' || item.kind === 'shaft')).toBe(false);
+  });
+
+  it('reflects live topology approvals when given a TopologyStore', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'pilot-destinations-'));
+    try {
+      const store = new TopologyStore(
+        join(directory, 'topology.json'),
+        undefined,
+        undefined,
+        reviewedNetwork,
+      );
+      expect(pilotDestinations(store).some((item) => item.value === 'SW03 1710')).toBe(true);
+
+      for (const candidateId of ['sw3-f1-s160-to-1710', 'sw3-f1-s160-to-1710-corridor-1700']) {
+        const snapshot = store.snapshot();
+        const edgeId = snapshot.candidates.find((item) => item.id === candidateId)!.latestAnswer!
+          .bindings!.edgeId;
+        store.mutate({
+          revision: snapshot.document.revision,
+          command: {
+            type: 'review',
+            target: 'edge',
+            id: edgeId,
+            status: 'rejected',
+            reviewer: 'Destination suggestion regression test',
+            note: 'Withdraw only in this isolated test copy.',
+          },
+        });
+      }
+
+      expect(pilotDestinations(store).some((item) => item.value === 'SW03 1710')).toBe(false);
+    } finally {
+      rmSync(directory, { recursive: true, force: true });
+    }
   });
 
   it('ranks exact identifiers ahead of prefix and substring matches and accepts building aliases', () => {

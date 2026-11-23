@@ -158,6 +158,10 @@ export class CampusJourney {
     const keys = new Set(precise.map((s) => s.key));
     return [...precise, ...this.alternativeStops(place).filter((s) => !keys.has(s.key))];
   }
+  /** Whether a place has at least one linked arrival stop on the active visitor network. */
+  routableDestination(place: FloorPlace) {
+    return this.stops(place).some((stop) => this.search.canArriveAt(stop));
+  }
   private alternativeStops(place: FloorPlace): SearchStop[] {
     if (visitorExclusion(place) || place.reviewedDoor || place.reviewedLanding) return [];
     const floor = floorGraphs().byId.get(place.planId)!;

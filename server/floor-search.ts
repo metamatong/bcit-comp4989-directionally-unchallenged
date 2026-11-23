@@ -36,6 +36,7 @@ function reversed(step: WalkingStep) {
 }
 export class FloorSearch {
   private readonly links = new Map<number, Link[]>();
+  private readonly incoming = new Set<number>();
   private readonly thresholds = new Map<string, number>();
   private readonly nodeKeys = new Map<string, SearchStop>();
   private readonly allowedFloors: Set<string>;
@@ -136,6 +137,10 @@ export class FloorSearch {
   reviewed(id: string) {
     return this.nodeKeys.get(id);
   }
+  /** True when a route can arrive at this stop via a walkable floor cell or active directed link. */
+  canArriveAt(stop: SearchStop) {
+    return !stop.unlinked && (stop.key >= 0 || this.incoming.has(stop.key));
+  }
   /** Inspect the same directed connections as a visitor, confined to selected sheets. */
   reachable(starts: SearchStop[], plans: Set<string>, reverse = false) {
     const links = new Map<number, number[]>();
@@ -235,6 +240,7 @@ export class FloorSearch {
       const list = this.links.get(a) ?? [];
       if (!list.some((l) => l.to === b)) list.push({ to: b, cost, step: s });
       this.links.set(a, list);
+      this.incoming.add(b);
     };
     add(from, to, step);
     if (both) add(to, from, reversed(step));
