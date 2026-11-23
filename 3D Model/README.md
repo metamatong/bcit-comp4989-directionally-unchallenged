@@ -10,3 +10,5 @@ Open http://127.0.0.1:3210/three for the Three.js model or http://127.0.0.1:3210
 Choose buildings and floors independently. Selecting two floors displays their published stair and elevator links. Navigable area draws the navigation app's compiled walking cells. SE12 and SW3 include source-bound wall and stair meshes. Estimated walls are switchable. Floor separation, heights and intermediate stair geometry are schematic. The 26 confirmed door locations and source-bound wall cuts are recorded under local-analysis/doorway-review.
 
 The server reads the parent repository's plans, floor graphs and navigation network. Rebuild using npm run build inside this folder. Published changes to routing data should be verified against the same app checkout. The local-analysis folder contains the inputs and reports for the inspector and its review pages.
+
+The Three.js view marks each published inter-floor stair endpoint with one raised gold stair symbol. Symbols use a common display size and orientation. Select two floors of one building to see arrows for the permitted directions between their landings.
