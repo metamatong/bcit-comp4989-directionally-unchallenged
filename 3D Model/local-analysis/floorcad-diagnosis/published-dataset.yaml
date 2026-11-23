@@ -1,0 +1,43 @@
+# Class map shipped with FloorCAD Detect (YOLOv8n).
+# Training images are not included in this model repo.
+path: .
+train: images/train
+val: images/val
+test: images/test
+nc: 35
+names:
+  0: bath
+  1: bath_tub
+  2: bay_window
+  3: bed
+  4: bedside_cupboard
+  5: blind_window
+  6: chair
+  7: class_31
+  8: class_32
+  9: class_34
+  10: class_35
+  11: double_door
+  12: elevator
+  13: escalator
+  14: gas_stove
+  15: half_height_cabinet
+  16: high_cabinet
+  17: opening_symbol
+  18: parking
+  19: railing
+  20: refrigerator
+  21: single_door
+  22: sink
+  23: sliding_door
+  24: sofa
+  25: squat_toilet
+  26: stair
+  27: table
+  28: toilet
+  29: tv_cabinet
+  30: urinal
+  31: wall
+  32: wardrobe
+  33: washing_machine
+  34: window

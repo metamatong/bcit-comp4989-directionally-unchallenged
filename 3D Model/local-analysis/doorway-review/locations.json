@@ -1,0 +1,340 @@
+[
+  {
+    "id": "D01",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.4812398,
+      0.4775142
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": true,
+    "labels": [
+      "1748"
+    ]
+  },
+  {
+    "id": "D02",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.4812329,
+      0.4840061
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": true,
+    "labels": [
+      "1748"
+    ]
+  },
+  {
+    "id": "D03",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.553106,
+      0.5014096
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": true,
+    "labels": []
+  },
+  {
+    "id": "D04",
+    "planId": "SE12-F3-p1",
+    "point": [
+      0.3883701,
+      0.3314772
+    ],
+    "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+    "pathConflict": false,
+    "labels": [
+      "S313"
+    ]
+  },
+  {
+    "id": "D05",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.7340764,
+      0.4928927
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1695"
+    ]
+  },
+  {
+    "id": "D06",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.6081659,
+      0.4929186
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1635"
+    ]
+  },
+  {
+    "id": "D07",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.6048972,
+      0.4928449
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1635"
+    ]
+  },
+  {
+    "id": "D08",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.6001299,
+      0.5219715
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1640"
+    ]
+  },
+  {
+    "id": "D09",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.6044128,
+      0.5220149
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1640"
+    ]
+  },
+  {
+    "id": "D10",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.2750909,
+      0.7796417
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1990"
+    ]
+  },
+  {
+    "id": "D11",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.2708836,
+      0.7796267
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1990"
+    ]
+  },
+  {
+    "id": "D12",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.2593608,
+      0.7050013
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1990"
+    ]
+  },
+  {
+    "id": "D13",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.2543925,
+      0.7687734
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1985",
+      "1990"
+    ]
+  },
+  {
+    "id": "D14",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.4721522,
+      0.4918308
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1748"
+    ]
+  },
+  {
+    "id": "D15",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.4764041,
+      0.491862
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1748"
+    ]
+  },
+  {
+    "id": "D16",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.2430522,
+      0.5026648
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1915"
+    ]
+  },
+  {
+    "id": "D17",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.243052,
+      0.589381
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1915"
+    ]
+  },
+  {
+    "id": "D18",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.2651817,
+      0.5820634
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1920"
+    ]
+  },
+  {
+    "id": "D19",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.2651289,
+      0.6532287
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1920"
+    ]
+  },
+  {
+    "id": "D20",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.247934,
+      0.7796417
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1985"
+    ]
+  },
+  {
+    "id": "D21",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.2437268,
+      0.7796267
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1985"
+    ]
+  },
+  {
+    "id": "D22",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.7063601,
+      0.5219529
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1660"
+    ]
+  },
+  {
+    "id": "D23",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.7096759,
+      0.52199
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "1660"
+    ]
+  },
+  {
+    "id": "D24",
+    "planId": "SW3-F1-p1",
+    "point": [
+      0.7797938,
+      0.5175571
+    ],
+    "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+    "pathConflict": false,
+    "labels": [
+      "S160"
+    ]
+  },
+  {
+    "id": "D25",
+    "planId": "SW3-F2-p1",
+    "point": [
+      0.5093872,
+      0.4840341
+    ],
+    "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+    "pathConflict": false,
+    "labels": [
+      "2702",
+      "2704"
+    ]
+  },
+  {
+    "id": "D26",
+    "planId": "SW3-F2-p1",
+    "point": [
+      0.6769229,
+      0.5242787
+    ],
+    "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+    "pathConflict": false,
+    "labels": [
+      "2644"
+    ]
+  }
+]

@@ -1,0 +1,65 @@
+{
+  "model": "gemma4:12b-it-q4_K_M",
+  "modelDigest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+  "createdAt": "2026-11-19T00:06:10.156Z",
+  "endpoint": "http://127.0.0.1:11434",
+  "method": "One manually located stair-region crop per call; floor-1 text rotated upright. Crop boundaries are drawing observations, not inferred landing points.",
+  "status": "stopped-after-repeated-output-truncation",
+  "observations": [
+    {
+      "id": "F1-A",
+      "planId": "SE12-F1-p1",
+      "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "bounds": [
+        0.45,
+        0.07973856209150326,
+        0.6196969696969697,
+        0.17973856209150327
+      ],
+      "rotation": 270,
+      "cropSha256": "45d2d9349fe7340c095501c8333464e0105a6a5e8064503c8b955d7e810c83ff",
+      "cropFile": "F1-A.png",
+      "routeEligible": false,
+      "status": "failed",
+      "error": "Error: Truncated response",
+      "elapsedMs": 51094
+    },
+    {
+      "id": "F1-B",
+      "planId": "SE12-F1-p1",
+      "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "bounds": [
+        0.4196969696969697,
+        0.2699346405228758,
+        0.5297979797979798,
+        0.33986928104575165
+      ],
+      "rotation": 270,
+      "cropSha256": "c5274fb36eda1b563e9e93cdcfeaff0697a2d63c28df3e685e2cf4cee947eb57",
+      "cropFile": "F1-B.png",
+      "routeEligible": false,
+      "status": "failed",
+      "error": "Error: Truncated response",
+      "elapsedMs": 28094
+    },
+    {
+      "id": "F1-C",
+      "planId": "SE12-F1-p1",
+      "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "bounds": [
+        0.40959595959595957,
+        0.75,
+        0.55,
+        0.8199346405228758
+      ],
+      "rotation": 270,
+      "cropSha256": "c86a182c6ea023ca1ad6480326bbe85093bd5294fc8e7206a6153b83c87c63a6",
+      "cropFile": "F1-C.png",
+      "routeEligible": false,
+      "status": "failed",
+      "error": "Error: Truncated response",
+      "elapsedMs": 28712
+    }
+  ],
+  "routingChanges": 0
+}

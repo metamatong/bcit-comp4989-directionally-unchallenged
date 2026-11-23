@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Model evidence review</title>
+    <link rel="stylesheet" href="/stairs.css" />
+    <style>
+      main {
+        padding: 24px;
+        max-width: 1600px;
+        margin: auto;
+      }
+      h2 {
+        margin-top: 32px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+        gap: 20px;
+      }
+      .card {
+        background: #162333;
+        padding: 18px;
+        border-radius: 8px;
+      }
+      .sheet {
+        position: relative;
+        background: white;
+      }
+      .sheet img {
+        display: block;
+        width: 100%;
+      }
+      .sheet svg {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 16px 0;
+      }
+      td,
+      th {
+        padding: 10px;
+        border-bottom: 1px solid #40536a;
+        text-align: left;
+      }
+      pre {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+      }
+      .warning {
+        color: #ffbd66;
+      }
+      .crop {
+        max-height: 280px;
+        max-width: 100%;
+        background: white;
+      }
+      a {
+        color: #72d9e6;
+      }
+      .status {
+        padding: 12px;
+        background: #1a2b3c;
+      }
+      details {
+        margin: 16px 0;
+      }
+      li {
+        margin: 8px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>Model evidence review</h1>
+      <p>
+        <a href="/">Spatial twin</a> · <a href="/stairs">Stair review</a> ·
+        <a href="/local-review">Earlier local trials</a> �
+        <a href="/floorcad-diagnosis">S280 and class-label diagnosis</a>
+      </p>
+      <p class="status">
+        Experimental suggestions only. No model output approves a route. Orange
+        boxes preserve raw FloorCAD classes; cyan dots are current reviewed
+        landings.
+      </p>
+      <p id="status">Loading current reviewed map…</p>
+      <section id="gaps"></section>
+      <section id="questions"></section>
+      <section id="coverage"></section>
+      <section id="tiled"></section>
+      <section id="expanded"></section>
+      <section>
+        <h2>Local vision checks</h2>
+        <p>
+          Four selected crops; model sees the image without the detector label
+          or known relationship. This is a diagnostic sample, not held-out
+          validation.
+        </p>
+        <div class="grid" id="shapes"></div>
+      </section>
+      <section>
+        <h2>Source-sheet evidence</h2>
+        <p>
+          100 source pixels around a box define its review context. Nearby
+          labels are drawing evidence, not a landing position or physical
+          distance. Open a source image for closer inspection.
+        </p>
+        <div class="grid" id="floors"></div>
+      </section>
+      <section>
+        <h2>Local graph audit</h2>
+        <p id="reject" class="warning"></p>
+        <details>
+          <summary>
+            Raw local-model suggestion — may contain unsupported claims
+          </summary>
+          <pre id="raw"></pre>
+        </details>
+      </section>
+      <ul id="limits"></ul>
+    </main>
+    <script type="module" src="/model-review.js"></script>
+  </body>
+</html>

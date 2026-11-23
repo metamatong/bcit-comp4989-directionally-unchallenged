@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>SE12 local model comparison</title>
+    <link rel="stylesheet" href="/stairs.css" />
+    <style>
+      main {
+        padding: 24px;
+      }
+      .comparisons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(330px, 1fr));
+        gap: 18px;
+      }
+      .evidence {
+        background: #162333;
+        padding: 16px;
+        border-radius: 8px;
+      }
+      .evidence img {
+        width: 100%;
+        max-height: 430px;
+        object-fit: contain;
+        background: white;
+      }
+      .result {
+        white-space: pre-wrap;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 20px 0;
+      }
+      td,
+      th {
+        text-align: left;
+        padding: 12px;
+        border-bottom: 1px solid #40536a;
+      }
+      .warning {
+        color: #ffb454;
+      }
+      code {
+        overflow-wrap: anywhere;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>SE12 floors 1–2 · local analysis review</h1>
+      <a href="/stairs">Stair review board</a>
+    </header>
+    <main>
+      <p id="status" role="status">Loading local trial records…</p>
+      <p class="warning">
+        No new floor-1/2 links are approved. Local model text is unverified. The
+        detailed crops below were selected manually from original source images;
+        floor-1 text is rotated upright. These are not automatic detections or
+        surveyed landing positions.
+      </p>
+      <h2>Possible relationships to review</h2>
+      <p>
+        These questions come from drawing shape, approximate north-oriented
+        position and existing source records—not model agreement or label
+        prefixes. Different source dates, incomplete drawings and unresolved
+        alignment prevent automatic matching.
+      </p>
+      <table>
+        <thead>
+          <tr>
+            <th>Floor 1 crop</th>
+            <th>Floor 2 crop</th>
+            <th>Question</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>F1-A · S100</td>
+            <td>F2-A · S200</td>
+            <td>
+              Do these exterior north-end stair drawings represent the same
+              staircase?
+            </td>
+          </tr>
+          <tr>
+            <td>F1-B · S102</td>
+            <td>F2-C · S203</td>
+            <td>
+              Does this short floor-1 flight reach the internal floor-2 stair
+              marked down?
+            </td>
+          </tr>
+          <tr>
+            <td>F1-C · S103</td>
+            <td>F2-D · S209</td>
+            <td>
+              Do these internal stairs near the southern section connect
+              directly?
+            </td>
+          </tr>
+          <tr>
+            <td>F1-D · identifier unresolved</td>
+            <td>F2-E · S228</td>
+            <td>
+              Is the floor-1 stair-area label related to this exterior flight?
+              The crop does not establish a matching flight.
+            </td>
+          </tr>
+          <tr>
+            <td>Unmatched / unknown</td>
+            <td>F2-B · S202</td>
+            <td>Which floor-1 landing, if any, serves this stair?</td>
+          </tr>
+        </tbody>
+      </table>
+      <p>
+        All answers and permitted directions remain unknown. Inspect the
+        <a href="/image?id=SE12-F1-p1" target="_blank" rel="noopener"
+          >complete first-floor plan</a
+        >
+        and
+        <a href="/image?id=SE12-F2-p1" target="_blank" rel="noopener"
+          >complete second-floor plan</a
+        >
+        before confirming. This nine-crop trial is not a complete stair census.
+      </p>
+      <h2>Local model evidence</h2>
+      <p>
+        The initial five-image-per-page trial repeated detections at wrong
+        positions and could not reliably read identifiers. Its output is
+        retained in
+        <a href="/local-analysis/overview-trial.json">overview-trial.json</a>.
+        An intermediate crop-order failure is excluded from the comparison. No
+        raw model coordinates enter the twin.
+      </p>
+      <div id="evidence" class="comparisons"></div>
+    </main>
+    <footer>
+      © British Columbia Institute of Technology. Live local-model trial,
+      separate from mocked tests and physical-campus validation. No cloud
+      inference or route changes.
+    </footer>
+    <script type="module" src="/local-review.js"></script>
+  </body>
+</html>

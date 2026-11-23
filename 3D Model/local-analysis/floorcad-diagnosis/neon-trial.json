@@ -1,0 +1,105 @@
+{
+  "requestedModel": "Gemini 4 Neon",
+  "selectedModelInOfficialApp": "Gemini 4 Neon Extra",
+  "transport": "Official Antigravity desktop app; not OmniRoute",
+  "conversationId": "f340fcfb-2673-4e10-88b4-7f6451e32d17",
+  "status": "completed",
+  "samples": [
+    {
+      "sample": "A",
+      "image": "local-analysis/floorcad-diagnosis/s280-tight.png",
+      "cropSha256": "54a552761b753b15f2d6bf8945b7f55f7097bba15f9965e1cb88ace2f6e9b74a",
+      "planId": "SW3-F2-p1",
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "imageSha256": "09f8418f5bd386380e11218207f850febe1ab5be6aa12be2e0507103b051a085",
+      "bounds": [
+        0.19901960784313724,
+        0.39191919191919194,
+        0.269281045751634,
+        0.4621212121212121
+      ]
+    },
+    {
+      "sample": "B",
+      "image": "local-analysis/model-shapes/SE12-F3-p1-parking-0.png",
+      "cropSha256": "c37c7a4d7c1758a47ba7053a2c2ff7096d97ce1c919781377fe020e758fef6a8",
+      "planId": "SE12-F3-p1",
+      "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "imageSha256": "75f1fae4a8354a32b33110151792dcd5cc472412a5034dc16ce7ecc31e457097",
+      "bounds": [
+        0.04084967320261438,
+        0.4686868686868687,
+        0.10130718954248366,
+        0.5868686868686869
+      ]
+    },
+    {
+      "sample": "C",
+      "image": "local-analysis/model-shapes/SW3-F2-p1-parking-0.png",
+      "cropSha256": "b00de8e55bdd5f5881750517eac2737590260c99b1722cc9fa324d15e2c537be",
+      "planId": "SW3-F2-p1",
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "imageSha256": "09f8418f5bd386380e11218207f850febe1ab5be6aa12be2e0507103b051a085",
+      "bounds": [
+        0.5120915032679738,
+        0.44242424242424244,
+        0.5640522875816993,
+        0.5505050505050505
+      ]
+    }
+  ],
+  "limitations": [
+    "Three selected positive crops, no negative controls or held-out accuracy estimate.",
+    "Filenames were visible; prompt instructed the model not to use them as classification labels.",
+    "Model identity is the official app selector; no API response model identifier or digest is available."
+  ],
+  "routingChanges": 0,
+  "weightChanges": 0,
+  "completedDate": "2026-11-19",
+  "capture": "Assistant transcription/summary of the visible completed Antigravity response, not a raw API response.",
+  "observations": [
+    {
+      "sample": "A",
+      "classification": "stair-flight",
+      "readablePrimaryText": [
+        "S280",
+        "STAIR"
+      ],
+      "visibleEvidence": "Repeated vertical tread lines in two banks, bounded enclosure, heavy central horizontal divider and a diagonal interruption in one bank.",
+      "uncertainties": [
+        "Adjacent shaft text is obscured or cropped.",
+        "Switchback layout is a hypothesis, not a verified connection.",
+        "No up/down direction, scale, building or floor metadata established."
+      ]
+    },
+    {
+      "sample": "B",
+      "classification": "stair-flight",
+      "readablePrimaryText": [
+        "S300",
+        "STAIR"
+      ],
+      "visibleEvidence": "Parallel horizontal tread lines, central vertical division, open landing areas and a doorway in an angled enclosure.",
+      "uncertainties": [
+        "Peripheral corridor text is cropped.",
+        "Two-run switchback interpretation is a hypothesis.",
+        "No served floors or travel direction established."
+      ]
+    },
+    {
+      "sample": "C",
+      "classification": "stair-flight",
+      "readablePrimaryText": [
+        "S270",
+        "STAIR"
+      ],
+      "visibleEvidence": "Two banks of horizontal tread lines, thick central vertical divider, interrupted linework in the left bank and landings.",
+      "uncertainties": [
+        "Several small peripheral room numbers are explicitly ambiguous.",
+        "Switchback and cut-line interpretations are hypotheses.",
+        "Door access restrictions, up/down direction, scale and floor connectivity are not determined."
+      ]
+    }
+  ],
+  "conclusion": "Neon classified all three selected crops as stair-flight and none as parking-bays. This supports local review of detector errors, not a global class remap or connection approval."
+}

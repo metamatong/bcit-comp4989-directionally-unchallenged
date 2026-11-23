@@ -1,0 +1,29 @@
+{
+  "model": "gemma4:12b-it-q4_K_M",
+  "modelDigest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+  "createdAt": "2026-11-19T00:08:07.606Z",
+  "endpoint": "http://127.0.0.1:11434",
+  "method": "One manually located stair-region crop per call; floor-1 text rotated upright. Crop boundaries are drawing observations, not inferred landing points.",
+  "status": "incomplete",
+  "observations": [
+    {
+      "id": "F1-A",
+      "planId": "SE12-F1-p1",
+      "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "bounds": [
+        0.45,
+        0.07973856209150326,
+        0.6196969696969697,
+        0.17973856209150327
+      ],
+      "rotation": 270,
+      "cropSha256": "45d2d9349fe7340c095501c8333464e0105a6a5e8064503c8b955d7e810c83ff",
+      "cropFile": "F1-A.png",
+      "routeEligible": false,
+      "status": "failed",
+      "error": "Error: Truncated response",
+      "elapsedMs": 74623
+    }
+  ],
+  "routingChanges": 0
+}

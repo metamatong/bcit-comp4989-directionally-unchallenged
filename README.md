@@ -1,5 +1,7 @@
 # DirectionallyUnchallenged
 
+[3D spatial twin and local setup](3D%20Model/README.md)
+
 Add a photo, enter a destination and tap **Get Directions** for walking directions in the SE12, SW03, SW05 and SW01 pilot. The source archive contains all supplied BCIT Burnaby plans, but the visitor app exposes only those four buildings. The app requests GPS automatically, reads the photo once, matches signs to the catalogue and selects the strongest starting estimate without asking the visitor to choose one.
 
 The archived catalogue contains **89 official floor plans in 45 buildings**. Visitor routes are restricted to the four-building pilot. GPS narrows the building; the photo provides floor and nearby-place evidence. The route search computes paths through compiled walking areas, doors and corridors. The visitor graph infers same-building transfers from corresponding landings. The two SW05 source sheets connect through S180–S280 and S189–S289. Only links between buildings use fixed reviewed records. [Floor graph coverage and remaining gaps](docs/floor-routing.md)

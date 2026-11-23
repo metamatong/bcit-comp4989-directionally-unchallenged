@@ -1,0 +1,368 @@
+{
+  "schemaVersion": 1,
+  "scope": "source-floor-plan preprocessing only",
+  "model": "qwen3.5:latest",
+  "modelDigest": "6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7",
+  "endpoint": "http://127.0.0.1:11434",
+  "createdAt": "2026-11-19T00:03:09.186Z",
+  "status": "complete",
+  "plans": [
+    {
+      "planId": "SE12-F1-p1",
+      "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+      "imageSha256": "31c873f400e965a825f8586c94439aec1254954c1dfc0c75987e233ad779b4df",
+      "views": [
+        {
+          "index": 0,
+          "bounds": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "sha256": "ab076327a1b0a7280fb7d13440c7ad1accbc38bb70592ff4472c5317e7bd6c57"
+        },
+        {
+          "index": 1,
+          "bounds": [
+            0,
+            0,
+            0.55,
+            0.55
+          ],
+          "sha256": "88811b348ee333241e9bede4b8c651d21abf11525b1c6b18eced08c730b08d2e"
+        },
+        {
+          "index": 2,
+          "bounds": [
+            0.45,
+            0,
+            1,
+            0.55
+          ],
+          "sha256": "f7aa0fde5f7ba54cfc751bc69132427d50456f166355ac204169e04a2fcdad0d"
+        },
+        {
+          "index": 3,
+          "bounds": [
+            0,
+            0.45,
+            0.55,
+            1
+          ],
+          "sha256": "7cc4bbec5d983548a13412bbbc5f41e01618767486dca85fd173024fd54026f0"
+        },
+        {
+          "index": 4,
+          "bounds": [
+            0.45,
+            0.45,
+            1,
+            1
+          ],
+          "sha256": "8129e01534551b81c31ca6495c148464455612040d823e0cf7b0ee974cc0ac6f"
+        }
+      ],
+      "status": "complete",
+      "observations": [
+        {
+          "label": "S102",
+          "imageIndex": 0,
+          "x": 0.38,
+          "y": 0.29,
+          "observation": "Stair symbol with label 'S102' visible; flight and landing details present.",
+          "uncertainty": "",
+          "pagePoint": {
+            "x": 0.38,
+            "y": 0.29
+          },
+          "status": "unverified-model-observation",
+          "routeEligible": false
+        },
+        {
+          "label": "S102",
+          "imageIndex": 1,
+          "x": 0.75,
+          "y": 0.38,
+          "observation": "Stair symbol with label 'S102' visible; flight and landing details present.",
+          "uncertainty": "",
+          "pagePoint": {
+            "x": 0.41250000000000003,
+            "y": 0.20900000000000002
+          },
+          "status": "unverified-model-observation",
+          "routeEligible": false
+        },
+        {
+          "label": "S102",
+          "imageIndex": 2,
+          "x": 0.19,
+          "y": 0.47,
+          "observation": "Stair symbol with label 'S102' visible; flight and landing details present.",
+          "uncertainty": "",
+          "pagePoint": {
+            "x": 0.5545,
+            "y": 0.2585
+          },
+          "status": "unverified-model-observation",
+          "routeEligible": false
+        },
+        {
+          "label": "S103",
+          "imageIndex": 0,
+          "x": 0.86,
+          "y": 0.15,
+          "observation": "Stair symbol with label 'S103' visible; flight and landing details present.",
+          "uncertainty": "",
+          "pagePoint": {
+            "x": 0.86,
+            "y": 0.15
+          },
+          "status": "unverified-model-observation",
+          "routeEligible": false
+        },
+        {
+          "label": "S103",
+          "imageIndex": 2,
+          "x": 0.79,
+          "y": 0.14,
+          "observation": "Stair symbol with label 'S103' visible; flight and landing details present.",
+          "uncertainty": "",
+          "pagePoint": {
+            "x": 0.8845000000000001,
+            "y": 0.07700000000000001
+          },
+          "status": "unverified-model-observation",
+          "routeEligible": false
+        },
+        {
+          "label": "S103",
+          "imageIndex": 3,
+          "x": 0.62,
+          "y": 0.75,
+          "observation": "Stair symbol with label 'S103' visible; flight and landing details present.",
+          "uncertainty": "",
+          "pagePoint": {
+            "x": 0.341,
+            "y": 0.8625
+          },
+          "status": "unverified-model-observation",
+          "routeEligible": false
+        }
+      ],
+      "limitations": "Observations are based on the provided images. Any text or symbols not clearly readable in the given resolution are marked as such.",
+      "elapsedMs": 22952,
+      "tokens": {
+        "input": 6376,
+        "output": 412
+      }
+    },
+    {
+      "planId": "SE12-F2-p1",
+      "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+      "imageSha256": "0781545412b3ea5b6d166f153d8b191b2b68e1dbe4ae0ca15a02e226728b0e7d",
+      "views": [
+        {
+          "index": 0,
+          "bounds": [
+            0,
+            0,
+            1,
+            1
+          ],
+          "sha256": "7c1e7f3ecfd25fe3b045e72b52e94ed4dd8bef65207afeb46f05264d988b97a2"
+        },
+        {
+          "index": 1,
+          "bounds": [
+            0,
+            0,
+            0.55,
+            0.55
+          ],
+          "sha256": "3be91855bc378b3c9625e794b4ddc0dba2c0298cb274181a7184dfdbd17528e7"
+        },
+        {
+          "index": 2,
+          "bounds": [
+            0.45,
+            0,
+            1,
+            0.55
+          ],
+          "sha256": "16a6a058a1a36e98a85a1f67bafd59c44866308235fafcc7d41552386a5787dd"
+        },
+        {
+          "index": 3,
+          "bounds": [
+            0,
+            0.45,
+            0.55,
+            1
+          ],
+          "sha256": "55153ea1c1f260050d642fdf571882134d55bf502d93b612670d4390cc23de09"
+        },
+        {
+          "index": 4,
+          "bounds": [
+            0.45,
+            0.45,
+            1,
+            1
+          ],
+          "sha256": "b6d38a28ecb76b1966d98e11b2378fa7694a76d2f6838e60d78105b3f1587526"
+        }
+      ],
+      "status": "complete",
+      "observations": [
+        {
+          "label": "unreadable",
+          "imageIndex": 0,
+          "x": 0.08,
+          "y": 0.41,
+          "observation": "Stair symbol on left side of building footprint; adjacent text is illegible.",
+          "uncertainty": "Text label for this stair is unreadable.",
+          "pagePoint": {
+            "x": 0.08,
+            "y": 0.41
+          },
+          "status": "unverified-model-observation",
+          "routeEligible": false
+        },
+        {
+          "label": "unreadable",
+          "imageIndex": 0,
+          "x": 0.52,
+          "y": 0.21,
+          "observation": "Stair symbol located above the main corridor; adjacent text is illegible.",
+          "uncertainty": "Text label for this stair is unreadable.",
+          "pagePoint": {
+            "x": 0.52,
+            "y": 0.21
+          },
+          "status": "unverified-model-observation",
+          "routeEligible": false
+        },
+        {
+          "label": "unreadable",
+          "imageIndex": 0,
+          "x": 0.79,
+          "y": 0.56,
+          "observation": "Stair symbol in lower right area of building footprint; adjacent text is illegible.",
+          "uncertainty": "Text label for this stair is unreadable.",
+          "pagePoint": {
+            "x": 0.79,
+            "y": 0.56
+          },
+          "status": "unverified-model-observation",
+          "routeEligible": false
+        },
+        {
+          "label": "unreadable",
+          "imageIndex": 1,
+          "x": 0.07,
+          "y": 0.64,
+          "observation": "Stair symbol on left side of building footprint; adjacent text is illegible.",
+          "uncertainty": "Text label for this stair is unreadable.",
+          "pagePoint": {
+            "x": 0.038500000000000006,
+            "y": 0.35200000000000004
+          },
+          "status": "unverified-model-observation",
+          "routeEligible": false
+        },
+        {
+          "label": "unreadable",
+          "imageIndex": 1,
+          "x": 0.73,
+          "y": 0.28,
+          "observation": "Stair symbol located above the main corridor; adjacent text is illegible.",
+          "uncertainty": "Text label for this stair is unreadable.",
+          "pagePoint": {
+            "x": 0.4015,
+            "y": 0.15400000000000003
+          },
+          "status": "unverified-model-observation",
+          "routeEligible": false
+        },
+        {
+          "label": "unreadable",
+          "imageIndex": 1,
+          "x": 0.95,
+          "y": 0.72,
+          "observation": "Stair symbol in lower right area of building footprint; adjacent text is illegible.",
+          "uncertainty": "Text label for this stair is unreadable.",
+          "pagePoint": {
+            "x": 0.5225,
+            "y": 0.396
+          },
+          "status": "unverified-model-observation",
+          "routeEligible": false
+        },
+        {
+          "label": "unreadable",
+          "imageIndex": 3,
+          "x": 0.18,
+          "y": 0.12,
+          "observation": "Stair symbol on left side of building footprint; adjacent text is illegible.",
+          "uncertainty": "Text label for this stair is unreadable.",
+          "pagePoint": {
+            "x": 0.099,
+            "y": 0.516
+          },
+          "status": "unverified-model-observation",
+          "routeEligible": false
+        },
+        {
+          "label": "unreadable",
+          "imageIndex": 3,
+          "x": 0.84,
+          "y": 0.12,
+          "observation": "Stair symbol located above the main corridor; adjacent text is illegible.",
+          "uncertainty": "Text label for this stair is unreadable.",
+          "pagePoint": {
+            "x": 0.462,
+            "y": 0.516
+          },
+          "status": "unverified-model-observation",
+          "routeEligible": false
+        },
+        {
+          "label": "unreadable",
+          "imageIndex": 3,
+          "x": 0.64,
+          "y": 0.58,
+          "observation": "Stair symbol in lower right area of building footprint; adjacent text is illegible.",
+          "uncertainty": "Text label for this stair is unreadable.",
+          "pagePoint": {
+            "x": 0.35200000000000004,
+            "y": 0.769
+          },
+          "status": "unverified-model-observation",
+          "routeEligible": false
+        },
+        {
+          "label": "unreadable",
+          "imageIndex": 4,
+          "x": 0.63,
+          "y": 0.52,
+          "observation": "Stair symbol in lower right area of building footprint; adjacent text is illegible.",
+          "uncertainty": "Text label for this stair is unreadable.",
+          "pagePoint": {
+            "x": 0.7965,
+            "y": 0.736
+          },
+          "status": "unverified-model-observation",
+          "routeEligible": false
+        }
+      ],
+      "limitations": "All stair labels are unreadable due to low resolution and/or blurriness in the provided images.",
+      "elapsedMs": 14859,
+      "tokens": {
+        "input": 6376,
+        "output": 693
+      }
+    }
+  ],
+  "routingChanges": 0
+}

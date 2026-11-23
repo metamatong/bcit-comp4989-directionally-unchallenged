@@ -1,0 +1,6 @@
+node_modules/
+.geometry-tools/
+__pycache__/
+/viewer.js
+/stairs.js
+/three-view.js

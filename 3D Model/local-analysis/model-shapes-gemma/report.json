@@ -1,0 +1,89 @@
+{
+  "prompt": "Inspect only this architectural drawing crop. Does it visibly contain a stair flight (repeated parallel tread lines bounded by a flight)? Distinguish north arrows, compass symbols, text, logos, roofs and hatching. Do not infer connections, floor levels or labels. If ambiguous return uncertain. Give short visual evidence.",
+  "model": "gemma4:12b-it-q4_K_M",
+  "modelDigest": "6114515d63c17436a7c0417d82820ac65ad643e2806c5a3c89cb62846436ed0b",
+  "createdAt": "2026-11-19T09:10:16.147Z",
+  "observations": [
+    {
+      "id": "SE12-F3-p1-parking-0",
+      "planId": "SE12-F3-p1",
+      "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "imageSha256": "75f1fae4a8354a32b33110151792dcd5cc472412a5034dc16ce7ecc31e457097",
+      "bounds": [
+        0.04084967320261438,
+        0.4686868686868687,
+        0.10130718954248366,
+        0.5868686868686869
+      ],
+      "rawDetectorClass": "parking",
+      "raw": "{\"classification\": \"stair-flight\", \"visibleEvidence\": \"The drawing shows a series of repeated parallel horizontal lines bounded by a structural outline, which is the standard architectural representation for a stair flight.\"}",
+      "finishReason": "stop",
+      "output": {
+        "classification": "stair-flight",
+        "visibleEvidence": "The drawing shows a series of repeated parallel horizontal lines bounded by a structural outline, which is the standard architectural representation for a stair flight."
+      },
+      "elapsedMs": 31635
+    },
+    {
+      "id": "SE12-F3-p1-stair-0",
+      "planId": "SE12-F3-p1",
+      "sourceSha256": "521d90e70cda6b4fd58c0e00219fdcefb8ff605787b36bf383d124a129e794f1",
+      "imageSha256": "75f1fae4a8354a32b33110151792dcd5cc472412a5034dc16ce7ecc31e457097",
+      "bounds": [
+        0.8777777777777778,
+        0.09848484848484848,
+        0.953921568627451,
+        0.1712121212121212
+      ],
+      "rawDetectorClass": "stair",
+      "raw": "{\"classification\": \"not-stair-flight\", \"visibleEvidence\": \"The image contains a compass rose symbol with a north arrow and a stylized 'N' label, but no architectural representation of a stair flight (parallel treads bounded by a flight).\"}",
+      "finishReason": "stop",
+      "output": {
+        "classification": "not-stair-flight",
+        "visibleEvidence": "The image contains a compass rose symbol with a north arrow and a stylized 'N' label, but no architectural representation of a stair flight (parallel treads bounded by a flight)."
+      },
+      "elapsedMs": 6596
+    },
+    {
+      "id": "SW3-F2-p1-parking-0",
+      "planId": "SW3-F2-p1",
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "imageSha256": "09f8418f5bd386380e11218207f850febe1ab5be6aa12be2e0507103b051a085",
+      "bounds": [
+        0.5120915032679738,
+        0.44242424242424244,
+        0.5640522875816993,
+        0.5505050505050505
+      ],
+      "rawDetectorClass": "parking",
+      "raw": "{\"classification\": \"stair-flight\", \"visibleEvidence\": \"The drawing shows a rectangular area labeled 'S270 STAIR' containing a series of repeated parallel lines representing treads, bounded by a structural frame.\"}",
+      "finishReason": "stop",
+      "output": {
+        "classification": "stair-flight",
+        "visibleEvidence": "The drawing shows a rectangular area labeled 'S270 STAIR' containing a series of repeated parallel lines representing treads, bounded by a structural frame."
+      },
+      "elapsedMs": 5391
+    },
+    {
+      "id": "SW3-F2-p1-stair-0",
+      "planId": "SW3-F2-p1",
+      "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+      "imageSha256": "09f8418f5bd386380e11218207f850febe1ab5be6aa12be2e0507103b051a085",
+      "bounds": [
+        0.11830065359477124,
+        0.7782828282828282,
+        0.26895424836601306,
+        0.8575757575757575
+      ],
+      "rawDetectorClass": "stair",
+      "raw": "{\"classification\": \"not-stair-flight\", \"visibleEvidence\": \"The drawing shows a symmetrical geometric layout with large rectangular and trapezoidal shapes, but it lacks the characteristic repeated parallel lines representing individual treads within a defined flight.\"}",
+      "finishReason": "stop",
+      "output": {
+        "classification": "not-stair-flight",
+        "visibleEvidence": "The drawing shows a symmetrical geometric layout with large rectangular and trapezoidal shapes, but it lacks the characteristic repeated parallel lines representing individual treads within a defined flight."
+      },
+      "elapsedMs": 5667
+    }
+  ],
+  "routingChanges": 0
+}

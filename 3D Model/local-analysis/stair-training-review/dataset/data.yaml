@@ -1,0 +1,6 @@
+# Single-class transfer learning; NOT a remapping of FloorCAD class 26.
+train: images/train
+val: images/validation
+test: images/heldout
+names:
+  0: stair-assembly

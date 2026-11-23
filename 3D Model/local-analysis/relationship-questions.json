@@ -1,0 +1,262 @@
+{
+  "sourceRevision": 41,
+  "questions": [
+    {
+      "id": "se12-north",
+      "kind": "pair-review",
+      "question": "Do these two drawn stair regions belong to the same staircase between SE12 floors 1 and 2?",
+      "from": {
+        "planId": "SE12-F1-p1",
+        "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+        "region": [
+          0.45,
+          0.07973856209150326,
+          0.6196969696969697,
+          0.17973856209150327
+        ],
+        "cropFile": "F1-A.png",
+        "rotation": 270,
+        "labelReading": "S100",
+        "point": null,
+        "node": null
+      },
+      "to": {
+        "planId": "SE12-F2-p1",
+        "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+        "region": [
+          0.03986928104575163,
+          0.4,
+          0.11993464052287582,
+          0.5297979797979798
+        ],
+        "cropFile": "F2-A.png",
+        "rotation": 0,
+        "labelReading": "S200",
+        "point": null,
+        "node": null
+      },
+      "basis": "Earlier manual drawing-review question; models have not established this pairing",
+      "requiredEvidence": [
+        "Independently mark the accessible landing on each sheet",
+        "Confirm whether the same physical stair connects both landings",
+        "Confirm permitted direction: A-to-B, B-to-A, both, or unknown"
+      ],
+      "answer": null,
+      "permittedDirection": null
+    },
+    {
+      "id": "se12-short-flight",
+      "kind": "pair-review",
+      "question": "Does the short floor-1 flight reach the floor-2 internal stair shown here?",
+      "from": {
+        "planId": "SE12-F1-p1",
+        "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+        "region": [
+          0.4196969696969697,
+          0.2699346405228758,
+          0.5297979797979798,
+          0.33986928104575165
+        ],
+        "cropFile": "F1-B.png",
+        "rotation": 270,
+        "labelReading": "S102",
+        "point": null,
+        "node": null
+      },
+      "to": {
+        "planId": "SE12-F2-p1",
+        "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+        "region": [
+          0.5,
+          0.4297979797979798,
+          0.5598039215686275,
+          0.5398989898989899
+        ],
+        "cropFile": "F2-C.png",
+        "rotation": 0,
+        "labelReading": "S203",
+        "point": null,
+        "node": null
+      },
+      "basis": "Earlier manual drawing-review question; models have not established this pairing",
+      "requiredEvidence": [
+        "Independently mark the accessible landing on each sheet",
+        "Confirm whether the same physical stair connects both landings",
+        "Confirm permitted direction: A-to-B, B-to-A, both, or unknown"
+      ],
+      "answer": null,
+      "permittedDirection": null
+    },
+    {
+      "id": "se12-south-internal",
+      "kind": "pair-review",
+      "question": "Do these two internal stair regions connect directly between floors 1 and 2?",
+      "from": {
+        "planId": "SE12-F1-p1",
+        "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+        "region": [
+          0.40959595959595957,
+          0.75,
+          0.55,
+          0.8199346405228758
+        ],
+        "cropFile": "F1-C.png",
+        "rotation": 270,
+        "labelReading": "S103",
+        "point": null,
+        "node": null
+      },
+      "to": {
+        "planId": "SE12-F2-p1",
+        "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+        "region": [
+          0.7098039215686275,
+          0.3398989898989899,
+          0.7898692810457516,
+          0.4398989898989899
+        ],
+        "cropFile": "F2-D.png",
+        "rotation": 0,
+        "labelReading": "S209",
+        "point": null,
+        "node": null
+      },
+      "basis": "Earlier manual drawing-review question; models have not established this pairing",
+      "requiredEvidence": [
+        "Independently mark the accessible landing on each sheet",
+        "Confirm whether the same physical stair connects both landings",
+        "Confirm permitted direction: A-to-B, B-to-A, both, or unknown"
+      ],
+      "answer": null,
+      "permittedDirection": null
+    },
+    {
+      "id": "se12-unresolved",
+      "kind": "pair-review",
+      "question": "Is there a floor-1 landing corresponding to this floor-2 exterior flight? The first-floor crop does not establish a matching flight.",
+      "from": {
+        "planId": "SE12-F1-p1",
+        "sourceSha256": "b87581c2dce2d170f90a0512267803567026395948ab381dcbd70a1f0c437f72",
+        "region": [
+          0.1696969696969697,
+          0.7699346405228759,
+          0.3398989898989899,
+          0.85
+        ],
+        "cropFile": "F1-D.png",
+        "rotation": 270,
+        "labelReading": "Identifier unresolved",
+        "point": null,
+        "node": null
+      },
+      "to": {
+        "planId": "SE12-F2-p1",
+        "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+        "region": [
+          0.7699346405228759,
+          0.5398989898989899,
+          0.85,
+          0.6398989898989899
+        ],
+        "cropFile": "F2-E.png",
+        "rotation": 0,
+        "labelReading": "S228",
+        "point": null,
+        "node": null
+      },
+      "basis": "Earlier manual drawing-review question; models have not established this pairing",
+      "requiredEvidence": [
+        "Independently mark the accessible landing on each sheet",
+        "Confirm whether the same physical stair connects both landings",
+        "Confirm permitted direction: A-to-B, B-to-A, both, or unknown"
+      ],
+      "answer": null,
+      "permittedDirection": null
+    },
+    {
+      "id": "se12-unmatched-s202",
+      "kind": "missing-endpoint",
+      "question": "Which floor-1 landing, if any, serves the floor-2 stair S202?",
+      "from": null,
+      "to": {
+        "planId": "SE12-F2-p1",
+        "sourceSha256": "9cbb10dee2e102cb05baec386bae3b7dc51f43276f30c1807063015dbc41f545",
+        "region": [
+          0.36993464052287583,
+          0.1898989898989899,
+          0.4598039215686274,
+          0.2797979797979798
+        ],
+        "cropFile": "F2-B.png",
+        "rotation": 0,
+        "labelReading": "S202",
+        "point": null,
+        "node": null
+      },
+      "basis": "Existing floor-2 review region; no source-grounded first-floor counterpart identified",
+      "requiredEvidence": [
+        "Identify and mark a first-floor landing before proposing a connection"
+      ],
+      "answer": null,
+      "permittedDirection": null
+    },
+    {
+      "id": "sw3-east-up-direction",
+      "kind": "direction-review",
+      "question": "Is upward travel from the reviewed SW3 floor-1 S160 landing to floor-2 S260 also permitted? Only floor 2 to floor 1 is currently reviewed.",
+      "from": {
+        "planId": "SW3-F1-p1",
+        "sourceSha256": "768da55d04f76d0d33ad2ff9822aac2d1ddc57c2c29cbc7c88890ca7ffac20b0",
+        "region": null,
+        "cropFile": null,
+        "rotation": 0,
+        "labelReading": "S160 \u00b7 east stair landing",
+        "point": {
+          "x": 0.7779412,
+          "y": 0.5136364
+        },
+        "node": {
+          "id": "97fdec6c-5dab-48b8-a116-6968dae55b3c",
+          "version": 1,
+          "point": {
+            "x": 0.7779412,
+            "y": 0.5136364
+          }
+        }
+      },
+      "to": {
+        "planId": "SW3-F2-p1",
+        "sourceSha256": "39b1a81a2706f7254b3175859e94348839385f0afed3b785561f6bad1e2b9fcc",
+        "region": null,
+        "cropFile": null,
+        "rotation": 0,
+        "labelReading": "S260 \u00b7 beside shaft 2696",
+        "point": {
+          "x": 0.848039,
+          "y": 0.462121
+        },
+        "node": {
+          "id": "5ab26f71-aabe-4414-af8f-d195a668bd65",
+          "version": 1,
+          "point": {
+            "x": 0.848039,
+            "y": 0.462121
+          }
+        }
+      },
+      "basis": "Existing eligible stair edge with one permitted direction; do not infer reversibility",
+      "existingEdge": {
+        "id": "aba7b4eb-2994-4418-bdb8-1cf936b90f9d",
+        "version": 1,
+        "direction": "forward",
+        "fromNodeId": "5ab26f71-aabe-4414-af8f-d195a668bd65",
+        "toNodeId": "97fdec6c-5dab-48b8-a116-6968dae55b3c"
+      },
+      "requiredEvidence": [
+        "Confirm or reject the additional upward direction; preserve the existing downward approval"
+      ],
+      "answer": null,
+      "permittedDirection": null
+    }
+  ]
+}
