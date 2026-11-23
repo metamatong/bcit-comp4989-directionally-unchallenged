@@ -6,7 +6,13 @@
 import type { VisualPlan } from '../types';
 import type { PagePoint, WalkingStep, WalkingSurface } from '../wayfinding';
 import { fitCalibration } from './geometry';
-import type { DeviceOverlay, DeviceReading, FloorCalibration } from './types';
+import type {
+  DeviceOverlay,
+  DeviceReading,
+  FloorCalibration,
+  MotionActivityState,
+  TrackingMode,
+} from './types';
 
 export const MAP_MATCH_CONFIG = Object.freeze({
   maxReportedAccuracyMetres: 35,
@@ -21,13 +27,35 @@ export const MAP_MATCH_CONFIG = Object.freeze({
   /** Mild preference for the active route step to break ties without hiding off-route detours. */
   routeTieBreakWeight: 0.15,
   routeTieBreakCapMetres: 3.0,
+  /** Tier 2 walking continuity budget derived from detected step distance. */
+  stepTravelMultiplier: 1.35,
+  stepTravelSlackMetres: 1.0,
 });
 
 export type PreviousMatch = { point: PagePoint; timestamp: number };
 
+export type MotionGatingInput = {
+  /** Only 'stationary' or 'moving' influences matching; 'unknown' degrades identically to Tier 1. */
+  activity: MotionActivityState;
+  /** Fixed corridor point held while activity === 'stationary' until released. */
+  stationaryAnchor?: PagePoint | null;
+  /** Estimated step distance walked since `previous.timestamp` (metres). */
+  deltaStepDistanceMetres?: number;
+  /** True once independent GPS timestamps confirm relocation away from `stationaryAnchor`. */
+  stationaryAnchorReleased?: boolean;
+};
+
 export type MapMatchResult =
   | { status: 'unavailable' | 'low-accuracy' | 'outside-page' | 'too-far' }
-  | { status: 'raw' | 'matched'; overlay: DeviceOverlay };
+  | { status: 'raw'; overlay: DeviceOverlay }
+  | {
+      status: 'matched';
+      overlay: DeviceOverlay;
+      /** Unanchored nearest-corridor GPS match used for independent stationary-hold divergence checks. */
+      unanchoredPoint: PagePoint;
+      /** Distance between raw projected GPS and `overlay.point` in metres. */
+      rawOffsetMetres: number;
+    };
 
 function onPage(point: PagePoint) {
   return point.x >= 0 && point.x <= 1 && point.y >= 0 && point.y <= 1;
@@ -39,12 +67,14 @@ function makeOverlay(
   scale: number,
   plan: VisualPlan,
   snapDistanceMetres?: number,
+  trackingMode?: TrackingMode,
 ): DeviceOverlay {
   return {
     point,
     radiusX: (radiusMetres * scale) / plan.width,
     radiusY: (radiusMetres * scale) / plan.height,
     ...(snapDistanceMetres !== undefined ? { snapDistanceMetres } : {}),
+    ...(trackingMode !== undefined ? { trackingMode } : {}),
   };
 }
 
@@ -86,6 +116,7 @@ export function matchDeviceToFloor({
   routePath,
   stepKind,
   previous,
+  motion,
 }: {
   reading: DeviceReading;
   plan: VisualPlan;
@@ -94,6 +125,7 @@ export function matchDeviceToFloor({
   routePath?: PagePoint[];
   stepKind?: WalkingStep['kind'];
   previous?: PreviousMatch | null;
+  motion?: MotionGatingInput | null;
 }): MapMatchResult {
   if (
     !calibration ||
@@ -113,7 +145,10 @@ export function matchDeviceToFloor({
   // Outdoor steps have unmapped exterior geometry; missing surfaces fall back to raw footprint gating.
   if (stepKind === 'outdoor' || !surface) {
     return onPage(rawPoint)
-      ? { status: 'raw', overlay: makeOverlay(rawPoint, reading.accuracy, scale, plan) }
+      ? {
+          status: 'raw',
+          overlay: makeOverlay(rawPoint, reading.accuracy, scale, plan, undefined, 'raw'),
+        }
       : { status: 'outside-page' };
   }
 
@@ -145,17 +180,46 @@ export function matchDeviceToFloor({
   const prevPx = hasContinuity
     ? { x: previous.point.x * plan.width, y: previous.point.y * plan.height }
     : null;
+
+  const motionMoving = motion?.activity === 'moving';
   const maxTravelMetres = hasContinuity
-    ? MAP_MATCH_CONFIG.maxWalkingSpeedMps * ((reading.timestamp - previous.timestamp) / 1000)
+    ? motionMoving && Number.isFinite(motion.deltaStepDistanceMetres)
+      ? Math.max(
+          1.0,
+          (motion.deltaStepDistanceMetres ?? 0) * MAP_MATCH_CONFIG.stepTravelMultiplier +
+            MAP_MATCH_CONFIG.stepTravelSlackMetres,
+        )
+      : MAP_MATCH_CONFIG.maxWalkingSpeedMps * ((reading.timestamp - previous.timestamp) / 1000)
     : Infinity;
 
   let bestPointPx: PagePoint | null = null;
   let bestRawMetres = Infinity;
   let bestCost = Infinity;
 
+  let unanchoredPointPx: PagePoint | null = null;
+  let unanchoredRawMetres = Infinity;
+  let unanchoredCost = Infinity;
+
   const scoreCandidate = (candidatePx: PagePoint, dRawPx: number) => {
     if (dRawPx > limitPx) return;
     const dRawMetres = dRawPx / scale;
+    const routePenalty = routePx
+      ? Math.min(
+          MAP_MATCH_CONFIG.routeTieBreakCapMetres,
+          MAP_MATCH_CONFIG.routeTieBreakWeight * (distanceToPolylinePx(candidatePx, routePx) / scale),
+        )
+      : 0;
+
+    const baseCost = dRawMetres + routePenalty;
+    if (
+      baseCost < unanchoredCost - 1e-9 ||
+      (Math.abs(baseCost - unanchoredCost) <= 1e-9 && dRawMetres < unanchoredRawMetres)
+    ) {
+      unanchoredCost = baseCost;
+      unanchoredRawMetres = dRawMetres;
+      unanchoredPointPx = candidatePx;
+    }
+
     const dPrevMetres = prevPx
       ? Math.hypot(prevPx.x - candidatePx.x, prevPx.y - candidatePx.y) / scale
       : 0;
@@ -163,13 +227,7 @@ export function matchDeviceToFloor({
       prevPx && dPrevMetres > maxTravelMetres
         ? MAP_MATCH_CONFIG.continuityWeight * (dPrevMetres - maxTravelMetres)
         : 0;
-    const routePenalty = routePx
-      ? Math.min(
-          MAP_MATCH_CONFIG.routeTieBreakCapMetres,
-          MAP_MATCH_CONFIG.routeTieBreakWeight * (distanceToPolylinePx(candidatePx, routePx) / scale),
-        )
-      : 0;
-    const cost = dRawMetres + continuityPenalty + routePenalty;
+    const cost = baseCost + continuityPenalty;
     if (cost < bestCost - 1e-9 || (Math.abs(cost - bestCost) <= 1e-9 && dRawMetres < bestRawMetres)) {
       bestCost = cost;
       bestRawMetres = dRawMetres;
@@ -188,7 +246,45 @@ export function matchDeviceToFloor({
     }
   }
 
-  if (!bestPointPx) return { status: 'too-far' };
+  if (!bestPointPx || !unanchoredPointPx) return { status: 'too-far' };
+
+  const unanchoredPoint = {
+    x: (unanchoredPointPx as PagePoint).x / plan.width,
+    y: (unanchoredPointPx as PagePoint).y / plan.height,
+  };
+
+  // Tier 2 hard stationary hold: retain exact corridor anchor (0 m drift) until a step,
+  // sensor silence, or independently confirmed multi-fix relocation releases it.
+  if (
+    motion?.activity === 'stationary' &&
+    motion.stationaryAnchor &&
+    !motion.stationaryAnchorReleased &&
+    onPage(motion.stationaryAnchor)
+  ) {
+    const anchorPx = {
+      x: motion.stationaryAnchor.x * plan.width,
+      y: motion.stationaryAnchor.y * plan.height,
+    };
+    const anchorOffsetMetres = Math.hypot(rawPx.x - anchorPx.x, rawPx.y - anchorPx.y) / scale;
+    const radiusMetres = Math.max(reading.accuracy, anchorOffsetMetres);
+    const snapDistanceMetres =
+      anchorOffsetMetres >= MAP_MATCH_CONFIG.snapNoticeThresholdMetres
+        ? anchorOffsetMetres
+        : undefined;
+    return {
+      status: 'matched',
+      overlay: makeOverlay(
+        motion.stationaryAnchor,
+        radiusMetres,
+        scale,
+        plan,
+        snapDistanceMetres,
+        'motion-gated',
+      ),
+      unanchoredPoint,
+      rawOffsetMetres: anchorOffsetMetres,
+    };
+  }
 
   const matchedPoint = {
     x: (bestPointPx as PagePoint).x / plan.width,
@@ -200,8 +296,11 @@ export function matchDeviceToFloor({
   const radiusMetres = Math.max(reading.accuracy, bestRawMetres);
   const snapDistanceMetres =
     bestRawMetres >= MAP_MATCH_CONFIG.snapNoticeThresholdMetres ? bestRawMetres : undefined;
+  const trackingMode: TrackingMode = motionMoving && hasContinuity ? 'motion-gated' : 'matched';
   return {
     status: 'matched',
-    overlay: makeOverlay(matchedPoint, radiusMetres, scale, plan, snapDistanceMetres),
+    overlay: makeOverlay(matchedPoint, radiusMetres, scale, plan, snapDistanceMetres, trackingMode),
+    unanchoredPoint,
+    rawOffsetMetres: bestRawMetres,
   };
 }

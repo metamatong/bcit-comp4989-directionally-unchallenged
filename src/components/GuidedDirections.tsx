@@ -1,26 +1,28 @@
-/** Manual progress through saved route steps; never infers movement or camera heading. */
-import { useEffect, useRef, useState } from 'react';
+/** Manual progress through saved route steps; never infers floor changes or camera heading. */
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, Maximize2, Minimize2 } from 'lucide-react';
 import type { NavigationResult, WalkingSurface } from '../wayfinding';
 import type { VisualPlan } from '../types';
 import { fetchWalkingSurface } from '../api';
 import { planLabel } from '../topology';
 import { RouteMapImage } from './RouteMap';
-import type { DeviceOverlay, DeviceReading, LocationCatalogue } from '../location/types';
+import type {
+  DetectedStep,
+  DeviceOverlay,
+  DeviceReading,
+  LocationCatalogue,
+  MotionSnapshot,
+} from '../location/types';
 import { overlapsFootprint } from '../location/geometry';
+import { getMotionPermissionState, requestMotionPermission } from '../location/browser-motion';
 import {
-  matchDeviceToFloor,
-  type MapMatchResult,
-  type PreviousMatch,
-} from '../location/map-matching';
+  IndoorPdrTracker,
+  PARTICLE_PDR_ENABLED,
+  type TrackerEvaluation,
+} from '../location/pdr-tracker';
 import { useWalkingLocation } from '../location/use-device-location';
+import { useMotionTracker } from '../location/use-motion-tracker';
 import { floorTransferInstruction } from '../wayfinding';
-
-type MatchHistory = {
-  planId: string;
-  prior: PreviousMatch | null;
-  latest: PreviousMatch;
-};
 
 function locationStatusMessage({
   complete,
@@ -30,7 +32,7 @@ function locationStatusMessage({
   hasBuilding,
   withinBuilding,
   plan,
-  matchResult,
+  evaluation,
   device,
 }: {
   complete: boolean;
@@ -40,31 +42,37 @@ function locationStatusMessage({
   hasBuilding: boolean;
   withinBuilding: boolean;
   plan: VisualPlan;
-  matchResult: MapMatchResult | null;
+  evaluation: TrackerEvaluation | null;
   device: DeviceOverlay | null;
 }) {
   if (complete) return 'Location tracking stopped. Route complete.';
-  if (!reading) {
+  if (evaluation?.status === 'bridged' && device) {
+    return 'Approx. step tracking · waiting for GPS…';
+  }
+  if (!reading || evaluation?.status === 'waiting') {
     return trackingStatus || (hasStaleReading ? 'Waiting for a fresh GPS update…' : 'Waiting for GPS…');
   }
   const floor = planLabel(plan);
   if (!hasBuilding) {
     return `Building footprint unavailable for ${floor}. Position dot hidden.`;
   }
-  if (matchResult?.status === 'unavailable') {
+  if (evaluation?.status === 'unavailable') {
     return `Floor-plan alignment is unavailable for ${floor}. Position dot hidden.`;
   }
-  if (matchResult?.status === 'low-accuracy') {
+  if (evaluation?.status === 'low-accuracy') {
     return `GPS accuracy too wide (±${reading.accuracy.toFixed(0)} m). Position dot hidden.`;
   }
-  if (matchResult?.status === 'too-far') {
+  if (evaluation?.status === 'too-far') {
     return `GPS reading is outside mapped corridors on ${floor}. Position dot hidden.`;
   }
-  if (matchResult?.status === 'raw' && !withinBuilding) {
+  if (evaluation?.status === 'raw' && !withinBuilding) {
     return 'GPS area does not overlap this building. Position dot hidden.';
   }
-  if (matchResult?.status === 'outside-page' || !device) {
+  if (evaluation?.status === 'outside-page' || !device) {
     return 'GPS position falls outside this floor plan. Position dot hidden.';
+  }
+  if (device.trackingMode === 'motion-gated' || device.trackingMode === 'pdr') {
+    return `Approx. corridor GPS + motion (±${reading.accuracy.toFixed(0)} m · indoor accuracy unmeasured)`;
   }
   if (device.snapDistanceMetres !== undefined) {
     return `Approx. corridor GPS (±${reading.accuracy.toFixed(0)} m · indoor accuracy unmeasured)`;
@@ -78,6 +86,7 @@ export function GuidedDirections({
   locationCatalogue,
   gpsTestMode = false,
   walkingSurfaces,
+  enableParticlePdr = PARTICLE_PDR_ENABLED,
   index,
   onStepChange,
   transferNotice,
@@ -89,6 +98,8 @@ export function GuidedDirections({
   locationCatalogue?: LocationCatalogue;
   gpsTestMode?: boolean;
   walkingSurfaces?: Record<string, WalkingSurface | null>;
+  /** Internal Stage 2 verification gate override for tests and controlled rollouts. */
+  enableParticlePdr?: boolean;
   index: number;
   onStepChange: (index: number) => void;
   transferNotice?: string;
@@ -99,10 +110,21 @@ export function GuidedDirections({
   const heading = useRef<HTMLHeadingElement>(null);
   const [whole, setWhole] = useState(false);
   const [loadedSurfaces, setLoadedSurfaces] = useState<Record<string, WalkingSurface | null>>({});
-  const matchHistory = useRef<MatchHistory | null>(null);
+  const [permissionTick, setPermissionTick] = useState(0);
+  const [evaluation, setEvaluation] = useState<TrackerEvaluation | null>(null);
+  const trackerRef = useRef<IndoorPdrTracker | null>(null);
+  if (!trackerRef.current) {
+    trackerRef.current = new IndoorPdrTracker({ enableParticleFilter: enableParticlePdr });
+  }
+  const pauseReasonRef = useRef(tracking.pauseReason);
+  pauseReasonRef.current = tracking.pauseReason;
+  const startTrackingRef = useRef(tracking.start);
+  startTrackingRef.current = tracking.start;
+
   const step = route.steps[index];
   const complete = !step;
   const transfer = !!step && step.from.planId !== step.to.planId;
+  const isSamePlanCorridor = !!step && step.kind === 'corridor' && !transfer;
   const stop = complete ? route.destination : step.from;
   const plan = plans.find((item) => item.id === stop.planId)!;
   const targetPlan = step ? plans.find((item) => item.id === step.to.planId) : undefined;
@@ -114,6 +136,22 @@ export function GuidedDirections({
   const building = locationCatalogue?.buildings.find((item) => item.building === plan.building);
   const hasProvidedSurface = !!walkingSurfaces && plan.id in walkingSurfaces;
   const surface = hasProvidedSurface ? walkingSurfaces[plan.id] : loadedSurfaces[plan.id];
+  const canTrack = !complete && tracking.active && !gpsTestMode;
+  const stepKind = step?.kind;
+  const transferStepIndex = step && !isSamePlanCorridor ? index : undefined;
+  const routePath = isSamePlanCorridor ? step.path : undefined;
+  const stepStartPoint = isSamePlanCorridor ? step.from.point : undefined;
+
+  const handleDetectedStep = useCallback((detected: DetectedStep, snapshot: MotionSnapshot) => {
+    trackerRef.current?.updateMotion(snapshot);
+    trackerRef.current?.ingestStep(detected);
+  }, []);
+
+  const motion = useMotionTracker({
+    active: canTrack && isSamePlanCorridor,
+    permissionTick,
+    onStep: handleDetectedStep,
+  });
 
   useEffect(() => {
     if (complete || hasProvidedSurface || plan.id in loadedSurfaces) return;
@@ -133,57 +171,91 @@ export function GuidedDirections({
     setWhole(false);
   }, [index, plan.id]);
 
-  const reading = !complete && tracking.fresh ? (tracking.reading ?? null) : null;
-  const history = matchHistory.current;
-  // Re-renders on the 500 ms freshness tick reuse `prior` so continuity stays idempotent.
-  const previousMatch =
-    reading && history && history.planId === plan.id
-      ? history.latest.timestamp === reading.timestamp
-        ? history.prior
-        : history.latest.timestamp < reading.timestamp
-          ? history.latest
-          : null
-      : null;
+  // Resume with a new watch and discard fixes captured before the tab returned.
+  useEffect(() => {
+    if (gpsTestMode || complete) return;
+    const onVisibility = () => {
+      if (document.hidden) {
+        trackerRef.current?.reset(Date.now());
+      } else if (pauseReasonRef.current === 'hidden') {
+        trackerRef.current?.reset(Date.now());
+        startTrackingRef.current();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, [complete, gpsTestMode]);
 
-  const matchResult =
-    reading && building
-      ? matchDeviceToFloor({
-          reading,
-          plan,
-          calibration,
-          surface,
-          routePath: step?.kind === 'corridor' ? step.path : undefined,
-          stepKind: step?.kind,
-          previous: previousMatch,
-        })
-      : null;
+  const reading = !complete && tracking.fresh ? (tracking.reading ?? null) : null;
+  const tracker = trackerRef.current;
+
+  // Apply the committed floor and transfer context before consuming a GPS fix for it.
+  useLayoutEffect(() => {
+    if (!canTrack) {
+      tracker.reset();
+      return;
+    }
+    tracker.configureContext(
+      {
+        plan,
+        calibration,
+        surface,
+        stepKind,
+        transferStepIndex,
+        isSamePlanStep: !transfer,
+        routePath,
+        stepStartPoint,
+      },
+      Date.now(),
+    );
+  }, [
+    tracker,
+    canTrack,
+    plan,
+    calibration,
+    surface,
+    stepKind,
+    transferStepIndex,
+    transfer,
+    routePath,
+    stepStartPoint,
+  ]);
+
+  useLayoutEffect(() => {
+    if (!canTrack || !building) {
+      setEvaluation(null);
+      return;
+    }
+    if (reading) tracker.ingestGpsReading(reading, motion);
+    else tracker.updateMotion(motion);
+    setEvaluation(tracker.evaluateAt(Math.max(tracking.now, Date.now()), !!reading, motion.activity));
+  }, [
+    tracker,
+    canTrack,
+    building,
+    reading,
+    motion,
+    tracking.now,
+    plan,
+    calibration,
+    surface,
+    stepKind,
+    transferStepIndex,
+    transfer,
+    routePath,
+    stepStartPoint,
+  ]);
 
   const withinBuilding =
-    matchResult?.status === 'raw' && !!reading && !!building
+    evaluation?.status === 'raw' && !!reading && !!building
       ? overlapsFootprint(reading, building.rings)
       : false;
   const device =
-    matchResult?.status === 'matched'
-      ? matchResult.overlay
-      : matchResult?.status === 'raw' && withinBuilding
-        ? matchResult.overlay
+    evaluation?.status === 'matched' || evaluation?.status === 'bridged'
+      ? evaluation.overlay
+      : evaluation?.status === 'raw' && withinBuilding
+        ? evaluation.overlay
         : null;
-
-  useEffect(() => {
-    if (complete || !tracking.active) {
-      matchHistory.current = null;
-      return;
-    }
-    const current = matchHistory.current?.planId === plan.id ? matchHistory.current : null;
-    if (!current) matchHistory.current = null;
-    if (!reading || matchResult?.status !== 'matched') return;
-    if (current?.latest.timestamp === reading.timestamp) return;
-    matchHistory.current = {
-      planId: plan.id,
-      prior: current?.latest ?? null,
-      latest: { point: matchResult.overlay.point, timestamp: reading.timestamp },
-    };
-  }, [complete, matchResult, plan.id, reading, tracking.active]);
 
   const positionStatus = locationStatusMessage({
     complete,
@@ -193,7 +265,7 @@ export function GuidedDirections({
     hasBuilding: !!building,
     withinBuilding,
     plan,
-    matchResult,
+    evaluation,
     device,
   });
   const visiblePositionStatus = gpsTestMode
@@ -205,8 +277,14 @@ export function GuidedDirections({
     heading.current?.scrollIntoView?.({ block: 'nearest' });
   }, [index]);
 
+  function promptMotionOnGesture() {
+    if (gpsTestMode || getMotionPermissionState() !== 'unknown') return;
+    void requestMotionPermission().then(() => setPermissionTick((tick) => tick + 1));
+  }
+
   function move(next: number) {
     if (next >= route.steps.length) tracking.stop();
+    else promptMotionOnGesture();
     onStepChange(next);
   }
 
@@ -261,7 +339,10 @@ export function GuidedDirections({
           aria-pressed={whole}
           aria-label={whole ? 'Zoom to route' : 'Show full floor'}
           title={whole ? 'Zoom to route' : 'Show full floor'}
-          onClick={() => setWhole(!whole)}
+          onClick={() => {
+            promptMotionOnGesture();
+            setWhole(!whole);
+          }}
         >
           {whole ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
         </button>

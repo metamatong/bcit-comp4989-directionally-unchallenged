@@ -218,7 +218,7 @@ describe('indoor corridor map-matching', () => {
       expect(host.querySelector('.walking-map')?.getAttribute('viewBox')).toBe(initialViewBox);
       expect(host.querySelector('.device-position')?.getAttribute('data-matched')).toBe('true');
       expect(host.querySelector('.guided-location-status')?.textContent).toContain(
-        'Approximate corridor match on SE12 · Floor 3',
+        'Approx. corridor GPS',
       );
     } finally {
       await act(async () => root.unmount());

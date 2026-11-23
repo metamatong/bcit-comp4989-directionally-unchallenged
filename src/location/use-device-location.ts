@@ -68,24 +68,32 @@ export function usePhotoDeviceLocation() {
   return { snapshot, status, capture, clear, cancelPending };
 }
 
+export type WalkingPauseReason = 'none' | 'hidden' | 'denied' | 'manual';
+
 export function useWalkingLocation(startActive = false) {
   const [active, setActive] = useState(startActive);
   const [watchRevision, setWatchRevision] = useState(0);
   const [paused, setPaused] = useState(false);
+  const [pauseReason, setPauseReason] = useState<WalkingPauseReason>('none');
   const [reading, setReading] = useState<DeviceReading>();
   const [status, setStatus] = useState('');
   const [now, setNow] = useState(Date.now());
   const provider = useRef<BrowserLocation | null>(null);
-  function stop() {
+  function stopWithReason(reason: Exclude<WalkingPauseReason, 'none'>) {
     provider.current?.stop();
     setActive(false);
     setPaused(true);
+    setPauseReason(reason);
+  }
+  function stop() {
+    stopWithReason('manual');
   }
   function start() {
     provider.current?.stop();
     setReading(undefined);
     setStatus('Waiting for a fresh device reading…');
     setPaused(false);
+    setPauseReason('none');
     setActive(true);
     setWatchRevision((revision) => revision + 1);
   }
@@ -96,7 +104,7 @@ export function useWalkingLocation(startActive = false) {
     provider.current = location;
     const hide = () => {
       if (document.hidden) {
-        stop();
+        stopWithReason('hidden');
         setStatus('Tracking paused while the page is hidden. Resume when you are ready.');
       }
     };
@@ -112,7 +120,7 @@ export function useWalkingLocation(startActive = false) {
         (message, denied) => {
           if (disposed) return;
           setStatus(message);
-          if (denied) stop();
+          if (denied) stopWithReason('denied');
         },
       );
     // Freshness changes only the evidence display, never route progress.
@@ -121,7 +129,7 @@ export function useWalkingLocation(startActive = false) {
     let permission: PermissionStatus | undefined;
     const revoked = () => {
       if (!disposed && permission?.state === 'denied') {
-        stop();
+        stopWithReason('denied');
         setStatus('Location permission was revoked. Enable it in your browser settings to resume.');
       }
     };
@@ -147,6 +155,7 @@ export function useWalkingLocation(startActive = false) {
   return {
     active,
     paused,
+    pauseReason,
     reading,
     status,
     now,
