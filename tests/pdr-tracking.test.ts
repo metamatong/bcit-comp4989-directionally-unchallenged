@@ -1255,6 +1255,8 @@ describe('GuidedDirections DOM integration (iOS fallback, background return, fus
     vi.stubGlobal('navigator', { geolocation: { watchPosition, clearWatch } });
 
     const route = makeRouteFixture();
+    const [first, ...remaining] = route.steps;
+    route.steps = [first, { ...first }, ...remaining];
     const host = document.createElement('div');
     document.body.append(host);
     const root = createRoot(host);
@@ -1283,10 +1285,13 @@ describe('GuidedDirections DOM integration (iOS fallback, background return, fus
       expect(host.querySelector('.device-position')).not.toBeNull();
       expect(host.querySelector('.walking-map')?.getAttribute('viewBox')).toBe(initialViewBox);
 
-      // Tapping Show full floor triggers the one-time iOS motion prompt; denial degrades cleanly to Tier 1.
-      const fab = host.querySelector('.map-floating-fab') as HTMLButtonElement;
+      // Tapping Next step triggers the one-time iOS motion prompt; denial degrades cleanly to Tier 1.
+      expect(host.querySelector('.map-floating-fab')).toBeNull();
+      const nextBtn = [...host.querySelectorAll('button')].find(
+        (button) => button.textContent?.trim() === 'Next step',
+      ) as HTMLButtonElement;
       await act(async () => {
-        fab.click();
+        nextBtn.click();
         await Promise.resolve();
       });
       expect(requestPermission).toHaveBeenCalledTimes(1);

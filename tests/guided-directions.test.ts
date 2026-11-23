@@ -7,7 +7,8 @@ import { RouteDirections } from '../src/components/RouteDirections';
 import { walkingRouteFixture } from './wayfinding-fixtures';
 import { pilotEvidence } from '../server/pilot-evidence';
 import { locationCatalogue } from '../server/geolocation';
-import type { MapStop, NavigationResult } from '../src/wayfinding';
+import type { MapStop, NavigationResult, WalkingStep } from '../src/wayfinding';
+import { guidedStepInstruction } from '../src/wayfinding';
 
 afterEach(() => vi.unstubAllGlobals());
 it('opens only the current instruction, advances manually, finishes, and returns to the overview', async () => {
@@ -33,7 +34,15 @@ it('opens only the current instruction, advances manually, finishes, and returns
     destinations: [],
     origin: stop(fixture.origin),
     destination: stop(fixture.destination),
-    steps: fixture.steps.map((s) => ({ ...s, from: stop(s.from), to: stop(s.to) })),
+    steps: fixture.steps.map((s, stepIdx) => ({
+      ...s,
+      instruction:
+        stepIdx === 0
+          ? 'Follow the window-side corridor past rooms 306, 308, 310 and 312 between room 302 and the SW03 passage at corridor 312A.'
+          : s.instruction,
+      from: stop(s.from),
+      to: stop(s.to),
+    })),
   };
   const host = document.createElement('div');
   document.body.append(host);
@@ -79,6 +88,16 @@ it('opens only the current instruction, advances manually, finishes, and returns
       firstPosition,
     );
     expect(host.querySelector('.guided-map')?.nextElementSibling?.classList.contains('guided-step')).toBe(true);
+    expect(host.querySelector('.sheet-handle')).toBeNull();
+    expect(host.querySelector('.map-floating-fab')).toBeNull();
+    expect(host.querySelector('.guided-step h2')).toBeNull();
+    expect(host.querySelector('.guided-step-subtitle')).toBeNull();
+    expect(host.querySelector('.guided-step-instruction')?.textContent).toBe(
+      'Follow the corridor from 302 (window-side corridor door) to Passage to SW03.',
+    );
+    expect(host.querySelector('.guided-step-instruction')?.textContent).not.toMatch(
+      /306|308|310|312/,
+    );
     expect(host.querySelector('.map-floor-badge')?.textContent).toBe('SE12 · Floor 3');
     expect(host.querySelector('.step-progress-fill')).not.toBeNull();
     expect(host.textContent).toContain('Step 1 of 5');
@@ -127,4 +146,76 @@ it('opens only the current instruction, advances manually, finishes, and returns
     host.remove();
     expect(clearWatch).toHaveBeenCalled();
   }
+});
+
+it('formats concise guided step instructions for every step kind without listing passed rooms', () => {
+  const mkStop = (planId: string, label: string): MapStop => ({
+    id: `${planId}:${label}`,
+    planId,
+    label,
+    point: { x: 0.5, y: 0.5 },
+  });
+  const corridorStep: WalkingStep = {
+    kind: 'corridor',
+    from: mkStop('SE12-F3-p1', '302 · window-side corridor door'),
+    to: mkStop('SE12-F3-p1', 'Passage to SW03'),
+    instruction:
+      'Follow the window-side corridor past rooms 306, 308, 310 and 312 between room 302 and the SW03 passage at corridor 312A.',
+    path: [],
+  };
+  expect(guidedStepInstruction(corridorStep)).toBe(
+    'Follow the corridor from 302 (window-side corridor door) to Passage to SW03.',
+  );
+
+  const corridorPrefixStep: WalkingStep = {
+    ...corridorStep,
+    from: mkStop('SE12-F3-p1', 'Corridor outside room 323'),
+  };
+  expect(guidedStepInstruction(corridorPrefixStep)).toBe(
+    'Walk from Corridor outside room 323 to Passage to SW03.',
+  );
+
+  const stairsStep: WalkingStep = {
+    kind: 'stairs',
+    from: mkStop('SW3-F3-p1', 'S360 · beside shaft 3696'),
+    to: mkStop('SW3-F2-p1', 'S260 · beside shaft 2696'),
+    instruction: 'Take stairs.',
+    path: [],
+  };
+  expect(guidedStepInstruction(stairsStep, { fromFloor: '3', toFloor: '2' })).toBe(
+    'Take the stairs at S360 (beside shaft 3696) DOWN ↓ 1 floor to Floor 2.',
+  );
+
+  const elevatorStep: WalkingStep = {
+    kind: 'elevator',
+    from: mkStop('SW3-F3-p1', 'East elevator at 3696 · corridor 3600'),
+    to: mkStop('SW3-F2-p1', 'East elevator at 2696 · corridor 2600'),
+    instruction: 'Take elevator.',
+    path: [],
+  };
+  expect(guidedStepInstruction(elevatorStep, { fromFloor: '3', toFloor: '2' })).toBe(
+    'Take East elevator at 3696 (corridor 3600) DOWN ↓ 1 floor to Floor 2.',
+  );
+
+  const linkStep: WalkingStep = {
+    kind: 'building-link',
+    from: mkStop('SE12-F3-p1', 'Passage to SW03'),
+    to: mkStop('SW3-F3-p1', 'Passage to SE12'),
+    instruction: 'Cross passage.',
+    path: [],
+  };
+  expect(guidedStepInstruction(linkStep, { targetPlanLabel: 'SW03 · Floor 3' })).toBe(
+    'Use the connecting passage to SW03 · Floor 3.',
+  );
+
+  const outdoorStep: WalkingStep = {
+    kind: 'outdoor',
+    from: mkStop('SW3-F1-p1', 'Door toward SW01 · lobby 1602'),
+    to: mkStop('SW1-F1-p1', 'Door toward SW03 · vestibule 1098'),
+    instruction: 'Walk outside.',
+    path: [],
+  };
+  expect(guidedStepInstruction(outdoorStep, { targetPlanLabel: 'SW01 · Floor 1' })).toBe(
+    'Walk outdoors from Door toward SW01 (lobby 1602) to Door toward SW03 (vestibule 1098) (SW01 · Floor 1). Outdoor path unmapped.',
+  );
 });

@@ -70,6 +70,69 @@ export function floorTransferInstruction(
     : `From Floor ${fromFloor}, at ${fromLabel}, take the elevator ${direction} ${floors} to Floor ${toFloor}. Select Floor ${toFloor}.`;
 }
 
+/** Format a stop label with a middot qualifier as parenthetical prose while preserving exact IDs. */
+export function formatStopLabel(label: string) {
+  const parts = label
+    .split(' · ')
+    .map((part) => part.trim())
+    .filter(Boolean);
+  if (parts.length <= 1) return parts[0] ?? '';
+  return `${parts[0]} (${parts.slice(1).join(', ')})`;
+}
+
+/**
+ * Concise single-sentence copy for the guided step sheet.
+ * Derived from exact step endpoints and floor metadata so archived corridor-trace hashes remain
+ * untouched and intermediate rooms walked past are not enumerated.
+ */
+export function guidedStepInstruction(
+  step: WalkingStep,
+  context?: { fromFloor?: string; toFloor?: string; targetPlanLabel?: string },
+) {
+  const from = formatStopLabel(step.from.label);
+  const to = formatStopLabel(step.to.label);
+
+  if (step.kind === 'corridor') {
+    const genericFrom = !from || /^corridor$/i.test(from);
+    const genericTo = !to || /^corridor$/i.test(to);
+    if ((genericFrom && genericTo) || from === to) return 'Follow the marked corridor.';
+    if (genericFrom) return `Follow the corridor to ${to}.`;
+    if (genericTo) return `Follow the corridor from ${from}.`;
+    if (/^corridor\b/i.test(from)) return `Walk from ${from} to ${to}.`;
+    return `Follow the corridor from ${from} to ${to}.`;
+  }
+
+  if (step.kind === 'stairs' || step.kind === 'elevator') {
+    const action =
+      step.kind === 'stairs'
+        ? /^stairs?\b/i.test(from)
+          ? `Take ${from}`
+          : `Take the stairs at ${from}`
+        : /elevator\b/i.test(from)
+          ? `Take ${from}`
+          : `Take the elevator at ${from}`;
+    const fromFloor = context?.fromFloor ?? '';
+    const toFloor = context?.toFloor ?? '';
+    const fromNum = /^-?\d+$/.test(fromFloor) ? Number(fromFloor) : NaN;
+    const toNum = /^-?\d+$/.test(toFloor) ? Number(toFloor) : NaN;
+    if (Number.isFinite(fromNum) && Number.isFinite(toNum) && fromNum !== toNum) {
+      const direction = toNum > fromNum ? 'UP ↑' : 'DOWN ↓';
+      const count = Math.abs(toNum - fromNum);
+      const floors = `${count} ${count === 1 ? 'floor' : 'floors'}`;
+      return `${action} ${direction} ${floors} to Floor ${toFloor}.`;
+    }
+    return toFloor ? `${action} to Floor ${toFloor}.` : step.instruction;
+  }
+
+  if (step.kind === 'building-link') {
+    const target = context?.targetPlanLabel || to;
+    return `Use the connecting passage to ${target}.`;
+  }
+
+  const targetSuffix = context?.targetPlanLabel ? ` (${context.targetPlanLabel})` : '';
+  return `Walk outdoors from ${from} to ${to}${targetSuffix}. Outdoor path unmapped.`;
+}
+
 export type NavigationChoice = {
   preferElevators?: boolean;
   revision: number;

@@ -146,6 +146,20 @@ test('submits photo and destination and displays directions without route confir
   expect(uploads).toHaveLength(0);
   await submitPhoto(page);
   await expect(page.getByRole('button', { name: 'Route overview', exact: true })).toBeVisible();
+  await expect(page.locator('.sheet-handle')).toHaveCount(0);
+  await expect(page.locator('.map-floating-fab')).toHaveCount(0);
+  await expect(page.locator('.guided-step h2')).toHaveCount(0);
+  await expect(page.locator('.guided-step-subtitle')).toHaveCount(0);
+  await expect(page.locator('.guided-step-instruction')).toHaveText(
+    'Follow the corridor from 302 (window-side corridor door) to Passage to SW03.',
+  );
+  const prevBox = await page.getByRole('button', { name: 'Previous', exact: true }).boundingBox();
+  const nextBox = await page.getByRole('button', { name: 'Next step', exact: true }).boundingBox();
+  const viewportHeight = await page.evaluate(() => window.innerHeight);
+  expect(prevBox).not.toBeNull();
+  expect(nextBox).not.toBeNull();
+  expect(prevBox!.y + prevBox!.height).toBeLessThanOrEqual(viewportHeight);
+  expect(nextBox!.y + nextBox!.height).toBeLessThanOrEqual(viewportHeight);
   await page.getByRole('button', { name: 'Route overview', exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'Walking directions', exact: true }),

@@ -73,6 +73,7 @@
   width: 100%;
   max-width: none;
   margin: 0;
+  min-height: 0;
 }
 
 .visitor-shell .setup-notice {
@@ -572,6 +573,7 @@
 
 /* Screen 3: Guided Step-by-Step Navigation */
 .visitor-shell.guided-active {
+  height: 100svh;
   height: 100dvh;
   overflow: hidden;
 }
@@ -597,15 +599,15 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  height: 100dvh;
+  height: 100%;
   min-height: 0;
   background: #ffffff;
 }
 
 .guided-map {
   position: relative;
-  flex: 1 1 62%;
-  min-height: 280px;
+  flex: 1 1 0;
+  min-height: 160px;
   background: #ffffff;
   overflow: hidden;
   display: flex;
@@ -650,33 +652,22 @@
   white-space: nowrap;
 }
 
-.map-floating-fab {
-  position: absolute;
-  right: 14px;
-  bottom: 18px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  background: rgba(255, 254, 250, 0.96);
-  border: 1px solid #d4dfd7;
-  box-shadow: 0 6px 18px rgba(18, 45, 35, 0.12);
-  color: #163b30;
-  display: grid;
-  place-items: center;
-  z-index: 5;
-}
-
 .guided-step {
   position: relative;
   z-index: 6;
   margin-top: -18px;
   gap: 8px;
+  flex: 0 1 auto;
+  max-height: 55%;
+  overflow-y: auto;
 }
 
-.guided-step-count {
+.guided-step .guided-step-count {
   color: var(--muted);
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 600;
+  line-height: 1.3;
+  margin: 0;
 }
 
 .step-progress-track {
@@ -695,34 +686,33 @@
   transition: width 0.25s ease;
 }
 
-.guided-step h2 {
-  font-size: 22px;
-  font-weight: 750;
-  line-height: 1.22;
-  letter-spacing: -0.025em;
-  color: #14372e;
-}
-
-.guided-step-subtitle {
-  font-size: 13.5px;
-  color: var(--muted);
+.guided-step .guided-step-instruction {
+  font-size: 16.5px;
+  font-weight: 450;
   line-height: 1.45;
+  color: #14372e;
+  margin: 2px 0;
 }
 
-.guided-transfer-note {
+.guided-step .guided-step-instruction:focus {
+  outline: none;
+}
+
+.guided-step .guided-transfer-note {
   font-size: 12.5px;
   color: #546d62;
   background: #f1f7f3;
   padding: 7px 10px;
   border-radius: 10px;
+  margin: 0;
 }
 
-.guided-location-status {
+.guided-step .guided-location-status {
   display: flex;
   align-items: center;
   gap: 8px;
   color: #5c7369;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.4;
   margin: 2px 0 4px;
 }
@@ -1111,7 +1101,7 @@
   letter-spacing: -0.02em;
 }
 
-.journey-panel p {
+.journey-panel:not(.journey-panel-guided) p {
   font-size: 14.5px;
   line-height: 1.55;
   color: #466156;
