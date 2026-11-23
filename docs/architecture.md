@@ -39,3 +39,5 @@ The router preserves source-backed approach tiers (mapped stops, shared entrance
 The private photo receipt retains structured fields and an image fingerprint for five minutes. Request media bytes are released after extraction. Session state contains no raw photo or GPS coordinates. Sessions expire after 30 minutes; the service caps sessions at 200 and API traffic at 180 requests per minute per IP.
 
 The local listener and Vercel function share the visitor API. Vercel verifies compact source assets at cold start and shares encrypted session state across workers. Provider keys remain server-side. This is a local prototype, not a publicly hardened service.
+
+The Gemini adapter can retry an upstream quota error with another configured credential for the same model. The worker tracks each key's retry time per model. Every transport attempt draws from one application budget across the primary key and its backups.

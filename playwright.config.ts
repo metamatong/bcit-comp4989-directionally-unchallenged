@@ -9,6 +9,9 @@ export default defineConfig({
   use: {
     baseURL: 'http://127.0.0.1:3100',
     channel: 'chrome',
+    // Simulate a fix inside the SE12 footprint so photo tests reach the mocked provider.
+    permissions: ['geolocation'],
+    geolocation: { latitude: 49.249972, longitude: -123.001589, accuracy: 2 },
     screenshot: 'only-on-failure',
     trace: 'retain-on-failure',
   },
@@ -27,7 +30,10 @@ export default defineConfig({
       NODE_ENV: 'test',
       PORT: '3100',
       HOST: '127.0.0.1',
+      GPS_TEST_MODE: 'false',
       GEMINI_API_KEY: '',
+      GEMINI_API_KEY_2: '',
+      GEMINI_API_KEY_3: '',
       AI_PROVIDER: 'gemini',
       OPENAI_API_KEY: '',
       GEMINI_MODEL: 'gemini-3.5-flash-lite',

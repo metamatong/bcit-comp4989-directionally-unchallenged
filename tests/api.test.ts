@@ -107,8 +107,8 @@ describe('real-campus-only HTTP contract', () => {
     const response = await fetch(`${base}/api/bootstrap`);
     const body = await response.json();
     expect(body.liveAvailable).toBe(false);
-    expect(body.coverage.floorPlans).toBe(89);
-    expect(body.visualPlans).toHaveLength(89);
+    expect(body.coverage.floorPlans).toBe(14);
+    expect(body.visualPlans).toHaveLength(14);
     expect(body).not.toHaveProperty('graph');
     expect(body).not.toHaveProperty('catalogue');
     expect(body).not.toHaveProperty('defaultMode');

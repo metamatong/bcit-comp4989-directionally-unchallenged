@@ -142,6 +142,96 @@ describe('provider transport and free-tier request controls', () => {
     await expect(provider.generate([], [])).rejects.toThrow('quota');
     expect(fake).toHaveBeenCalledTimes(1);
   });
+  it('skips exhausted keys until their individual retry times and restores primary priority', async () => {
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(10_000);
+    const fake = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(
+        Response.json(
+          {
+            error: {
+              details: [
+                { '@type': 'type.googleapis.com/google.rpc.RetryInfo', retryDelay: '120.25s' },
+              ],
+            },
+          },
+          { status: 429 },
+        ),
+      )
+      .mockResolvedValueOnce(new Response(null, { status: 429, headers: { 'Retry-After': '15' } }))
+      .mockImplementation(async () =>
+        Response.json({ candidates: [{ content: { parts: [{ text: 'OK' }] } }] }),
+      );
+    const provider = new GeminiProvider({
+      ...options,
+      fallbackApiKeys: [options.apiKey, ' backup '],
+      fetchImpl: fake,
+    });
+    try {
+      await expect(provider.generate([], [])).rejects.toMatchObject({
+        code: 'quota',
+        retryAfterSeconds: 15,
+      });
+      clock.mockReturnValue(14_000);
+      await expect(provider.generate([], [])).rejects.toMatchObject({
+        code: 'quota',
+        retryAfterSeconds: 11,
+      });
+      expect(fake).toHaveBeenCalledTimes(2);
+      clock.mockReturnValue(25_000);
+      await provider.generate([], []);
+      clock.mockReturnValue(130_249);
+      await provider.generate([], []);
+      clock.mockReturnValue(130_250);
+      await provider.generate([], []);
+      expect(
+        fake.mock.calls.map(([, init]) => new Headers(init?.headers).get('x-goog-api-key')),
+      ).toEqual([options.apiKey, 'backup', 'backup', 'backup', options.apiKey]);
+      expect(provider.calls).toBe(5);
+    } finally {
+      clock.mockRestore();
+    }
+  });
+  it('stops at a hosted budget rejection before sending a request on the next key', async () => {
+    const reserve = vi
+      .fn()
+      .mockResolvedValueOnce(undefined)
+      .mockRejectedValue(new ProviderError('AI request budget reached.', 429, 'budget', true, 8));
+    const fake = vi.fn<typeof fetch>().mockResolvedValue(new Response(null, { status: 429 }));
+    const provider = new GeminiProvider({
+      ...options,
+      fallbackApiKeys: ['backup'],
+      reserveSharedBudget: reserve,
+      fetchImpl: fake,
+    });
+    await expect(provider.generate([], [])).rejects.toMatchObject({
+      code: 'budget',
+      retryAfterSeconds: 8,
+    });
+    expect(reserve).toHaveBeenCalledTimes(2);
+    expect(fake).toHaveBeenCalledTimes(1);
+    expect(provider.calls).toBe(1);
+  });
+  it('checks the shared stage deadline before spending quota on another key', async () => {
+    const clock = vi.spyOn(Date, 'now').mockReturnValue(10_000);
+    const fake = vi.fn<typeof fetch>().mockImplementation(async () => {
+      clock.mockReturnValue(11_000);
+      return new Response(null, { status: 429 });
+    });
+    try {
+      const provider = new GeminiProvider({
+        ...options,
+        fallbackApiKeys: ['backup'],
+        fetchImpl: fake,
+      });
+      await expect(
+        provider.generate([], [], undefined, undefined, { deadlineAt: 11_000 }),
+      ).rejects.toMatchObject({ code: 'timeout' });
+      expect(fake).toHaveBeenCalledTimes(1);
+    } finally {
+      clock.mockRestore();
+    }
+  });
   it('tries the next configured Gemini model after quota exhaustion', async () => {
     const fake = vi
       .fn<typeof fetch>()
@@ -165,30 +255,55 @@ describe('provider transport and free-tier request controls', () => {
     expect(String(fake.mock.calls[1][0])).toContain('/gemini-2.5-flash-lite:');
     expect(onModelFallback).toHaveBeenCalledTimes(1);
   });
-  it('reports when every configured Gemini model is exhausted', async () => {
-    const fake = vi.fn<typeof fetch>().mockResolvedValue(new Response('{}', { status: 429 }));
+  it('reports the earliest retry when all keys and configured models are exhausted', async () => {
+    const fake = vi.fn<typeof fetch>().mockImplementation(async (url, init) => {
+      const key = new Headers(init?.headers).get('x-goog-api-key');
+      const firstToRecover = String(url).includes(options.model) && key === 'backup';
+      return new Response(null, {
+        status: 429,
+        headers: { 'Retry-After': firstToRecover ? '10' : '90' },
+      });
+    });
     const provider = new GeminiProvider({
       ...options,
+      fallbackApiKeys: ['backup'],
       fallbackModels: ['gemini-2.5-flash'],
       fetchImpl: fake,
     });
-    await expect(provider.generate([], [])).rejects.toThrow(
-      'All configured Gemini models failed. Gemini quota exhausted.',
-    );
-    expect(fake).toHaveBeenCalledTimes(2);
+    for (let submission = 0; submission < 2; submission++) {
+      await expect(provider.generate([], [])).rejects.toMatchObject({
+        message:
+          'All configured Gemini models failed. Gemini quota exhausted. Try again in 10 seconds.',
+        code: 'quota',
+        retryAfterSeconds: 10,
+      });
+    }
+    expect(
+      fake.mock.calls.map(([, init]) => new Headers(init?.headers).get('x-goog-api-key')),
+    ).toEqual([options.apiKey, 'backup', options.apiKey, 'backup']);
   });
   it('bounds service-unavailable retries', async () => {
     const fake = vi
       .fn<typeof fetch>()
       .mockImplementation(async () => new Response('{}', { status: 503 }));
     const pause = vi.fn(async (_milliseconds: number, _signal?: AbortSignal) => {});
-    const provider = new GeminiProvider({ ...options, fetchImpl: fake, waitForRetry: pause });
+    const provider = new GeminiProvider({
+      ...options,
+      fallbackApiKeys: ['backup'],
+      fetchImpl: fake,
+      waitForRetry: pause,
+    });
     await expect(provider.generate([], [])).rejects.toMatchObject({
       httpStatus: 503,
       code: 'unavailable',
       retryable: true,
     });
     expect(fake).toHaveBeenCalledTimes(3);
+    expect(
+      fake.mock.calls.every(
+        ([, init]) => new Headers(init?.headers).get('x-goog-api-key') === options.apiKey,
+      ),
+    ).toBe(true);
     expect(pause).toHaveBeenCalledTimes(2);
     expect(pause.mock.calls[0][0]).toBeGreaterThanOrEqual(1000);
     expect(pause.mock.calls[0][0]).toBeLessThan(1250);
@@ -341,6 +456,7 @@ describe('provider transport and free-tier request controls', () => {
     );
     const provider = new GeminiProvider({
       ...options,
+      fallbackApiKeys: ['backup'],
       fallbackModels: ['gemini-2.5-flash'],
       fetchImpl: fake,
     });
