@@ -1,6 +1,6 @@
 /** Manual progress through saved route steps; never infers floor changes or camera heading. */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { ArrowLeft, ArrowRight, Maximize2, Minimize2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import type { NavigationResult, WalkingSurface } from '../wayfinding';
 import type { VisualPlan } from '../types';
 import { fetchWalkingSurface, getCachedWalkingSurface } from '../api';
@@ -22,7 +22,7 @@ import {
 } from '../location/pdr-tracker';
 import { useWalkingLocation } from '../location/use-device-location';
 import { useMotionTracker } from '../location/use-motion-tracker';
-import { floorTransferInstruction } from '../wayfinding';
+import { guidedStepInstruction } from '../wayfinding';
 
 function locationStatusMessage({
   complete,
@@ -137,8 +137,7 @@ export function GuidedDirections({
   onDone?: () => void;
 }) {
   const tracking = useWalkingLocation(!gpsTestMode);
-  const heading = useRef<HTMLHeadingElement>(null);
-  const [whole, setWhole] = useState(false);
+  const instructionRef = useRef<HTMLParagraphElement>(null);
   const [loadedSurfaces, setLoadedSurfaces] = useState<Record<string, WalkingSurface | null>>(
     () => {
       const initial: Record<string, WalkingSurface | null> = {};
@@ -169,10 +168,13 @@ export function GuidedDirections({
   const stop = complete ? route.destination : step.from;
   const plan = plans.find((item) => item.id === stop.planId)!;
   const targetPlan = step ? plans.find((item) => item.id === step.to.planId) : undefined;
-  const stepInstruction =
-    step && targetPlan && (step.kind === 'stairs' || step.kind === 'elevator')
-      ? floorTransferInstruction(step.kind, step.from.label, plan.floor, targetPlan.floor)
-      : step?.instruction;
+  const stepInstruction = step
+    ? guidedStepInstruction(step, {
+        fromFloor: plan.floor,
+        toFloor: targetPlan?.floor,
+        targetPlanLabel: targetPlan ? planLabel(targetPlan) : undefined,
+      })
+    : undefined;
   const calibration = locationCatalogue?.floors.find((floor) => floor.planId === plan.id);
   const building = locationCatalogue?.buildings.find((item) => item.building === plan.building);
   const hasProvidedSurface = !!walkingSurfaces && plan.id in walkingSurfaces;
@@ -213,11 +215,6 @@ export function GuidedDirections({
     });
     return () => controller.abort();
   }, [complete, hasProvidedSurface, loadedSurfaces, plan.id]);
-
-  // Reset full-floor toggle when advancing to a different step.
-  useEffect(() => {
-    setWhole(false);
-  }, [index, plan.id]);
 
   // Resume with a new watch and discard fixes captured before the tab returned.
   useEffect(() => {
@@ -327,8 +324,8 @@ export function GuidedDirections({
       });
 
   useEffect(() => {
-    heading.current?.focus({ preventScroll: true });
-    heading.current?.scrollIntoView?.({ block: 'nearest' });
+    instructionRef.current?.focus({ preventScroll: true });
+    instructionRef.current?.scrollIntoView?.({ block: 'nearest' });
   }, [index]);
 
   function promptMotionOnGesture() {
@@ -368,7 +365,6 @@ export function GuidedDirections({
           label={`${planLabel(plan)} · ${complete ? 'Destination' : `Step ${index + 1}`}`}
           paths={step?.kind === 'corridor' ? [step.path] : []}
           device={device}
-          whole={whole}
           fillContainer
           markers={
             step?.kind === 'corridor'
@@ -386,45 +382,18 @@ export function GuidedDirections({
                 ]
           }
         />
-
-        <button
-          type="button"
-          className="map-floating-fab"
-          aria-pressed={whole}
-          aria-label={whole ? 'Zoom to route' : 'Show full floor'}
-          title={whole ? 'Zoom to route' : 'Show full floor'}
-          onClick={() => {
-            promptMotionOnGesture();
-            setWhole(!whole);
-          }}
-        >
-          {whole ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-        </button>
       </div>
 
       <div className="guided-step bottom-sheet">
-        <span className="sheet-handle" aria-hidden="true" />
         <p className="guided-step-count">
           {complete ? 'Route complete' : `Step ${index + 1} of ${route.steps.length}`}
         </p>
         <div className="step-progress-track" aria-hidden="true">
           <div className="step-progress-fill" style={{ width: `${progressPercent}%` }} />
         </div>
-        <h2 ref={heading} tabIndex={-1}>
+        <p ref={instructionRef} tabIndex={-1} className="guided-step-instruction">
           {complete ? `Destination: ${route.destination.label}` : stepInstruction}
-        </h2>
-        {!complete && (
-          <p className="guided-step-subtitle">
-            {step.from.label} → {step.to.label}
-            {transfer && (
-              <>
-                {' · '}
-                {planLabel(plans.find((p) => p.id === step.from.planId)!)} →{' '}
-                {planLabel(plans.find((p) => p.id === step.to.planId)!)}
-              </>
-            )}
-          </p>
-        )}
+        </p>
         {index === 0 && transferNotice && (
           <p className="guided-transfer-note" role="note">
             {transferNotice}
