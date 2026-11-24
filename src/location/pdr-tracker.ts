@@ -3,7 +3,7 @@
  * and transient inertial motion estimates across three automatic hardware tiers:
  *   Tier 1: GPS-only corridor map-matching (or raw outdoor footprint gating)
  *   Tier 2 (Stage 1): Accel-only hard stationary anchor + step-budgeted walking continuity
- *   Tier 3 (Stage 2, gated): 120-particle corridor-constrained PDR + GPS filter
+ *   Tier 3 (Stage 2): 120-particle corridor-constrained PDR + GPS filter
  *
  * All state stays strictly in active browser memory.
  */
@@ -31,10 +31,11 @@ import { getWalkableGrid, type WalkableGrid } from './walkable-grid';
 
 /**
  * Explicit Stage 2 rollout gate.
- * Keep false in the live app until physical Android Chrome + iOS Safari turn tests confirm
- * raw rotationRate axis order and gravity polarity; unit tests and benchmarks enable it explicitly.
+ * Enabled for live corridor tracking when accelerometer + gyroscope streams are available;
+ * phones without a gyroscope automatically fall back to Stage 1 (Tier 2), and denied/desktop/outdoor
+ * sessions fall back to Tier 1.
  */
-export const PARTICLE_PDR_ENABLED = false;
+export const PARTICLE_PDR_ENABLED = true;
 
 export const PDR_TRACKER_CONFIG = Object.freeze({
   particleCount: 120,
