@@ -1,10 +1,20 @@
 /** The raster and route overlay share the original source-page coordinate system. */
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import type { PlanBounds, VisualPlan } from '../types';
 import type { PagePoint } from '../wayfinding';
 import { planLabel } from '../topology';
 import type { DeviceOverlay } from '../location/types';
 import { DevicePosition } from './DevicePosition';
+
+const RouteWalls = lazy(() => import('./RouteWalls'));
+
+export function RouteViewToggle({ active, onToggle }: { active: boolean; onToggle: () => void }) {
+  return (
+    <button type="button" className="map-floating-pill" aria-pressed={active} onClick={onToggle}>
+      3D view
+    </button>
+  );
+}
 
 export type MapMarker = { point: PagePoint; label: string; symbol: string; end?: boolean };
 type MapProps = {
@@ -13,6 +23,7 @@ type MapProps = {
   paths?: PagePoint[][];
   bounds?: PlanBounds;
   label: string;
+  threeD?: boolean;
   device?: DeviceOverlay | null;
   lastKnownPoint?: PagePoint;
 };
@@ -25,6 +36,7 @@ export function RouteMapImage({
   bounds,
   label,
   device,
+  threeD = false,
   lastKnownPoint,
   whole = false,
   fillContainer = false,
@@ -51,121 +63,137 @@ export function RouteMapImage({
   const h = whole || !points.length ? height : Math.min(height, Math.max(...ys) + margin) - y;
   const scale = Math.max(w / 640, h / 420);
   const line = 3.7 * scale;
+  // Follow the same published step and accepted on-floor dot used by live guidance.
+  const follow = threeD && fillContainer && !whole && device;
+  const left = follow ? Math.max(0, Math.min(width - w, follow.point.x * width - w / 2)) : x;
+  const top = follow ? Math.max(0, Math.min(height - h, follow.point.y * height - h / 2)) : y;
+  const viewWidth = threeD ? w + 0.22 * h : w;
+  const wallMargin = threeD ? width * 0.012 : 0;
+  const viewHeight = threeD ? 0.72 * h + wallMargin : h;
+  const viewX = threeD ? left + 0.22 * top : left;
+  const viewY = threeD ? 0.72 * top - wallMargin : top;
   return (
     <svg
-      viewBox={`${x} ${y} ${w} ${h}`}
-      style={fillContainer ? undefined : { aspectRatio: `${w} / ${h}` }}
+      viewBox={`${viewX} ${viewY} ${viewWidth} ${viewHeight}`}
+      style={fillContainer ? undefined : { aspectRatio: `${viewWidth} / ${viewHeight}` }}
       preserveAspectRatio="xMidYMid meet"
       role="img"
       aria-label={label}
       className="walking-map"
     >
       <title>{label}</title>
-      <image href={plan.full.url} x={0} y={0} width={width} height={height} />
-      {bounds && (
-        <rect
-          x={bounds[0] * width}
-          y={bounds[1] * height}
-          width={(bounds[2] - bounds[0]) * width}
-          height={(bounds[3] - bounds[1]) * height}
-          fill="#eba72c30"
-          stroke="#986219"
-          strokeWidth={line * 0.65}
-          strokeDasharray={`${3 * line} ${line}`}
-        />
-      )}
-      {paths
-        .filter((path) => path.length > 1)
-        .map((path, pathIndex) => {
-          const svgPoints = path.map((p) => `${p.x * width},${p.y * height}`).join(' ');
-          return (
-            <g key={pathIndex}>
-              <polyline
-                points={svgPoints}
-                fill="none"
-                stroke="white"
-                strokeWidth={line * 2.3}
-                strokeLinejoin="round"
-                strokeLinecap="round"
-              />
-              <polyline
-                data-walking-line="true"
-                points={svgPoints}
-                fill="none"
-                stroke="#1460ab"
-                strokeWidth={line}
-                strokeLinejoin="round"
-                strokeLinecap="round"
-              />
-              {path.slice(1).map((p, i) => {
-                const a = path[i],
-                  dx = (p.x - a.x) * width,
-                  dy = (p.y - a.y) * height;
-                if (Math.hypot(dx, dy) < 14 * scale) return null;
-                return (
-                  <path
-                    key={i}
-                    d="M -5 -4 L 2.5 0 L -5 4"
-                    transform={`translate(${((a.x + p.x) * width) / 2} ${((a.y + p.y) * height) / 2}) rotate(${(Math.atan2(dy, dx) * 180) / Math.PI}) scale(${scale * 1.4})`}
-                    fill="none"
-                    stroke="#103f73"
-                    strokeWidth="2.6"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                );
-              })}
-            </g>
-          );
-        })}
-      {device && <DevicePosition overlay={device} width={width} height={height} />}
-      {!device && lastKnownPoint && (
-        <circle
-          className="last-known-position"
-          cx={lastKnownPoint.x * width}
-          cy={lastKnownPoint.y * height}
-          r={Math.min(width, height) * 0.004}
-          fill="none"
-          stroke="#58665f"
-          strokeWidth={2}
-          vectorEffect="non-scaling-stroke"
-        >
-          <title>Last known location on this floor</title>
-        </circle>
-      )}
-      {markers.map((m, i) => (
-        <g key={i} transform={`translate(${m.point.x * width} ${m.point.y * height})`}>
-          <title>{m.label}</title>
-          {m.symbol.length === 1 ? (
-            <circle
-              r={10 * scale}
-              fill={m.end ? '#a84b29' : '#124f40'}
-              stroke="white"
-              strokeWidth={2 * scale}
-            />
-          ) : (
-            <rect
-              x={-(m.symbol.length * 3.7 + 4) * scale}
-              y={-10 * scale}
-              width={(m.symbol.length * 7.4 + 8) * scale}
-              height={20 * scale}
-              rx={5 * scale}
-              fill="#175678"
-              stroke="white"
-              strokeWidth={2 * scale}
-            />
-          )}
-          <text
-            textAnchor="middle"
-            dominantBaseline="central"
-            fontSize={11 * scale}
-            fontWeight="700"
-            fill="white"
+      <g transform={threeD ? 'matrix(1 0 .22 .72 0 0)' : undefined}>
+        <image href={plan.full.url} x={0} y={0} width={width} height={height} />
+        {threeD && (
+          <Suspense fallback={null}>
+            <RouteWalls plan={plan} />
+          </Suspense>
+        )}
+        {bounds && (
+          <rect
+            x={bounds[0] * width}
+            y={bounds[1] * height}
+            width={(bounds[2] - bounds[0]) * width}
+            height={(bounds[3] - bounds[1]) * height}
+            fill="#eba72c30"
+            stroke="#986219"
+            strokeWidth={line * 0.65}
+            strokeDasharray={`${3 * line} ${line}`}
+          />
+        )}
+        {paths
+          .filter((path) => path.length > 1)
+          .map((path, pathIndex) => {
+            const svgPoints = path.map((p) => `${p.x * width},${p.y * height}`).join(' ');
+            return (
+              <g key={pathIndex}>
+                <polyline
+                  points={svgPoints}
+                  fill="none"
+                  stroke="white"
+                  strokeWidth={line * 2.3}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+                <polyline
+                  data-walking-line="true"
+                  points={svgPoints}
+                  fill="none"
+                  stroke="#1460ab"
+                  strokeWidth={line}
+                  strokeLinejoin="round"
+                  strokeLinecap="round"
+                />
+                {path.slice(1).map((p, i) => {
+                  const a = path[i],
+                    dx = (p.x - a.x) * width,
+                    dy = (p.y - a.y) * height;
+                  if (Math.hypot(dx, dy) < 14 * scale) return null;
+                  return (
+                    <path
+                      key={i}
+                      d="M -5 -4 L 2.5 0 L -5 4"
+                      transform={`translate(${((a.x + p.x) * width) / 2} ${((a.y + p.y) * height) / 2}) rotate(${(Math.atan2(dy, dx) * 180) / Math.PI}) scale(${scale * 1.4})`}
+                      fill="none"
+                      stroke="#103f73"
+                      strokeWidth="2.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  );
+                })}
+              </g>
+            );
+          })}
+        {device && <DevicePosition overlay={device} width={width} height={height} />}
+        {!device && lastKnownPoint && (
+          <circle
+            className="last-known-position"
+            cx={lastKnownPoint.x * width}
+            cy={lastKnownPoint.y * height}
+            r={Math.min(width, height) * 0.004}
+            fill="none"
+            stroke="#58665f"
+            strokeWidth={2}
+            vectorEffect="non-scaling-stroke"
           >
-            {m.symbol}
-          </text>
-        </g>
-      ))}
+            <title>Last known location on this floor</title>
+          </circle>
+        )}
+        {markers.map((m, i) => (
+          <g key={i} transform={`translate(${m.point.x * width} ${m.point.y * height})`}>
+            <title>{m.label}</title>
+            {m.symbol.length === 1 ? (
+              <circle
+                r={10 * scale}
+                fill={m.end ? '#a84b29' : '#124f40'}
+                stroke="white"
+                strokeWidth={2 * scale}
+              />
+            ) : (
+              <rect
+                x={-(m.symbol.length * 3.7 + 4) * scale}
+                y={-10 * scale}
+                width={(m.symbol.length * 7.4 + 8) * scale}
+                height={20 * scale}
+                rx={5 * scale}
+                fill="#175678"
+                stroke="white"
+                strokeWidth={2 * scale}
+              />
+            )}
+            <text
+              textAnchor="middle"
+              dominantBaseline="central"
+              fontSize={11 * scale}
+              fontWeight="700"
+              fill="white"
+            >
+              {m.symbol}
+            </text>
+          </g>
+        ))}
+      </g>
     </svg>
   );
 }

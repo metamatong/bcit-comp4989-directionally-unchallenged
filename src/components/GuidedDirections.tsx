@@ -5,7 +5,7 @@ import type { NavigationResult, WalkingSurface } from '../wayfinding';
 import type { VisualPlan } from '../types';
 import { fetchWalkingSurface, getCachedWalkingSurface } from '../api';
 import { planLabel } from '../topology';
-import { RouteMapImage } from './RouteMap';
+import { RouteMapImage, RouteViewToggle } from './RouteMap';
 import type {
   DetectedStep,
   DeviceOverlay,
@@ -58,7 +58,8 @@ function locationStatusMessage({
     const seconds = evaluation.lastKnown.ageSeconds;
     const age = seconds < 60 ? `${seconds}s` : `${Math.floor(seconds / 60)} min`;
     const coarseReading =
-      evaluation.status === 'low-accuracy' && reading &&
+      evaluation.status === 'low-accuracy' &&
+      reading &&
       reading.accuracy >= MAP_MATCH_CONFIG.coarseLocationAccuracyMetres;
     return {
       announcement: 'Last known location',
@@ -68,7 +69,8 @@ function locationStatusMessage({
   if (!reading || evaluation?.status === 'waiting') {
     return {
       announcement:
-        trackingStatus || (hasStaleReading ? 'Waiting for a fresh GPS update…' : 'Waiting for GPS…'),
+        trackingStatus ||
+        (hasStaleReading ? 'Waiting for a fresh GPS update…' : 'Waiting for GPS…'),
     };
   }
   const floor = planLabel(plan);
@@ -106,6 +108,8 @@ function locationStatusMessage({
 }
 
 export function GuidedDirections({
+  threeD = false,
+  onToggleView,
   route,
   plans,
   locationCatalogue,
@@ -118,6 +122,8 @@ export function GuidedDirections({
   onOverview,
   onDone,
 }: {
+  threeD?: boolean;
+  onToggleView?: () => void;
   route: Extract<NavigationResult, { status: 'route' }>;
   plans: VisualPlan[];
   locationCatalogue?: LocationCatalogue;
@@ -210,7 +216,9 @@ export function GuidedDirections({
     if (complete || hasProvidedSurface || plan.id in loadedSurfaces) return;
     const cached = getCachedWalkingSurface(plan.id);
     if (cached) {
-      setLoadedSurfaces((current) => (plan.id in current ? current : { ...current, [plan.id]: cached }));
+      setLoadedSurfaces((current) =>
+        plan.id in current ? current : { ...current, [plan.id]: cached },
+      );
       return;
     }
     const controller = new AbortController();
@@ -364,10 +372,12 @@ export function GuidedDirections({
             <ArrowLeft size={16} aria-hidden="true" />
             <span>Overview</span>
           </button>
+          {onToggleView && <RouteViewToggle active={threeD} onToggle={onToggleView} />}
           <span className="map-floating-pill map-floor-badge">{planLabel(plan)}</span>
         </div>
 
         <RouteMapImage
+          threeD={threeD}
           key={`${index}-${plan.id}`}
           plan={plan}
           label={`${planLabel(plan)} · ${complete ? 'Destination' : `Step ${index + 1}`}`}
@@ -448,11 +458,7 @@ export function GuidedDirections({
             Back
           </button>
           {complete ? (
-            <button
-              type="button"
-              className="primary sheet-pill-btn"
-              onClick={onDone ?? onOverview}
-            >
+            <button type="button" className="primary sheet-pill-btn" onClick={onDone ?? onOverview}>
               Done
             </button>
           ) : (
@@ -461,8 +467,7 @@ export function GuidedDirections({
               className="primary sheet-pill-btn"
               onClick={() => move(index + 1)}
             >
-              {index === route.steps.length - 1 ? 'Finish' : 'Next'}{' '}
-              <ArrowRight size={17} />
+              {index === route.steps.length - 1 ? 'Finish' : 'Next'} <ArrowRight size={17} />
             </button>
           )}
         </div>
