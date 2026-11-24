@@ -150,7 +150,7 @@ try {
     element("h2", "Tiled detector compared with current map", byId("tiled"));
     element(
       "p",
-      "1024-pixel tiles, 768-pixel stride, rotations 0�/90�, confidence 0.25. Same 100-source-pixel review context as the baseline. Purple boxes below are tiled hypotheses; orange boxes are whole-page hypotheses. Neither establishes a route.",
+      "1024-pixel tiles, 768-pixel stride, rotations 0°/90°, confidence 0.25. Same 100-source-pixel review context as the baseline. Purple boxes below are tiled hypotheses; orange boxes are whole-page hypotheses. Neither establishes a route.",
       byId("tiled"),
     );
     const comparison = element("table", undefined, byId("tiled"));

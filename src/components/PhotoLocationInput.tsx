@@ -143,7 +143,7 @@ function DestinationCombobox({
                 <span className="destination-option-value">{item.value}</span>
                 <span className="destination-option-meta">
                   Floor {item.floor}
-                  {kindText ? ` Â· ${kindText}` : ''}
+                  {kindText ? ` · ${kindText}` : ''}
                 </span>
               </li>
             );
@@ -317,7 +317,7 @@ export function PhotoLocationInput({
                 )}
               </div>
               <h1 id="location-heading">Snap a nearby room sign</h1>
-              <span className="scope-pill">SE12 Â· SW03 Â· SW05 Â· SW01</span>
+              <span className="scope-pill">SE12 · SW03 · SW05 · SW01</span>
             </div>
           )}
 
@@ -507,7 +507,7 @@ export function PhotoLocationInput({
             disabled={!canSubmitPhoto}
           >
             {busy ? <LoaderCircle className="spin" size={18} /> : <Search size={18} />}
-            {busy ? 'Finding your routeâ€¦' : error ? 'Try again' : 'Get Directions'}
+            {busy ? 'Finding your route…' : error ? 'Try again' : 'Get Directions'}
           </button>
           {locationRequirement}
         </div>

@@ -5,6 +5,14 @@ import type { DeviceReading } from '../location/types';
 const scale = 1.3483373186000787;
 const origin = { x: 412.02829804962175, y: -27.882951850066576 };
 
+// Roof anchors and label centres in the campus artwork's 520 × 240 viewBox.
+const searchLabels = [
+  { name: 'SW01', x: 55, y: 96, roofX: 120, roofY: 110 },
+  { name: 'SE12', x: 376, y: 19, roofX: 358, roofY: 59 },
+  { name: 'SW03', x: 280, y: 220, roofX: 295, roofY: 183 },
+  { name: 'SW05', x: 428, y: 149, roofX: 350, roofY: 140 },
+];
+
 export function CampusPositionMap({
   reading,
   searching = false,
@@ -29,8 +37,43 @@ export function CampusPositionMap({
         ' m';
   return (
     <figure className="campus-position-map">
-      <svg viewBox="0 0 520 240" role="img" aria-label={caption}>
+      <svg
+        viewBox="0 0 520 240"
+        role="img"
+        aria-label={
+          searching
+            ? caption + '. Buildings: ' + searchLabels.map((label) => label.name).join(', ')
+            : caption
+        }
+      >
         <image href={searching ? campusMap : campusMap + '#guidance'} width="520" height="240" />
+        {searching &&
+          searchLabels.map(({ name, x, y, roofX, roofY }) => (
+            <g key={name} aria-hidden="true">
+              <line x1={x} y1={y} x2={roofX} y2={roofY} stroke="#355f50" strokeWidth="1.6" />
+              <rect
+                x={x - 29}
+                y={y - 12}
+                width="58"
+                height="24"
+                rx="5"
+                fill="#fff"
+                stroke="#9eb8aa"
+              />
+              <text
+                x={x}
+                y={y}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fill="#193f34"
+                fontSize="17"
+                fontWeight="650"
+                fontFamily="system-ui, sans-serif"
+              >
+                {name}
+              </text>
+            </g>
+          ))}
         {onMap && reading && (
           <g className="campus-gps-position">
             <circle
