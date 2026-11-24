@@ -16,6 +16,7 @@ import { planVisitorNavigation } from '../server/wayfinding';
 import { checkPublishedRoute } from '../server/routing-readiness';
 import { CampusLocationResults } from '../src/components/CampusLocationResults';
 import { JourneyPanel, StartingPositionNotice } from '../src/components/JourneyPanel';
+import { RouteDirections } from '../src/components/RouteDirections';
 import type { CampusLocationCandidate, PhotoEvidence } from '../src/types';
 import type { NavigationResult } from '../src/wayfinding';
 
@@ -148,28 +149,53 @@ it('uses an elevator without stairs from SE12 302 to the SW03 1730 entrance', as
   expect(result.steps.some((step) => step.kind === 'stairs')).toBe(false);
 });
 
-it('uses the SW03 elevator for SE12 302 to SE12 402 when elevators are required', async () => {
+it('draws the final corridor to room 402 after returning from the SW03 elevator', async () => {
   const { candidate } = matchedPlace('302');
   const result = await planVisitorNavigation(
     candidate,
     { revision: 1, candidateId: candidate.id, destination: 'SE12 402', preferElevators: true },
     store,
   );
-  const route = result.status === 'route' ? result : result.mappedPortion;
-  if (!route) throw Error(JSON.stringify(result));
-  expect(route.steps.some((step) => step.kind === 'elevator' && step.to.planId === 'SW3-F4-p1')).toBe(
-    true,
-  );
-  expect(route.steps.some((step) => step.kind === 'stairs')).toBe(false);
+  if (result.status !== 'route')
+    throw Error('Expected a complete elevator route: ' + result.status);
   expect(
-    route.steps.some(
-      (step) =>
-        step.kind === 'building-link' &&
-        step.from.planId === 'SW3-F4-p1' &&
-        step.to.planId === 'SE12-F4-p1',
-    ),
+    result.steps.some((step) => step.kind === 'elevator' && step.to.planId === 'SW3-F4-p1'),
   ).toBe(true);
-  expect(route.destination.planId).toBe('SE12-F4-p1');
+  expect(result.steps.some((step) => step.kind === 'stairs')).toBe(false);
+  const crossing = result.steps.at(-2)!;
+  const arrival = result.steps.at(-1)!;
+  expect(crossing).toMatchObject({
+    kind: 'building-link',
+    from: { planId: 'SW3-F4-p1' },
+    to: { planId: 'SE12-F4-p1', label: 'Passage to SW03' },
+  });
+  expect(arrival).toMatchObject({
+    kind: 'corridor',
+    from: crossing.to,
+    to: { planId: 'SE12-F4-p1', label: '402' },
+  });
+  expect(arrival.path[0]).toEqual(crossing.to.point);
+  expect(arrival.path.length).toBeGreaterThan(2);
+  expect(arrival.path.at(-1)).toEqual(result.destination.point);
+
+  await act(async () =>
+    root.render(
+      createElement(RouteDirections, {
+        route: result,
+        plans: store.plans,
+        onRecheck: vi.fn(),
+        preferElevators: true,
+        gpsTestMode: true,
+      }),
+    ),
+  );
+  const overview = host.querySelector<HTMLButtonElement>('button[aria-label="Route overview"]')!;
+  await act(async () => overview.click());
+  const finalMap = host.querySelector('figure[aria-label="SE12 · Floor 4"]')!;
+  expect(finalMap.querySelector('.pin-legend')?.textContent).toContain('Destination · 402');
+  const line = finalMap.querySelector('[data-walking-line="true"]');
+  expect(line).toBeTruthy();
+  expect(line?.parentElement?.querySelector('path')).toBeTruthy();
 });
 
 it('keeps the matched room on a coverage-error card without making a real room a permanent failure fixture', async () => {

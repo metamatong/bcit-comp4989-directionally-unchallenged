@@ -9,6 +9,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts/floor_graph"))
+from cad_landings import cell_at_door_swing
 from compile import FloorGrid
 from passage_openings import (
     SCALE,
@@ -51,6 +52,26 @@ class PassageOpeningTests(unittest.TestCase):
         )
         open_passage_doors(None, self.drawing, [self.pair], self.sealed, self.public)
         self.assertEqual(self.sealed[self.y, self.x], 255)
+
+    def test_door_swing_tie_requires_clearance_within_the_fitted_aperture(self):
+        walk = np.zeros((64, 64), dtype=bool)
+        walk[:18, 20:37] = True
+        sealed = np.zeros((64, 64), dtype=np.uint8)
+        sealed[20, :] = 255
+        barriers = np.zeros_like(sealed)
+        grid = FloorGrid(walk, sealed, np.zeros_like(sealed), 2)
+        door = [
+            (np.array([10.0, 10.0]), np.array([18.0, 10.0]), np.array([0.0, 1.0]), 8.0)
+        ]
+        pin = np.array([28.0, 24.0])
+
+        self.assertIsNone(grid.cell_near(pin, 16, boundary=True))
+        self.assertIsNotNone(cell_at_door_swing(pin, grid, barriers, door))
+        self.assertIsNone(
+            cell_at_door_swing(np.array([40.0, 24.0]), grid, barriers, door)
+        )
+        barriers[20, :] = 255
+        self.assertIsNone(cell_at_door_swing(pin, grid, barriers, door))
 
     def test_unrelated_leaves_do_not_create_a_passage(self):
         record = {"swings": ["curve-730", "curve-829"]}

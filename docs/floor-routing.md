@@ -33,6 +33,8 @@ SW03 and SW05 connect on floor 1. Visitors can walk outdoors in both directions 
 
 The layered SW01 compiler also resolves signed enclosures, open bays, suite entries and independently marked room areas. Interior pins follow their own source-checked path to a circulation cell. The declared staff-only area is excluded from both surfaces. [SW01 walking coverage and exact gaps](sw01-routing.md)
 
+On layered plans a confirmed indoor building passage can be marked within the swing of its double doors. If that mark has no ordinary grid connection, the compiler checks the fitted leaves from the CAD door layer and looks for a public walking cell within the aperture. The short segment must clear the structural walls and fixtures. On SE12 floor 4 this connects the SW03 passage at corridor 408C to the walking network serving 402. The existing transfer still controls travel between the buildings. [Official SE12 fourth-floor plan](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1204.pdf)
+
 On SW03 floor 1, corridor 1700 connects the reviewed lobby 1602 approach to the corridor side of AV room 1730. The corridor caption overlaps the door swing, and the steps inside the room partition its label from the threshold in the raster. The compiler checks the fitted leaf, the room label and a walking cell in the named corridor before binding the arrival point. The marker sits outside the door. [Official SW03 first-floor plan](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0301.pdf)
 
 ## Starting between two rooms

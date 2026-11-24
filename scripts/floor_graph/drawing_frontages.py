@@ -208,9 +208,11 @@ def _distinct_leaves(primary, extra):
 class DrawingFrontages:
     def __init__(self, page, geometry, config, leaves, sealed, words):
         self.glyphs = None
+        self.cad_door_swings = ()
         if "frontageLayers" in config:
             sheet = CadLayers(page, config["frontageLayers"])
-            self.leaves = _distinct_leaves(sheet.swings(), leaves)
+            self.cad_door_swings = sheet.swings()
+            self.leaves = _distinct_leaves(self.cad_door_swings, leaves)
             walls, barriers = sheet.walls, sheet.walls | sheet.objects
             partition = walls | sheet.door_ink
         else:

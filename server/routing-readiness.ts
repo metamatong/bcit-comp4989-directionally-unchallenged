@@ -69,6 +69,7 @@ async function checkRoomTrip(
     !room.doors.some(([, , doorCell]) => doorCell !== null && floor.offset + doorCell === cell) ||
     arrival?.kind !== 'corridor' ||
     arrival.path.length < 2 ||
+    (plans.preferElevators && transfers.some((step) => step.kind === 'stairs')) ||
     !usesExpectedPassage(transfers, plans.directOutdoorPassage)
   ) {
     throw Error(
@@ -103,6 +104,11 @@ export async function checkPublishedRoute(store = new TopologyStore()) {
         to: 'SW1-F1-p1',
         preferElevators: true,
         directOutdoorPassage: 'sw03-f1-1602-to-sw01-f1-1501-exterior',
+      }),
+      await checkRoomTrip(store, '302', '402', {
+        from: 'SE12-F3-p1',
+        to: 'SE12-F4-p1',
+        preferElevators: true,
       }),
     ],
   };

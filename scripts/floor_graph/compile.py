@@ -10,6 +10,7 @@ from concurrent.futures import ProcessPoolExecutor
 import cv2
 import numpy as np
 import pymupdf
+from cad_landings import cell_at_door_swing
 from cad_routing import compile_cad_floor
 from corridor_frontages import bind_frontages, corridor_bands, recorded_swings
 from doors import SCALE
@@ -38,6 +39,12 @@ AREAS = {
     for p in json.loads((SPATIAL / "floor-circulation.json").read_text())["plans"]
 }
 REVIEWED = json.loads((SPATIAL / "reviewed-network.json").read_text())
+INDOOR_PASSAGE_NODES = {
+    edge[key]
+    for edge in REVIEWED["edges"]
+    if edge["kind"] == "building-link"
+    for key in ("fromNodeId", "toNodeId")
+}
 TRACES = json.loads((SPATIAL / "corridor-traces.json").read_text())["traces"]
 PROPOSALS = json.loads((CAMPUS / "connection-candidates.json").read_text())
 
@@ -58,8 +65,12 @@ def grid_cells(walk, cell_size):
 
 
 class FloorGrid:
-    def __init__(self, walk, sealed, regions, cell_size):
+    def __init__(
+        self, walk, sealed, regions, cell_size, *, cad_door_swings=(), structural=None
+    ):
         self.walk, self.sealed, self.regions = walk, sealed, regions
+        self.cad_door_swings = cad_door_swings
+        self.structural = sealed if structural is None else structural
         self.cell_size = cell_size
         self.grid, self.runs = grid_cells(walk, cell_size)
         self.h, self.w = walk.shape
@@ -100,11 +111,17 @@ class FloorGrid:
 
 def ties_for(plan, grid):
     """Only bind the exact published point or trace vertex; runtime checks its live approval."""
-    points = [
-        n["point"]
+    nodes = [
+        n
         for n in REVIEWED["nodes"]
         if n["planId"] == plan["id"] and n["sourceSha256"] == plan["sourceSha256"]
     ]
+    points = [n["point"] for n in nodes]
+    passage_doors = {
+        (n["point"]["x"], n["point"]["y"])
+        for n in nodes
+        if n["kind"] == "door" and n["id"] in INDOOR_PASSAGE_NODES
+    }
     for t in TRACES:
         if t["planId"] == plan["id"] and t["sourceSha256"] == plan["sourceSha256"]:
             points.extend([t["from"], *t["bends"], t["to"]])
@@ -118,7 +135,14 @@ def ties_for(plan, grid):
             points.extend(trace["bends"])
     ties = []
     for x, y in sorted({(p["x"], p["y"]) for p in points}):
-        cell = grid.cell_near(grid.norm((x, y)), 4 * CELL, boundary=True)
+        pixel = grid.norm((x, y))
+        cell = grid.cell_near(pixel, 4 * CELL, boundary=True)
+        # A confirmed passage may be marked on its door swing. The swing and sill
+        # can block an ordinary grid tie even when the actual doorway is open.
+        if cell is None and grid.cad_door_swings and (x, y) in passage_doors:
+            cell = cell_at_door_swing(
+                pixel, grid, grid.structural, grid.cad_door_swings
+            )
         if cell is not None:
             ties.append([x, y, cell])
     return ties
@@ -228,6 +252,8 @@ def compile_floor(item):
         sealed,
         regions,
         2 if sides and np.median([d[4] for d in sides]) < 12 else CELL,
+        cad_door_swings=frontages.cad_door_swings if frontages else (),
+        structural=frontages.structural if frontages else None,
     )
     door_cells, callout_doors = signed_door_cells(
         grid, words, sides, extra.get("doorApproaches", [])

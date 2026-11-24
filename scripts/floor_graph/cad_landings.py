@@ -1,6 +1,7 @@
-"""Bind a confirmed stair or elevator on this source sheet to its own public landing."""
+"""Bind confirmed landings and doorway pins to public walking cells on their source sheet."""
 
 import numpy as np
+from doors import SCALE
 
 
 def landing_cells(plan, places, nodes, grid, cad, symbols, config):
@@ -47,12 +48,7 @@ def landing_cells(plan, places, nodes, grid, cad, symbols, config):
         if cell is None:
             # A pin may lie on the drawing of its door swing. Within that actual
             # aperture only, the swing ink is traversable; all walls and fixtures remain.
-            near = [
-                (a * 2, b * 2, n, r * 2)
-                for a, b, n, r in symbols
-                if np.linalg.norm(pixel - (a + b)) < r * 2.0
-            ]
-            cell = _from_swing(pixel, grid, cad, near)
+            cell = cell_at_door_swing(pixel, grid, cad.walls | cad.objects, symbols)
         via = []
         explicit = next(
             (
@@ -98,13 +94,20 @@ def landing_cells(plan, places, nodes, grid, cad, symbols, config):
     return approvals
 
 
-def _from_swing(pixel, grid, cad, symbols):
-    barrier = cad.walls | cad.objects
+def cell_at_door_swing(pixel, grid, barriers, symbols):
+    """Cross only a fitted door's aperture on a clear ray to the public walking grid."""
+    x, y = np.rint(pixel).astype(int)
+    if not (0 <= x < grid.w and 0 <= y < grid.h):
+        return None
     best = None
-    for hinge, tip, normal, radius in symbols:
-        centre = (hinge + tip) / 2
-        tangent = (tip - hinge) / radius
-        if abs((pixel - centre) @ tangent) > 0.52 * radius:
+    for hinge, tip, normal, source_radius in symbols:
+        centre = (hinge + tip) * SCALE / 2
+        radius = source_radius * SCALE
+        tangent = (tip - hinge) / source_radius
+        if (
+            np.linalg.norm(pixel - centre) >= radius
+            or abs((pixel - centre) @ tangent) > 0.52 * radius
+        ):
             continue
         for side in (-1, 1):
             for lateral in (0, -0.18, 0.18):
@@ -124,7 +127,7 @@ def _from_swing(pixel, grid, cad, symbols):
                         pixel, end, max(3, round(np.linalg.norm(end - pixel) * 2))
                     )
                 ).astype(int)
-                if (np.abs((ray - centre) @ tangent) > 0.65 * radius).any() or barrier[
+                if (np.abs((ray - centre) @ tangent) > 0.65 * radius).any() or barriers[
                     ray[:, 1], ray[:, 0]
                 ].any():
                     continue
