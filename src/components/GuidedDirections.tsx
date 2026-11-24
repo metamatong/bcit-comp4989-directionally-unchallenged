@@ -15,6 +15,7 @@ import type {
 } from '../location/types';
 import { overlapsFootprint } from '../location/geometry';
 import { getMotionPermissionState, requestMotionPermission } from '../location/browser-motion';
+import { MAP_MATCH_CONFIG } from '../location/map-matching';
 import {
   IndoorPdrTracker,
   PARTICLE_PDR_ENABLED,
@@ -67,7 +68,9 @@ function locationStatusMessage({
     return { announcement: `Location unavailable on ${floor}` };
   }
   if (evaluation?.status === 'low-accuracy') {
-    return { announcement: 'GPS signal too weak' };
+    return reading.accuracy >= MAP_MATCH_CONFIG.coarseLocationAccuracyMetres
+      ? { announcement: 'GPS signal too weak · check Precise Location' }
+      : { announcement: 'GPS signal too weak' };
   }
   if (evaluation?.status === 'too-far') {
     return { announcement: 'Location off mapped route' };
@@ -80,6 +83,12 @@ function locationStatusMessage({
   }
   if (evaluation?.status === 'outside-page' || !device) {
     return { announcement: `Location off ${floor} map` };
+  }
+  if (evaluation?.status === 'matched') {
+    return {
+      announcement: 'Approx. location',
+      detail: ` · ${Math.ceil(device.uncertaintyRadiusMetres)} m uncertainty radius`,
+    };
   }
   const accuracy = (device.reportedAccuracyMetres ?? reading.accuracy).toFixed(0);
   return { announcement: `Approx. location · ±${accuracy}m` };

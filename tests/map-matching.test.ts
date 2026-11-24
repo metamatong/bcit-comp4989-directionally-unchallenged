@@ -8,7 +8,7 @@ import { locationCatalogue } from '../server/geolocation';
 import { pilotEvidence } from '../server/pilot-evidence';
 import { visualPlans } from '../server/visual-data';
 import { RouteDirections } from '../src/components/RouteDirections';
-import { fitCalibration } from '../src/location/geometry';
+import { fitCalibration, overlapsFootprint } from '../src/location/geometry';
 import { MAP_MATCH_CONFIG, matchDeviceToFloor } from '../src/location/map-matching';
 import type { DeviceReading } from '../src/location/types';
 import type { MapStop, NavigationResult, WalkingSurface } from '../src/wayfinding';
@@ -17,6 +17,7 @@ import { walkingRouteFixture } from './wayfinding-fixtures';
 const catalogue = locationCatalogue();
 const se12Plan = visualPlans.find((plan) => plan.id === 'SE12-F3-p1')!;
 const se12Calibration = catalogue.floors.find((floor) => floor.planId === se12Plan.id)!;
+const se12BuildingRings = catalogue.buildings.find((building) => building.building === 'SE12')!.rings;
 const se12Fit = fitCalibration(se12Calibration.controls, se12Plan.width, se12Plan.height);
 const se12Floor = floorGraphs().byId.get(se12Plan.id)!;
 const se12Surface: WalkingSurface = {
@@ -45,12 +46,15 @@ function readingAt(point: { x: number; y: number }, accuracy = 6, timestamp = 10
 afterEach(() => vi.unstubAllGlobals());
 
 describe('indoor corridor map-matching', () => {
-  it('snaps a 10 m exterior pull onto the nearest SE12 F3 corridor even with under-reported accuracy', () => {
+  it('preserves the original near-wall snap allowance when the fix misses the building', () => {
+    const reading = readingAt(se12ExteriorPoint(10), 6);
+    expect(overlapsFootprint(reading, se12BuildingRings)).toBe(false);
     const result = matchDeviceToFloor({
-      reading: readingAt(se12ExteriorPoint(10), 6),
+      reading,
       plan: se12Plan,
       calibration: se12Calibration,
       surface: se12Surface,
+      buildingRings: se12BuildingRings,
       stepKind: 'corridor',
     });
 
@@ -58,13 +62,46 @@ describe('indoor corridor map-matching', () => {
     if (result.status !== 'matched') return;
     expect(result.overlay.snapDistanceMetres).toBeGreaterThan(9);
     expect(result.overlay.snapDistanceMetres).toBeLessThanOrEqual(
-      MAP_MATCH_CONFIG.minSnapFloorMetres,
+      MAP_MATCH_CONFIG.minSnapWithoutFootprintOverlapMetres,
     );
     expect(result.overlay.point.y).toBeGreaterThan(se12TopY);
     expect((result.overlay.radiusY * se12Plan.height) / se12Fit.scale).toBeCloseTo(
       result.overlay.snapDistanceMetres!,
       4,
     );
+
+    const exteriorReading = readingAt(se12ExteriorPoint(15), 6);
+    expect(overlapsFootprint(exteriorReading, se12BuildingRings)).toBe(false);
+    expect(
+      matchDeviceToFloor({
+        reading: exteriorReading,
+        plan: se12Plan,
+        calibration: se12Calibration,
+        surface: se12Surface,
+        buildingRings: se12BuildingRings,
+        stepKind: 'corridor',
+      }).status,
+    ).toBe('too-far');
+  });
+
+  it('applies the 24 m cap when the accuracy circle overlaps SE12', () => {
+    const context = { plan: se12Plan, calibration: se12Calibration, surface: se12Surface };
+    // This transect reaches the corridor about 0.34 m past the alignment control.
+    const insideCap = readingAt(se12ExteriorPoint(22.66), 30);
+    const outsideCap = readingAt(se12ExteriorPoint(24.66), 30);
+    expect(overlapsFootprint(insideCap, se12BuildingRings)).toBe(true);
+    expect(overlapsFootprint(outsideCap, se12BuildingRings)).toBe(true);
+    const result = matchDeviceToFloor({
+      ...context,
+      reading: insideCap,
+      buildingRings: se12BuildingRings,
+    });
+    expect(result.status).toBe('matched');
+    if (result.status === 'matched') expect(result.rawOffsetMetres).toBeCloseTo(23, 1);
+    expect(
+      matchDeviceToFloor({ ...context, reading: outsideCap, buildingRings: se12BuildingRings }).status,
+    ).toBe('too-far');
+    expect(matchDeviceToFloor({ ...context, reading: insideCap }).status).toBe('too-far');
   });
 
   it('rejects extreme outliers, wide accuracy circles, and mismatched surface hashes', () => {
@@ -159,7 +196,7 @@ describe('indoor corridor map-matching', () => {
     if (result.status === 'raw') expect(result.overlay.snapDistanceMetres).toBeUndefined();
   });
 
-  it('renders corridor-matched status in GuidedDirections without shifting the route viewBox', async () => {
+  it('reports the displayed halo radius without shifting the route viewBox', async () => {
     vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
     vi.stubGlobal('isSecureContext', true);
     let reportLocation: PositionCallback = () => {};
@@ -187,6 +224,13 @@ describe('indoor corridor map-matching', () => {
       destination: stop(fixture.destination),
       steps: fixture.steps.map((s) => ({ ...s, from: stop(s.from), to: stop(s.to) })),
     };
+    // Isolate one corridor cell so the nearest point is exactly 15.3 m from the simulated fix.
+    const surface: WalkingSurface = { ...se12Surface, runs: [[133, 200, 200]] };
+    const reading = readingAt({
+      x: (201 * surface.step + 15.3 * se12Fit.scale) / se12Plan.width,
+      y: (133.5 * surface.step) / se12Plan.height,
+    });
+    expect(overlapsFootprint(reading, se12BuildingRings)).toBe(true);
 
     const host = document.createElement('div');
     document.body.append(host);
@@ -198,7 +242,7 @@ describe('indoor corridor map-matching', () => {
             route,
             plans: pilotEvidence().map((p) => p.plan),
             locationCatalogue: catalogue,
-            walkingSurfaces: { [se12Plan.id]: se12Surface },
+            walkingSurfaces: { [se12Plan.id]: surface },
             onRecheck: vi.fn(),
           }),
         ),
@@ -207,18 +251,26 @@ describe('indoor corridor map-matching', () => {
       const initialViewBox = host.querySelector('.walking-map')?.getAttribute('viewBox');
       expect(initialViewBox).toBeTruthy();
 
-      const outside = se12Fit.unproject(se12ExteriorPoint(10));
       await act(async () =>
         reportLocation({
-          coords: { latitude: outside.latitude, longitude: outside.longitude, accuracy: 8 },
+          coords: {
+            latitude: reading.latitude,
+            longitude: reading.longitude,
+            accuracy: reading.accuracy,
+          },
           timestamp: Date.now(),
         } as GeolocationPosition),
       );
 
       expect(host.querySelector('.walking-map')?.getAttribute('viewBox')).toBe(initialViewBox);
       expect(host.querySelector('.device-position')?.getAttribute('data-matched')).toBe('true');
+      const radiusX = host.querySelector('.device-position ellipse')?.getAttribute('rx');
+      expect(Number(radiusX) / se12Fit.scale).toBeCloseTo(15.3, 4);
+      expect(host.querySelector('.guided-location-status [role="status"]')?.textContent).toBe(
+        'Approx. location',
+      );
       expect(host.querySelector('.guided-location-status')?.textContent).toContain(
-        'Approx. corridor GPS',
+        'Approx. location · 16 m uncertainty radius',
       );
     } finally {
       await act(async () => root.unmount());

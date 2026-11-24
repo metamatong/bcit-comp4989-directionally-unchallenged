@@ -46,6 +46,8 @@ export type DeviceOverlay = {
   point: { x: number; y: number };
   radiusX: number;
   radiusY: number;
+  /** Radius of the displayed uncertainty area in metres on the aligned plan. */
+  uncertaintyRadiusMetres: number;
   /** Set when indoor map-matching pulled the raw reading onto a nearby corridor. */
   snapDistanceMetres?: number;
   /** Fusion tier indicator for honest status labeling and tests; never persisted or transmitted. */

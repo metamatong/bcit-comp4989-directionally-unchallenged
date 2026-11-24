@@ -15,7 +15,7 @@ import { visualPlans } from '../server/visual-data';
 import { clearWalkingSurfaceCacheForTests, fetchWalkingSurface } from '../src/api';
 import { RouteDirections } from '../src/components/RouteDirections';
 import { resetMotionPermissionCacheForTests } from '../src/location/browser-motion';
-import { fitCalibration } from '../src/location/geometry';
+import { fitCalibration, overlapsFootprint } from '../src/location/geometry';
 import { matchDeviceToFloor, type PreviousMatch } from '../src/location/map-matching';
 import { IndoorPdrTracker, PDR_TRACKER_CONFIG } from '../src/location/pdr-tracker';
 import type {
@@ -31,6 +31,7 @@ import { walkingRouteFixture } from './wayfinding-fixtures';
 const catalogue = locationCatalogue();
 const se12Plan = visualPlans.find((plan) => plan.id === 'SE12-F3-p1')!;
 const se12Calibration = catalogue.floors.find((floor) => floor.planId === se12Plan.id)!;
+const se12BuildingRings = catalogue.buildings.find((building) => building.building === 'SE12')!.rings;
 const se12Fit = fitCalibration(se12Calibration.controls, se12Plan.width, se12Plan.height);
 const se12Floor = floorGraphs().byId.get(se12Plan.id)!;
 const se12Surface: WalkingSurface = {
@@ -397,14 +398,20 @@ describe('IndoorPdrTracker lifecycle, deduplication, ambiguity, and halo invaria
     expect(rejected.status).toBe('low-accuracy');
 
     if (limit === 'rejections') {
+      // Rapid bad-fix bursts shorter than minBadFixStreakMs do not prematurely kill the PDR bridge.
       expect(tracker.evaluateAt(lastGpsT + 4000, true, 'moving').status).toBe('bridged');
       tracker.ingestGpsReading(readingFromPage(finalTruth, se12Fit, 50, lastGpsT + 4500), moving);
       expect(tracker.evaluateAt(lastGpsT + 4500, true, 'moving').status).toBe('bridged');
       tracker.ingestGpsReading(readingFromPage(finalTruth, se12Fit, 50, lastGpsT + 5000), moving);
-      expect(tracker.evaluateAt(lastGpsT + 5000, true, 'moving').status).toBe('low-accuracy');
-      expect(tracker.evaluateAt(lastGpsT + 7500, false, 'moving').status).toBe('low-accuracy');
-      tracker.ingestGpsReading(readingFromPage(finalTruth, se12Fit, 8, lastGpsT + 8000), moving);
-      expect(tracker.evaluateAt(lastGpsT + 8000, true, 'moving')).toMatchObject({
+      expect(tracker.evaluateAt(lastGpsT + 5000, true, 'moving').status).toBe('bridged');
+      // Once >= 3 consecutive bad fixes span at least minBadFixStreakMs, the bridge blanks cleanly.
+      tracker.ingestGpsReading(readingFromPage(finalTruth, se12Fit, 50, lastGpsT + 8000), moving);
+      const sustainedAt = lastGpsT + 4000 + PDR_TRACKER_CONFIG.minBadFixStreakMs;
+      tracker.ingestGpsReading(readingFromPage(finalTruth, se12Fit, 50, sustainedAt), moving);
+      expect(tracker.evaluateAt(sustainedAt, true, 'moving').status).toBe('low-accuracy');
+      expect(tracker.evaluateAt(sustainedAt + 1500, false, 'moving').status).toBe('low-accuracy');
+      tracker.ingestGpsReading(readingFromPage(finalTruth, se12Fit, 8, sustainedAt + 2000), moving);
+      expect(tracker.evaluateAt(sustainedAt + 2000, true, 'moving')).toMatchObject({
         status: 'matched', overlay: { trackingMode: 'pdr' },
       });
       return;
@@ -776,7 +783,7 @@ describe('IndoorPdrTracker lifecycle, deduplication, ambiguity, and halo invaria
     });
   });
 
-  it('conservatively holds recent GPS for 8 s with growing halo while moving/unknown and tolerates 1-2 bad indoor outliers', () => {
+  it('holds recent GPS for up to 8 s and tolerates brief indoor rejection bursts', () => {
     const tracker = new IndoorPdrTracker({ enableParticleFilter: false });
     const corridorPt = cellToPage(200, 133, se12Surface, se12Plan);
     tracker.configureContext({
@@ -806,7 +813,12 @@ describe('IndoorPdrTracker lifecycle, deduplication, ambiguity, and halo invaria
       expect(held5.overlay.radiusX * se12Plan.width).toBeGreaterThan(baseRadiusPx + 4 * se12Fit.scale);
     }
 
-    // 1st and 2nd bad accuracy spikes (50 m) do NOT blank the held dot.
+    // Refresh anchor at t = 15_000 so the 8 s hold extends through t = 23_000 during the streak check.
+    expect(
+      tracker.ingestGpsReading(readingFromPage(corridorPt, se12Fit, 7, 15_000), unknown).status,
+    ).toBe('matched');
+
+    // Rapid bad accuracy spikes (even 3+ within < minBadFixStreakMs) do NOT blank the held dot.
     const firstOutlier = {
       ...readingFromPage(corridorPt, se12Fit, 50, 15_500), captureTimestamp: 15_700,
     };
@@ -817,24 +829,125 @@ describe('IndoorPdrTracker lifecycle, deduplication, ambiguity, and halo invaria
       tracker.ingestGpsReading(readingFromPage(corridorPt, se12Fit, 50, 16_000), unknown).status,
     ).toBe('low-accuracy');
     expect(tracker.evaluateAt(16_000, true, 'unknown').status).toBe('held');
-
-    // 3rd consecutive bad fix hides the dot and surfaces low-accuracy.
     expect(
       tracker.ingestGpsReading(readingFromPage(corridorPt, se12Fit, 50, 16_500), unknown).status,
     ).toBe('low-accuracy');
-    expect(tracker.evaluateAt(16_500, true, 'unknown').status).toBe('low-accuracy');
+    expect(tracker.evaluateAt(16_500, true, 'unknown').status).toBe('held');
 
-    // A fresh valid fix resets outlier count; past 8 s without updates expires to waiting.
+    // Once consecutive bad fixes span at least minBadFixStreakMs, the dot hides and surfaces low-accuracy.
+    tracker.ingestGpsReading(readingFromPage(corridorPt, se12Fit, 50, 19_500), unknown);
+    const sustainedCaptureAt = firstOutlier.captureTimestamp + PDR_TRACKER_CONFIG.minBadFixStreakMs;
+    const sustainedAt = sustainedCaptureAt - 300;
     expect(
-      tracker.ingestGpsReading(readingFromPage(corridorPt, se12Fit, 7, 17_000), unknown).status,
+      tracker.ingestGpsReading(
+        {
+          ...readingFromPage(corridorPt, se12Fit, 50, sustainedAt),
+          captureTimestamp: sustainedCaptureAt,
+        },
+        unknown,
+      ).status,
+    ).toBe('low-accuracy');
+    expect(tracker.evaluateAt(sustainedAt, true, 'unknown').status).toBe('low-accuracy');
+
+    // A fresh valid fix resets outlier count and span; past 8 s without updates expires to waiting.
+    const recoveredAt = sustainedAt + 500;
+    expect(
+      tracker.ingestGpsReading(readingFromPage(corridorPt, se12Fit, 7, recoveredAt), unknown).status,
     ).toBe('matched');
-    expect(tracker.evaluateAt(17_000 + PDR_TRACKER_CONFIG.liveGpsHoldMs, false, 'unknown').status).toBe(
+    expect(tracker.evaluateAt(recoveredAt + PDR_TRACKER_CONFIG.liveGpsHoldMs, false, 'unknown').status).toBe(
       'held',
     );
     expect(
-      tracker.evaluateAt(17_000 + PDR_TRACKER_CONFIG.liveGpsHoldMs + 1, false, 'unknown').status,
+      tracker.evaluateAt(recoveredAt + PDR_TRACKER_CONFIG.liveGpsHoldMs + 1, false, 'unknown').status,
     ).toBe('waiting');
   });
+
+  it('restarts the stationary streak after silence and recovers only on a valid fix', () => {
+    const tracker = new IndoorPdrTracker({ enableParticleFilter: false });
+    const point = cellToPage(200, 133, se12Surface, se12Plan);
+    tracker.configureContext({
+      plan: se12Plan,
+      calibration: se12Calibration,
+      surface: se12Surface,
+      stepKind: 'corridor',
+      isSamePlanStep: true,
+    });
+    const stationary = makeMotionSnapshot('stationary', { hasGyro: false });
+    tracker.ingestGpsReading(readingFromPage(point, se12Fit, 6, 10_000), stationary);
+    tracker.ingestGpsReading(readingFromPage(point, se12Fit, 50, 11_000), stationary);
+    tracker.ingestGpsReading(readingFromPage(point, se12Fit, 50, 11_500), stationary);
+
+    for (const timestamp of [30_000, 33_000]) {
+      tracker.ingestGpsReading(readingFromPage(point, se12Fit, 50, timestamp), stationary);
+      expect(tracker.evaluateAt(timestamp, true, 'stationary')).toMatchObject({
+        status: 'held',
+        overlay: { trackingMode: 'stationary-hold' },
+      });
+    }
+    for (const timestamp of [36_000, 42_000]) {
+      tracker.ingestGpsReading(readingFromPage(point, se12Fit, 50, timestamp), stationary);
+      expect(tracker.evaluateAt(timestamp, true, 'stationary').status).toBe('low-accuracy');
+    }
+    tracker.ingestGpsReading(readingFromPage(point, se12Fit, 6, 42_500), stationary);
+    expect(tracker.evaluateAt(42_500, true, 'stationary').status).toBe('matched');
+  });
+
+  it.each(['outdoor', 'corridor'] as const)(
+    'hides a raw %s position on the third distinct rejection',
+    (stepKind) => {
+      const tracker = new IndoorPdrTracker({ enableParticleFilter: false });
+      tracker.configureContext({
+        plan: se12Plan,
+        calibration: se12Calibration,
+        buildingRings: se12BuildingRings,
+        surface: stepKind === 'outdoor' ? se12Surface : undefined,
+        stepKind,
+        isSamePlanStep: stepKind === 'corridor',
+      });
+      const point = cellToPage(200, 133, se12Surface, se12Plan);
+      const outsidePoint = { x: 0.05, y: 0.05 };
+      expect(tracker.ingestGpsReading(readingFromPage(point, se12Fit, 6, 10_000)).status).toBe('raw');
+      const firstRejection = readingFromPage(outsidePoint, se12Fit, 6, 11_000);
+      expect(tracker.ingestGpsReading(firstRejection).status).toBe('outside-building');
+      tracker.ingestGpsReading({ ...firstRejection, timestamp: 11_100, captureTimestamp: 11_000 });
+      tracker.ingestGpsReading(readingFromPage(outsidePoint, se12Fit, 6, 12_000));
+      expect(tracker.evaluateAt(12_000, true, 'unknown').status).toBe('held');
+      tracker.ingestGpsReading(readingFromPage(outsidePoint, se12Fit, 6, 13_000));
+      expect(tracker.evaluateAt(13_000, true, 'unknown').status).toBe('outside-building');
+    },
+  );
+
+  it.each(['unknown', 'stationary', 'moving'] as const)(
+    'rejects a SW03 fix on the SE12 corridor before or after a match with %s motion',
+    (activity) => {
+      const tracker = new IndoorPdrTracker({ enableParticleFilter: activity === 'moving' });
+      tracker.configureContext({
+        plan: se12Plan,
+        calibration: se12Calibration,
+        buildingRings: se12BuildingRings,
+        surface: se12Surface,
+        stepKind: 'corridor',
+        isSamePlanStep: true,
+      });
+      // Simulated point just inside the archived SW03 footprint, 12.31 m from the SE12 corridor.
+      const fix = { latitude: 49.24993241648, longitude: -123.00192178556, accuracy: 6 };
+      const reading = { ...fix, timestamp: 10_000, receivedAt: 10_000 };
+      const sw3BuildingRings = catalogue.buildings.find((building) => building.building === 'SW3')!.rings;
+      expect(overlapsFootprint({ ...reading, accuracy: 0 }, sw3BuildingRings)).toBe(true);
+      expect(overlapsFootprint(reading, se12BuildingRings)).toBe(false);
+
+      const motion = makeMotionSnapshot(activity);
+      expect(tracker.ingestGpsReading(reading, motion).status).toBe('too-far');
+      expect(tracker.evaluateAt(10_000, true, activity).status).toBe('too-far');
+      const point = cellToPage(200, 133, se12Surface, se12Plan);
+      expect(
+        tracker.ingestGpsReading(readingFromPage(point, se12Fit, 6, 11_000), motion).status,
+      ).toBe('matched');
+      expect(
+        tracker.ingestGpsReading({ ...fix, timestamp: 12_000, receivedAt: 12_000 }, motion).status,
+      ).toBe('too-far');
+    },
+  );
 });
 
 describe('Three-way comparative simulation benchmarks (Raw GPS vs Existing Matcher vs Stage 1 vs Stage 2)', () => {
@@ -1548,7 +1661,73 @@ describe('GuidedDirections DOM integration (iOS fallback, background return, fus
         reportLocation({ coords: { ...pt, accuracy: 7 }, timestamp: Date.now() } as GeolocationPosition),
       );
       expect(host.querySelector('.device-position')).not.toBeNull();
-      expect(announcement?.textContent).toBe('Approx. location · ±7m');
+      expect(announcement?.textContent).toBe('Approx. location');
+      expect(announcement?.parentElement?.textContent).toContain('7 m uncertainty radius');
+    } finally {
+      clearWalkingSurfaceCacheForTests();
+      await act(async () => root.unmount());
+      host.remove();
+    }
+  });
+
+  it('adds a Precise Location hint when low-accuracy readings are coarse (>= 150 m)', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(30_000);
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+    vi.stubGlobal('isSecureContext', true);
+    clearWalkingSurfaceCacheForTests();
+    vi.stubGlobal(
+      'fetch',
+      vi.fn(async () => ({ ok: true, json: async () => se12Surface })),
+    );
+
+    let reportLocation: PositionCallback = () => {};
+    vi.stubGlobal('navigator', {
+      geolocation: {
+        watchPosition: vi.fn((success: PositionCallback) => {
+          reportLocation = success;
+          return 22;
+        }),
+        clearWatch: vi.fn(),
+      },
+    });
+
+    const route = makeRouteFixture();
+    const host = document.createElement('div');
+    document.body.append(host);
+    const root = createRoot(host);
+    try {
+      await act(async () =>
+        root.render(
+          createElement(RouteDirections, {
+            route,
+            plans: pilotEvidence().map((p) => p.plan),
+            locationCatalogue: catalogue,
+            onRecheck: vi.fn(),
+          }),
+        ),
+      );
+
+      const pt = se12Fit.unproject(cellToPage(200, 133, se12Surface, se12Plan));
+      const announcement = () => host.querySelector('.guided-location-status [role="status"]')?.textContent;
+
+      await act(async () =>
+        reportLocation({
+          coords: { latitude: pt.latitude, longitude: pt.longitude, accuracy: 50 },
+          timestamp: 30_000,
+        } as GeolocationPosition),
+      );
+      expect(host.querySelector('.device-position')).toBeNull();
+      expect(announcement()).toBe('GPS signal too weak');
+
+      await act(async () =>
+        reportLocation({
+          coords: { latitude: pt.latitude, longitude: pt.longitude, accuracy: 2500 },
+          timestamp: 31_000,
+        } as GeolocationPosition),
+      );
+      expect(host.querySelector('.device-position')).toBeNull();
+      expect(announcement()).toBe('GPS signal too weak · check Precise Location');
     } finally {
       clearWalkingSurfaceCacheForTests();
       await act(async () => root.unmount());

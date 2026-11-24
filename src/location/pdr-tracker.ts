@@ -86,6 +86,10 @@ export const PDR_TRACKER_CONFIG = Object.freeze({
   stationaryHoldMaxMs: 45_000,
   /** Consecutive rejected fixes required before blanking an otherwise held valid position. */
   maxConsecutiveBadFixes: 3,
+  /** Minimum elapsed span (ms) across consecutive rejected fixes before blanking a held/bridged position. */
+  minBadFixStreakMs: 6_000,
+  /** A longer capture gap starts a new indoor rejection streak. */
+  maxBadFixGapMs: 4_000,
 });
 
 export type TrackerContext = {
@@ -205,7 +209,12 @@ export class IndoorPdrTracker {
   private lastProcessedCaptureTimestamp = -Infinity;
   private lastGpsResult: StoredGpsResult | null = null;
   private lastValidResult: ValidOverlaySnapshot | null = null;
-  private consecutiveBadFixes = 0;
+  private badFixStreak: {
+    count: number;
+    firstCaptureAt: number;
+    lastCaptureAt: number;
+    hidePosition: boolean;
+  } | null = null;
   private lastBadFixAt = -Infinity;
   private sawRawBeforeSurface = false;
 
@@ -331,7 +340,7 @@ export class IndoorPdrTracker {
     }
     this.lastGpsResult = null;
     this.lastValidResult = null;
-    this.consecutiveBadFixes = 0;
+    this.badFixStreak = null;
     this.lastBadFixAt = -Infinity;
     this.sawRawBeforeSurface = false;
     this.previousMatch = null;
@@ -370,7 +379,7 @@ export class IndoorPdrTracker {
     this.stationaryCandidates = [];
     // Never snap backwards onto an old pre-walk GPS anchor after a particle-bridge outage.
     this.lastValidResult = null;
-    this.consecutiveBadFixes = 0;
+    this.badFixStreak = null;
     this.clearParticleEstimate();
     this.invalidatedGyroStreamStart = this.gyroStreamStart ?? this.invalidatedGyroStreamStart;
   }
@@ -442,7 +451,7 @@ export class IndoorPdrTracker {
         corridorMatched: normalized.status === 'matched',
         reportedAccuracyMetres: reading.accuracy,
       };
-      this.consecutiveBadFixes = 0;
+      this.badFixStreak = null;
       this.lastValidResult = {
         status: normalized.status,
         overlay,
@@ -456,11 +465,35 @@ export class IndoorPdrTracker {
 
     if (normalized.status === 'unavailable') {
       this.lastValidResult = null;
-      this.consecutiveBadFixes = 0;
+      this.badFixStreak = null;
       return normalized;
     }
 
-    this.consecutiveBadFixes += 1;
+    const timedStreak =
+      normalized.status !== 'outside-building' &&
+      this.lastValidResult?.status === 'matched' &&
+      this.isPdrEligible();
+    const captureAt = this.lastProcessedCaptureTimestamp;
+    let streak = this.badFixStreak;
+    if (
+      timedStreak &&
+      streak &&
+      captureAt - streak.lastCaptureAt > PDR_TRACKER_CONFIG.maxBadFixGapMs
+    ) {
+      streak = null;
+    }
+    const count = (streak?.count ?? 0) + 1;
+    const firstCaptureAt = streak?.firstCaptureAt ?? captureAt;
+    const enoughRejections = count >= PDR_TRACKER_CONFIG.maxConsecutiveBadFixes;
+    const sustained = captureAt - firstCaptureAt >= PDR_TRACKER_CONFIG.minBadFixStreakMs;
+    this.badFixStreak = {
+      count,
+      firstCaptureAt,
+      lastCaptureAt: captureAt,
+      // Once hidden, a later rejected fix cannot restore an old position after a gap.
+      hidePosition:
+        this.badFixStreak?.hidePosition === true || (enoughRejections && (!timedStreak || sustained)),
+    };
     this.lastBadFixAt = reading.timestamp;
     return normalized;
   }
@@ -504,6 +537,7 @@ export class IndoorPdrTracker {
         plan: ctx.plan,
         calibration: ctx.calibration,
         surface: ctx.surface,
+        buildingRings: ctx.buildingRings,
         routePath: ctx.stepKind === 'corridor' ? ctx.routePath : undefined,
         stepKind: ctx.stepKind,
         previous: ctx.stepKind === 'corridor' && ctx.isSamePlanStep ? this.previousMatch : null,
@@ -632,9 +666,7 @@ export class IndoorPdrTracker {
       now - this.lastBadFixAt <= PDR_TRACKER_CONFIG.liveGpsHoldMs
         ? this.toEvaluation(this.lastGpsResult)
         : { status: 'waiting' };
-    if (this.consecutiveBadFixes >= PDR_TRACKER_CONFIG.maxConsecutiveBadFixes) {
-      return recentRejection;
-    }
+    if (this.badFixStreak?.hidePosition) return recentRejection;
 
     const heldFix = this.lastValidResult;
     const canHoldStationary =
@@ -671,7 +703,7 @@ export class IndoorPdrTracker {
       const ageMs = Math.max(0, now - heldFix.timestamp);
 
       // Fresh live reading with no intervening rejected fix.
-      if (freshGps && ageMs <= LOCATION_FRESH_MS && this.consecutiveBadFixes === 0) {
+      if (freshGps && ageMs <= LOCATION_FRESH_MS && !this.badFixStreak) {
         return { status: heldFix.status, overlay: heldFix.overlay };
       }
 
@@ -680,7 +712,7 @@ export class IndoorPdrTracker {
         return this.buildHeldEvaluation(now, 'stationary-hold');
       }
 
-      // Conservative bounded GPS hold across normal indoor watch gaps or 1-2 bad fixes.
+      // Keep the last accepted fix through brief watch gaps and rejection bursts.
       if (ageMs <= PDR_TRACKER_CONFIG.liveGpsHoldMs) {
         return this.buildHeldEvaluation(now, 'gps-hold');
       }
@@ -724,6 +756,7 @@ export class IndoorPdrTracker {
       plan: ctx.plan,
       calibration: ctx.calibration,
       surface: ctx.surface,
+      buildingRings: ctx.buildingRings,
       routePath: ctx.routePath,
       stepKind: ctx.stepKind,
       previous: this.previousMatch,
@@ -773,6 +806,7 @@ export class IndoorPdrTracker {
           plan: ctx.plan,
           calibration: ctx.calibration,
           surface: ctx.surface,
+          buildingRings: ctx.buildingRings,
           routePath: ctx.routePath,
           stepKind: ctx.stepKind,
           previous: null,
@@ -815,6 +849,7 @@ export class IndoorPdrTracker {
       plan: ctx.plan,
       calibration: ctx.calibration,
       surface: ctx.surface,
+      buildingRings: ctx.buildingRings,
       routePath: ctx.routePath,
       stepKind: ctx.stepKind,
       previous: null,
@@ -1248,6 +1283,7 @@ export class IndoorPdrTracker {
         point,
         radiusX: (radiusMetres * fit.scale) / ctx.plan.width,
         radiusY: (radiusMetres * fit.scale) / ctx.plan.height,
+        uncertaintyRadiusMetres: radiusMetres,
         ...(snapDistanceMetres !== undefined ? { snapDistanceMetres } : {}),
         trackingMode,
         corridorMatched: true,
@@ -1288,14 +1324,14 @@ export class IndoorPdrTracker {
       PDR_TRACKER_CONFIG.gpsHoldMaxExtraRadiusMetres,
       PDR_TRACKER_CONFIG.gpsHoldGrowthMetresPerSec * extraSec,
     );
-    const baseRadiusMetres = (valid.overlay.radiusX * ctx.plan.width) / fit.scale;
-    const radiusMetres = baseRadiusMetres + extraMetres;
+    const radiusMetres = valid.overlay.uncertaintyRadiusMetres + extraMetres;
     return {
       status: 'held',
       overlay: {
         ...valid.overlay,
         radiusX: (radiusMetres * fit.scale) / ctx.plan.width,
         radiusY: (radiusMetres * fit.scale) / ctx.plan.height,
+        uncertaintyRadiusMetres: radiusMetres,
         trackingMode: 'gps-hold',
         corridorMatched: valid.status === 'matched',
         ageSeconds,

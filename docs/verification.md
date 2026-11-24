@@ -2,6 +2,12 @@
 
 This file is a historical log. Older entries describe workflows and route data that have since changed. The current visitor app uses GPS-required automatic start matching and has no start-confirmation, connection-review or topology-editor screen/API; see [current architecture](architecture.md) and [device-location coverage](device-location.md).
 
+## Guided GPS footprint, hold, and uncertainty checks · November 24, 2026
+
+An offline replay used a simulated fix inside the archived SW03 footprint whose 6 m accuracy circle missed SE12. All three tracking tiers rejected it on the SE12 floor-3 corridor. Separate checks exercised 23 m and 25 m snap offsets with footprint overlap, the third outdoor and raw GPS rejection, duplicate fixes, and a stationary rejection after 18.5 seconds of simulated GPS silence. A DOM test confirmed that a 15.3 m halo displays as a 16 m uncertainty radius.
+
+The six targeted Vitest suites passed all 67 cases. With localhost access, `npm.cmd run test:unit -- --reporter=dot` passed 534 of 575 cases. The same 41 tests failed by name before and after the change. `npm.cmd run build` and `npm.cmd run data:validate` passed. These checks used simulated GPS and motion readings. Physical Android and iOS campus walkthroughs remain pending, and Stage 2 remains disabled for visitors.
+
 ## SE12 fourth-floor elevator return to room 402 · November 24, 2026
 
 Replayed the 302 sign through location matching and the visitor planner with elevators required. The previous graph returned the SW03 elevator and both interbuilding transfers, then stopped at the SE12 entrance with a separate marker for 402. The entrance pin lay in the drawn double-door swing beyond the ordinary walking grid. On the recompiled graph the final walk runs from the confirmed passage through corridor 408C to a mapped classroom doorway. The reverse elevator trip also completes, and the stair-preferred trip uses the SE12 stairs.

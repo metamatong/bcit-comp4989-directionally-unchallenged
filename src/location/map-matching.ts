@@ -5,7 +5,7 @@
  */
 import type { VisualPlan } from '../types';
 import type { PagePoint, WalkingStep, WalkingSurface } from '../wayfinding';
-import { fitCalibration } from './geometry';
+import { fitCalibration, overlapsFootprint } from './geometry';
 import type {
   DeviceOverlay,
   DeviceReading,
@@ -16,9 +16,13 @@ import type {
 
 export const MAP_MATCH_CONFIG = Object.freeze({
   maxReportedAccuracyMetres: 35,
-  maxSnapMetres: 20,
-  /** Floor allowance so ~10 m exterior pulls still match even when a phone under-reports error. */
-  minSnapFloorMetres: 12,
+  /** Threshold above which a rejected reading is likely OS coarse/approximate location (e.g., iOS Precise Location off). */
+  coarseLocationAccuracyMetres: 150,
+  maxSnapMetres: 24,
+  /** Floor allowance so indoor exterior pulls still match even when a phone under-reports error. */
+  minSnapFloorMetres: 16,
+  maxSnapWithoutFootprintOverlapMetres: 20,
+  minSnapWithoutFootprintOverlapMetres: 12,
   /** Shifts smaller than this mean the raw reading already sits on the walkable corridor. */
   snapNoticeThresholdMetres: 0.5,
   maxWalkingSpeedMps: 2.0,
@@ -73,6 +77,7 @@ function makeOverlay(
     point,
     radiusX: (radiusMetres * scale) / plan.width,
     radiusY: (radiusMetres * scale) / plan.height,
+    uncertaintyRadiusMetres: radiusMetres,
     ...(snapDistanceMetres !== undefined ? { snapDistanceMetres } : {}),
     ...(trackingMode !== undefined ? { trackingMode } : {}),
   };
@@ -113,6 +118,7 @@ export function matchDeviceToFloor({
   plan,
   calibration,
   surface,
+  buildingRings,
   routePath,
   stepKind,
   previous,
@@ -122,6 +128,7 @@ export function matchDeviceToFloor({
   plan: VisualPlan;
   calibration?: FloorCalibration;
   surface?: WalkingSurface | null;
+  buildingRings?: number[][][];
   routePath?: PagePoint[];
   stepKind?: WalkingStep['kind'];
   previous?: PreviousMatch | null;
@@ -162,11 +169,18 @@ export function matchDeviceToFloor({
     return { status: 'unavailable' };
 
   const rawPx = { x: rawPoint.x * plan.width, y: rawPoint.y * plan.height };
-  const limitPx =
-    Math.min(
-      MAP_MATCH_CONFIG.maxSnapMetres,
-      Math.max(reading.accuracy, MAP_MATCH_CONFIG.minSnapFloorMetres),
-    ) * scale;
+  const overlapsBuilding = buildingRings && overlapsFootprint(reading, buildingRings);
+  // Preserve the original near-wall allowance unless the reading supports the active building.
+  const limitMetres = overlapsBuilding
+    ? Math.min(
+        MAP_MATCH_CONFIG.maxSnapMetres,
+        Math.max(reading.accuracy, MAP_MATCH_CONFIG.minSnapFloorMetres),
+      )
+    : Math.min(
+        MAP_MATCH_CONFIG.maxSnapWithoutFootprintOverlapMetres,
+        Math.max(reading.accuracy, MAP_MATCH_CONFIG.minSnapWithoutFootprintOverlapMetres),
+      );
+  const limitPx = limitMetres * scale;
   const routePx = routePath?.length
     ? routePath.map((p) => ({ x: p.x * plan.width, y: p.y * plan.height }))
     : null;

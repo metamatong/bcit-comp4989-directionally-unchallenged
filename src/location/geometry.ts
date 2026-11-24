@@ -106,10 +106,14 @@ export function deviceOverlay(
     point: fit.project(reading),
     radiusX: (reading.accuracy * fit.scale) / plan.width,
     radiusY: (reading.accuracy * fit.scale) / plan.height,
+    uncertaintyRadiusMetres: reading.accuracy,
   };
 }
 
-export function overlapsBounds(overlay: DeviceOverlay, bounds: [number, number, number, number]) {
+export function overlapsBounds(
+  overlay: Pick<DeviceOverlay, 'point' | 'radiusX' | 'radiusY'>,
+  bounds: [number, number, number, number],
+) {
   const dx = Math.max(bounds[0] - overlay.point.x, 0, overlay.point.x - bounds[2]);
   const dy = Math.max(bounds[1] - overlay.point.y, 0, overlay.point.y - bounds[3]);
   if (!overlay.radiusX || !overlay.radiusY) return dx === 0 && dy === 0;
