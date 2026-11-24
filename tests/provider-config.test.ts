@@ -38,8 +38,9 @@ describe('provider configuration', () => {
   it('defaults to Gemini and preserves its current model/fallback settings', () => {
     expect(liveAiProvider({})).toBe('gemini');
     expect(liveAiSetupIssue({ ...gemini, OPENAI_MODEL: '', OPENAI_API_KEY: '' })).toBeNull();
+    expect(liveAiModel({})).toBe('gemini-3.1-flash-lite');
     expect(liveAiModel({ GEMINI_MODEL: 'gemini-3.6-flash' })).toBe('gemini-3.6-flash');
-    expect(liveAiFallbackModels({})).toEqual(['gemini-3.8-flash']);
+    expect(liveAiFallbackModels({})).toEqual(['gemini-3.5-flash', 'gemini-3.8-flash']);
   });
   it('selects paid OpenAI without requiring Gemini credentials or free-tier confirmation', () => {
     expect(liveAiProvider(openai)).toBe('openai');

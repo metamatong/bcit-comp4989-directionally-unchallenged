@@ -9,13 +9,16 @@ import {
 } from '../server/provider';
 
 describe('live configuration', () => {
-  it('defaults to current models without implicitly trying restricted Gemini 2.5 models', () => {
-    expect(defaultGeminiModel).toBe('gemini-3.5-flash-lite');
-    expect(liveAiFallbackModels({})).toEqual(['gemini-3.8-flash']);
-    expect(liveAiFallbackModels({ GEMINI_MODEL: 'gemini-3.8-flash' })).toEqual([
-      'gemini-3.5-flash-lite',
-    ]);
-  });
+  it.each([
+    ['gemini-3.5-flash', ['gemini-3.1-flash-lite', 'gemini-3.8-flash']],
+    ['gemini-3.8-flash', ['gemini-3.1-flash-lite', 'gemini-3.5-flash']],
+    ['gemini-3.6-flash', ['gemini-3.1-flash-lite', 'gemini-3.5-flash']],
+  ] as const)(
+    'selects the first two remaining default models for primary %s',
+    (primary, fallbacks) => {
+      expect(liveAiFallbackModels({ GEMINI_MODEL: primary })).toEqual(fallbacks);
+    },
+  );
   it('preserves explicit supported fallback choices, including opting out', () => {
     expect(liveAiFallbackModels({ GEMINI_FALLBACK_MODELS: '' })).toEqual([]);
     expect(
@@ -49,6 +52,7 @@ describe('live configuration', () => {
     },
   );
   it.each([
+    'gemini-3.1-flash-lite',
     'gemini-3.5-flash',
     'gemini-3.5-flash-lite',
     'gemini-3.6-flash',
@@ -141,6 +145,27 @@ describe('provider transport and free-tier request controls', () => {
     const provider = new GeminiProvider({ ...options, fetchImpl: fake });
     await expect(provider.generate([], [])).rejects.toThrow('quota');
     expect(fake).toHaveBeenCalledTimes(1);
+  });
+  it('tries the three default Gemini endpoints in order when the first two return 429', async () => {
+    const fake = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(new Response(null, { status: 429 }))
+      .mockResolvedValueOnce(new Response(null, { status: 429 }))
+      .mockResolvedValueOnce(
+        Response.json({ candidates: [{ content: { parts: [{ text: 'Done' }] } }] }),
+      );
+    const provider = new GeminiProvider({
+      ...options,
+      model: defaultGeminiModel,
+      fallbackModels: liveAiFallbackModels({}),
+      fetchImpl: fake,
+    });
+    await expect(provider.generate([], [])).resolves.toEqual([{ text: 'Done' }]);
+    expect(fake.mock.calls.map(([url]) => new URL(String(url)).pathname)).toEqual([
+      '/v1beta/models/gemini-3.1-flash-lite:generateContent',
+      '/v1beta/models/gemini-3.5-flash:generateContent',
+      '/v1beta/models/gemini-3.8-flash:generateContent',
+    ]);
   });
   it('skips exhausted keys until their individual retry times and restores primary priority', async () => {
     const clock = vi.spyOn(Date, 'now').mockReturnValue(10_000);

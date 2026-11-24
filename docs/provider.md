@@ -32,13 +32,15 @@ Automated regression tests use mocked OpenAI transport and source protocol fixtu
 
 ## Gemini adapter
 
-Google Gemini Developer API. The new-install default is **`gemini-3.5-flash-lite`**, with **`gemini-3.8-flash`** as its default fallback. Google's current [model catalogue](https://ai.google.dev/gemini-api/docs/models) describes both as multimodal models; the [pricing page](https://ai.google.dev/gemini-api/docs/pricing) currently lists free-tier input and output for them. The existing private `.env` model is preserved and remains the primary model unless changed by the operator. An existing 3.8 primary defaults to a 3.5 Flash-Lite backup. Explicit fallback lists, including an empty list, are preserved. Photo analysis sends the actual image, official plan PNGs and geometry summaries. Selection/detail use 4,096/8,192 total output-and-thinking token allowances.
+The default request order is `gemini-3.1-flash-lite` → `gemini-3.5-flash` → `gemini-3.8-flash`. The server sends these exact IDs to the Gemini Developer API. Google marks `gemini-3.5-flash` as deprecated and serves requests for it through `gemini-3.6-flash`. [Google’s model documentation](https://aistudio.google.com/docs/models/gemini-3.5-flash)
+
+Set `GEMINI_MODEL` to override the primary. When `GEMINI_FALLBACK_MODELS` is unset, the first two other IDs in the default order are the backups. An explicit comma-separated list sets their order, and an empty list disables model fallback.
 
 Free-tier content may be used to improve Google's products. DirectionallyUnchallenged uses local source/visual retrieval and does not use provider context caching or Google Search/Maps grounding. Verify the selected primary and fallback models are available to the specific API project before confirming eligibility.
 
 Gemini enforces quotas per Google Cloud project, and limits vary by model. Every key in the same project shares its quota. Use backups only for allocations authorized for this application. To increase the application's allowance, check the project's limits in AI Studio and request an increase where eligible. [Google rate limits](https://ai.google.dev/gemini-api/docs/rate-limits) · [Google API terms, section 2(d)](https://developers.google.com/terms#d_api_limitations)
 
-The supported stable Flash model IDs are Gemini 3.5 Flash, 3.5 Flash-Lite, 3.6 Flash, 3.7 Flash and 3.8 Flash. Gemini 2.5 is excluded from configuration even though Google currently lists the Flash models as available: access is restricted to existing users, and they are not appropriate new defaults or fallbacks. A successful model-list or metadata response does not prove generation access. Google's exact model availability and quotas can change and must be checked for the operator's account.
+The app also accepts Gemini 3.5 Flash-Lite, 3.6 Flash and 3.7 Flash as explicit choices. Gemini 2.5 is excluded from configuration even though Google currently lists the Flash models as available: access is restricted to existing users, and they are not appropriate new defaults or fallbacks. A successful model-list or metadata response does not prove generation access. Google's exact model availability and quotas can change and must be checked for the operator's account.
 
 ## Activation
 

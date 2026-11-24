@@ -36,7 +36,7 @@ export default defineConfig({
       GEMINI_API_KEY_3: '',
       AI_PROVIDER: 'gemini',
       OPENAI_API_KEY: '',
-      GEMINI_MODEL: 'gemini-3.5-flash-lite',
+      GEMINI_MODEL: 'gemini-3.1-flash-lite',
       AI_FREE_TIER_CONFIRMED: 'false',
     },
     timeout: 30000,
