@@ -122,9 +122,15 @@ def compile_cad_floor(plan, page, geometry, extra, reviewed, grid_type):
             cv2.fillPoly(restricted, [polygon], 255)
     sealed |= restricted
     barriers |= restricted
-    local = grid_type((public > 0) & (sealed == 0), sealed, regions, 2)
+    local = grid_type(
+        (public > 0) & (sealed == 0),
+        sealed,
+        regions,
+        2,
+        cad_door_swings=symbols,
+        structural=barriers,
+    )
     local.partition = segmentation
-    local.structural = barriers
     nodes = [
         n
         for n in reviewed

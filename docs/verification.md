@@ -2,6 +2,14 @@
 
 This file is a historical log. Older entries describe workflows and route data that have since changed. The current visitor app uses GPS-required automatic start matching and has no start-confirmation, connection-review or topology-editor screen/API; see [current architecture](architecture.md) and [device-location coverage](device-location.md).
 
+## SE12 fourth-floor elevator return to room 402 · November 24, 2026
+
+Replayed the 302 sign through location matching and the visitor planner with elevators required. The previous graph returned the SW03 elevator and both interbuilding transfers, then stopped at the SE12 entrance with a separate marker for 402. The entrance pin lay in the drawn double-door swing beyond the ordinary walking grid. On the recompiled graph the final walk runs from the confirmed passage through corridor 408C to a mapped classroom doorway. The reverse elevator trip also completes, and the stair-preferred trip uses the SE12 stairs.
+
+The 402 regression now requires a complete route and checks the final floor map for the destination, walking line and arrowhead. A compiler check covers a real obstruction at the swing and a mark outside the aperture. The regenerated corpus added one doorway-to-grid connection on SE12 floor 4. The per-place network coverage totals are the same because 402 was already reachable via stairs. These checks use structured sign readings and the source drawing. [SE12 fourth-floor plan](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1204.pdf)
+
+The local visitor HTTP API returned the complete elevator-only trip with six points in the final corridor line. The Vercel package build verified this trip on graph `624fb6d19cc2c20b`. All 11 offline compiler tests and all 26 browser checks passed. The full unit and API suite passed 525 of 567 cases. The same 42 cases failed on the base commit `8161f64` with matching assertions.
+
 ## SW05 source and walking network · November 22, 2026
 
 The visitor router pairs SW05 stair enclosures across the two registered source sheets. It requires the matching signed stair number, a fitted doorway with a public grid approach on each floor and a unique overlapping enclosure in both directions. The left stair is S180–S280 and the right stair is S189–S289. These pairs are computed at runtime without device GPS or a stored inter-floor approval. The route planner returned a walk from SW05 lobby 1800 to classroom 2895 and from classroom 2825 to ground-floor AV room 1845. It also connected communications room 2880 to the public side of the 1856 janitor door. The 1856 label is printed in the lobby, and its doorway opens into vestibule 1854. These checks used structured source signs. No visitor media or external model call was used.
