@@ -156,7 +156,7 @@ Five local visitor API pairs were sampled before checking reachability, using se
 
 ## Stair preference and guided directions · November 19, 2026
 
-The destination step offers **Accessibility: prefer elevators**; unchecked routes prefer stairs. The planner first looks for a complete route without the non-preferred transfer type, then falls back to all currently permitted connections. Route results retain the ordered floor-map overview. At the time of this verification, **GO** required a fresh GPS reading before opening the guided step with its floor map and a live position dot where floor calibration existed. Previous/next/finish controls update progress without inferring floors or advancing from GPS. GPS and accessibility remain approximate indoors.
+The destination step offers **Use elevators**; when selected, routes exclude stairs throughout and report when no elevator-only path is mapped. Unchecked routes prefer stairs and may use elevators when needed. Route results retain the ordered floor-map overview. At the time of this verification, **GO** required a fresh GPS reading before opening the guided step with its floor map and a live position dot where floor calibration existed. Previous/next/finish controls update progress without inferring floors or advancing from GPS. GPS and accessibility remain approximate indoors.
 
 ## SE12 302 to SW03 1730
 

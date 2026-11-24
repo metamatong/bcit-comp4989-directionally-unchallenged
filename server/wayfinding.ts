@@ -490,14 +490,19 @@ export function planVisitorJourney(
       )
       .filter((r) => r.outcome === 'route')
       .sort((a, b) => a.edgeIds.length - b.edgeIds.length);
-  // Prefer a complete path without the other transfer type; preserve coverage when none exists.
-  const route = routesUsing(preferredEdges)[0] ?? routesUsing(network.allowed)[0];
+  // Selecting elevators is a strict constraint. Stairs remain a fallback only when
+  // the visitor has left the elevator switch off.
+  const route =
+    routesUsing(preferredEdges)[0] ??
+    (request.preferElevators ? undefined : routesUsing(network.allowed)[0]);
   if (!route)
     return {
       ...context,
       ...(destinationMatch ? { destinationMatch } : {}),
       status: 'no-route',
-      message: 'The photo location and destination do not have a continuous walking route.',
+      message: request.preferElevators
+        ? 'No route using elevators is mapped between these places.'
+        : 'The photo location and destination do not have a continuous walking route.',
     };
   const byId = new Map(nodes.map((n) => [n.id, n]));
   const edges = new Map(doc.edges.map((e) => [e.id, e]));

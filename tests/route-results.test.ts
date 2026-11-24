@@ -167,7 +167,7 @@ it.each([true, 'denied'] as const)(
       await wait(() => expect(host.querySelector('#trip-destination')).not.toBeNull());
       await setDestination('SW03 2082');
       const elevatorOption = [...host.querySelectorAll('label')]
-        .find((label) => label.textContent?.includes('Prefer elevators'))!
+        .find((label) => label.textContent?.includes('Use elevators'))!
         .querySelector<HTMLInputElement>('input')!;
       expect(elevatorOption.checked).toBe(false);
       expect(getCurrentPosition).not.toHaveBeenCalled();
@@ -286,7 +286,7 @@ it.each([true, 'denied'] as const)(
       expect(result.querySelectorAll('.route-map-visit')).toHaveLength(3);
       await click(host.querySelector<HTMLElement>('.journey-inputs > summary')!);
       const preference = [...host.querySelectorAll('label')]
-        .find((label) => label.textContent?.includes('Prefer elevators'))!
+        .find((label) => label.textContent?.includes('Use elevators'))!
         .querySelector<HTMLInputElement>('input')!;
       expect(preference.checked).toBe(false);
       await click(preference);
@@ -296,7 +296,7 @@ it.each([true, 'denied'] as const)(
       await click(button('Overview'));
       await wait(() =>
         expect(host.querySelector('.route-directions .helper')?.textContent).toContain(
-          'Elevators preferred',
+          'Elevators only',
         ),
       );
       const navigationRequests = requestBodies

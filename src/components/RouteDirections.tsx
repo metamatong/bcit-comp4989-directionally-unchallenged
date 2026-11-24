@@ -275,7 +275,7 @@ export function RouteDirections({
                 : 'Walking directions'}
           </h2>
           <p className="helper overview-pref" role="note">
-            {transferNotice ?? (preferElevators ? 'Elevators preferred.' : 'Stairs preferred.')}
+            {transferNotice ?? (preferElevators ? 'Elevators only.' : 'Stairs preferred.')}
           </p>
         </div>
         {canGuide && (

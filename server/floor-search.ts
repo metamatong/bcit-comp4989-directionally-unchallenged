@@ -142,11 +142,17 @@ export class FloorSearch {
     return !stop.unlinked && (stop.key >= 0 || this.incoming.has(stop.key));
   }
   /** Inspect the same directed connections as a visitor, confined to selected sheets. */
-  reachable(starts: SearchStop[], plans: Set<string>, reverse = false) {
+  reachable(
+    starts: SearchStop[],
+    plans: Set<string>,
+    reverse = false,
+    excluded?: 'stairs' | 'elevator',
+  ) {
     const links = new Map<number, number[]>();
     for (const [from, edges] of this.links) {
       for (const edge of edges) {
         if (!plans.has(edge.step.from.planId) || !plans.has(edge.step.to.planId)) continue;
+        if (edge.step.kind === excluded) continue;
         const [a, b] = reverse ? [edge.to, from] : [from, edge.to];
         const group = links.get(a) ?? [];
         group.push(b);
@@ -265,10 +271,9 @@ export class FloorSearch {
     );
   }
   route(origins: SearchStop[], goals: SearchStop[], preferElevators = false) {
-    return (
-      this.search(origins, goals, preferElevators ? 'stairs' : 'elevator') ??
-      this.search(origins, goals)
-    );
+    const preferred = this.search(origins, goals, preferElevators ? 'stairs' : 'elevator');
+    if (preferred || preferElevators) return preferred;
+    return this.search(origins, goals);
   }
   private search(origins: SearchStop[], goals: SearchStop[], excluded?: WalkingStep['kind']) {
     const floors = floorGraphs().ordered;

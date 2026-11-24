@@ -250,7 +250,7 @@ export function PhotoLocationInput({
             </button>
           )}
           <label className="switch-card">
-            <span className="switch-label">Prefer elevators</span>
+            <span className="switch-label">Use elevators</span>
             <span className="pill-switch">
               <input
                 type="checkbox"
@@ -445,7 +445,7 @@ export function PhotoLocationInput({
           />
 
           <label className="switch-card">
-            <span className="switch-label">Prefer elevators</span>
+            <span className="switch-label">Use elevators</span>
             <span className="pill-switch">
               <input
                 type="checkbox"

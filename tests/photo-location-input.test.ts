@@ -72,7 +72,7 @@ describe('inline photo input (Node rendering, no browser)', () => {
       preferElevators: false,
     });
     expect(markup).toContain('<h1 id="location-heading">Where are you headed?</h1>');
-    expect(markup).toContain('Prefer elevators');
+    expect(markup).toContain('Use elevators');
     expect(markup).toContain('role="switch"');
     expect(markup).not.toContain('building-chips');
     expect(button(markup, 'Get Directions')).not.toContain('disabled');

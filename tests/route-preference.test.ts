@@ -64,18 +64,18 @@ it.each([false, true])(
   },
 );
 
-it.each(['stairs', 'elevator'] as const)(
-  'uses the remaining approved transfer when %s is unavailable',
-  (excluded) => {
-    const { planner, from, to } = search(excluded);
-    const route = planner.route([from], [to], excluded === 'elevator')!;
-    expect(route).toBeDefined();
-    expect(route.steps.some((s) => s.kind === excluded)).toBe(false);
-    expect(
-      route.steps.some((s) => s.kind === (excluded === 'stairs' ? 'elevator' : 'stairs')),
-    ).toBe(true);
-  },
-);
+it('uses elevators only when selected, even when stairs are available', () => {
+  const { planner, from, to } = search('elevator');
+  expect(planner.route([from], [to], true)).toBeUndefined();
+});
+
+it('falls back to elevators when stairs are preferred but unavailable', () => {
+  const { planner, from, to } = search('stairs');
+  const route = planner.route([from], [to], false)!;
+  expect(route).toBeDefined();
+  expect(route.steps.some((s) => s.kind === 'stairs')).toBe(false);
+  expect(route.steps.some((s) => s.kind === 'elevator')).toBe(true);
+});
 
 it('validates the preference and preserves a legacy route when only an elevator path is approved', () => {
   const candidate = photoStartFixture();

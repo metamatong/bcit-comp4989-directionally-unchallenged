@@ -131,6 +131,47 @@ it('draws directions from SE12 302 to the SW03 1730 entrance without asking for 
   expect(vi.mocked(fetch)).toHaveBeenCalledOnce();
 });
 
+it('uses an elevator without stairs from SE12 302 to the SW03 1730 entrance', async () => {
+  const { candidate } = matchedPlace('302');
+  const result = await planVisitorNavigation(
+    candidate,
+    {
+      revision: 1,
+      candidateId: candidate.id,
+      destination: 'SW03 1730',
+      preferElevators: true,
+    },
+    store,
+  );
+  if (result.status !== 'route') throw Error(JSON.stringify(result));
+  expect(result.steps.some((step) => step.kind === 'elevator')).toBe(true);
+  expect(result.steps.some((step) => step.kind === 'stairs')).toBe(false);
+});
+
+it('uses the SW03 elevator for SE12 302 to SE12 402 when elevators are required', async () => {
+  const { candidate } = matchedPlace('302');
+  const result = await planVisitorNavigation(
+    candidate,
+    { revision: 1, candidateId: candidate.id, destination: 'SE12 402', preferElevators: true },
+    store,
+  );
+  const route = result.status === 'route' ? result : result.mappedPortion;
+  if (!route) throw Error(JSON.stringify(result));
+  expect(route.steps.some((step) => step.kind === 'elevator' && step.to.planId === 'SW3-F4-p1')).toBe(
+    true,
+  );
+  expect(route.steps.some((step) => step.kind === 'stairs')).toBe(false);
+  expect(
+    route.steps.some(
+      (step) =>
+        step.kind === 'building-link' &&
+        step.from.planId === 'SW3-F4-p1' &&
+        step.to.planId === 'SE12-F4-p1',
+    ),
+  ).toBe(true);
+  expect(route.destination.planId).toBe('SE12-F4-p1');
+});
+
 it('keeps the matched room on a coverage-error card without making a real room a permanent failure fixture', async () => {
   const { candidate } = matchedPlace('302');
   const destination = 'SW03 1730';

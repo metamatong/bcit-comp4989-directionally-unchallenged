@@ -380,7 +380,12 @@ export class CampusJourney {
       for (const origins of originGroups) {
         const eligible = origins.filter((s) => !s.unlinked);
         if (!eligible.length) continue;
-        const reachable = this.search.reachable(eligible, this.plans);
+        const reachable = this.search.reachable(
+          eligible,
+          this.plans,
+          false,
+          request.preferElevators ? 'stairs' : undefined,
+        );
         const checkpoint = reachableFloorCheckpoint(
           targetFloor,
           targetPlace,
@@ -397,7 +402,7 @@ export class CampusJourney {
           { ...context, origins: eligible.map((s) => s.stop) },
           eligible,
           checkpoint.stop.label,
-          false,
+          Boolean(request.preferElevators),
         );
         if (portion.status === 'route')
           return {
@@ -423,7 +428,12 @@ export class CampusJourney {
         const checkpoint = reachableFloorCheckpoint(
           floor,
           originPlace,
-          this.search.reachable(targets, this.plans, true),
+          this.search.reachable(
+            targets,
+            this.plans,
+            true,
+            request.preferElevators ? 'stairs' : undefined,
+          ),
           this.map,
           this.search,
         );
@@ -467,10 +477,13 @@ export class CampusJourney {
       const messages = {
         'unmapped-origin':
           'The starting place needs a mapped approach to the public walking network.',
-        'unmapped-destination':
-          'The floor plan shows ' +
-          destinationName +
-          '. Its entrance has no mapped connection to a public corridor.',
+        'unmapped-destination': request.preferElevators
+          ? 'No route using elevators is mapped to ' +
+            destinationName +
+            '. Its entrance has no mapped connection to a public corridor.'
+          : 'The floor plan shows ' +
+            destinationName +
+            '. Its entrance has no mapped connection to a public corridor.',
         'unmapped-origin-and-destination':
           'The starting place and ' + destinationName + ' both need mapped walking approaches.',
       };
@@ -498,9 +511,12 @@ export class CampusJourney {
       return {
         ...context,
         status: 'unmapped-destination',
-        message:
-          destinationName +
-          ' has a marked door. Its approach from the public walking route is missing.',
+        message: request.preferElevators
+          ? 'No route using elevators is mapped to ' +
+            destinationName +
+            '. Its marked door has no mapped approach from the public walking route.'
+          : destinationName +
+            ' has a marked door. Its approach from the public walking route is missing.',
       };
     // Preserve a shared departure region where the source supports one; otherwise
     // choose a reachable source-backed approach automatically within this tier.
@@ -520,8 +536,9 @@ export class CampusJourney {
       return {
         ...context,
         status: 'no-route',
-        message:
-          floorGraphs().byId.get(goal.place.planId)!.plan.building !== candidate.building
+        message: request.preferElevators
+          ? 'No route using elevators is mapped between these places.'
+          : floorGraphs().byId.get(goal.place.planId)!.plan.building !== candidate.building
             ? 'Both places have walking approaches. The saved passages do not provide a continuous route between these buildings.'
             : 'Both places have walking approaches. A continuous connection between them is missing.',
       };
