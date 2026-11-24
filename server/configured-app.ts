@@ -8,13 +8,11 @@ import {
   liveAiFallbackModels,
   liveAiSetupIssue,
   openAiApiModel,
+  providerRequestLimits,
 } from './provider-config';
 import { aiProviderDetails } from '../src/ai-provider';
 import type { ProviderMetric } from './provider-metrics';
 import { RedisVisitorSessions, redisRestCommand, sharedAiBudget } from './redis-visitor-sessions';
-
-const bounded = (value: string | undefined, fallback: number, max: number) =>
-  Math.max(1, Math.min(max, Number(value) || fallback));
 
 export function configuredApplication(environment: NodeJS.ProcessEnv, hosted = false) {
   const providerName = liveAiProvider(environment);
@@ -40,9 +38,7 @@ export function configuredApplication(environment: NodeJS.ProcessEnv, hosted = f
   const providerOptions = {
     apiKey,
     model,
-    requestsPerMinute: bounded(environment.AI_REQUESTS_PER_MINUTE, 6, 20),
-    requestsPerDay: bounded(environment.AI_REQUESTS_PER_DAY, 60, 1000),
-    timeoutMs: bounded(environment.AI_TIMEOUT_MS, 15000, 110000),
+    ...providerRequestLimits(environment),
     onMetric: (metric: ProviderMetric) => console.info('AI request metric', JSON.stringify(metric)),
     reserveSharedBudget: redis ? sharedAiBudget(redis, apiKey) : undefined,
     onModelFailure: (event: {

@@ -17,6 +17,7 @@ import {
 import { reviewedNetwork } from '../server/pilot-network';
 import { readConnectionCandidates } from '../server/topology-candidates';
 import { importReviewedNetwork } from '../server/topology-import';
+import { providerRequestLimits } from '../server/provider-config';
 
 const output = join(root, '.vercel/output');
 const functionDir = join(output, 'functions/api.func');
@@ -115,6 +116,10 @@ const handler = (await import(
   pathToFileURL(join(functionDir, 'server/entry.mjs')).href
 )) as typeof import('../server/vercel');
 const routing = await handler.checkPublishedRoute();
+const { requestsPerMinute, requestsPerDay } = providerRequestLimits(process.env);
+console.log(
+  `Shared AI budget allows ${requestsPerMinute} attempts per minute and ${requestsPerDay} per rolling 24 hours.`,
+);
 const graphDigest = await readFile(join(root, 'data/campus/spatial/floor-graphs.sha256'), 'utf8');
 if (routing.graphVersion !== graphDigest.trim().slice(0, 16))
   throw Error('Packaged route used a different floor graph from this build.');
