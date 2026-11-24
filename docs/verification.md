@@ -2,6 +2,12 @@
 
 This file is a historical log. Older entries describe workflows and route data that have since changed. The current visitor app uses GPS-required automatic start matching and has no start-confirmation, connection-review or topology-editor screen/API; see [current architecture](architecture.md) and [device-location coverage](device-location.md).
 
+## SE12 west stair access to floor 1 · November 24, 2026
+
+Replayed the 302 and 100A signs with SE12 as the building. Both trips returned no route on the previous graph. After accounting for the confirmed outdoor approaches, each replay reached its requested endpoint through S300, S200, S100 and entrance 102Z. The floor 1 endpoint is the mapped walking point for washroom 100A. The floor 3 endpoint is the window-side doorway at 302. A separate replay walked between 201V and 100A in both directions via the outdoor approaches on both floors. These checks used structured sign evidence and the published plans.
+
+Both requested journeys also passed against the built Vercel routing code and its packaged data. All nine west-stair regression cases, 26 browser tests and 11 Python floor-plan tests passed, as did the Vercel package build and source validation. The full unit/API run passed 548 of 586 tests. Its 38 failures also failed on base commit `9ff6cb0`, with the same error messages. Three previously failing route tests recovered.
+
 ## Last known position during guided tracking · November 24, 2026
 
 Simulated a walk with two accepted SE12 corridor fixes followed by three off-map readings spanning six seconds and a GPS gap. After the live hold ended, the tracker returned the latest accepted point as a historical reference. Its age continued from the original capture. A fresh corridor match restored the live dot. Checks also covered a first reading with no match, out-of-order readings, tracking resets, transfers and changes to the floor, calibration or walking surface.

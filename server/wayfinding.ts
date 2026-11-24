@@ -226,26 +226,21 @@ export function visitorNetworkMap(
   const eligible = topologyEligibility(sourceDocument, plans);
   const approvedNodes = new Set(eligible.nodeIds);
   const published = sourceDocument.nodes.filter((n) => approvedNodes.has(n.id));
-  const inferred = visitorTransferNetwork(published, plans);
-  const nodes = [...published, ...inferred.landings];
   const edges = sourceDocument.edges.filter(
     (edge) => edge.kind !== 'stairs' && edge.kind !== 'elevator',
   );
+  const network = visitorPassages({ ...sourceDocument, edges }, eligible, store.candidates, plans);
+  const outdoorPassages = edges.filter(
+    (edge) => edge.kind === 'outdoor' && network.allowed.has(edge.id),
+  );
+  const inferred = visitorTransferNetwork(published, plans, outdoorPassages);
+  const nodes = [...published, ...inferred.landings];
   const doc = {
     ...sourceDocument,
     nodes: [...sourceDocument.nodes, ...inferred.landings],
     edges: [...edges, ...inferred.edges],
   };
-  const eligibleEdges = new Set(
-    eligible.edgeIds.filter((id) => edges.some((edge) => edge.id === id)),
-  );
-  for (const edge of inferred.edges) eligibleEdges.add(edge.id);
-  const network = visitorPassages(
-    doc,
-    { ...eligible, nodeIds: nodes.map((n) => n.id), edgeIds: [...eligibleEdges] },
-    store.candidates,
-    plans,
-  );
+  for (const edge of inferred.edges) network.allowed.add(edge.id);
   return { plans, doc, network, nodes };
 }
 

@@ -9,15 +9,23 @@ import type { PhotoEvidence } from '../src/types';
 import { TopologyStore } from '../server/topology';
 import { reviewedNetwork } from '../server/pilot-network';
 import { floorGraphs } from '../server/floor-graph';
+import { inferSameBuildingTransfers } from '../server/inferred-transfers';
 import { locateFromLabels } from '../server/label-localization';
 import { newSession } from '../server/session';
-import { planVisitorNavigation } from '../server/wayfinding';
+import { planVisitorNavigation, visitorNetworkMap } from '../server/wayfinding';
 
 const dir = mkdtempSync(join(tmpdir(), 'se12-vertical-'));
 const store = new TopologyStore(join(dir, 'topology.json'), undefined, undefined, reviewedNetwork);
 afterAll(() => rmSync(dir, { recursive: true, force: true }));
 
-async function walk(from: string, to: string) {
+async function planWalk(
+  from: string,
+  to: string,
+  {
+    preferElevators = false,
+    routeStore = store,
+  }: { preferElevators?: boolean; routeStore?: TopologyStore } = {},
+) {
   const session = newSession();
   const evidence: PhotoEvidence = {
     id: randomUUID(),
@@ -38,15 +46,117 @@ async function walk(from: string, to: string) {
   );
   expect(result.candidates.map((c) => c.anchorLabel)).toEqual([from]);
   const c = session.campusLocation!;
-  const journey = await planVisitorNavigation(
+  return planVisitorNavigation(
     c,
-    { revision: 0, candidateId: c.id, destination: 'SE12 ' + to },
-    store,
+    { revision: 0, candidateId: c.id, destination: 'SE12 ' + to, preferElevators },
+    routeStore,
   );
+}
+
+async function walk(from: string, to: string) {
+  const journey = await planWalk(from, to);
   if (journey.status !== 'route')
     throw Error(from + ' to ' + to + ': ' + journey.status + ' ' + journey.message);
   return journey;
 }
+
+it.each([
+  ['302', '100A', ['S300', 'S200', 'S100', '102Z']],
+  ['100A', '302', ['102Z', 'S100', 'S200', 'S300']],
+  ['201V', '100A', ['201V', 'S200', 'S100', '102Z']],
+  ['100A', '201V', ['102Z', 'S100', 'S200', '201V']],
+] as const)(
+  'reaches SE12 %s to %s via the west stairs and confirmed outdoor approaches',
+  async (from, to, via) => {
+    const journey = await walk(from, to);
+    expect(journey.mappedPortion).toBeUndefined();
+    expect(journey.origin.label.split(' · ')[0]).toBe(from);
+    expect(journey.destination.label.split(' · ')[0]).toBe(to);
+    expect(journey.steps.at(-1)?.path.at(-1)).toEqual(journey.destination.point);
+
+    const transfers = journey.steps.filter((s) => s.kind !== 'corridor');
+    const stops = [transfers[0].from, ...transfers.map((s) => s.to)];
+    expect(stops.map((stop) => stop.label.split(' · ')[0])).toEqual(via);
+    for (const step of transfers) {
+      expect(step.kind).toBe(step.from.planId === step.to.planId ? 'outdoor' : 'stairs');
+      expect(step.path).toEqual([]);
+    }
+  },
+);
+
+it.each(['se12-f1-s100-to-102z-exterior', 'se12-f2-s200-to-201v-exterior'])(
+  'omits the west stair transfer when %s has a superseded confirmation',
+  (candidateId) => {
+    const document = store.read();
+    const candidateAnswers = document.candidateAnswers.map((answer) =>
+      answer.candidateId === candidateId ? { ...answer, definitionHash: '0'.repeat(64) } : answer,
+    );
+    const map = visitorNetworkMap({
+      plans: store.plans,
+      candidates: store.candidates,
+      read: () => ({ ...document, candidateAnswers }),
+    });
+    const landing = map.nodes.find(
+      (n) => n.planId === 'SE12-F1-p1' && n.label.startsWith('S100 ·'),
+    )!;
+    expect(
+      map.doc.edges.some(
+        (e) => e.kind === 'stairs' && (e.fromNodeId === landing.id || e.toNodeId === landing.id),
+      ),
+    ).toBe(false);
+  },
+);
+
+it('keeps the west stairs out of elevator-only directions', async () => {
+  expect((await planWalk('302', '100A', { preferElevators: true })).status).toBe('no-route');
+});
+
+it('respects the direction of a one-way outdoor approach to an exterior landing', async () => {
+  const routeStore = new TopologyStore(
+    join(dir, 'one-way.json'),
+    undefined,
+    undefined,
+    reviewedNetwork,
+  );
+  const snapshot = routeStore.snapshot();
+  const approach = snapshot.candidates.find((c) => c.id === 'se12-f1-s100-to-102z-exterior')!;
+  routeStore.mutate({
+    revision: snapshot.document.revision,
+    command: {
+      type: 'answer-candidate',
+      candidateId: approach.id,
+      presentedHash: approach.presentedHash,
+      from: {
+        planId: approach.from.planId,
+        sourceSha256: approach.from.sourceSha256,
+        point: approach.from.point!,
+      },
+      to: {
+        planId: approach.to.planId,
+        sourceSha256: approach.to.sourceSha256,
+        point: approach.to.point!,
+      },
+      answer: 'true',
+      direction: 'a-to-b',
+      reviewer: 'Isolated test',
+      note: 'Simulate one-way entry from S100 to 102Z.',
+    },
+  });
+  expect((await planWalk('302', '100A', { routeStore })).status).toBe('route');
+  expect((await planWalk('100A', '302', { routeStore })).status).toBe('no-route');
+});
+
+it('withholds an exterior stair transfer when the upper sheet has two landings with the same sign', () => {
+  const map = visitorNetworkMap(store);
+  const lower = map.nodes.find((n) => n.planId === 'SE12-F1-p1' && n.label.startsWith('S100 ·'))!;
+  const upper = map.nodes.find((n) => n.planId === 'SE12-F2-p1' && n.label.startsWith('S200 ·'))!;
+  const duplicate = { ...upper, id: randomUUID(), point: { x: 0.01, y: 0.01 } };
+  const outdoor = map.doc.edges.filter(
+    (e) => e.kind === 'outdoor' && map.network.allowed.has(e.id),
+  );
+  const stairs = inferSameBuildingTransfers([...map.nodes, duplicate], map.plans, outdoor);
+  expect(stairs.some((e) => e.fromNodeId === lower.id || e.toNodeId === lower.id)).toBe(false);
+});
 
 it.each([
   ['S200', 'S300', 'S400'],

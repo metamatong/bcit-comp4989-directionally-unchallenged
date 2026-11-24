@@ -1,13 +1,13 @@
 # Visitor routes in SE12, SW03, SW05 and SW01
 
-Of 1,191 visitor occurrences, 1,037 connect in both directions to the SE12 end of the confirmed third-floor passage to SW03. The audit covers fourteen sheets and excludes 145 shafts or voids and 14 staff-only entries.
+Of 1,191 visitor occurrences, 1,080 connect in both directions to the SE12 end of the confirmed third-floor passage to SW03. The audit covers fourteen sheets and excludes 145 shafts or voids and 14 staff-only entries.
 
 A **mapped stop** is a doorway, a public circulation point or a marked room area. A **shared entrance** serves the named space through a suite or vestibule. A **corridor-side stop** lies along a verified common wall and is labelled as an approximate arrival. The **remaining** column includes every occurrence without a continuous walk to the common network in both directions. A one-way destination can still accept arrivals. Counts describe stored drawing evidence and confirmations. They do not measure indoor positioning accuracy.
 
 | Official sheet | Visitor places | Mapped stop | Shared entrance | Corridor-side stop | Remaining |
 |---|---:|---:|---:|---:|---:|
-| [SE12 floor 1](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1201.pdf) | 49 | 0 | 0 | 0 | 49 |
-| [SE12 floor 2](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1202.pdf) | 66 | 33 | 2 | 3 | 28 |
+| [SE12 floor 1](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1201.pdf) | 49 | 35 | 1 | 0 | 13 |
+| [SE12 floor 2](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1202.pdf) | 66 | 40 | 2 | 3 | 21 |
 | [SE12 floor 3](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1203.pdf) | 62 | 56 | 1 | 3 | 2 |
 | [SE12 floor 4](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/se/bse1204.pdf) | 68 | 61 | 4 | 0 | 3 |
 | [SW03 floor 1](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0301.pdf) | 38 | 26 | 8 | 0 | 4 |
@@ -20,9 +20,13 @@ A **mapped stop** is a doorway, a public circulation point or a marked room area
 | [SW01 floor 2](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0102.pdf) | 221 | 179 | 14 | 0 | 28 |
 | [SW01 floor 3](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0103.pdf) | 164 | 152 | 1 | 5 | 6 |
 | [SW01 floor 4](https://www.bcit.ca/files/facilities/campusdev/pdf/floorplans/sw/bsw0104.pdf) | 69 | 64 | 3 | 0 | 2 |
-| **Total** | **1,191** | **940** | **79** | **18** | **154** |
+| **Total** | **1,191** | **982** | **80** | **18** | **111** |
 
 The audit searches the visitor graph forward and in reverse. Older three-building reports traversed saved vertical edges, including connections that the current visitor router omits. Counts now reflect runtime transfer inference and retain floors with zero interbuilding coverage. A room may still accept arrivals in one direction. [Complete origin and destination inventory](three-building-coverage.csv)
+
+## SE12 west stairs
+
+The signed landings S100 and S200 each have a confirmed outdoor approach to a mapped entrance. They continue the same stair as S300 on floor 3. In both directions, 36 of the 49 first-floor visitor places can reach the common network, including washroom 100A via entrance 102Z. The dining entrance 201V provides access to S200 from inside floor 2.
 
 ## SW05 first and second floors
 
