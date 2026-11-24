@@ -64,9 +64,9 @@ export function RouteMapImage({
   const scale = Math.max(w / 640, h / 420);
   const line = 3.7 * scale;
   // Follow the same published step and accepted on-floor dot used by live guidance.
-  const follow = threeD && fillContainer && !whole && device;
-  const left = follow ? Math.max(0, Math.min(width - w, follow.point.x * width - w / 2)) : x;
-  const top = follow ? Math.max(0, Math.min(height - h, follow.point.y * height - h / 2)) : y;
+  const follow = threeD && fillContainer && !whole ? device?.point ?? lastKnownPoint : null;
+  const left = follow ? Math.max(0, Math.min(width - w, follow.x * width - w / 2)) : x;
+  const top = follow ? Math.max(0, Math.min(height - h, follow.y * height - h / 2)) : y;
   const viewWidth = threeD ? w + 0.22 * h : w;
   const wallMargin = threeD ? width * 0.012 : 0;
   const viewHeight = threeD ? 0.72 * h + wallMargin : h;

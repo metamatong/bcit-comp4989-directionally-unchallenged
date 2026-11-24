@@ -5,6 +5,7 @@ import type { NavigationResult, WalkingSurface } from '../wayfinding';
 import type { VisualPlan } from '../types';
 import { fetchWalkingSurface, getCachedWalkingSurface } from '../api';
 import { planLabel } from '../topology';
+import { CampusPositionMap } from './CampusPositionMap';
 import { RouteMapImage, RouteViewToggle } from './RouteMap';
 import type {
   DetectedStep,
@@ -401,6 +402,9 @@ export function GuidedDirections({
                 ]
           }
         />
+        {threeD && !complete && (
+          <CampusPositionMap reading={canTrack && tracking.fresh ? watchReading : null} />
+        )}
         {transferDirection && targetPlan && (
           <div
             className={`guided-transfer-overlay is-${transferDirection}`}

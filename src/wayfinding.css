@@ -1,4 +1,4 @@
-/* Option 1 — Bottom-Sheet Navigator: mobile-first 100dvh wayfinding layout */
+/* Option 1 â€” Bottom-Sheet Navigator: mobile-first 100dvh wayfinding layout */
 
 .visitor-shell {
   --ink: #173d37;
@@ -1302,3 +1302,11 @@
   display: block;
   cursor: crosshair;
 }
+
+.campus-search { width: 100%; text-align: center; }
+.campus-search svg { display: block; width: 100%; max-width: 520px; height: auto; max-height: 32vh; margin: 0 auto 1rem; }
+
+.campus-position-map { margin: 0; }
+.campus-position-map svg { display: block; width: 100%; }
+.campus-position-map figcaption { font-size: .75rem; color: #365448; text-align: center; }
+.guided-map > .campus-position-map { position: absolute; bottom: 8px; right: 8px; width: clamp(94px, 25%, 158px); pointer-events: none; background: #f1f7f3; border: 1px solid #96aca2; border-radius: 8px; overflow: hidden; }

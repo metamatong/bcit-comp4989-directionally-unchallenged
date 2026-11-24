@@ -33,6 +33,7 @@ export default function App() {
   const [data, setData] = useState<Bootstrap>();
   const [session, setSession] = useState<Session>();
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [queryingPhoto, setQueryingPhoto] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
   const [reading, setReading] = useState(false);
@@ -83,6 +84,7 @@ export default function App() {
 
   function discardPhoto() {
     photoDevice.clear();
+    setQueryingPhoto(false);
     evidenceGate.current.cancel();
     photoAbort.current?.abort();
     setPreparedPhoto(null);
@@ -224,6 +226,7 @@ export default function App() {
             latest.photoEvidence?.id === cached.id &&
             Date.parse(latest.photoEvidence.expiresAt) > Date.now()
           )) {
+            setQueryingPhoto(true);
             latest = await request<Session>(
               `/api/sessions/${active.id}/photo/evidence`,
               {
@@ -237,6 +240,7 @@ export default function App() {
                 signal: controller.signal,
               },
             );
+            setQueryingPhoto(false);
             controller.signal.throwIfAborted();
             updateSession(latest);
             if (!latest.photoEvidence)
@@ -301,7 +305,10 @@ export default function App() {
     } finally {
       busyRef.current = false;
       setBusy(false);
-      if (photoAbort.current === controller) photoAbort.current = null;
+      if (photoAbort.current === controller) {
+        photoAbort.current = null;
+        setQueryingPhoto(false);
+      }
     }
   }
   if (!data || !session)
@@ -360,6 +367,8 @@ export default function App() {
       ready={photoReady}
       reading={reading}
       busy={busy}
+      queryingPhoto={queryingPhoto}
+      submissionReading={data.gpsTestMode ? undefined : photoDevice.snapshot?.reading}
       status={readStatus}
       error={photoError}
       onPhoto={(file) => void readPhoto(file)}
