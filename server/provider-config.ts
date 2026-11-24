@@ -4,6 +4,18 @@ import type { AiProviderName } from '../src/ai-provider';
 export const defaultGeminiModel = 'gemini-3.5-flash-lite';
 export const defaultOpenAiModel = 'luna-6.0';
 export const defaultGroqModel = 'qwen/qwen3.8-27b';
+
+const bounded = (value: string | undefined, fallback: number, max: number) =>
+  Math.max(1, Math.min(max, Number(value) || fallback));
+
+export function providerRequestLimits(environment: NodeJS.ProcessEnv) {
+  return {
+    requestsPerMinute: bounded(environment.AI_REQUESTS_PER_MINUTE, 120, 400),
+    requestsPerDay: bounded(environment.AI_REQUESTS_PER_DAY, 1_200, 20_000),
+    timeoutMs: bounded(environment.AI_TIMEOUT_MS, 15_000, 110_000),
+  };
+}
+
 // The requested configuration alias resolves to OpenAI's documented public API ID.
 export function openAiApiModel(model: string): string {
   return model === 'luna-6.0' ? 'gpt-6-luna' : model;

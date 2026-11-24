@@ -44,7 +44,7 @@ The supported stable Flash model IDs are Gemini 3.5 Flash, 3.5 Flash-Lite, 3.6 F
 
 1. Verify the API project's free tier, model access and quotas in AI Studio.
 2. Set the required `GEMINI_API_KEY` in the private server environment. The two optional backups are `GEMINI_API_KEY_2` and `GEMINI_API_KEY_3`, in that order. Blank slots and duplicate keys are skipped. Configure the primary model and `GEMINI_FALLBACK_MODELS`, then set `AI_FREE_TIER_CONFIRMED=true` after verifying eligibility for every configured project.
-3. Set application request ceilings to fit the authorized quota. The defaults are six attempts per minute and 60 per day across all keys and models, including retries. Local counters reset on restart. Hosted workers share a rolling Redis budget identified by the primary key.
+3. The app allows 120 attempts per rolling minute and 1,200 per rolling 24 hours by default. Retries and attempts on backup keys and models count toward both totals. Set `AI_REQUESTS_PER_MINUTE` (1–400) and `AI_REQUESTS_PER_DAY` (1–20,000) to override the defaults. Local counters reset on restart. Hosted workers share a rolling Redis budget identified by the primary key.
 4. Restart the existing server and refresh. Gemini readiness is displayed directly. `AI_DEFAULT_MODE` is unused and old browser mode preferences are cleared.
 5. Choose a photo, then select **Analyze photo against BCIT plans** or **Find my route** to send it to Gemini. No request occurs merely because a key is configured.
 

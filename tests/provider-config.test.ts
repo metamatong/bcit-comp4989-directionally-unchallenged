@@ -6,11 +6,35 @@ import {
   liveAiSetupIssue,
   liveAiFallbackModels,
   openAiApiModel,
+  providerRequestLimits,
 } from '../server/provider-config';
 
 describe('provider configuration', () => {
   const gemini = { GEMINI_API_KEY: 'private-gemini', AI_FREE_TIER_CONFIRMED: 'true' };
   const openai = { AI_PROVIDER: 'openai', OPENAI_API_KEY: 'private-openai' };
+  it('sets a shared budget of 120 attempts per minute and 1,200 per rolling day', () => {
+    expect(providerRequestLimits({})).toMatchObject({
+      requestsPerMinute: 120,
+      requestsPerDay: 1200,
+    });
+  });
+
+  it.each([
+    ['120', '1200', 120, 1200],
+    ['6', '60', 6, 60],
+    ['450', '25000', 400, 20000],
+  ])(
+    'applies configured request limits %s and %s',
+    (minute, day, requestsPerMinute, requestsPerDay) => {
+      expect(
+        providerRequestLimits({ AI_REQUESTS_PER_MINUTE: minute, AI_REQUESTS_PER_DAY: day }),
+      ).toMatchObject({
+        requestsPerMinute,
+        requestsPerDay,
+      });
+    },
+  );
+
   it('defaults to Gemini and preserves its current model/fallback settings', () => {
     expect(liveAiProvider({})).toBe('gemini');
     expect(liveAiSetupIssue({ ...gemini, OPENAI_MODEL: '', OPENAI_API_KEY: '' })).toBeNull();
