@@ -12,7 +12,8 @@ import {
   stairPlaces,
 } from "./model.ts";
 const files: Record<string, [string, string]> = {
-  "/": ["index.html", "text/html"],
+  "/": ["three.html", "text/html"],
+  "/inspector": ["index.html", "text/html"],
   "/three": ["three.html", "text/html"],
   "/three-view.js": ["three-view.js", "text/javascript"],
   "/viewer.js": ["viewer.js", "text/javascript"],

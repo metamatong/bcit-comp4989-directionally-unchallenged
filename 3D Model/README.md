@@ -12,7 +12,7 @@ From the repository root, install the navigation app dependencies with `npm ci`,
 
 
 
-Open http://127.0.0.1:3210/three for the Three.js model or http://127.0.0.1:3210/three?view=se12-3-4 for the SE12 floor pair. The root URL opens the full spatial inspector. Use SPATIAL_PORT to change the port.
+Open http://127.0.0.1:3210/ for the Three.js campus twin or http://127.0.0.1:3210/?view=se12-3-4 for the SE12 floor pair. Existing /three links also open the twin. Choose Records inspector to reach the sheet and network records at /inspector. Use SPATIAL_PORT to change the port.
 
 
 
