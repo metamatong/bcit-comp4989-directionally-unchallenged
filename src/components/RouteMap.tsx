@@ -14,6 +14,7 @@ type MapProps = {
   bounds?: PlanBounds;
   label: string;
   device?: DeviceOverlay | null;
+  lastKnownPoint?: PagePoint;
 };
 
 /** Bare map for a continuous itinerary with shared controls and source attribution. */
@@ -24,6 +25,7 @@ export function RouteMapImage({
   bounds,
   label,
   device,
+  lastKnownPoint,
   whole = false,
   fillContainer = false,
 }: MapProps & { whole?: boolean; fillContainer?: boolean }) {
@@ -117,6 +119,20 @@ export function RouteMapImage({
           );
         })}
       {device && <DevicePosition overlay={device} width={width} height={height} />}
+      {!device && lastKnownPoint && (
+        <circle
+          className="last-known-position"
+          cx={lastKnownPoint.x * width}
+          cy={lastKnownPoint.y * height}
+          r={Math.min(width, height) * 0.004}
+          fill="none"
+          stroke="#58665f"
+          strokeWidth={2}
+          vectorEffect="non-scaling-stroke"
+        >
+          <title>Last known location on this floor</title>
+        </circle>
+      )}
       {markers.map((m, i) => (
         <g key={i} transform={`translate(${m.point.x * width} ${m.point.y * height})`}>
           <title>{m.label}</title>

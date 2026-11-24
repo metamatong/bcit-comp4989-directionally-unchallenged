@@ -54,6 +54,17 @@ function locationStatusMessage({
     const age = Math.max(1, device.ageSeconds ?? 0);
     return { announcement: `Using last location · ${age}s ago` };
   }
+  if (evaluation?.lastKnown) {
+    const seconds = evaluation.lastKnown.ageSeconds;
+    const age = seconds < 60 ? `${seconds}s` : `${Math.floor(seconds / 60)} min`;
+    const coarseReading =
+      evaluation.status === 'low-accuracy' && reading &&
+      reading.accuracy >= MAP_MATCH_CONFIG.coarseLocationAccuracyMetres;
+    return {
+      announcement: 'Last known location',
+      detail: ` · ${age} ago${coarseReading ? ' · check Precise Location' : ''}`,
+    };
+  }
   if (!reading || evaluation?.status === 'waiting') {
     return {
       announcement:
@@ -73,7 +84,7 @@ function locationStatusMessage({
       : { announcement: 'GPS signal too weak' };
   }
   if (evaluation?.status === 'too-far') {
-    return { announcement: 'Location off mapped route' };
+    return { announcement: 'Waiting for a GPS match on this floor' };
   }
   if (
     evaluation?.status === 'outside-building' ||
@@ -362,6 +373,7 @@ export function GuidedDirections({
           label={`${planLabel(plan)} · ${complete ? 'Destination' : `Step ${index + 1}`}`}
           paths={step?.kind === 'corridor' ? [step.path] : []}
           device={device}
+          lastKnownPoint={canTrack ? evaluation?.lastKnown?.point : undefined}
           fillContainer
           markers={
             step?.kind === 'corridor'

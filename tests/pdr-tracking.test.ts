@@ -948,6 +948,74 @@ describe('IndoorPdrTracker lifecycle, deduplication, ambiguity, and halo invaria
       ).toBe('too-far');
     },
   );
+
+  it('keeps the latest same-floor match through off-map updates, using its original capture time', () => {
+    const tracker = new IndoorPdrTracker({ enableParticleFilter: false });
+    tracker.configureContext({
+      plan: se12Plan,
+      calibration: se12Calibration,
+      surface: se12Surface,
+      stepKind: 'corridor',
+      isSamePlanStep: true,
+    });
+    const first = cellToPage(160, 133, se12Surface, se12Plan);
+    const second = cellToPage(275, 133, se12Surface, se12Plan);
+    const offMap = { x: 0.01, y: 0.01 };
+    const fix = (point: PagePoint, time: number) =>
+      tracker.ingestGpsReading(readingFromPage(point, se12Fit, 7, time));
+
+    fix(offMap, 1_000);
+    expect(tracker.evaluateAt(1_000, true, 'unknown')).toEqual({ status: 'too-far' });
+    const earlier = fix(first, 10_000);
+    const latest = fix(second, 21_000);
+    if (earlier.status !== 'matched' || latest.status !== 'matched')
+      throw Error('Expected two valid corridor fixes');
+    expect(latest.overlay.point).not.toEqual(earlier.overlay.point);
+
+    for (const time of [22_000, 25_000, 28_000]) expect(fix(offMap, time).status).toBe('too-far');
+    expect(tracker.evaluateAt(28_000, true, 'unknown')).toEqual({
+      status: 'too-far',
+      lastKnown: { point: latest.overlay.point, ageSeconds: 7 },
+    });
+    fix(first, 20_000); // An out-of-order reading cannot replace the latest match.
+    expect(tracker.evaluateAt(81_000, false, 'unknown')).toEqual({
+      status: 'waiting',
+      lastKnown: { point: latest.overlay.point, ageSeconds: 60 },
+    });
+    expect(fix(first, 82_000).status).toBe('matched');
+    const recovered = tracker.evaluateAt(82_000, true, 'unknown');
+    expect(recovered.status).toBe('matched');
+    expect(recovered.lastKnown).toBeUndefined();
+  });
+
+  it('clears a historical point when its floor, calibration, walking surface or tracking context changes', () => {
+    const ctx = {
+      plan: se12Plan,
+      calibration: se12Calibration,
+      surface: se12Surface,
+      stepKind: 'corridor' as const,
+      isSamePlanStep: true,
+    };
+    const point = cellToPage(200, 133, se12Surface, se12Plan);
+    for (const next of [
+      { ...ctx, plan: sw3Plan, calibration: sw3Calibration, surface: sw3Surface },
+      { ...ctx, stepKind: 'building-link' as const, isSamePlanStep: false },
+      { ...ctx, calibration: { ...se12Calibration, version: 'updated-calibration' } },
+      { ...ctx, surface: { ...se12Surface, graphVersion: 'updated-surface' } },
+      { ...ctx, surface: null },
+      null,
+    ]) {
+      const tracker = new IndoorPdrTracker({ enableParticleFilter: false });
+      tracker.configureContext(ctx);
+      const reading = readingFromPage(point, se12Fit, 7, 10_000);
+      expect(tracker.ingestGpsReading(reading).status).toBe('matched');
+      expect(tracker.evaluateAt(20_000, false, 'unknown').lastKnown?.ageSeconds).toBe(10);
+      if (next) tracker.configureContext(next, 21_000);
+      else tracker.reset(21_000);
+      expect(tracker.ingestGpsReading(reading).status).toBe('waiting');
+      expect(tracker.evaluateAt(21_000, false, 'unknown')).toEqual({ status: 'waiting' });
+    }
+  });
 });
 
 describe('Three-way comparative simulation benchmarks (Raw GPS vs Existing Matcher vs Stage 1 vs Stage 2)', () => {
@@ -1586,7 +1654,7 @@ describe('GuidedDirections DOM integration (iOS fallback, background return, fus
     }
   });
 
-  it('uses prefetched walking surfaces synchronously on Step 1, holds recent GPS for 8 s with honest status, and hides past 8 s', async () => {
+  it('shows the last matched position and its age on Step 1 until the live dot recovers', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(30_000);
     vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
@@ -1633,6 +1701,14 @@ describe('GuidedDirections DOM integration (iOS fallback, background return, fus
       );
 
       const pt = se12Fit.unproject(cellToPage(200, 133, se12Surface, se12Plan));
+      const offMap = se12Fit.unproject({ x: 0.01, y: 0.01 });
+      await act(async () =>
+        reportLocation({ coords: { ...offMap, accuracy: 7 }, timestamp: 26_000 } as GeolocationPosition),
+      );
+      expect(host.querySelector('.guided-location-status')?.textContent).toContain(
+        'Waiting for a GPS match on this floor',
+      );
+      expect(host.querySelector('.last-known-position')).toBeNull();
       // Even an indoor fix captured 3 s before receipt displays immediately as a corridor-matched held dot.
       await act(async () =>
         reportLocation({
@@ -1642,6 +1718,9 @@ describe('GuidedDirections DOM integration (iOS fallback, background return, fus
       );
       expect(host.querySelector('.device-position')?.getAttribute('data-matched')).toBe('true');
       expect(host.querySelector('.device-position')?.getAttribute('data-held')).toBe('true');
+      const heldPoint = host.querySelector('.device-position circle')!;
+      const x = heldPoint.getAttribute('cx');
+      const y = heldPoint.getAttribute('cy');
       expect(host.querySelector('.guided-location-status')?.textContent).toContain(
         '3s ago',
       );
@@ -1653,14 +1732,30 @@ describe('GuidedDirections DOM integration (iOS fallback, background return, fus
       expect(host.querySelector('.guided-location-status')?.textContent).toContain('4s ago');
       expect(announcement?.textContent).toBe('Using last location · 4s ago');
 
-      // At 9 seconds past capture the hold expires. A fresh accepted fix restores the dot.
+      // The live hold ends after 8 s. The hollow marker stays at the last accepted coordinates.
       await act(async () => vi.advanceTimersByTime(5_000));
       expect(host.querySelector('.device-position')).toBeNull();
-      expect(announcement?.textContent).toBe('Waiting for a fresh GPS update…');
+      expect(host.querySelector('.last-known-position')?.getAttribute('cx')).toBe(x);
+      expect(host.querySelector('.last-known-position')?.getAttribute('cy')).toBe(y);
+      expect(announcement?.textContent).toBe('Last known location');
+      expect(host.querySelector('.guided-location-status')?.textContent).toContain('9s ago');
+      await act(async () =>
+        reportLocation({ coords: { ...offMap, accuracy: 7 }, timestamp: Date.now() } as GeolocationPosition),
+      );
+      await act(async () => vi.advanceTimersByTime(1_000));
+      expect(host.querySelector('.last-known-position')?.getAttribute('cx')).toBe(x);
+      expect(host.querySelector('.guided-location-status')?.textContent).toContain('10s ago');
+      await act(async () =>
+        reportLocation({ coords: { ...pt, accuracy: 200 }, timestamp: Date.now() } as GeolocationPosition),
+      );
+      expect(announcement?.textContent).toBe('Last known location');
+      expect(announcement?.parentElement?.textContent).toContain('check Precise Location');
+      await act(async () => vi.advanceTimersByTime(1_000));
       await act(async () =>
         reportLocation({ coords: { ...pt, accuracy: 7 }, timestamp: Date.now() } as GeolocationPosition),
       );
       expect(host.querySelector('.device-position')).not.toBeNull();
+      expect(host.querySelector('.last-known-position')).toBeNull();
       expect(announcement?.textContent).toBe('Approx. location');
       expect(announcement?.parentElement?.textContent).toContain('7 m uncertainty radius');
     } finally {
