@@ -1,7 +1,12 @@
 /** Validate only the explicitly selected provider; never switch providers on failure. */
 import type { AiProviderName } from '../src/ai-provider';
 
-export const defaultGeminiModel = 'gemini-3.5-flash-lite';
+const defaultGeminiModelOrder = [
+  'gemini-3.1-flash-lite',
+  'gemini-3.5-flash',
+  'gemini-3.8-flash',
+] as const;
+export const defaultGeminiModel = defaultGeminiModelOrder[0];
 export const defaultOpenAiModel = 'luna-6.0';
 export const defaultGroqModel = 'qwen/qwen3.8-27b';
 
@@ -34,7 +39,7 @@ export function liveAiModel(environment: NodeJS.ProcessEnv): string {
   return environment.GEMINI_MODEL ?? defaultGeminiModel;
 }
 
-// Keep this to stable multimodal Flash models suitable for the app's free-tier configuration.
+// Model IDs accepted by the app's Gemini configuration.
 const supportedFreeTierModels = new Set([
   'gemini-3-flash-preview',
   'gemini-3.1-flash-lite',
@@ -44,18 +49,22 @@ const supportedFreeTierModels = new Set([
   'gemini-3.7-flash',
   'gemini-3.8-flash',
 ]);
-const defaultFallbackModels = [defaultGeminiModel, 'gemini-3.8-flash'];
 const maximumFallbackModels = 2;
 
 export function liveAiFallbackModels(environment: NodeJS.ProcessEnv): string[] {
   if (liveAiProvider(environment) !== 'gemini') return [];
+  const primary = liveAiModel(environment);
   const configured = environment.GEMINI_FALLBACK_MODELS;
-  const models = (configured === undefined ? defaultFallbackModels.join(',') : configured)
+  if (configured === undefined)
+    return defaultGeminiModelOrder
+      .filter((model) => model !== primary)
+      .slice(0, maximumFallbackModels);
+
+  const models = configured
     .split(',')
     .map((model) => model.trim())
-    .filter(Boolean);
-  const primary = environment.GEMINI_MODEL ?? defaultGeminiModel;
-  return [...new Set(models)].filter((model) => model !== primary);
+    .filter((model) => model.length > 0 && model !== primary);
+  return [...new Set(models)];
 }
 
 export function liveAiSetupIssue(environment: NodeJS.ProcessEnv): string | null {

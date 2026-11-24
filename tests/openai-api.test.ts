@@ -51,7 +51,7 @@ it.each(['gemini', 'openai'] as const)(
     expect(bootstrap).toMatchObject({
       provider,
       liveAvailable: true,
-      model: provider === 'openai' ? 'gpt-6-luna' : 'gemini-3.5-flash-lite',
+      model: provider === 'openai' ? 'gpt-6-luna' : 'gemini-3.1-flash-lite',
     });
     expect(JSON.stringify(bootstrap)).not.toContain('private-');
     const session: Session = await (await client.post('/api/sessions', {})).json();
