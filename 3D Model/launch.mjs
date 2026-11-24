@@ -14,6 +14,7 @@ if (["start", "build"].includes(mode)) {
     entryPoints: [resolve(here, "viewer.ts"), resolve(here, "stairs.ts"), resolve(here, "three-view.mjs")],
     outdir: here,
     bundle: true,
+    loader: { ".webp": "dataurl" },
     format: "esm",
     target: "es2022",
   });
