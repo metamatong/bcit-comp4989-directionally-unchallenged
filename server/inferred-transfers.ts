@@ -26,9 +26,43 @@ function stairSuffix(node: TopologyNode) {
   return label ? label.slice(-2) : undefined;
 }
 
-function landingHasApproach(node: TopologyNode) {
+function hasFloorApproach(node: TopologyNode) {
   const floor = floorGraphs().byId.get(node.planId);
   return !!floor && !!floor.approachAt(node.point, node);
+}
+
+/** An exterior landing can join the floor through an active outdoor walk to a mapped entrance. */
+function exteriorOnlyLandings(nodes: TopologyNode[], activeOutdoorPassages: TopologyEdge[]) {
+  const byId = new Map(nodes.map((node) => [node.id, node]));
+  const landings = new Set<string>();
+  for (const passage of activeOutdoorPassages) {
+    const from = byId.get(passage.fromNodeId);
+    const to = byId.get(passage.toNodeId);
+    if (passage.kind !== 'outdoor' || !from || !to || from.planId !== to.planId) continue;
+    const [landing, entrance] = from.kind === 'stair-landing' ? [from, to] : [to, from];
+    if (
+      landing.kind === 'stair-landing' &&
+      entrance.kind === 'outdoor-access' &&
+      hasFloorApproach(entrance) &&
+      !hasFloorApproach(landing)
+    ) {
+      landings.add(landing.id);
+    }
+  }
+  return landings;
+}
+
+/** Keep every character after the floor number, and reject duplicate stair IDs on a sheet. */
+function signedStairsByStack(landings: TopologyNode[], floor: string) {
+  const stacks = new Map<string, TopologyNode | null>();
+  const prefix = 'S' + floor;
+  for (const landing of landings) {
+    const id = landing.label.split(' · ', 1)[0];
+    if (landing.kind !== 'stair-landing' || !id.startsWith(prefix)) continue;
+    const stack = id.slice(prefix.length);
+    if (/^\d+[A-Z]*$/.test(stack)) stacks.set(stack, stacks.has(stack) ? null : landing);
+  }
+  return stacks;
 }
 
 function candidateCost(from: TopologyNode, to: TopologyNode) {
@@ -42,19 +76,23 @@ function candidateCost(from: TopologyNode, to: TopologyNode) {
   return distance <= 0.24 ? distance : undefined;
 }
 
-function adjacentFloorPairs(nodes: TopologyNode[], planIndex: Map<string, VisualPlan>) {
+function adjacentFloorPairs(
+  nodes: TopologyNode[],
+  planIndex: Map<string, VisualPlan>,
+  exterior: Set<string>,
+) {
   const byBuilding = new Map<string, TopologyNode[]>();
   for (const node of nodes) {
     const plan = planIndex.get(node.planId);
     if (!plan || !legacyLandingBuildings.has(plan.building) || !transferKinds.has(node.kind))
       continue;
-    if (!landingHasApproach(node)) continue;
     const group = byBuilding.get(plan.building) ?? [];
     group.push(node);
     byBuilding.set(plan.building, group);
   }
 
   const pairs: [TopologyNode, TopologyNode][] = [];
+  const hasApproach = (node: TopologyNode) => exterior.has(node.id) || hasFloorApproach(node);
   for (const group of byBuilding.values()) {
     const byFloor = new Map<string, TopologyNode[]>();
     for (const node of group) {
@@ -68,15 +106,30 @@ function adjacentFloorPairs(nodes: TopologyNode[], planIndex: Map<string, Visual
       if (Number(floors[index]) - Number(floors[index - 1]) !== 1) continue;
       const lower = byFloor.get(floors[index - 1])!,
         upper = byFloor.get(floors[index])!;
-      const possible = lower.flatMap((from) =>
-        upper.flatMap((to) => {
-          if (from.kind !== to.kind) return [];
+      const reachableLower = lower.filter(hasApproach);
+      const reachableUpper = upper.filter(hasApproach);
+      const possible = reachableLower.flatMap((from) =>
+        reachableUpper.flatMap((to) => {
+          if (from.kind !== to.kind || exterior.has(from.id) || exterior.has(to.id)) return [];
           const cost = candidateCost(from, to);
           return cost === undefined ? [] : [{ from, to, cost }];
         }),
       );
-      possible.sort((a, b) => a.cost - b.cost || a.from.id.localeCompare(b.from.id));
+      // Exterior marks can be on differently oriented sheets. Match their signed stack first.
       const used = new Set<string>();
+      const lowerStairs = signedStairsByStack(lower, floors[index - 1]);
+      const upperStairs = signedStairsByStack(upper, floors[index]);
+      for (const [stack, from] of lowerStairs) {
+        const to = upperStairs.get(stack);
+        if (!from || !to || !reachableLower.includes(from) || !reachableUpper.includes(to))
+          continue;
+        if (exterior.has(from.id) || exterior.has(to.id)) {
+          pairs.push([from, to]);
+          used.add(from.id);
+          used.add(to.id);
+        }
+      }
+      possible.sort((a, b) => a.cost - b.cost || a.from.id.localeCompare(b.from.id));
       for (const candidate of possible) {
         if (used.has(candidate.from.id) || used.has(candidate.to.id)) continue;
         used.add(candidate.from.id);
@@ -128,8 +181,14 @@ function inferredEdge([from, to]: [TopologyNode, TopologyNode]): TopologyEdge {
 }
 
 /** Legacy landing inputs are still paired at request time. */
-export function inferSameBuildingTransfers(nodes: TopologyNode[], plans: VisualPlan[]) {
-  return adjacentFloorPairs(nodes, new Map(plans.map((plan) => [plan.id, plan]))).map(inferredEdge);
+export function inferSameBuildingTransfers(
+  nodes: TopologyNode[],
+  plans: VisualPlan[],
+  activeOutdoorPassages: TopologyEdge[] = [],
+) {
+  const exterior = exteriorOnlyLandings(nodes, activeOutdoorPassages);
+  const planIndex = new Map(plans.map((plan) => [plan.id, plan]));
+  return adjacentFloorPairs(nodes, planIndex, exterior).map(inferredEdge);
 }
 
 type DrawnStair = {
@@ -214,7 +273,11 @@ function containsOtherStair(enclosure: DrawnStair, other: DrawnStair) {
   return point.x >= left && point.x <= right && point.y >= top && point.y <= bottom;
 }
 
-export function visitorTransferNetwork(existing: TopologyNode[], plans: VisualPlan[]) {
+export function visitorTransferNetwork(
+  existing: TopologyNode[],
+  plans: VisualPlan[],
+  activeOutdoorPassages: TopologyEdge[] = [],
+) {
   const stairs = drawnStairLandings(plans, existing);
   function counterparts(stair: DrawnStair, nextFloor: number) {
     const suffix = stairSuffix(stair.node);
@@ -228,7 +291,7 @@ export function visitorTransferNetwork(existing: TopologyNode[], plans: VisualPl
         containsOtherStair(other, stair),
     );
   }
-  const edges = inferSameBuildingTransfers(existing, plans);
+  const edges = inferSameBuildingTransfers(existing, plans, activeOutdoorPassages);
   for (const stair of stairs) {
     const floor = Number(stair.plan.floor);
     const above = counterparts(stair, floor + 1);

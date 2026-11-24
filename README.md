@@ -55,6 +55,8 @@ Floor changes require a fix captured after the transition. Watches deduplicate f
 
 The current route dataset includes examples such as SE12 302 to SW03 2605 and SW03 1710. Each journey is calculated over source-derived floor walking areas. Same-building floor changes are inferred from corresponding stair and elevator landings. Building-to-building links remain explicit source-backed records. Physical distance and accessibility remain unmeasured.
 
+Within SE12, 302 and the floor 1 washroom 100A connect in both directions via west stairs S300, S200 and S100 and the outdoor approach at entrance 102Z.
+
 With **Elevators only** selected, SE12 302 to SE12 402 uses the east elevator in SW03. On returning to SE12 floor 4, the final arrow follows corridor 408C to the classroom door.
 
 SE12 323 to SW03 1750 retains the shared corridor departure and corridor-side arrival. The SW03 west wing remains connected through the outdoor 1700–1900 passage and S190–S299 stairs. If part of a trip is unmapped, the app shows the reachable route segment, marks the last mapped stop and identifies the requested destination on the plan. Shafts, voids and staff-only spaces remain excluded. [Current route coverage](docs/three-building-routing.md)
