@@ -2,6 +2,12 @@
 
 This file is a historical log. Older entries describe workflows and route data that have since changed. The current visitor app uses GPS-required automatic start matching and has no start-confirmation, connection-review or topology-editor screen/API; see [current architecture](architecture.md) and [device-location coverage](device-location.md).
 
+## Last known position during guided tracking · November 24, 2026
+
+Simulated a walk with two accepted SE12 corridor fixes followed by three off-map readings spanning six seconds and a GPS gap. After the live hold ended, the tracker returned the latest accepted point as a historical reference. Its age continued from the original capture. A fresh corridor match restored the live dot. Checks also covered a first reading with no match, out-of-order readings, tracking resets, transfers and changes to the floor, calibration or walking surface.
+
+The guided-screen check verified the hollow marker at the saved coordinates, its visible age and the Precise Location hint for a coarse reading. The Vercel package build, source validation, all 69 cases in the six tracking-related suites and all 26 browser tests passed. The full unit/API suite passed 536 of 577 cases. The same 41 tests failed on base commit `6b30dae` with matching error messages. These checks used simulated device readings.
+
 ## Guided GPS footprint, hold, and uncertainty checks · November 24, 2026
 
 An offline replay used a simulated fix inside the archived SW03 footprint whose 6 m accuracy circle missed SE12. All three tracking tiers rejected it on the SE12 floor-3 corridor. Separate checks exercised 23 m and 25 m snap offsets with footprint overlap, the third outdoor and raw GPS rejection, duplicate fixes, and a stationary rejection after 18.5 seconds of simulated GPS silence. A DOM test confirmed that a 15.3 m halo displays as a 16 m uncertainty radius.

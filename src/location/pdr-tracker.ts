@@ -84,7 +84,7 @@ export const PDR_TRACKER_CONFIG = Object.freeze({
   gpsHoldMaxExtraRadiusMetres: 15.0,
   /** Bounded Tier 2 hold when live accelerometer variance actively confirms stationary state. */
   stationaryHoldMaxMs: 45_000,
-  /** Consecutive rejected fixes required before blanking an otherwise held valid position. */
+  /** Minimum count of consecutive rejected fixes for ending a live hold. */
   maxConsecutiveBadFixes: 3,
   /** Minimum elapsed span (ms) across consecutive rejected fixes before blanking a held/bridged position. */
   minBadFixStreakMs: 6_000,
@@ -114,11 +114,14 @@ export type TrackerEvaluation =
         | 'outside-page'
         | 'outside-building'
         | 'too-far';
+      /** Display-only reference to an accepted corridor fix from this tracking context. */
+      lastKnown?: { point: PagePoint; ageSeconds: number };
     }
   | {
       status: 'raw' | 'matched' | 'bridged' | 'held';
       overlay: DeviceOverlay;
       directionResolved?: boolean;
+      lastKnown?: never;
     };
 
 type StoredGpsResult = MapMatchResult | { status: 'outside-building' };
@@ -275,7 +278,9 @@ export class IndoorPdrTracker {
     const sourceChanged =
       !prev ||
       prev.plan.sourceSha256 !== next.plan.sourceSha256 ||
-      prev.calibration?.sourceSha256 !== next.calibration?.sourceSha256;
+      prev.calibration?.sourceSha256 !== next.calibration?.sourceSha256 ||
+      prev.calibration?.version !== next.calibration?.version ||
+      prev.calibration?.status !== next.calibration?.status;
     const enteringOrLeavingTransfer =
       !!prev &&
       (prev.stepKind !== next.stepKind || prev.isSamePlanStep !== next.isSamePlanStep) &&
@@ -284,7 +289,12 @@ export class IndoorPdrTracker {
         next.stepKind !== 'corridor' ||
         !next.isSamePlanStep);
     const surfaceJustLoaded = !prev?.surface && !!next.surface;
-    const surfaceLost = !!prev?.surface && !next.surface;
+    const surfaceChanged =
+      !!prev?.surface &&
+      (prev.surface.graphVersion !== next.surface?.graphVersion ||
+        prev.surface.sourceSha256 !== next.surface?.sourceSha256);
+    const hadFit = !!this.fit;
+    const hadGrid = !!this.grid;
 
     this.context = next;
     this.routePx = next.routePath?.length
@@ -323,7 +333,9 @@ export class IndoorPdrTracker {
         sourceChanged ||
         enteringOrLeavingTransfer ||
         prev.transferStepIndex !== next.transferStepIndex ||
-        surfaceLost ||
+        surfaceChanged ||
+        (hadFit && !this.fit) ||
+        (hadGrid && !this.grid) ||
         (surfaceJustLoaded && this.sawRawBeforeSurface))
     ) {
       this.reset(Math.max(transitionTimestamp ?? -Infinity, this.lastProcessedGpsTimestamp));
@@ -659,14 +671,7 @@ export class IndoorPdrTracker {
 
     if (this.lastGpsResult?.status === 'unavailable') return { status: 'unavailable' };
 
-    const recentRejection: TrackerEvaluation =
-      this.lastGpsResult &&
-      this.lastGpsResult.status !== 'matched' &&
-      this.lastGpsResult.status !== 'raw' &&
-      now - this.lastBadFixAt <= PDR_TRACKER_CONFIG.liveGpsHoldMs
-        ? this.toEvaluation(this.lastGpsResult)
-        : { status: 'waiting' };
-    if (this.badFixStreak?.hidePosition) return recentRejection;
+    if (this.badFixStreak?.hidePosition) return this.positionUnavailable(now);
 
     const heldFix = this.lastValidResult;
     const canHoldStationary =
@@ -696,7 +701,7 @@ export class IndoorPdrTracker {
       if (canHoldStationary && this.stepsSinceLastAcceptedGps === 0) {
         return this.buildHeldEvaluation(now, 'stationary-hold');
       }
-      return recentRejection;
+      return this.positionUnavailable(now);
     }
 
     if (heldFix && this.fit) {
@@ -727,7 +732,35 @@ export class IndoorPdrTracker {
       return this.toEvaluation(this.lastGpsResult);
     }
 
-    return recentRejection;
+    return this.positionUnavailable(now);
+  }
+
+  private positionUnavailable(now: number): TrackerEvaluation {
+    const gps = this.lastGpsResult;
+    const status =
+      gps &&
+      gps.status !== 'matched' &&
+      gps.status !== 'raw' &&
+      now - this.lastBadFixAt <= PDR_TRACKER_CONFIG.liveGpsHoldMs
+        ? gps.status
+        : 'waiting';
+    const fix = this.lastValidResult;
+    if (
+      fix?.status === 'matched' &&
+      this.isPdrEligible() &&
+      now >= fix.timestamp &&
+      (gps?.status === 'matched' || gps?.status === 'too-far' || gps?.status === 'low-accuracy')
+    ) {
+      // Rejected or repeated readings never advance the position or its capture time.
+      return {
+        status,
+        lastKnown: {
+          point: fix.overlay.point,
+          ageSeconds: Math.floor((now - fix.timestamp) / 1000),
+        },
+      };
+    }
+    return { status };
   }
 
   private bridgeExpired(now: number): boolean {
