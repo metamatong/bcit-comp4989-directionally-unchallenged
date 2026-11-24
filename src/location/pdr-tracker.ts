@@ -122,6 +122,10 @@ export type TrackerEvaluation =
       status: 'raw' | 'matched' | 'bridged' | 'held';
       overlay: DeviceOverlay;
       directionResolved?: boolean;
+      /** Resolved Stage 2 particle-cloud travel direction in floor-plan pixel radians. */
+      resolvedHeadingPx?: number;
+      /** Circular heading resultant length R in [0, 1] when directionResolved is true. */
+      headingResultant?: number;
       lastKnown?: never;
     };
 
@@ -146,6 +150,8 @@ type ClusterSummary = {
   dominantWeightShare: number;
   cloudSpreadMetres: number;
   modeSeparationMetres: number;
+  headingPx: number;
+  headingResultant: number;
   directionResolved: boolean;
 };
 
@@ -1233,6 +1239,7 @@ export class IndoorPdrTracker {
       totalW += w;
     }
     const headingResultant = totalW > 0 ? Math.hypot(sumCos, sumSin) / totalW : 0;
+    const headingPx = Math.atan2(sumSin, sumCos);
 
     const directionResolved =
       headingResultant >= PDR_TRACKER_CONFIG.minResolvedHeadingResultant &&
@@ -1244,6 +1251,8 @@ export class IndoorPdrTracker {
       dominantWeightShare: top.weight,
       cloudSpreadMetres: top.spreadMetres,
       modeSeparationMetres,
+      headingPx,
+      headingResultant,
       directionResolved,
     };
   }
@@ -1313,6 +1322,12 @@ export class IndoorPdrTracker {
     return {
       status: bridged ? 'bridged' : 'matched',
       directionResolved: summary.directionResolved,
+      ...(summary.directionResolved
+        ? {
+            resolvedHeadingPx: summary.headingPx,
+            headingResultant: summary.headingResultant,
+          }
+        : {}),
       overlay: {
         point,
         radiusX: (radiusMetres * fit.scale) / ctx.plan.width,

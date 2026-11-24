@@ -60,6 +60,32 @@ export type DeviceOverlay = {
   reportedAccuracyMetres?: number;
 };
 
+export type HeadingSource = 'compass-gyro' | 'compass' | 'pdr';
+
+/** Transient browser-only facing estimate in floor-plan pixel coordinates. */
+export type DeviceHeading = {
+  /** Facing direction in floor-plan pixel radians (0 = +X right, +pi/2 = +Y down). */
+  angleRad: number;
+  /** Full angular spread of the rendered directional cone in degrees (50-85 deg). */
+  spreadDeg: number;
+  source: HeadingSource;
+  /** Reported compass accuracy in degrees when supplied by the browser. */
+  accuracyDeg?: number;
+};
+
+/** Raw DeviceOrientationEvent sample normalized off the DOM for pure tilt-compensated heading math. */
+export type RawOrientationSample = {
+  alpha: number | null;
+  beta: number | null;
+  gamma: number | null;
+  absolute: boolean;
+  webkitCompassHeading?: number | null;
+  webkitCompassAccuracy?: number | null;
+  /** Current screen orientation angle in degrees (0, 90, -90/270, 180). */
+  screenAngleDeg: number;
+  timestamp: number;
+};
+
 export type MotionPermissionState = 'unknown' | 'granted' | 'denied' | 'unsupported';
 
 /** Explicitly separates verified live stillness from a silent or paused sensor stream. */

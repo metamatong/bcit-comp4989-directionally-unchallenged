@@ -13,8 +13,12 @@ import type {
 type DeviceMotionWithPermission = typeof DeviceMotionEvent & {
   requestPermission?: () => Promise<'granted' | 'denied'>;
 };
+type DeviceOrientationWithPermission = typeof DeviceOrientationEvent & {
+  requestPermission?: () => Promise<'granted' | 'denied'>;
+};
 
 let cachedPermission: MotionPermissionState = 'unknown';
+let cachedOrientationPermission: MotionPermissionState = 'unknown';
 
 function motionConstructor(): DeviceMotionWithPermission | undefined {
   return typeof DeviceMotionEvent !== 'undefined'
@@ -22,8 +26,18 @@ function motionConstructor(): DeviceMotionWithPermission | undefined {
     : undefined;
 }
 
+function orientationConstructor(): DeviceOrientationWithPermission | undefined {
+  return typeof DeviceOrientationEvent !== 'undefined'
+    ? (DeviceOrientationEvent as DeviceOrientationWithPermission)
+    : undefined;
+}
+
 export function isMotionSupported(): boolean {
   return Boolean(globalThis.isSecureContext && motionConstructor());
+}
+
+export function isOrientationSupported(): boolean {
+  return Boolean(globalThis.isSecureContext && orientationConstructor());
 }
 
 /**
@@ -50,29 +64,69 @@ export function getMotionPermissionState(): MotionPermissionState {
   return cachedPermission;
 }
 
+export function getOrientationPermissionState(): MotionPermissionState {
+  if (!isOrientationSupported()) return 'unsupported';
+  const ctor = orientationConstructor();
+  if (typeof ctor?.requestPermission !== 'function') return 'granted';
+  return cachedOrientationPermission;
+}
+
 /**
- * Request browser motion permission (required on iOS 13+ WebKit within a user tap).
- * Never blocks or throws; resolves to the resulting MotionPermissionState.
+ * Request browser motion and orientation permission (required on iOS 13+ WebKit within a user tap).
+ * Both APIs share Apple's unified Motion & Orientation access prompt; orientation is unlocked
+ * alongside motion without blocking or failing motion if orientation is unavailable.
  */
 export async function requestMotionPermission(): Promise<MotionPermissionState> {
-  if (!isMotionSupported()) return 'unsupported';
+  const orientCtor = isOrientationSupported() ? orientationConstructor() : undefined;
+  const unlockOrientation = async (motionState: MotionPermissionState) => {
+    if (!orientCtor) return;
+    if (typeof orientCtor.requestPermission !== 'function') {
+      cachedOrientationPermission = 'granted';
+      return;
+    }
+    if (cachedOrientationPermission === 'granted' || cachedOrientationPermission === 'denied') {
+      return;
+    }
+    if (motionState === 'denied') {
+      cachedOrientationPermission = 'denied';
+      return;
+    }
+    try {
+      const result = await orientCtor.requestPermission();
+      cachedOrientationPermission = result === 'granted' ? 'granted' : 'denied';
+    } catch (error) {
+      const name = (error as { name?: string } | null)?.name;
+      if (name !== 'NotAllowedError') {
+        cachedOrientationPermission = 'denied';
+      }
+    }
+  };
+
+  if (!isMotionSupported()) {
+    await unlockOrientation('unsupported');
+    return 'unsupported';
+  }
   const ctor = motionConstructor();
   if (typeof ctor?.requestPermission !== 'function') {
     cachedPermission = 'granted';
+    await unlockOrientation('granted');
     return 'granted';
   }
   if (cachedPermission === 'granted' || cachedPermission === 'denied') {
+    await unlockOrientation(cachedPermission);
     return cachedPermission;
   }
   try {
     const result = await ctor.requestPermission();
     cachedPermission = result === 'granted' ? 'granted' : 'denied';
+    await unlockOrientation(cachedPermission);
     return cachedPermission;
   } catch (error) {
     // Preserve 'unknown' if called outside a user gesture so a later tap can still prompt.
     const name = (error as { name?: string } | null)?.name;
     if (name !== 'NotAllowedError') {
       cachedPermission = 'denied';
+      cachedOrientationPermission = 'denied';
     }
     return cachedPermission;
   }
@@ -80,6 +134,7 @@ export async function requestMotionPermission(): Promise<MotionPermissionState> 
 
 export function resetMotionPermissionCacheForTests() {
   cachedPermission = 'unknown';
+  cachedOrientationPermission = 'unknown';
 }
 
 export class BrowserMotion {
@@ -111,6 +166,7 @@ export class BrowserMotion {
   start(
     onStep: (step: DetectedStep, snapshot: MotionSnapshot) => void,
     onSnapshotChange: (snapshot: MotionSnapshot) => void,
+    onGyroYaw?: (omegaCcwRadPerSec: number, timestamp: number) => void,
   ) {
     this.stop();
     if (!isMotionSupported() || getMotionPermissionState() !== 'granted') {
@@ -127,6 +183,7 @@ export class BrowserMotion {
       const acc = event.accelerationIncludingGravity;
       if (!acc || acc.x === null || acc.y === null || acc.z === null) return;
       const rot = event.rotationRate;
+      const timestamp = Date.now();
       const result = this.estimator.ingest({
         ax: acc.x,
         ay: acc.y,
@@ -134,8 +191,11 @@ export class BrowserMotion {
         rotAlpha: rot?.alpha ?? null,
         rotBeta: rot?.beta ?? null,
         rotGamma: rot?.gamma ?? null,
-        timestamp: Date.now(),
+        timestamp,
       });
+      if (result.omegaCcwRadPerSec !== null) {
+        onGyroYaw?.(result.omegaCcwRadPerSec, timestamp);
+      }
       if (result.step) {
         onStep(result.step, this.snapshot());
       } else if (result.activityChanged || result.capabilityChanged || result.gyroFreshnessChanged) {
