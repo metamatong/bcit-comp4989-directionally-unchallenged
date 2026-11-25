@@ -13,7 +13,12 @@ import type { PreparedPhoto } from '../photo';
 import type { DestinationSuggestion } from '../types';
 import { filterDestinationSuggestions, formatPlaceKind } from '../destination-suggestions';
 
+import { CampusPositionMap } from './CampusPositionMap';
+import type { DeviceReading } from '../location/types';
+
 type PhotoLocationInputProps = {
+  queryingPhoto?: boolean;
+  submissionReading?: DeviceReading;
   step?: 'photo' | 'destination';
   photo: PreparedPhoto | null;
   ready: boolean;
@@ -167,6 +172,8 @@ function ElapsedTime() {
 }
 
 export function PhotoLocationInput({
+  queryingPhoto = false,
+  submissionReading,
   step = 'photo',
   photo,
   ready,
@@ -434,41 +441,49 @@ export function PhotoLocationInput({
         </div>
 
         <div className="destination-body">
-          <h1 id="location-heading">Where are you headed?</h1>
+          {queryingPhoto ? (
+            <div className="campus-search">
+              <CampusPositionMap searching reading={submissionReading} />
+              <h1 id="location-heading">Finding your starting location</h1>
+            </div>
+          ) : (
+            <>
+              <h1 id="location-heading">Where are you headed?</h1>
 
-          <DestinationCombobox
-            value={destination}
-            destinations={destinations}
-            disabled={busy}
-            autoFocus
-            onChange={onDestinationChange}
-          />
-
-          <label className="switch-card">
-            <span className="switch-label">Use elevators</span>
-            <span className="pill-switch">
-              <input
-                type="checkbox"
-                role="switch"
-                checked={preferElevators}
+              <DestinationCombobox
+                value={destination}
+                destinations={destinations}
                 disabled={busy}
-                onChange={(event) => onPreferElevatorsChange?.(event.target.checked)}
+                autoFocus
+                onChange={onDestinationChange}
               />
-              <span className="pill-switch-track" aria-hidden="true" />
-            </span>
-          </label>
 
-          {!destination.trim() && (
-            <button
-              type="button"
-              className="text-button map-point-link"
-              disabled={busy}
-              onClick={() => onDestinationChange('Map point')}
-            >
-              Choose a map point
-            </button>
+              <label className="switch-card">
+                <span className="switch-label">Use elevators</span>
+                <span className="pill-switch">
+                  <input
+                    type="checkbox"
+                    role="switch"
+                    checked={preferElevators}
+                    disabled={busy}
+                    onChange={(event) => onPreferElevatorsChange?.(event.target.checked)}
+                  />
+                  <span className="pill-switch-track" aria-hidden="true" />
+                </span>
+              </label>
+
+              {!destination.trim() && (
+                <button
+                  type="button"
+                  className="text-button map-point-link"
+                  disabled={busy}
+                  onClick={() => onDestinationChange('Map point')}
+                >
+                  Choose a map point
+                </button>
+              )}
+            </>
           )}
-
           {error ? (
             <p className="photo-failure" role="alert">
               {error}

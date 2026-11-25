@@ -25,7 +25,7 @@ try {
     const card = add("article", undefined, section);
     add(
       "h3",
-      `${observation.sample}: ${observation.readablePrimaryText.join(" ")} � ${observation.classification}`,
+      `${observation.sample}: ${observation.readablePrimaryText.join(" ")} · ${observation.classification}`,
       card,
     );
     const image = add("img", undefined, card);

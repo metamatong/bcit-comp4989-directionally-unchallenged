@@ -82,11 +82,16 @@ it('opens only the current instruction, advances manually, finishes, and returns
     expect(host.querySelector('.route-overview')).toBeNull();
     expect(host.querySelectorAll('.walking-map')).toHaveLength(1);
     expect(host.querySelector('.device-position')).not.toBeNull();
+    await click('3D view');
+    const firstFrame = host.querySelector('.walking-map')?.getAttribute('viewBox');
     const firstPosition = host.querySelector('.device-position circle')?.getAttribute('cx');
     await emit(se12.controls[1].latitude, se12.controls[1].longitude);
     expect(host.querySelector('.device-position circle')?.getAttribute('cx')).not.toBe(
       firstPosition,
     );
+    expect(host.querySelector('.walking-map')?.getAttribute('viewBox')).not.toBe(firstFrame);
+    await click('3D view');
+    expect(host.textContent).toContain('Step 1 of 5');
     expect(host.querySelector('.guided-map')?.nextElementSibling?.classList.contains('guided-step')).toBe(true);
     expect(host.querySelector('.sheet-handle')).toBeNull();
     expect(host.querySelector('.map-floating-fab')).toBeNull();

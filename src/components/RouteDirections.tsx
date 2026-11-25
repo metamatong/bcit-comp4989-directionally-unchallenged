@@ -12,7 +12,7 @@ import type {
   WalkingStep,
   WalkingSurface,
 } from '../wayfinding';
-import { RouteMapImage, type MapMarker } from './RouteMap';
+import { RouteMapImage, RouteViewToggle, type MapMarker } from './RouteMap';
 import type { LocationCatalogue } from '../location/types';
 import {
   getMotionPermissionState,
@@ -95,6 +95,7 @@ function FloorMap({
   plan,
   first,
   last,
+  threeD,
   whole,
   requestedRoom,
   requestedOrigin,
@@ -103,6 +104,7 @@ function FloorMap({
   plan: VisualPlan;
   first: boolean;
   last: boolean;
+  threeD: boolean;
   whole: boolean;
   requestedRoom?: PlaceChoice;
   requestedOrigin?: PlaceChoice;
@@ -146,6 +148,7 @@ function FloorMap({
       <span className="route-floor-label">{heading}</span>
       <div className="timeline-map-frame">
         <RouteMapImage
+          threeD={threeD}
           plan={plan}
           paths={visit.walks.map((step) => step.path)}
           markers={markers}
@@ -201,6 +204,8 @@ export function RouteDirections({
   onStartOver?: () => void;
   busy?: boolean;
 }) {
+  const [threeD, setThreeD] = useState(false);
+  const toggleView = () => setThreeD((active) => !active);
   const [showOverview, setShowOverview] = useState(false);
   const [stepIndex, setStepIndex] = useState(0);
   const [whole, setWhole] = useState(false);
@@ -247,6 +252,8 @@ export function RouteDirections({
   if (guided)
     return (
       <GuidedDirections
+        threeD={threeD}
+        onToggleView={toggleView}
         route={route}
         plans={plans}
         locationCatalogue={locationCatalogue}
@@ -325,6 +332,7 @@ export function RouteDirections({
 
       <div className="route-map-stack" role="group" aria-label="Route maps in travel order">
         <div className="map-bar">
+          <RouteViewToggle active={threeD} onToggle={toggleView} />
           <button type="button" aria-pressed={whole} onClick={() => setWhole(!whole)}>
             {whole ? 'Zoom to route' : 'Show full floors'}
           </button>
@@ -332,6 +340,7 @@ export function RouteDirections({
         {visits.map((visit, index) => (
           <Fragment key={`visit-${index}`}>
             <FloorMap
+              threeD={threeD}
               visit={visit}
               plan={planById.get(visit.start.planId)!}
               first={index === 0}

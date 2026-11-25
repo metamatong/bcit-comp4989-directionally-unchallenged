@@ -1315,3 +1315,19 @@
   display: block;
   cursor: crosshair;
 }
+
+.campus-search { width: 100%; text-align: center; }
+.campus-search svg { display: block; width: 100%; max-width: 520px; height: auto; max-height: 32vh; margin: 0 auto 1rem; }
+
+.campus-position-map { margin: 0; }
+.campus-position-map svg { display: block; width: 100%; }
+.campus-position-map figcaption { font-size: .75rem; color: #365448; text-align: center; }
+.guided-map > .campus-position-map { position: absolute; bottom: 8px; right: 8px; width: clamp(94px, 25%, 158px); pointer-events: none; background: #f1f7f3; border: 1px solid #96aca2; border-radius: 8px; overflow: hidden; }
+
+
+.route-preview-button { position: absolute; left: 14px; bottom: 12px; z-index: 4; }
+.route-playback-maps { flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 12px; overflow: auto; }
+.route-playback-maps figure { flex: 1; min-height: 95px; margin: 0; display: flex; flex-direction: column; }
+.route-playback-maps figcaption { font-weight: 650; }
+.route-playback-maps .walking-map { flex: 1; width: 100%; min-height: 0; }
+.route-playback-controls { display: flex; flex-wrap: wrap; gap: 8px; }
