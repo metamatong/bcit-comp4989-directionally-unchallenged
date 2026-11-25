@@ -7,7 +7,7 @@ const TWO_PI = 2 * Math.PI;
 export const HEADING_CONFIG = Object.freeze({
   /** WMM2025 magnetic declination for BCIT Burnaby, degrees East positive. */
   bcitDeclinationDeg: 15.3,
-  maxCompassAccuracyDeg: 45,
+  maxCompassAccuracyDeg: 75,
   /** Heading is unstable when the screen's right axis is nearly vertical. */
   minHorizontalRight: 0.15,
   compassTauSec: 1.5,
@@ -37,7 +37,8 @@ function spreadForCompassAccuracy(accuracyDeg?: number): number {
   if (accuracyDeg === undefined) return 65;
   if (accuracyDeg <= 20) return 50;
   if (accuracyDeg <= 35) return 65;
-  return 85;
+  if (accuracyDeg <= 55) return 85;
+  return 110;
 }
 
 /** Extract clockwise radians from magnetic north in the current screen orientation. */

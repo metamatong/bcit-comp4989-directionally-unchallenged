@@ -309,13 +309,20 @@ describe('StepMotionEstimator (pure IMU signal processing)', () => {
       estimator.ingest({ ax: 0, ay: 0, az: 9.81, rotAlpha: 0, rotBeta: 0, rotGamma, timestamp });
     sample(1000, 90);
     for (let timestamp = 1020; timestamp <= 2600; timestamp += 20) sample(timestamp, 0);
-    expect(estimator.snapshot()).toMatchObject({ hasGyro: true, gyroFresh: true, gyroFreshSince: 1000 });
+    expect(estimator.snapshot()).toMatchObject({
+      hasGyro: true,
+      gyroFresh: true,
+      gyroFreshSince: 1000,
+    });
 
     for (let timestamp = 2620; timestamp <= 3100; timestamp += 20) sample(timestamp, null);
     expect(estimator.snapshot().gyroFresh).toBe(true);
     expect(sample(3101, null).gyroFreshnessChanged).toBe(true);
     expect(estimator.snapshot()).toMatchObject({
-      hasGyro: true, gyroFresh: false, gyroFreshSince: null, activity: 'stationary',
+      hasGyro: true,
+      gyroFresh: false,
+      gyroFreshSince: null,
+      activity: 'stationary',
     });
     expect(sample(3120, 0).gyroFreshnessChanged).toBe(true);
     expect(estimator.snapshot()).toMatchObject({ gyroFresh: true, gyroFreshSince: 3120 });
@@ -383,11 +390,27 @@ describe('StepMotionEstimator (pure IMU signal processing)', () => {
     const outEstimator = new StepMotionEstimator();
     let ot = 0;
     for (; ot <= 500; ot += 20) {
-      outEstimator.ingest({ ax: 0, ay: 0, az: 9.81, rotAlpha: 0, rotBeta: 0, rotGamma: 45, timestamp: ot });
+      outEstimator.ingest({
+        ax: 0,
+        ay: 0,
+        az: 9.81,
+        rotAlpha: 0,
+        rotBeta: 0,
+        rotGamma: 45,
+        timestamp: ot,
+      });
     }
     // Keep sending acceleration after the gyro continuity limit passes, then take a step.
     for (let k = 0; k < 30; k++, ot += 20) {
-      outEstimator.ingest({ ax: 0, ay: 0, az: 9.81, rotAlpha: null, rotBeta: null, rotGamma: null, timestamp: ot });
+      outEstimator.ingest({
+        ax: 0,
+        ay: 0,
+        az: 9.81,
+        rotAlpha: null,
+        rotBeta: null,
+        rotGamma: null,
+        timestamp: ot,
+      });
     }
     let staleGyroStep: DetectedStep | null = null;
     for (let dt = 0; dt <= 800 && !staleGyroStep; dt += 20) {
@@ -410,7 +433,15 @@ describe('StepMotionEstimator (pure IMU signal processing)', () => {
     // 3. An 800 ms devicemotion stall (>500 ms, <1500 ms) resets activity to 'unknown' and advances gyroFreshSince.
     const stallEstimator = new StepMotionEstimator();
     for (let st = 1000; st <= 2000; st += 20) {
-      stallEstimator.ingest({ ax: 0, ay: 0, az: 9.81, rotAlpha: 0, rotBeta: 0, rotGamma: 1, timestamp: st });
+      stallEstimator.ingest({
+        ax: 0,
+        ay: 0,
+        az: 9.81,
+        rotAlpha: 0,
+        rotBeta: 0,
+        rotGamma: 1,
+        timestamp: st,
+      });
     }
     expect(stallEstimator.snapshot().gyroFreshSince).toBe(1000);
     const afterStall = stallEstimator.ingest({
@@ -461,7 +492,55 @@ describe('BrowserMotion adapter & permissions', () => {
         platform: 'iPhone',
         maxTouchPoints: 5,
       }),
-    ).toEqual({ rotationAxisOrder: 'xyz', gravitySign: -1 });
+    ).toEqual({ rotationAxisOrder: 'zxy', gravitySign: -1 });
+
+    // Verify iOS CoreMotion convention ('zxy', gravitySign: -1) yields positive CCW yaw flat and upright.
+    const iosConvention = detectSensorConvention({
+      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) Safari/604.1',
+      platform: 'iPhone',
+      maxTouchPoints: 5,
+    });
+    const flatEstimator = new StepMotionEstimator(iosConvention);
+    flatEstimator.ingest({
+      ax: 0,
+      ay: 0,
+      az: -9.81,
+      rotAlpha: 90,
+      rotBeta: 0,
+      rotGamma: 0,
+      timestamp: 1000,
+    });
+    const flatTurn = flatEstimator.ingest({
+      ax: 0,
+      ay: 0,
+      az: -9.81,
+      rotAlpha: 90,
+      rotBeta: 0,
+      rotGamma: 0,
+      timestamp: 1020,
+    });
+    expect(flatTurn.omegaCcwRadPerSec).toBeCloseTo(Math.PI / 2, 2);
+
+    const uprightEstimator = new StepMotionEstimator(iosConvention);
+    uprightEstimator.ingest({
+      ax: 0,
+      ay: -9.81,
+      az: 0,
+      rotAlpha: 0,
+      rotBeta: 0,
+      rotGamma: 90,
+      timestamp: 1000,
+    });
+    const uprightTurn = uprightEstimator.ingest({
+      ax: 0,
+      ay: -9.81,
+      az: 0,
+      rotAlpha: 0,
+      rotBeta: 0,
+      rotGamma: 90,
+      timestamp: 1020,
+    });
+    expect(uprightTurn.omegaCcwRadPerSec).toBeCloseTo(Math.PI / 2, 2);
 
     const requestPermission = vi
       .fn<() => Promise<'granted' | 'denied'>>()

@@ -23,6 +23,7 @@ function readScreenAngleDeg(): number {
 export class BrowserHeading {
   private readonly estimator = new HeadingEstimator();
   private source: OrientationSource | null = null;
+  private sawDedicatedAbsolute = false;
   private watchdog: ReturnType<typeof setInterval> | null = null;
   private onChange: ((heading: DeviceHeading | null) => void) | null = null;
   private lastEmitted: DeviceHeading | null = null;
@@ -58,6 +59,7 @@ export class BrowserHeading {
     }
     this.estimator.reset();
     this.source = null;
+    this.sawDedicatedAbsolute = false;
     this.lastEmitted = null;
     this.lastEmitAt = -Infinity;
     this.onChange = null;
@@ -74,8 +76,12 @@ export class BrowserHeading {
       source = 'webkit';
     } else if (dedicatedAbsoluteEvent) {
       source = 'absolute-event';
-    } else if (event.absolute === true && this.source !== 'absolute-event') {
-      // Prefer the dedicated event when both events report absolute orientation.
+    } else if (
+      event.absolute === true &&
+      !this.sawDedicatedAbsolute &&
+      this.source !== 'absolute-event'
+    ) {
+      // Prefer the dedicated event once observed so brief invalid samples never flap sources.
       source = 'absolute';
     } else {
       return;
@@ -92,6 +98,9 @@ export class BrowserHeading {
     });
     // An unavailable event from another source says nothing about our current bearing.
     if (!reading && this.source !== source) return;
+    if (dedicatedAbsoluteEvent && reading) {
+      this.sawDedicatedAbsolute = true;
+    }
     if (reading && this.source !== null && this.source !== source) {
       this.estimator.reset();
     }

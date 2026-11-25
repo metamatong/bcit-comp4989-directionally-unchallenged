@@ -16,7 +16,12 @@ import { visualPlans } from '../server/visual-data';
 import { RouteDirections } from '../src/components/RouteDirections';
 import { DevicePosition } from '../src/components/DevicePosition';
 import { BrowserHeading } from '../src/location/browser-heading';
-import { resetMotionPermissionCacheForTests } from '../src/location/browser-motion';
+import {
+  getMotionPermissionState,
+  getOrientationPermissionState,
+  requestMotionPermission,
+  resetMotionPermissionCacheForTests,
+} from '../src/location/browser-motion';
 import { fitCalibration } from '../src/location/geometry';
 import {
   extractMagneticBearingRad,
@@ -148,7 +153,17 @@ describe('extractMagneticBearingRad (iOS Safari & Android Chrome tilt compensati
         extractMagneticBearingRad({ ...sample, webkitCompassHeading, webkitCompassAccuracy: 15 }),
       ).toBeNull();
     }
-    for (const webkitCompassAccuracy of [-1, 60, NaN]) {
+    const indoorWide = extractMagneticBearingRad({
+      ...sample,
+      webkitCompassHeading: 45,
+      webkitCompassAccuracy: 60,
+    });
+    expect(indoorWide).toEqual({ bearingRad: 45 * DEG, accuracyDeg: 60 });
+    const wideEstimator = new HeadingEstimator();
+    wideEstimator.ingestCompass(indoorWide, 1000);
+    expect(wideEstimator.resolvePlanHeading((angle) => angle, 1000)?.spreadDeg).toBe(110);
+
+    for (const webkitCompassAccuracy of [-1, 80, NaN]) {
       expect(
         extractMagneticBearingRad({ ...sample, webkitCompassHeading: 45, webkitCompassAccuracy }),
       ).toBeNull();
@@ -331,6 +346,17 @@ describe('BrowserHeading', () => {
       dispatchOrientation(target, 'deviceorientationabsolute', { alpha: 0, beta: 0, gamma: 0 });
       dispatchOrientation(target, 'deviceorientationabsolute', unavailable);
       expect(onHeading).toHaveBeenLastCalledWith(null);
+
+      // Once deviceorientationabsolute has produced a valid reading, fallback deviceorientation
+      // events must not hijack the stream after a momentary invalid sample.
+      const callsBeforeFallback = onHeading.mock.calls.length;
+      dispatchOrientation(target, 'deviceorientation', {
+        alpha: 90,
+        beta: 0,
+        gamma: 0,
+        absolute: true,
+      });
+      expect(onHeading).toHaveBeenCalledTimes(callsBeforeFallback);
     } finally {
       adapter.stop();
     }
@@ -415,6 +441,55 @@ describe('useHeadingTracker lifecycle', () => {
   });
 });
 
+describe('iOS synchronous sensor permission request', () => {
+  it('invokes both Motion and Orientation requestPermission() synchronously in one user gesture', async () => {
+    vi.stubGlobal('isSecureContext', true);
+    let resolveMotion!: (value: 'granted' | 'denied') => void;
+    let resolveOrient!: (value: 'granted' | 'denied') => void;
+    const requestMotion = vi.fn(
+      () => new Promise<'granted' | 'denied'>((resolve) => (resolveMotion = resolve)),
+    );
+    const requestOrientation = vi.fn(
+      () => new Promise<'granted' | 'denied'>((resolve) => (resolveOrient = resolve)),
+    );
+    vi.stubGlobal('DeviceMotionEvent', { requestPermission: requestMotion });
+    vi.stubGlobal('DeviceOrientationEvent', { requestPermission: requestOrientation });
+
+    const pending = requestMotionPermission();
+    // Both must be called synchronously before the first promise settles so WebKit keeps user activation.
+    expect(requestMotion).toHaveBeenCalledTimes(1);
+    expect(requestOrientation).toHaveBeenCalledTimes(1);
+    // Duplicate taps while the modal is open share the in-flight request without re-prompting.
+    expect(requestMotionPermission()).toBe(pending);
+
+    resolveMotion('granted');
+    resolveOrient('granted');
+    expect(await pending).toBe('granted');
+    expect(getMotionPermissionState()).toBe('granted');
+    expect(getOrientationPermissionState()).toBe('granted');
+  });
+
+  it('keeps orientation retryable on NotAllowedError without re-requesting granted motion', async () => {
+    vi.stubGlobal('isSecureContext', true);
+    const requestMotion = vi.fn<() => Promise<'granted' | 'denied'>>().mockResolvedValue('granted');
+    const requestOrientation = vi
+      .fn<() => Promise<'granted' | 'denied'>>()
+      .mockRejectedValueOnce(new DOMException('Gesture required', 'NotAllowedError'))
+      .mockResolvedValueOnce('granted');
+    vi.stubGlobal('DeviceMotionEvent', { requestPermission: requestMotion });
+    vi.stubGlobal('DeviceOrientationEvent', { requestPermission: requestOrientation });
+
+    await requestMotionPermission();
+    expect(getMotionPermissionState()).toBe('granted');
+    expect(getOrientationPermissionState()).toBe('unknown');
+
+    await requestMotionPermission();
+    expect(requestMotion).toHaveBeenCalledTimes(1);
+    expect(requestOrientation).toHaveBeenCalledTimes(2);
+    expect(getOrientationPermissionState()).toBe('granted');
+  });
+});
+
 describe('GuidedDirections heading cone DOM integration', () => {
   it.each(['granted', 'denied'] as const)(
     'gates the cone on iOS orientation permission (%s)',
@@ -430,7 +505,7 @@ describe('GuidedDirections heading cone DOM integration', () => {
         .mockResolvedValue(permission);
       const requestOrientation = vi
         .fn<() => Promise<'granted' | 'denied'>>()
-        .mockResolvedValue('granted');
+        .mockResolvedValue(permission);
       vi.stubGlobal('DeviceMotionEvent', { requestPermission: requestMotion });
       vi.stubGlobal('DeviceOrientationEvent', { requestPermission: requestOrientation });
 
@@ -474,21 +549,23 @@ describe('GuidedDirections heading cone DOM integration', () => {
           } as GeolocationPosition),
         );
 
-        // Before iOS Motion & Orientation permission is granted, dot + circle render with no cone.
+        // Before iOS Motion & Orientation permission is resolved, dot + circle + Enable compass pill render with no cone.
         expect(host.querySelector('.device-position ellipse')).not.toBeNull();
         expect(host.querySelector('.device-position circle')).not.toBeNull();
+        expect(host.querySelector('.map-compass-btn')?.textContent).toContain('Enable compass');
         expect(host.querySelector('.device-heading-cone')).toBeNull();
 
-        // Tapping the map area on Step 1 unlocks both Motion & Orientation on iOS.
+        // Tapping the Enable compass pill unlocks both Motion & Orientation synchronously on iOS.
         await act(async () => {
           host
-            .querySelector('.guided-map')
+            .querySelector('.map-compass-btn')
             ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
           await Promise.resolve();
           await Promise.resolve();
         });
         expect(requestMotion).toHaveBeenCalledTimes(1);
-        expect(requestOrientation).toHaveBeenCalledTimes(permission === 'granted' ? 1 : 0);
+        expect(requestOrientation).toHaveBeenCalledTimes(1);
+        expect(host.querySelector('.map-compass-btn')).toBeNull();
 
         // Dispatch an iOS compass event while standing still -> cone appears over the uncertainty ellipse.
         const orient1 = new Event('deviceorientation');
@@ -544,6 +621,241 @@ describe('GuidedDirections heading cone DOM integration', () => {
       }
     },
   );
+
+  it('attaches heading tracking when Back to steps resolves iOS permission after GuidedDirections mounts', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(20_000);
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+    vi.stubGlobal('isSecureContext', true);
+    vi.spyOn(document, 'hidden', 'get').mockReturnValue(false);
+
+    let resolveMotion!: (value: 'granted' | 'denied') => void;
+    let resolveOrient!: (value: 'granted' | 'denied') => void;
+    vi.stubGlobal('DeviceMotionEvent', {
+      requestPermission: vi.fn(
+        () => new Promise<'granted' | 'denied'>((resolve) => (resolveMotion = resolve)),
+      ),
+    });
+    vi.stubGlobal('DeviceOrientationEvent', {
+      requestPermission: vi.fn(
+        () => new Promise<'granted' | 'denied'>((resolve) => (resolveOrient = resolve)),
+      ),
+    });
+
+    let reportLocation: PositionCallback = () => {};
+    vi.stubGlobal('navigator', {
+      geolocation: {
+        watchPosition: vi.fn((success: PositionCallback) => {
+          reportLocation = success;
+          return 12;
+        }),
+        clearWatch: vi.fn(),
+      },
+    });
+
+    const route = makeRouteFixture();
+    const host = document.createElement('div');
+    document.body.append(host);
+    const root = createRoot(host);
+    try {
+      await act(async () =>
+        root.render(
+          createElement(RouteDirections, {
+            route,
+            plans: pilotEvidence().map((p) => p.plan),
+            locationCatalogue: catalogue,
+            walkingSurfaces: { [se12Plan.id]: se12Surface },
+            onRecheck: vi.fn(),
+          }),
+        ),
+      );
+
+      // Switch to Overview, then tap Back to steps while the iOS prompt remains pending.
+      await act(async () => {
+        host
+          .querySelector('.map-overview-btn')
+          ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
+      await act(async () => {
+        host
+          .querySelector('.overview-back-pill')
+          ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
+      expect(host.querySelector('.map-compass-btn')).not.toBeNull();
+
+      const pt = se12Fit.unproject({
+        x: (200.5 * se12Surface.step) / se12Plan.width,
+        y: (133.5 * se12Surface.step) / se12Plan.height,
+      });
+      await act(async () =>
+        reportLocation({
+          coords: { latitude: pt.latitude, longitude: pt.longitude, accuracy: 7 },
+          timestamp: Date.now(),
+        } as GeolocationPosition),
+      );
+
+      // Resolve the pending iOS prompt AFTER GuidedDirections has already mounted.
+      await act(async () => {
+        resolveMotion('granted');
+        resolveOrient('granted');
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      expect(host.querySelector('.map-compass-btn')).toBeNull();
+
+      await act(async () =>
+        dispatchOrientation(window, 'deviceorientation', {
+          webkitCompassHeading: 45,
+          webkitCompassAccuracy: 20,
+        }),
+      );
+      expect(host.querySelector('.device-heading-cone')).not.toBeNull();
+    } finally {
+      await act(async () => root.unmount());
+      host.remove();
+    }
+  });
+
+  it('catches immediate microtask resolution on Back to steps, supports map-tap unlock, and hides compass prompt when GPS is denied', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(20_000);
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+    vi.stubGlobal('isSecureContext', true);
+    vi.spyOn(document, 'hidden', 'get').mockReturnValue(false);
+
+    vi.stubGlobal('DeviceMotionEvent', {
+      requestPermission: vi.fn(() => Promise.resolve<'granted'>('granted')),
+    });
+    vi.stubGlobal('DeviceOrientationEvent', {
+      requestPermission: vi.fn(() => Promise.resolve<'granted'>('granted')),
+    });
+
+    let reportLocation: PositionCallback = () => {};
+    let reportError: PositionErrorCallback = () => {};
+    vi.stubGlobal('navigator', {
+      geolocation: {
+        watchPosition: vi.fn((success: PositionCallback, error?: PositionErrorCallback) => {
+          reportLocation = success;
+          reportError = error ?? (() => {});
+          return 15;
+        }),
+        clearWatch: vi.fn(),
+      },
+    });
+
+    const route = makeRouteFixture();
+    const host = document.createElement('div');
+    document.body.append(host);
+    const root = createRoot(host);
+    try {
+      await act(async () =>
+        root.render(
+          createElement(RouteDirections, {
+            route,
+            plans: pilotEvidence().map((p) => p.plan),
+            locationCatalogue: catalogue,
+            walkingSurfaces: { [se12Plan.id]: se12Surface },
+            onRecheck: vi.fn(),
+          }),
+        ),
+      );
+
+      // 1. Immediate microtask grant on Overview -> Back to steps must attach heading via useSyncExternalStore.
+      await act(async () => {
+        host
+          .querySelector('.map-overview-btn')
+          ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      });
+      await act(async () => {
+        host
+          .querySelector('.overview-back-pill')
+          ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      expect(host.querySelector('.map-compass-btn')).toBeNull();
+
+      const pt = se12Fit.unproject({
+        x: (200.5 * se12Surface.step) / se12Plan.width,
+        y: (133.5 * se12Surface.step) / se12Plan.height,
+      });
+      await act(async () =>
+        reportLocation({
+          coords: { latitude: pt.latitude, longitude: pt.longitude, accuracy: 7 },
+          timestamp: Date.now(),
+        } as GeolocationPosition),
+      );
+      await act(async () =>
+        dispatchOrientation(window, 'deviceorientation', {
+          webkitCompassHeading: 30,
+          webkitCompassAccuracy: 15,
+        }),
+      );
+      expect(host.querySelector('.device-heading-cone')).not.toBeNull();
+    } finally {
+      await act(async () => root.unmount());
+      host.remove();
+    }
+
+    // 2. Direct .guided-map tap unlocks permissions, and GPS denial hides the Enable compass pill.
+    resetMotionPermissionCacheForTests();
+    const host2 = document.createElement('div');
+    document.body.append(host2);
+    const root2 = createRoot(host2);
+    try {
+      await act(async () =>
+        root2.render(
+          createElement(RouteDirections, {
+            route,
+            plans: pilotEvidence().map((p) => p.plan),
+            locationCatalogue: catalogue,
+            walkingSurfaces: { [se12Plan.id]: se12Surface },
+            onRecheck: vi.fn(),
+          }),
+        ),
+      );
+      expect(host2.querySelector('.map-compass-btn')).not.toBeNull();
+
+      // Denying GPS tracking (canTrack -> false) hides the compass pill immediately.
+      await act(async () => {
+        reportError({ code: 1, message: 'Denied' } as GeolocationPositionError);
+      });
+      expect(host2.querySelector('.map-compass-btn')).toBeNull();
+    } finally {
+      await act(async () => root2.unmount());
+      host2.remove();
+    }
+
+    resetMotionPermissionCacheForTests();
+    const host3 = document.createElement('div');
+    document.body.append(host3);
+    const root3 = createRoot(host3);
+    try {
+      await act(async () =>
+        root3.render(
+          createElement(RouteDirections, {
+            route,
+            plans: pilotEvidence().map((p) => p.plan),
+            locationCatalogue: catalogue,
+            walkingSurfaces: { [se12Plan.id]: se12Surface },
+            onRecheck: vi.fn(),
+          }),
+        ),
+      );
+      expect(host3.querySelector('.map-compass-btn')).not.toBeNull();
+      await act(async () => {
+        host3
+          .querySelector('.guided-map')
+          ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      expect(host3.querySelector('.map-compass-btn')).toBeNull();
+    } finally {
+      await act(async () => root3.unmount());
+      host3.remove();
+    }
+  });
 });
 
 describe('DevicePosition full-ring radar sector', () => {
@@ -561,7 +873,9 @@ describe('DevicePosition full-ring radar sector', () => {
     };
     const heading = { angleRad: 0, spreadDeg: 50, source: 'compass' as const, accuracyDeg: 18 };
     const render = (props: Parameters<typeof DevicePosition>[0]) =>
-      act(async () => root.render(createElement('svg', null, createElement(DevicePosition, props))));
+      act(async () =>
+        root.render(createElement('svg', null, createElement(DevicePosition, props))),
+      );
 
     try {
       // Corridor-matched with active heading: sector and arc match full rx/ry (50, 80).
@@ -570,7 +884,21 @@ describe('DevicePosition full-ring radar sector', () => {
       const rays = host.querySelector('.device-heading-rays');
       const arc = host.querySelector('.device-heading-arc');
       const ellipse = host.querySelector('.device-position ellipse');
+      const gradientId = host.querySelector('.device-position radialGradient')?.getAttribute('id');
+      const filterId = host.querySelector('.device-position filter')?.getAttribute('id');
+      const shadow = host.querySelector('.device-position feDropShadow');
+      expect(gradientId).toMatch(/^[a-zA-Z0-9_-]+$/);
+      expect(filterId).toMatch(/^[a-zA-Z0-9_-]+$/);
+      expect(Number(shadow?.getAttribute('dy'))).toBeCloseTo(1, 5);
+      expect(Number(shadow?.getAttribute('stdDeviation'))).toBeCloseTo(1.52, 5);
       expect(cone?.getAttribute('d')).toContain('A 50 80 0 0 1');
+
+      // High-resolution plan scales drop-shadow proportionally with dotR.
+      await render({ overlay, heading, width: 3000, height: 3000 });
+      const scaledShadow = host.querySelector('.device-position feDropShadow');
+      expect(Number(scaledShadow?.getAttribute('dy'))).toBeCloseTo(3, 5);
+      expect(Number(scaledShadow?.getAttribute('stdDeviation'))).toBeCloseTo(4.56, 5);
+      await render({ overlay, heading, width: 1000, height: 1000 });
       expect(arc?.getAttribute('d')).toContain('A 50 80 0 0 1');
       expect(rays?.getAttribute('stroke')).toBe('#0f766e');
       expect(arc?.getAttribute('stroke')).toBe('#0f766e');
@@ -603,7 +931,9 @@ describe('DevicePosition full-ring radar sector', () => {
         expect(host.querySelector('.device-heading-cone')).toBeNull();
         expect(host.querySelector('.device-heading-rays')).toBeNull();
         expect(host.querySelector('.device-heading-arc')).toBeNull();
-        expect(host.querySelector('.device-position ellipse')?.getAttribute('stroke-opacity')).toBeNull();
+        expect(
+          host.querySelector('.device-position ellipse')?.getAttribute('stroke-opacity'),
+        ).toBeNull();
       }
     } finally {
       await act(async () => root.unmount());

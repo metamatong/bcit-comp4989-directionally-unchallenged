@@ -19,7 +19,9 @@
     max-width: 480px;
     margin: 0 auto;
     min-height: 100dvh;
-    box-shadow: 0 0 0 1px #dde4db, 0 20px 60px rgba(22, 52, 40, 0.08);
+    box-shadow:
+      0 0 0 1px #dde4db,
+      0 20px 60px rgba(22, 52, 40, 0.08);
   }
 }
 
@@ -403,7 +405,9 @@
   border-radius: 999px;
   color: var(--green);
   box-shadow: 0 4px 14px rgba(22, 52, 40, 0.04);
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 
 .destination-input-pill:focus-within {
@@ -692,6 +696,15 @@
   font-size: 13.5px;
   font-weight: 600;
   white-space: nowrap;
+}
+
+.map-compass-btn {
+  position: absolute;
+  bottom: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 5;
+  cursor: pointer;
 }
 
 .guided-step {

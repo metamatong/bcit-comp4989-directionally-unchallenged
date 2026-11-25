@@ -14,7 +14,11 @@ import type {
 } from '../wayfinding';
 import { RouteMapImage, type MapMarker } from './RouteMap';
 import type { LocationCatalogue } from '../location/types';
-import { getMotionPermissionState, requestMotionPermission } from '../location/browser-motion';
+import {
+  getMotionPermissionState,
+  getOrientationPermissionState,
+  requestMotionPermission,
+} from '../location/browser-motion';
 import { GuidedDirections } from './GuidedDirections';
 
 type FoundRoute = Extract<NavigationResult, { status: 'route' }>;
@@ -283,7 +287,11 @@ export function RouteDirections({
             type="button"
             className="primary overview-back-pill"
             onClick={() => {
-              if (!gpsTestMode && getMotionPermissionState() === 'unknown') {
+              if (
+                !gpsTestMode &&
+                (getMotionPermissionState() === 'unknown' ||
+                  getOrientationPermissionState() === 'unknown')
+              ) {
                 void requestMotionPermission();
               }
               if (complete) setStepIndex(0);

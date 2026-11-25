@@ -34,13 +34,7 @@ export type GpsBuildingHint = {
   accuracy: number;
 };
 export type TrackingMode =
-  | 'raw'
-  | 'matched'
-  | 'motion-gated'
-  | 'stationary-hold'
-  | 'gps-hold'
-  | 'pdr'
-  | 'pdr-bridged';
+  'raw' | 'matched' | 'motion-gated' | 'stationary-hold' | 'gps-hold' | 'pdr' | 'pdr-bridged';
 
 export type DeviceOverlay = {
   point: { x: number; y: number };
@@ -66,7 +60,7 @@ export type HeadingSource = 'compass-gyro' | 'compass';
 export type DeviceHeading = {
   /** Facing direction in floor-plan pixel radians (0 = +X right, +pi/2 = +Y down). */
   angleRad: number;
-  /** Full angular spread of the rendered directional cone in degrees (50-85 deg). */
+  /** Full angular spread of the rendered directional cone in degrees (50-110 deg). */
   spreadDeg: number;
   source: HeadingSource;
   /** Reported compass accuracy in degrees when supplied by the browser. */

@@ -4,11 +4,7 @@
  * step detections, activity changes, capability detection, or stop/silence transitions.
  */
 import { useEffect, useRef, useState } from 'react';
-import {
-  BrowserMotion,
-  getMotionPermissionState,
-  isMotionSupported,
-} from './browser-motion';
+import { BrowserMotion, getMotionPermissionState, isMotionSupported } from './browser-motion';
 import type { DetectedStep, MotionSnapshot } from './types';
 
 function emptySnapshot(): MotionSnapshot {
@@ -35,8 +31,8 @@ export function useMotionTracker({
   onGyroYaw,
 }: {
   active: boolean;
-  /** Increment after a user-gesture permission prompt completes to re-check attachment. */
-  permissionTick?: number;
+  /** Increment or update snapshot after a user-gesture permission prompt settles. */
+  permissionTick?: number | string;
   onStep?: (step: DetectedStep, snapshot: MotionSnapshot) => void;
   /** Live bias-corrected world CCW yaw rate (rad/s) streamed off React's render loop. */
   onGyroYaw?: (omegaCcwRadPerSec: number, timestamp: number) => void;

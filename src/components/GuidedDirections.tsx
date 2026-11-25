@@ -1,6 +1,14 @@
 /** Manual progress through saved route steps; never infers floor changes or photo camera heading. */
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from 'react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Compass } from 'lucide-react';
 import type { NavigationResult, WalkingSurface } from '../wayfinding';
 import type { VisualPlan } from '../types';
 import { fetchWalkingSurface, getCachedWalkingSurface } from '../api';
@@ -17,7 +25,9 @@ import { fitCalibration, overlapsFootprint } from '../location/geometry';
 import {
   getMotionPermissionState,
   getOrientationPermissionState,
+  getSensorPermissionSnapshot,
   requestMotionPermission,
+  subscribeSensorPermissions,
 } from '../location/browser-motion';
 import { MAP_MATCH_CONFIG } from '../location/map-matching';
 import {
@@ -63,7 +73,8 @@ function locationStatusMessage({
     const seconds = evaluation.lastKnown.ageSeconds;
     const age = seconds < 60 ? `${seconds}s` : `${Math.floor(seconds / 60)} min`;
     const coarseReading =
-      evaluation.status === 'low-accuracy' && reading &&
+      evaluation.status === 'low-accuracy' &&
+      reading &&
       reading.accuracy >= MAP_MATCH_CONFIG.coarseLocationAccuracyMetres;
     return {
       announcement: 'Last known location',
@@ -73,7 +84,8 @@ function locationStatusMessage({
   if (!reading || evaluation?.status === 'waiting') {
     return {
       announcement:
-        trackingStatus || (hasStaleReading ? 'Waiting for a fresh GPS update…' : 'Waiting for GPS…'),
+        trackingStatus ||
+        (hasStaleReading ? 'Waiting for a fresh GPS update…' : 'Waiting for GPS…'),
     };
   }
   const floor = planLabel(plan);
@@ -150,7 +162,11 @@ export function GuidedDirections({
       return initial;
     },
   );
-  const [permissionTick, setPermissionTick] = useState(0);
+  const permissionSnapshot = useSyncExternalStore(
+    subscribeSensorPermissions,
+    getSensorPermissionSnapshot,
+    getSensorPermissionSnapshot,
+  );
   const [evaluation, setEvaluation] = useState<TrackerEvaluation | null>(null);
   const trackerRef = useRef<IndoorPdrTracker | null>(null);
   if (!trackerRef.current) {
@@ -218,7 +234,7 @@ export function GuidedDirections({
 
   const { heading, onGyroYaw } = useHeadingTracker({
     active: canTrack && !!bearingToPlanAngle,
-    permissionTick,
+    permissionTick: permissionSnapshot,
     bearingToPlanAngle,
   });
 
@@ -229,7 +245,7 @@ export function GuidedDirections({
 
   const motion = useMotionTracker({
     active: canTrack && isSamePlanCorridor,
-    permissionTick,
+    permissionTick: permissionSnapshot,
     onStep: handleDetectedStep,
     onGyroYaw,
   });
@@ -238,7 +254,9 @@ export function GuidedDirections({
     if (complete || hasProvidedSurface || plan.id in loadedSurfaces) return;
     const cached = getCachedWalkingSurface(plan.id);
     if (cached) {
-      setLoadedSurfaces((current) => (plan.id in current ? current : { ...current, [plan.id]: cached }));
+      setLoadedSurfaces((current) =>
+        plan.id in current ? current : { ...current, [plan.id]: cached },
+      );
       return;
     }
     const controller = new AbortController();
@@ -370,8 +388,11 @@ export function GuidedDirections({
       (getMotionPermissionState() !== 'unknown' && getOrientationPermissionState() !== 'unknown')
     )
       return;
-    void requestMotionPermission().then(() => setPermissionTick((tick) => tick + 1));
+    void requestMotionPermission();
   }
+
+  const showCompassPrompt =
+    canTrack && !!bearingToPlanAngle && getOrientationPermissionState() === 'unknown';
 
   function move(next: number) {
     if (next >= route.steps.length) tracking.stop();
@@ -405,6 +426,16 @@ export function GuidedDirections({
           </button>
           <span className="map-floating-pill map-floor-badge">{planLabel(plan)}</span>
         </div>
+        {showCompassPrompt && (
+          <button
+            type="button"
+            className="map-floating-pill map-compass-btn"
+            onClick={() => promptMotionOnGesture()}
+          >
+            <Compass size={15} aria-hidden="true" />
+            <span>Enable compass</span>
+          </button>
+        )}
 
         <RouteMapImage
           key={`${index}-${plan.id}`}
@@ -488,11 +519,7 @@ export function GuidedDirections({
             Back
           </button>
           {complete ? (
-            <button
-              type="button"
-              className="primary sheet-pill-btn"
-              onClick={onDone ?? onOverview}
-            >
+            <button type="button" className="primary sheet-pill-btn" onClick={onDone ?? onOverview}>
               Done
             </button>
           ) : (
@@ -501,8 +528,7 @@ export function GuidedDirections({
               className="primary sheet-pill-btn"
               onClick={() => move(index + 1)}
             >
-              {index === route.steps.length - 1 ? 'Finish' : 'Next'}{' '}
-              <ArrowRight size={17} />
+              {index === route.steps.length - 1 ? 'Finish' : 'Next'} <ArrowRight size={17} />
             </button>
           )}
         </div>

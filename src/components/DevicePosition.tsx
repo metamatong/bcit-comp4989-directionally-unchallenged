@@ -13,9 +13,10 @@ export function DevicePosition({
   width: number;
   height: number;
 }) {
-  const baseId = useId();
-  const gradientId = `${baseId}-grad`;
-  const shadowId = `${baseId}-shadow`;
+  // Strip colons from React useId() values so SVG url(#...) references stay strictly valid in WebKit.
+  const safeId = useId().replace(/[^a-zA-Z0-9_-]/g, '');
+  const gradientId = `device-cone-grad-${safeId}`;
+  const shadowId = `device-cone-shadow-${safeId}`;
   const matched =
     overlay.corridorMatched ||
     overlay.snapDistanceMetres !== undefined ||
@@ -103,8 +104,8 @@ export function DevicePosition({
         <filter id={shadowId} x="-80%" y="-80%" width="260%" height="260%">
           <feDropShadow
             dx="0"
-            dy="0.8"
-            stdDeviation="1.2"
+            dy={dotR * 0.25}
+            stdDeviation={dotR * 0.38}
             floodColor={shadowColor}
             floodOpacity="0.35"
           />

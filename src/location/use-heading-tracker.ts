@@ -9,8 +9,8 @@ export function useHeadingTracker({
   bearingToPlanAngle,
 }: {
   active: boolean;
-  /** Increment when a user-gesture permission request settles. */
-  permissionTick?: number;
+  /** Increment or update snapshot when a user-gesture permission request settles. */
+  permissionTick?: number | string;
   bearingToPlanAngle: ((trueBearingRad: number) => number) | null;
 }): {
   heading: DeviceHeading | null;
