@@ -219,6 +219,36 @@ test('submits photo and destination and displays directions without route confir
   await page.screenshot({ path: info.outputPath('photo-comparison-mocked.png'), fullPage: true });
 });
 
+test('3D view follows the active floor and keeps progress across view changes', async ({ page }) => {
+  await setup(page);
+  await choosePhoto(page);
+  await page.context().setGeolocation({ latitude: 49.249972, longitude: -123.001589, accuracy: 2 });
+  await submitPhoto(page);
+  const toggle = page.getByRole('button', { name: '3D view', exact: true });
+  const next = page.getByRole('button', { name: 'Next', exact: true });
+  const floor = page.locator('.map-floor-badge');
+  const walls = page.locator('.walking-map path').filter({ has: page.locator('title', { hasText: /walls/i }) });
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  await expect(walls).toHaveCount(1);
+  await expect(floor).toHaveText('SE12 · Floor 3');
+  await next.click();
+  await next.click();
+  await expect(floor).toHaveText('SW03 · Floor 3');
+  await expect(walls).toHaveCount(1);
+  await page.getByRole('button', { name: 'Route overview', exact: true }).click();
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  await page.getByRole('button', { name: 'Back to steps', exact: true }).click();
+  await next.click();
+  await next.click();
+  await expect(floor).toHaveText('SW03 · Floor 2');
+  await toggle.click();
+  await expect(walls).toHaveCount(0);
+  await expect(floor).toHaveText('SW03 · Floor 2');
+  await expect(page.locator('.guided-step-count')).toContainText('Step 5 of 5');
+});
+
 test('ambiguous photo asks for another view without generating a route', async ({ page }) => {
   const { requests } = await setup(page, false);
   await choosePhoto(page);

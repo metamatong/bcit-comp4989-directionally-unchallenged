@@ -585,4 +585,4 @@ async function start() {
   resize();new ResizeObserver(resize).observe(canvas.parentElement);
   showFloorControls();rebuild();renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera)});
 }
-start().catch(e=>document.getElementById("status").textContent="Three.js view unavailable Â· "+e.message);
+start().catch(e=>document.getElementById("status").textContent="Three.js view unavailable · "+e.message);

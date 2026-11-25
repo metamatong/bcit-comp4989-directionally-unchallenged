@@ -13,7 +13,9 @@ import type { NavigationResult, WalkingSurface } from '../wayfinding';
 import type { VisualPlan } from '../types';
 import { fetchWalkingSurface, getCachedWalkingSurface } from '../api';
 import { planLabel } from '../topology';
-import { RouteMapImage } from './RouteMap';
+import { RoutePlayback } from './RoutePlayback';
+import { CampusPositionMap } from './CampusPositionMap';
+import { RouteMapImage, RouteViewToggle } from './RouteMap';
 import type {
   DetectedStep,
   DeviceOverlay,
@@ -123,6 +125,8 @@ function locationStatusMessage({
 }
 
 export function GuidedDirections({
+  threeD = false,
+  onToggleView,
   route,
   plans,
   locationCatalogue,
@@ -134,6 +138,8 @@ export function GuidedDirections({
   onOverview,
   onDone,
 }: {
+  threeD?: boolean;
+  onToggleView?: () => void;
   route: Extract<NavigationResult, { status: 'route' }>;
   plans: VisualPlan[];
   locationCatalogue?: LocationCatalogue;
@@ -146,6 +152,7 @@ export function GuidedDirections({
   onOverview: () => void;
   onDone?: () => void;
 }) {
+  const [previewOpen, setPreviewOpen] = useState(false);
   const tracking = useWalkingLocation(true);
   const instructionRef = useRef<HTMLParagraphElement>(null);
   const [loadedSurfaces, setLoadedSurfaces] = useState<Record<string, WalkingSurface | null>>(
@@ -400,6 +407,8 @@ export function GuidedDirections({
     ? 100
     : Math.max(8, Math.round(((index + 1) / Math.max(route.steps.length, 1)) * 100));
 
+  if (previewOpen) return <RoutePlayback route={route} plans={plans} onClose={() => setPreviewOpen(false)} />;
+
   return (
     <section className="guided-directions guided-stage" aria-label="Step-by-step directions">
       <div
@@ -420,6 +429,7 @@ export function GuidedDirections({
             <ArrowLeft size={16} aria-hidden="true" />
             <span>Overview</span>
           </button>
+          {onToggleView && <RouteViewToggle active={threeD} onToggle={onToggleView} />}
           <span className="map-floating-pill map-floor-badge">{planLabel(plan)}</span>
         </div>
         {showCompassPrompt && (
@@ -433,7 +443,9 @@ export function GuidedDirections({
           </button>
         )}
 
+        {threeD && <button type="button" className="map-floating-pill route-preview-button" onClick={() => setPreviewOpen(true)}>Preview full route</button>}
         <RouteMapImage
+          threeD={threeD}
           key={`${index}-${plan.id}`}
           plan={plan}
           label={`${planLabel(plan)} · ${complete ? 'Destination' : `Step ${index + 1}`}`}
@@ -458,6 +470,9 @@ export function GuidedDirections({
                 ]
           }
         />
+        {threeD && !complete && (
+          <CampusPositionMap reading={canTrack && tracking.fresh ? watchReading : null} />
+        )}
         {transferDirection && targetPlan && (
           <div
             className={`guided-transfer-overlay is-${transferDirection}`}
