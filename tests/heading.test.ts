@@ -824,16 +824,16 @@ describe('GuidedDirections heading cone DOM integration', () => {
           } as GeolocationPosition),
         );
 
-        // Before iOS Motion & Orientation permission is resolved, dot + circle + Enable compass pill render with no cone.
+        // Before iOS Motion & Orientation permission is resolved, dot + circle render with no cone and no manual compass button.
         expect(host.querySelector('.device-position ellipse')).not.toBeNull();
         expect(host.querySelector('.device-position circle')).not.toBeNull();
-        expect(host.querySelector('.map-compass-btn')?.textContent).toContain('Enable compass');
+        expect(host.querySelector('.map-compass-btn')).toBeNull();
         expect(host.querySelector('.device-heading-cone')).toBeNull();
 
-        // Tapping the Enable compass pill unlocks both Motion & Orientation synchronously on iOS.
+        // Any fallback tap inside the guided view unlocks both Motion & Orientation synchronously on iOS.
         await act(async () => {
           host
-            .querySelector('.map-compass-btn')
+            .querySelector('.guided-map')
             ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
           await Promise.resolve();
           await Promise.resolve();
@@ -945,7 +945,7 @@ describe('GuidedDirections heading cone DOM integration', () => {
         ),
       );
 
-      // Switch to Overview, then tap Back to steps while the iOS prompt remains pending.
+      // Switch to Overview (does not prompt on exit), then tap Back to steps while the iOS prompt remains pending.
       await act(async () => {
         host
           .querySelector('.map-overview-btn')
@@ -956,7 +956,7 @@ describe('GuidedDirections heading cone DOM integration', () => {
           .querySelector('.overview-back-pill')
           ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       });
-      expect(host.querySelector('.map-compass-btn')).not.toBeNull();
+      expect(host.querySelector('.map-compass-btn')).toBeNull();
 
       const pt = se12Fit.unproject({
         x: (200.5 * se12Surface.step) / se12Plan.width,
@@ -991,19 +991,17 @@ describe('GuidedDirections heading cone DOM integration', () => {
     }
   });
 
-  it('catches immediate microtask resolution on Back to steps, supports map-tap unlock, and hides compass prompt when GPS is denied', async () => {
+  it('catches immediate microtask resolution on Back to steps, ignores taps when GPS is denied, and unlocks via any guided tap', async () => {
     vi.useFakeTimers();
     vi.setSystemTime(20_000);
     vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
     vi.stubGlobal('isSecureContext', true);
     vi.spyOn(document, 'hidden', 'get').mockReturnValue(false);
 
-    vi.stubGlobal('DeviceMotionEvent', {
-      requestPermission: vi.fn(() => Promise.resolve<'granted'>('granted')),
-    });
-    vi.stubGlobal('DeviceOrientationEvent', {
-      requestPermission: vi.fn(() => Promise.resolve<'granted'>('granted')),
-    });
+    const requestMotion = vi.fn(() => Promise.resolve<'granted'>('granted'));
+    const requestOrientation = vi.fn(() => Promise.resolve<'granted'>('granted'));
+    vi.stubGlobal('DeviceMotionEvent', { requestPermission: requestMotion });
+    vi.stubGlobal('DeviceOrientationEvent', { requestPermission: requestOrientation });
 
     let reportLocation: PositionCallback = () => {};
     let reportError: PositionErrorCallback = () => {};
@@ -1041,6 +1039,7 @@ describe('GuidedDirections heading cone DOM integration', () => {
           .querySelector('.map-overview-btn')
           ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
       });
+      expect(requestOrientation).not.toHaveBeenCalled();
       await act(async () => {
         host
           .querySelector('.overview-back-pill')
@@ -1048,6 +1047,7 @@ describe('GuidedDirections heading cone DOM integration', () => {
         await Promise.resolve();
         await Promise.resolve();
       });
+      expect(requestOrientation).toHaveBeenCalledTimes(1);
       expect(host.querySelector('.map-compass-btn')).toBeNull();
 
       const pt = se12Fit.unproject({
@@ -1072,8 +1072,10 @@ describe('GuidedDirections heading cone DOM integration', () => {
       host.remove();
     }
 
-    // 2. Direct .guided-map tap unlocks permissions, and GPS denial hides the Enable compass pill.
+    // 2. When GPS is denied (canTrack -> false), tapping the guided screen does not prompt for compass.
     resetMotionPermissionCacheForTests();
+    requestMotion.mockClear();
+    requestOrientation.mockClear();
     const host2 = document.createElement('div');
     document.body.append(host2);
     const root2 = createRoot(host2);
@@ -1089,19 +1091,34 @@ describe('GuidedDirections heading cone DOM integration', () => {
           }),
         ),
       );
-      expect(host2.querySelector('.map-compass-btn')).not.toBeNull();
+      expect(host2.querySelector('.map-compass-btn')).toBeNull();
 
-      // Denying GPS tracking (canTrack -> false) hides the compass pill immediately.
       await act(async () => {
         reportError({ code: 1, message: 'Denied' } as GeolocationPositionError);
       });
-      expect(host2.querySelector('.map-compass-btn')).toBeNull();
+      await act(async () => {
+        host2
+          .querySelector('.guided-map')
+          ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+        await Promise.resolve();
+      });
+      expect(requestOrientation).not.toHaveBeenCalled();
     } finally {
       await act(async () => root2.unmount());
       host2.remove();
     }
 
+    // 3. If permission was already granted earlier (e.g. on Get Directions) and pre-warmed,
+    // Step 1 renders the cone automatically without any extra button click.
     resetMotionPermissionCacheForTests();
+    requestMotion.mockClear();
+    requestOrientation.mockClear();
+    await requestMotionPermission();
+    startHeadingPrewarm();
+    dispatchOrientation(window, 'deviceorientation', {
+      webkitCompassHeading: 30,
+      webkitCompassAccuracy: 15,
+    });
     const host3 = document.createElement('div');
     document.body.append(host3);
     const root3 = createRoot(host3);
@@ -1117,16 +1134,20 @@ describe('GuidedDirections heading cone DOM integration', () => {
           }),
         ),
       );
-      expect(host3.querySelector('.map-compass-btn')).not.toBeNull();
-      await act(async () => {
-        host3
-          .querySelector('.guided-map')
-          ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        await Promise.resolve();
-        await Promise.resolve();
+      const pt = se12Fit.unproject({
+        x: (200.5 * se12Surface.step) / se12Plan.width,
+        y: (133.5 * se12Surface.step) / se12Plan.height,
       });
+      await act(async () =>
+        reportLocation({
+          coords: { latitude: pt.latitude, longitude: pt.longitude, accuracy: 7 },
+          timestamp: Date.now(),
+        } as GeolocationPosition),
+      );
       expect(host3.querySelector('.map-compass-btn')).toBeNull();
+      expect(host3.querySelector('.device-heading-cone')).not.toBeNull();
     } finally {
+      stopHeadingPrewarm();
       await act(async () => root3.unmount());
       host3.remove();
     }

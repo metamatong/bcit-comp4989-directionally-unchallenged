@@ -26,6 +26,11 @@ import { JourneyPanel } from './components/JourneyPanel';
 import { PhotoDeviceRequirement } from './components/PhotoDeviceLocation';
 import { useLocationPrewarm, usePhotoDeviceLocation } from './location/use-device-location';
 import { useHeadingPrewarm } from './location/use-heading-tracker';
+import {
+  getMotionPermissionState,
+  getOrientationPermissionState,
+  requestMotionPermission,
+} from './location/browser-motion';
 import { gpsBuildingHint } from './location/building-hint';
 import type { GpsBuildingHint } from './location/types';
 import './wayfinding.css';
@@ -188,6 +193,14 @@ export default function App() {
       if (evidenceGate.current.isCurrent(generation)) setReading(false);
     }
   }
+  function promptMotionOnGesture() {
+    if (
+      getMotionPermissionState() !== 'unknown' &&
+      getOrientationPermissionState() !== 'unknown'
+    )
+      return;
+    void requestMotionPermission();
+  }
   async function analyzePhoto() {
     const current = sessionRef.current;
     if (
@@ -198,6 +211,9 @@ export default function App() {
       busyRef.current
     )
       return;
+    // Request iOS motion & orientation permission synchronously on the Get Directions gesture
+    // so orientation pre-warming can start during analysis and the cone appears automatically on Step 1.
+    promptMotionOnGesture();
     const generation = evidenceGate.current.next();
     const controller = new AbortController();
     photoAbort.current = controller;
@@ -408,7 +424,10 @@ export default function App() {
       status={readStatus}
       error={photoError}
       onPhoto={(file) => void readPhoto(file)}
-      onNext={() => setFlowStep('destination')}
+      onNext={() => {
+        promptMotionOnGesture();
+        setFlowStep('destination');
+      }}
       onBack={() => (preparedPhoto ? setFlowStep('photo') : removePhoto())}
       onAnalyze={() => void analyzePhoto()}
       onDiscard={removePhoto}
@@ -440,6 +459,7 @@ export default function App() {
         className="primary full-width sheet-pill-btn"
         disabled={busy}
         onClick={() => {
+          promptMotionOnGesture();
           const submittedDestination = destination.trim();
           setActiveDestination(submittedDestination);
           setPendingPrewarmKey(journeyKeyFor(session, submittedDestination, preferElevators));
