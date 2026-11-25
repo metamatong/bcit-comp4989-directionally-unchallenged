@@ -5,6 +5,7 @@ import type { NavigationResult, WalkingSurface } from '../wayfinding';
 import type { VisualPlan } from '../types';
 import { fetchWalkingSurface, getCachedWalkingSurface } from '../api';
 import { planLabel } from '../topology';
+import { RoutePlayback } from './RoutePlayback';
 import { CampusPositionMap } from './CampusPositionMap';
 import { RouteMapImage, RouteViewToggle } from './RouteMap';
 import type {
@@ -138,6 +139,7 @@ export function GuidedDirections({
   onOverview: () => void;
   onDone?: () => void;
 }) {
+  const [previewOpen, setPreviewOpen] = useState(false);
   const tracking = useWalkingLocation(!gpsTestMode);
   const instructionRef = useRef<HTMLParagraphElement>(null);
   const [loadedSurfaces, setLoadedSurfaces] = useState<Record<string, WalkingSurface | null>>(
@@ -360,6 +362,8 @@ export function GuidedDirections({
     ? 100
     : Math.max(8, Math.round(((index + 1) / Math.max(route.steps.length, 1)) * 100));
 
+  if (previewOpen) return <RoutePlayback route={route} plans={plans} onClose={() => setPreviewOpen(false)} />;
+
   return (
     <section className="guided-directions guided-stage" aria-label="Step-by-step directions">
       <div className="guided-map">
@@ -377,6 +381,7 @@ export function GuidedDirections({
           <span className="map-floating-pill map-floor-badge">{planLabel(plan)}</span>
         </div>
 
+        {threeD && <button type="button" className="map-floating-pill route-preview-button" onClick={() => setPreviewOpen(true)}>Preview full route</button>}
         <RouteMapImage
           threeD={threeD}
           key={`${index}-${plan.id}`}

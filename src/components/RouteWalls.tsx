@@ -21,8 +21,7 @@ export default memo(function RouteWalls({ plan }: { plan: VisualPlan }) {
   return (
     <path
       d={faces}
-      fill={record.estimated ? '#75a69a' : '#789aa8'}
-      fillOpacity={0.75}
+      fill={record.estimated ? '#98bcb3' : '#9ab3be'}
       stroke="#516e78"
       strokeWidth={plan.width * 0.00045}
       fillRule="nonzero"

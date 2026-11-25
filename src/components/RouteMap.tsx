@@ -24,6 +24,7 @@ type MapProps = {
   bounds?: PlanBounds;
   label: string;
   threeD?: boolean;
+  playbackDuration?: number;
   device?: DeviceOverlay | null;
   lastKnownPoint?: PagePoint;
 };
@@ -37,6 +38,7 @@ export function RouteMapImage({
   label,
   device,
   threeD = false,
+  playbackDuration,
   lastKnownPoint,
   whole = false,
   fillContainer = false,
@@ -83,12 +85,15 @@ export function RouteMapImage({
     >
       <title>{label}</title>
       <g transform={threeD ? 'matrix(1 0 .22 .72 0 0)' : undefined}>
-        <image href={plan.full.url} x={0} y={0} width={width} height={height} />
-        {threeD && (
-          <Suspense fallback={null}>
-            <RouteWalls plan={plan} />
-          </Suspense>
-        )}
+        <image
+          key={plan.sourceSha256}
+          href={threeD ? `/route-plans/${plan.id}-${plan.sourceSha256}.svg` : plan.full.url}
+          onError={(event) => {
+            const image = event.currentTarget;
+            if (image.getAttribute('href') !== plan.full.url) image.setAttribute('href', plan.full.url);
+          }}
+          x={0} y={0} width={width} height={height}
+        />
         {bounds && (
           <rect
             x={bounds[0] * width}
@@ -124,6 +129,12 @@ export function RouteMapImage({
                   strokeLinejoin="round"
                   strokeLinecap="round"
                 />
+                {playbackDuration && (
+                  <circle r={6 * scale} fill="#103f73" stroke="white" strokeWidth={2 * scale}>
+                    <title>Route preview</title>
+                    <animateMotion path={'M' + svgPoints.split(' ').join(' L')} dur={playbackDuration + 'ms'} fill="freeze" />
+                  </circle>
+                )}
                 {path.slice(1).map((p, i) => {
                   const a = path[i],
                     dx = (p.x - a.x) * width,
@@ -132,10 +143,10 @@ export function RouteMapImage({
                   return (
                     <path
                       key={i}
-                      d="M -5 -4 L 2.5 0 L -5 4"
-                      transform={`translate(${((a.x + p.x) * width) / 2} ${((a.y + p.y) * height) / 2}) rotate(${(Math.atan2(dy, dx) * 180) / Math.PI}) scale(${scale * 1.4})`}
-                      fill="none"
-                      stroke="#103f73"
+                      d={threeD ? 'M -2 -.85 L 1.75 0 L -2 .85 Z' : 'M -5 -4 L 2.5 0 L -5 4'}
+                      transform={`translate(${((a.x + p.x) * width) / 2} ${((a.y + p.y) * height) / 2}) rotate(${(Math.atan2(dy, dx) * 180) / Math.PI}) scale(${threeD ? line / 2 : scale * 1.4})`}
+                      fill={threeD ? 'white' : 'none'}
+                      stroke={threeD ? 'none' : '#103f73'}
                       strokeWidth="2.6"
                       strokeLinecap="round"
                       strokeLinejoin="round"
@@ -145,6 +156,11 @@ export function RouteMapImage({
               </g>
             );
           })}
+        {threeD && (
+          <Suspense fallback={null}>
+            <RouteWalls plan={plan} />
+          </Suspense>
+        )}
         {device && <DevicePosition overlay={device} width={width} height={height} />}
         {!device && lastKnownPoint && (
           <circle
