@@ -60,7 +60,7 @@ export type DeviceOverlay = {
   reportedAccuracyMetres?: number;
 };
 
-export type HeadingSource = 'compass-gyro' | 'compass' | 'pdr';
+export type HeadingSource = 'compass-gyro' | 'compass';
 
 /** Transient browser-only facing estimate in floor-plan pixel coordinates. */
 export type DeviceHeading = {
@@ -83,7 +83,6 @@ export type RawOrientationSample = {
   webkitCompassAccuracy?: number | null;
   /** Current screen orientation angle in degrees (0, 90, -90/270, 180). */
   screenAngleDeg: number;
-  timestamp: number;
 };
 
 export type MotionPermissionState = 'unknown' | 'granted' | 'denied' | 'unsupported';

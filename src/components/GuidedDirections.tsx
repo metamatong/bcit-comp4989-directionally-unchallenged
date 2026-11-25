@@ -216,25 +216,10 @@ export function GuidedDirections({
     }
   }, [calibration, plan.id, plan.sourceSha256, plan.width, plan.height]);
 
-  const pdrHeadingFallback = useMemo(() => {
-    if (
-      (evaluation?.status === 'matched' || evaluation?.status === 'bridged') &&
-      evaluation.resolvedHeadingPx !== undefined &&
-      evaluation.headingResultant !== undefined
-    ) {
-      return {
-        angleRad: evaluation.resolvedHeadingPx,
-        resultant: evaluation.headingResultant,
-      };
-    }
-    return null;
-  }, [evaluation]);
-
   const { heading, onGyroYaw } = useHeadingTracker({
     active: canTrack && !!bearingToPlanAngle,
     permissionTick,
     bearingToPlanAngle,
-    pdrFallback: pdrHeadingFallback,
   });
 
   const handleDetectedStep = useCallback((detected: DetectedStep, snapshot: MotionSnapshot) => {
@@ -427,7 +412,7 @@ export function GuidedDirections({
           label={`${planLabel(plan)} · ${complete ? 'Destination' : `Step ${index + 1}`}`}
           paths={step?.kind === 'corridor' ? [step.path] : []}
           device={device}
-          heading={device ? heading : null}
+          heading={canTrack && device ? heading : null}
           lastKnownPoint={canTrack ? evaluation?.lastKnown?.point : undefined}
           fillContainer
           markers={

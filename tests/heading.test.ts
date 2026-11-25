@@ -3,8 +3,7 @@
  * Focused unit and DOM tests for the live directional heading cone:
  * - True North -> floor-plan pixel angle conversion (including rotated plans)
  * - iOS webkitCompassHeading & Android 3D tilt-compensated deviceorientationabsolute
- * - Complementary gyro + compass smoothing, magnetic-spike damping, and staleness expiry
- * - Stage 2 PDR travel-heading fallback and stationary gyro rotation
+ * - Compass validation, gyro turn limits and guided tracking lifecycle
  * - GuidedDirections SVG cone rendering layered over the uncertainty circle
  */
 import { act, createElement } from 'react';
@@ -15,6 +14,7 @@ import { locationCatalogue } from '../server/geolocation';
 import { pilotEvidence } from '../server/pilot-evidence';
 import { visualPlans } from '../server/visual-data';
 import { RouteDirections } from '../src/components/RouteDirections';
+import { BrowserHeading } from '../src/location/browser-heading';
 import { resetMotionPermissionCacheForTests } from '../src/location/browser-motion';
 import { fitCalibration } from '../src/location/geometry';
 import {
@@ -24,6 +24,7 @@ import {
   wrapAngleRad,
 } from '../src/location/heading';
 import type { CalibrationControl } from '../src/location/types';
+import { useHeadingTracker } from '../src/location/use-heading-tracker';
 import type { MapStop, NavigationResult, WalkingSurface } from '../src/wayfinding';
 import { walkingRouteFixture } from './wayfinding-fixtures';
 
@@ -79,8 +80,12 @@ describe('calibration bearing-to-plan angle conversion', () => {
       { label: 'NE', latitude: lat0 + dLat, longitude: lon0 + dLon, x: 0.6, y: 0.4 },
     ];
     const northUpFit = fitCalibration(northUpControls, 1000, 1000);
-    expect(Math.abs(wrapAngleRad(northUpFit.bearingToPlanAngle(0) - -Math.PI / 2))).toBeLessThan(0.01);
-    expect(Math.abs(wrapAngleRad(northUpFit.bearingToPlanAngle(Math.PI / 2) - 0))).toBeLessThan(0.01);
+    expect(Math.abs(wrapAngleRad(northUpFit.bearingToPlanAngle(0) - -Math.PI / 2))).toBeLessThan(
+      0.01,
+    );
+    expect(Math.abs(wrapAngleRad(northUpFit.bearingToPlanAngle(Math.PI / 2) - 0))).toBeLessThan(
+      0.01,
+    );
 
     // 90 deg clockwise-rotated plan: +North -> +X right, +East -> +Y down.
     const rotatedControls: CalibrationControl[] = [
@@ -91,7 +96,9 @@ describe('calibration bearing-to-plan angle conversion', () => {
     ];
     const rotatedFit = fitCalibration(rotatedControls, 1000, 1000);
     expect(Math.abs(wrapAngleRad(rotatedFit.bearingToPlanAngle(0) - 0))).toBeLessThan(0.01);
-    expect(Math.abs(wrapAngleRad(rotatedFit.bearingToPlanAngle(Math.PI / 2) - Math.PI / 2))).toBeLessThan(0.01);
+    expect(
+      Math.abs(wrapAngleRad(rotatedFit.bearingToPlanAngle(Math.PI / 2) - Math.PI / 2)),
+    ).toBeLessThan(0.01);
 
     // Real SE12-F3-p1 calibration: bearingToPlanAngle(0) matches finite-difference North projection.
     const p0 = se12Fit.project(se12Calibration.controls[0]);
@@ -103,7 +110,9 @@ describe('calibration bearing-to-plan angle conversion', () => {
       (pNorth.y - p0.y) * se12Plan.height,
       (pNorth.x - p0.x) * se12Plan.width,
     );
-    expect(Math.abs(wrapAngleRad(se12Fit.bearingToPlanAngle(0) - expectedNorthAngle))).toBeLessThan(0.005);
+    expect(Math.abs(wrapAngleRad(se12Fit.bearingToPlanAngle(0) - expectedNorthAngle))).toBeLessThan(
+      0.005,
+    );
   });
 });
 
@@ -117,7 +126,6 @@ describe('extractMagneticBearingRad (iOS Safari & Android Chrome tilt compensati
       webkitCompassHeading: 90,
       webkitCompassAccuracy: 15,
       screenAngleDeg: 0,
-      timestamp: 1000,
     });
     expect(portrait).toEqual({ bearingRad: Math.PI / 2, accuracyDeg: 15 });
 
@@ -130,38 +138,23 @@ describe('extractMagneticBearingRad (iOS Safari & Android Chrome tilt compensati
       webkitCompassHeading: 270,
       webkitCompassAccuracy: 18,
       screenAngleDeg: 90,
-      timestamp: 1000,
     });
     expect(Math.abs(wrapAngleRad(landscape!.bearingRad - 0))).toBeLessThan(1e-6);
 
-    // Reject uncalibrated (-1) or overly wide (> 45 deg) compass accuracy.
-    expect(
-      extractMagneticBearingRad({
-        alpha: 0,
-        beta: 0,
-        gamma: 0,
-        absolute: false,
-        webkitCompassHeading: 45,
-        webkitCompassAccuracy: -1,
-        screenAngleDeg: 0,
-        timestamp: 1000,
-      }),
-    ).toBeNull();
-    expect(
-      extractMagneticBearingRad({
-        alpha: 0,
-        beta: 0,
-        gamma: 0,
-        absolute: false,
-        webkitCompassHeading: 45,
-        webkitCompassAccuracy: 60,
-        screenAngleDeg: 0,
-        timestamp: 1000,
-      }),
-    ).toBeNull();
+    const sample = { alpha: null, beta: null, gamma: null, absolute: false, screenAngleDeg: 0 };
+    for (const webkitCompassHeading of [null, -1, NaN, Infinity]) {
+      expect(
+        extractMagneticBearingRad({ ...sample, webkitCompassHeading, webkitCompassAccuracy: 15 }),
+      ).toBeNull();
+    }
+    for (const webkitCompassAccuracy of [-1, 60, NaN]) {
+      expect(
+        extractMagneticBearingRad({ ...sample, webkitCompassHeading: 45, webkitCompassAccuracy }),
+      ).toBeNull();
+    }
   });
 
-  it('computes consistent Android absolute bearings across flat, 45 deg, upright, rolled, and landscape holds', () => {
+  it('computes consistent Android absolute bearings across pitched, upright, rolled, and landscape holds', () => {
     // Reject non-absolute W3C orientation events (relative alpha is not North-referenced).
     expect(
       extractMagneticBearingRad({
@@ -170,32 +163,39 @@ describe('extractMagneticBearingRad (iOS Safari & Android Chrome tilt compensati
         gamma: 0,
         absolute: false,
         screenAngleDeg: 0,
-        timestamp: 1000,
       }),
     ).toBeNull();
 
     // Facing East (90 deg magnetic) across flat (beta=0), 45 deg tilt, and upright portrait (beta=90).
-    for (const beta of [0, 35, 45, 65, 90]) {
+    for (const beta of [-65, -46, -44, 0, 35, 45, 65, 90]) {
       const sample = extractMagneticBearingRad({
         alpha: 270,
         beta,
         gamma: 0,
         absolute: true,
         screenAngleDeg: 0,
-        timestamp: 1000,
       });
       expect(sample).not.toBeNull();
       expect(Math.abs(wrapAngleRad(sample!.bearingRad - Math.PI / 2))).toBeLessThan(1e-4);
     }
 
-    // Upright portrait facing North (alpha=0, beta=90) rolled +15 deg around Y turns back (-Z) 15 deg West (345 deg).
+    expect(
+      extractMagneticBearingRad({
+        alpha: 0,
+        beta: 0,
+        gamma: 89,
+        absolute: true,
+        screenAngleDeg: 0,
+      }),
+    ).toBeNull();
+
+    // Rolling the upright portrait hold changes the horizontal facing estimate to 345 degrees.
     const rolled = extractMagneticBearingRad({
       alpha: 0,
       beta: 90,
       gamma: 15,
       absolute: true,
       screenAngleDeg: 0,
-      timestamp: 1000,
     });
     expect(rolled).not.toBeNull();
     expect(Math.abs(wrapAngleRad(rolled!.bearingRad - 345 * DEG))).toBeLessThan(1e-4);
@@ -207,184 +207,340 @@ describe('extractMagneticBearingRad (iOS Safari & Android Chrome tilt compensati
       gamma: 0,
       absolute: true,
       screenAngleDeg: 90,
-      timestamp: 1000,
     });
     expect(landscapeFlat).not.toBeNull();
     expect(Math.abs(wrapAngleRad(landscapeFlat!.bearingRad - 0))).toBeLessThan(1e-4);
   });
 });
 
-describe('HeadingEstimator complementary filter, spike damping, and PDR fallback', () => {
-  const northUpTransform = (trueBearingRad: number) => wrapAngleRad(trueBearingRad - Math.PI / 2);
+describe('HeadingEstimator', () => {
+  const identity = (bearing: number) => bearing;
+  const declination = HEADING_CONFIG.bcitDeclinationDeg * DEG;
 
-  it('applies BCIT magnetic declination, rotates smoothly with gyro yaw, and damps sudden magnetic spikes', () => {
+  it('keeps a quiet compass bearing and applies the next compass-only reading directly', () => {
     const estimator = new HeadingEstimator();
-    // Initial iOS compass facing Magnetic North (0 deg) -> True bearing = +15.3 deg.
-    estimator.ingestGyroYaw(0, 1000);
-    estimator.ingestOrientation({
-      alpha: null,
-      beta: null,
-      gamma: null,
-      absolute: false,
-      webkitCompassHeading: 0,
-      webkitCompassAccuracy: 15,
-      screenAngleDeg: 0,
-      timestamp: 1000,
-    });
-    const initial = estimator.resolvePlanHeading(northUpTransform, null, 1000)!;
-    expect(initial.source).toBe('compass-gyro');
-    expect(initial.spreadDeg).toBe(50);
-    expect(
-      Math.abs(wrapAngleRad(initial.angleRad - northUpTransform(HEADING_CONFIG.bcitDeclinationDeg * DEG))),
-    ).toBeLessThan(0.01);
+    estimator.ingestCompass({ bearingRad: 0 }, 1000);
+    expect(estimator.resolvePlanHeading(identity, 60_000)?.angleRad).toBeCloseTo(declination);
+    estimator.ingestCompass({ bearingRad: Math.PI / 2 }, 60_100);
+    expect(estimator.resolvePlanHeading(identity, 120_000)?.angleRad).toBeCloseTo(
+      Math.PI / 2 + declination,
+    );
+  });
 
-    // Sudden 90 deg magnetic spike for 0.4 s while stationary (gyro = 0): damped strongly (< 10 deg pull).
+  it('follows a gyro pivot from a compass anchor while damping a brief magnetic spike', () => {
+    const estimator = new HeadingEstimator();
+    estimator.ingestGyroYaw(0, 1000);
+    expect(estimator.resolvePlanHeading(identity, 1000)).toBeNull();
+    estimator.ingestCompass({ bearingRad: 0, accuracyDeg: 15 }, 1000);
+
+    const initial = estimator.resolvePlanHeading(identity, 1000)!;
+    expect(initial).toMatchObject({ source: 'compass-gyro', spreadDeg: 50 });
+    expect(initial.angleRad).toBeCloseTo(declination);
+
     for (let t = 1100; t <= 1400; t += 100) {
       estimator.ingestGyroYaw(0, t);
-      estimator.ingestOrientation({
-        alpha: null,
-        beta: null,
-        gamma: null,
-        absolute: false,
-        webkitCompassHeading: 90,
-        webkitCompassAccuracy: 15,
-        screenAngleDeg: 0,
-        timestamp: t,
-      });
+      estimator.ingestCompass({ bearingRad: Math.PI / 2, accuracyDeg: 15 }, t);
     }
-    const afterSpike = estimator.resolvePlanHeading(northUpTransform, null, 1400)!;
+    const afterSpike = estimator.resolvePlanHeading(identity, 1400)!;
     expect(Math.abs(wrapAngleRad(afterSpike.angleRad - initial.angleRad))).toBeLessThan(10 * DEG);
 
-    // Real 90 deg left turn (CCW = +pi/2 rad over 1 s) via gyro rotates floor-plan angle by -pi/2.
     for (let t = 1500; t <= 2400; t += 100) {
       estimator.ingestGyroYaw(Math.PI / 2, t);
     }
-    const afterTurn = estimator.resolvePlanHeading(northUpTransform, null, 2400)!;
-    expect(Math.abs(wrapAngleRad(afterTurn.angleRad - (initial.angleRad - Math.PI / 2)))).toBeLessThan(
-      15 * DEG,
-    );
+    const afterTurn = estimator.resolvePlanHeading(identity, 2400)!;
+    expect(wrapAngleRad(afterTurn.angleRad - afterSpike.angleRad)).toBeCloseTo(-Math.PI / 2);
+  });
+});
 
-    // Past compassStaleMs without orientation updates -> expires cleanly to null.
-    expect(estimator.resolvePlanHeading(northUpTransform, null, 1400 + HEADING_CONFIG.compassStaleMs + 1)).toBeNull();
+function dispatchOrientation(target: EventTarget, type: string, fields: object) {
+  target.dispatchEvent(Object.assign(new Event(type), fields));
+}
+
+describe('BrowserHeading', () => {
+  it.each(['gyro gap', 'compass timeout'])('clears an unconfirmed turn after a %s', (failure) => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1000);
+    vi.stubGlobal('isSecureContext', true);
+    vi.stubGlobal('DeviceOrientationEvent', {});
+    const target = new EventTarget();
+    const adapter = new BrowserHeading((angle) => angle, target);
+    const onHeading = vi.fn();
+    const north = { alpha: 0, beta: 0, gamma: 0 };
+
+    try {
+      adapter.start(onHeading);
+      adapter.ingestGyroYaw(Math.PI / 2, Date.now());
+      expect(onHeading).not.toHaveBeenCalled();
+
+      dispatchOrientation(target, 'deviceorientationabsolute', north);
+      const initial = onHeading.mock.lastCall![0];
+      expect(initial).toMatchObject({ source: 'compass-gyro' });
+
+      for (let i = 0; i < 10; i++) {
+        vi.advanceTimersByTime(100);
+        adapter.ingestGyroYaw(Math.PI / 2, Date.now());
+      }
+      expect(wrapAngleRad(onHeading.mock.lastCall![0].angleRad - initial.angleRad)).toBeCloseTo(
+        -Math.PI / 2,
+      );
+
+      if (failure === 'gyro gap') {
+        vi.advanceTimersByTime(750);
+      } else {
+        for (let i = 0; i < 21; i++) {
+          vi.advanceTimersByTime(100);
+          adapter.ingestGyroYaw(0, Date.now());
+        }
+      }
+      expect(onHeading).toHaveBeenLastCalledWith(null);
+
+      adapter.ingestGyroYaw(Math.PI / 2, Date.now());
+      expect(onHeading).toHaveBeenLastCalledWith(null);
+      dispatchOrientation(target, 'deviceorientationabsolute', { ...north, alpha: 90 });
+      expect(onHeading.mock.lastCall![0].angleRad).toBeCloseTo(
+        (270 + HEADING_CONFIG.bcitDeclinationDeg) * DEG,
+      );
+    } finally {
+      adapter.stop();
+    }
   });
 
-  it('falls back to resolved Stage 2 PDR heading when compass is unavailable and rotates via gyro while stationary', () => {
-    const estimator = new HeadingEstimator();
-    estimator.ingestGyroYaw(0, 1000);
-    const pdrHeading = estimator.resolvePlanHeading(
-      northUpTransform,
-      { angleRad: 0.2, resultant: 0.9 },
-      1000,
-    )!;
-    expect(pdrHeading).toEqual({ angleRad: 0.2, spreadDeg: 50, source: 'pdr' });
+  it('ignores relative events and clears a bearing when its absolute source reports unavailable', () => {
+    vi.stubGlobal('isSecureContext', true);
+    vi.stubGlobal('DeviceOrientationEvent', {});
+    const target = new EventTarget();
+    const adapter = new BrowserHeading((angle) => angle, target);
+    const onHeading = vi.fn();
+    const unavailable = { alpha: null, beta: null, gamma: null };
+    try {
+      adapter.start(onHeading);
+      dispatchOrientation(target, 'deviceorientationabsolute', unavailable);
+      dispatchOrientation(target, 'deviceorientation', {
+        alpha: 0,
+        beta: 0,
+        gamma: 0,
+        absolute: true,
+      });
+      expect(onHeading).toHaveBeenCalledTimes(1);
 
-    // User stops (no active pdrFallback passed) and pivots 90 deg left with live gyro.
-    for (let t = 1100; t <= 2000; t += 100) {
-      estimator.ingestGyroYaw(Math.PI / 2, t);
+      dispatchOrientation(target, 'deviceorientation', { ...unavailable, absolute: false });
+      dispatchOrientation(target, 'deviceorientationabsolute', unavailable);
+      expect(onHeading).toHaveBeenCalledTimes(1);
+
+      dispatchOrientation(target, 'deviceorientationabsolute', { alpha: 0, beta: 0, gamma: 0 });
+      dispatchOrientation(target, 'deviceorientationabsolute', unavailable);
+      expect(onHeading).toHaveBeenLastCalledWith(null);
+    } finally {
+      adapter.stop();
     }
-    const rotated = estimator.resolvePlanHeading(northUpTransform, null, 2000)!;
-    expect(rotated.source).toBe('pdr');
-    expect(Math.abs(wrapAngleRad(rotated.angleRad - (0.2 - Math.PI / 2)))).toBeLessThan(0.05);
+  });
+
+  it('keeps a steady bearing when the gyro falls silent and orientation does not change', () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(1000);
+    vi.stubGlobal('isSecureContext', true);
+    vi.stubGlobal('DeviceOrientationEvent', {});
+    const target = new EventTarget();
+    const adapter = new BrowserHeading((angle) => angle, target);
+    const onHeading = vi.fn();
+    try {
+      adapter.start(onHeading);
+      adapter.ingestGyroYaw(0, Date.now());
+      dispatchOrientation(target, 'deviceorientationabsolute', { alpha: 0, beta: 0, gamma: 0 });
+      const initial = onHeading.mock.lastCall![0];
+      vi.advanceTimersByTime(60_000);
+      expect(onHeading).toHaveBeenLastCalledWith({ ...initial, source: 'compass' });
+    } finally {
+      adapter.stop();
+    }
+  });
+});
+
+describe('useHeadingTracker lifecycle', () => {
+  it('requires a new compass reading after calibration change, backgrounding, or guidance pause', async () => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+    vi.stubGlobal('isSecureContext', true);
+    vi.stubGlobal('DeviceOrientationEvent', {});
+    let hidden = false;
+    vi.spyOn(document, 'hidden', 'get').mockImplementation(() => hidden);
+    const host = document.createElement('div');
+    const root = createRoot(host);
+    const northUp = (angle: number) => angle - Math.PI / 2;
+    const rotated = (angle: number) => angle;
+    function Probe({ active, project }: { active: boolean; project: (angle: number) => number }) {
+      const { heading } = useHeadingTracker({ active, bearingToPlanAngle: project });
+      return createElement('output', null, heading ? heading.angleRad.toFixed(2) : '');
+    }
+    const render = (active: boolean, project: (angle: number) => number) =>
+      act(async () => root.render(createElement(Probe, { active, project })));
+    const compass = () =>
+      act(async () =>
+        dispatchOrientation(window, 'deviceorientationabsolute', { alpha: 0, beta: 0, gamma: 0 }),
+      );
+    const changeVisibility = (next: boolean) =>
+      act(async () => {
+        hidden = next;
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
+
+    try {
+      await render(true, northUp);
+      await compass();
+      expect(host.textContent).toBe('-1.30');
+
+      await render(true, rotated);
+      expect(host.textContent).toBe('');
+      await compass();
+      expect(host.textContent).toBe('0.27');
+
+      await changeVisibility(true);
+      await compass();
+      expect(host.textContent).toBe('');
+      await changeVisibility(false);
+      expect(host.textContent).toBe('');
+      await compass();
+      expect(host.textContent).toBe('0.27');
+
+      await render(false, rotated);
+      await compass();
+      expect(host.textContent).toBe('');
+      await render(true, rotated);
+      expect(host.textContent).toBe('');
+      await compass();
+      expect(host.textContent).toBe('0.27');
+    } finally {
+      await act(async () => root.unmount());
+    }
   });
 });
 
 describe('GuidedDirections heading cone DOM integration', () => {
-  it('renders a directional cone layered over the uncertainty circle while standing still, omits it on last-known fallback, and prompts on iOS map tap', async () => {
-    vi.useFakeTimers();
-    vi.setSystemTime(20_000);
-    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
-    vi.stubGlobal('isSecureContext', true);
-    vi.spyOn(document, 'hidden', 'get').mockReturnValue(false);
+  it.each(['granted', 'denied'] as const)(
+    'gates the cone on iOS orientation permission (%s)',
+    async (permission) => {
+      vi.useFakeTimers();
+      vi.setSystemTime(20_000);
+      vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+      vi.stubGlobal('isSecureContext', true);
+      vi.spyOn(document, 'hidden', 'get').mockReturnValue(false);
 
-    const requestMotion = vi.fn<() => Promise<'granted' | 'denied'>>().mockResolvedValue('granted');
-    const requestOrientation = vi.fn<() => Promise<'granted' | 'denied'>>().mockResolvedValue('granted');
-    vi.stubGlobal('DeviceMotionEvent', { requestPermission: requestMotion });
-    vi.stubGlobal('DeviceOrientationEvent', { requestPermission: requestOrientation });
+      const requestMotion = vi
+        .fn<() => Promise<'granted' | 'denied'>>()
+        .mockResolvedValue(permission);
+      const requestOrientation = vi
+        .fn<() => Promise<'granted' | 'denied'>>()
+        .mockResolvedValue('granted');
+      vi.stubGlobal('DeviceMotionEvent', { requestPermission: requestMotion });
+      vi.stubGlobal('DeviceOrientationEvent', { requestPermission: requestOrientation });
 
-    let reportLocation: PositionCallback = () => {};
-    vi.stubGlobal('navigator', {
-      geolocation: {
-        watchPosition: vi.fn((success: PositionCallback) => {
-          reportLocation = success;
-          return 9;
-        }),
-        clearWatch: vi.fn(),
-      },
-    });
-
-    const route = makeRouteFixture();
-    const host = document.createElement('div');
-    document.body.append(host);
-    const root = createRoot(host);
-    try {
-      await act(async () =>
-        root.render(
-          createElement(RouteDirections, {
-            route,
-            plans: pilotEvidence().map((p) => p.plan),
-            locationCatalogue: catalogue,
-            walkingSurfaces: { [se12Plan.id]: se12Surface },
-            onRecheck: vi.fn(),
+      let reportLocation: PositionCallback = () => {};
+      vi.stubGlobal('navigator', {
+        geolocation: {
+          watchPosition: vi.fn((success: PositionCallback) => {
+            reportLocation = success;
+            return 9;
           }),
-        ),
-      );
-
-      const initialViewBox = host.querySelector('.walking-map')?.getAttribute('viewBox');
-      const pt = se12Fit.unproject({
-        x: (200.5 * se12Surface.step) / se12Plan.width,
-        y: (133.5 * se12Surface.step) / se12Plan.height,
-      });
-      await act(async () =>
-        reportLocation({
-          coords: { latitude: pt.latitude, longitude: pt.longitude, accuracy: 7 },
-          timestamp: Date.now(),
-        } as GeolocationPosition),
-      );
-
-      // Before iOS Motion & Orientation permission is granted, dot + circle render with no cone.
-      expect(host.querySelector('.device-position ellipse')).not.toBeNull();
-      expect(host.querySelector('.device-position circle')).not.toBeNull();
-      expect(host.querySelector('.device-heading-cone')).toBeNull();
-
-      // Tapping the map area on Step 1 unlocks both Motion & Orientation on iOS.
-      await act(async () => {
-        host.querySelector('.guided-map')?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
-        await Promise.resolve();
-        await Promise.resolve();
-      });
-      expect(requestMotion).toHaveBeenCalledTimes(1);
-      expect(requestOrientation).toHaveBeenCalledTimes(1);
-
-      // Dispatch an iOS compass event while standing still -> cone appears over the uncertainty ellipse.
-      const orient1 = new Event('deviceorientation');
-      Object.assign(orient1, { webkitCompassHeading: 0, webkitCompassAccuracy: 15 });
-      await act(async () => {
-        window.dispatchEvent(orient1);
+          clearWatch: vi.fn(),
+        },
       });
 
-      const cone1 = host.querySelector('.device-heading-cone');
-      expect(cone1).not.toBeNull();
-      expect(cone1?.getAttribute('data-heading-source')).toBe('compass');
-      const firstPath = cone1?.getAttribute('d');
-      expect(host.querySelector('.walking-map')?.getAttribute('viewBox')).toBe(initialViewBox);
+      const route = makeRouteFixture();
+      const host = document.createElement('div');
+      document.body.append(host);
+      const root = createRoot(host);
+      try {
+        await act(async () =>
+          root.render(
+            createElement(RouteDirections, {
+              route,
+              plans: pilotEvidence().map((p) => p.plan),
+              locationCatalogue: catalogue,
+              walkingSurfaces: { [se12Plan.id]: se12Surface },
+              onRecheck: vi.fn(),
+            }),
+          ),
+        );
 
-      // Turning 90 deg clockwise rotates the cone cleanly without changing viewBox.
-      await act(async () => {
-        vi.advanceTimersByTime(150);
-        const orient2 = new Event('deviceorientation');
-        Object.assign(orient2, { webkitCompassHeading: 90, webkitCompassAccuracy: 15 });
-        window.dispatchEvent(orient2);
-      });
-      expect(host.querySelector('.device-heading-cone')?.getAttribute('d')).not.toBe(firstPath);
-      expect(host.querySelector('.walking-map')?.getAttribute('viewBox')).toBe(initialViewBox);
+        const initialViewBox = host.querySelector('.walking-map')?.getAttribute('viewBox');
+        const pt = se12Fit.unproject({
+          x: (200.5 * se12Surface.step) / se12Plan.width,
+          y: (133.5 * se12Surface.step) / se12Plan.height,
+        });
+        await act(async () =>
+          reportLocation({
+            coords: { latitude: pt.latitude, longitude: pt.longitude, accuracy: 7 },
+            timestamp: Date.now(),
+          } as GeolocationPosition),
+        );
 
-      // Past GPS hold expiry (> 8 s), hollow last-known marker appears with NO heading cone.
-      await act(async () => vi.advanceTimersByTime(9_000));
-      expect(host.querySelector('.last-known-position')).not.toBeNull();
-      expect(host.querySelector('.device-heading-cone')).toBeNull();
-    } finally {
-      await act(async () => root.unmount());
-      host.remove();
-    }
-  });
+        // Before iOS Motion & Orientation permission is granted, dot + circle render with no cone.
+        expect(host.querySelector('.device-position ellipse')).not.toBeNull();
+        expect(host.querySelector('.device-position circle')).not.toBeNull();
+        expect(host.querySelector('.device-heading-cone')).toBeNull();
+
+        // Tapping the map area on Step 1 unlocks both Motion & Orientation on iOS.
+        await act(async () => {
+          host
+            .querySelector('.guided-map')
+            ?.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+          await Promise.resolve();
+          await Promise.resolve();
+        });
+        expect(requestMotion).toHaveBeenCalledTimes(1);
+        expect(requestOrientation).toHaveBeenCalledTimes(permission === 'granted' ? 1 : 0);
+
+        // Dispatch an iOS compass event while standing still -> cone appears over the uncertainty ellipse.
+        const orient1 = new Event('deviceorientation');
+        Object.assign(orient1, { webkitCompassHeading: 0, webkitCompassAccuracy: 15 });
+        await act(async () => {
+          window.dispatchEvent(orient1);
+        });
+
+        const cone1 = host.querySelector('.device-heading-cone');
+        if (permission === 'denied') {
+          expect(cone1).toBeNull();
+          expect(host.querySelector('.device-position circle')).not.toBeNull();
+          return;
+        }
+        expect(cone1).not.toBeNull();
+        expect(cone1?.getAttribute('data-heading-source')).toBe('compass');
+        const firstPath = cone1?.getAttribute('d');
+        expect(host.querySelector('.walking-map')?.getAttribute('viewBox')).toBe(initialViewBox);
+
+        // Turning 90 deg clockwise rotates the cone cleanly without changing viewBox.
+        await act(async () => {
+          vi.advanceTimersByTime(150);
+          const orient2 = new Event('deviceorientation');
+          Object.assign(orient2, { webkitCompassHeading: 90, webkitCompassAccuracy: 15 });
+          window.dispatchEvent(orient2);
+        });
+        expect(host.querySelector('.device-heading-cone')?.getAttribute('d')).not.toBe(firstPath);
+        expect(host.querySelector('.walking-map')?.getAttribute('viewBox')).toBe(initialViewBox);
+
+        await act(async () =>
+          dispatchOrientation(window, 'deviceorientation', {
+            webkitCompassHeading: -1,
+            webkitCompassAccuracy: 15,
+          }),
+        );
+        expect(host.querySelector('.device-heading-cone')).toBeNull();
+        expect(host.querySelector('.device-position circle')).not.toBeNull();
+        await act(async () =>
+          dispatchOrientation(window, 'deviceorientation', {
+            webkitCompassHeading: 90,
+            webkitCompassAccuracy: 15,
+          }),
+        );
+        expect(host.querySelector('.device-heading-cone')).not.toBeNull();
+
+        // Past GPS hold expiry (> 8 s), hollow last-known marker appears with NO heading cone.
+        await act(async () => vi.advanceTimersByTime(9_000));
+        expect(host.querySelector('.last-known-position')).not.toBeNull();
+        expect(host.querySelector('.device-heading-cone')).toBeNull();
+      } finally {
+        await act(async () => root.unmount());
+        host.remove();
+      }
+    },
+  );
 });
