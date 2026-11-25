@@ -15,7 +15,7 @@ import { reviewedNetwork } from '../server/pilot-network';
 import { TopologyStore } from '../server/topology';
 import { pilotEvidence } from '../server/pilot-evidence';
 import { labelReading, photoInput } from './photo-fixtures';
-import type { Provider } from '../server/provider';
+import type { ModelPart, Provider } from '../server/provider';
 import { position } from './location-fixtures';
 import { locationCatalogue } from '../server/geolocation';
 
@@ -28,6 +28,7 @@ const dir = mkdtempSync(join(tmpdir(), 'route-result-ui-'));
 const store = new TopologyStore(join(dir, 'topology.json'), plans, undefined, () => reviewed);
 let rejectLocationOnce = false;
 let labelReads = 0;
+let customLabelReading: (() => ModelPart[] | Promise<ModelPart[]>) | null = null;
 const provider: Provider = {
   calls: 0,
   async generate(_contents, _tools, _signal, onAttempt, options) {
@@ -36,7 +37,7 @@ const provider: Provider = {
     if (options?.forceTool !== 'read_photo_labels')
       throw Error('Only the first stage may call AI.');
     labelReads++;
-    return labelReading('302', 'clear', 'SE12');
+    return customLabelReading ? customLabelReading() : labelReading('302', 'clear', 'SE12');
   },
 };
 let server: Server;
@@ -85,8 +86,8 @@ afterAll(async () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
-it.each([true, 'denied'] as const)(
-  'requires GPS and reuses one extraction when device permission is %s',
+it.each([true, 'denied', 'unavailable'] as const)(
+  'uses GPS by default, falls back to photo-only when unavailable, and reuses one extraction when device permission is %s',
   async (useGps) => {
     provider.calls = 0;
     requestBodies.length = 0;
@@ -110,12 +111,15 @@ it.each([true, 'denied'] as const)(
     const getCurrentPosition = vi.fn(
       (success: PositionCallback, failure: PositionErrorCallback) => {
         if (useGps === 'denied') failure({ code: 1 } as GeolocationPositionError);
+        else if (useGps === 'unavailable') failure({ code: 2 } as GeolocationPositionError);
         else success({ ...gpsPosition, timestamp: Date.now() });
       },
     );
     const clearWatch = vi.fn();
-    const watchPosition = vi.fn((success: PositionCallback) => {
+    const watchPosition = vi.fn((success: PositionCallback, failure?: PositionErrorCallback) => {
       deviceSuccess = success;
+      if (useGps === 'denied') failure?.({ code: 1 } as GeolocationPositionError);
+      else if (useGps === 'unavailable') failure?.({ code: 2 } as GeolocationPositionError);
       return 42;
     });
     vi.stubGlobal('isSecureContext', true);
@@ -175,12 +179,6 @@ it.each([true, 'denied'] as const)(
       rejectLocationOnce = true;
       labelReads = 0;
       await click(button('Get Directions'));
-      if (useGps === 'denied') {
-        await wait(() => expect(host.textContent).toContain('Location permission was denied'));
-        expect(provider.calls).toBe(0);
-        expect(host.querySelector('.route-directions')).toBeNull();
-        return;
-      }
       await wait(() => expect(button('Try again')).toBeDefined());
       expect(host.textContent).toContain('Finding your starting place stopped');
       expect(labelReads).toBe(1);
@@ -195,14 +193,25 @@ it.each([true, 'denied'] as const)(
       const locationRequests = requestBodies
         .map((body) => JSON.parse(body))
         .filter((body) => body.evidenceId);
-      expect(locationRequests.every((body) => Boolean(body.gps))).toBe(true);
       const extractionRequests = requestBodies
         .map((body) => JSON.parse(body))
         .filter((body) => body.image);
       expect(extractionRequests).toHaveLength(1);
-      expect(extractionRequests[0].gps.buildings).toContain('SE12');
       expect(requestBodies.join('')).not.toMatch(/latitude|longitude/);
       expect(provider.calls).toBe(1);
+      if (useGps !== true) {
+        expect(locationRequests.every((body) => body.gps === undefined)).toBe(true);
+        expect(extractionRequests[0].gps).toBeUndefined();
+        expect(host.querySelector('.device-position')).toBeNull();
+        await click(button('Overview'));
+        await wait(() => expect(host.querySelector('.journey-evidence')).not.toBeNull());
+        expect(host.querySelector('.journey-evidence')?.textContent).toContain(
+          'GPS was unavailable; matched using photo signs only.',
+        );
+        return;
+      }
+      expect(locationRequests.every((body) => Boolean(body.gps))).toBe(true);
+      expect(extractionRequests[0].gps.buildings).toContain('SE12');
       // Withdraw all interbuilding passages in this fixture; the real map has alternate stairs.
       const crossings = store
         .read()
@@ -222,11 +231,14 @@ it.each([true, 'denied'] as const)(
           });
       };
       reviewCrossings('rejected');
-      await click(button('Overview'));
-      await click(button('Recheck current route'));
-      await wait(() => expect(button('Retry route')).toBeDefined());
-      expect(host.textContent).toContain('continuous route between these buildings');
-      reviewCrossings('verified');
+      try {
+        await click(button('Overview'));
+        await click(button('Recheck current route'));
+        await wait(() => expect(button('Retry route')).toBeDefined());
+        expect(host.textContent).toContain('continuous route between these buildings');
+      } finally {
+        reviewCrossings('verified');
+      }
       await click(button('Retry route'));
       await wait(() => expect(host.querySelector('.guided-directions')).not.toBeNull());
       await click(button('Overview'));
@@ -360,5 +372,332 @@ it.each([true, 'denied'] as const)(
       host.remove();
     }
   },
-  15_000,
+  30_000,
 );
+
+it('cancelling analysis while GPS is pending aborts without calling the AI provider', async () => {
+  provider.calls = 0;
+  requestBodies.length = 0;
+  const getCurrentPosition = vi.fn(() => {
+    // Keep geolocation pending until the user cancels.
+  });
+  vi.stubGlobal('isSecureContext', true);
+  vi.stubGlobal('navigator', {
+    geolocation: { getCurrentPosition, watchPosition: vi.fn(), clearWatch: vi.fn() },
+  });
+  const host = document.createElement('div');
+  document.body.append(host);
+  const root = createRoot(host);
+  const wait = async (assertion: () => void) => {
+    let lastFailure: unknown;
+    for (let attempt = 0; attempt < 100; attempt++) {
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      try {
+        assertion();
+        return;
+      } catch (failure) {
+        lastFailure = failure;
+      }
+    }
+    throw lastFailure;
+  };
+  const button = (name: string) =>
+    [...host.querySelectorAll('button')].find((b) => b.textContent?.includes(name))!;
+  try {
+    await act(async () => root.render(createElement(App)));
+    await wait(() => expect(button('Upload photo')).toBeDefined());
+    const fileInput = host.querySelector<HTMLInputElement>(
+      'input[aria-label="Upload campus photo"]',
+    )!;
+    await act(async () => {
+      Object.defineProperty(fileInput, 'files', {
+        value: [new File(['fixture'], 'test.jpg', { type: 'image/jpeg' })],
+      });
+      fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await wait(() => expect(host.querySelector('#trip-destination')).not.toBeNull());
+    await act(async () => {
+      const field = host.querySelector<HTMLInputElement>('#trip-destination')!;
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(
+        field,
+        'SW03 2082',
+      );
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await act(async () => button('Get Directions').click());
+    await wait(() => expect(button('Cancel analysis')).toBeDefined());
+    expect(getCurrentPosition).toHaveBeenCalledTimes(1);
+    await act(async () => button('Cancel analysis').click());
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    });
+    expect(provider.calls).toBe(0);
+    expect(requestBodies.filter((body) => body.includes('"image":'))).toHaveLength(0);
+  } finally {
+    await act(async () => root.unmount());
+    host.remove();
+  }
+});
+
+it.each(['off-campus', 'sw03-conflict'] as const)(
+  'preserves initial GPS rejection (%s) when a >20s refresh fails without resubmitting stale GPS',
+  async (scenario) => {
+    provider.calls = 0;
+    requestBodies.length = 0;
+    let clockOffsetMs = 0;
+    const realNow = Date.now;
+    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => realNow() + clockOffsetMs);
+    const sw3Ring = locationCatalogue().buildings.find((building) => building.building === 'SW3')!
+      .rings[0];
+    const initialCoords =
+      scenario === 'off-campus'
+        ? { latitude: 49.0, longitude: -123.5 }
+        : {
+            latitude:
+              (Math.min(...sw3Ring.map((point) => point[1])) +
+                Math.max(...sw3Ring.map((point) => point[1]))) /
+              2,
+            longitude:
+              (Math.min(...sw3Ring.map((point) => point[0])) +
+                Math.max(...sw3Ring.map((point) => point[0]))) /
+              2,
+          };
+    let captureCalls = 0;
+    const getCurrentPosition = vi.fn(
+      (success: PositionCallback, failure: PositionErrorCallback) => {
+        captureCalls++;
+        if (captureCalls === 1) {
+          success({
+            ...position(),
+            coords: { ...position().coords, ...initialCoords },
+            timestamp: Date.now(),
+          });
+        } else {
+          // Simulate GPS disappearing indoors when the >20 s refresh runs.
+          failure({ code: 3 } as GeolocationPositionError);
+        }
+      },
+    );
+    customLabelReading = () => {
+      // Simulate a 25-second extraction so the initial GPS reading ages past the 20 s refresh threshold.
+      clockOffsetMs += 25_000;
+      return labelReading('302', 'clear', 'SE12');
+    };
+    vi.stubGlobal('isSecureContext', true);
+    vi.stubGlobal('navigator', {
+      geolocation: { getCurrentPosition, watchPosition: vi.fn(), clearWatch: vi.fn() },
+    });
+    const host = document.createElement('div');
+    document.body.append(host);
+    const root = createRoot(host);
+    const wait = async (assertion: () => void) => {
+      let lastFailure: unknown;
+      for (let attempt = 0; attempt < 150; attempt++) {
+        await act(async () => {
+          await new Promise((resolve) => setTimeout(resolve, 20));
+        });
+        try {
+          assertion();
+          return;
+        } catch (failure) {
+          lastFailure = failure;
+        }
+      }
+      throw lastFailure;
+    };
+    const button = (name: string) =>
+      [...host.querySelectorAll('button')].find((b) => b.textContent?.includes(name))!;
+    try {
+      await act(async () => root.render(createElement(App)));
+      await wait(() => expect(button('Upload photo')).toBeDefined());
+      const fileInput = host.querySelector<HTMLInputElement>(
+        'input[aria-label="Upload campus photo"]',
+      )!;
+      await act(async () => {
+        Object.defineProperty(fileInput, 'files', {
+          value: [new File(['fixture'], 'test.jpg', { type: 'image/jpeg' })],
+        });
+        fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      await wait(() => expect(host.querySelector('#trip-destination')).not.toBeNull());
+      await act(async () => {
+        const field = host.querySelector<HTMLInputElement>('#trip-destination')!;
+        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(
+          field,
+          'SW03 2082',
+        );
+        field.dispatchEvent(new Event('input', { bubbles: true }));
+      });
+      await act(async () => button('Get Directions').click());
+      await wait(() =>
+        expect(host.querySelector('.journey-panel h2')?.textContent).toBe(
+          'Couldn’t find your starting point',
+        ),
+      );
+      expect(host.querySelector('.guided-directions')).toBeNull();
+      expect(host.textContent).toContain('The device reading does not agree with the photo matches.');
+      expect(host.textContent).not.toContain('matched using photo signs only');
+      expect(getCurrentPosition).toHaveBeenCalledTimes(2);
+      const locationRequests = requestBodies
+        .map((body) => JSON.parse(body))
+        .filter((body) => body.evidenceId);
+      expect(locationRequests).toHaveLength(1);
+      // Stale GPS metadata must not be resubmitted when refresh fails.
+      expect(locationRequests[0].gps).toBeUndefined();
+    } finally {
+      customLabelReading = null;
+      nowSpy.mockRestore();
+      await act(async () => root.unmount());
+      host.remove();
+    }
+  },
+);
+
+it('falls back to photo-only starting detection on plain HTTP when crypto.randomUUID is unavailable', async () => {
+  provider.calls = 0;
+  requestBodies.length = 0;
+  const originalCrypto = globalThis.crypto;
+  vi.stubGlobal('isSecureContext', false);
+  vi.stubGlobal('crypto', {
+    getRandomValues: originalCrypto.getRandomValues.bind(originalCrypto),
+  });
+  vi.stubGlobal('navigator', {
+    geolocation: {
+      getCurrentPosition: vi.fn(),
+      watchPosition: vi.fn(),
+      clearWatch: vi.fn(),
+    },
+  });
+  const host = document.createElement('div');
+  document.body.append(host);
+  const root = createRoot(host);
+  const wait = async (assertion: () => void) => {
+    let lastFailure: unknown;
+    for (let attempt = 0; attempt < 150; attempt++) {
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      try {
+        assertion();
+        return;
+      } catch (failure) {
+        lastFailure = failure;
+      }
+    }
+    throw lastFailure;
+  };
+  const button = (name: string) =>
+    [...host.querySelectorAll('button')].find((b) => b.textContent?.includes(name))!;
+  try {
+    await act(async () => root.render(createElement(App)));
+    await wait(() => expect(button('Upload photo')).toBeDefined());
+    const fileInput = host.querySelector<HTMLInputElement>(
+      'input[aria-label="Upload campus photo"]',
+    )!;
+    await act(async () => {
+      Object.defineProperty(fileInput, 'files', {
+        value: [new File(['fixture'], 'test.jpg', { type: 'image/jpeg' })],
+      });
+      fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await wait(() => expect(host.querySelector('#trip-destination')).not.toBeNull());
+    await act(async () => {
+      const field = host.querySelector<HTMLInputElement>('#trip-destination')!;
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(
+        field,
+        'SW03 2082',
+      );
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await act(async () => button('Get Directions').click());
+    await wait(() => expect(host.querySelector('.guided-directions')).not.toBeNull());
+    await act(async () => button('Overview').click());
+    await wait(() => expect(button('Start over')).toBeDefined());
+    await act(async () => button('Start over').click());
+    await wait(() =>
+      expect(host.querySelector('#location-heading')?.textContent).toBe('Snap a nearby room sign'),
+    );
+    const parsed = requestBodies.map((body) => JSON.parse(body));
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    const withRequestIds = parsed.filter((body) => typeof body.requestId === 'string');
+    expect(withRequestIds.length).toBeGreaterThanOrEqual(3);
+    expect(withRequestIds.every((body) => uuidPattern.test(body.requestId))).toBe(true);
+    expect(parsed.filter((body) => body.image || body.evidenceId).every((b) => !b.gps)).toBe(true);
+  } finally {
+    vi.stubGlobal('crypto', originalCrypto);
+    await act(async () => root.unmount());
+    host.remove();
+  }
+});
+
+it('uses search wording instead of matched wording in Location evidence when photo-only fallback finds no match', async () => {
+  provider.calls = 0;
+  requestBodies.length = 0;
+  customLabelReading = () => labelReading('99999', 'clear');
+  vi.stubGlobal('isSecureContext', true);
+  vi.stubGlobal('navigator', {
+    geolocation: {
+      getCurrentPosition: (_success: PositionCallback, failure: PositionErrorCallback) =>
+        failure({ code: 1 } as GeolocationPositionError),
+      watchPosition: vi.fn(),
+      clearWatch: vi.fn(),
+    },
+  });
+  const host = document.createElement('div');
+  document.body.append(host);
+  const root = createRoot(host);
+  const wait = async (assertion: () => void) => {
+    let lastFailure: unknown;
+    for (let attempt = 0; attempt < 150; attempt++) {
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, 20));
+      });
+      try {
+        assertion();
+        return;
+      } catch (failure) {
+        lastFailure = failure;
+      }
+    }
+    throw lastFailure;
+  };
+  const button = (name: string) =>
+    [...host.querySelectorAll('button')].find((b) => b.textContent?.includes(name))!;
+  try {
+    await act(async () => root.render(createElement(App)));
+    await wait(() => expect(button('Upload photo')).toBeDefined());
+    const fileInput = host.querySelector<HTMLInputElement>(
+      'input[aria-label="Upload campus photo"]',
+    )!;
+    await act(async () => {
+      Object.defineProperty(fileInput, 'files', {
+        value: [new File(['fixture'], 'test.jpg', { type: 'image/jpeg' })],
+      });
+      fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+    await wait(() => expect(host.querySelector('#trip-destination')).not.toBeNull());
+    await act(async () => {
+      const field = host.querySelector<HTMLInputElement>('#trip-destination')!;
+      Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(
+        field,
+        'SW03 2082',
+      );
+      field.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+    await act(async () => button('Get Directions').click());
+    await wait(() =>
+      expect(host.querySelector('.journey-panel h2')?.textContent).toBe(
+        'Couldn’t find your starting point',
+      ),
+    );
+    const evidenceText = host.querySelector('.journey-evidence')?.textContent ?? '';
+    expect(evidenceText).toContain('GPS was unavailable; searched using photo signs only.');
+    expect(evidenceText).not.toContain('matched using photo signs only');
+  } finally {
+    customLabelReading = null;
+    await act(async () => root.unmount());
+    host.remove();
+  }
+});

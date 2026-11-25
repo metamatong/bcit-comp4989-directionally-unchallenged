@@ -1,12 +1,12 @@
 # Current requirements and evidence
 
-The supplied original [brief](project-brief.txt) remains unchanged. Current product direction is GPS-required photo localization with automatic start selection, no visitor start confirmation, guided route steps, automatically inferred same-building transfers, and fixed reviewed connections between buildings. The visitor app is limited to SE12, SW03, SW05 and SW01 even though the source archive is larger.
+The supplied original [brief](project-brief.txt) remains unchanged. Current product direction is GPS-by-default photo localization (with automatic photo-only fallback when GPS is unavailable), automatic start selection, no visitor start confirmation, guided route steps, automatically inferred same-building transfers, and fixed reviewed connections between buildings. The visitor app is limited to SE12, SW03, SW05 and SW01 even though the source archive is larger.
 
 | Requirement | Current state |
 |---|---|
 | Official Burnaby plans | All 89 supplied plans remain archived; the visitor app exposes only the four pilot buildings. |
 | Photo localization | One configured provider stage extracts labels/features; source lookup automatically ranks matches. |
-| Required GPS | **Get Directions** requests GPS by default. The browser keeps raw coordinates and sends derived building candidates. |
+| Default GPS with fallback | **Get Directions** requests GPS automatically by default. The browser keeps raw coordinates and sends derived building candidates. If GPS is unavailable, starting localization falls back automatically to photo signs only; outside-pilot and conflicting GPS fixes still reject. |
 | Starting place | The strongest source-linked photo/GPS building match is selected automatically; there is no start chooser in the visitor app/API. |
 | Floor GPS dot | Building footprints cover 43 of 45 supplied buildings. The device overlay has an approximate alignment on 65 of 89 floor plans. The remaining 24 have documented source gaps. Indoor phone accuracy remains unmeasured. |
 | Route display | A complete walking route opens on the first guided step. The visitor advances manually and can open the overview for floor maps in travel order. |

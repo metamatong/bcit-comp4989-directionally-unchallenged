@@ -355,3 +355,39 @@ test('picks an explicit destination floor in another building with one photo rea
   });
   expect(evidenceUploads).toHaveLength(1);
 });
+
+test('falls back to photo-only starting detection when browser GPS is unavailable', async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    const deny = (_success: PositionCallback, error?: PositionErrorCallback | null) => {
+      error?.({
+        code: 1,
+        message: 'User denied geolocation',
+        PERMISSION_DENIED: 1,
+        POSITION_UNAVAILABLE: 2,
+        TIMEOUT: 3,
+      } as GeolocationPositionError);
+    };
+    Object.defineProperty(navigator, 'geolocation', {
+      configurable: true,
+      value: {
+        getCurrentPosition: deny,
+        watchPosition: (success: PositionCallback, error?: PositionErrorCallback | null) => {
+          deny(success, error);
+          return 1;
+        },
+        clearWatch: () => {},
+      },
+    });
+  });
+  const { uploads, evidenceUploads } = await setup(page);
+  await choosePhoto(page);
+  await submitPhoto(page);
+  await expect(page.getByRole('button', { name: 'Route overview', exact: true })).toBeVisible();
+  await expect(page.locator('.device-position')).toHaveCount(0);
+  expect(evidenceUploads).toHaveLength(1);
+  expect(uploads).toHaveLength(1);
+  expect(evidenceUploads[0]).not.toHaveProperty('gps');
+  expect(uploads[0]).not.toHaveProperty('gps');
+});

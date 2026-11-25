@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import {
   bootstrap,
+  createRequestId,
   createSession,
   request,
   ApiError,
@@ -25,6 +26,7 @@ import { JourneyPanel } from './components/JourneyPanel';
 import { PhotoDeviceRequirement } from './components/PhotoDeviceLocation';
 import { usePhotoDeviceLocation } from './location/use-device-location';
 import { gpsBuildingHint } from './location/building-hint';
+import type { GpsBuildingHint } from './location/types';
 import './wayfinding.css';
 import type { Bootstrap, Session } from './types';
 
@@ -41,6 +43,7 @@ export default function App() {
   const [photoError, setPhotoError] = useState('');
   const [preparedPhoto, setPreparedPhoto] = useState<PreparedPhoto | null>(null);
   const [showPhotoResults, setShowPhotoResults] = useState(false);
+  const [gpsFallbackUsed, setGpsFallbackUsed] = useState(false);
   const [flowStep, setFlowStep] = useState<'photo' | 'destination'>('photo');
   const [destination, setDestination] = useState('');
   const [preferElevators, setPreferElevators] = useState(false);
@@ -91,11 +94,13 @@ export default function App() {
     evidenceForPhoto.current = null;
     setReadStatus('');
     setPhotoError('');
+    setGpsFallbackUsed(false);
     setReading(false);
   }
   function removePhoto() {
     discardPhoto();
     setShowPhotoResults(false);
+    setGpsFallbackUsed(false);
     setActiveDestination('');
     setFlowStep('photo');
     setGuidedMode(false);
@@ -115,7 +120,7 @@ export default function App() {
     setError('');
     try {
       const next = await request<Session>(`/api/sessions/${current.id}/actions`, {
-        requestId: crypto.randomUUID(),
+        requestId: createRequestId(),
         revision: current.revision,
         action,
       });
@@ -146,6 +151,7 @@ export default function App() {
     setPreparedPhoto(null);
     evidenceForPhoto.current = null;
     setShowPhotoResults(false);
+    setGpsFallbackUsed(false);
     setActiveDestination('');
     setFlowStep('photo');
     setGuidedMode(false);
@@ -180,7 +186,6 @@ export default function App() {
       !preparedPhoto ||
       !data?.liveAvailable ||
       !data.photoLocalizationAvailable ||
-      (!data.gpsTestMode && !data.locationCatalogue) ||
       busyRef.current
     )
       return;
@@ -191,22 +196,36 @@ export default function App() {
     setBusy(true);
     setError('');
     setShowPhotoResults(false);
+    setGpsFallbackUsed(false);
     setPhotoError('');
     setActiveDestination(destination.trim());
     setReadStatus(
-      data.gpsTestMode
+      !data.locationCatalogue
         ? 'Finding your starting point from the photo…'
         : 'Requesting GPS and finding your starting point…',
     );
+    // Request fresh GPS by default, falling back to photo-only matching when GPS is unavailable.
+    async function captureGpsHint(): Promise<{ hint?: GpsBuildingHint; fallback: boolean }> {
+      if (!data!.locationCatalogue) return { fallback: true };
+      try {
+        const reading = await photoDevice.capture();
+        controller.signal.throwIfAborted();
+        return { hint: gpsBuildingHint(reading.reading, data!.locationCatalogue), fallback: false };
+      } catch (gpsFailure) {
+        controller.signal.throwIfAborted();
+        if (!evidenceGate.current.isCurrent(generation)) throw gpsFailure;
+        return { fallback: true };
+      }
+    }
     let stage: 'evidence' | 'location' = 'evidence';
     try {
       stage = 'location';
-      const firstReading = data.gpsTestMode ? undefined : await photoDevice.capture();
-      controller.signal.throwIfAborted();
-      let gps = firstReading
-        ? gpsBuildingHint(firstReading.reading, data.locationCatalogue!)
-        : undefined;
-      setReadStatus('Reading your photo…');
+      const initialGps = await captureGpsHint();
+      let gps = initialGps.hint;
+      let fallbackUsed = initialGps.fallback;
+      setReadStatus(
+        fallbackUsed ? 'GPS unavailable — reading your photo…' : 'Reading your photo…',
+      );
       const media = {
         consent: true,
         image: { mimeType: preparedPhoto.mimeType, data: preparedPhoto.data },
@@ -217,7 +236,9 @@ export default function App() {
         async (active) => {
           let latest = active;
           stage = 'evidence';
-          setReadStatus('Reading your photo…');
+          setReadStatus(
+            fallbackUsed ? 'GPS unavailable — reading your photo…' : 'Reading your photo…',
+          );
           const contextKey = JSON.stringify(gps ? [gps.buildings, gps.sourceSha256] : null);
           const cached = evidenceForPhoto.current;
           if (!(
@@ -232,7 +253,7 @@ export default function App() {
               {
                 ...media,
                 ...(gps ? { gps } : {}),
-                requestId: crypto.randomUUID(),
+                requestId: createRequestId(),
                 revision: active.revision,
               },
               {
@@ -254,20 +275,17 @@ export default function App() {
           const evidence = latest.photoEvidence;
           if (!evidence) throw new Error('Read this photo again before comparing plans.');
           stage = 'location';
-          setReadStatus(
-            data.gpsTestMode
-              ? 'Matching your photo to the floor plans…'
-              : 'Requesting GPS and matching your photo…',
-          );
-          if (!data.gpsTestMode && gps && Date.now() - gps.capturedAt > 20000) {
-            const refreshed = await photoDevice.capture();
-            controller.signal.throwIfAborted();
-            gps = gpsBuildingHint(refreshed.reading, data.locationCatalogue!);
+          if (gps && Date.now() - gps.capturedAt > 20000) {
+            setReadStatus('Refreshing GPS and matching your photo…');
+            const refreshed = await captureGpsHint();
+            // If refresh fails, omit stale GPS metadata; the server retains Stage 1's validated building scope.
+            gps = refreshed.hint;
           }
+          setReadStatus('Matching your photo to the floor plans…');
           return request<Session>(
             `/api/sessions/${active.id}/photo/location`,
             {
-              requestId: crypto.randomUUID(),
+              requestId: createRequestId(),
               revision: latest.revision,
               evidenceId: evidence.id,
               ...(gps ? { gps } : {}),
@@ -289,6 +307,7 @@ export default function App() {
       if (!evidenceGate.current.isCurrent(generation)) return;
       updateSession(result);
       evidenceForPhoto.current = null;
+      setGpsFallbackUsed(fallbackUsed);
       setShowPhotoResults(true);
       setPreparedPhoto(null);
       setPhotoError('');
@@ -329,10 +348,7 @@ export default function App() {
       session.campusAnalysis?.candidates.some((candidate) => candidate.planId === plan.id) ||
       session.campusAnalysis?.referenceLabels?.some((ref) => ref.planId === plan.id),
   );
-  const photoReady =
-    data.liveAvailable &&
-    data.photoLocalizationAvailable &&
-    (data.gpsTestMode || !!data.locationCatalogue);
+  const photoReady = data.liveAvailable && data.photoLocalizationAvailable;
   const provider = aiProviderDetails(data.provider);
   const analysis = showPhotoResults ? session.campusAnalysis : null;
   const region = analysis ? session.campusLocation : null;
@@ -352,13 +368,7 @@ export default function App() {
         setActiveDestination('');
       }}
       canUsePhotoResult={!!analysis?.candidates.length}
-      locationRequirement={
-        data.gpsTestMode ? (
-          <p className="gps-auto-note" role="note">GPS disabled for local testing</p>
-        ) : (
-          <PhotoDeviceRequirement />
-        )
-      }
+      locationRequirement={<PhotoDeviceRequirement />}
       onDestinationChange={(value) => {
         setDestination(value);
         setActiveDestination('');
@@ -368,7 +378,7 @@ export default function App() {
       reading={reading}
       busy={busy}
       queryingPhoto={queryingPhoto}
-      submissionReading={data.gpsTestMode ? undefined : photoDevice.snapshot?.reading}
+      submissionReading={photoDevice.snapshot?.reading}
       status={readStatus}
       error={photoError}
       onPhoto={(file) => void readPhoto(file)}
@@ -388,6 +398,7 @@ export default function App() {
       analysis={analysis}
       selectedId={routeCandidate?.id}
       showSummary={!summaryInRoutePanel}
+      gpsFallbackUsed={gpsFallbackUsed}
       plans={plans}
       readings={
         session.photoEvidence?.id === analysis.evidenceId
@@ -477,10 +488,10 @@ export default function App() {
               plans.
             </p>
           )}
-          {!guidedMode && data.liveAvailable && !data.gpsTestMode && !data.locationCatalogue && (
+          {!guidedMode && data.liveAvailable && !data.locationCatalogue && (
             <p className="setup-notice" role="note">
-              GPS building data is unavailable on this server. Reload after restoring the campus
-              location catalogue to get directions.
+              GPS building data is unavailable on this server. Directions will match your starting
+              place from photo signs only.
             </p>
           )}
           {directionsMode ? (
@@ -499,7 +510,6 @@ export default function App() {
                 preferElevators={preferElevators}
                 plans={data.visualPlans}
                 locationCatalogue={data.locationCatalogue}
-                gpsTestMode={data.gpsTestMode}
                 locationEvidence={photoResults}
                 editInputs={editInputs}
                 busy={busy}
@@ -623,7 +633,7 @@ export default function App() {
                 <p>
                   Take or upload a photo of a nearby sign, enter a destination, and tap Get
                   Directions. The app reads the photo once, uses GPS to narrow the building when
-                  required, matches the sign to a floor and starting area, and calculates a route.
+                  available, matches the sign to a floor and starting area, and calculates a route.
                 </p>
               </div>
               <div className="about-section">
@@ -641,11 +651,12 @@ export default function App() {
                 <p>
                   Get Directions sends the photo and detail views to {provider.recipient} for label
                   and feature extraction. The app uses source records for location and routing.
-                  Photo bytes are discarded after processing. In production, GPS is required; the
-                  provider receives matching building IDs as context, and the app receives those
-                  IDs and reading metadata while raw coordinates stay in this tab. Local testing
-                  can disable GPS with GPS_TEST_MODE=true. Hosted session results are
-                  encrypted and expire after 30 minutes. {provider.dataUse}
+                  Photo bytes are discarded after processing. GPS is requested automatically by
+                  default; when available, the provider receives matching building IDs as context,
+                  and the app receives those IDs and reading metadata while raw coordinates stay in
+                  this tab. If GPS is unavailable, starting-place matching falls back to photo
+                  signs only. Hosted session results are encrypted and expire after 30 minutes.{' '}
+                  {provider.dataUse}
                 </p>
               </div>
               <p className="about-credit">

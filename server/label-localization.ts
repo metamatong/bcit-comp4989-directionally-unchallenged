@@ -41,6 +41,20 @@ function deviceScope(gps: LabelLocationRequest['gps']): DeviceScope | undefined 
   };
 }
 
+/** Reuse Stage 1's validated building scope when a post-extraction GPS refresh is unavailable. */
+function savedDeviceScope(gpsScope: PhotoEvidenceRecord['gpsScope']): DeviceScope | undefined {
+  if (!gpsScope) return undefined;
+  const catalogue = locationCatalogue();
+  if (gpsScope.sourceSha256 !== catalogue.geographicSource.sha256)
+    throw new PhotoEvidenceError(
+      'The device-location map changed. Reload before requesting location.',
+    );
+  return {
+    buildings: gpsScope.buildings,
+    footprints: new Set(catalogue.buildings.map((b) => b.building)),
+  };
+}
+
 function observations(evidence: PhotoEvidence) {
   const values = [...evidence.observations],
     f = evidence.features;
@@ -253,7 +267,7 @@ export function locateFromLabels(
     throw new PhotoEvidenceError('Photo evidence expired. Read the photo again.');
   const started = performance.now(),
     evidence = record.evidence,
-    device = input.gps ? deviceScope(input.gps) : undefined;
+    device = input.gps ? deviceScope(input.gps) : savedDeviceScope(record.gpsScope);
   const result = resolveStartingSigns(
     evidence.labels,
     record.buildingHint,
@@ -315,7 +329,9 @@ export function locateFromLabels(
     session,
     'locate_from_labels',
     candidate
-      ? 'Selected the best source-linked starting estimate using photo evidence and GPS building scope.'
+      ? device
+        ? 'Selected the best source-linked starting estimate using photo evidence and GPS building scope.'
+        : 'Selected the best source-linked starting estimate using photo evidence without GPS.'
       : 'The evidence did not establish a starting place.',
     candidate ? [candidate.sourceRef] : [],
     performance.now() - started,

@@ -358,3 +358,88 @@ it('reuses extracted evidence after a stale GPS hint without another provider re
   expect((await retry.json()).campusLocation.planId).toBe('SE12-F3-p1');
   expect(provider.calls).toBe(before);
 });
+
+it('locates a starting place from photo evidence without GPS when GPS is unavailable, while still validating supplied GPS', async () => {
+  const initial = await start();
+  const before = provider.calls;
+  const input = photoInput({ revision: initial.revision, gps: undefined });
+  const evidenceRes = await post(`/api/sessions/${initial.id}/photo/evidence`, input);
+  expect(evidenceRes.status).toBe(200);
+  const observed: Session = await evidenceRes.json();
+  expect(observed.photoEvidence?.labels[0].text).toBe('302');
+  expect(provider.calls - before).toBe(1);
+
+  // Malformed GPS is still rejected when provided.
+  const badGps = await post(`/api/sessions/${initial.id}/photo/location`, {
+    requestId: randomUUID(),
+    revision: observed.revision,
+    evidenceId: observed.photoEvidence!.id,
+    gps: { buildings: ['INVALID'], capturedAt: Date.now(), accuracy: 5, sourceSha256: 'a'.repeat(64) },
+  });
+  expect(badGps.status).toBe(400);
+
+  // Outside-pilot GPS reading still rejects instead of falling back to photo-only.
+  const outsideRes = await post(`/api/sessions/${initial.id}/photo/location`, {
+    requestId: randomUUID(),
+    revision: observed.revision,
+    evidenceId: observed.photoEvidence!.id,
+    gps: {
+      buildings: [],
+      capturedAt: Date.now(),
+      accuracy: 5,
+      sourceSha256: locationCatalogue().geographicSource.sha256,
+    },
+  });
+  expect(outsideRes.status).toBe(200);
+  const outsideSession: Session = await outsideRes.json();
+  expect(outsideSession.campusAnalysis?.gpsStatus).toBe('outside-pilot');
+  expect(outsideSession.campusLocation).toBeNull();
+
+  // Omitting GPS falls back to photo-only localization using the existing evidence receipt.
+  const fallbackRes = await post(`/api/sessions/${initial.id}/photo/location`, {
+    requestId: randomUUID(),
+    revision: outsideSession.revision,
+    evidenceId: observed.photoEvidence!.id,
+  });
+  expect(fallbackRes.status).toBe(200);
+  const fallbackSession: Session = await fallbackRes.json();
+  expect(fallbackSession.campusAnalysis?.gpsStatus).toBe('not-used');
+  expect(fallbackSession.campusLocation?.planId).toBe('SE12-F3-p1');
+  expect(provider.calls - before).toBe(1);
+});
+
+it.each([
+  { buildings: [], expectedStatus: 'outside-pilot' },
+  { buildings: ['SW3'], expectedStatus: 'conflict' },
+] as const)(
+  'retains Stage 1 GPS scope ($expectedStatus) when Stage 2 omits stale GPS after refresh failure',
+  async ({ buildings, expectedStatus }) => {
+    const initial = await start();
+    const evidenceRes = await post(
+      `/api/sessions/${initial.id}/photo/evidence`,
+      photoInput({
+        revision: initial.revision,
+        gps: {
+          buildings: [...buildings],
+          capturedAt: Date.now(),
+          accuracy: 5,
+          sourceSha256: locationCatalogue().geographicSource.sha256,
+        },
+      }),
+    );
+    expect(evidenceRes.status).toBe(200);
+    const observed: Session = await evidenceRes.json();
+
+    // Stage 2 omits gps (e.g., refresh failed after >20s); Stage 1's validated building scope still governs.
+    const locationRes = await post(`/api/sessions/${initial.id}/photo/location`, {
+      requestId: randomUUID(),
+      revision: observed.revision,
+      evidenceId: observed.photoEvidence!.id,
+    });
+    expect(locationRes.status).toBe(200);
+    const located: Session = await locationRes.json();
+    expect(located.campusAnalysis?.gpsStatus).toBe(expectedStatus);
+    expect(located.campusAnalysis?.candidates).toEqual([]);
+    expect(located.campusLocation).toBeNull();
+  },
+);

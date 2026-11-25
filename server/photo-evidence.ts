@@ -50,6 +50,11 @@ export type PhotoEvidenceRecord = {
   evidence: PhotoEvidence;
   scope?: 'wayfinding-pilot';
   buildingHint?: string | null;
+  /** Validated building candidates from Stage 1, retained if a later GPS refresh fails. */
+  gpsScope?: {
+    buildings: string[];
+    sourceSha256: string;
+  };
 };
 export class PhotoEvidenceError extends Error {
   readonly httpStatus = 409;
@@ -147,6 +152,7 @@ export async function readPhotoEvidence(
   cancellation?: AbortSignal,
 ): Promise<PhotoEvidenceRecord> {
   validatePhotoBundle(input);
+  let gpsScope: PhotoEvidenceRecord['gpsScope'];
   if (input.gps) {
     const gps = gpsContextSchema.parse(input.gps);
     const age = Date.now() - gps.capturedAt;
@@ -156,6 +162,7 @@ export async function readPhotoEvidence(
       throw new PhotoEvidenceError(
         'The device-location map changed. Reload before requesting location.',
       );
+    gpsScope = { buildings: [...gps.buildings], sourceSha256: gps.sourceSha256 };
   }
   const gpsParts = input.gps?.buildings.length
     ? [
@@ -221,12 +228,13 @@ export async function readPhotoEvidence(
       expiresAt: new Date(now + PHOTO_EVIDENCE_TTL_MS).toISOString(),
       usedFallbackModel,
     };
-    const record = {
+    const record: PhotoEvidenceRecord = {
       sessionId: session.id,
       fingerprint: photoFingerprint(input),
       evidence: structuredClone(evidence),
       scope: input.scope,
       buildingHint: input.buildingHint,
+      ...(gpsScope ? { gpsScope } : {}),
     };
     session.photoEvidence = evidence;
     session.agentStatus = `${aiProviderDetails(provider.name).label} · photo evidence extracted; locating from source records`;

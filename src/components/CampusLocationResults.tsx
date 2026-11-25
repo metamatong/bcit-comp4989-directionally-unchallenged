@@ -76,11 +76,13 @@ export function CampusLocationResults({
   plans,
   readings = [],
   showSummary = true,
+  gpsFallbackUsed = false,
   selectedId,
 }: {
   analysis: CampusPhotoAnalysis;
   readings?: PhotoLabelReading[];
   showSummary?: boolean;
+  gpsFallbackUsed?: boolean;
   plans: VisualPlan[];
   selectedId?: string;
 }) {
@@ -109,6 +111,13 @@ export function CampusLocationResults({
       {showSummary && <p>{analysis.summary}</p>}
       {analysis.gpsStatus === 'used' && (
         <p className="helper">Device building matches were checked against the extracted labels.</p>
+      )}
+      {analysis.gpsStatus === 'not-used' && gpsFallbackUsed && (
+        <p className="helper">
+          {analysis.candidates.length > 0
+            ? 'GPS was unavailable; matched using photo signs only.'
+            : 'GPS was unavailable; searched using photo signs only.'}
+        </p>
       )}
       {labelBased && (readings.length > 0 || analysis.observations.length > 0) && (
         <details>

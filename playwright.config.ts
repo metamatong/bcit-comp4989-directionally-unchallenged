@@ -30,7 +30,6 @@ export default defineConfig({
       NODE_ENV: 'test',
       PORT: '3100',
       HOST: '127.0.0.1',
-      GPS_TEST_MODE: 'false',
       GEMINI_API_KEY: '',
       GEMINI_API_KEY_2: '',
       GEMINI_API_KEY_3: '',

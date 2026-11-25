@@ -185,7 +185,6 @@ it('draws the final corridor to room 402 after returning from the SW03 elevator'
         plans: store.plans,
         onRecheck: vi.fn(),
         preferElevators: true,
-        gpsTestMode: true,
       }),
     ),
   );

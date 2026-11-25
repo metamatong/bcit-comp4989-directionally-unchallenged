@@ -27,7 +27,6 @@ export function createApp(options: {
   topologyStore?: TopologyStore;
   sessions?: VisitorSessions;
   hosted?: boolean;
-  gpsTestMode?: boolean;
 }) {
   const app = express();
   const visitorPlans = visualPlans.filter(isPilotPlan);
@@ -97,7 +96,6 @@ export function createApp(options: {
     res.json({
       coverage: visitorCoverage,
       liveAvailable: options.liveAvailable,
-      gpsTestMode: options.gpsTestMode === true,
       model: options.model,
       provider: options.provider.name ?? 'gemini',
       setupNotice: options.liveAvailable ? null : (options.setupNotice ?? null),
