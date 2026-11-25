@@ -378,7 +378,7 @@ export default function App() {
       reading={reading}
       busy={busy}
       queryingPhoto={queryingPhoto}
-      submissionReading={data.gpsTestMode ? undefined : photoDevice.snapshot?.reading}
+      submissionReading={photoDevice.snapshot?.reading}
       status={readStatus}
       error={photoError}
       onPhoto={(file) => void readPhoto(file)}
