@@ -1,3 +1,4 @@
+import { zoomDurationMs } from './components/CampusSearchMap';
 import { aiProviderDetails } from './ai-provider';
 import { useEffect, useRef, useState } from 'react';
 import {
@@ -35,6 +36,7 @@ export default function App() {
   const [data, setData] = useState<Bootstrap>();
   const [session, setSession] = useState<Session>();
   const [aboutOpen, setAboutOpen] = useState(false);
+  const [matchedBuilding,setMatchedBuilding] = useState<string>();
   const [queryingPhoto, setQueryingPhoto] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
@@ -88,6 +90,7 @@ export default function App() {
   function discardPhoto() {
     photoDevice.clear();
     setQueryingPhoto(false);
+    setMatchedBuilding(undefined);
     evidenceGate.current.cancel();
     photoAbort.current?.abort();
     setPreparedPhoto(null);
@@ -223,6 +226,7 @@ export default function App() {
       const initialGps = await captureGpsHint();
       let gps = initialGps.hint;
       let fallbackUsed = initialGps.fallback;
+      setQueryingPhoto(true);
       setReadStatus(
         fallbackUsed ? 'GPS unavailable — reading your photo…' : 'Reading your photo…',
       );
@@ -247,7 +251,6 @@ export default function App() {
             latest.photoEvidence?.id === cached.id &&
             Date.parse(latest.photoEvidence.expiresAt) > Date.now()
           )) {
-            setQueryingPhoto(true);
             latest = await request<Session>(
               `/api/sessions/${active.id}/photo/evidence`,
               {
@@ -261,7 +264,6 @@ export default function App() {
                 signal: controller.signal,
               },
             );
-            setQueryingPhoto(false);
             controller.signal.throwIfAborted();
             updateSession(latest);
             if (!latest.photoEvidence)
@@ -306,6 +308,19 @@ export default function App() {
       );
       if (!evidenceGate.current.isCurrent(generation)) return;
       updateSession(result);
+      const building=result.campusLocation?.building;
+      if (building && ['SE12','SW1','SW3','SW5','SW01','SW03','SW05'].includes(building)) {
+        setMatchedBuilding(building);
+        setReadStatus('');
+        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          await new Promise<void>(resolve => {
+            const finish=()=>{clearTimeout(timer);controller.signal.removeEventListener('abort',finish);resolve();};
+            const timer=setTimeout(finish,zoomDurationMs+180);
+            controller.signal.addEventListener('abort',finish,{once:true});
+          });
+          if (!evidenceGate.current.isCurrent(generation)) return;
+        }
+      }
       evidenceForPhoto.current = null;
       setGpsFallbackUsed(fallbackUsed);
       setShowPhotoResults(true);
@@ -327,6 +342,7 @@ export default function App() {
       if (photoAbort.current === controller) {
         photoAbort.current = null;
         setQueryingPhoto(false);
+        setMatchedBuilding(undefined);
       }
     }
   }
@@ -378,6 +394,7 @@ export default function App() {
       reading={reading}
       busy={busy}
       queryingPhoto={queryingPhoto}
+      matchedBuilding={matchedBuilding}
       submissionReading={photoDevice.snapshot?.reading}
       status={readStatus}
       error={photoError}

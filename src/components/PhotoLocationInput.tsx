@@ -13,11 +13,12 @@ import type { PreparedPhoto } from '../photo';
 import type { DestinationSuggestion } from '../types';
 import { filterDestinationSuggestions, formatPlaceKind } from '../destination-suggestions';
 
-import { CampusPositionMap } from './CampusPositionMap';
+import { CampusSearchMap } from './CampusSearchMap';
 import type { DeviceReading } from '../location/types';
 
 type PhotoLocationInputProps = {
   queryingPhoto?: boolean;
+  matchedBuilding?: string;
   submissionReading?: DeviceReading;
   step?: 'photo' | 'destination';
   photo: PreparedPhoto | null;
@@ -173,6 +174,7 @@ function ElapsedTime() {
 
 export function PhotoLocationInput({
   queryingPhoto = false,
+  matchedBuilding,
   submissionReading,
   step = 'photo',
   photo,
@@ -443,8 +445,8 @@ export function PhotoLocationInput({
         <div className="destination-body">
           {queryingPhoto ? (
             <div className="campus-search">
-              <CampusPositionMap searching reading={submissionReading} />
-              <h1 id="location-heading">Finding your starting location</h1>
+              <CampusSearchMap building={matchedBuilding} reading={submissionReading} />
+              <h1 id="location-heading">{matchedBuilding ? 'Starting building found' : 'Finding your starting location'}</h1>
             </div>
           ) : (
             <>

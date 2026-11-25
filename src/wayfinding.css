@@ -1331,3 +1331,11 @@
 .route-playback-maps figcaption { font-weight: 650; }
 .route-playback-maps .walking-map { flex: 1; width: 100%; min-height: 0; }
 .route-playback-controls { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.search-model-camera { transition: transform 900ms ease-in-out; }
+@keyframes search-building-enter { from { opacity: 0; } to { opacity: 1; } }
+.search-building { animation: search-building-enter 450ms ease-out; }
+@media (prefers-reduced-motion: reduce) {
+  .search-model-camera { transition: none; }
+  .search-building { animation: none; }
+}
