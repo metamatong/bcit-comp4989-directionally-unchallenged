@@ -1,6 +1,6 @@
 import { zoomDurationMs } from './components/CampusSearchMap';
 import { aiProviderDetails } from './ai-provider';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   AlertTriangle,
   Compass,
@@ -25,11 +25,22 @@ import { CampusLocationResults } from './components/CampusLocationResults';
 import { PhotoLocationInput } from './components/PhotoLocationInput';
 import { JourneyPanel } from './components/JourneyPanel';
 import { PhotoDeviceRequirement } from './components/PhotoDeviceLocation';
-import { usePhotoDeviceLocation } from './location/use-device-location';
+import { useLocationPrewarm, usePhotoDeviceLocation } from './location/use-device-location';
+import { useHeadingPrewarm } from './location/use-heading-tracker';
+import {
+  getMotionPermissionState,
+  getOrientationPermissionState,
+  requestMotionPermission,
+} from './location/browser-motion';
 import { gpsBuildingHint } from './location/building-hint';
 import type { GpsBuildingHint } from './location/types';
 import './wayfinding.css';
 import type { Bootstrap, Session } from './types';
+
+function journeyKeyFor(session: Session | undefined, destination: string, preferElevators: boolean) {
+  if (!session?.campusLocation || !destination) return null;
+  return JSON.stringify([session.id, session.campusLocation.id, destination, preferElevators]);
+}
 
 export default function App() {
   const photoDevice = usePhotoDeviceLocation();
@@ -51,6 +62,7 @@ export default function App() {
   const [preferElevators, setPreferElevators] = useState(false);
   const [activeDestination, setActiveDestination] = useState('');
   const [guidedMode, setGuidedMode] = useState(false);
+  const [pendingPrewarmKey, setPendingPrewarmKey] = useState<string | null>(null);
   const photoAbort = useRef<AbortController | null>(null);
   const evidenceForPhoto = useRef<{ photo: PreparedPhoto; id: string; contextKey: string } | null>(
     null,
@@ -94,6 +106,7 @@ export default function App() {
     evidenceGate.current.cancel();
     photoAbort.current?.abort();
     setPreparedPhoto(null);
+    setPendingPrewarmKey(null);
     evidenceForPhoto.current = null;
     setReadStatus('');
     setPhotoError('');
@@ -158,6 +171,7 @@ export default function App() {
     setActiveDestination('');
     setFlowStep('photo');
     setGuidedMode(false);
+    setPendingPrewarmKey(null);
     setReading(true);
     setPhotoError('');
     setError('');
@@ -182,6 +196,14 @@ export default function App() {
       if (evidenceGate.current.isCurrent(generation)) setReading(false);
     }
   }
+  function promptMotionOnGesture() {
+    if (
+      getMotionPermissionState() !== 'unknown' &&
+      getOrientationPermissionState() !== 'unknown'
+    )
+      return;
+    void requestMotionPermission();
+  }
   async function analyzePhoto() {
     const current = sessionRef.current;
     if (
@@ -192,6 +214,9 @@ export default function App() {
       busyRef.current
     )
       return;
+    // Request iOS motion & orientation permission synchronously on the Get Directions gesture
+    // so orientation pre-warming can start during analysis and the cone appears automatically on Step 1.
+    promptMotionOnGesture();
     const generation = evidenceGate.current.next();
     const controller = new AbortController();
     photoAbort.current = controller;
@@ -201,7 +226,9 @@ export default function App() {
     setShowPhotoResults(false);
     setGpsFallbackUsed(false);
     setPhotoError('');
-    setActiveDestination(destination.trim());
+    const submittedDestination = destination.trim();
+    setPendingPrewarmKey(null);
+    setActiveDestination(submittedDestination);
     setReadStatus(
       !data.locationCatalogue
         ? 'Finding your starting point from the photo…'
@@ -308,19 +335,24 @@ export default function App() {
       );
       if (!evidenceGate.current.isCurrent(generation)) return;
       updateSession(result);
-      const building=result.campusLocation?.building;
-      if (building && ['SE12','SW1','SW3','SW5','SW01','SW03','SW05'].includes(building)) {
+      const building = result.campusLocation?.building;
+      if (building && ['SE12', 'SW1', 'SW3', 'SW5', 'SW01', 'SW03', 'SW05'].includes(building)) {
         setMatchedBuilding(building);
         setReadStatus('');
-        if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          await new Promise<void>(resolve => {
-            const finish=()=>{clearTimeout(timer);controller.signal.removeEventListener('abort',finish);resolve();};
-            const timer=setTimeout(finish,zoomDurationMs+180);
-            controller.signal.addEventListener('abort',finish,{once:true});
+        if (!globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+          await new Promise<void>((resolve) => {
+            const finish = () => {
+              clearTimeout(timer);
+              controller.signal.removeEventListener('abort', finish);
+              resolve();
+            };
+            const timer = setTimeout(finish, zoomDurationMs + 180);
+            controller.signal.addEventListener('abort', finish, { once: true });
           });
           if (!evidenceGate.current.isCurrent(generation)) return;
         }
       }
+      setPendingPrewarmKey(journeyKeyFor(result, submittedDestination, preferElevators));
       evidenceForPhoto.current = null;
       setGpsFallbackUsed(fallbackUsed);
       setShowPhotoResults(true);
@@ -346,6 +378,23 @@ export default function App() {
       }
     }
   }
+  const analysis = showPhotoResults ? session?.campusAnalysis : null;
+  const region = analysis ? session?.campusLocation : null;
+  const routeCandidate = region ?? undefined;
+  const directionsMode = Boolean(analysis && activeDestination);
+  const isDestinationScreen = !analysis && !!preparedPhoto && flowStep === 'destination';
+  const journeyKey = directionsMode
+    ? journeyKeyFor(session, activeDestination, preferElevators)
+    : null;
+  const handleNavigationSettled = useCallback(() => {
+    setPendingPrewarmKey((pending) => (pending === journeyKey ? null : pending));
+  }, [journeyKey]);
+  const shouldPrewarmSensors =
+    Boolean(data?.locationCatalogue) &&
+    (isDestinationScreen || (journeyKey !== null && journeyKey === pendingPrewarmKey));
+  useHeadingPrewarm(shouldPrewarmSensors);
+  useLocationPrewarm(shouldPrewarmSensors);
+
   if (!data || !session)
     return (
       <main className="loading-page">
@@ -366,11 +415,6 @@ export default function App() {
   );
   const photoReady = data.liveAvailable && data.photoLocalizationAvailable;
   const provider = aiProviderDetails(data.provider);
-  const analysis = showPhotoResults ? session.campusAnalysis : null;
-  const region = analysis ? session.campusLocation : null;
-  const routeCandidate = region ?? undefined;
-  const directionsMode = Boolean(analysis && activeDestination);
-  const isDestinationScreen = !analysis && !!preparedPhoto && flowStep === 'destination';
   const showAppHeader = !guidedMode && !isDestinationScreen && !(directionsMode && routeCandidate);
 
   const photoInput = (
@@ -382,12 +426,14 @@ export default function App() {
       onPreferElevatorsChange={(value) => {
         setPreferElevators(value);
         setActiveDestination('');
+        setPendingPrewarmKey(null);
       }}
       canUsePhotoResult={!!analysis?.candidates.length}
       locationRequirement={<PhotoDeviceRequirement />}
       onDestinationChange={(value) => {
         setDestination(value);
         setActiveDestination('');
+        setPendingPrewarmKey(null);
       }}
       photo={preparedPhoto}
       ready={photoReady}
@@ -399,7 +445,10 @@ export default function App() {
       status={readStatus}
       error={photoError}
       onPhoto={(file) => void readPhoto(file)}
-      onNext={() => setFlowStep('destination')}
+      onNext={() => {
+        promptMotionOnGesture();
+        setFlowStep('destination');
+      }}
       onBack={() => (preparedPhoto ? setFlowStep('photo') : removePhoto())}
       onAnalyze={() => void analyzePhoto()}
       onDiscard={removePhoto}
@@ -430,7 +479,12 @@ export default function App() {
       <button
         className="primary full-width sheet-pill-btn"
         disabled={busy}
-        onClick={() => setActiveDestination(destination.trim())}
+        onClick={() => {
+          promptMotionOnGesture();
+          const submittedDestination = destination.trim();
+          setActiveDestination(submittedDestination);
+          setPendingPrewarmKey(journeyKeyFor(session, submittedDestination, preferElevators));
+        }}
       >
         Get Directions to {destination.trim()}
       </button>
@@ -514,12 +568,7 @@ export default function App() {
           {directionsMode ? (
             routeCandidate ? (
               <JourneyPanel
-                key={JSON.stringify([
-                  session.id,
-                  routeCandidate.id,
-                  activeDestination,
-                  preferElevators,
-                ])}
+                key={journeyKey}
                 sessionId={session.id}
                 revision={session.revision}
                 candidate={routeCandidate}
@@ -531,9 +580,11 @@ export default function App() {
                 editInputs={editInputs}
                 busy={busy}
                 onGuidedChange={setGuidedMode}
+                onNavigationSettled={handleNavigationSettled}
                 onStartOver={startOver}
                 onTryAnotherPhoto={() => {
                   setShowPhotoResults(false);
+                  setPendingPrewarmKey(null);
                   setFlowStep('photo');
                 }}
               />
@@ -554,6 +605,7 @@ export default function App() {
                     className="primary full-width sheet-pill-btn"
                     onClick={() => {
                       setShowPhotoResults(false);
+                      setPendingPrewarmKey(null);
                       setFlowStep('photo');
                     }}
                   >

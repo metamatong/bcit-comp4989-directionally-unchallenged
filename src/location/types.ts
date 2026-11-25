@@ -79,6 +79,13 @@ export type RawOrientationSample = {
   screenAngleDeg: number;
 };
 
+/** Raw AbsoluteOrientationSensor unit quaternion sample (Earth ENU -> device frame). */
+export type RawQuaternionSample = {
+  quaternion: readonly [number, number, number, number] | null;
+  /** Current screen orientation angle in degrees (0, 90, -90/270, 180). */
+  screenAngleDeg: number;
+};
+
 export type MotionPermissionState = 'unknown' | 'granted' | 'denied' | 'unsupported';
 
 /** Explicitly separates verified live stillness from a silent or paused sensor stream. */

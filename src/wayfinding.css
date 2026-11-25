@@ -698,15 +698,6 @@
   white-space: nowrap;
 }
 
-.map-compass-btn {
-  position: absolute;
-  bottom: 28px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 5;
-  cursor: pointer;
-}
-
 .guided-step {
   position: relative;
   z-index: 6;

@@ -247,7 +247,9 @@ export class BrowserMotion {
         rotGamma: rot?.gamma ?? null,
         timestamp,
       });
-      if (result.omegaCcwRadPerSec !== null) {
+      // Wait for initial activity classification (~600 ms) before forwarding live yaw to the
+      // heading cone so uncalibrated startup gyro bias cannot clear a quiet compass anchor.
+      if (result.omegaCcwRadPerSec !== null && this.estimator.snapshot().activity !== 'unknown') {
         onGyroYaw?.(result.omegaCcwRadPerSec, timestamp);
       }
       if (result.step) {

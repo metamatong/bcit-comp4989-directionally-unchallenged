@@ -1,6 +1,15 @@
 /** Deterministic permission, cancellation and sample ordering tests. No physical device is used. */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { BrowserLocation, LOCATION_OPTIONS } from '../src/location/browser-location';
+import {
+  BrowserLocation,
+  consumePrewarmedLocation,
+  LOCATION_OPTIONS,
+  peekFreshPrewarmedLocation,
+  resetLocationPrewarmForTests,
+  seedPrewarmedLocationFromCapture,
+  startLocationPrewarm,
+  stopLocationPrewarm,
+} from '../src/location/browser-location';
 import { position } from './location-fixtures';
 describe('foreground browser location adapter', () => {
   beforeEach(() => {
@@ -9,6 +18,7 @@ describe('foreground browser location adapter', () => {
     vi.stubGlobal('isSecureContext', true);
   });
   afterEach(() => {
+    resetLocationPrewarmForTests();
     vi.useRealTimers();
     vi.unstubAllGlobals();
   });
@@ -146,4 +156,119 @@ describe('foreground browser location adapter', () => {
     expect(onTimeout).toHaveBeenCalledTimes(1);
     expect(onError).not.toHaveBeenCalled();
   });
+
+  it('pre-warms silently once geolocation permission changes from prompt to granted', async () => {
+    const watchPosition = vi.fn((success: PositionCallback) => {
+      lastWatchSuccess = success;
+      return 42;
+    });
+    const clearWatch = vi.fn();
+    let lastWatchSuccess: PositionCallback | null = null;
+    const perm = Object.assign(new EventTarget(), { state: 'prompt' as PermissionState });
+    vi.stubGlobal('navigator', {
+      geolocation: { getCurrentPosition: vi.fn(), watchPosition, clearWatch },
+      permissions: { query: vi.fn().mockResolvedValue(perm) },
+    });
+
+    // Under 'prompt', pre-warming stays silent and never calls watchPosition.
+    await startLocationPrewarm();
+    expect(watchPosition).not.toHaveBeenCalled();
+    expect(peekFreshPrewarmedLocation(10000)).toBeNull();
+
+    perm.state = 'granted';
+    perm.dispatchEvent(new Event('change'));
+    seedPrewarmedLocationFromCapture({
+      latitude: 49.25,
+      longitude: -123.0,
+      accuracy: 8,
+      timestamp: 10000,
+      receivedAt: 10000,
+    });
+    expect(watchPosition).toHaveBeenCalledTimes(1);
+    expect(peekFreshPrewarmedLocation(11500)).toMatchObject({ timestamp: 10000, accuracy: 8 });
+    // Strict 2 s freshness check for Get Directions reuse, while 8 s window still qualifies for Step 1 handoff.
+    expect(peekFreshPrewarmedLocation(12500)).toBeNull();
+    expect(consumePrewarmedLocation(15000)).toMatchObject({
+      timestamp: 10000,
+      captureTimestamp: 10000,
+    });
+    // One-shot consumption clears the handoff slot.
+    expect(consumePrewarmedLocation(15000)).toBeNull();
+
+    // Subsequent watch fix refreshes the cache; stop clears watch and reading.
+    vi.setSystemTime(16000);
+    lastWatchSuccess!(position(16000));
+    expect(peekFreshPrewarmedLocation(16000)).toMatchObject({ timestamp: 16000 });
+    stopLocationPrewarm();
+    expect(clearWatch).toHaveBeenCalledWith(42);
+    expect(consumePrewarmedLocation(16000)).toBeNull();
+  });
+
+  it.each(['prompt', 'denied'] as const)(
+    'clears the watch and cached fix when permission becomes %s',
+    async (state) => {
+      let nextWatchId = 0;
+      const watchPosition = vi.fn((_success: PositionCallback) => ++nextWatchId);
+      const clearWatch = vi.fn();
+      const permission = Object.assign(new EventTarget(), { state: 'granted' as PermissionState });
+      vi.stubGlobal('navigator', {
+        geolocation: { watchPosition, clearWatch },
+        permissions: { query: vi.fn().mockResolvedValue(permission) },
+      });
+
+      await startLocationPrewarm();
+      const [firstFix] = watchPosition.mock.calls[0];
+      firstFix(position(10000));
+      expect(peekFreshPrewarmedLocation()).toMatchObject({ timestamp: 10000 });
+
+      permission.state = state;
+      expect(peekFreshPrewarmedLocation()).toBeNull();
+      permission.dispatchEvent(new Event('change'));
+      expect(clearWatch).toHaveBeenCalledWith(1);
+      expect(watchPosition).toHaveBeenCalledTimes(1);
+
+      permission.state = 'granted';
+      permission.dispatchEvent(new Event('change'));
+      expect(watchPosition).toHaveBeenCalledTimes(2);
+      firstFix(position(10000));
+      expect(consumePrewarmedLocation()).toBeNull();
+      watchPosition.mock.calls[1][0](position(10000));
+      expect(consumePrewarmedLocation()).toMatchObject({ captureTimestamp: 10000 });
+    },
+  );
+
+  it.each(['unavailable', 'rejected'] as const)(
+    'skips silent pre-warming when the permission query is %s after a capture',
+    async (query) => {
+      const permission = Object.assign(new EventTarget(), { state: 'granted' as PermissionState });
+      const watchPosition = vi.fn(() => 1);
+      const geolocation = {
+        watchPosition,
+        clearWatch: vi.fn(),
+        getCurrentPosition: vi.fn((success: PositionCallback) => success(position(10000))),
+      };
+      vi.stubGlobal('navigator', {
+        geolocation,
+        permissions: { query: vi.fn().mockResolvedValue(permission) },
+      });
+      await startLocationPrewarm();
+      seedPrewarmedLocationFromCapture(await new BrowserLocation().once());
+      expect(peekFreshPrewarmedLocation()).toMatchObject({ timestamp: 10000 });
+      stopLocationPrewarm();
+      watchPosition.mockClear();
+
+      vi.stubGlobal('navigator', {
+        geolocation,
+        permissions:
+          query === 'rejected'
+            ? { query: vi.fn().mockRejectedValue(Error('Unavailable')) }
+            : undefined,
+      });
+      await startLocationPrewarm();
+      seedPrewarmedLocationFromCapture(await new BrowserLocation().once());
+      expect(watchPosition).not.toHaveBeenCalled();
+      expect(peekFreshPrewarmedLocation()).toBeNull();
+      expect(consumePrewarmedLocation()).toBeNull();
+    },
+  );
 });

@@ -1,7 +1,43 @@
-/** Attach heading sensors for the current foreground floor calibration. */
-import { useCallback, useLayoutEffect, useRef, useState } from 'react';
-import { BrowserHeading } from './browser-heading';
+/** Attach heading sensors for the current foreground floor calibration and pre-warm before Step 1. */
+import { useCallback, useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { BrowserHeading, startHeadingPrewarm, stopHeadingPrewarm } from './browser-heading';
+import {
+  getOrientationPermissionState,
+  getSensorPermissionSnapshot,
+  subscribeSensorPermissions,
+} from './browser-motion';
 import type { DeviceHeading } from './types';
+
+/**
+ * Pre-warm foreground orientation sensors before GuidedDirections mounts when orientation
+ * permission is already granted (e.g. Android Chrome or already-granted iOS sessions).
+ */
+export function useHeadingPrewarm(active: boolean) {
+  const permissionSnapshot = useSyncExternalStore(
+    subscribeSensorPermissions,
+    getSensorPermissionSnapshot,
+    getSensorPermissionSnapshot,
+  );
+
+  useEffect(() => {
+    if (!active || getOrientationPermissionState() !== 'granted') {
+      stopHeadingPrewarm();
+      return;
+    }
+
+    const syncVisibility = () => {
+      if (document.hidden) stopHeadingPrewarm();
+      else startHeadingPrewarm();
+    };
+
+    syncVisibility();
+    document.addEventListener('visibilitychange', syncVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', syncVisibility);
+      stopHeadingPrewarm();
+    };
+  }, [active, permissionSnapshot]);
+}
 
 export function useHeadingTracker({
   active,

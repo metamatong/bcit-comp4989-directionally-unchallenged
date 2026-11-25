@@ -170,3 +170,176 @@ export class BrowserLocation {
     }
   }
 }
+
+const PREWARM_WATCH_STALL_MS = 15_000;
+
+let prewarmActive = false;
+let prewarmGeneration = 0;
+let prewarmLocation: BrowserLocation | null = null;
+let prewarmedReading: WalkingReading | null = null;
+let prewarmPermissionStatus: PermissionStatus | null = null;
+let prewarmPermissionListener: (() => void) | null = null;
+let prewarmStallTimer: ReturnType<typeof setInterval> | null = null;
+
+function stopPrewarmWatch() {
+  if (prewarmLocation) {
+    prewarmLocation.stop();
+    prewarmLocation = null;
+  }
+  if (prewarmStallTimer !== null) {
+    clearInterval(prewarmStallTimer);
+    prewarmStallTimer = null;
+  }
+  prewarmedReading = null;
+}
+
+function detachPrewarmPermissionListener() {
+  if (prewarmPermissionStatus && prewarmPermissionListener) {
+    prewarmPermissionStatus.removeEventListener('change', prewarmPermissionListener);
+  }
+  prewarmPermissionStatus = null;
+  prewarmPermissionListener = null;
+}
+
+function canUseLocationPrewarm() {
+  return (
+    prewarmActive &&
+    prewarmPermissionStatus?.state === 'granted' &&
+    (typeof document === 'undefined' || !document.hidden)
+  );
+}
+
+function beginPrewarmWatch(gen: number) {
+  if (!canUseLocationPrewarm() || prewarmGeneration !== gen || prewarmLocation) return;
+
+  let latestCaptureTimestamp = prewarmedReading?.captureTimestamp ?? -Infinity;
+  let lastFixOrStartAt = Date.now();
+  let lastRecoveryRestartAt = -Infinity;
+  const location = new BrowserLocation();
+  prewarmLocation = location;
+  const isCurrentWatch = () => prewarmGeneration === gen && prewarmLocation === location;
+
+  const startWatch = () => {
+    if (!isCurrentWatch() || !canUseLocationPrewarm()) return;
+    location.start(
+      (next) => {
+        if (!isCurrentWatch() || !canUseLocationPrewarm()) return;
+        latestCaptureTimestamp = next.captureTimestamp;
+        lastFixOrStartAt = Date.now();
+        prewarmedReading = next;
+      },
+      (_message, denied) => {
+        if (isCurrentWatch() && denied) stopPrewarmWatch();
+      },
+      {
+        minCaptureTimestamp: latestCaptureTimestamp,
+        onTimeout: () => {
+          if (!isCurrentWatch() || !canUseLocationPrewarm()) return;
+          const tickNow = Date.now();
+          if (tickNow - lastRecoveryRestartAt >= PREWARM_WATCH_STALL_MS) {
+            lastRecoveryRestartAt = tickNow;
+            lastFixOrStartAt = tickNow;
+            startWatch();
+          }
+        },
+      },
+    );
+  };
+
+  prewarmStallTimer = setInterval(() => {
+    if (!isCurrentWatch() || !canUseLocationPrewarm()) return;
+    const tickNow = Date.now();
+    if (
+      tickNow - lastFixOrStartAt >= PREWARM_WATCH_STALL_MS &&
+      tickNow - lastRecoveryRestartAt >= PREWARM_WATCH_STALL_MS
+    ) {
+      lastRecoveryRestartAt = tickNow;
+      lastFixOrStartAt = tickNow;
+      startWatch();
+    }
+  }, 5000);
+  startWatch();
+}
+
+/** Start silent foreground GPS pre-warming only with a verified current permission grant. */
+export async function startLocationPrewarm() {
+  if (prewarmActive) return;
+  if (
+    !globalThis.isSecureContext ||
+    !navigator.geolocation ||
+    typeof navigator.permissions?.query !== 'function' ||
+    (typeof document !== 'undefined' && document.hidden)
+  ) {
+    return;
+  }
+
+  prewarmActive = true;
+  const gen = ++prewarmGeneration;
+  let status: PermissionStatus;
+  try {
+    status = await navigator.permissions.query({ name: 'geolocation' });
+  } catch {
+    return;
+  }
+  if (!prewarmActive || prewarmGeneration !== gen) return;
+
+  prewarmPermissionStatus = status;
+  const syncPermission = () => {
+    if (!prewarmActive || prewarmGeneration !== gen) return;
+    if (status.state === 'granted') beginPrewarmWatch(gen);
+    else stopPrewarmWatch();
+  };
+  prewarmPermissionListener = syncPermission;
+  status.addEventListener('change', syncPermission);
+  syncPermission();
+}
+
+/** Stop foreground GPS pre-warming and discard any transient cached reading. */
+export function stopLocationPrewarm() {
+  prewarmActive = false;
+  prewarmGeneration += 1;
+  stopPrewarmWatch();
+  detachPrewarmPermissionListener();
+}
+
+/** Cache the Get Directions fix when current permission permits pre-warming. */
+export function seedPrewarmedLocationFromCapture(reading: DeviceReading) {
+  if (!canUseLocationPrewarm()) return;
+  const normalized = normalizeWatchReading(reading);
+  if (
+    eligibleWatchReading(normalized, Date.now()) &&
+    (!prewarmedReading || normalized.captureTimestamp >= prewarmedReading.captureTimestamp)
+  ) {
+    prewarmedReading = normalized;
+  }
+  if (!prewarmLocation) {
+    beginPrewarmWatch(prewarmGeneration);
+  }
+}
+
+/**
+ * Non-destructively reuse a pre-warmed reading for Get Directions only if it meets the
+ * strict one-shot freshness threshold (<= LOCATION_FRESH_MS).
+ */
+export function peekFreshPrewarmedLocation(now = Date.now()): DeviceReading | null {
+  if (!canUseLocationPrewarm() || !prewarmedReading) return null;
+  if (!eligibleReading(prewarmedReading, now)) return null;
+  const { latitude, longitude, accuracy, timestamp, receivedAt } = prewarmedReading;
+  return { latitude, longitude, accuracy, timestamp, receivedAt };
+}
+
+/**
+ * One-shot handoff of a fresh pre-warmed watch reading (<= WALKING_GPS_INGEST_MAX_AGE_MS)
+ * when GuidedDirections mounts so Step 1 can show the live dot immediately.
+ */
+export function consumePrewarmedLocation(now = Date.now()): WalkingReading | null {
+  const candidate = prewarmedReading;
+  prewarmedReading = null;
+  if (!canUseLocationPrewarm() || !candidate) return null;
+  if (!eligibleWatchReading(candidate, now)) return null;
+  return candidate;
+}
+
+export function resetLocationPrewarmForTests() {
+  stopLocationPrewarm();
+}

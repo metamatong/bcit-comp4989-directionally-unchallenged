@@ -8,7 +8,7 @@ import {
   useState,
   useSyncExternalStore,
 } from 'react';
-import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp, Compass } from 'lucide-react';
+import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react';
 import type { NavigationResult, WalkingSurface } from '../wayfinding';
 import type { VisualPlan } from '../types';
 import { fetchWalkingSurface, getCachedWalkingSurface } from '../api';
@@ -387,15 +387,13 @@ export function GuidedDirections({
 
   function promptMotionOnGesture() {
     if (
-      getMotionPermissionState() !== 'unknown' &&
-      getOrientationPermissionState() !== 'unknown'
+      !canTrack ||
+      (getMotionPermissionState() !== 'unknown' &&
+        getOrientationPermissionState() !== 'unknown')
     )
       return;
     void requestMotionPermission();
   }
-
-  const showCompassPrompt =
-    canTrack && !!bearingToPlanAngle && getOrientationPermissionState() === 'unknown';
 
   function move(next: number) {
     if (next >= route.steps.length) tracking.stop();
@@ -410,15 +408,16 @@ export function GuidedDirections({
   if (previewOpen) return <RoutePlayback route={route} plans={plans} onClose={() => setPreviewOpen(false)} />;
 
   return (
-    <section className="guided-directions guided-stage" aria-label="Step-by-step directions">
-      <div
-        className="guided-map"
-        onClick={(event) => {
-          if (!(event.target as Element | null)?.closest('button')) {
-            promptMotionOnGesture();
-          }
-        }}
-      >
+    <section
+      className="guided-directions guided-stage"
+      aria-label="Step-by-step directions"
+      onClickCapture={(event) => {
+        if (!(event.target as Element | null)?.closest('.map-overview-btn')) {
+          promptMotionOnGesture();
+        }
+      }}
+    >
+      <div className="guided-map">
         <div className="map-floating-bar">
           <button
             type="button"
@@ -432,16 +431,6 @@ export function GuidedDirections({
           {onToggleView && <RouteViewToggle active={threeD} onToggle={onToggleView} />}
           <span className="map-floating-pill map-floor-badge">{planLabel(plan)}</span>
         </div>
-        {showCompassPrompt && (
-          <button
-            type="button"
-            className="map-floating-pill map-compass-btn"
-            onClick={() => promptMotionOnGesture()}
-          >
-            <Compass size={15} aria-hidden="true" />
-            <span>Enable compass</span>
-          </button>
-        )}
 
         {threeD && <button type="button" className="map-floating-pill route-preview-button" onClick={() => setPreviewOpen(true)}>Preview full route</button>}
         <RouteMapImage

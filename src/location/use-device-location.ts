@@ -1,7 +1,40 @@
 /** Browser-only location lifecycle. Readings never enter application session/API state. */
-import { useEffect, useRef, useState } from 'react';
-import { BrowserLocation, eligibleReading } from './browser-location';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import {
+  BrowserLocation,
+  consumePrewarmedLocation,
+  eligibleReading,
+  peekFreshPrewarmedLocation,
+  seedPrewarmedLocationFromCapture,
+  startLocationPrewarm,
+  stopLocationPrewarm,
+} from './browser-location';
 import type { PhotoReading, WalkingReading } from './types';
+
+/**
+ * Silently pre-warm foreground GPS while current permission is granted.
+ * Stops and clears on page hide or deactivation.
+ */
+export function useLocationPrewarm(active: boolean) {
+  useEffect(() => {
+    if (!active) {
+      stopLocationPrewarm();
+      return;
+    }
+
+    const syncVisibility = () => {
+      if (document.hidden) stopLocationPrewarm();
+      else void startLocationPrewarm();
+    };
+
+    syncVisibility();
+    document.addEventListener('visibilitychange', syncVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', syncVisibility);
+      stopLocationPrewarm();
+    };
+  }, [active]);
+}
 
 export function usePhotoDeviceLocation() {
   const [snapshot, setSnapshot] = useState<PhotoReading>();
@@ -29,6 +62,12 @@ export function usePhotoDeviceLocation() {
     setSnapshot(undefined);
     setStatus('');
     const submission = generation.current;
+    const prewarmed = peekFreshPrewarmedLocation(Date.now());
+    if (prewarmed) {
+      const next = { submission, reading: prewarmed };
+      setSnapshot(next);
+      return Promise.resolve(next);
+    }
     pending.current = true;
     setStatus('Requesting device location for this photo…');
     provider.current = new BrowserLocation();
@@ -38,6 +77,7 @@ export function usePhotoDeviceLocation() {
         if (generation.current !== submission)
           throw new DOMException('The GPS request was cancelled.', 'AbortError');
         pending.current = false;
+        seedPrewarmedLocationFromCapture(reading);
         const next = { submission, reading };
         setSnapshot(next);
         setStatus('');
@@ -74,6 +114,8 @@ export type WalkingPauseReason = 'none' | 'hidden' | 'denied' | 'manual';
 export const WATCH_STALL_RESTART_MS = 15_000;
 
 export function useWalkingLocation(startActive = false) {
+  const initialSeedRef = useRef<WalkingReading | undefined>(undefined);
+  const shouldSeedOnMount = useRef(startActive);
   const [active, setActive] = useState(startActive);
   const [watchRevision, setWatchRevision] = useState(0);
   const [paused, setPaused] = useState(false);
@@ -82,7 +124,19 @@ export function useWalkingLocation(startActive = false) {
   const [status, setStatus] = useState('');
   const [now, setNow] = useState(Date.now());
   const provider = useRef<BrowserLocation | null>(null);
+  // Take the handoff on commit, before the parent's passive pre-warm cleanup.
+  useLayoutEffect(() => {
+    if (!shouldSeedOnMount.current) return;
+    shouldSeedOnMount.current = false;
+    const handoffTime = Date.now();
+    const seed = consumePrewarmedLocation(handoffTime);
+    if (!seed) return;
+    initialSeedRef.current = seed;
+    setReading(seed);
+    setNow(handoffTime);
+  }, []);
   function stopWithReason(reason: Exclude<WalkingPauseReason, 'none'>) {
+    initialSeedRef.current = undefined;
     provider.current?.stop();
     setActive(false);
     setPaused(true);
@@ -92,6 +146,7 @@ export function useWalkingLocation(startActive = false) {
     stopWithReason('manual');
   }
   function start() {
+    initialSeedRef.current = undefined;
     provider.current?.stop();
     setReading(undefined);
     setStatus('Waiting for a fresh device reading…');
@@ -103,7 +158,8 @@ export function useWalkingLocation(startActive = false) {
   useEffect(() => {
     if (!active) return;
     let disposed = false;
-    let latestCaptureTimestamp = -Infinity;
+    const seeded = watchRevision === 0 ? initialSeedRef.current : undefined;
+    let latestCaptureTimestamp = seeded?.captureTimestamp ?? -Infinity;
     let lastFixOrStartAt = Date.now();
     let lastRecoveryRestartAt = -Infinity;
     const location = new BrowserLocation();

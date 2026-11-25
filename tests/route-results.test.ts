@@ -18,6 +18,7 @@ import { labelReading, photoInput } from './photo-fixtures';
 import type { ModelPart, Provider } from '../server/provider';
 import { position } from './location-fixtures';
 import { locationCatalogue } from '../server/geolocation';
+import type { NavigationResult } from '../src/wayfinding';
 
 vi.mock('../src/photo', () => ({ preparePhoto: vi.fn() }));
 
@@ -29,6 +30,7 @@ const store = new TopologyStore(join(dir, 'topology.json'), plans, undefined, ()
 let rejectLocationOnce = false;
 let labelReads = 0;
 let customLabelReading: (() => ModelPart[] | Promise<ModelPart[]>) | null = null;
+let navigationResponse: Promise<Response> | undefined;
 const provider: Provider = {
   calls: 0,
   async generate(_contents, _tools, _signal, onAttempt, options) {
@@ -52,6 +54,7 @@ beforeAll(async () => {
   const realFetch = globalThis.fetch;
   vi.stubGlobal('fetch', (path: string, options?: RequestInit) => {
     if (typeof options?.body === 'string') requestBodies.push(options.body);
+    if (navigationResponse && path.endsWith('/navigation')) return navigationResponse;
     if (rejectLocationOnce && path.endsWith('/photo/location')) {
       rejectLocationOnce = false;
       return Promise.resolve(
@@ -86,6 +89,46 @@ afterAll(async () => {
   rmSync(dir, { recursive: true, force: true });
 });
 
+async function wait(assertion: () => void) {
+  let lastFailure: unknown;
+  for (let attempt = 0; attempt < 150; attempt++) {
+    // Flush network-driven React updates before checking the DOM.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    });
+    try {
+      assertion();
+      return;
+    } catch (failure) {
+      lastFailure = failure;
+    }
+  }
+  throw lastFailure;
+}
+
+const click = (element: HTMLElement) => act(async () => element.click());
+const findButton = (host: HTMLElement, name: string) =>
+  [...host.querySelectorAll('button')].find((button) => button.textContent?.includes(name))!;
+
+async function uploadPhoto(host: HTMLElement) {
+  await wait(() => expect(findButton(host, 'Upload photo')).toBeDefined());
+  const input = host.querySelector<HTMLInputElement>('input[aria-label="Upload campus photo"]')!;
+  await act(async () => {
+    Object.defineProperty(input, 'files', {
+      value: [new File(['fixture'], 'test.jpg', { type: 'image/jpeg' })],
+    });
+    input.dispatchEvent(new Event('change', { bubbles: true }));
+  });
+  await wait(() => expect(host.querySelector('#trip-destination')).not.toBeNull());
+}
+
+const enterDestination = (host: HTMLElement, value: string) =>
+  act(async () => {
+    const field = host.querySelector<HTMLInputElement>('#trip-destination')!;
+    Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(field, value);
+    field.dispatchEvent(new Event('input', { bubbles: true }));
+  });
+
 it.each([true, 'denied', 'unavailable'] as const)(
   'uses GPS by default, falls back to photo-only when unavailable, and reuses one extraction when device permission is %s',
   async (useGps) => {
@@ -108,73 +151,55 @@ it.each([true, 'denied', 'unavailable'] as const)(
           2,
       },
     };
+    const permission = Object.assign(new EventTarget(), {
+      state: (useGps === 'denied' ? 'denied' : 'prompt') as PermissionState,
+    });
     const getCurrentPosition = vi.fn(
       (success: PositionCallback, failure: PositionErrorCallback) => {
         if (useGps === 'denied') failure({ code: 1 } as GeolocationPositionError);
         else if (useGps === 'unavailable') failure({ code: 2 } as GeolocationPositionError);
-        else success({ ...gpsPosition, timestamp: Date.now() });
+        else {
+          permission.state = 'granted';
+          permission.dispatchEvent(new Event('change'));
+          success({ ...gpsPosition, timestamp: Date.now() });
+        }
       },
     );
-    const clearWatch = vi.fn();
+    const activeWatchIds = new Set<number>();
+    let lastWatchId = 0;
+    const clearWatch = vi.fn((watchId: number) => activeWatchIds.delete(watchId));
     const watchPosition = vi.fn((success: PositionCallback, failure?: PositionErrorCallback) => {
+      const watchId = ++lastWatchId;
+      activeWatchIds.add(watchId);
       deviceSuccess = success;
-      if (useGps === 'denied') failure?.({ code: 1 } as GeolocationPositionError);
-      else if (useGps === 'unavailable') failure?.({ code: 2 } as GeolocationPositionError);
-      return 42;
+      if (useGps !== true) {
+        queueMicrotask(() =>
+          failure?.({ code: useGps === 'denied' ? 1 : 2 } as GeolocationPositionError),
+        );
+      }
+      return watchId;
     });
     vi.stubGlobal('isSecureContext', true);
-    vi.stubGlobal('navigator', { geolocation: { getCurrentPosition, watchPosition, clearWatch } });
+    vi.stubGlobal('DeviceOrientationEvent', {});
+    vi.stubGlobal('navigator', {
+      geolocation: { getCurrentPosition, watchPosition, clearWatch },
+      permissions: { query: vi.fn().mockResolvedValue(permission) },
+    });
     const host = document.createElement('div');
     document.body.append(host);
     const root = createRoot(host);
-    const wait = async (assertion: () => void) => {
-      let lastFailure: unknown;
-      // Keep network-driven React updates inside act during every polling interval.
-      for (let attempt = 0; attempt < 150; attempt++) {
-        await act(async () => {
-          await new Promise((resolve) => setTimeout(resolve, 20));
-        });
-        try {
-          assertion();
-          return;
-        } catch (failure) {
-          lastFailure = failure;
-        }
-      }
-      throw lastFailure;
-    };
-    const click = (element: HTMLElement) => act(async () => element.click());
-    const button = (name: string) =>
-      [...host.querySelectorAll('button')].find((b) => b.textContent?.includes(name))!;
-    const setDestination = async (value: string) =>
-      act(async () => {
-        const field = host.querySelector<HTMLInputElement>('#trip-destination')!;
-        Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(
-          field,
-          value,
-        );
-        field.dispatchEvent(new Event('input', { bubbles: true }));
-      });
+    const button = (name: string) => findButton(host, name);
+    const setDestination = (value: string) => enterDestination(host, value);
     try {
       await act(async () => root.render(createElement(App)));
-      await wait(() => expect(button('Upload photo')).toBeDefined());
-      const fileInput = host.querySelector<HTMLInputElement>(
-        'input[aria-label="Upload campus photo"]',
-      )!;
-      await act(async () => {
-        Object.defineProperty(fileInput, 'files', {
-          value: [new File(['fixture'], 'test.jpg', { type: 'image/jpeg' })],
-        });
-        fileInput.dispatchEvent(new Event('change', { bubbles: true }));
-      });
-      // Photo preparation auto-advances straight to Destination.
-      await wait(() => expect(host.querySelector('#trip-destination')).not.toBeNull());
+      await uploadPhoto(host);
       await setDestination('SW03 2082');
       const elevatorOption = [...host.querySelectorAll('label')]
         .find((label) => label.textContent?.includes('Use elevators'))!
         .querySelector<HTMLInputElement>('input')!;
       expect(elevatorOption.checked).toBe(false);
       expect(getCurrentPosition).not.toHaveBeenCalled();
+      expect(watchPosition).not.toHaveBeenCalled();
       expect(provider.calls).toBe(0);
       rejectLocationOnce = true;
       labelReads = 0;
@@ -182,14 +207,27 @@ it.each([true, 'denied', 'unavailable'] as const)(
       await wait(() => expect(button('Try again')).toBeDefined());
       expect(host.textContent).toContain('Finding your starting place stopped');
       expect(labelReads).toBe(1);
+      await act(async () => {
+        if (useGps === true) deviceSuccess({ ...gpsPosition, timestamp: Date.now() });
+        window.dispatchEvent(
+          Object.assign(new Event('deviceorientationabsolute'), { alpha: 0, beta: 0, gamma: 0 }),
+        );
+      });
       await click(button('Try again'));
       await wait(() => expect(host.querySelector('.guided-directions')).not.toBeNull());
-      expect(watchPosition).toHaveBeenCalledTimes(1);
+      if (useGps === true) {
+        expect(clearWatch).toHaveBeenCalledWith(1);
+        expect(activeWatchIds).toEqual(new Set([2]));
+        expect(host.querySelector('.device-position')).not.toBeNull();
+        expect(host.querySelector('.device-heading-cone')).not.toBeNull();
+      } else {
+        expect(watchPosition).toHaveBeenCalledTimes(1);
+      }
       expect(labelReads).toBe(1);
       expect(host.querySelector('.journey-evidence .floor-point-picker')).toBeNull();
       expect(host.querySelector('header.header')).toBeNull();
       expect(button('Start at')).toBeUndefined();
-      expect(getCurrentPosition).toHaveBeenCalledTimes(2);
+      expect(getCurrentPosition).toHaveBeenCalledTimes(useGps === true ? 1 : 2);
       const locationRequests = requestBodies
         .map((body) => JSON.parse(body))
         .filter((body) => body.evidenceId);
@@ -233,15 +271,19 @@ it.each([true, 'denied', 'unavailable'] as const)(
       reviewCrossings('rejected');
       try {
         await click(button('Overview'));
+        expect(activeWatchIds.size).toBe(0);
         await click(button('Recheck current route'));
         await wait(() => expect(button('Retry route')).toBeDefined());
+        expect(activeWatchIds.size).toBe(0);
         expect(host.textContent).toContain('continuous route between these buildings');
       } finally {
         reviewCrossings('verified');
       }
       await click(button('Retry route'));
       await wait(() => expect(host.querySelector('.guided-directions')).not.toBeNull());
+      expect(activeWatchIds).toEqual(new Set([3]));
       await click(button('Overview'));
+      expect(activeWatchIds.size).toBe(0);
       expect(requestBodies.filter((body) => body.includes('"image":'))).toHaveLength(1);
       const result = host.querySelector('.workspace > section')!;
       expect(result.getAttribute('aria-label')).toBe('Your walking route');
@@ -285,7 +327,7 @@ it.each([true, 'denied', 'unavailable'] as const)(
       expect(provider.calls).toBe(1);
       expect(result.querySelector('.route-device-controls')).toBeNull();
       await click(button('Back to steps'));
-      expect(watchPosition).toHaveBeenCalledTimes(3);
+      expect(activeWatchIds).toEqual(new Set([4]));
       await act(async () => deviceSuccess({ ...gpsPosition, timestamp: Date.now() }));
       expect(result.querySelectorAll('.device-position')).toHaveLength(1);
       await click(button('Next'));
@@ -294,7 +336,8 @@ it.each([true, 'denied', 'unavailable'] as const)(
       await act(async () => deviceSuccess({ ...gpsPosition, timestamp: Date.now() + 1 }));
       expect(result.querySelector('[aria-label="Current tracking floor"]')).toBeNull();
       await click(button('Overview'));
-      expect(clearWatch).toHaveBeenCalledWith(42);
+      expect(clearWatch).toHaveBeenCalledWith(4);
+      expect(activeWatchIds.size).toBe(0);
       expect(result.querySelectorAll('.route-map-visit')).toHaveLength(3);
       await click(host.querySelector<HTMLElement>('.journey-inputs > summary')!);
       const preference = [...host.querySelectorAll('label')]
@@ -373,6 +416,108 @@ it.each([true, 'denied', 'unavailable'] as const)(
     }
   },
   30_000,
+);
+
+it.each(['zero steps', 'partial route', 'no route', 'request failure'] as const)(
+  'stops both pre-warm streams when the first navigation request ends with %s',
+  async (outcome) => {
+    let completeNavigation!: (response: Response) => void;
+    navigationResponse = new Promise((resolve) => {
+      completeNavigation = resolve;
+    });
+    const gpsPermission = Object.assign(new EventTarget(), { state: 'granted' });
+    const watchPosition = vi.fn(() => 1);
+    const clearWatch = vi.fn();
+    const startCompass = vi.fn();
+    const stopCompass = vi.fn();
+    vi.stubGlobal('isSecureContext', true);
+    vi.stubGlobal('DeviceOrientationEvent', {});
+    vi.stubGlobal(
+      'AbsoluteOrientationSensor',
+      class extends EventTarget {
+        start() {
+          startCompass();
+        }
+        stop() {
+          stopCompass();
+        }
+      },
+    );
+    vi.stubGlobal('navigator', {
+      permissions: { query: vi.fn().mockResolvedValue(gpsPermission) },
+      geolocation: {
+        watchPosition,
+        clearWatch,
+        getCurrentPosition: (_success: PositionCallback, failure: PositionErrorCallback) =>
+          failure({ code: 2 } as GeolocationPositionError),
+      },
+    });
+    const host = document.body.appendChild(document.createElement('div'));
+    const root = createRoot(host);
+    try {
+      await act(async () => root.render(createElement(App)));
+      await uploadPhoto(host);
+      await enterDestination(host, 'SW03 2082');
+      await click(findButton(host, 'Get Directions'));
+      await wait(() => expect(host.querySelector('.journey-loading')).not.toBeNull());
+      expect(watchPosition).toHaveBeenCalledTimes(1);
+      expect(startCompass).toHaveBeenCalledTimes(1);
+      expect(clearWatch).not.toHaveBeenCalled();
+      expect(stopCompass).not.toHaveBeenCalled();
+
+      const origin = { id: 'start', planId: 'SE12-F3-p1', label: '302', point: { x: 0.3, y: 0.4 } };
+      const destination = { ...origin, id: 'end', label: '303', point: { x: 0.4, y: 0.4 } };
+      const metadata = { networkRevision: 1, origins: [], destinations: [] };
+      const results: Record<Exclude<typeof outcome, 'request failure'>, NavigationResult> = {
+        'zero steps': { ...metadata, status: 'route', origin, destination: origin, steps: [] },
+        'partial route': {
+          ...metadata,
+          status: 'unmapped-destination',
+          message: 'The route ends at the last mapped stop.',
+          mappedPortion: {
+            origin,
+            destination,
+            steps: [
+              {
+                kind: 'corridor',
+                from: origin,
+                to: destination,
+                instruction: 'Follow the corridor.',
+                path: [origin.point, destination.point],
+              },
+            ],
+            requested: { ...destination, id: 'unmapped-room', label: '304' },
+          },
+        },
+        'no route': { ...metadata, status: 'no-route', message: 'No mapped route.' },
+      };
+      await act(async () => {
+        completeNavigation(
+          outcome === 'request failure'
+            ? Response.json({ error: 'Navigation unavailable.' }, { status: 503 })
+            : Response.json(results[outcome]),
+        );
+      });
+      expect(host.querySelector('.journey-loading')).toBeNull();
+      expect(host.querySelector('.guided-directions')).toBeNull();
+      if (outcome === 'zero steps' || outcome === 'partial route') {
+        expect(host.querySelector('.overview-stage')).not.toBeNull();
+      } else {
+        expect(host.textContent).toContain(
+          outcome === 'no route' ? 'No mapped route.' : 'Navigation unavailable.',
+        );
+      }
+      expect(watchPosition).toHaveBeenCalledTimes(1);
+      expect(clearWatch.mock.calls).toEqual([[1]]);
+      expect(startCompass).toHaveBeenCalledTimes(1);
+      expect(stopCompass).toHaveBeenCalledTimes(1);
+    } finally {
+      await act(async () => root.unmount());
+      host.remove();
+      navigationResponse = undefined;
+      vi.stubGlobal('AbsoluteOrientationSensor', undefined);
+    }
+  },
 );
 
 it('cancelling analysis while GPS is pending aborts without calling the AI provider', async () => {

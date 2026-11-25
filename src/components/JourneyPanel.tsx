@@ -47,6 +47,7 @@ type JourneyProps = {
   onTryAnotherPhoto: () => void;
   onStartOver?: () => void;
   onGuidedChange?: (guided: boolean) => void;
+  onNavigationSettled?: () => void;
   locationCatalogue?: LocationCatalogue;
   locationEvidence?: ReactNode;
   editInputs?: ReactNode;
@@ -64,6 +65,7 @@ export function JourneyPanel(props: JourneyProps) {
     editInputs,
     onStartOver,
     onGuidedChange,
+    onNavigationSettled,
   } = props;
   const [result, setResult] = useState<NavigationResult>();
   const loadingPanel = useRef<HTMLElement>(null);
@@ -103,10 +105,15 @@ export function JourneyPanel(props: JourneyProps) {
     )
       .then(async (value) => {
         if (controller.signal.aborted) return;
-        if (value.status === 'route' && loadingPanel.current && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
-          const byPlan = new Map(plans.map(plan => [plan.id, plan.building]));
-          const stops = [value.origin, ...value.steps.map(step => step.to), value.destination];
-          setRouteBuildings([...new Set(stops.flatMap(stop => byPlan.get(stop.planId) ?? []))]);
+        if (
+          value.status === 'route' &&
+          loadingPanel.current &&
+          typeof loadingPanel.current.animate === 'function' &&
+          !globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+        ) {
+          const byPlan = new Map(plans.map((plan) => [plan.id, plan.building]));
+          const stops = [value.origin, ...value.steps.map((step) => step.to), value.destination];
+          setRouteBuildings([...new Set(stops.flatMap((stop) => byPlan.get(stop.planId) ?? []))]);
           exitFade = loadingPanel.current.animate([{ opacity: 1 }, { opacity: 0 }], {
             delay: zoomDurationMs,
             duration: 416,
@@ -114,16 +121,30 @@ export function JourneyPanel(props: JourneyProps) {
             fill: 'forwards',
           });
           await exitFade.finished;
-          if (!controller.signal.aborted) setResult(value);
-        } else {
-          setResult(value);
+          if (controller.signal.aborted) return;
         }
+        setResult(value);
+        onNavigationSettled?.();
       })
-      .catch((failure) => {
-        if (!controller.signal.aborted) setError(failure.message);
+      .catch((failure: Error) => {
+        if (controller.signal.aborted) return;
+        setError(failure.message);
+        onNavigationSettled?.();
       });
-    return () => { controller.abort(); exitFade?.cancel(); };
-  }, [sessionId, revision, candidate.id, destination, preferElevators, refresh, choice]);
+    return () => {
+      controller.abort();
+      exitFade?.cancel();
+    };
+  }, [
+    sessionId,
+    revision,
+    candidate.id,
+    destination,
+    preferElevators,
+    refresh,
+    choice,
+    onNavigationSettled,
+  ]);
 
   const useMapDestination =
     !!candidate.sourcePlaceId && mapDestinationScope(destination) !== undefined;
