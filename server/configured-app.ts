@@ -77,9 +77,6 @@ export function configuredApplication(environment: NodeJS.ProcessEnv, hosted = f
       liveAvailable,
       hosted,
       sessions,
-      // GPS-free mode is intentionally limited to local non-production testing.
-      gpsTestMode:
-        !hosted && environment.NODE_ENV !== 'production' && environment.GPS_TEST_MODE === 'true',
     }),
     setupNotice,
     providerLabel,

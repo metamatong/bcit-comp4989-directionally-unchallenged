@@ -1,6 +1,6 @@
 # Verification record
 
-This file is a historical log. Older entries describe workflows and route data that have since changed. The current visitor app uses GPS-required automatic start matching and has no start-confirmation, connection-review or topology-editor screen/API; see [current architecture](architecture.md) and [device-location coverage](device-location.md).
+This file is a historical log. Older entries describe workflows and route data that have since changed. The current visitor app requests GPS automatically by default with photo-only fallback for starting-place matching when GPS is unavailable (while still rejecting outside-pilot and conflicting GPS readings), and has no start-confirmation, connection-review or topology-editor screen/API; see [current architecture](architecture.md) and [device-location coverage](device-location.md).
 
 ## SE12 west stair access to floor 1 · November 24, 2026
 

@@ -126,7 +126,6 @@ export function GuidedDirections({
   route,
   plans,
   locationCatalogue,
-  gpsTestMode = false,
   walkingSurfaces,
   enableParticlePdr = PARTICLE_PDR_ENABLED,
   index,
@@ -138,7 +137,6 @@ export function GuidedDirections({
   route: Extract<NavigationResult, { status: 'route' }>;
   plans: VisualPlan[];
   locationCatalogue?: LocationCatalogue;
-  gpsTestMode?: boolean;
   walkingSurfaces?: Record<string, WalkingSurface | null>;
   /** Internal Stage 2 verification gate override for tests and controlled rollouts. */
   enableParticlePdr?: boolean;
@@ -148,7 +146,7 @@ export function GuidedDirections({
   onOverview: () => void;
   onDone?: () => void;
 }) {
-  const tracking = useWalkingLocation(!gpsTestMode);
+  const tracking = useWalkingLocation(true);
   const instructionRef = useRef<HTMLParagraphElement>(null);
   const [loadedSurfaces, setLoadedSurfaces] = useState<Record<string, WalkingSurface | null>>(
     () => {
@@ -210,7 +208,7 @@ export function GuidedDirections({
   const surface = hasProvidedSurface
     ? walkingSurfaces[plan.id]
     : (loadedSurfaces[plan.id] ?? getCachedWalkingSurface(plan.id));
-  const canTrack = !complete && tracking.active && !gpsTestMode;
+  const canTrack = !complete && tracking.active;
   const stepKind = step?.kind;
   const transferStepIndex = step && !isSamePlanCorridor ? index : undefined;
   const routePath = isSamePlanCorridor ? step.path : undefined;
@@ -272,7 +270,7 @@ export function GuidedDirections({
 
   // Resume with a new watch and discard fixes captured before the tab returned.
   useEffect(() => {
-    if (gpsTestMode || complete) return;
+    if (complete) return;
     const onVisibility = () => {
       if (document.hidden) {
         trackerRef.current?.reset(Date.now());
@@ -283,7 +281,7 @@ export function GuidedDirections({
     };
     document.addEventListener('visibilitychange', onVisibility);
     return () => document.removeEventListener('visibilitychange', onVisibility);
-  }, [complete, gpsTestMode]);
+  }, [complete]);
 
   // Ingest every accepted watch fix (including 2-8 s indoor fixes); freshness drives live vs. hold state.
   const watchReading = !complete && tracking.active ? (tracking.reading ?? null) : null;
@@ -363,19 +361,17 @@ export function GuidedDirections({
         ? evaluation.overlay
         : null;
 
-  const positionStatus = gpsTestMode
-    ? { announcement: 'GPS off · follow the map' }
-    : locationStatusMessage({
-        complete,
-        reading: watchReading,
-        trackingStatus: tracking.status,
-        hasStaleReading: !!tracking.reading,
-        hasBuilding: !!building,
-        withinBuilding,
-        plan,
-        evaluation,
-        device,
-      });
+  const positionStatus = locationStatusMessage({
+    complete,
+    reading: watchReading,
+    trackingStatus: tracking.status,
+    hasStaleReading: !!tracking.reading,
+    hasBuilding: !!building,
+    withinBuilding,
+    plan,
+    evaluation,
+    device,
+  });
 
   useEffect(() => {
     instructionRef.current?.focus({ preventScroll: true });
@@ -384,8 +380,8 @@ export function GuidedDirections({
 
   function promptMotionOnGesture() {
     if (
-      gpsTestMode ||
-      (getMotionPermissionState() !== 'unknown' && getOrientationPermissionState() !== 'unknown')
+      getMotionPermissionState() !== 'unknown' &&
+      getOrientationPermissionState() !== 'unknown'
     )
       return;
     void requestMotionPermission();

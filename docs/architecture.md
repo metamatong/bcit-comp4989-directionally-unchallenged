@@ -4,10 +4,10 @@ DirectionallyUnchallenged uses a React/TypeScript client and Express server for 
 
 ## Visitor flow
 
-1. The browser prepares a photo and detail crops locally. On **Get Directions**, it requests a fresh GPS reading immediately so the browser permission request is tied to the visitor's tap.
-2. The browser sends GPS-derived building IDs and the photo bundle to the single vision stage for labels, label kind/placement and visible scene features. If that work makes the GPS reading stale, the browser refreshes it before matching.
-3. The browser intersects the GPS accuracy area with official building footprints. Raw coordinates stay on-device; derived building candidates and metadata go to the extraction and location endpoints. Only building IDs are forwarded to the provider; they cannot supply unseen room digits or a floor. Evidence reuse requires unchanged building context.
-4. Source localization ranks exact photo-label matches within GPS-compatible buildings and selects the strongest starting estimate. The visitor is not asked to select or confirm a start. GPS cannot distinguish floors.
+1. The browser prepares a photo and detail crops locally. On **Get Directions**, it requests a fresh GPS reading immediately so the browser permission request is tied to the visitor's tap. If GPS is unavailable (permission denied, unavailable, timed out, or missing catalogue), it falls back automatically to photo-only starting detection without altering the visitor flow.
+2. When GPS is available, the browser sends GPS-derived building IDs and the photo bundle to the single vision stage for labels, label kind/placement and visible scene features. If that work makes the GPS reading stale, the browser tries to refresh it before matching (if the refresh fails, it omits stale GPS metadata and the server retains the validated initial GPS building scope).
+3. The browser intersects the GPS accuracy area with official building footprints. Raw coordinates stay on-device; derived building candidates and metadata go to the extraction and location endpoints when available. Only building IDs are forwarded to the provider; they cannot supply unseen room digits or a floor. Evidence reuse requires unchanged building context.
+4. Source localization ranks exact photo-label matches within GPS-compatible buildings (or across all four pilot buildings when GPS is unavailable) and selects the strongest starting estimate. The visitor is not asked to select or confirm a start. GPS cannot distinguish floors, and readings that succeed outside the pilot buildings or contradict the photo still reject.
 5. Navigation resolves the destination and searches generated floor walking areas plus source-plan inferred same-building transfers and fixed inter-building links. A complete walking route opens on its first step and starts a foreground location watch (plus browser-only motion tracking on same-plan indoor corridor steps when available and permitted). The route step selects the floor map, and fresh GPS readings fused with corridor map-matching and transient motion evidence can show a dot on a geographically aligned floor. The full itinerary remains available through **Route overview**.
 
 ## Visitor API
@@ -16,7 +16,7 @@ DirectionallyUnchallenged uses a React/TypeScript client and Express server for 
 - `GET /api/plans/:planId/walking-surface`: pilot-scoped public corridor/lobby walking cells (`step`, `runs`, source hashes) fetched lazily by the browser for client-side indoor GPS map-matching; kept distinct from `LocationCatalogue`.
 - `POST /api/sessions`: creates an empty live-analysis session.
 - `POST /api/sessions/:id/photo/evidence`: the only image and vision request.
-- `POST /api/sessions/:id/photo/location`: metadata-only localization with a required GPS building hint.
+- `POST /api/sessions/:id/photo/location`: metadata-only localization with an optional GPS building hint.
 - `POST /api/sessions/:id/navigation`: calculates a route from the automatic photo/GPS start to the requested destination.
 - `POST /api/sessions/:id/navigation/surface`: returns walking cells for a custom destination point.
 - `POST /api/sessions/:id/actions`: resets the session.

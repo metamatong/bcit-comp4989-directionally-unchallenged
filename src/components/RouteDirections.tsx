@@ -173,7 +173,6 @@ export function RouteDirections({
   plans,
   onRecheck,
   locationCatalogue,
-  gpsTestMode = false,
   walkingSurfaces,
   enableParticlePdr,
   preferElevators = false,
@@ -191,7 +190,6 @@ export function RouteDirections({
   plans: VisualPlan[];
   onRecheck: () => void;
   locationCatalogue?: LocationCatalogue;
-  gpsTestMode?: boolean;
   walkingSurfaces?: Record<string, WalkingSurface | null>;
   enableParticlePdr?: boolean;
   preferElevators?: boolean;
@@ -220,14 +218,14 @@ export function RouteDirections({
   guidedChangeRef.current = onGuidedChange;
 
   useEffect(() => {
-    if (gpsTestMode || walkingSurfaces || !canGuide) return;
+    if (walkingSurfaces || !canGuide) return;
     const planIds = new Set<string>();
     for (const step of route.steps) {
       if (step.from.planId) planIds.add(step.from.planId);
       if (step.to.planId) planIds.add(step.to.planId);
     }
     prefetchWalkingSurfaces(planIds);
-  }, [gpsTestMode, walkingSurfaces, canGuide, route.steps]);
+  }, [walkingSurfaces, canGuide, route.steps]);
 
   useEffect(() => {
     guidedChangeRef.current?.(guided);
@@ -250,7 +248,6 @@ export function RouteDirections({
         route={route}
         plans={plans}
         locationCatalogue={locationCatalogue}
-        gpsTestMode={gpsTestMode}
         walkingSurfaces={walkingSurfaces}
         enableParticlePdr={enableParticlePdr}
         index={stepIndex}
@@ -288,9 +285,8 @@ export function RouteDirections({
             className="primary overview-back-pill"
             onClick={() => {
               if (
-                !gpsTestMode &&
-                (getMotionPermissionState() === 'unknown' ||
-                  getOrientationPermissionState() === 'unknown')
+                getMotionPermissionState() === 'unknown' ||
+                getOrientationPermissionState() === 'unknown'
               ) {
                 void requestMotionPermission();
               }
