@@ -86,7 +86,13 @@ export function fitCalibration(controls: CalibrationControl[], width: number, he
     const p = project(c);
     return Math.hypot((p.x - c.x) * width, (p.y - c.y) * height) / scale;
   });
-  return { project, unproject, scale, residuals };
+  /** Convert a True North clockwise bearing (radians: 0 = North, +pi/2 = East) to floor-plan pixel angle. */
+  const bearingToPlanAngle = (trueBearingRad: number) => {
+    const dx = a * Math.sin(trueBearingRad) + b * Math.cos(trueBearingRad);
+    const dy = b * Math.sin(trueBearingRad) - a * Math.cos(trueBearingRad);
+    return Math.atan2(dy, dx);
+  };
+  return { project, unproject, scale, residuals, bearingToPlanAngle };
 }
 
 export function deviceOverlay(

@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { PlanBounds, VisualPlan } from '../types';
 import type { PagePoint } from '../wayfinding';
 import { planLabel } from '../topology';
-import type { DeviceOverlay } from '../location/types';
+import type { DeviceHeading, DeviceOverlay } from '../location/types';
 import { DevicePosition } from './DevicePosition';
 
 export type MapMarker = { point: PagePoint; label: string; symbol: string; end?: boolean };
@@ -14,6 +14,7 @@ type MapProps = {
   bounds?: PlanBounds;
   label: string;
   device?: DeviceOverlay | null;
+  heading?: DeviceHeading | null;
   lastKnownPoint?: PagePoint;
 };
 
@@ -25,6 +26,7 @@ export function RouteMapImage({
   bounds,
   label,
   device,
+  heading,
   lastKnownPoint,
   whole = false,
   fillContainer = false,
@@ -118,7 +120,9 @@ export function RouteMapImage({
             </g>
           );
         })}
-      {device && <DevicePosition overlay={device} width={width} height={height} />}
+      {device && (
+        <DevicePosition overlay={device} heading={heading} width={width} height={height} />
+      )}
       {!device && lastKnownPoint && (
         <circle
           className="last-known-position"

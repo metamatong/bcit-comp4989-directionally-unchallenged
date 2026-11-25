@@ -60,6 +60,8 @@ export type MotionIngestResult = {
   activityChanged: boolean;
   capabilityChanged: boolean;
   gyroFreshnessChanged: boolean;
+  /** Bias-corrected, tilt-invariant world CCW yaw rate (rad/s) for live heading fusion. */
+  omegaCcwRadPerSec: number | null;
 };
 
 type StepFsmState = 'idle' | 'seeking-peak' | 'seeking-valley';
@@ -208,6 +210,7 @@ export class StepMotionEstimator {
         activityChanged: false,
         capabilityChanged: false,
         gyroFreshnessChanged: gyroExpired,
+        omegaCcwRadPerSec: null,
       };
     }
     const accelNorm = Math.hypot(ax, ay, az);
@@ -220,6 +223,7 @@ export class StepMotionEstimator {
         activityChanged: false,
         capabilityChanged: false,
         gyroFreshnessChanged: gyroExpired,
+        omegaCcwRadPerSec: null,
       };
     }
 
@@ -231,7 +235,13 @@ export class StepMotionEstimator {
     }
 
     if (this.lastEventAt !== null && timestamp <= this.lastEventAt) {
-      return { step: null, activityChanged: false, capabilityChanged, gyroFreshnessChanged: false };
+      return {
+        step: null,
+        activityChanged: false,
+        capabilityChanged,
+        gyroFreshnessChanged: false,
+        omegaCcwRadPerSec: null,
+      };
     }
 
     const previousEventAt = this.lastEventAt;
@@ -263,6 +273,7 @@ export class StepMotionEstimator {
         activityChanged: this.activity !== prevActivity,
         capabilityChanged,
         gyroFreshnessChanged: this.gyroFreshSince !== previousGyroFreshSince,
+        omegaCcwRadPerSec: null,
       };
     }
 
@@ -282,6 +293,7 @@ export class StepMotionEstimator {
     }
 
     // 3. Integrate gravity-projected yaw & non-yaw handling tilt when live gyro is present.
+    let omegaCcwRadPerSec: number | null = null;
     const omega = mapRotationRateRad(sample, this.convention.rotationAxisOrder);
     if (omega) {
       const omegaNorm = Math.hypot(omega.wx, omega.wy, omega.wz);
@@ -331,6 +343,7 @@ export class StepMotionEstimator {
           Math.abs(omegaCcw) < PDR_MOTION_CONFIG.stationaryYawDeadbandRadPerSec
             ? 0
             : omegaCcw;
+        omegaCcwRadPerSec = effectiveCcw;
         this.accumulatedYawRad += effectiveCcw * gyroDtSec;
         this.accumulatedTiltNoiseRad += PDR_MOTION_CONFIG.tiltNoiseGain * omegaTilt * gyroDtSec;
       }
@@ -354,6 +367,7 @@ export class StepMotionEstimator {
       activityChanged: this.activity !== prevActivity,
       capabilityChanged,
       gyroFreshnessChanged: this.gyroFreshSince !== previousGyroFreshSince,
+      omegaCcwRadPerSec,
     };
   }
 

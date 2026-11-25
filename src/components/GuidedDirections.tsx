@@ -1,5 +1,5 @@
-/** Manual progress through saved route steps; never infers floor changes or camera heading. */
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+/** Manual progress through saved route steps; never infers floor changes or photo camera heading. */
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { ArrowDown, ArrowLeft, ArrowRight, ArrowUp } from 'lucide-react';
 import type { NavigationResult, WalkingSurface } from '../wayfinding';
 import type { VisualPlan } from '../types';
@@ -13,8 +13,12 @@ import type {
   LocationCatalogue,
   MotionSnapshot,
 } from '../location/types';
-import { overlapsFootprint } from '../location/geometry';
-import { getMotionPermissionState, requestMotionPermission } from '../location/browser-motion';
+import { fitCalibration, overlapsFootprint } from '../location/geometry';
+import {
+  getMotionPermissionState,
+  getOrientationPermissionState,
+  requestMotionPermission,
+} from '../location/browser-motion';
 import { MAP_MATCH_CONFIG } from '../location/map-matching';
 import {
   IndoorPdrTracker,
@@ -23,6 +27,7 @@ import {
 } from '../location/pdr-tracker';
 import { useWalkingLocation } from '../location/use-device-location';
 import { useMotionTracker } from '../location/use-motion-tracker';
+import { useHeadingTracker } from '../location/use-heading-tracker';
 import { guidedStepInstruction } from '../wayfinding';
 
 function locationStatusMessage({
@@ -195,6 +200,28 @@ export function GuidedDirections({
   const routePath = isSamePlanCorridor ? step.path : undefined;
   const stepStartPoint = isSamePlanCorridor ? step.from.point : undefined;
 
+  const bearingToPlanAngle = useMemo(() => {
+    if (
+      !calibration ||
+      calibration.status !== 'approximate' ||
+      calibration.planId !== plan.id ||
+      calibration.sourceSha256 !== plan.sourceSha256
+    ) {
+      return null;
+    }
+    try {
+      return fitCalibration(calibration.controls, plan.width, plan.height).bearingToPlanAngle;
+    } catch {
+      return null;
+    }
+  }, [calibration, plan.id, plan.sourceSha256, plan.width, plan.height]);
+
+  const { heading, onGyroYaw } = useHeadingTracker({
+    active: canTrack && !!bearingToPlanAngle,
+    permissionTick,
+    bearingToPlanAngle,
+  });
+
   const handleDetectedStep = useCallback((detected: DetectedStep, snapshot: MotionSnapshot) => {
     trackerRef.current?.updateMotion(snapshot, detected.timestamp);
     trackerRef.current?.ingestStep(detected);
@@ -204,6 +231,7 @@ export function GuidedDirections({
     active: canTrack && isSamePlanCorridor,
     permissionTick,
     onStep: handleDetectedStep,
+    onGyroYaw,
   });
 
   useEffect(() => {
@@ -337,7 +365,11 @@ export function GuidedDirections({
   }, [index]);
 
   function promptMotionOnGesture() {
-    if (gpsTestMode || getMotionPermissionState() !== 'unknown') return;
+    if (
+      gpsTestMode ||
+      (getMotionPermissionState() !== 'unknown' && getOrientationPermissionState() !== 'unknown')
+    )
+      return;
     void requestMotionPermission().then(() => setPermissionTick((tick) => tick + 1));
   }
 
@@ -353,7 +385,14 @@ export function GuidedDirections({
 
   return (
     <section className="guided-directions guided-stage" aria-label="Step-by-step directions">
-      <div className="guided-map">
+      <div
+        className="guided-map"
+        onClick={(event) => {
+          if (!(event.target as Element | null)?.closest('button')) {
+            promptMotionOnGesture();
+          }
+        }}
+      >
         <div className="map-floating-bar">
           <button
             type="button"
@@ -373,6 +412,7 @@ export function GuidedDirections({
           label={`${planLabel(plan)} · ${complete ? 'Destination' : `Step ${index + 1}`}`}
           paths={step?.kind === 'corridor' ? [step.path] : []}
           device={device}
+          heading={canTrack && device ? heading : null}
           lastKnownPoint={canTrack ? evaluation?.lastKnown?.point : undefined}
           fillContainer
           markers={

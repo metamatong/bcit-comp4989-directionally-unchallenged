@@ -32,15 +32,20 @@ export function useMotionTracker({
   active,
   permissionTick = 0,
   onStep,
+  onGyroYaw,
 }: {
   active: boolean;
   /** Increment after a user-gesture permission prompt completes to re-check attachment. */
   permissionTick?: number;
   onStep?: (step: DetectedStep, snapshot: MotionSnapshot) => void;
+  /** Live bias-corrected world CCW yaw rate (rad/s) streamed off React's render loop. */
+  onGyroYaw?: (omegaCcwRadPerSec: number, timestamp: number) => void;
 }): MotionSnapshot {
   const [snapshot, setSnapshot] = useState<MotionSnapshot>(emptySnapshot);
   const onStepRef = useRef(onStep);
   onStepRef.current = onStep;
+  const onGyroYawRef = useRef(onGyroYaw);
+  onGyroYawRef.current = onGyroYaw;
 
   useEffect(() => {
     if (!active || document.hidden || getMotionPermissionState() !== 'granted') {
@@ -61,6 +66,9 @@ export function useMotionTracker({
         onStepRef.current?.(step, next);
       },
       update,
+      (omegaCcwRadPerSec, timestamp) => {
+        if (!disposed) onGyroYawRef.current?.(omegaCcwRadPerSec, timestamp);
+      },
     );
 
     const onVisibility = () => {
