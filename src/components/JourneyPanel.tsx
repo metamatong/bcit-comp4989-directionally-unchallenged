@@ -4,6 +4,7 @@ import { prefetchWalkingSurfaces, request } from '../api';
 import type { CampusLocationCandidate, VisualPlan } from '../types';
 import { mapDestinationScope, type NavigationChoice, type NavigationResult } from '../wayfinding';
 import { FloorPointPicker } from './FloorPointPicker';
+import { CampusSearchMap, zoomDurationMs } from './CampusSearchMap';
 import { RouteDirections } from './RouteDirections';
 import { RouteMapImage } from './RouteMap';
 import { planLabel } from '../topology';
@@ -66,6 +67,8 @@ export function JourneyPanel(props: JourneyProps) {
     onGuidedChange,
   } = props;
   const [result, setResult] = useState<NavigationResult>();
+  const loadingPanel = useRef<HTMLElement>(null);
+  const [routeBuildings, setRouteBuildings] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [refresh, setRefresh] = useState(0);
   const [guided, setGuided] = useState(false);
@@ -89,6 +92,8 @@ export function JourneyPanel(props: JourneyProps) {
 
   useEffect(() => {
     const controller = new AbortController();
+    let exitFade: Animation | undefined;
+    setRouteBuildings([]);
     setResult(undefined);
     setError('');
     handleGuidedChange(false);
@@ -97,13 +102,28 @@ export function JourneyPanel(props: JourneyProps) {
       { revision, candidateId: candidate.id, destination, preferElevators, ...choice },
       { signal: controller.signal },
     )
-      .then((value) => {
-        if (!controller.signal.aborted) setResult(value);
+      .then(async (value) => {
+        if (controller.signal.aborted) return;
+        if (value.status === 'route' && loadingPanel.current && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+          const byPlan = new Map(plans.map(plan => [plan.id, plan.building]));
+          const stops = [value.origin, ...value.steps.map(step => step.to), value.destination];
+          setRouteBuildings([...new Set(stops.flatMap(stop => byPlan.get(stop.planId) ?? []))]);
+          exitFade = loadingPanel.current.animate([{ opacity: 1 }, { opacity: 0 }], {
+            delay: zoomDurationMs,
+            duration: 416,
+            easing: 'ease-in-out',
+            fill: 'forwards',
+          });
+          await exitFade.finished;
+          if (!controller.signal.aborted) setResult(value);
+        } else {
+          setResult(value);
+        }
       })
       .catch((failure) => {
         if (!controller.signal.aborted) setError(failure.message);
       });
-    return () => controller.abort();
+    return () => { controller.abort(); exitFade?.cancel(); };
   }, [sessionId, revision, candidate.id, destination, preferElevators, refresh, choice]);
 
   const useMapDestination =
@@ -155,9 +175,10 @@ export function JourneyPanel(props: JourneyProps) {
     );
   } else if (!result) {
     panel = (
-      <section className="journey-panel journey-loading" role="status">
+      <section ref={loadingPanel} className="journey-panel journey-loading" role="status">
+        <div className="campus-search"><CampusSearchMap building={candidate.building} routeBuildings={routeBuildings} /></div>
         <p className="photo-status">
-          <Route size={16} className="spin" /> Finding your route…
+          <Route size={16} className="spin" /> {routeBuildings.length ? routeBuildings.map(id => id.replace(/^SW(\d)$/, 'SW0$1')).join(' → ') : 'Finding your route…'}
         </p>
       </section>
     );
