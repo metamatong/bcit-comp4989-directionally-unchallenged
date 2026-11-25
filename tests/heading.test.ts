@@ -14,6 +14,7 @@ import { locationCatalogue } from '../server/geolocation';
 import { pilotEvidence } from '../server/pilot-evidence';
 import { visualPlans } from '../server/visual-data';
 import { RouteDirections } from '../src/components/RouteDirections';
+import { DevicePosition } from '../src/components/DevicePosition';
 import { BrowserHeading } from '../src/location/browser-heading';
 import { resetMotionPermissionCacheForTests } from '../src/location/browser-motion';
 import { fitCalibration } from '../src/location/geometry';
@@ -543,4 +544,69 @@ describe('GuidedDirections heading cone DOM integration', () => {
       }
     },
   );
+});
+
+describe('DevicePosition full-ring radar sector', () => {
+  it('spans 100% of the uncertainty ellipse with rays and highlighted arc in matched and raw modes', async () => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+    const host = document.createElement('div');
+    const root = createRoot(host);
+    const overlay = {
+      point: { x: 0.25, y: 0.5 },
+      radiusX: 0.05,
+      radiusY: 0.08,
+      uncertaintyRadiusMetres: 6,
+      corridorMatched: true,
+      trackingMode: 'matched' as const,
+    };
+    const heading = { angleRad: 0, spreadDeg: 50, source: 'compass' as const, accuracyDeg: 18 };
+    const render = (props: Parameters<typeof DevicePosition>[0]) =>
+      act(async () => root.render(createElement('svg', null, createElement(DevicePosition, props))));
+
+    try {
+      // Corridor-matched with active heading: sector and arc match full rx/ry (50, 80).
+      await render({ overlay, heading, width: 1000, height: 1000 });
+      const cone = host.querySelector('.device-heading-cone');
+      const rays = host.querySelector('.device-heading-rays');
+      const arc = host.querySelector('.device-heading-arc');
+      const ellipse = host.querySelector('.device-position ellipse');
+      expect(cone?.getAttribute('d')).toContain('A 50 80 0 0 1');
+      expect(arc?.getAttribute('d')).toContain('A 50 80 0 0 1');
+      expect(rays?.getAttribute('stroke')).toBe('#0f766e');
+      expect(arc?.getAttribute('stroke')).toBe('#0f766e');
+      expect(ellipse?.getAttribute('stroke-opacity')).toBe('0.55');
+
+      // Raw GPS mode switches accent to blue (#155b9d).
+      await render({
+        overlay: { ...overlay, corridorMatched: false, trackingMode: 'raw' },
+        heading,
+        width: 1000,
+        height: 1000,
+      });
+      expect(host.querySelector('.device-heading-arc')?.getAttribute('stroke')).toBe('#155b9d');
+      expect(host.querySelector('.device-position circle')?.getAttribute('fill')).toBe('#155b9d');
+
+      // Zero-radius overlay falls back cleanly to minimum cone radius so the SVG arc stays valid.
+      await render({
+        overlay: { ...overlay, radiusX: 0, radiusY: 0 },
+        heading,
+        width: 1000,
+        height: 1000,
+      });
+      expect(host.querySelector('.device-heading-cone')?.getAttribute('d')).toContain(
+        'A 22 22 0 0 1',
+      );
+
+      // Missing or out-of-range heading omits sector/rays/arc and restores full ellipse stroke.
+      for (const invalid of [null, { ...heading, spreadDeg: 0 }, { ...heading, spreadDeg: 180 }]) {
+        await render({ overlay, heading: invalid, width: 1000, height: 1000 });
+        expect(host.querySelector('.device-heading-cone')).toBeNull();
+        expect(host.querySelector('.device-heading-rays')).toBeNull();
+        expect(host.querySelector('.device-heading-arc')).toBeNull();
+        expect(host.querySelector('.device-position ellipse')?.getAttribute('stroke-opacity')).toBeNull();
+      }
+    } finally {
+      await act(async () => root.unmount());
+    }
+  });
 });
