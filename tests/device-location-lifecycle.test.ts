@@ -3,7 +3,9 @@
 import { act, createElement } from 'react';
 import { createRoot, type Root } from 'react-dom/client';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { resetLocationPrewarmForTests } from '../src/location/browser-location';
 import {
+  useLocationPrewarm,
   usePhotoDeviceLocation,
   useWalkingLocation,
   WATCH_STALL_RESTART_MS,
@@ -55,6 +57,7 @@ beforeEach(async () => {
 });
 afterEach(async () => {
   await act(async () => root.unmount());
+  resetLocationPrewarmForTests();
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
   vi.useRealTimers();
@@ -181,5 +184,84 @@ describe('device evidence lifecycle', () => {
 
     await act(async () => watchSuccess(position(10900)));
     expect(walking.reading).toMatchObject({ timestamp: 10400, captureTimestamp: 10900 });
+  });
+
+  it('pre-warms silently when granted, reuses a <=2s fix for Get Directions, and seeds Step 1 once', async () => {
+    let prewarmedWalking: ReturnType<typeof useWalkingLocation> | undefined;
+    let prewarmedPhoto!: ReturnType<typeof usePhotoDeviceLocation>;
+    function PrewarmHarness({
+      prewarm,
+      guided,
+    }: {
+      prewarm: boolean;
+      guided: boolean;
+    }) {
+      useLocationPrewarm(prewarm);
+      prewarmedPhoto = usePhotoDeviceLocation();
+      return guided ? createElement(GuidedProbe) : null;
+    }
+    function GuidedProbe() {
+      prewarmedWalking = useWalkingLocation(true);
+      return null;
+    }
+
+    const host2 = document.createElement('div');
+    const root2 = createRoot(host2);
+    try {
+      await act(async () =>
+        root2.render(createElement(PrewarmHarness, { prewarm: true, guided: false })),
+      );
+      await act(async () => {
+        await Promise.resolve();
+        await Promise.resolve();
+      });
+      // Permission is already 'granted' -> silent pre-warm watch started.
+      expect(watchCount).toBe(1);
+      await act(async () => watchSuccess(position(10000)));
+
+      // Get Directions reuses the <=2 s pre-warmed fix immediately without calling getCurrentPosition.
+      let captured: Awaited<ReturnType<typeof prewarmedPhoto.capture>> | undefined;
+      await act(async () => {
+        captured = await prewarmedPhoto.capture();
+      });
+      expect(onceSuccess).toHaveLength(0);
+      expect(captured?.reading.timestamp).toBe(10000);
+      expect(prewarmedPhoto.snapshot?.reading.timestamp).toBe(10000);
+
+      // Past 2 s (stale for Get Directions), capture falls back to one-shot getCurrentPosition.
+      await act(async () => vi.advanceTimersByTimeAsync(2500));
+      let fallbackPromise!: Promise<Awaited<ReturnType<typeof prewarmedPhoto.capture>>>;
+      await act(async () => {
+        fallbackPromise = prewarmedPhoto.capture();
+      });
+      expect(onceSuccess).toHaveLength(1);
+      await act(async () => onceSuccess[0](position(12500)));
+      expect((await fallbackPromise).reading.timestamp).toBe(12500);
+
+      // GuidedDirections mounts while pre-warm is still active: Step 1 immediately receives the <=8 s fix.
+      await act(async () => vi.advanceTimersByTimeAsync(1500));
+      await act(async () =>
+        root2.render(createElement(PrewarmHarness, { prewarm: true, guided: true })),
+      );
+      expect(prewarmedWalking?.reading?.timestamp).toBe(12500);
+      expect(watchCount).toBe(2);
+
+      // Replaying the same timestamp on the live watch is deduplicated; a newer fix advances it.
+      const seededReading = prewarmedWalking?.reading;
+      await act(async () => watchSuccess(position(12500)));
+      expect(prewarmedWalking?.reading).toBe(seededReading);
+      await act(async () => vi.advanceTimersByTimeAsync(500));
+      await act(async () => watchSuccess(position(14500)));
+      expect(prewarmedWalking?.reading?.timestamp).toBe(14500);
+
+      // Deactivating pre-warm stops only the pre-warm watch; live guided watch stays active.
+      await act(async () =>
+        root2.render(createElement(PrewarmHarness, { prewarm: false, guided: true })),
+      );
+      expect(clearWatch).toHaveBeenCalledWith(9);
+      expect(prewarmedWalking?.active).toBe(true);
+    } finally {
+      await act(async () => root2.unmount());
+    }
   });
 });

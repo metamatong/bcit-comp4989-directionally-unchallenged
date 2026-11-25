@@ -1,5 +1,5 @@
 /** Browser-only compass and gyroscope estimate for the live facing cone. */
-import type { DeviceHeading, RawOrientationSample } from './types';
+import type { DeviceHeading, RawOrientationSample, RawQuaternionSample } from './types';
 
 const DEG_TO_RAD = Math.PI / 180;
 const TWO_PI = 2 * Math.PI;
@@ -19,7 +19,7 @@ export const HEADING_CONFIG = Object.freeze({
   unconfirmedTurnTimeoutMs: 3_000,
 });
 
-type CompassBearing = { bearingRad: number; accuracyDeg?: number };
+export type CompassBearing = { bearingRad: number; accuracyDeg?: number };
 
 export function wrapAngleRad(rad: number): number {
   let angle = rad % TWO_PI;
@@ -39,6 +39,66 @@ function spreadForCompassAccuracy(accuracyDeg?: number): number {
   if (accuracyDeg <= 35) return 65;
   if (accuracyDeg <= 55) return 85;
   return 110;
+}
+
+/** Project horizontal device right/top axes through screen rotation to clockwise magnetic bearing. */
+function bearingFromDeviceHorizontalAxes(
+  deviceRightEast: number,
+  deviceRightNorth: number,
+  deviceTopEast: number,
+  deviceTopNorth: number,
+  screenAngleDeg: number,
+): CompassBearing | null {
+  const screenRad = screenAngleDeg * DEG_TO_RAD;
+  const screenRightEast =
+    Math.cos(screenRad) * deviceRightEast - Math.sin(screenRad) * deviceTopEast;
+  const screenRightNorth =
+    Math.cos(screenRad) * deviceRightNorth - Math.sin(screenRad) * deviceTopNorth;
+  if (Math.hypot(screenRightEast, screenRightNorth) < HEADING_CONFIG.minHorizontalRight) {
+    return null;
+  }
+
+  // World up crossed with screen right faces screen-top in a face-up hold and
+  // stays continuous when the phone pitches around that right axis.
+  return { bearingRad: normalizePositiveRad(Math.atan2(-screenRightNorth, screenRightEast)) };
+}
+
+/** Extract clockwise radians from magnetic north from an AbsoluteOrientationSensor quaternion. */
+export function extractQuaternionMagneticBearingRad(
+  sample: RawQuaternionSample,
+): CompassBearing | null {
+  const q = sample.quaternion;
+  if (!q || q.length !== 4) return null;
+  const [rawX, rawY, rawZ, rawW] = q;
+  if (
+    !Number.isFinite(rawX) ||
+    !Number.isFinite(rawY) ||
+    !Number.isFinite(rawZ) ||
+    !Number.isFinite(rawW)
+  ) {
+    return null;
+  }
+  const norm = Math.hypot(rawX, rawY, rawZ, rawW);
+  if (norm < 1e-6) return null;
+
+  const qx = rawX / norm;
+  const qy = rawY / norm;
+  const qz = rawZ / norm;
+  const qw = rawW / norm;
+  const screenAngle = Number.isFinite(sample.screenAngleDeg) ? sample.screenAngleDeg : 0;
+
+  // Columns 0 (+X device right) and 1 (+Y device top) of Earth-ENU rotation matrix R(q).
+  const deviceRightEast = 1 - 2 * (qy * qy + qz * qz);
+  const deviceRightNorth = 2 * (qx * qy + qw * qz);
+  const deviceTopEast = 2 * (qx * qy - qw * qz);
+  const deviceTopNorth = 1 - 2 * (qx * qx + qz * qz);
+  return bearingFromDeviceHorizontalAxes(
+    deviceRightEast,
+    deviceRightNorth,
+    deviceTopEast,
+    deviceTopNorth,
+    screenAngle,
+  );
 }
 
 /** Extract clockwise radians from magnetic north in the current screen orientation. */
@@ -83,24 +143,19 @@ export function extractMagneticBearingRad(sample: RawOrientationSample): Compass
   const a = alpha * DEG_TO_RAD;
   const b = beta * DEG_TO_RAD;
   const g = gamma * DEG_TO_RAD;
-  const screenRad = screenAngle * DEG_TO_RAD;
 
   // Horizontal components of the device right and top axes in Rz(a) * Rx(b) * Ry(g).
   const deviceRightEast = Math.cos(a) * Math.cos(g) - Math.sin(a) * Math.sin(b) * Math.sin(g);
   const deviceRightNorth = Math.sin(a) * Math.cos(g) + Math.cos(a) * Math.sin(b) * Math.sin(g);
   const deviceTopEast = -Math.sin(a) * Math.cos(b);
   const deviceTopNorth = Math.cos(a) * Math.cos(b);
-  const screenRightEast =
-    Math.cos(screenRad) * deviceRightEast - Math.sin(screenRad) * deviceTopEast;
-  const screenRightNorth =
-    Math.cos(screenRad) * deviceRightNorth - Math.sin(screenRad) * deviceTopNorth;
-  if (Math.hypot(screenRightEast, screenRightNorth) < HEADING_CONFIG.minHorizontalRight) {
-    return null;
-  }
-
-  // World up crossed with screen right faces screen-top in a face-up hold and
-  // stays continuous when the phone pitches around that right axis.
-  return { bearingRad: normalizePositiveRad(Math.atan2(-screenRightNorth, screenRightEast)) };
+  return bearingFromDeviceHorizontalAxes(
+    deviceRightEast,
+    deviceRightNorth,
+    deviceTopEast,
+    deviceTopNorth,
+    screenAngle,
+  );
 }
 
 export class HeadingEstimator {

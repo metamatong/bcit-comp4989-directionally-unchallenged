@@ -606,4 +606,39 @@ describe('BrowserMotion adapter & permissions', () => {
 
     motion.stop();
   });
+
+  it('withholds live onGyroYaw forwarding until initial activity classifies past unknown', () => {
+    vi.stubGlobal('DeviceMotionEvent', function MockDeviceMotionEvent() {});
+    const target = new EventTarget();
+    const yawSamples: number[] = [];
+    const motion = new BrowserMotion({
+      convention: { rotationAxisOrder: 'xyz', gravitySign: 1 },
+      target: target as unknown as Window,
+    });
+
+    motion.start(
+      () => {},
+      () => {},
+      (omega) => yawSamples.push(omega),
+    );
+
+    // First 500 ms: activity is still 'unknown', so small raw gyro bias is withheld from heading cone.
+    for (let i = 0; i < 25; i++) {
+      dispatchMotion(target, { x: 0, y: 0, z: 9.81 }, { alpha: 0, beta: 0, gamma: 3 });
+      vi.advanceTimersByTime(20);
+    }
+    expect(motion.snapshot().activity).toBe('unknown');
+    expect(yawSamples).toHaveLength(0);
+
+    // Past 600 ms, activity classifies and live yaw forwarding resumes (deadbanded when stationary, live on turns).
+    for (let i = 0; i < 15; i++) {
+      dispatchMotion(target, { x: 0, y: 0, z: 9.81 }, { alpha: 0, beta: 0, gamma: 90 });
+      vi.advanceTimersByTime(20);
+    }
+    expect(motion.snapshot().activity).not.toBe('unknown');
+    expect(yawSamples.length).toBeGreaterThan(0);
+    expect(yawSamples.at(-1)!).toBeCloseTo(Math.PI / 2, 1);
+
+    motion.stop();
+  });
 });

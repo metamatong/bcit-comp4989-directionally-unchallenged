@@ -15,7 +15,13 @@ import { pilotEvidence } from '../server/pilot-evidence';
 import { visualPlans } from '../server/visual-data';
 import { RouteDirections } from '../src/components/RouteDirections';
 import { DevicePosition } from '../src/components/DevicePosition';
-import { BrowserHeading } from '../src/location/browser-heading';
+import {
+  BrowserHeading,
+  HEADING_PREWARM_MAX_AGE_MS,
+  resetHeadingPrewarmForTests,
+  startHeadingPrewarm,
+  stopHeadingPrewarm,
+} from '../src/location/browser-heading';
 import {
   getMotionPermissionState,
   getOrientationPermissionState,
@@ -25,12 +31,13 @@ import {
 import { fitCalibration } from '../src/location/geometry';
 import {
   extractMagneticBearingRad,
+  extractQuaternionMagneticBearingRad,
   HEADING_CONFIG,
   HeadingEstimator,
   wrapAngleRad,
 } from '../src/location/heading';
 import type { CalibrationControl } from '../src/location/types';
-import { useHeadingTracker } from '../src/location/use-heading-tracker';
+import { useHeadingPrewarm, useHeadingTracker } from '../src/location/use-heading-tracker';
 import type { MapStop, NavigationResult, WalkingSurface } from '../src/wayfinding';
 import { walkingRouteFixture } from './wayfinding-fixtures';
 
@@ -66,6 +73,7 @@ function makeRouteFixture(): Extract<NavigationResult, { status: 'route' }> {
 }
 
 afterEach(() => {
+  resetHeadingPrewarmForTests();
   resetMotionPermissionCacheForTests();
   vi.useRealTimers();
   vi.unstubAllGlobals();
@@ -227,6 +235,77 @@ describe('extractMagneticBearingRad (iOS Safari & Android Chrome tilt compensati
     expect(landscapeFlat).not.toBeNull();
     expect(Math.abs(wrapAngleRad(landscapeFlat!.bearingRad - 0))).toBeLessThan(1e-4);
   });
+
+  it('extracts matching bearings from AbsoluteOrientationSensor quaternions and rejects degenerate poses', () => {
+    const eulerToQuaternion = (
+      alphaDeg: number,
+      betaDeg: number,
+      gammaDeg: number,
+    ): [number, number, number, number] => {
+      // Intrinsic Z-X-Y (alpha, beta, gamma) -> Rz(a) * Rx(b) * Ry(g)
+      const ca = Math.cos((alphaDeg * DEG) / 2);
+      const sa = Math.sin((alphaDeg * DEG) / 2);
+      const cb = Math.cos((betaDeg * DEG) / 2);
+      const sb = Math.sin((betaDeg * DEG) / 2);
+      const cg = Math.cos((gammaDeg * DEG) / 2);
+      const sg = Math.sin((gammaDeg * DEG) / 2);
+      const mul = (
+        a: [number, number, number, number],
+        b: [number, number, number, number],
+      ): [number, number, number, number] => [
+        a[3] * b[0] + a[0] * b[3] + a[1] * b[2] - a[2] * b[1],
+        a[3] * b[1] - a[0] * b[2] + a[1] * b[3] + a[2] * b[0],
+        a[3] * b[2] + a[0] * b[1] - a[1] * b[0] + a[2] * b[3],
+        a[3] * b[3] - a[0] * b[0] - a[1] * b[1] - a[2] * b[2],
+      ];
+      return mul(mul([0, 0, sa, ca], [sb, 0, 0, cb]), [0, sg, 0, cg]);
+    };
+
+    const poses = [
+      { alpha: 270, beta: 0, gamma: 0, screenAngleDeg: 0, expectedDeg: 90 },
+      { alpha: 270, beta: 45, gamma: 0, screenAngleDeg: 0, expectedDeg: 90 },
+      { alpha: 270, beta: 90, gamma: 0, screenAngleDeg: 0, expectedDeg: 90 },
+      { alpha: 0, beta: 90, gamma: 15, screenAngleDeg: 0, expectedDeg: 345 },
+      { alpha: 90, beta: 0, gamma: 0, screenAngleDeg: 90, expectedDeg: 0 },
+    ];
+    for (const pose of poses) {
+      const q = eulerToQuaternion(pose.alpha, pose.beta, pose.gamma);
+      const fromQuat = extractQuaternionMagneticBearingRad({
+        quaternion: q,
+        screenAngleDeg: pose.screenAngleDeg,
+      });
+      const fromEuler = extractMagneticBearingRad({
+        alpha: pose.alpha,
+        beta: pose.beta,
+        gamma: pose.gamma,
+        absolute: true,
+        screenAngleDeg: pose.screenAngleDeg,
+      });
+      expect(fromQuat).not.toBeNull();
+      expect(Math.abs(wrapAngleRad(fromQuat!.bearingRad - pose.expectedDeg * DEG))).toBeLessThan(
+        1e-4,
+      );
+      expect(Math.abs(wrapAngleRad(fromQuat!.bearingRad - fromEuler!.bearingRad))).toBeLessThan(
+        1e-5,
+      );
+    }
+
+    // Sideways roll (~89 deg) and invalid/zero-norm quaternions return null.
+    expect(
+      extractQuaternionMagneticBearingRad({
+        quaternion: eulerToQuaternion(0, 0, 89),
+        screenAngleDeg: 0,
+      }),
+    ).toBeNull();
+    for (const quaternion of [
+      null,
+      [0, 0, 0, 0] as const,
+      [NaN, 0, 0, 1] as const,
+      [Infinity, 0, 0, 1] as const,
+    ]) {
+      expect(extractQuaternionMagneticBearingRad({ quaternion, screenAngleDeg: 0 })).toBeNull();
+    }
+  });
 });
 
 describe('HeadingEstimator', () => {
@@ -379,6 +458,202 @@ describe('BrowserHeading', () => {
       expect(onHeading).toHaveBeenLastCalledWith({ ...initial, source: 'compass' });
     } finally {
       adapter.stop();
+    }
+  });
+
+  it('prefers AbsoluteOrientationSensor when available and falls back to deviceorientationabsolute on error', () => {
+    vi.stubGlobal('isSecureContext', true);
+    vi.stubGlobal('DeviceOrientationEvent', {});
+    const instances: FakeAbsoluteSensor[] = [];
+    class FakeAbsoluteSensor extends EventTarget {
+      quaternion: [number, number, number, number] | null = null;
+      started = false;
+      stopped = false;
+      constructor(public readonly options?: { frequency?: number; referenceFrame?: string }) {
+        super();
+        instances.push(this);
+      }
+      start() {
+        this.started = true;
+      }
+      stop() {
+        this.stopped = true;
+      }
+    }
+    vi.stubGlobal('AbsoluteOrientationSensor', FakeAbsoluteSensor);
+
+    const target = new EventTarget();
+    const adapter = new BrowserHeading((angle) => angle, target);
+    const onHeading = vi.fn();
+    try {
+      adapter.start(onHeading);
+      expect(instances).toHaveLength(1);
+      expect(instances[0].started).toBe(true);
+      expect(instances[0].options).toEqual({ frequency: 15, referenceFrame: 'device' });
+
+      // Flat facing East (alpha=270 -> q = [0, 0, -sqrt(2)/2, sqrt(2)/2]).
+      instances[0].quaternion = [0, 0, -Math.SQRT1_2, Math.SQRT1_2];
+      instances[0].dispatchEvent(new Event('reading'));
+      expect(onHeading).toHaveBeenCalledTimes(1);
+      expect(onHeading.mock.lastCall![0].angleRad).toBeCloseTo(
+        (90 + HEADING_CONFIG.bcitDeclinationDeg) * DEG,
+      );
+
+      // Once AbsoluteOrientationSensor has emitted a valid bearing, fallback events do not overwrite it.
+      dispatchOrientation(target, 'deviceorientationabsolute', { alpha: 0, beta: 0, gamma: 0 });
+      expect(onHeading).toHaveBeenCalledTimes(1);
+
+      // Runtime sensor error detaches the sensor, clears its bearing, and allows fallback events to recover.
+      instances[0].dispatchEvent(new Event('error'));
+      expect(instances[0].stopped).toBe(true);
+      expect(onHeading).toHaveBeenLastCalledWith(null);
+
+      dispatchOrientation(target, 'deviceorientationabsolute', { alpha: 0, beta: 0, gamma: 0 });
+      expect(onHeading.mock.lastCall![0].angleRad).toBeCloseTo(
+        HEADING_CONFIG.bcitDeclinationDeg * DEG,
+      );
+    } finally {
+      adapter.stop();
+    }
+  });
+
+  it('falls back cleanly when AbsoluteOrientationSensor throws on construction', () => {
+    vi.stubGlobal('isSecureContext', true);
+    vi.stubGlobal('DeviceOrientationEvent', {});
+    vi.stubGlobal(
+      'AbsoluteOrientationSensor',
+      class {
+        constructor() {
+          throw new DOMException('Blocked by Permissions-Policy', 'SecurityError');
+        }
+      },
+    );
+    const target = new EventTarget();
+    const adapter = new BrowserHeading((angle) => angle, target);
+    const onHeading = vi.fn();
+    try {
+      adapter.start(onHeading);
+      dispatchOrientation(target, 'deviceorientationabsolute', { alpha: 0, beta: 0, gamma: 0 });
+      expect(onHeading).toHaveBeenCalledTimes(1);
+    } finally {
+      adapter.stop();
+    }
+  });
+});
+
+describe('heading pre-warm handoff', () => {
+  it('accepts an absolute event when the guided sensor fails to start after pre-warming', () => {
+    vi.useFakeTimers();
+    vi.stubGlobal('isSecureContext', true);
+    vi.stubGlobal('DeviceOrientationEvent', {});
+    const sensors: EventTarget[] = [];
+    vi.stubGlobal(
+      'AbsoluteOrientationSensor',
+      class extends EventTarget {
+        readonly quaternion = [0, 0, 0, 1];
+
+        constructor() {
+          super();
+          if (sensors.length) throw Error('Guided sensor unavailable');
+          sensors.push(this);
+        }
+
+        start() {}
+        stop() {}
+      },
+    );
+    const onHeading = vi.fn();
+    const heading = new BrowserHeading((angle) => angle);
+    startHeadingPrewarm();
+    sensors[0].dispatchEvent(new Event('reading'));
+
+    try {
+      heading.start(onHeading);
+      stopHeadingPrewarm();
+      expect(onHeading.mock.lastCall?.[0].angleRad).toBeCloseTo(
+        HEADING_CONFIG.bcitDeclinationDeg * DEG,
+      );
+      vi.advanceTimersByTime(100);
+      dispatchOrientation(window, 'deviceorientationabsolute', { alpha: 270, beta: 0, gamma: 0 });
+      expect(onHeading.mock.lastCall?.[0].angleRad).toBeCloseTo(
+        (90 + HEADING_CONFIG.bcitDeclinationDeg) * DEG,
+      );
+    } finally {
+      heading.stop();
+    }
+  });
+
+  it('seeds useHeadingTracker immediately on mount from a fresh pre-warmed reading while preserving reset rules', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(10_000);
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+    vi.stubGlobal('isSecureContext', true);
+    vi.stubGlobal('DeviceOrientationEvent', {});
+    let hidden = false;
+    vi.spyOn(document, 'hidden', 'get').mockImplementation(() => hidden);
+
+    const host = document.createElement('div');
+    const root = createRoot(host);
+    const northUp = (angle: number) => angle - Math.PI / 2;
+    const rotated = (angle: number) => angle;
+    function Harness({
+      prewarm,
+      track,
+      project,
+    }: {
+      prewarm: boolean;
+      track: boolean;
+      project: (angle: number) => number;
+    }) {
+      useHeadingPrewarm(prewarm);
+      const { heading } = useHeadingTracker({ active: track, bearingToPlanAngle: project });
+      return createElement('output', null, heading ? heading.angleRad.toFixed(2) : '');
+    }
+    const render = (prewarm: boolean, track: boolean, project: (angle: number) => number) =>
+      act(async () => root.render(createElement(Harness, { prewarm, track, project })));
+
+    try {
+      // Pre-warm on destination/loading screen before GuidedDirections mounts.
+      await render(true, false, northUp);
+      await act(async () => {
+        dispatchOrientation(window, 'deviceorientationabsolute', { alpha: 0, beta: 0, gamma: 0 });
+      });
+      expect(host.textContent).toBe('');
+
+      // GuidedDirections mounts: heading is immediately seeded on frame 1 without a new orientation event.
+      await render(false, true, northUp);
+      expect(host.textContent).toBe('-1.30');
+
+      // Handoff is one-shot: a subsequent calibration change still clears heading until a fresh event.
+      await render(false, true, rotated);
+      expect(host.textContent).toBe('');
+
+      // Backgrounding during pre-warm discards the cached reading so Step 1 starts empty.
+      await render(true, false, northUp);
+      await act(async () => {
+        dispatchOrientation(window, 'deviceorientationabsolute', { alpha: 0, beta: 0, gamma: 0 });
+      });
+      await act(async () => {
+        hidden = true;
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
+      await act(async () => {
+        hidden = false;
+        document.dispatchEvent(new Event('visibilitychange'));
+      });
+      await render(false, true, northUp);
+      expect(host.textContent).toBe('');
+
+      // Pre-warmed reading older than HEADING_PREWARM_MAX_AGE_MS is ignored on handoff.
+      await render(false, false, northUp);
+      startHeadingPrewarm();
+      dispatchOrientation(window, 'deviceorientationabsolute', { alpha: 0, beta: 0, gamma: 0 });
+      vi.advanceTimersByTime(HEADING_PREWARM_MAX_AGE_MS + 1);
+      await render(false, true, northUp);
+      expect(host.textContent).toBe('');
+      stopHeadingPrewarm();
+    } finally {
+      await act(async () => root.unmount());
     }
   });
 });

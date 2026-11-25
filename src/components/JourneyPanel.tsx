@@ -46,6 +46,7 @@ type JourneyProps = {
   onTryAnotherPhoto: () => void;
   onStartOver?: () => void;
   onGuidedChange?: (guided: boolean) => void;
+  onNavigationSettled?: () => void;
   locationCatalogue?: LocationCatalogue;
   locationEvidence?: ReactNode;
   editInputs?: ReactNode;
@@ -63,6 +64,7 @@ export function JourneyPanel(props: JourneyProps) {
     editInputs,
     onStartOver,
     onGuidedChange,
+    onNavigationSettled,
   } = props;
   const [result, setResult] = useState<NavigationResult>();
   const [error, setError] = useState('');
@@ -96,14 +98,29 @@ export function JourneyPanel(props: JourneyProps) {
       { revision, candidateId: candidate.id, destination, preferElevators, ...choice },
       { signal: controller.signal },
     )
-      .then((value) => {
-        if (!controller.signal.aborted) setResult(value);
-      })
-      .catch((failure) => {
-        if (!controller.signal.aborted) setError(failure.message);
-      });
+      .then(
+        (value) => {
+          if (controller.signal.aborted) return;
+          setResult(value);
+          onNavigationSettled?.();
+        },
+        (failure: Error) => {
+          if (controller.signal.aborted) return;
+          setError(failure.message);
+          onNavigationSettled?.();
+        },
+      );
     return () => controller.abort();
-  }, [sessionId, revision, candidate.id, destination, preferElevators, refresh, choice]);
+  }, [
+    sessionId,
+    revision,
+    candidate.id,
+    destination,
+    preferElevators,
+    refresh,
+    choice,
+    onNavigationSettled,
+  ]);
 
   const useMapDestination =
     !!candidate.sourcePlaceId && mapDestinationScope(destination) !== undefined;
